@@ -1,0 +1,35 @@
+name: Example
+slots:
+  label: Menu label
+  items:
+    - type: component
+      component: "display_builder:menu_item"
+      props:
+        variant: divider
+    - type: component
+      component: "display_builder:menu_item"
+      story: default
+    - type: component
+      component: "display_builder:menu_item"
+      props:
+        variant: divider
+    - type: component
+      component: "display_builder:menu_item"
+      props:
+        icon: heart
+        icon_position: suffix
+      slots:
+        title:
+          title: Suffix Icon
+    - type: component
+      component: "display_builder:menu_item"
+      slots:
+        title:
+          title: Menu
+    - type: component
+      component: "display_builder:menu_item"
+      props:
+        disabled: true
+      slots:
+        title:
+          title: Disabled

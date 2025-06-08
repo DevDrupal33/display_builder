@@ -1,0 +1,16 @@
+name: Shoelace Card
+description: Can be used to group related subjects in a container.
+links:
+  - https://shoelace.style/components/card
+slots:
+  image:
+    title: Image
+  header:
+    title: Header
+  content:
+    title: Content
+  footer:
+    title: Footer
+libraryOverrides:
+  dependencies:
+    - display_builder/shoelace

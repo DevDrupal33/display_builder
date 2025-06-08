@@ -1,0 +1,5 @@
+name: Button
+slots:
+  content: "Lorem ipsum"
+props:
+  variant: button

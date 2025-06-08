@@ -1,0 +1,28 @@
+{
+  "name": "drupal/display_builder",
+  "description": "Display Builder",
+  "license": "GPL-2.0+",
+  "type": "drupal-module",
+  "homepage": "https://www.drupal.org/project/display_builder",
+  "require": {
+    "drupal/core": "^11.1",
+    "drupal/ui_patterns": "2.0.4",
+    "php": ">=8.3"
+  },
+  "require-dev": {
+    "drupal/ui_icons": "^1.1",
+    "drupal/ui_skins": "^1.1",
+    "drupal/ui_styles": "^1.16",
+    "drupal/page_manager": "^4"
+  },
+  "extra": {
+    "patches": {
+      "drupal/page_manager": {
+        "Some mandatory parameters are missing": "https://www.drupal.org/files/issues/2024-08-14/page-manager-3438993-MR34-24.patch"
+      },
+      "drupal/ui_suite_bootstrap": {
+        "Display builder override for accordion and fieldset": "https://git.drupalcode.org/project/ui_suite_bootstrap/-/merge_requests/291.patch"
+      }
+    }
+  }
+}

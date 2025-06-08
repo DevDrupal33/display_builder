@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Display Builder Entity View install file.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_install().
+ */
+function display_builder_entity_view_install(): void {
+  module_set_weight('display_builder_entity_view', 2);
+}
+
+/**
+ * Disable adding entity, bundle, view mode classes per display.
+ */
+function display_builder_entity_view_8001(): void {
+  module_set_weight('display_builder_entity_view', 2);
+}

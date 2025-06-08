@@ -1,0 +1,101 @@
+langcode: en
+status: true
+dependencies: {  }
+id: default
+label: Default
+description: 'Default display builder configuration.'
+island_settings:
+  button:
+    history:
+      enable: '1'
+      weight: '-10'
+    state:
+      enable: '1'
+      weight: '-9'
+    instance:
+      enable: '1'
+      weight: '-8'
+    keyboard_help:
+      enable: '1'
+      weight: '-7'
+    toggle_fullscreen:
+      enable: '1'
+      weight: '-6'
+    theme_mode:
+      weight: '0'
+      enable: 0
+    toggle_highlight:
+      weight: '0'
+      enable: 0
+    reset:
+      weight: '0'
+      enable: 0
+  contextual:
+    instance_form:
+      enable: '1'
+      weight: '1'
+    ui_styles:
+      enable: '1'
+      weight: '2'
+    ui_skins:
+      enable: '1'
+      weight: '3'
+    visibility_conditions:
+      weight: '4'
+      enable: 0
+    info:
+      enable: '1'
+      weight: '5'
+  view:
+    library:
+      enable: '1'
+      options: sidebar
+      weight: '-10'
+    builder:
+      enable: '1'
+      options: main
+      weight: '-10'
+    preview:
+      enable: '1'
+      options: main
+      weight: '-9'
+    layers:
+      enable: '1'
+      options: sidebar
+      weight: '-9'
+    logs:
+      options: sidebar
+      weight: '-8'
+      enable: 0
+    state_debug:
+      options: sidebar
+      weight: '-3'
+      enable: 0
+    tree:
+      options: sidebar
+      weight: '0'
+      enable: 0
+    index_debug:
+      options: sidebar
+      weight: '0'
+      enable: 0
+  library:
+    component_library:
+      enable: '1'
+      weight: '-10'
+    block_library:
+      enable: '1'
+      weight: '-9'
+    preset_library:
+      enable: '1'
+      weight: '-8'
+  menu:
+    menu:
+      enable: '1'
+      weight: '-10'
+    menu_preset:
+      enable: '1'
+      weight: '-9'
+    menu_delete:
+      enable: '1'
+      weight: '-8'

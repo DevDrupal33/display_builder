@@ -1,0 +1,16 @@
+{% set attributes = attributes.addClass('db-button') %}
+{% set attributes = (variant and variant != 'default') ? attributes.setAttribute('variant', variant) : attributes %}
+{% set attributes = disabled ? attributes.setAttribute('disabled', true) : attributes %}
+{% set attributes = attributes.setAttribute('type', 'checkbox') %}
+{% set attributes = value ? attributes.setAttribute('value', value) : attributes %}
+
+{% if variant == 'divider' %}
+  <sl-divider></sl-divider>
+{% else %}
+  <sl-menu-item{{ attributes }}>
+    {{ title }}
+    {% if icon %}
+      <sl-icon slot="{{ icon_position }}" name="{{ icon }}"></sl-icon>
+    {% endif %}
+  </sl-menu-item>
+{% endif %}

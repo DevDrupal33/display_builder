@@ -1,0 +1,75 @@
+shoelace:
+  css:
+    theme:
+      https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.min.css: { type: external, minified: true }
+      https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/dark.min.css: { type: external, minified: true }
+
+  js:
+    # https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace.min.js:
+    https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.min.js:
+      { type: external, minified: true, attributes: { type: "module" } }
+
+shoelace_local:
+  css:
+    theme:
+      ./node_modules/@shoelace-style/shoelace/cdn/themes/light.css: {}
+      ./node_modules/@shoelace-style/shoelace/cdn/themes/dark.css: {}
+
+  js:
+    ./node_modules/@shoelace-style/shoelace/cdn/shoelace.js:
+      attributes:
+        type: module
+    ./node_modules/@shoelace-style/shoelace/cdn/shoelace-autoloader.js:
+      attributes:
+        type: module
+
+# Wysiwyg fixes with HTMX and our SlotSourceForm
+# @todo find a better way and fix this
+wysiwyg_fixes.js:
+  js:
+    ./assets/js/wysiwyg_fixes.js: {}
+
+drawer:
+  css:
+    component:
+      ./assets/css/drawer.css: {}
+  js:
+    ./assets/js/drawer.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+
+search:
+  css:
+    component:
+      ./assets/css/search.css: {}
+  js:
+    ./assets/js/search.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/drupal.debounce
+    - core/once
+
+preview:
+  css:
+    component:
+      ./assets/css/preview.css: {}
+  js:
+    ./assets/js/preview.js: {}
+
+# Keyboard mapping behavior.
+keyboard.js:
+  js:
+    ./assets/js/keyboard.js: {}
+
+# Local storage utility class.
+local-storage-manager:
+  js:
+    ./assets/js/localStorageManager.js: {}
+
+# Contextual form fixes.
+form:
+  css:
+    theme:
+      ./assets/css/form.css: {}

@@ -1,0 +1,27 @@
+<sl-menu{{ attributes }}>
+  {% if label %}
+    <sl-menu-label>{{ label }}</sl-menu-label>
+  {% endif %}
+  {% for item in items %}
+    {% if item.divider %}
+      <sl-divider></sl-divider>
+    {% else %}
+      {% set item_attributes = create_attribute() %}
+      {% set item_attributes = item.value ? item_attributes.setAttribute('value', item.value) : item_attributes %}
+      {% set item_attributes = item.type ? item_attributes.setAttribute('type', item.type) : item_attributes %}
+      {% set item_attributes = item.disabled ? item_attributes.setAttribute('disabled', true) : item_attributes %}
+
+      <sl-menu-item{{ item_attributes }}>
+      {% if item.icon %}
+        <sl-icon slot="prefix" name="{{ item.icon }}"></sl-icon>
+      {% endif %}
+        {% if item.url %}
+          <a href="{{ item.url }}">{{ item.title }}</a>
+        {% else %}
+          {{ item.title }}
+        {% endif %}
+      </sl-menu-item>
+
+    {% endif %}
+  {% endfor %}
+</sl-menu>

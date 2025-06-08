@@ -1,0 +1,105 @@
+langcode: en
+status: true
+dependencies: {  }
+id: devel
+label: Devel
+description: 'Devel oriented Display Builder configuration.'
+island_settings:
+  button:
+    history:
+      enable: '1'
+      weight: '-10'
+    reset:
+      weight: '-9'
+      enable: 0
+    state:
+      enable: '1'
+      weight: '-8'
+    instance:
+      enable: '1'
+      weight: '-7'
+    keyboard_help:
+      weight: '-6'
+      enable: 0
+    toggle_highlight:
+      enable: '1'
+      weight: '-5'
+    toggle_fullscreen:
+      enable: '1'
+      weight: '-4'
+    theme_mode:
+      weight: '-3'
+      enable: 0
+  contextual:
+    instance_form:
+      enable: '1'
+      weight: '1'
+    ui_styles:
+      enable: '1'
+      weight: '2'
+    ui_skins:
+      weight: '3'
+      enable: 0
+    visibility_conditions:
+      weight: '4'
+      enable: 0
+    info:
+      weight: '5'
+      enable: 0
+  view:
+    library:
+      enable: '1'
+      options: sidebar
+      weight: '-10'
+    tree:
+      enable: '1'
+      options: sidebar
+      weight: '-9'
+    index_debug:
+      options: sidebar
+      weight: '-8'
+      enable: 0
+    builder:
+      enable: '1'
+      options: main
+      weight: '-7'
+    layers:
+      enable: '1'
+      options: main
+      weight: '-6'
+    preview:
+      enable: '1'
+      options: main
+      weight: '-5'
+    logs:
+      options: sidebar
+      weight: '-4'
+      enable: 0
+    hybrid:
+      options: main
+      weight: '-3'
+      enable: 0
+    state_debug:
+      options: main
+      weight: '-2'
+      enable: 0
+  library:
+    component_library:
+      enable: '1'
+      weight: '-10'
+    block_library:
+      enable: '1'
+      weight: '-9'
+    preset_library:
+      enable: '1'
+      weight: '-8'
+  menu:
+    menu:
+      enable: '1'
+      weight: '-10'
+    menu_preset:
+      enable: '1'
+      weight: '-9'
+    menu_delete:
+      enable: '1'
+      weight: '-8'

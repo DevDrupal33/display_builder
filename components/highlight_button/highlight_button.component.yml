@@ -1,0 +1,22 @@
+name: Highlight Button
+description: Display builder specific button to highlight the builder areas.
+props:
+  type: object
+  properties:
+    label:
+      title: Label
+      type: string
+    title:
+      title: Title
+      type: string
+    keyboard:
+      title: Keyboard shortcut
+      type: string
+    icon:
+      title: Icon name
+      type: string
+libraryOverrides:
+  dependencies:
+    - core/drupal
+    - core/once
+    - display_builder/local-storage-manager

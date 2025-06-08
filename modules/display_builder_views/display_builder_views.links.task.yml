@@ -1,0 +1,4 @@
+entity.display_builder.instance.views:
+  route_name: display_builder_views.views.collection
+  title: "Display builder"
+  base_route: entity.view.collection

@@ -1,0 +1,8 @@
+name: Default
+props:
+  value: foo
+  icon: gift
+  icon_position: prefix
+slots:
+  title:
+    title: Prefix Icon

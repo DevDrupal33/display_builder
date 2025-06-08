@@ -1,0 +1,16 @@
+name: Shoelace Icon button
+description: Simple, icon-only buttons that can be used for actions and in toolbars.
+links:
+  - https://shoelace.style/components/icon-button
+props:
+  type: object
+  properties:
+    icon:
+      title: Icon
+      type: string
+    label:
+      title: Label
+      type: string
+libraryOverrides:
+  dependencies:
+    - display_builder/shoelace

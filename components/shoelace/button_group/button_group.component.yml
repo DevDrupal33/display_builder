@@ -1,0 +1,10 @@
+name: Shoelace Button group
+description: Group related buttons into sections.
+links:
+  - https://shoelace.style/components/button-group
+slots:
+  buttons:
+    title: Buttons
+libraryOverrides:
+  dependencies:
+    - display_builder/shoelace

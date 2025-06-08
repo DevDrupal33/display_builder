@@ -1,0 +1,45 @@
+name: Alert
+description: Alerts are used to display important messages inline or as toast notifications.
+links:
+  - https://shoelace.style/components/alert#toast-notifications
+variants:
+  default:
+    title: Default
+  primary:
+    title: Primary
+  success:
+    title: Success
+  neutral:
+    title: Neutral
+  warning:
+    title: Warning
+  danger:
+    title: Danger
+slots:
+  content:
+    title: Content
+  debug:
+    title: Debug code, wrapper with pre
+props:
+  type: object
+  properties:
+    id:
+      title: Id
+      type: string
+    icon:
+      title: Icon name
+      type: string
+    open:
+      title: Open
+      description: Indicates whether or not the alert is open.
+      type: boolean
+      default: true
+    closable:
+      title: Closable
+      description: Enables a close button that allows the user to dismiss the alert.
+      type: boolean
+      default: true
+    duration:
+      title: Duration
+      description: The length of time, in milliseconds, the alert will show before closing itself.
+      type: integer

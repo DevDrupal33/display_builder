@@ -1,0 +1,16 @@
+name: Shoelace Menu
+description: A list of options for the user to choose from.
+links:
+  - https://shoelace.style/components/menu
+slots:
+  label:
+    title: Label
+props:
+  type: object
+  properties:
+    items:
+      title: Items
+      $ref: ui-patterns://links
+libraryOverrides:
+  dependencies:
+    - display_builder/shoelace

@@ -1,0 +1,7 @@
+name: Default
+props:
+  label: Fruits
+  items:
+    - title: Apple
+    - title: Banana
+    - title: Orange

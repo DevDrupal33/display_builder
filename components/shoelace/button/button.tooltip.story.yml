@@ -1,0 +1,4 @@
+name: Tooltip
+props:
+  label: Lorem ipsum
+  tooltip: Ipsum lorem

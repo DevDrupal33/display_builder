@@ -1,0 +1,47 @@
+.db-drawer {
+  will-change: auto;
+  /* Allow the contained version of drawer to get all height. */
+  position: fixed;
+  overflow: hidden;
+
+  /* Add a transition for the --size variable to make resizing smoother */
+  transition: --size 0.2s ease;
+  /* Reduce the header as we don't have labels, only close button. */
+  &::part(title) {
+    padding: 0.5rem 1rem;
+  }
+  &::part(body) {
+    padding: 0 0.5rem 0 0.5rem;
+  }
+  &::part(panel) {
+    z-index: calc(var(--db-z-index, 1) + 1);
+    padding-top: var(--drupal-displace-offset-top, 0);
+  }
+  &::part(base) {
+    position: fixed;
+    z-index: calc(var(--db-z-index, 1) + 1) !important;
+  }
+  &::part(overlay) {
+    position: relative;
+    display: none;
+    height: 0;
+  }
+
+  .db-drawer__hidden {
+    display: none;
+  }
+
+  .db-resize-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 5px;
+    height: 100%;
+    cursor: ew-resize;
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  .db-resize-handle:active,
+  .db-resize-handle:hover {
+    background-color: var(--sl-color-primary-400, rgba(45, 25, 90, 0.2));
+  }
+}

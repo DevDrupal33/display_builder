@@ -1,0 +1,26 @@
+display_builder_devel.add_form:
+  route_name: display_builder_devel.add
+  title: "Add demo instance"
+  appears_on:
+    - display_builder_devel.collection
+
+display_builder_devel.delete_all:
+  route_name: display_builder_devel.delete_all
+  title: "Delete all instances"
+  appears_on:
+    - display_builder_devel.collection
+  options:
+    attributes:
+      class:
+        - "button--danger"
+
+display_builder_devel.delete_all_presets:
+  route_name: display_builder_devel.presets.delete_all
+  title: "Delete all presets"
+  appears_on:
+    - entity.display_builder_preset.collection
+  options:
+    attributes:
+      class:
+        - "button--danger"
+  weight: 10

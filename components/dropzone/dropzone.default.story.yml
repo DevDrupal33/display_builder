@@ -1,0 +1,5 @@
+name: Default
+slots:
+  content: Lorem ipsum
+props:
+  title: Lorem ipsum

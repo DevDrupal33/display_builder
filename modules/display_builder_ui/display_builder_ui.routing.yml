@@ -1,0 +1,71 @@
+entity.display_builder.collection:
+  path: '/admin/structure/display-builder'
+  defaults:
+    _entity_list: 'display_builder'
+    _title: 'Display builders'
+  requirements:
+    _permission: 'administer display builders'
+  options:
+    _admin_route: true
+
+entity.display_builder.add_form:
+  path: '/admin/structure/display_builder/add'
+  defaults:
+    _entity_form: 'display_builder.add'
+    _title: 'Add display builder'
+  requirements:
+    _permission: 'administer display builders'
+  options:
+    _admin_route: true
+
+entity.display_builder.edit_form:
+  path: '/admin/structure/display-builder/{display_builder}'
+  defaults:
+    _entity_form: 'display_builder.edit'
+    _title: 'Edit a display builder'
+  requirements:
+    _permission: 'administer display builders'
+  options:
+    _admin_route: true
+
+entity.display_builder.delete_form:
+  path: '/admin/structure/display-builder/{display_builder}/delete'
+  defaults:
+    _entity_form: 'display_builder.delete'
+    _title: 'Delete a display builder'
+  requirements:
+    _permission: 'administer display builders'
+  options:
+    _admin_route: true
+
+entity.display_builder_preset.collection:
+  path: '/admin/structure/display-builder/preset'
+  defaults:
+    _entity_list: 'display_builder_preset'
+    _title: 'Display builder Preset configuration'
+  requirements:
+    _permission: 'administer display_builder_preset'
+
+entity.display_builder_preset.add_form:
+  path: '/admin/structure/display-builder/preset/add'
+  defaults:
+    _entity_form: 'display_builder_preset.add'
+    _title: 'Add a display builder preset'
+  requirements:
+    _permission: 'administer display_builder_preset'
+
+entity.display_builder_preset.edit_form:
+  path: '/admin/structure/display-builder/preset/{display_builder_preset}'
+  defaults:
+    _entity_form: 'display_builder_preset.edit'
+    _title: 'Edit a display builder preset'
+  requirements:
+    _permission: 'administer display_builder_preset'
+
+entity.display_builder_preset.delete_form:
+  path: '/admin/structure/display-builder/preset/{display_builder_preset}/delete'
+  defaults:
+    _entity_form: 'display_builder_preset.delete'
+    _title: 'Delete a display builder preset'
+  requirements:
+    _permission: 'administer display_builder_preset'

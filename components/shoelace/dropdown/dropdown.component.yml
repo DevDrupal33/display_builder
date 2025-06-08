@@ -1,0 +1,32 @@
+name: Shoelace Dropdown
+description: Additional content that “drops down” in an island.
+links:
+  - https://shoelace.style/components/dropdown
+slots:
+  button:
+    title: Button
+  content:
+    title: Content
+props:
+  type: object
+  properties:
+    placement:
+      title: Placement
+      type: string
+      default: bottom-start
+      enum:
+        - top
+        - top-start
+        - top-end
+        - bottom
+        - bottom-start
+        - bottom-end
+        - right
+        - right-start
+        - right-end
+        - left
+        - left-start
+        - left-end
+libraryOverrides:
+  dependencies:
+    - display_builder/shoelace

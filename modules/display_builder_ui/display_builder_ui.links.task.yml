@@ -1,0 +1,10 @@
+entity.display_builder.collection:
+  route_name: entity.display_builder.collection
+  title: 'Display builders'
+  base_route: entity.display_builder.collection
+
+entity.display_builder.preset.collection:
+  route_name: entity.display_builder_preset.collection
+  title: Presets
+  base_route: entity.display_builder.collection
+  weight: 9

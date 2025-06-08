@@ -1,0 +1,22 @@
+name: Placeholder
+description: Display builder placeholder.
+variants:
+  default:
+    title: Default
+  button:
+    title: Button
+slots:
+  content:
+    title: Content
+  image:
+    title: Image
+props:
+  type: object
+  properties:
+    preview_url:
+      title: Component preview url
+      type: string
+libraryOverrides:
+  dependencies:
+    - core/drupal
+    - core/once

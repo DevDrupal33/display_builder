@@ -1,0 +1,15 @@
+{% set attributes = image ? attributes.addClass('card-image') : attributes.addClass('card-basic') %}
+<sl-card {{ attributes }}>
+  {{ image|set_attribute('slot', 'image') }}
+  {% if header %}
+  <div slot="header">
+  {{ header }}
+  </div>
+  {% endif %}
+  {{ content }}
+  {% if footer %}
+  <div slot="footer">
+  {{ footer }}
+  </div>
+  {% endif %}
+</sl-card>

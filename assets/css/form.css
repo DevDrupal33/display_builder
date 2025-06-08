@@ -1,0 +1,393 @@
+/* Dirty copy from shoelace primary button */
+.db-form input[type="submit"] {
+  display: inline-flex;
+  align-items: stretch;
+  justify-content: center;
+  min-height: var(--sl-input-height-medium);
+  margin-top: 0.5rem;
+  padding: 0 0.5rem;
+  cursor: inherit;
+  /* user-select: none; */
+  -webkit-user-select: none;
+  transition:
+    var(--sl-transition-x-fast) background-color,
+    var(--sl-transition-x-fast) color,
+    var(--sl-transition-x-fast) border,
+    var(--sl-transition-x-fast) box-shadow;
+  vertical-align: middle;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--sl-color-neutral-0);
+  border-width: var(--sl-input-border-width);
+  /* width: 100%; */
+  border-style: solid;
+  border-color: var(--sl-color-primary-600);
+  border-radius: var(--sl-input-border-radius-medium);
+  background-color: var(--sl-color-primary-600);
+  font-family: var(--sl-input-font-family);
+  /* font-size: var(--sl-button-font-size-medium); */
+  font-weight: var(--sl-font-weight-semibold);
+  line-height: calc(
+    var(--sl-input-height-medium) - var(--sl-input-border-width) * 2
+  );
+}
+
+.db-form input[type="submit"]:hover {
+  color: var(--sl-color-neutral-0);
+  border-color: var(--sl-color-primary-500);
+  background-color: var(--sl-color-primary-500);
+}
+
+/* Dirty copy from pure css */
+.db-form input[type="color"] {
+  display: block;
+}
+.db-form input[type="date"],
+.db-form input[type="datetime-local"],
+.db-form input[type="datetime"],
+.db-form input[type="email"],
+.db-form input[type="month"],
+.db-form input[type="number"],
+.db-form input[type="password"],
+.db-form input[type="search"],
+.db-form input[type="tel"],
+.db-form input[type="text"],
+.db-form input[type="time"],
+.db-form input[type="url"],
+.db-form input[type="week"],
+.db-form select,
+.db-island-ui_styles .db-form textarea,
+.db-island-ui_skins .db-form textarea {
+  display: block !important;
+  box-sizing: border-box;
+  padding: 0.5em 0.6em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 3px #ddd;
+  font-size: var(--sl-button-font-size-medium);
+  /* color: var(--sl-input-color);
+  background-color: var(--sl-input-background-color); */
+}
+
+.db-form select,
+.db-island-ui_styles .db-display-builder .db-form textarea,
+.db-island-ui_skins .db-display-builder .db-form textarea,
+.db-display-builder .db-form input[type="text"] {
+  display: inline-block !important;
+  width: 100% !important;
+  vertical-align: middle;
+}
+
+.db-form input:not([type]) {
+  display: inline-block;
+  box-sizing: border-box;
+  padding: 0.5em 0.6em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 3px #ddd;
+}
+
+.db-form input[type="color"] {
+  padding: 0.2em 0.5em;
+}
+
+.db-form input[type="color"]:focus,
+.db-form input[type="date"]:focus,
+.db-form input[type="datetime-local"]:focus,
+.db-form input[type="datetime"]:focus,
+.db-form input[type="email"]:focus,
+.db-form input[type="month"]:focus,
+.db-form input[type="number"]:focus,
+.db-form input[type="password"]:focus,
+.db-form input[type="search"]:focus,
+.db-form input[type="tel"]:focus,
+.db-form input[type="text"]:focus,
+.db-form input[type="time"]:focus,
+.db-form input[type="url"]:focus,
+.db-form input[type="week"]:focus,
+.db-form select:focus,
+.db-island-ui_styles .db-form textarea:focus,
+.db-island-ui_skins .db-form textarea:focus {
+  border-color: var(--sl-color-primary-500) !important;
+  outline: 0;
+}
+
+.db-form input:not([type]):focus {
+  border-color: var(--sl-color-primary-500);
+  outline: 0;
+}
+
+.db-form input[type="checkbox"]:focus,
+.db-form input[type="file"]:focus,
+.db-form input[type="radio"]:focus {
+  outline: thin solid var(--sl-color-primary-500);
+  outline: 1px auto var(--sl-color-primary-500);
+}
+
+.db-form .pure-checkbox,
+.db-form .pure-radio {
+  display: block;
+  margin: 0.5em 0;
+}
+
+.db-form input[type="color"][disabled],
+.db-form input[type="date"][disabled],
+.db-form input[type="datetime-local"][disabled],
+.db-form input[type="datetime"][disabled],
+.db-form input[type="email"][disabled],
+.db-form input[type="month"][disabled],
+.db-form input[type="number"][disabled],
+.db-form input[type="password"][disabled],
+.db-form input[type="search"][disabled],
+.db-form input[type="tel"][disabled],
+.db-form input[type="text"][disabled],
+.db-form input[type="time"][disabled],
+.db-form input[type="url"][disabled],
+.db-form input[type="week"][disabled],
+.db-form select[disabled],
+.db-island-ui_styles .db-form textarea[disabled],
+.db-island-ui_skins .db-form textarea[disabled] {
+  cursor: not-allowed;
+  color: var(--sl-input-color-disabled);
+  background-color: var(--sl-input-background-color-disabled);
+}
+
+.db-form input:not([type])[disabled] {
+  cursor: not-allowed;
+  color: var(--sl-input-color-disabled);
+  background-color: var(--sl-input-background-color-disabled);
+}
+
+.db-form input[readonly],
+.db-form select[readonly],
+.db-island-ui_styles .db-form textarea[readonly],
+.db-island-ui_skins .db-form textarea[readonly] {
+  color: var(--sl-input-color-disabled);
+  border-color: var(--sl-input-border-color-disabled);
+  background-color: var(--sl-input-background-color-disabled);
+}
+
+.db-form input:focus:invalid,
+.db-form select:focus:invalid,
+.db-island-ui_styles .db-form textarea:focus:invalid,
+.db-island-ui_skins .db-form textarea:focus:invalid {
+  color: var(--sl-color-danger-400);
+  border-color: var(--sl-color-danger-200);
+}
+
+.db-form input[type="checkbox"]:focus:invalid:focus,
+.db-form input[type="file"]:focus:invalid:focus,
+.db-form input[type="radio"]:focus:invalid:focus {
+  outline-color: var(--sl-color-danger-200);
+}
+
+.db-form select {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--sl-input-border-color);
+  background-color: var(--sl-input-background-color);
+}
+
+.db-form select[multiple] {
+  height: auto;
+}
+
+.db-form label {
+  margin: 0.25em 0 0.25em 0;
+}
+
+.db-form fieldset {
+  margin: 0;
+  padding: 0.35em 0 0.75em;
+  border: 0;
+}
+
+/* Manual fixes */
+.db-form input[type="radio"] {
+  color: var(--sl-input-color);
+  background-color: var(--sl-input-background-color);
+}
+
+.db-form .ui-styles-source-select-plugin > div > div {
+  border: 1px solid var(--sl-input-border-color) !important;
+}
+
+.db-form .ui-styles-source-select-plugin > div > div::after {
+  background-color: var(--sl-input-background-color) !important;
+}
+
+.db-form div:has(> .ui-styles-source-select-plugin[type="radio"]:hover),
+.db-form
+  div:has(> .ui-styles-source-select-plugin[type="radio"] + label:hover) {
+  color: var(--sl-input-color) !important;
+  background-color: var(--sl-input-background-color) !important;
+}
+
+.db-form div:has(> .ui-styles-source-select-plugin[type="radio"]) {
+  background-color: var(--sl-input-background-color) !important;
+}
+
+.db-form .ui-styles-source-select-plugin[type="radio"] + label {
+  color: var(--db-text-color) !important;
+}
+
+.db-form {
+  font-size: var(--sl-button-font-size-medium) !important;
+}
+.db-form .form-item {
+  margin-block: 0.25rem;
+}
+.db-form .description {
+  color: var(--sl-color-neutral-700) !important;
+  /* font-size: 0.8rem; */
+}
+.db-form fieldset {
+  padding: 0 !important;
+}
+.db-form fieldset legend {
+  display: block;
+  width: 100%;
+  /* padding-top: 0.3em !important; */
+  margin-bottom: 0 !important;
+  padding: 0.5em 0;
+  color: var(--sl-color-neutral-700) !important;
+  font-size: var(--sl-button-font-size-medium);
+  font-weight: bold;
+}
+
+/* Manual ui styles fixes */
+.db-form .ui-styles-source-select-plugin > div > div {
+  height: 38px !important;
+}
+.db-form .ui-styles-source-select-plugin[type="radio"] {
+  height: 38px !important;
+}
+.db-form .ui-styles-source-select-plugin > div > div::after {
+  top: 10px !important;
+}
+.db-form .ui-styles-source-select-plugin .bg-light {
+  background-color: var(--sl-color-neutral-50) !important;
+}
+.db-form .ui-styles-source-select-plugin .border-dark {
+  border-color: var(--db-text-color) !important;
+}
+.db-form .form-text {
+  color: var(--db-text-color) !important;
+}
+
+/* Expand icons field to have room for autocomplete */
+.db-form .ui-icons-wrapper {
+  min-height: 30rem;
+}
+
+/* Hide the ajax progress for now */
+/* @todo better ajax styling */
+.db-form .ajax-progress-throbber {
+  display: none !important;
+}
+
+.db-form .form-select {
+  margin-top: 0.5rem;
+}
+
+.db-form .ui-icons-settings-wrapper {
+  margin-top: 0.5rem;
+}
+
+/* Dirty style on details */
+.db-form summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  list-style: none;
+  font-size: var(--sl-button-font-size-medium);
+}
+
+.db-form summary::after {
+  width: 0;
+  height: 0;
+  content: "";
+  transition: 0.2s;
+  border-top: 8px solid var(--sl-color-neutral-500);
+  border-inline: 7px solid transparent;
+}
+
+.db-form details[open] > summary {
+  border-bottom: 0 none;
+}
+
+.db-form details[open] > summary::after {
+  transform: rotate(-180deg);
+}
+
+.db-form summary::-webkit-details-marker {
+  display: none;
+}
+
+.db-form details {
+  margin-bottom: 0.5rem;
+  padding: 0;
+  border: 1px solid var(--sl-input-border-color);
+  border-radius: var(--sl-input-border-radius-medium);
+  box-shadow: var(--sl-shadow-small);
+}
+
+.db-form details summary {
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--sl-input-border-radius-medium);
+  background-color: var(--sl-color-neutral-100);
+}
+
+/* Have a smaller global size and color for description text */
+.db-form details {
+  color: var(--sl-color-neutral-600);
+}
+
+.db-form details {
+  padding: 0 0 0 0.5rem;
+}
+
+.db-form details > * {
+  padding: 0;
+}
+.db-form form details > *:last-child {
+  margin-bottom: 0.5rem;
+}
+
+.db-form details > summary {
+  margin-left: -0.5rem;
+}
+
+.db-form details > div {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  padding: 0 0.1rem 0.1rem 0;
+}
+
+.db-form details summary,
+.db-form details label,
+.db-form details input {
+  color: var(--db-text-color);
+}
+
+.db-form details summary {
+  padding: 0.5rem;
+  font-weight: normal;
+}
+.db-form details label {
+  display: inline-block;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+.db-form details > .js-form-type-checkbox {
+  margin-top: 1rem;
+}
+
+.db-form details[open] summary {
+  color: var(--db-text-color);
+  border-radius: 5px 5px 0 0;
+  background-color: var(--sl-color-primary-600);
+}
+
+.db-form .ui-styles-source-select-plugin > div > div::after {
+  background-color: var(--sl-color-neutral-600) !important;
+}

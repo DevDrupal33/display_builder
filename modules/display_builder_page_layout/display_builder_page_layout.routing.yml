@@ -1,0 +1,44 @@
+display_builder_page_layout.manage:
+  path: "/admin/structure/page-layout"
+  defaults:
+    _title: "Page layout"
+    _controller: '\Drupal\display_builder_page_layout\Controller\DisplayBuilderPageLayoutController::managePageLayout'
+  requirements:
+    _permission: "administer display builders"
+  options:
+    _admin_route: false
+    _display_builder_route: true
+
+# Page Manager related routing.
+# @todo use page manager permissions for now.
+display_builder_page_layout.page_manager.collection:
+  path: "/admin/structure/page_manager/display_builder"
+  defaults:
+    _title: "List of Display builder in Page Manager"
+    _controller: '\Drupal\display_builder_page_layout\Controller\DisplayBuilderPageLayoutController::pageManagerIndex'
+  requirements:
+    _permission: "administer pages"
+  options:
+    _admin_route: true
+
+display_builder_page_layout.page_manager.manage:
+  path: "/admin/structure/page_manager/display_builder/{builder_id}"
+  defaults:
+    _title_callback: '\Drupal\display_builder_page_layout\Controller\DisplayBuilderPageLayoutController::title'
+    _controller: '\Drupal\display_builder_page_layout\Controller\DisplayBuilderPageLayoutController::managePageManager'
+    builder_id: ""
+  requirements:
+    _permission: "administer pages"
+  options:
+    _admin_route: false
+    _display_builder_route: true
+
+display_builder_page_layout.page_manager.delete:
+  path: "/admin/structure/page_manager/display_builder/{builder_id}/delete"
+  defaults:
+    _form: '\Drupal\display_builder_page_layout\Form\ConfirmPageManagerBuilderDeleteForm'
+    _title: "Confirm Deletion"
+  requirements:
+    _permission: "administer pages"
+  options:
+    _admin_route: true

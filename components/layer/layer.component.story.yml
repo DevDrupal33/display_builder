@@ -1,0 +1,24 @@
+name: Component
+description: A component has children.
+slots:
+  title: Lorem ipsum
+  children:
+    - type: component
+      component: "display_builder:layer"
+      slots:
+        title: Block 1
+    - type: component
+      component: "display_builder:layer"
+      slots:
+        title: Block 2
+    - type: component
+      component: "display_builder:layer"
+      slots:
+        title: Component 1
+        children:
+          type: component
+          component: "display_builder:layer"
+          slots:
+            title: Block 3
+      props:
+        variant: component

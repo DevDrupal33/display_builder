@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {}
+id: page_layout
+label: Page Layout
+description: "Display Builder page layout configuration to replace Block Layout."
+sources: {}

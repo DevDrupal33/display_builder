@@ -1,0 +1,33 @@
+{% set id = id|default('db-library-island--' ~ random()) %}
+<div{{ attributes.addClass('db-library-island') }}>
+
+  {# Class is needed for library_panel.js search filter. #}
+  {# Allow auto focus when opening dialog #}
+  {# @see assets/js/search.js #}
+  <div class="db-library-island-wrap">
+    {{ include('display_builder:input', {
+      variant: 'search',
+      placeholder: 'Filter by name'|t,
+      size: 'medium',
+      autocomplete_off: true,
+      clearable: true,
+      attributes: {
+        class: ['db-search-library'],
+        'data-target': id,
+        'data-elements-selector': '.db-placeholder',
+        autofocus: true,
+      },
+      icon: 'search',
+    }, with_context: false) }}
+  </div>
+
+  {% if tabs %}
+  <div class="db-library-island-wrap">
+    {{ tabs }}
+  </div>
+  {% endif %}
+
+  <div id="{{ id }}">
+    {{ content }}
+  </div>
+</div>

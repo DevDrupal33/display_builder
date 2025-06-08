@@ -1,0 +1,7 @@
+name: "Display Builder for page layout"
+description: "Provide integration of Display Builder to the page layout system."
+type: module
+core_version_requirement: ^10.3.4 || ^11
+package: "User interface"
+dependencies:
+  - display_builder:display_builder

@@ -1,0 +1,9 @@
+views.display_extender.display_builder:
+  type: views_display_extender
+  mapping:
+    builder_config_id:
+      type: string
+      label: 'Display builder config id'
+    display_builder_id:
+      type: string
+      label: 'Display builder id'

@@ -1,0 +1,27 @@
+-
+  source_id: View_header_source
+  source: {  }
+-
+  source_id: View_exposed_source
+  source: {  }
+-
+  source_id: View_attachment_before_source
+  source: {  }
+-
+  source_id: View_rows_source
+  source: {  }
+-
+  source_id: View_pager_source
+  source: {  }
+-
+  source_id: View_attachment_after_source
+  source: {  }
+-
+  source_id: View_more_source
+  source: {  }
+-
+  source_id: View_footer_source
+  source: {  }
+-
+  source_id: View_feed_icons_source
+  source: {  }

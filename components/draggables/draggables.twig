@@ -1,0 +1,4 @@
+{% set attributes = (variant and variant != 'default') ? attributes.addClass('db-draggables--' ~ variant) : attributes %}
+<div {{ attributes.addClass('db-draggables') }}>
+  {{ content }}
+</div>

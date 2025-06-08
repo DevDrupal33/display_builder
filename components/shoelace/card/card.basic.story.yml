@@ -1,0 +1,3 @@
+name: Basic
+slots:
+  content: This is just a basic card. No image, no header, and no footer. Just your content.

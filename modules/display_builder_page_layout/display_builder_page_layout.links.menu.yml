@@ -1,0 +1,11 @@
+display_builder_page_layout.manage:
+  title: Page layout
+  parent: system.admin_structure
+  description: "Manage page layout with Display Builder (Replace Block Layout)."
+  route_name: display_builder_page_layout.manage
+
+entity.display_builder.page_manager.collection:
+  title: Page builder
+  parent: entity.page.collection
+  description: "Manage Display Builder used in Page Manager."
+  route_name: display_builder_page_layout.page_manager.collection

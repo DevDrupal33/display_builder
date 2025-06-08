@@ -1,0 +1,8 @@
+name: Image
+slots:
+  image:
+    type: html_tag
+    tag: img
+    attributes:
+      src: https://images.unsplash.com/photo-1547191783-94d5f8f6d8b1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80
+  content: This is a kitten, but not just any kitten. This kitten likes walking along pallets.

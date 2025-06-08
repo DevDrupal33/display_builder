@@ -1,0 +1,17 @@
+name: Library island
+slots:
+  tabs:
+    title: Tabs
+  content:
+    title: Content
+props:
+  type: object
+  properties:
+    id:
+      title: ID
+      $ref: ui-patterns://identifier
+libraryOverrides:
+  dependencies:
+    - core/drupal
+    - core/drupal.debounce
+    - core/once

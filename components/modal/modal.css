@@ -1,0 +1,136 @@
+:root {
+  /* Core variables */
+  --db-modal-sidebar-width: 370px;
+  --db-modal-width: 440px;
+
+  /* Content constraints */
+  --db-modal-sidebar-min-width: 200px;
+  --db-modal-sidebar-max-width: 1400px;
+
+  /* Z-index layers */
+  /* Inspired from https://shoelace.style/tokens/z-index/ */
+  --db-modal-z-index: 400;
+  --db-modal-resize-z-index: 401;
+}
+
+/* Have some animation on the dialog. */
+.db-modal-content-transition
+  dialog.db-modal--sidebar.db-modal--transition-opening[open] {
+  transform: scaleX(1);
+}
+
+.db-modal-content-transition
+  dialog.db-modal--sidebar.db-modal--transition-opening {
+  transition: transform 0.2s allow-discrete;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+@starting-style {
+  .db-modal-content-transition
+    dialog.db-modal--sidebar.db-modal--transition-opening[open] {
+    transform: scaleX(0);
+  }
+}
+
+.db-modal {
+  z-index: var(--db-modal-z-index);
+  top: 0;
+  overflow: hidden scroll;
+  width: var(--db-modal-width);
+  height: 100%;
+  margin: 0;
+  border: 0 none;
+}
+
+/* Sidebar specific styles */
+.db-modal.db-modal--sidebar {
+  position: fixed;
+  /* Admin toolbar compatibility */
+  top: var(--drupal-displace-offset-top, 0);
+  overflow: auto;
+  width: var(--db-modal-sidebar-width);
+  min-width: var(--db-modal-sidebar-min-width);
+  max-width: var(--db-modal-sidebar-max-width);
+  padding-top: 1rem;
+  border: 0 none;
+  border-radius: 0;
+  box-shadow: var(--sl-shadow-large);
+}
+
+.toolbar-horizontal .db-modal.db-modal--sidebar {
+  height: 96%;
+}
+
+.toolbar-horizontal.toolbar-tray-open .db-modal.db-modal--sidebar {
+  height: 94%;
+}
+
+body .db-display-builder .db-modal.db-modal--sidebar:focus {
+  box-shadow: var(--sl-shadow-medium);
+}
+
+/* Resize handler */
+.db-modal--resize-handler {
+  position: absolute;
+  z-index: var(--db-modal-resize-z-index);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 12px;
+  cursor: col-resize;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.db-modal--resize-handler:hover,
+.db-modal--resize-handler:focus {
+  box-shadow: inset -4px 0 0 0 var(--sl-color-primary-400);
+}
+
+.db-modal--resize-handler::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 5px;
+  content: "";
+}
+
+.db-modal.db-modal--is-resizing {
+  box-shadow: 0 0 5px 5px var(--sl-color-primary-200) !important;
+}
+
+/* Dropdown dialog specifics */
+.db-modal.db-modal--dropdown {
+  top: 0 !important;
+  overflow: auto;
+  width: var(--db-modal-width);
+  height: auto;
+  max-height: 80vh;
+  margin-top: 64px;
+  margin-right: 0;
+  margin-left: auto;
+  padding: 0.5rem;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.db-display-builder--fullscreen .db-modal {
+  top: 4.5rem;
+}
+
+.db-modal--sidebar.db-modal--resizable .db-island-library {
+  /* margin-top: -2rem; */
+}
+
+/* Disable background for preview in sidebar */
+.db-modal.db-modal--sidebar:has(div.db-island-preview_side) {
+  background-image: inherit;
+}
+
+.db-gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}

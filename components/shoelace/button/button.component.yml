@@ -1,0 +1,35 @@
+name: Shoelace Button
+description: Actions that are available to the user.
+links:
+  - https://shoelace.style/components/button
+variants:
+  default:
+    title: Default
+  primary:
+    title: Primary
+  success:
+    title: Success
+  neutral:
+    title: Neutral
+  warning:
+    title: Warning
+  danger:
+    title: Danger
+props:
+  type: object
+  properties:
+    id:
+      title: Id
+      type: string
+    label:
+      title: Label
+      type: string
+    tooltip:
+      title: Tooltip content, can contain HTML
+      type: string
+    icon:
+      title: Icon name
+      type: string
+libraryOverrides:
+  dependencies:
+    - display_builder/shoelace

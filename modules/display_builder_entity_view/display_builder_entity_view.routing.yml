@@ -1,0 +1,8 @@
+display_builder_entity_view.save_form:
+  path: '/api/display-builder/_/entity_view_display'
+  defaults:
+    _form: '\Drupal\display_builder_entity_view\Form\DisplayBuilderEntityViewDisplaySaveForm'
+    _title: ''
+  methods: [POST]
+  requirements:
+    _permission: 'administer display builders'

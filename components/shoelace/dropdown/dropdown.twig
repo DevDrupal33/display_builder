@@ -1,0 +1,4 @@
+<sl-dropdown {{ attributes.setAttribute('placement', placement|default('bottom-start')) }}>
+  {{ button|set_attribute('slot', 'trigger')|set_attribute('caret', 'caret') }}
+  {{ content }}
+</sl-dropdown>

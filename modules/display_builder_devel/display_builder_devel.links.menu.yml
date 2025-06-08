@@ -1,0 +1,25 @@
+display_builder_devel.add:
+  title: Add devel
+  parent: entity.display_builder.collection
+  description: "Add a display builder instance without contexts."
+  route_name: display_builder_devel.add
+  weight: 9
+
+display_builder_devel.collection:
+  title: Devel
+  parent: entity.display_builder.collection
+  description: "Create and manage display builders without constraints."
+  route_name: display_builder_devel.collection
+  weight: 10
+
+display_builder.user.db:
+  title: 'My demo'
+  weight: -9
+  route_name: display_builder_devel.user_demo
+  menu_name: account
+
+display_builder.user.db_reset:
+  title: 'Reset my demo'
+  weight: -8
+  route_name: display_builder_devel.reset_user_db
+  menu_name: account

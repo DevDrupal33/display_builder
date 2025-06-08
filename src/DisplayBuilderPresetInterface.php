@@ -1,0 +1,27 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Drupal\display_builder;
+
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
+
+/**
+ * Provides an interface defining a display builder preset entity type.
+ */
+interface DisplayBuilderPresetInterface extends ConfigEntityInterface {
+
+  /**
+   * Return the ready to use sources.
+   *
+   * @param array $contexts
+   *   (Optional) Contexts for the sources.
+   * @param bool $fillInstanceId
+   *   (Optional) Set instance_id on all children. Default to TRUE.
+   *
+   * @return array
+   *   The preset data.
+   */
+  public function getSources(array $contexts = [], bool $fillInstanceId = TRUE): array;
+
+}

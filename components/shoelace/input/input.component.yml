@@ -1,0 +1,81 @@
+name: Input
+description: Inputs collect data from the user.
+links:
+  - https://shoelace.style/components/input
+variants:
+  # button:
+  #   title: Button
+  # checkbox:
+  #   title: Checkbox
+  color:
+    title: Color
+  date:
+    title: Date
+  datetime-local:
+    title: Datetime local
+  email:
+    title: Email
+  # file:
+  #   title: File
+  # hidden:
+  #   title: Hidden
+  # image:
+  #   title: Image
+  month:
+    title: Month
+  number:
+    title: Number
+  # password:
+  #   title: Password
+  # radio:
+  #   title: Radio
+  # range:
+  #   title: Range
+  # reset:
+  #   title: Reset
+  search:
+    title: Search
+  # submit:
+  #   title: Submit
+  tel:
+    title: Tel
+  text:
+    title: Text
+  time:
+    title: Time
+  url:
+    title: Url
+  week:
+    title: Week
+props:
+  type: object
+  properties:
+    id:
+      title: Id
+      type: string
+    label:
+      title: Label
+      type: string
+    placeholder:
+      title: Placeholder
+      type: string
+    clearable:
+      title: Clearable
+      type: boolean
+    autocomplete_off:
+      title: Disable autocomplete
+      type: boolean
+    size:
+      title: Size
+      type: string
+      enum:
+        - small
+        - medium
+        - large
+      default: medium
+    icon:
+      title: Icon name
+      type: string
+libraryOverrides:
+  dependencies:
+    - display_builder/shoelace

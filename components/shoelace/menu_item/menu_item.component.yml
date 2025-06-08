@@ -1,0 +1,33 @@
+name: Menu Item
+description: Menu items provide options for the user to pick from in a menu.
+links:
+  - https://shoelace.style/components/menu-item
+variants:
+  default:
+    title: Default
+  divider:
+    title: Divider
+slots:
+  title:
+    title: Title
+props:
+  type: object
+  properties:
+    value:
+      title: Value
+      type: string
+    icon:
+      title: Icon name
+      type: string
+    icon_position:
+      title: Icon position
+      type: string
+      enum:
+        - prefix
+        - suffix
+    disabled:
+      title: Disabled
+      type: boolean
+libraryOverrides:
+  dependencies:
+    - display_builder/shoelace

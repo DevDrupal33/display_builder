@@ -1,0 +1,25 @@
+services:
+  display_builder_page_layout.config_manager:
+    class: Drupal\display_builder_page_layout\DisplayBuilderPageLayout
+    arguments:
+      [
+        "@config.factory",
+        "@display_builder.state_manager",
+        "@entity_type.manager",
+      ]
+  Drupal\display_builder_page_layout\DisplayBuilderPageLayoutInterface: "@display_builder_page_layout.config_manager"
+
+  display_builder_page_layout.page_variant_subscriber:
+    class: Drupal\display_builder_page_layout\EventSubscriber\DisplayBuilderPageDisplayVariantSubscriber
+    tags:
+      - { name: event_subscriber }
+  display_builder_page_layout.page_layout_event_subscriber:
+    class: Drupal\display_builder_page_layout\EventSubscriber\DisplayBuilderPageLayoutEventsSubscriber
+    arguments:
+      [
+        "@display_builder.state_manager",
+        "@display_builder_page_layout.config_manager",
+        '@plugin.cache_clearer'
+      ]
+    tags:
+      - { name: "event_subscriber" }

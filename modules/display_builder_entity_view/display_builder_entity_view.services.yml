@@ -1,0 +1,13 @@
+services:
+  display_builder_entity_view.routes:
+    class: Drupal\display_builder_entity_view\Routing\DisplayBuilderRoutes
+    arguments:
+      - "@entity_type.manager"
+      - "@module_handler"
+    tags:
+      - { name: event_subscriber }
+  display_builder_entity_view.event_subscriber:
+    class: '\Drupal\display_builder_entity_view\Event\DisplayBuilderEntityViewEventsSubscriber'
+    arguments: ["@display_builder.state_manager"]
+    tags:
+      - { name: "event_subscriber" }

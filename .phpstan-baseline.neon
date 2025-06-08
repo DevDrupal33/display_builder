@@ -1,0 +1,41 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Method Drupal\\\\display_builder\\\\Controller\\\\ApiController\\:\\:dispatchDisplayBuilderEventRaw\\(\\) is unused\\.$#"
+			count: 1
+			path: src/Controller/ApiController.php
+
+		-
+			message: "#^Cannot access offset 'icon' on array\\|Drupal\\\\Component\\\\Plugin\\\\Definition\\\\PluginDefinitionInterface\\.$#"
+			count: 1
+			path: src/IslandPluginBase.php
+
+		-
+			message: "#^Cannot access offset 'id' on array\\|Drupal\\\\Component\\\\Plugin\\\\Definition\\\\PluginDefinitionInterface\\.$#"
+			count: 1
+			path: src/IslandPluginBase.php
+
+		-
+			message: "#^Cannot access offset 'keyboard_shortcuts' on array\\|Drupal\\\\Component\\\\Plugin\\\\Definition\\\\PluginDefinitionInterface\\.$#"
+			count: 1
+			path: src/IslandPluginBase.php
+
+		-
+			message: "#^Cannot access offset 'label' on array\\|Drupal\\\\Component\\\\Plugin\\\\Definition\\\\PluginDefinitionInterface\\.$#"
+			count: 1
+			path: src/IslandPluginBase.php
+
+		-
+			message: "#^Cannot access offset 'type' on array\\|Drupal\\\\Component\\\\Plugin\\\\Definition\\\\PluginDefinitionInterface\\.$#"
+			count: 1
+			path: src/IslandPluginBase.php
+
+		-
+			message: "#^Cannot access offset 'type' on array\\|Drupal\\\\Component\\\\Plugin\\\\Definition\\\\PluginDefinitionInterface\\.$#"
+			count: 1
+			path: src/IslandPluginManager.php
+
+		-
+			message: "#^Call to an undefined method Drupal\\\\Component\\\\Plugin\\\\PluginManagerInterface\\:\\:getSource\\(\\)\\.$#"
+			count: 1
+			path: src/SlotSourceProxy.php

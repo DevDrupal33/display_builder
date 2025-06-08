@@ -1,0 +1,31 @@
+display_builder_views.views.collection:
+  path: "/admin/structure/views/display_builder"
+  defaults:
+    _title: "List of Display builder in Views"
+    _controller: '\Drupal\display_builder_views\Controller\DisplayBuilderViewsController::pageViewsIndex'
+  requirements:
+    _permission: "administer views"
+  options:
+    _admin_route: true
+
+display_builder_views.views.manage:
+  path: "/admin/structure/views/display_builder/{builder_id}"
+  defaults:
+    _title_callback: '\Drupal\display_builder_views\Controller\DisplayBuilderViewsController::title'
+    _controller: '\Drupal\display_builder_views\Controller\DisplayBuilderViewsController::manageViews'
+    builder_id: ""
+  requirements:
+    _permission: "administer views"
+  options:
+    _admin_route: false
+    _display_builder_route: true
+
+display_builder_views.views.delete:
+  path: "/admin/structure/views/display_builder/{builder_id}/delete"
+  defaults:
+    _form: '\Drupal\display_builder_views\Form\ConfirmViewsBuilderDeleteForm'
+    _title: "Confirm Deletion"
+  requirements:
+    _permission: "administer views"
+  options:
+    _admin_route: true

@@ -1,0 +1,29 @@
+{% set menu %}
+  {{ include('display_builder:menu', {
+    items: [
+      {
+        title: 'Light'|t,
+        value: 'light',
+        type: 'checkbox',
+      },
+      {
+        title: 'Dark'|t,
+        value: 'dark',
+        type: 'checkbox',
+      },
+      {divider: true},
+      {
+        title: 'System'|t,
+        value: 'auto',
+        type: 'checkbox',
+      },
+    ],
+    attributes: create_attribute().addClass('db-background'),
+  }, with_context: false) }}
+{% endset %}
+
+{{ include('display_builder:dropdown', {
+  attributes: attributes,
+  button: button,
+  content: menu,
+}, with_context: false) }}

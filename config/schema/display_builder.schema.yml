@@ -1,0 +1,32 @@
+display_builder.display_builder.*:
+  type: config_entity
+  label: Display builder
+  mapping:
+    id:
+      type: string
+      label: ID
+    label:
+      type: label
+      label: Label
+    uuid:
+      type: string
+    description:
+      type: string
+    island_settings:
+      type: mapping
+      label: "Island settings"
+
+display_builder.display_builder_preset.*:
+  type: config_entity
+  label: Display builder Preset
+  mapping:
+    id:
+      type: string
+      label: ID
+    label:
+      type: label
+      label: Label
+    uuid:
+      type: string
+    description:
+      type: string

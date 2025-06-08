@@ -1,0 +1,20 @@
+.db-island-library .db-placeholder {
+  --padding: var(--sl-spacing-x-small);
+  --border-radius: var(--sl-border-radius-large);
+
+  margin-bottom: var(--sl-spacing-x-small);
+  cursor: grab;
+}
+
+/* Hover effect only when in library context. */
+.db-island-library .db-placeholder:hover {
+  --border-color: var(--sl-color-primary-600);
+
+  color: var(--sl-color-primary-600);
+  box-shadow: var(--sl-shadow-medium);
+}
+
+/* Fix block on the builder view to stay close to preview for inline/block elements. */
+.db-display-builder__main .db-placeholder {
+  /* display: block; */
+}

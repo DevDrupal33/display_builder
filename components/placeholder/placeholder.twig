@@ -1,0 +1,18 @@
+{% set attributes = attributes.addClass('db-placeholder') %}
+{% set attributes = attributes.setAttribute('tabindex', 0) %}
+{% if preview_url %}
+  {% set attributes = attributes.setAttribute('data-preview-url', preview_url) %}
+{% endif %}
+
+{% if variant == 'button' %}
+  {{ include('display_builder:button', {
+    attributes,
+    label: content,
+  }, with_context: false) }}
+{% else %}
+  {{ include('display_builder:card', {
+    attributes,
+    content: content,
+    image: image,
+  }, with_context: false) }}
+{% endif %}

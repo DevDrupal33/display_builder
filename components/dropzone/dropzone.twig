@@ -1,0 +1,4 @@
+{% set attributes = variant ? attributes.addClass('db-dropzone--' ~ variant) : attributes %}
+{% set attributes = title ? attributes.setAttribute('title', title) : attributes %}
+{% set attributes = attributes.setAttribute('tabIndex', 0) %}
+<slot{{ attributes.addClass('db-dropzone') }}>{{ content }}</slot>

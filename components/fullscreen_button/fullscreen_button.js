@@ -1,0 +1,115 @@
+/**
+ * @file
+ * Provides fullscreen behavior to the display builder.
+ */
+
+((Drupal, once) => {
+  /**
+   * Set fullscreen for the display builder.
+   *
+   * @param {HTMLElement} builder - The builder element containing dropzone.
+   * @param {HTMLElement|null} icon - The fullscreen icon.
+   * @param {HTMLElement|null} button - The fullscreen button.
+   *
+   * @todo move to it's own component?
+   */
+  function setFullscreen(builder, icon, button) {
+    if (builder.classList.contains('db-display-builder--fullscreen')) {
+      document.documentElement.classList.remove(
+        'db-display-builder-is-fullscreen',
+      );
+      builder.classList.remove('db-display-builder--fullscreen');
+      if (icon) {
+        icon.setAttribute('name', 'fullscreen');
+      }
+      if (button) {
+        button.setAttribute('variant', 'default');
+      }
+
+      Drupal.displayBuilder.LocalStorageManager.remove(
+        builder.id,
+        'fullscreen',
+      );
+
+      // Clear any left margin set by sidebar width.
+      const main = builder.querySelector('.db-display-builder__main');
+      if (!main) return;
+      main.style.marginLeft = '';
+    } else {
+      document.documentElement.classList.add(
+        'db-display-builder-is-fullscreen',
+      );
+      builder.classList.add('db-display-builder--fullscreen');
+      if (icon) {
+        icon.setAttribute('name', 'fullscreen-exit');
+      }
+      if (button) {
+        button.setAttribute('variant', 'primary');
+      }
+      // Remember fullscreen.
+      Drupal.displayBuilder.LocalStorageManager.set(
+        builder.id,
+        'fullscreen',
+        true,
+      );
+
+      const open = builder.querySelector('.db-modal--resizable[open]');
+      if (!open) return;
+      // Restore sidebar width.
+      const { width } = open.style;
+      const main = builder.querySelector('.db-display-builder__main');
+      if (!main) return;
+      main.style.marginLeft = width;
+    }
+  }
+
+  /**
+   * Set up sortable dropzone for the display builder.
+   *
+   * @param {HTMLElement} builder - The builder element containing dropzone.
+   *
+   * @todo move to it's own component?
+   */
+  function restoreFullscreen(builder) {
+    if (
+      Drupal.displayBuilder.LocalStorageManager.get(builder.id, 'fullscreen')
+    ) {
+      const button = builder.querySelector('[data-set-fullscreen]');
+      const icon = button.querySelector('sl-icon');
+      setFullscreen(builder, icon, button);
+    }
+  }
+
+  /**
+   * Drupal behavior for display builder fullscreen .
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behavior.
+   */
+  Drupal.behaviors.displayBuilderFullscreen = {
+    attach(context) {
+      once('dbFullscreen', '[data-set-fullscreen]', context).forEach(
+        (button) => {
+          const builder = button.closest('.db-display-builder');
+          button.addEventListener('click', (event) => {
+            // Click on button or icon is different.
+            let icon = event.target;
+            if (event.target.tagName !== 'SL-ICON') {
+              icon = event.target.querySelector('sl-icon');
+            }
+
+            setFullscreen(builder, icon, button);
+          });
+        },
+      );
+
+      once('dbFullscreenRestore', '.db-display-builder', context).forEach(
+        (builder) => {
+          restoreFullscreen(builder);
+        },
+      );
+    },
+  };
+})(Drupal, once, Drupal);

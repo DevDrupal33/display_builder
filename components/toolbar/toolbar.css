@@ -1,0 +1,33 @@
+.db-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+}
+
+.db-toolbar--sticky {
+  position: sticky;
+  z-index: var(--db-z-index, 1);
+}
+
+.db-toolbar__end > *:not(:first-child, dialog) {
+  margin-left: 6px;
+}
+
+/* Compatibility with core admin toolbar. */
+.db-toolbar {
+  top: var(--drupal-displace-offset-top, 0);
+}
+
+.db-display-builder--fullscreen .db-toolbar {
+  z-index: calc(var(--db-z-index, 1) + 2);
+  top: 0;
+}
+
+/* Compatibility with core navigation. */
+/* @todo is there a variable? */
+html[data-admin-toolbar] .db-toolbar {
+  top: 0.5em;
+}

@@ -1,0 +1,12 @@
+name: Default
+slots:
+  label: Deciduous
+  children:
+    - type: component
+      component: display_builder:tree_item
+      slots:
+        label: Birch
+    - type: component
+      component: display_builder:tree_item
+      slots:
+        label: Maple

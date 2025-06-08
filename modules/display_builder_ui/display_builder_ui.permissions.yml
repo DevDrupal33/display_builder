@@ -1,0 +1,8 @@
+administer display builders:
+  title: 'Administer display builder'
+
+administer display builder preset:
+  title: 'Administer display builder preset'
+
+access display builders api:
+  title: 'Access display builder API'

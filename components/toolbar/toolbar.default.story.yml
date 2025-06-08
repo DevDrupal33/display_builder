@@ -1,0 +1,14 @@
+name: Default
+slots:
+  start:
+    type: component
+    component: "display_builder:button_group"
+    story: default
+  middle:
+    type: component
+    component: "display_builder:tabs"
+    story: default
+  end:
+    type: component
+    component: "display_builder:button_group"
+    story: default

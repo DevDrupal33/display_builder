@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for UI Patterns Overrides module.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_ui_patterns_source_info_alter().
+ */
+function ui_patterns_overrides_ui_patterns_source_info_alter(array &$definitions): void {
+  $definitions['component']['class'] = 'Drupal\ui_patterns_overrides\Plugin\UiPatterns\Source\ComponentSource';
+  $definitions['block']['class'] = 'Drupal\ui_patterns_overrides\Plugin\UiPatterns\Source\BlockSource';
+  $definitions['wysiwyg']['class'] = 'Drupal\ui_patterns_overrides\Plugin\UiPatterns\Source\WysiwygWidget';
+}

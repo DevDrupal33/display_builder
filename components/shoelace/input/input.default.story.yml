@@ -1,0 +1,7 @@
+name: Default
+props:
+  label: An input
+  # placeholder: Type to search
+  # clearable: true
+  # autocomplete_off: true
+  # icon: search

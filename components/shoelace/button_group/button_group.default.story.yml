@@ -1,0 +1,9 @@
+name: Default
+slots:
+  buttons:
+    - type: component
+      component: "display_builder:button"
+      story: default
+    - type: component
+      component: "display_builder:button"
+      story: default

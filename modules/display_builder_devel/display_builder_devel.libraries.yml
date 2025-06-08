@@ -1,0 +1,17 @@
+prism.js:
+  version: VERSION
+  js:
+    https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js:
+      { type: external, minified: true }
+    https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js:
+      { type: external, minified: true }
+    https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js:
+      { type: external, minified: true }
+    https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js:
+      { type: external, minified: true }
+  css:
+    theme:
+      https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css:
+        { minified: true }
+      https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css:
+        { minified: true }

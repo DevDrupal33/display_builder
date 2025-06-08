@@ -1,0 +1,61 @@
+.db-display-builder .db-button-search,
+.db-display-builder .db-search-contextual {
+  width: 100%;
+}
+
+/* Search filter tweaks to hide the form and handle results */
+/* @see components/display_builder/display_builder.js */
+.db-display-builder .db-form .db-search-contextual {
+  display: none;
+}
+/* @todo add instance form when possible, currently only apply to styles and
+ skins because instance form do not have an easy to use markup */
+/* .db-display-builder .db-form:has(.db-tabs [active][data-target$="instance_form"]) .db-search-contextual, */
+.db-display-builder
+  .db-form:has(.db-tabs [active][data-target$="ui_styles"])
+  .db-search-contextual,
+.db-display-builder
+  .db-form:has(.db-tabs [active][data-target$="ui_skins"])
+  .db-search-contextual {
+  display: block;
+}
+.db-search-contextual {
+  margin-bottom: 0.5rem;
+}
+.db-form-search-found .db-island-ui_styles .db-search-found,
+.db-form-search-found .db-island-ui_skins .db-search-found {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  padding: 0 0.5rem 0.5rem 0.5rem;
+  border: 1px solid var(--sl-color-success-600);
+  background-color: var(--sl-color-success-200);
+}
+.db-form-search-found
+  .db-island-ui_styles
+  details
+  > fieldset:not(.db-element-search-in),
+.db-form-search-found
+  .db-island-ui_styles
+  details
+  > div:not(.db-element-search-in),
+.db-form-search-found
+  .db-island-ui_skins
+  details
+  > fieldset:not(.db-element-search-in),
+.db-form-search-found
+  .db-island-ui_skins
+  details
+  > div:not(.db-element-search-in) {
+  display: none;
+}
+.db-form-search-found .db-island-ui_styles .db-element-search-in,
+.db-form-search-found .db-island-ui_skins .db-element-search-in {
+  display: block;
+}
+
+.db-display-builder .db-button-search,
+.db-form .db-search-contextual {
+  margin-bottom: 0.5rem;
+  padding: 0;
+  border: 0 none;
+}

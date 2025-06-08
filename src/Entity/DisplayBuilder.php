@@ -1,0 +1,515 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Drupal\display_builder\Entity;
+
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder\DisplayBuilderInterface;
+use Drupal\display_builder\Form\DisplayBuilderDeleteForm;
+use Drupal\display_builder\Form\DisplayBuilderForm;
+use Drupal\display_builder\IslandPluginManagerInterface;
+use Drupal\display_builder\IslandType;
+use Drupal\display_builder\RenderableBuilderTrait;
+use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder_ui\DisplayBuilderListBuilder;
+
+/**
+ * Defines the display builder entity type.
+ */
+#[ConfigEntityType(
+  id: 'display_builder',
+  label: new TranslatableMarkup('Display builder'),
+  label_collection: new TranslatableMarkup('Display builders'),
+  label_singular: new TranslatableMarkup('display builder'),
+  label_plural: new TranslatableMarkup('display builders'),
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+    'description' => 'description',
+    'island_settings' => 'island_settings',
+  ],
+  handlers: [
+    'list_builder' => DisplayBuilderListBuilder::class,
+    'form' => [
+      'add' => DisplayBuilderForm::class,
+      'edit' => DisplayBuilderForm::class,
+      'delete' => DisplayBuilderDeleteForm::class,
+    ],
+  ],
+  links: [
+    'add-form' => '/admin/structure/display-builder/add',
+    'edit-form' => '/admin/structure/display-builder/{display_builder}',
+    'delete-form' => '/admin/structure/display-builder/{display_builder}/delete',
+    'collection' => '/admin/structure/display-builder',
+  ],
+  admin_permission: 'administer display builders',
+  constraints: [
+    'ImmutableProperties' => [
+      'id',
+    ],
+  ],
+  config_export: [
+    'id',
+    'label',
+    'description',
+    'island_settings',
+  ],
+)]
+final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInterface {
+
+  use RenderableBuilderTrait;
+  use StringTranslationTrait;
+
+  public const DISPLAY_BUILDER_CONFIG = 'default';
+
+  /**
+   * The display builder description.
+   */
+  protected string $description;
+
+  /**
+   * The display builder config ID.
+   */
+  protected string $id;
+
+  /**
+   * The display builder label.
+   */
+  protected string $label;
+
+  /**
+   * The display builder enabled islands.
+   */
+  protected ?array $island_settings;
+
+  /**
+   * The display builder state manager.
+   */
+  private StateManagerInterface $stateManager;
+
+  /**
+   * The display builder island plugin manager.
+   */
+  private IslandPluginManagerInterface $islandPluginManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function build(string $builder_id, array $contexts = []): array {
+    $stateManager = $this->getStateManager();
+
+    $builder_data = $stateManager->getCurrentState($builder_id);
+    $islands_enabled_sorted = $this->getIslandsEnableSorted($contexts);
+    $hash = $stateManager->getCurrentHash($builder_id);
+
+    $button_islands = $islands_enabled_sorted[IslandType::Button->value] ?? [];
+    $library_islands = $islands_enabled_sorted[IslandType::Library->value] ?? [];
+    $contextual_islands = $islands_enabled_sorted[IslandType::Contextual->value] ?? [];
+    $menu_islands = $islands_enabled_sorted[IslandType::Menu->value] ?? [];
+
+    $buttons = [];
+    if (!empty($button_islands)) {
+      $buttons = $this->buildPanes($builder_id, $button_islands, $this->getKeyboardKeys(), 'span');
+    }
+
+    if (!empty($menu_islands)) {
+      $menu_islands = $this->buildMenuWrapper($builder_id, $menu_islands);
+    }
+
+    if (!empty($library_islands)) {
+      $library_islands = [
+        $this->buildBuilderTabs($builder_id, $library_islands, TRUE),
+        $this->buildPanes($builder_id, $library_islands, $builder_data),
+      ];
+    }
+
+    $view_islands_data = $this->prepareViewIslands($builder_id, $islands_enabled_sorted, $builder_data);
+    $view_sidebar = $view_islands_data['view_sidebar'];
+    $view_main = $view_islands_data['view_main'];
+    // Library content can be in main or sidebar.
+    // @todo Move the logic to LibrariesIsland::build().
+    if (isset($view_sidebar['library']) && !empty($library_islands)) {
+      $view_sidebar['library']['content'] = $library_islands;
+    }
+    elseif (isset($view_main['library']) && !empty($library_islands)) {
+      $view_main['library']['content'] = $library_islands;
+    }
+
+    if (!empty($contextual_islands)) {
+      $contextual_islands = $this->buildContextualIslands($builder_id, $islands_enabled_sorted, $builder_data);
+    }
+
+    return [
+      '#type' => 'component',
+      '#component' => 'display_builder:display_builder',
+      '#props' => [
+        'builder_id' => $builder_id,
+        'hash' => $hash,
+      ],
+      '#slots' => [
+        'view_sidebar_buttons' => $view_islands_data['view_sidebar_buttons'],
+        'view_sidebar' => $view_sidebar,
+        'view_main_tabs' => $view_islands_data['view_main_tabs'],
+        'view_main' => $view_main,
+        'buttons' => $buttons,
+        'contextual_islands' => $contextual_islands,
+        'menu_islands' => $menu_islands,
+      ],
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getIslandEnabled(): array {
+    $island_enabled = [];
+
+    foreach ($this->island_settings as $settings) {
+      foreach ($settings as $key => $value) {
+        if (isset($value['enable']) && (bool) $value['enable']) {
+          $island_enabled[$key] = $value['weight'] ?? 0;
+        }
+      }
+    }
+
+    return $island_enabled;
+  }
+
+  /**
+   * Prepares view islands data.
+   *
+   * @param string $builder_id
+   *   The builder ID.
+   * @param array $islands_enabled_sorted
+   *   The sorted, enabled islands.
+   * @param array $builder_data
+   *   The builder data.
+   *
+   * @return array
+   *   The prepared view islands data.
+   */
+  private function prepareViewIslands(string $builder_id, array $islands_enabled_sorted, array $builder_data): array {
+    $view_islands_sidebar = [];
+    $view_islands_main = [];
+    $view_sidebar_buttons = [];
+    $view_main_tabs = [];
+    $view_islands = $islands_enabled_sorted[IslandType::View->value] ?? [];
+
+    if (isset($this->island_settings[IslandType::View->value])) {
+      foreach ($this->island_settings[IslandType::View->value] as $id => $settings) {
+        if (!isset($view_islands[$id])) {
+          continue;
+        }
+
+        if ($settings['options'] === 'sidebar') {
+          $view_islands_sidebar[$id] = $view_islands[$id];
+          $view_sidebar_buttons[$id] = $view_islands[$id];
+        }
+        else {
+          $view_islands_main[$id] = $view_islands[$id];
+          $view_main_tabs[$id] = $view_islands[$id];
+        }
+      }
+    }
+
+    if (!empty($view_sidebar_buttons)) {
+      $view_sidebar_buttons = $this->buildStartButtons($builder_id, $view_sidebar_buttons);
+    }
+
+    if (!empty($view_main_tabs)) {
+      $view_main_tabs = $this->buildBuilderTabs($builder_id, $view_main_tabs, FALSE, TRUE);
+    }
+
+    $view_sidebar = $this->buildPanes($builder_id, $view_islands_sidebar, $builder_data);
+    $view_main = $this->buildPanes($builder_id, $view_islands_main, $builder_data);
+
+    return [
+      'view_sidebar_buttons' => $view_sidebar_buttons,
+      'view_main_tabs' => $view_main_tabs,
+      'view_sidebar' => $view_sidebar,
+      'view_main' => $view_main,
+    ];
+  }
+
+  /**
+   * Build contextual islands which are tabbed sub islands.
+   *
+   * @param string $builder_id
+   *   The builder ID.
+   * @param array $islands_enabled_sorted
+   *   The islands enabled sorted.
+   * @param array $builder_data
+   *   The builder data.
+   *
+   * @return array
+   *   The contextual islands render array.
+   */
+  private function buildContextualIslands(string $builder_id, array $islands_enabled_sorted, array $builder_data): array {
+    $contextual_islands = $islands_enabled_sorted[IslandType::Contextual->value] ?? [];
+
+    if (empty($contextual_islands)) {
+      return [];
+    }
+
+    $filter = $this->buildInput($builder_id, '', 'search', 'medium', 'off', $this->t('Filter by name'), TRUE, 'search');
+    // @see assets/js/search.js
+    $filter['#attributes']['class'] = ['db-search-contextual'];
+
+    return [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      // Used for custom styling in assets/css/form.css.
+      '#attributes' => ['class' => ['db-form']],
+      'tabs' => $this->buildBuilderTabs($builder_id, $contextual_islands),
+      'filter' => $filter,
+      'panes' => $this->buildPanes($builder_id, $contextual_islands, $builder_data),
+    ];
+  }
+
+  /**
+   * Builds panes.
+   *
+   * @param string $builder_id
+   *   The builder ID.
+   * @param \Drupal\display_builder\IslandInterface[] $islands
+   *   The islands to build tabs for.
+   * @param array $data
+   *   (Optional) The data to pass to the islands.
+   * @param string $tag
+   *   (Optional) The HTML tag, defaults to 'div'.
+   *
+   * @return array
+   *   The tabs render array.
+   */
+  private function buildPanes(string $builder_id, array $islands, array $data = [], string $tag = 'div'): array {
+    $panes = [];
+
+    foreach ($islands as $island_id => $island) {
+      $classes = [
+        'db-island',
+        \sprintf('db-island-%s', $island->getTypeId()),
+        \sprintf('db-island-%s', $island->getPluginId()),
+      ];
+
+      $panes[$island_id] = [
+        '#type' => 'html_tag',
+        '#tag' => $tag,
+        'children' => $island->build($builder_id, $data),
+        '#attributes' => [
+          'id' => $island->getHtmlId($builder_id),
+          'class' => $classes,
+        ],
+      ];
+    }
+
+    return $panes;
+  }
+
+  /**
+   * Build the buttons to hide/show the drawer.
+   *
+   * @param string $builder_id
+   *   The builder ID.
+   * @param \Drupal\display_builder\IslandInterface[] $islands
+   *   An array of island objects for which buttons will be created.
+   *
+   * @return array
+   *   An array of render arrays for the drawer buttons.
+   */
+  private function buildStartButtons(string $builder_id, array $islands): array {
+    $build = [];
+
+    foreach ($islands as $island) {
+      $island_id = $island->getPluginId();
+
+      $build[$island_id] = [
+        '#type' => 'component',
+        '#component' => 'display_builder:button',
+        '#props' => [
+          'id' => \sprintf('start-btn-%s-%s', $builder_id, $island_id),
+          'label' => (string) $island->label(),
+          'icon' => $island->getIcon(),
+          'attributes' => [
+            'data-open-first-drawer' => TRUE,
+            'data-target' => $island_id,
+          ],
+        ],
+      ];
+
+      // Keep only first keyboard key.
+      if ($keyboard = $island->getKeyboardShortcuts()) {
+        $build[$island_id]['#attributes']['data-keyboard'] = key($keyboard);
+      }
+    }
+
+    return $build;
+  }
+
+  /**
+   * Builds tabs.
+   *
+   * @param string $builder_id
+   *   The builder ID.
+   * @param \Drupal\display_builder\IslandInterface[] $islands
+   *   The islands to build tabs for.
+   * @param bool $contextual
+   *   (Optional) Whether the tabs are contextual.
+   * @param bool $enableKeyboard
+   *   (Optional) Add the keyboard data value.
+   *
+   * @return array
+   *   The tabs render array.
+   */
+  private function buildBuilderTabs(string $builder_id, array $islands, bool $contextual = FALSE, bool $enableKeyboard = FALSE): array {
+    // Global id is based on last island.
+    $id = '';
+    $tabs = [];
+
+    foreach ($islands as $island) {
+      $id = $island_id = $island->getHtmlId($builder_id);
+      $attributes = [];
+      if ($enableKeyboard) {
+        $key = array_keys($island->getKeyboardShortcuts());
+        if (!empty($key)) {
+          $attributes = ['data-keyboard' => $key[0]];
+        }
+      }
+      $tabs[] = [
+        'title' => $island->label(),
+        'url' => '#' . $island_id,
+        'attributes' => $attributes,
+      ];
+    }
+
+    // Id is needed for storage tabs state, @see component tabs.js file.
+    return $this->buildTabs($id, $tabs, $contextual);
+  }
+
+  /**
+   * Builds menu with islands as entries.
+   *
+   * @param string $builder_id
+   *   The builder ID.
+   * @param \Drupal\display_builder\IslandInterface[] $islands
+   *   The islands to build tabs for.
+   * @param array $data
+   *   (Optional) The data to pass to the islands.
+   *
+   * @return array
+   *   The islands render array.
+   *
+   * @see components/contextual_menu/contextual_menu.js
+   */
+  private function buildMenuWrapper(string $builder_id, array $islands, array $data = []): array {
+    $build = [
+      '#type' => 'component',
+      '#component' => 'display_builder:contextual_menu',
+      '#slots' => [
+        'label' => $this->t('Select an action'),
+      ],
+      '#attributes' => [
+        'class' => ['db-background', 'db-context-menu'],
+        // Require for JavaScript.
+        // @see components/contextual_menu/contextual_menu.js
+        'data-db-id' => $builder_id,
+      ],
+    ];
+
+    $items = [];
+    foreach ($islands as $island) {
+      $items = \array_merge($items, $island->build($builder_id, $data));
+    }
+    $build['#slots']['items'] = $items;
+
+    return $build;
+  }
+
+  /**
+   * Get keyboard keys defined in islands.
+   *
+   * @return array
+   *   The keyboard array list as key => description.
+   */
+  private function getKeyboardKeys(): array {
+    $island_enable = [];
+
+    foreach ($this->island_settings as $island_settings) {
+      foreach ($island_settings as $island_id => $island_setting) {
+        if (!$island_setting['enable']) {
+          continue;
+        }
+        $island_enable[] = $island_id;
+      }
+    }
+
+    if (empty($island_enable)) {
+      return [];
+    }
+
+    $output = $this->getIslandPluginManager()->getIslandsKeyboard(array_flip($island_enable));
+    ksort($output, SORT_NATURAL | SORT_FLAG_CASE);
+
+    return $output;
+  }
+
+  /**
+   * Get enabled panes sorted by weight.
+   *
+   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
+   *   An array of contexts, keyed by context name.
+   *
+   * @return array
+   *   The list of enabled islands sorted.
+   *
+   * @todo just key by weight and default weight in Island?
+   */
+  private function getIslandsEnableSorted(array $contexts): array {
+    // Set island by weight.
+    // @todo just key by weight and default weight in Island?
+    $islands_enable_by_weight = [];
+
+    foreach ($this->island_settings as $settings) {
+      foreach ($settings as $key => $value) {
+        if (isset($value['enable']) && (bool) $value['enable']) {
+          $islands_enable_by_weight[$key] = $value['weight'] ?? 0;
+        }
+      }
+    }
+
+    return $this->getIslandPluginManager()->getIslandsByTypes($contexts, $islands_enable_by_weight);
+  }
+
+  /**
+   * Gets the display builder island plugin manager.
+   *
+   * @return \Drupal\display_builder\IslandPluginManagerInterface
+   *   The island plugin manager.
+   */
+  private function getIslandPluginManager(): IslandPluginManagerInterface {
+    if (!isset($this->islandPluginManager)) {
+      $this->islandPluginManager = \Drupal::service('plugin.manager.db_island');
+    }
+
+    return $this->islandPluginManager;
+  }
+
+  /**
+   * Gets the display builder state manager.
+   *
+   * @return \Drupal\display_builder\StateManager\StateManagerInterface
+   *   The state manager.
+   */
+  private function getStateManager(): StateManagerInterface {
+    if (!isset($this->stateManager)) {
+      $this->stateManager = \Drupal::service('display_builder.state_manager');
+    }
+
+    return $this->stateManager;
+  }
+
+}

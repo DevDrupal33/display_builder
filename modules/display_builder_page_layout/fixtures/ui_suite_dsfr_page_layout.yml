@@ -1,0 +1,107 @@
+- source_id: block
+  source:
+    plugin_id: 'system_menu_block:main'
+    'system_menu_block:main':
+      id: 'system_menu_block:main'
+      label: 'Main navigation'
+      label_display: ''
+      provider: system
+      level: 1
+      depth: 1
+      expand_all_items: false
+- source_id: page_title
+  source: {}
+- source_id: block
+  source:
+    plugin_id: system_breadcrumb_block
+
+- source_id: local_tasks
+  source: {}
+  _third_party_settings:
+    ui_styles:
+      styles:
+        selected:
+          spacing_margin_bottom: fr-mb-3w
+
+- source_id: local_actions
+  source: {}
+
+- source_id: component
+  source:
+    component:
+      component_id: 'ui_suite_dsfr:alert'
+      variant_id:
+        source_id: select
+        source:
+          value: info
+      props:
+        attributes:
+          source_id: attributes
+          source:
+            value: 'class="fr-mb-3w"'
+        dismissible:
+          source_id: select
+          source:
+            value: core
+      slots:
+        message:
+          sources:
+
+          - source_id: wysiwyg
+            source:
+              value:
+                value: |
+                  Check the <b>Manage > Structure > Page Layout</b> to edit this layout.
+                format: full_html
+
+        title:
+          sources:
+
+          - source_id: token
+            source:
+              value: 'Welcome to your new display builder layout!'
+
+- source_id: component
+  source:
+    component:
+      component_id: 'ui_suite_dsfr:grid_row_2'
+      slots:
+        second:
+          sources:
+
+          - source_id: main_page_content
+            source: {}
+
+        first:
+          sources:
+
+          - source_id: block
+            source:
+              plugin_id: search_form_block
+
+          - source_id: block
+            source:
+              plugin_id: 'system_menu_block:tools'
+      props:
+        with_gutters:
+          source_id: checkbox
+          source:
+            value: '1'
+        cols_sm:
+          source_id: selects
+          source:
+            value:
+            - '12'
+            - ''
+        cols_md:
+          source_id: selects
+          source:
+            value:
+            - '3'
+            - ''
+        cols_lg:
+          source_id: selects
+          source:
+            value:
+            - '3'
+            - ''

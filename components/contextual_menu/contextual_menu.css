@@ -1,0 +1,31 @@
+:root {
+  --db-context-menu-z-index: 901;
+}
+
+.db-display-builder .db-context-menu {
+  position: absolute;
+  z-index: var(--db-context-menu-z-index);
+  display: none;
+  border: 1px dashed var(--sl-color-neutral-200) !important;
+  box-shadow: var(--sl-shadow-x-large);
+
+  sl-menu-label::part(base) {
+    padding-left: 0.5rem;
+    color: var(--sl-color-primary-800);
+    font-style: italic;
+  }
+  sl-menu-item::part(checked-icon) {
+    width: 0.5rem;
+  }
+  sl-menu-item[hx-delete]::part(base) {
+    color: var(--sl-color-danger-600);
+  }
+}
+
+.debug-info {
+  margin: 0;
+  padding: 3px;
+  border: 1px solid gray;
+  background-color: white;
+  font-size: 0.8rem;
+}

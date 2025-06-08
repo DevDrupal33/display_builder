@@ -1,0 +1,10 @@
+name: Island tree
+description: Display a hierarchical list of selectable tree items in an island.
+slots:
+  items:
+    title: Items
+libraryOverrides:
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/sortable

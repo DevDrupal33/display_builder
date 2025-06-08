@@ -1,0 +1,32 @@
+.db-draggables {
+  padding-top: 16px;
+}
+
+.db-draggables > h4 {
+  margin: 8px 8px 16px;
+  font-size: 1rem;
+  font-weight: bold;
+  line-height: 1rem;
+}
+
+.db-draggables--mosaic {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  margin-top: 1rem;
+  padding: 0 4px;
+  gap: 8px;
+}
+
+/* Ensure minimum 2 columns when space allows */
+@media (min-width: 400px) {
+  .db-draggables--mosaic {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
+/* Ensure minimum 3 columns for larger widths */
+@media (min-width: 600px) {
+  .db-draggables--mosaic {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}

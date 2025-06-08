@@ -1,0 +1,22 @@
+name: Shoelace Tabs
+description: Organize content into a container that shows one section at a time.
+links:
+  - https://shoelace.style/components/tab-group
+props:
+  type: object
+  properties:
+    id:
+      title: ID
+      $ref: ui-patterns://identifier
+    tabs:
+      title: Tabs
+      $ref: ui-patterns://links
+    contextual:
+      title: Contextual?
+      type: boolean
+libraryOverrides:
+  dependencies:
+    - core/drupal
+    - core/once
+    - display_builder/shoelace
+    - display_builder/local-storage-manager

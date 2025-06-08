@@ -1,0 +1,150 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Drupal\display_builder\Plugin\display_builder\Island;
+
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\IslandType;
+
+/**
+ * Layers island plugin implementation.
+ */
+#[Island(
+  id: 'layers',
+  label: new TranslatableMarkup('Layers'),
+  description: new TranslatableMarkup('Manageable hierarchical layer view of elements.'),
+  type: IslandType::View,
+  keyboard_shortcuts: [
+    'y' => new TranslatableMarkup('Show layers view'),
+  ],
+  icon: 'layers',
+)]
+class LayersPanel extends BuilderPanel {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): array {
+    $component_id = $data['source']['component']['component_id'] ?? NULL;
+    $instance_id = $instance_id ?: $data['_instance_id'];
+
+    if (!$instance_id && !$component_id) {
+      return [];
+    }
+
+    $component = $this->sdcManager->getDefinition($component_id);
+    if (!$component) {
+      return [];
+    }
+
+    $slots = [];
+    foreach ($component['slots'] ?? [] as $slot_id => $definition) {
+      $dropzone = [
+        '#type' => 'component',
+        '#component' => 'display_builder:dropzone',
+        '#props' => [
+          'title' => $definition['title'],
+          'variant' => 'highlighted',
+        ],
+        '#attributes' => [
+           // Required for JavaScript @see components/dropzone/dropzone.js.
+          'data-db-id' => $builder_id,
+          // Slot is needed for contextual menu paste.
+          // @see components/contextual_menu/contextual_menu.js
+          'data-slot-id' => $slot_id,
+          'data-slot-title' => $definition['title'],
+          'data-instance-title' => $component['label'],
+        ],
+      ];
+
+      if (isset($data['source']['component']['slots'][$slot_id])) {
+        $sources = $data['source']['component']['slots'][$slot_id]['sources'];
+        $dropzone['#slots']['content'] = $this->digFromSlot($builder_id, $sources);
+      }
+      $dropzone = $this->htmxEvents->onSlotDrop($dropzone, $builder_id, $instance_id, $slot_id);
+      $slots[] = [
+        [
+          '#plain_text' => $definition['title'],
+        ],
+        $dropzone,
+      ];
+    }
+    $name = $component['name'];
+    $variant = $this->getComponentVariantLabel($data, $component);
+
+    if ($variant) {
+      $name .= ' - ' . $variant;
+    }
+
+    $build = [
+      '#type' => 'component',
+      '#component' => 'display_builder:layer',
+      '#slots' => [
+        'title' => $name,
+        'children' => $slots,
+      ],
+      // Required for the context menu label.
+      // @see components/contextual_menu/contextual_menu.js
+      '#attributes' => [
+        'data-instance-title' => $name,
+      ],
+    ];
+
+    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): array {
+    /** @var \Drupal\display_builder\SlotSourceProxy $proxy */
+    $proxy = \Drupal::service('display_builder.slot_sources_proxy');
+    $label = $proxy->getLabel($data);
+    $build = [
+      '#type' => 'component',
+      '#component' => 'display_builder:layer',
+      '#slots' => [
+        'title' => $label,
+      ],
+    ];
+    $instance_id = $instance_id ?: $data['_instance_id'];
+
+    // This label is used for contextual menu.
+    // @see components/contextual_menu/contextual_menu.js
+    $build['#attributes']['data-instance-title'] = $label;
+    $build['#attributes']['data-slot-position'] = $index;
+
+    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id);
+  }
+
+  /**
+   * Get the label for a component variant.
+   *
+   * @param array $data
+   *   The component data array.
+   * @param array $definition
+   *   The component definition array.
+   *
+   * @return string
+   *   The variant label or empty string if no variant is set.
+   */
+  private function getComponentVariantLabel(array $data, array $definition): string {
+    if (!isset($data['source']['component']['variant_id'])) {
+      return '';
+    }
+
+    if ($data['source']['component']['variant_id']['source_id'] !== 'select') {
+      return '';
+    }
+    $variant_id = $data['source']['component']['variant_id']['source']['value'] ?? '';
+
+    if (empty($variant_id)) {
+      return '';
+    }
+
+    return $definition['variants'][$variant_id]['title'] ?? '';
+  }
+
+}

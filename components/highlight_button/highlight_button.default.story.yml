@@ -1,0 +1,5 @@
+name: Example
+props:
+  label: Lorem ipsum
+  title: Lorem ipsum title
+  icon: highlights

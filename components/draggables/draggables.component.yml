@@ -1,0 +1,14 @@
+name: Draggables
+variants:
+  default:
+    title: Default
+  mosaic:
+    title: Mosaic
+slots:
+  content:
+    title: Content
+libraryOverrides:
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/sortable
