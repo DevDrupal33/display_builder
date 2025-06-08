@@ -143,7 +143,6 @@ display_builder.api_clear:
   options:
     _htmx_route: true
 
-## Display Builder preview API.
 display_builder.api_component_preview:
   path: "/api/display-builder/component/{component_id}/preview/{variant_id}"
   methods: [GET]

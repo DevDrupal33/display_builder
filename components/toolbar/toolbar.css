@@ -9,7 +9,9 @@
 
 .db-toolbar--sticky {
   position: sticky;
-  z-index: var(--db-z-index, 1);
+  /* Include dialog, set above content. */
+  /* Inspired from https://shoelace.style/tokens/z-index/ */
+  z-index: 500;
 }
 
 .db-toolbar__end > *:not(:first-child, dialog) {
@@ -22,7 +24,6 @@
 }
 
 .db-display-builder--fullscreen .db-toolbar {
-  z-index: calc(var(--db-z-index, 1) + 2);
   top: 0;
 }
 

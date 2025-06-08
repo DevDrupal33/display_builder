@@ -33,9 +33,7 @@
   min-width: var(--dropzone-slot-min-width);
   min-height: var(--dropzone-slot-min-height);
 }
-.db-display-builder--highlight
-  .db-display-builder__main
-  .db-dropzone[data-component-id][data-slot-id]:empty {
+.db-display-builder--highlight .db-display-builder__main .db-dropzone[data-component-id][data-slot-id]:empty {
   padding: 1rem 2rem;
 }
 
@@ -57,8 +55,7 @@ handle it instead of shoelace */
   width: 100%;
   height: 100%;
   min-height: 50vh;
-  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target-light)
-    var(--dropzone-slot-outline-type-light);
+  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target-light) var(--dropzone-slot-outline-type-light);
 }
 
 .db-display-builder--fullscreen .db-dropzone--root {
@@ -71,9 +68,7 @@ handle it instead of shoelace */
 }
 
 /* Enough to make something with empty slot selectable */
-[data-instance-id][data-component-id]:not(
-    [data-component-id^="display_builder"]
-  ):has([data-slot-id]:empty) {
+[data-instance-id][data-component-id]:not([data-component-id^="display_builder"]):has([data-slot-id]:empty) {
   min-width: var(--dropzone-placeholder-min-height);
   min-height: var(--dropzone-placeholder-min-height);
 }
@@ -81,61 +76,43 @@ handle it instead of shoelace */
 /* Highlight empty slots */
 [data-slot-id]:empty {
   margin: 0.2rem;
-  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-strong)
-    var(--dropzone-slot-outline-type);
+  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-strong) var(--dropzone-slot-outline-type);
 }
 
 /** Hover context, when something is to be dropped **/
 
 /* When nothing happen, slightly highlight containers of slot */
-.db-dropzone
-  [data-component-id]:not(
-    [data-component-id^="display_builder"],
-    [data-slot-id]
-  ) {
-  outline: var(--dropzone-slot-outline-width-light) var(--dropzone-color-light)
-    var(--dropzone-slot-outline-type-light);
+.db-dropzone [data-component-id]:not([data-component-id^="display_builder"], [data-slot-id]) {
+  outline: var(--dropzone-slot-outline-width-light) var(--dropzone-color-light) var(--dropzone-slot-outline-type-light);
 }
 .db-display-builder--highlight
   .db-display-builder__main
   .db-dropzone
-  [data-component-id]:not(
-    [data-component-id^="display_builder"],
-    [data-slot-id]
-  ) {
+  [data-component-id]:not([data-component-id^="display_builder"], [data-slot-id]) {
   padding: 1rem;
-  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-light)
-    var(--dropzone-slot-outline-type);
+  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-light) var(--dropzone-slot-outline-type);
 }
 
 /* On hover, highlight only possible selectable elements */
-.db-dropzone
-  [data-instance-id]:not([data-component-id^="display_builder"]):hover,
+.db-dropzone [data-instance-id]:not([data-component-id^="display_builder"]):hover,
 .db-dropzone [data-instance-id]:not([data-component-id]):hover,
 .db-placeholder[data-instance-id]:hover {
   position: relative;
   cursor: move !important;
-  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-hover)
-    var(--dropzone-slot-outline-type) !important;
+  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-hover) var(--dropzone-slot-outline-type) !important;
   outline-offset: var(--dropzone-slot-outline-offset-light) !important;
 }
 .db-display-builder--highlight
   .db-display-builder__main
   .db-dropzone
   [data-instance-id]:not([data-component-id^="display_builder"]),
-.db-display-builder--highlight
-  .db-display-builder__main
-  .db-dropzone
-  [data-instance-id]:not([data-component-id]),
-.db-display-builder--highlight
-  .db-display-builder__main
-  .db-placeholder[data-instance-id] {
+.db-display-builder--highlight .db-display-builder__main .db-dropzone [data-instance-id]:not([data-component-id]),
+.db-display-builder--highlight .db-display-builder__main .db-placeholder[data-instance-id] {
   position: relative;
   margin: 0.5rem;
   padding: 0.5rem;
   cursor: move !important;
-  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-strong)
-    var(--dropzone-slot-outline-type);
+  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-strong) var(--dropzone-slot-outline-type);
   outline-offset: var(--dropzone-slot-outline-offset);
 }
 .db-display-builder--highlight
@@ -146,9 +123,7 @@ handle it instead of shoelace */
   .db-display-builder__main
   .db-dropzone
   [data-instance-id]:not([data-component-id])::before,
-.db-display-builder--highlight
-  .db-display-builder__main
-  .db-placeholder[data-instance-id]::before {
+.db-display-builder--highlight .db-display-builder__main .db-placeholder[data-instance-id]::before {
   position: absolute;
   z-index: var(--dropzone-z-index-label-element);
   top: 0;
@@ -162,8 +137,7 @@ handle it instead of shoelace */
   font-size: 14px;
 }
 
-.db-dropzone
-  [data-instance-id]:not([data-component-id^="display_builder"]):hover::before,
+.db-dropzone [data-instance-id]:not([data-component-id^="display_builder"]):hover::before,
 .db-dropzone [data-instance-id]:not([data-component-id]):hover::before,
 .db-placeholder[data-instance-id]:hover::before {
   position: absolute;
@@ -186,9 +160,7 @@ handle it instead of shoelace */
   .db-display-builder__main
   .db-dropzone
   [data-instance-id]:not([data-component-id])::before,
-.db-display-builder--highlight
-  .db-display-builder__main
-  .db-placeholder[data-instance-id]::before {
+.db-display-builder--highlight .db-display-builder__main .db-placeholder[data-instance-id]::before {
   background-color: var(--dropzone-color-strong);
 }
 .db-display-builder--highlight
@@ -199,18 +171,14 @@ handle it instead of shoelace */
   .db-display-builder__main
   .db-dropzone
   [data-instance-id]:not([data-component-id]):hover::before,
-.db-display-builder--highlight
-  .db-display-builder__main
-  .db-placeholder[data-instance-id]:hover::before {
+.db-display-builder--highlight .db-display-builder__main .db-placeholder[data-instance-id]:hover::before {
   background-color: var(--dropzone-color-hover) !important;
 }
 
 /** On drag context, when something is selected **/
 
 /* Reset the slight highlight when nothing happen */
-.db-display-builder--onDrag
-  .db-dropzone
-  [data-component-id][data-instance-id]:not([data-slot-id]) {
+.db-display-builder--onDrag .db-dropzone [data-component-id][data-instance-id]:not([data-slot-id]) {
   position: relative;
   outline: 0 none transparent;
   outline-offset: 0;
@@ -226,8 +194,7 @@ handle it instead of shoelace */
 
 .db-dropzone--ghost,
 .db-dropzone--chosen {
-  border: var(--dropzone-slot-outline-width) var(--dropzone-color-hover)
-    var(--dropzone-slot-outline-type);
+  border: var(--dropzone-slot-outline-width) var(--dropzone-color-hover) var(--dropzone-slot-outline-type);
 }
 
 .db-dropzone--chosen {
@@ -246,12 +213,8 @@ handle it instead of shoelace */
 }
 
 /* Reset the hover effect when on drag to focus on possible targets */
-.db-display-builder--onDrag
-  .db-dropzone
-  [data-instance-id]:not([data-component-id^="display_builder"]):hover,
-.db-display-builder--onDrag
-  .db-dropzone
-  [data-instance-id]:not([data-component-id]):hover,
+.db-display-builder--onDrag .db-dropzone [data-instance-id]:not([data-component-id^="display_builder"]):hover,
+.db-display-builder--onDrag .db-dropzone [data-instance-id]:not([data-component-id]):hover,
 .db-display-builder--onDrag .db-placeholder[data-instance-id]:hover {
   outline: 0 none transparent;
   outline-offset: 0;
@@ -266,8 +229,7 @@ handle it instead of shoelace */
 /* When start dragging something, highlight strongly targets and show labels */
 .db-display-builder--highlight .db-display-builder__main .db-dropzone--root,
 .db-display-builder--onDrag .db-dropzone--root {
-  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target-light)
-    var(--dropzone-slot-outline-type) !important;
+  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target-light) var(--dropzone-slot-outline-type) !important;
   outline-offset: 0 !important;
 }
 .db-display-builder--highlight .db-display-builder__main .db-dropzone--root {
@@ -276,8 +238,7 @@ handle it instead of shoelace */
 .db-display-builder--highlight .db-display-builder__main [data-slot-id],
 .db-display-builder--onDrag [data-slot-id] {
   padding: 0.5rem;
-  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target)
-    var(--dropzone-slot-outline-type);
+  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
   outline-offset: var(--dropzone-slot-outline-offset);
 }
 .db-display-builder--highlight .db-display-builder__main [data-slot-id]::after,
@@ -296,9 +257,7 @@ handle it instead of shoelace */
 }
 /* Base container style when starting empty with nothing */
 .db-dropzone--root:empty::after,
-.db-display-builder--highlight
-  .db-display-builder__main
-  .db-dropzone.db-dropzone--root::after,
+.db-display-builder--highlight .db-display-builder__main .db-dropzone.db-dropzone--root::after,
 .db-display-builder--onDrag .db-dropzone.db-dropzone--root::after {
   position: absolute;
   z-index: var(--dropzone-z-index-label-root);
@@ -311,23 +270,17 @@ handle it instead of shoelace */
   color: var(--db-background-color);
   background-color: var(--dropzone-color-target-light);
 }
-.db-display-builder--highlight
-  .db-display-builder__main
-  .db-dropzone.db-dropzone--root::before {
+.db-display-builder--highlight .db-display-builder__main .db-dropzone.db-dropzone--root::before {
   font-size: 0.9rem;
 }
 
 .db-display-builder--highlight
   .db-display-builder__main
   .db-dropzone
-  *:not([data-slot-id], [data-component-id^="display_builder"]):has(
-    [data-slot-id]
-  )::before,
+  *:not([data-slot-id], [data-component-id^="display_builder"]):has([data-slot-id])::before,
 .db-display-builder--onDrag
   .db-dropzone
-  *:not([data-slot-id], [data-component-id^="display_builder"]):has(
-    [data-slot-id]
-  )::before {
+  *:not([data-slot-id], [data-component-id^="display_builder"]):has([data-slot-id])::before {
   position: absolute;
   z-index: var(--dropzone-z-index-label-element);
   top: -2px;
@@ -343,9 +296,7 @@ handle it instead of shoelace */
 .db-display-builder--highlight
   .db-display-builder__main
   .db-dropzone
-  *:not([data-slot-id], [data-component-id^="display_builder"]):has(
-    [data-slot-id]
-  )::before {
+  *:not([data-slot-id], [data-component-id^="display_builder"]):has([data-slot-id])::before {
   top: -2px;
   left: -2px;
 }
@@ -353,8 +304,7 @@ handle it instead of shoelace */
 /* When moving something inside the builder highlight the slots. */
 .db-display-builder--onMove .db-display-builder__main [data-slot-id] {
   padding: 0;
-  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target)
-    var(--dropzone-slot-outline-type);
+  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
   outline-offset: var(--dropzone-slot-outline-offset);
 }
 

@@ -218,7 +218,8 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
     }
 
     if (!empty($view_sidebar_buttons)) {
-      $view_sidebar_buttons = $this->buildStartButtons($builder_id, $view_sidebar_buttons);
+      // dpr($view_sidebar_buttons);
+      $view_sidebar_buttons = $this->buildSidebarButtons($builder_id, $view_sidebar_buttons);
     }
 
     if (!empty($view_main_tabs)) {
@@ -311,7 +312,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
   }
 
   /**
-   * Build the buttons to hide/show the drawer.
+   * Build the buttons to hide/show a sidebar.
    *
    * @param string $builder_id
    *   The builder ID.
@@ -319,31 +320,35 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    *   An array of island objects for which buttons will be created.
    *
    * @return array
-   *   An array of render arrays for the drawer buttons.
+   *   An array of render arrays for the sidebar buttons.
    */
-  private function buildStartButtons(string $builder_id, array $islands): array {
+  private function buildSidebarButtons(string $builder_id, array $islands): array {
     $build = [];
 
     foreach ($islands as $island) {
-      $island_id = $island->getPluginId();
+      // Keep only first keyboard key.
+      if ($keyboard = $island->getKeyboardShortcuts()) {
+        $keyboard = key($keyboard);
+      }
 
-      $build[$island_id] = [
+      $id = $island->getPluginId();
+      $build[$id] = [
         '#type' => 'component',
         '#component' => 'display_builder:button',
         '#props' => [
-          'id' => \sprintf('start-btn-%s-%s', $builder_id, $island_id),
+          'id' => Html::getUniqueId($id),
           'label' => (string) $island->label(),
           'icon' => $island->getIcon(),
           'attributes' => [
-            'data-open-first-drawer' => TRUE,
-            'data-target' => $island_id,
+            'class' => ['db-button--offcanvas'],
+            'data-modal-type' => 'offcanvas',
+            'data-modal-target' => $island->getHtmlId($builder_id),
           ],
         ],
       ];
 
-      // Keep only first keyboard key.
-      if ($keyboard = $island->getKeyboardShortcuts()) {
-        $build[$island_id]['#attributes']['data-keyboard'] = key($keyboard);
+      if ($keyboard) {
+        $build[$id]['#attributes']['data-keyboard'] = $keyboard;
       }
     }
 

@@ -7,8 +7,7 @@
 
 .db-island-layers .db-dropzone--root {
   padding: 0.5rem;
-  outline: var(--layers-slot-outline-width) var(--layers-color-target)
-    var(--layers-slot-outline-type-light);
+  outline: var(--layers-slot-outline-width) var(--layers-color-target) var(--layers-slot-outline-type-light);
 }
 
 .db-layer {

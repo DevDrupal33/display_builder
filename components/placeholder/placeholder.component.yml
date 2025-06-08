@@ -20,3 +20,4 @@ libraryOverrides:
   dependencies:
     - core/drupal
     - core/once
+    - display_builder/tippy

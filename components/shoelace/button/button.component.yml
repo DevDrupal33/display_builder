@@ -32,4 +32,5 @@ props:
       type: string
 libraryOverrides:
   dependencies:
-    - display_builder/shoelace
+    - "display_builder/tippy.js"
+    - "display_builder/shoelace"

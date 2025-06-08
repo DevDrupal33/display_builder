@@ -31,7 +31,7 @@ props:
       type: boolean
       default: false
     no_header:
-      title: FRemoves the header
+      title: Removes the header
       type: boolean
       default: false
     footer_close:

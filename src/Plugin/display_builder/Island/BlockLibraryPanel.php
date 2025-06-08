@@ -54,8 +54,14 @@ class BlockLibraryPanel extends IslandPluginBase {
     $block_source = $this->sourceManager->createInstance('block', $this->configuration);
 
     return [
-      $this->buildOtherSources($builder_id, $sources),
-      $this->buildDrupalBlocks($builder_id, $block_source),
+      '#type' => 'component',
+      '#component' => 'display_builder:library_panel',
+      '#slots' => [
+        'content' => [
+          $this->buildOtherSources($builder_id, $sources),
+          $this->buildDrupalBlocks($builder_id, $block_source),
+        ],
+      ],
     ];
   }
 
@@ -119,9 +125,9 @@ class BlockLibraryPanel extends IslandPluginBase {
       }
     }
     $build = [
-      $views_blocks ? $this->buildDrupalBlocksGroup($builder_id, $this->t('List (Views)'), $views_blocks, $block_source) : [],
-      $menu_blocks ? $this->buildDrupalBlocksGroup($builder_id, $this->t('Menus'), $menu_blocks, $block_source) : [],
-      $other_blocks ? $this->buildDrupalBlocksGroup($builder_id, $this->t('Others'), $other_blocks, $block_source) : [],
+      $views_blocks ? $this->buildDrupalBlocksGroup($this->t('List (Views)'), $views_blocks, $block_source) : [],
+      $menu_blocks ? $this->buildDrupalBlocksGroup($this->t('Menus'), $menu_blocks, $block_source) : [],
+      $other_blocks ? $this->buildDrupalBlocksGroup($this->t('Others'), $other_blocks, $block_source) : [],
     ];
     $build = $this->buildDraggables($builder_id, $build);
     $build['#source_contexts'] = $this->configuration['contexts'] ?? [];
@@ -132,8 +138,6 @@ class BlockLibraryPanel extends IslandPluginBase {
   /**
    * Build a group of block placeholders.
    *
-   * @param string $builder_id
-   *   Builder ID.
    * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $title
    *   The group title.
    * @param array $definitions
@@ -144,12 +148,13 @@ class BlockLibraryPanel extends IslandPluginBase {
    * @return array
    *   A renderable array.
    */
-  protected function buildDrupalBlocksGroup(string $builder_id, string|TranslatableMarkup $title, array $definitions, SourcesBundlerInterface $block_source): array {
+  protected function buildDrupalBlocksGroup(string|TranslatableMarkup $title, array $definitions, SourcesBundlerInterface $block_source): array {
     $build = [
       [
         '#type' => 'html_tag',
         '#tag' => 'h4',
         // We hide the group titles on search.
+        // @see components/library_panel/library_panel.js
         '#attributes' => ['class' => 'db-filter-hide-on-search'],
         '#value' => $title,
       ],
@@ -166,7 +171,7 @@ class BlockLibraryPanel extends IslandPluginBase {
       $data = $block_source->getDataSkeleton($block_id);
       $keywords = \sprintf('%s %s %s', $definition['id'], $definition['admin_label'] ?? '', $definition['category'] ?? '');
       $block_preview_url = Url::fromRoute('display_builder.api_block_preview', ['block_id' => $block_id]);
-      $build[] = $this->buildPlaceholderButtonWithPreview($builder_id, $definition['admin_label'], $data, $block_preview_url, $keywords);
+      $build[] = $this->buildPlaceholderButtonWithPreview($definition['admin_label'], $data, $block_preview_url, $keywords);
     }
 
     return $build;

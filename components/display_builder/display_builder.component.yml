@@ -27,9 +27,7 @@ libraryOverrides:
   dependencies:
     - core/drupal
     - core/once
-    - display_builder/drawer
     - display_builder/form
-    - display_builder/preview
     - display_builder/shoelace
     - display_builder/search
     - display_builder/keyboard.js

@@ -29,16 +29,6 @@ wysiwyg_fixes.js:
   js:
     ./assets/js/wysiwyg_fixes.js: {}
 
-drawer:
-  css:
-    component:
-      ./assets/css/drawer.css: {}
-  js:
-    ./assets/js/drawer.js: {}
-  dependencies:
-    - core/drupal
-    - core/drupalSettings
-
 search:
   css:
     component:
@@ -51,13 +41,6 @@ search:
     - core/drupal.debounce
     - core/once
 
-preview:
-  css:
-    component:
-      ./assets/css/preview.css: {}
-  js:
-    ./assets/js/preview.js: {}
-
 # Keyboard mapping behavior.
 keyboard.js:
   js:
@@ -68,8 +51,55 @@ local-storage-manager:
   js:
     ./assets/js/localStorageManager.js: {}
 
+# Tippy wrapper utility class.
+tippy:
+  css:
+    theme:
+      ./assets/css/tippy.css: {}
+  js:
+    ./assets/js/tippy.js: {}
+  dependencies:
+    - core/drupal
+    - display_builder/popper.js
+    - display_builder/tippy.js
+
 # Contextual form fixes.
 form:
   css:
     theme:
       ./assets/css/form.css: {}
+
+popper.js:
+  remote: https://github.com/FezVrasta/popper.js
+  license:
+    name: MIT
+    url: https://github.com/FezVrasta/popper.js/blob/master/LICENSE.md
+    gpl-compatible: true
+  version: 2
+  js:
+    # ./node_modules/@popperjs/core/dist/umd/popper.min.js: { minified: true }
+    https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js:
+      {
+        type: external,
+        minified: true,
+        attributes: { defer: false, async: false },
+      }
+
+tippy.js:
+  remote: https://github.com/atomiks/tippyjs
+  license:
+    name: MIT
+    url: https://github.com/atomiks/tippyjs/blob/master/LICENSE
+    gpl-compatible: true
+  version: 6
+  js:
+    # ./node_modules/tippy.js/dist/tippy-bundle.umd.min.js: { minified: true }
+    https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy-bundle.umd.min.js:
+      {
+        type: external,
+        minified: true,
+        attributes: { defer: false, async: false },
+      }
+  dependencies:
+    - core/drupal
+    - display_builder/popper.js
