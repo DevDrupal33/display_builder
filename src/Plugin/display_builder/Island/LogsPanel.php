@@ -76,7 +76,7 @@ class LogsPanel extends IslandPluginBase {
    *   A step with time and log message.
    * @param array $future
    *   Steps with time and log message.
-   * @param int|null $saveHash
+   * @param string|null $saveHash
    *   Hash of the saved state.
    * @param bool $saveInPast
    *   Is the saved stated in the past?
@@ -88,7 +88,7 @@ class LogsPanel extends IslandPluginBase {
    * @return array
    *   A renderable array representing a table row.
    */
-  protected function buildRows(array $past, array $present, array $future, int|NULL $saveHash, bool &$saveInPast, bool &$saveInPresent, bool &$saveInFuture): array {
+  protected function buildRows(array $past, array $present, array $future, string|NULL $saveHash, bool &$saveInPast, bool &$saveInPresent, bool &$saveInFuture): array {
     $rows_past = [];
     $rows_present = [];
     $rows_future = [];
@@ -207,7 +207,7 @@ class LogsPanel extends IslandPluginBase {
     return [
       'hash' => $step['hash'] ?? '',
       'data' => [
-        \sprintf('<small>%s</small>', $step['hash'] ?? ''),
+        $step['hash'] ?? '',
         (string) $index,
         '',
         $step['time'] ?? NULL,
