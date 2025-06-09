@@ -219,11 +219,13 @@ class DisplayBuilderDevelController extends ControllerBase {
       $type = $this->t('Page layout');
     }
     elseif (class_exists('Drupal\display_builder_entity_view\Event\DisplayBuilderEntityViewEventsSubscriber') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderEntityViewEventsSubscriber::CONTEXT_REQUIREMENT)) {
-      $entity_type_id = $builder['contexts']['entity']->getContextValue()->getEntityTypeId();
+      /** @var \Drupal\Core\Entity\EntityInterface $entity */
+      $entity = $builder['contexts']['entity']->getContextValue();
+      $entity_type_id = $entity->getEntityTypeId();
       $route_name = \sprintf('display_builder.%s.view', $entity_type_id);
       $bundle = $builder['contexts']['bundle']->getContextValue();
 
-      $route_params[\sprintf('%s_type', $entity_type_id)] = $bundle;
+      $route_params[$entity->getEntityType()->getBundleEntityType()] = $bundle;
       $route_params['view_mode_name'] = $builder['contexts']['view_mode']->getContextValue();
       $type = $this->t('Entity');
       $extra_links['refresh_sample'] = [
