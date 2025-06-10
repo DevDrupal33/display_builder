@@ -8,9 +8,9 @@ use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Provides a listing of display builder presets.
+ * Provides a listing of Pattern presets.
  */
-final class DisplayBuilderPresetListBuilder extends ConfigEntityListBuilder {
+final class PatternPresetListBuilder extends ConfigEntityListBuilder {
 
   /**
    * {@inheritdoc}
@@ -45,7 +45,7 @@ final class DisplayBuilderPresetListBuilder extends ConfigEntityListBuilder {
   public function render(): array {
     $build = parent::render();
     $build['notice'] = [
-      '#markup' => $this->t('A display builder preset is used in the library of preset in a display builder.'),
+      '#markup' => $this->t('A Pattern preset is a reusable arrangement of components.'),
       '#prefix' => '<div class="description">',
       '#suffix' => '</div>',
       '#weight' => -100,

@@ -4,8 +4,8 @@ display_builder.add_form:
   appears_on:
     - entity.display_builder.collection
 
-display_builder_preset.add_form:
-  route_name: 'entity.display_builder_preset.add_form'
+pattern_preset.add_form:
+  route_name: 'entity.pattern_preset.add_form'
   title: 'Add preset'
   appears_on:
-    - entity.display_builder_preset.collection
+    - entity.pattern_preset.collection

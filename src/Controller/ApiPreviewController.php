@@ -21,7 +21,7 @@ class ApiPreviewController extends ControllerBase implements ContainerInjectionI
   use RenderableBuilderTrait;
 
   /**
-   * The display builder preset storage.
+   * The Pattern preset storage.
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
@@ -34,7 +34,7 @@ class ApiPreviewController extends ControllerBase implements ContainerInjectionI
     private ComponentPluginManager $componentManager,
     private RendererInterface $renderer,
   ) {
-    $this->presetConfigStorage = $this->entityTypeManager()->getStorage('display_builder_preset');
+    $this->presetConfigStorage = $this->entityTypeManager()->getStorage('pattern_preset');
   }
 
   /**
@@ -66,7 +66,7 @@ class ApiPreviewController extends ControllerBase implements ContainerInjectionI
    *   The HTML response.
    */
   public function getPresetPreview(string $preset_id): HtmlResponse {
-    /** @var \Drupal\display_builder\DisplayBuilderPresetInterface $preset */
+    /** @var \Drupal\display_builder\PatternPresetInterface $preset */
     $preset = $this->presetConfigStorage->load($preset_id);
     $data = $preset->getSources([], FALSE);
 

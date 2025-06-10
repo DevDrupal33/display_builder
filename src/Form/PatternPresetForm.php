@@ -7,13 +7,13 @@ namespace Drupal\display_builder\Form;
 // Use Drupal\Component\Serialization\Yaml;.
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\display_builder\Entity\DisplayBuilderPreset;
+use Drupal\display_builder\Entity\PatternPreset;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * Display builder Preset form.
+ * Pattern preset form.
  */
-final class DisplayBuilderPresetForm extends EntityForm {
+final class PatternPresetForm extends EntityForm {
 
   /**
    * {@inheritdoc}
@@ -36,7 +36,7 @@ final class DisplayBuilderPresetForm extends EntityForm {
       '#type' => 'machine_name',
       '#default_value' => $entity->id(),
       '#machine_name' => [
-        'exists' => [DisplayBuilderPreset::class, 'load'],
+        'exists' => [PatternPreset::class, 'load'],
       ],
       '#disabled' => !$entity->isNew(),
     ];

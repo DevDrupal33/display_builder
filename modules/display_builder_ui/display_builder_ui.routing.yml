@@ -38,34 +38,34 @@ entity.display_builder.delete_form:
   options:
     _admin_route: true
 
-entity.display_builder_preset.collection:
+entity.pattern_preset.collection:
   path: '/admin/structure/display-builder/preset'
   defaults:
-    _entity_list: 'display_builder_preset'
-    _title: 'Display builder Preset configuration'
+    _entity_list: 'pattern_preset'
+    _title: 'Pattern presets'
   requirements:
-    _permission: 'administer display_builder_preset'
+    _permission: 'administer pattern_preset'
 
-entity.display_builder_preset.add_form:
+entity.pattern_preset.add_form:
   path: '/admin/structure/display-builder/preset/add'
   defaults:
-    _entity_form: 'display_builder_preset.add'
-    _title: 'Add a display builder preset'
+    _entity_form: 'pattern_preset.add'
+    _title: 'Add a Pattern preset'
   requirements:
-    _permission: 'administer display_builder_preset'
+    _permission: 'administer pattern_preset'
 
-entity.display_builder_preset.edit_form:
-  path: '/admin/structure/display-builder/preset/{display_builder_preset}'
+entity.pattern_preset.edit_form:
+  path: '/admin/structure/display-builder/preset/{pattern_preset}'
   defaults:
-    _entity_form: 'display_builder_preset.edit'
-    _title: 'Edit a display builder preset'
+    _entity_form: 'pattern_preset.edit'
+    _title: 'Edit a Pattern preset'
   requirements:
-    _permission: 'administer display_builder_preset'
+    _permission: 'administer pattern_preset'
 
-entity.display_builder_preset.delete_form:
-  path: '/admin/structure/display-builder/preset/{display_builder_preset}/delete'
+entity.pattern_preset.delete_form:
+  path: '/admin/structure/display-builder/preset/{pattern_preset}/delete'
   defaults:
-    _entity_form: 'display_builder_preset.delete'
-    _title: 'Delete a display builder preset'
+    _entity_form: 'pattern_preset.delete'
+    _title: 'Delete a Pattern preset'
   requirements:
-    _permission: 'administer display_builder_preset'
+    _permission: 'administer pattern_preset'

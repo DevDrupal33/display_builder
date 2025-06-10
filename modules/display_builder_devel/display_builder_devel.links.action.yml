@@ -18,7 +18,7 @@ display_builder_devel.delete_all_presets:
   route_name: display_builder_devel.presets.delete_all
   title: "Delete all presets"
   appears_on:
-    - entity.display_builder_preset.collection
+    - entity.pattern_preset.collection
   options:
     attributes:
       class:

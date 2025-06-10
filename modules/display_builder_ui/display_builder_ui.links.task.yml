@@ -4,7 +4,7 @@ entity.display_builder.collection:
   base_route: entity.display_builder.collection
 
 entity.display_builder.preset.collection:
-  route_name: entity.display_builder_preset.collection
+  route_name: entity.pattern_preset.collection
   title: Presets
   base_route: entity.display_builder.collection
   weight: 9

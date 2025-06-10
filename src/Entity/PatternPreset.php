@@ -6,22 +6,22 @@ namespace Drupal\display_builder\Entity;
 
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\display_builder\DisplayBuilderPresetInterface;
+use Drupal\display_builder\PatternPresetInterface;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder\Form\DisplayBuilderPresetForm;
-use Drupal\display_builder_ui\DisplayBuilderPresetListBuilder;
+use Drupal\display_builder\Form\PatternPresetForm;
+use Drupal\display_builder_ui\PatternPresetListBuilder;
 use Drupal\Core\Entity\EntityDeleteForm;
 
 /**
- * Defines the display builder preset entity type.
+ * Defines the Pattern preset entity type.
  */
 #[ConfigEntityType(
-  id: 'display_builder_preset',
-  label: new TranslatableMarkup('Display builder Preset'),
-  label_collection: new TranslatableMarkup('Display builder Presets'),
-  label_singular: new TranslatableMarkup('display builder Preset'),
-  label_plural: new TranslatableMarkup('display builder presets'),
+  id: 'pattern_preset',
+  label: new TranslatableMarkup('Pattern preset'),
+  label_collection: new TranslatableMarkup('Pattern presets'),
+  label_singular: new TranslatableMarkup('Pattern preset'),
+  label_plural: new TranslatableMarkup('Pattern presets'),
   entity_keys: [
     'id' => 'id',
     'label' => 'label',
@@ -31,20 +31,20 @@ use Drupal\Core\Entity\EntityDeleteForm;
     'sources' => 'sources',
   ],
   handlers: [
-    'list_builder' => DisplayBuilderPresetListBuilder::class,
+    'list_builder' => PatternPresetListBuilder::class,
     'form' => [
-      'add' => DisplayBuilderPresetForm::class,
-      'edit' => DisplayBuilderPresetForm::class,
+      'add' => PatternPresetForm::class,
+      'edit' => PatternPresetForm::class,
       'delete' => EntityDeleteForm::class,
     ],
   ],
   links: [
     'add-form' => '/admin/structure/display-builder/preset/add',
-    'edit-form' => '/admin/structure/display-builder/preset/{display_builder_preset}',
-    'delete-form' => '/admin/structure/display-builder/preset/{display_builder_preset}/delete',
+    'edit-form' => '/admin/structure/display-builder/preset/{pattern_preset}',
+    'delete-form' => '/admin/structure/display-builder/preset/{pattern_preset}/delete',
     'collection' => '/admin/structure/display-builder/preset',
   ],
-  admin_permission: 'administer display builder preset',
+  admin_permission: 'administer Pattern preset',
   constraints: [
     'ImmutableProperties' => [
       'id',
@@ -59,7 +59,7 @@ use Drupal\Core\Entity\EntityDeleteForm;
     'sources',
   ],
 )]
-final class DisplayBuilderPreset extends ConfigEntityBase implements DisplayBuilderPresetInterface {
+final class PatternPreset extends ConfigEntityBase implements PatternPresetInterface {
 
   /**
    * The preset ID.

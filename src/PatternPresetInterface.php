@@ -7,9 +7,9 @@ namespace Drupal\display_builder;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 
 /**
- * Provides an interface defining a display builder preset entity type.
+ * Provides an interface defining a Pattern preset entity type.
  */
-interface DisplayBuilderPresetInterface extends ConfigEntityInterface {
+interface PatternPresetInterface extends ConfigEntityInterface {
 
   /**
    * Return the ready to use sources.

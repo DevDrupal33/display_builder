@@ -1,8 +1,8 @@
 administer display builders:
   title: 'Administer display builder'
 
-administer display builder preset:
-  title: 'Administer display builder preset'
+administer Pattern preset:
+  title: 'Administer Pattern preset'
 
 access display builders api:
   title: 'Access display builder API'

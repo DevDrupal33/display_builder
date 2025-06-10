@@ -23,7 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class PresetLibraryPanel extends IslandPluginBase {
 
   /**
-   * The display builder preset storage.
+   * The Pattern preset storage.
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
@@ -34,7 +34,7 @@ class PresetLibraryPanel extends IslandPluginBase {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->presetConfigStorage = $container->get('entity_type.manager')->getStorage('display_builder_preset');
+    $instance->presetConfigStorage = $container->get('entity_type.manager')->getStorage('pattern_preset');
 
     return $instance;
   }
@@ -50,7 +50,7 @@ class PresetLibraryPanel extends IslandPluginBase {
    * {@inheritdoc}
    */
   public function build(string $builder_id, array $data, array $options = []): array {
-    /** @var \Drupal\display_builder\DisplayBuilderPresetInterface[] $presets */
+    /** @var \Drupal\display_builder\PatternPresetInterface[] $presets */
     $presets = $this->presetConfigStorage->loadByProperties(['status' => TRUE]);
     if (empty($presets)) {
       $content = [
@@ -84,7 +84,7 @@ class PresetLibraryPanel extends IslandPluginBase {
    *
    * @param string $builder_id
    *   Builder ID.
-   * @param \Drupal\display_builder\DisplayBuilderPresetInterface[] $presets
+   * @param \Drupal\display_builder\PatternPresetInterface[] $presets
    *   The presets to build.
    *
    * @return array

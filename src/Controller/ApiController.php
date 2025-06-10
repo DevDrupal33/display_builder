@@ -69,9 +69,9 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     }
     elseif ($request->request->has('preset_id')) {
       $preset_id = (string) $request->request->get('preset_id');
-      $presetStorage = $this->entityTypeManager()->getStorage('display_builder_preset');
+      $presetStorage = $this->entityTypeManager()->getStorage('pattern_preset');
 
-      /** @var \Drupal\display_builder\DisplayBuilderPresetInterface $preset */
+      /** @var \Drupal\display_builder\PatternPresetInterface $preset */
       $preset = $presetStorage->load($preset_id);
       $data = $preset->getSources();
       if (!isset($data['source_id']) || !isset($data['source'])) {
@@ -114,9 +114,9 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     }
     elseif ($request->request->has('preset_id')) {
       $preset_id = (string) $request->request->get('preset_id');
-      $presetStorage = $this->entityTypeManager()->getStorage('display_builder_preset');
+      $presetStorage = $this->entityTypeManager()->getStorage('pattern_preset');
 
-      /** @var \Drupal\display_builder\DisplayBuilderPresetInterface $preset */
+      /** @var \Drupal\display_builder\PatternPresetInterface $preset */
       $preset = $presetStorage->load($preset_id);
       $data = $preset->getSources();
       if (!isset($data['source_id']) || !isset($data['source'])) {
@@ -310,7 +310,7 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     $data = $this->stateManager->get($builder_id, $instance_id);
     self::cleanInstanceId($data);
 
-    $preset_storage = $this->entityTypeManager()->getStorage('display_builder_preset');
+    $preset_storage = $this->entityTypeManager()->getStorage('pattern_preset');
     $preset = $preset_storage->create([
       'id' => uniqid(),
       'label' => (string) $label,
