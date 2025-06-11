@@ -45,6 +45,9 @@
   position: fixed;
   /* Admin toolbar compatibility */
   top: var(--drupal-displace-offset-top, 0);
+  right: var(--drupal-displace-offset-right, 0);
+  bottom: var(--drupal-displace-offset-bottom, 0);
+  left: var(--drupal-displace-offset-left, 0);
   overflow: auto;
   width: var(--db-modal-sidebar-width);
   min-width: var(--db-modal-sidebar-min-width);
