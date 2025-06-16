@@ -1,57 +1,49 @@
 # Display Builder
 
+A display building tool by the [UI Suite](https://www.drupal.org/project/ui_suite) team:
+
+- **Design system native**: fully use your design system (components, style utilities, icons, themes/modes, CSS variables...) directly in Drupal without the burden of compatibility layers
+- **Unified**: can be used instead of Layout Builder for entity view displays, Block Layout for page displays, and as a replacement of the Views' display building feature.
+- **Modern**: A builder for the world of today, with powerful features (dynamic previews, pattern presets, real-time collaboration, deep integration with Drupal APIs...)
+
 ## Installation
 
-For now Display Builder works only in dev mode and poorly with Drupal cache.
+The module is still in heavy development. So, before enabling `display_builder`, you may need to:
 
-It must be tested only with:
+- Disable JavaScript files aggregation to avoid issues with the _[Entity] ➜ [Field]_ context switcher in entity view displays.
+- Activate your component-based theme as the default front theme (to allow some temporary demo fixtures to be loaded)
+- Add some patches from [composer.json](https://git.drupalcode.org/project/display_builder/-/blob/1.0.x/composer.json) in your project's composer.json
 
-- **NO JS aggregation** (will fail Data from a field on entity view)
+With command-line:
 
-Other settings like performance or development settings can be production oriented.
+```
+$ drush -y config-set system.performance js.preprocess 0
+$ drush theme:enable my_theme
+$ drush -y config-set system.theme default my_theme
+$ drush -y en display_builder
+```
 
-_Note_: Enabling your component based theme before enabling Display Builder will help load fixtures.
+### Local assets
 
-### If re-install
+By default, the asset libraries are using CDN, but you can use local copies instead by picking them from [display_builder.libraries.yml](https://git.drupalcode.org/project/display_builder/-/blob/1.0.x/display_builder.libraries.yml) and execute:
+
+```
+$ npm install
+```
+
+## Troubleshooting
+
+### Browser-side reset
 
 We use `localStorage` that can change anytime, be sure to clear your local storage on each new install to start fresh.
 
-On your browser > developer toolbar > Application > Local storage > Delete all or clear all.
+- On Mozilla Firefox: `Privacy & Security` > `Cookies and Site Data` > Select the site > `Remove Selected` > `Save Changes`
+- On Google Chrome: `Developer toolbar` > `Application` > `Local storage` > Select the site > `Clear`
 
-### Page Layout specifics
-
-If testing `display_builder_page_layout`, first set the theme before enable to allow a fixture to be loaded.
-
-Disable ALL blocks from block layout page (/admin/structure/block) and **KEEP** only: Help and Main page content.
-
-### Patches in composer.json
-
-- <https://drupal.org/i/3438993>
-- <https://www.drupal.org/project/ui_suite_bootstrap/issues/3528760>
-
-```json
-        "patches": {
-            "drupal/page_manager": {
-                "Some mandatory parameters are missing": "https://www.drupal.org/files/issues/2024-08-14/page-manager-3438993-MR34-24.patch"
-            },
-            "drupal/ui_suite_bootstrap": {
-                "Display builder override for accordion and fieldset": "https://git.drupalcode.org/project/ui_suite_bootstrap/-/merge_requests/291.patch"
-            }
-        },
-```
-
-### Local libraries
-
-From this folder run:
-
-```shell
-npm install
-```
-
-### Emergencies
+### Server-side reset
 
 In case of a failing display builder configuration or instance:
 
 - Enable module `display_builder_devel`
 - Go to Structure > Display Builder > Devel
-- Delete or reset the instance (Reset is in the operations)
+- `Delete` from the _Operations_ dropdown
