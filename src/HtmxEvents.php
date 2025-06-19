@@ -28,7 +28,7 @@ class HtmxEvents {
    *   The render array.
    */
   public function onClickDelete(array $build, string $builder_id, string $instance_id): array {
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_instance_delete',
       [
         'builder_id' => $builder_id,
@@ -55,7 +55,7 @@ class HtmxEvents {
    *   The render array.
    */
   public function onClickSavePreset(array $build, string $builder_id, string $instance_id, string|MarkupInterface $prompt): array {
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_instance_save_preset',
       [
         'builder_id' => $builder_id,
@@ -86,7 +86,7 @@ class HtmxEvents {
    *   The render array.
    */
   public function onClickPaste(array $build, string $builder_id, string $instance_id, string $parent_id, string $slot_id, string $slot_position): array {
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_instance_paste',
       [
         'builder_id' => $builder_id,
@@ -120,7 +120,7 @@ class HtmxEvents {
    *   The render array.
    */
   public function onClickDuplicate(array $build, string $builder_id, string $instance_id, string $parent_id, string $slot_id, string $slot_position): array {
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_instance_duplicate',
       [
         'builder_id' => $builder_id,
@@ -146,7 +146,7 @@ class HtmxEvents {
    *   The render array.
    */
   public function onRootDrop(array $build, string $builder_id): array {
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_root_attach',
       [
         'builder_id' => $builder_id,
@@ -172,7 +172,7 @@ class HtmxEvents {
    *   The render array.
    */
   public function onSlotDrop(array $build, string $builder_id, string $instance_id, string $slot): array {
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_slot_attach',
       [
         'builder_id' => $builder_id,
@@ -198,19 +198,27 @@ class HtmxEvents {
    *   The render array.
    */
   public function onInstanceClick(array $build, string $builder_id, string $instance_id): array {
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_instance_get',
       [
         'builder_id' => $builder_id,
         'instance_id' => $instance_id,
       ]
     );
-    $extra_attr = [
-      'data-instance-id' => $instance_id,
+
+    $attributes = [
       'tabindex' => '0',
+      'data-instance-id' => $instance_id,
+      // This label is used for contextual menu.
+      // phpcs:ignore-next-line
+      // 'data-instance-title' => $label,
+      // phpcs:ignore-next-line
+      // 'data-slot-position' => $index,
+      'data-open-second-drawer' => '1',
+      'hx-on::after-swap' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this)', $builder_id),
     ];
 
-    return $this->setHtmxAttributes($build, $url, 'click consume', 'get', $extra_attr);
+    return $this->setHtmxAttributes($build, $url, 'click consume', 'get', $attributes);
   }
 
   /**
@@ -227,7 +235,7 @@ class HtmxEvents {
    *   The render array.
    */
   public function onInstanceFormChange(array $build, string $builder_id, string $instance_id): array {
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_instance_update',
       [
         'builder_id' => $builder_id,
@@ -262,7 +270,7 @@ class HtmxEvents {
     if (!isset($build['update']) || !isset($build['source']) || !isset($build['source']['#id'])) {
       return $build;
     }
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_instance_update',
       [
         'builder_id' => $builder_id,
@@ -299,7 +307,7 @@ class HtmxEvents {
    *   The render array.
    */
   public function onThirdPartyFormChange(array $build, string $builder_id, string $instance_id, string $island_id): array {
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_third_party_settings_update',
       [
         'builder_id' => $builder_id,
@@ -323,7 +331,7 @@ class HtmxEvents {
    *   The render array.
    */
   public function onUndo(array $build, string $builder_id): array {
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_undo',
       [
         'builder_id' => $builder_id,
@@ -345,7 +353,7 @@ class HtmxEvents {
    *   The render array.
    */
   public function onRedo(array $build, string $builder_id): array {
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_redo',
       [
         'builder_id' => $builder_id,
@@ -367,7 +375,7 @@ class HtmxEvents {
    *   The render array.
    */
   public function onReset(array $build, string $builder_id): array {
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_restore',
       [
         'builder_id' => $builder_id,
@@ -389,7 +397,7 @@ class HtmxEvents {
    *   The render array.
    */
   public function onClear(array $build, string $builder_id): array {
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_clear',
       [
         'builder_id' => $builder_id,
@@ -411,7 +419,7 @@ class HtmxEvents {
    *   The render array.
    */
   public function onSave(array $build, string $builder_id): array {
-    $url = $this->generateUrl(
+    $url = new Url(
       'display_builder.api_save',
       [
         'builder_id' => $builder_id,
@@ -474,21 +482,6 @@ class HtmxEvents {
     $build[$source_key]['#attributes'] = \array_merge($build[$source_key]['#attributes'] ?? [], $attr);
 
     return $build;
-  }
-
-  /**
-   * Generates a URL for a given route and parameters.
-   *
-   * @param string $route_name
-   *   The name of the route.
-   * @param array $route_parameters
-   *   (Optional) The parameters for the route.
-   *
-   * @return \Drupal\Core\Url
-   *   The generated URL.
-   */
-  private function generateUrl(string $route_name, array $route_parameters = []): Url {
-    return Url::fromRoute($route_name, $route_parameters);
   }
 
 }

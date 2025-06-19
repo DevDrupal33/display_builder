@@ -4,14 +4,40 @@
 {% set contextual_id = builder_id ~ '-contextual' %}
 
 <section{{ attributes }}>
-  {% for island in view_sidebar %}
-    {{ include('display_builder:modal', {
-      id: island['#attributes']['id'] ~ '-sidebar',
-      variant: 'sidebar',
-      content: island,
-      resizable: true,
-    }, with_context: false) }}
-  {% endfor %}
+  {% set first_drawer_content %}
+    <div class="db-resize-handle"></div>
+    <span class="db-drawer__content">
+      {% for island in view_sidebar %}
+        <span class="db-drawer__content_island" id="{{ island['#attributes']['id'] }}">
+          {{ island }}
+        </span>
+      {% endfor %}
+    </span>
+  {% endset %}
+
+  {{ include('display_builder:drawer', {
+    id: 'db-first-drawer',
+    placement: 'start',
+    content: first_drawer_content,
+    contained: true,
+    footer_close: false,
+  }, with_context: false) }}
+
+  {% set second_drawer_content %}
+    <div class="db-resize-handle"></div>
+    <span class="db-drawer__content">
+      {{ contextual_islands }}
+    </span>
+  {% endset %}
+
+  {{ include('display_builder:drawer', {
+    id: 'db-second-drawer',
+    label: 'Settings'|t,
+    placement: 'end',
+    content: second_drawer_content,
+    contained: true,
+    footer_close: false,
+  }, with_context: false) }}
 
   {% set start %}
     <sl-button-group label="{{ 'Sidebar buttons'|t }}">
@@ -19,33 +45,16 @@
     </sl-button-group>
   {% endset %}
 
-  {% set end %}
-    {{ buttons }}
-    {{ include('display_builder:modal', {
-      id: contextual_id,
-      variant: 'dropdown',
-      content: contextual_islands,
-    }, with_context: false) }}
-  {% endset %}
-
   {{ include('display_builder:toolbar', {
       sticky: true,
       start: start,
       middle: view_main_tabs,
-      end: end,
+      end: buttons,
     }, with_context: false) }}
 
   <div class="db-display-builder__main">
-  {# <div class="db-display-builder__main" style="position: relative;"> #}
     <span id="message-{{ builder_id }}"></span>
     {{ view_main }}
-    {# {{ include('display_builder:drawer', {
-      content: contextual_islands,
-      id: contextual_id,
-      label: 'Edit element'|t,
-      contained: false,
-      placement: 'end',
-    }, with_context: false) }} #}
   </div>
 
   {% if menu_islands %}
@@ -53,4 +62,7 @@
       {{ menu_islands }}
     </div>
   {% endif %}
+
+  <div id="preview-{{ builder_id }}" class="db-background db-preview" role="tooltip"></div>
+
 </section>

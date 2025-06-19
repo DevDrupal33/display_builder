@@ -30,7 +30,3 @@ props:
     icon:
       title: Icon name
       type: string
-libraryOverrides:
-  dependencies:
-    - "display_builder/tippy.js"
-    - "display_builder/shoelace"

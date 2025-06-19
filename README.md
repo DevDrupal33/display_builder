@@ -8,7 +8,7 @@ A display building tool by the [UI Suite](https://www.drupal.org/project/ui_suit
 
 ## Installation
 
-The module is still in heavy development. So, before enabling `display_builder`, you may need to:
+The module is still in heavy development. Before enabling `display_builder`, you may need to:
 
 - Disable JavaScript files aggregation to avoid issues with the _[Entity] ➜ [Field]_ context switcher in entity view displays.
 - Activate your component-based theme as the default front theme (to allow some temporary demo fixtures to be loaded)
@@ -16,19 +16,29 @@ The module is still in heavy development. So, before enabling `display_builder`,
 
 With command-line:
 
-```
-$ drush -y config-set system.performance js.preprocess 0
-$ drush theme:enable my_theme
-$ drush -y config-set system.theme default my_theme
-$ drush -y en display_builder
+```shell
+drush -y config-set system.performance js.preprocess 0
+drush theme:enable my_theme
+drush -y config-set system.theme default my_theme
+drush -y en display_builder
 ```
 
-### Local assets
+### Libraries
 
-By default, the asset libraries are using CDN, but you can use local copies instead by picking them from [display_builder.libraries.yml](https://git.drupalcode.org/project/display_builder/-/blob/1.0.x/display_builder.libraries.yml) and execute:
+Display builder rely on [Shoelace component library](https://shoelace.style/getting-started/installation), by default the library is loaded with CDN, but you can use local copies instead in Display Builder settings (/admin/structure/display-builder).
 
-```
-$ npm install
+#### Local installation
+
+Currently asset.packagist do not provide the last version of Shoelace, installation
+with package manager is recommended.
+
+From your installation libraries folder (web/libraries or app/libraries):
+
+```shell
+mkdir -p shoelace
+cd shoelace
+npm init -y
+npm install @shoelace-style/shoelace
 ```
 
 ## Troubleshooting

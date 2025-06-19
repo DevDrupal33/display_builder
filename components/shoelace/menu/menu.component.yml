@@ -11,6 +11,3 @@ props:
     items:
       title: Items
       $ref: ui-patterns://links
-libraryOverrides:
-  dependencies:
-    - display_builder/shoelace

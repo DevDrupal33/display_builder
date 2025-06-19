@@ -99,7 +99,7 @@ class PresetLibraryPanel extends IslandPluginBase {
       }
       $keywords = \sprintf('%s %s', $preset->get('label'), $preset->get('description') ?? '');
       $preset_preview_url = Url::fromRoute('display_builder.api_preset_preview', ['preset_id' => $preset_id]);
-      $build[] = $this->buildPlaceholderButtonWithPreview($preset->get('label'), ['preset_id' => $preset_id], $preset_preview_url, $keywords);
+      $build[] = $this->buildPlaceholderButtonWithPreview($builder_id, $preset->get('label'), ['preset_id' => $preset_id], $preset_preview_url, $keywords);
     }
     $build = $this->buildDraggables($builder_id, $build);
     $build['#source_contexts'] = $this->configuration['contexts'] ?? [];

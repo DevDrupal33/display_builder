@@ -12,11 +12,57 @@ display_builder.display_builder.*:
       type: string
     description:
       type: string
+    library:
+      type: string
+      label: 'Library type'
+    debug:
+      type: boolean
+      label: 'Debug mode'
     island_settings:
       type: mapping
-      label: "Island settings"
+      label: 'Island settings'
+      mapping:
+        library:
+          type: sequence
+          label: 'Library island'
+          sequence:
+            type: display_builder.island_settings.[%key]
+        view:
+          type: sequence
+          label: 'Library island'
+          sequence:
+            type: display_builder.island_settings.[%key]
+        button:
+          type: sequence
+          label: 'Library island'
+          sequence:
+            type: display_builder.island_settings.[%key]
+        contextual:
+          type: sequence
+          label: 'Library island'
+          sequence:
+            type: display_builder.island_settings.[%key]
+        menu:
+          type: sequence
+          label: 'Library island'
+          sequence:
+            type: display_builder.island_settings.[%key]
 
-display_builder.display_builder_preset.*:
+display_builder.island_settings.*:
+  type: mapping
+  label: 'Island settings'
+  mapping:
+    enable:
+      type: boolean
+      label: Enabled
+    weight:
+      type: string
+      label: Weight
+    options:
+      type: string
+      label: Options
+
+display_builder.pattern_preset.*:
   type: config_entity
   label: Display builder Preset
   mapping:

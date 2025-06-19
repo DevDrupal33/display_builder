@@ -28,6 +28,3 @@ props:
     disabled:
       title: Disabled
       type: boolean
-libraryOverrides:
-  dependencies:
-    - display_builder/shoelace

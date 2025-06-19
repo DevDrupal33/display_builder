@@ -1,0 +1,18 @@
+body {
+  /* Use transform for body margin adjustment for better performance */
+  /* transition: transform 0.2s ease; */
+  /* will-change: auto; */
+}
+
+.db-display-builder {
+  /* In fullscreen on drawer is below toolbar, adapt header */
+  &.db-display-builder--fullscreen .db-drawer {
+    &::part(panel) {
+      padding-top: var(--db-toolbar-height, 0);
+    }
+  }
+
+  #db-second-drawer .db-resize-handle {
+    left: 0;
+  }
+}

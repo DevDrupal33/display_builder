@@ -27,6 +27,3 @@ props:
         - left
         - left-start
         - left-end
-libraryOverrides:
-  dependencies:
-    - display_builder/shoelace

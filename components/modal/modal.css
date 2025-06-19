@@ -14,18 +14,21 @@
 }
 
 /* Have some animation on the dialog. */
-.db-modal-content-transition dialog.db-modal--sidebar.db-modal--transition-opening[open] {
+.db-modal-content-transition
+  dialog.db-modal--sidebar.db-modal--transition-opening[open] {
   transform: scaleX(1);
 }
 
-.db-modal-content-transition dialog.db-modal--sidebar.db-modal--transition-opening {
+.db-modal-content-transition
+  dialog.db-modal--sidebar.db-modal--transition-opening {
   transition: transform 0.2s allow-discrete;
   transform: scaleX(0);
   transform-origin: left center;
 }
 
 @starting-style {
-  .db-modal-content-transition dialog.db-modal--sidebar.db-modal--transition-opening[open] {
+  .db-modal-content-transition
+    dialog.db-modal--sidebar.db-modal--transition-opening[open] {
     transform: scaleX(0);
   }
 }

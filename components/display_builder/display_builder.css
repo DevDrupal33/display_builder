@@ -1,15 +1,6 @@
 :root {
   --db-background-color: white;
   --db-text-color: black;
-  --db-primary-color: rgb(159, 82, 85); /* Dark maroon */
-  --db-primary-light-color: rgba(159, 82, 85, 0.3); /* Dark maroon light */
-  --db-secondary-color: rgb(243, 158, 96); /* Orange */
-  --db-disabled-stroke: rgb(128, 128, 128);
-  --db-active-color: oklch(85.4207% 0 0);
-  --db-medium-color: oklch(89.7547% 0 0);
-  --db-active-surface: rgb(158, 158, 243);
-  --db-rounded-box: 0.2rem;
-  --db-light-color: oklch(94.9119% 0 0);
   --db-background-image: repeating-linear-gradient(
     45deg,
     oklch(100% 0 0),
@@ -18,7 +9,22 @@
     var(--sl-color-neutral-100) 14px
   );
   --db-background-size: 40px 40px;
-  --db-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --db-toolbar-height: 80px;
+  /* Drupal admin toolbar is 502 */
+  /* @see core/themes/claro/css/components/toolbar.module.css */
+  --db-z-index: 400;
+
+  /* @todo evaluate what's needed here */
+  --db-primary-color: rgb(159, 82, 85); /* Dark maroon */
+  --db-primary-light-color: rgb(159, 82, 85, 0.3); /* Dark maroon light */
+  --db-secondary-color: rgb(243, 158, 96); /* Orange */
+  --db-disabled-stroke: rgb(128, 128, 128);
+  --db-active-color: oklch(85.4207% 0 0);
+  --db-medium-color: oklch(89.7547% 0 0);
+  --db-active-surface: rgb(158, 158, 243);
+  --db-rounded-box: 0.2rem;
+  --db-light-color: oklch(94.9119% 0 0);
+  --db-shadow: 0 20px 25px -5px rgb(0, 0, 0, 0.1), 0 8px 10px -6px rgb(0, 0, 0, 0.1);
 }
 
 .db-display-builder {

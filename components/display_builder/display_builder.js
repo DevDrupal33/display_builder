@@ -140,6 +140,7 @@
     attach(context) {
       once('dbInit', '.db-display-builder', context).forEach((builder) => {
         alterHtmxEvents(builder);
+        Drupal.displayBuilder.initDrawer(builder, false);
       });
       once('dbIslandInit', '.db-island-view', context).forEach((builder) => {
         disableInsideLinks(builder);

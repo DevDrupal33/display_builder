@@ -7,13 +7,13 @@ entity.display_builder.collection:
 entity.pattern_preset.add_form:
   title: Add preset
   parent: entity.display_builder.collection
-  description: 'Add a pattern preset'
+  description: 'Add a Pattern preset.'
   route_name: entity.pattern_preset.add_form
   weight: 1
 
 entity.pattern_preset.collection:
   title: Presets
   parent: entity.display_builder.collection
-  description: 'Available pattern presets.'
+  description: 'Available Pattern presets.'
   route_name: entity.pattern_preset.collection
   weight: 2

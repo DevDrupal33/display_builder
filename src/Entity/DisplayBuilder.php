@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Entity;
 
-use Drupal\Component\Utility\Html;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -30,6 +29,8 @@ use Drupal\display_builder_ui\DisplayBuilderListBuilder;
   entity_keys: [
     'id' => 'id',
     'label' => 'label',
+    'debug' => 'debug',
+    'library' => 'library',
     'description' => 'description',
     'island_settings' => 'island_settings',
   ],
@@ -56,6 +57,8 @@ use Drupal\display_builder_ui\DisplayBuilderListBuilder;
   config_export: [
     'id',
     'label',
+    'debug',
+    'library',
     'description',
     'island_settings',
   ],
@@ -81,6 +84,16 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    * The display builder label.
    */
   protected string $label;
+
+  /**
+   * The display builder library mode.
+   */
+  protected string $library = 'cdn';
+
+  /**
+   * The display builder debug mode.
+   */
+  protected bool $debug = FALSE;
 
   /**
    * The display builder enabled islands.
@@ -144,7 +157,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
       $contextual_islands = $this->buildContextualIslands($builder_id, $islands_enabled_sorted, $builder_data);
     }
 
-    return [
+    $build = [
       '#type' => 'component',
       '#component' => 'display_builder:display_builder',
       '#props' => [
@@ -160,7 +173,21 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
         'contextual_islands' => $contextual_islands,
         'menu_islands' => $menu_islands,
       ],
+      '#attached' => [
+        'drupalSettings' => [
+          'dbDebug' => $this->debug,
+        ],
+      ],
     ];
+
+    if ($this->library === 'local') {
+      $build['#attached']['library'][] = 'display_builder/shoelace_local';
+    }
+    else {
+      $build['#attached']['library'][] = 'display_builder/shoelace_cdn';
+    }
+
+    return $build;
   }
 
   /**
@@ -218,8 +245,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
     }
 
     if (!empty($view_sidebar_buttons)) {
-      // dpr($view_sidebar_buttons);
-      $view_sidebar_buttons = $this->buildSidebarButtons($builder_id, $view_sidebar_buttons);
+      $view_sidebar_buttons = $this->buildStartButtons($builder_id, $view_sidebar_buttons);
     }
 
     if (!empty($view_main_tabs)) {
@@ -265,7 +291,10 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
       '#type' => 'html_tag',
       '#tag' => 'div',
       // Used for custom styling in assets/css/form.css.
-      '#attributes' => ['class' => ['db-form']],
+      '#attributes' => [
+        'id' => \sprintf('%s-contextual', $builder_id),
+        'class' => ['db-form'],
+      ],
       'tabs' => $this->buildBuilderTabs($builder_id, $contextual_islands),
       'filter' => $filter,
       'panes' => $this->buildPanes($builder_id, $contextual_islands, $builder_data),
@@ -312,7 +341,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
   }
 
   /**
-   * Build the buttons to hide/show a sidebar.
+   * Build the buttons to hide/show the drawer.
    *
    * @param string $builder_id
    *   The builder ID.
@@ -320,35 +349,31 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    *   An array of island objects for which buttons will be created.
    *
    * @return array
-   *   An array of render arrays for the sidebar buttons.
+   *   An array of render arrays for the drawer buttons.
    */
-  private function buildSidebarButtons(string $builder_id, array $islands): array {
+  private function buildStartButtons(string $builder_id, array $islands): array {
     $build = [];
 
     foreach ($islands as $island) {
-      // Keep only first keyboard key.
-      if ($keyboard = $island->getKeyboardShortcuts()) {
-        $keyboard = key($keyboard);
-      }
+      $island_id = $island->getPluginId();
 
-      $id = $island->getPluginId();
-      $build[$id] = [
+      $build[$island_id] = [
         '#type' => 'component',
         '#component' => 'display_builder:button',
         '#props' => [
-          'id' => Html::getUniqueId($id),
+          'id' => \sprintf('start-btn-%s-%s', $builder_id, $island_id),
           'label' => (string) $island->label(),
           'icon' => $island->getIcon(),
           'attributes' => [
-            'class' => ['db-button--offcanvas'],
-            'data-modal-type' => 'offcanvas',
-            'data-modal-target' => $island->getHtmlId($builder_id),
+            'data-open-first-drawer' => TRUE,
+            'data-target' => $island_id,
           ],
         ],
       ];
 
-      if ($keyboard) {
-        $build[$id]['#attributes']['data-keyboard'] = $keyboard;
+      // Keep only first keyboard key.
+      if ($keyboard = $island->getKeyboardShortcuts()) {
+        $build[$island_id]['#attributes']['data-keyboard'] = key($keyboard);
       }
     }
 

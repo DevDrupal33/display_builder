@@ -32,7 +32,7 @@ class ConfirmDeleteAllPresetsForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getFormId(): string {
-    return 'confirm_pattern_presets_delete_all_form';
+    return 'confirm_pattern_preset_delete_all_form';
   }
 
   /**

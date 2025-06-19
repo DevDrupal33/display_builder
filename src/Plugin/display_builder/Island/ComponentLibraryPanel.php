@@ -69,7 +69,7 @@ class ComponentLibraryPanel extends IslandPluginBase {
     $panes = [
       'grouped' => [
         'title' => $this->t('Grouped'),
-        'content' => $this->getGroupedComponents($builder_id),
+        'content' => $this->getComponentsGrouped($builder_id),
       ],
       'variants' => [
         'title' => $this->t('Variants'),
@@ -111,7 +111,7 @@ class ComponentLibraryPanel extends IslandPluginBase {
    * @return array
    *   A renderable array containing the grouped components.
    */
-  private function getGroupedComponents(string $builder_id): array {
+  private function getComponentsGrouped(string $builder_id): array {
     $build = [];
 
     /** @var \Drupal\ui_patterns_overrides\SourcesBundlerInterface $source */
@@ -122,8 +122,6 @@ class ComponentLibraryPanel extends IslandPluginBase {
         '#type' => 'html_tag',
         '#tag' => 'h4',
         '#value' => $group_name,
-        // We hide the group titles on search.
-        // @see components/library_panel/library_panel.js
         '#attributes' => [
           'class' => ['db-filter-hide-on-search'],
         ],
@@ -136,7 +134,7 @@ class ComponentLibraryPanel extends IslandPluginBase {
         $data = $source->getDataSkeleton($component_id);
         // Used for search filter.
         $keywords = \sprintf('%s %s', $definition['label'], $definition['provider']);
-        $build[] = $this->buildPlaceholderButtonWithPreview($definition['annotated_name'], $data, $component_preview_url, $keywords);
+        $build[] = $this->buildPlaceholderButtonWithPreview($builder_id, $definition['annotated_name'], $data, $component_preview_url, $keywords);
       }
     }
 
@@ -163,8 +161,6 @@ class ComponentLibraryPanel extends IslandPluginBase {
         '#type' => 'html_tag',
         '#tag' => 'h4',
         '#value' => $definition['annotated_name'],
-        // Use to collect search filter for variants and keep title.
-        // @see components/library_panel/library_panel.js
         '#attributes' => [
           'data-filter-parent' => $definition['machineName'],
         ],
@@ -175,7 +171,7 @@ class ComponentLibraryPanel extends IslandPluginBase {
         $component_preview_url = Url::fromRoute('display_builder.api_component_preview', ['component_id' => $component_id]);
         // Used for search filter.
         $keywords = \sprintf('%s %s', $definition['label'], $definition['provider']);
-        $build_variant = $this->buildPlaceholderButtonWithPreview($this->t('Default'), $data, $component_preview_url, $keywords);
+        $build_variant = $this->buildPlaceholderButtonWithPreview($builder_id, $this->t('Default'), $data, $component_preview_url, $keywords);
         $build_variant['#attributes']['data-filter-child'] = $definition['machineName'];
         $build[] = $build_variant;
         continue;
@@ -192,7 +188,7 @@ class ComponentLibraryPanel extends IslandPluginBase {
         ];
         // Used for search filter.
         $keywords = \sprintf('%s %s %s', $definition['label'], $variant['title'], $definition['provider']);
-        $build_variant = $this->buildPlaceholderButtonWithPreview($variant['title'], $data, $component_preview_url, $keywords);
+        $build_variant = $this->buildPlaceholderButtonWithPreview($builder_id, $variant['title'], $data, $component_preview_url, $keywords);
         $build_variant['#attributes']['data-filter-child'] = $definition['machineName'];
         $build[] = $build_variant;
       }

@@ -18,5 +18,4 @@ libraryOverrides:
   dependencies:
     - core/drupal
     - core/once
-    - display_builder/shoelace
     - display_builder/local-storage-manager

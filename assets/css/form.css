@@ -9,8 +9,11 @@
   cursor: inherit;
   /* user-select: none; */
   -webkit-user-select: none;
-  transition: var(--sl-transition-x-fast) background-color, var(--sl-transition-x-fast) color,
-    var(--sl-transition-x-fast) border, var(--sl-transition-x-fast) box-shadow;
+  transition:
+    var(--sl-transition-x-fast) background-color,
+    var(--sl-transition-x-fast) color,
+    var(--sl-transition-x-fast) border,
+    var(--sl-transition-x-fast) box-shadow;
   vertical-align: middle;
   white-space: nowrap;
   text-decoration: none;
@@ -24,7 +27,9 @@
   font-family: var(--sl-input-font-family);
   /* font-size: var(--sl-button-font-size-medium); */
   font-weight: var(--sl-font-weight-semibold);
-  line-height: calc(var(--sl-input-height-medium) - var(--sl-input-border-width) * 2);
+  line-height: calc(
+    var(--sl-input-height-medium) - var(--sl-input-border-width) * 2
+  );
 }
 
 .db-form input[type="submit"]:hover {
@@ -211,7 +216,8 @@
 }
 
 .db-form div:has(> .ui-styles-source-select-plugin[type="radio"]:hover),
-.db-form div:has(> .ui-styles-source-select-plugin[type="radio"] + label:hover) {
+.db-form
+  div:has(> .ui-styles-source-select-plugin[type="radio"] + label:hover) {
   color: var(--sl-input-color) !important;
   background-color: var(--sl-input-background-color) !important;
 }

@@ -83,6 +83,8 @@ trait RenderableBuilderTrait {
   /**
    * Build placeholder.
    *
+   * @param string $builder_id
+   *   The builder id.
    * @param string $label
    *   The placeholder label.
    * @param array $vals
@@ -95,9 +97,20 @@ trait RenderableBuilderTrait {
    * @return array
    *   A renderable array.
    */
-  protected function buildPlaceholderButtonWithPreview(string|TranslatableMarkup $label, array $vals, Url $preview_url, ?string $keywords = NULL): array {
+  protected function buildPlaceholderButtonWithPreview(string $builder_id, string|TranslatableMarkup $label, array $vals, Url $preview_url, ?string $keywords = NULL): array {
     $build = $this->buildPlaceholderButton($label, $vals, $keywords);
-    $build['#props']['preview_url'] = $preview_url;
+
+    $hide_script = \sprintf('Drupal.displayBuilder.hidePreview(%s)', $builder_id);
+    $attributes = [
+      'hx-get' => $preview_url->toString(),
+      'hx-target' => \sprintf('#preview-%s', $builder_id),
+      'hx-trigger' => 'mouseover',
+      'hx-on:mouseover' => \sprintf('Drupal.displayBuilder.showPreview(%s, this)', $builder_id),
+      'hx-on:mousedown' => $hide_script,
+      'hx-on:mouseout' => $hide_script,
+    ];
+
+    $build['#attributes'] = \array_merge($build['#attributes'], $attributes);
 
     return $build;
   }

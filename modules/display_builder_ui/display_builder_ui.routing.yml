@@ -44,7 +44,7 @@ entity.pattern_preset.collection:
     _entity_list: 'pattern_preset'
     _title: 'Pattern presets'
   requirements:
-    _permission: 'administer pattern_preset'
+    _permission: 'administer pattern preset'
 
 entity.pattern_preset.add_form:
   path: '/admin/structure/display-builder/preset/add'
@@ -52,7 +52,7 @@ entity.pattern_preset.add_form:
     _entity_form: 'pattern_preset.add'
     _title: 'Add a Pattern preset'
   requirements:
-    _permission: 'administer pattern_preset'
+    _permission: 'administer pattern preset'
 
 entity.pattern_preset.edit_form:
   path: '/admin/structure/display-builder/preset/{pattern_preset}'
@@ -60,7 +60,7 @@ entity.pattern_preset.edit_form:
     _entity_form: 'pattern_preset.edit'
     _title: 'Edit a Pattern preset'
   requirements:
-    _permission: 'administer pattern_preset'
+    _permission: 'administer pattern preset'
 
 entity.pattern_preset.delete_form:
   path: '/admin/structure/display-builder/preset/{pattern_preset}/delete'
@@ -68,4 +68,4 @@ entity.pattern_preset.delete_form:
     _entity_form: 'pattern_preset.delete'
     _title: 'Delete a Pattern preset'
   requirements:
-    _permission: 'administer pattern_preset'
+    _permission: 'administer pattern preset'

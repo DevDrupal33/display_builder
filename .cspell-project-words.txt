@@ -7,7 +7,6 @@ dropzones
 FloatingUIDOM
 htmx
 offcanvas
-popperjs
 unchoose
 uswds
 

@@ -5,6 +5,3 @@ links:
 slots:
   buttons:
     title: Buttons
-libraryOverrides:
-  dependencies:
-    - display_builder/shoelace

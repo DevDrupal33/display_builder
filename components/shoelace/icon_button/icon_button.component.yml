@@ -11,6 +11,3 @@ props:
     label:
       title: Label
       type: string
-libraryOverrides:
-  dependencies:
-    - display_builder/shoelace

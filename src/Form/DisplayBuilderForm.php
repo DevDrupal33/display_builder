@@ -52,6 +52,24 @@ final class DisplayBuilderForm extends EntityForm {
       '#default_value' => $entity->get('description'),
     ];
 
+    $form['library'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Shoelace library'),
+      '#description' => $this->t('Select the library mode. If local must be installed in libraries folder, see README.'),
+      '#options' => [
+        'cdn' => $this->t('CDN'),
+        'local' => $this->t('Local'),
+      ],
+      '#default_value' => $entity->get('library'),
+    ];
+
+    $form['debug'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Debug mode'),
+      '#description' => $this->t('Enable verbose JavaScript and error logs.'),
+      '#default_value' => $entity->get('debug'),
+    ];
+
     $form['island_settings'] = [
       '#type' => 'details',
       '#title' => $this->t('Islands configuration'),
