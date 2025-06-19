@@ -238,14 +238,15 @@ class ComponentLibraryPanel extends IslandPluginBase {
   private function getDefinitionsForProvider(): array {
     // @phpstan-ignore-next-line
     $definitions = $this->sdcManager->getSortedDefinitions($this->sdcManager->getDefinitions());
-    $provider = \Drupal::configFactory()->get('system.theme')->get('default');
+    $default_active_theme = \Drupal::service('theme.manager')->getActiveTheme();
+    $all_active_themes = array_merge([$default_active_theme->getName()], array_keys($default_active_theme->getBaseThemeExtensions()));
 
     $filtered_definitions = $grouped_definitions = [];
     foreach ($definitions as $id => $definition) {
       if (isset($definition['status']) && $definition['status'] === 'obsolete') {
         continue;
       }
-      if ($definition['extension_type']->value === 'theme' && $definition['provider'] !== $provider) {
+      if ($definition['extension_type']->value === 'theme' && !in_array($definition['provider'], $all_active_themes)) {
         continue;
       }
       if (in_array($definition['provider'], self::PROVIDER_EXCLUDE)) {
