@@ -4,7 +4,52 @@ dependencies: {  }
 id: default
 label: Default
 description: 'Default display builder configuration.'
+library: cdn
+debug: false
 island_settings:
+  library:
+    component_library:
+      enable: true
+      weight: '-10'
+    block_library:
+      enable: true
+      weight: '-9'
+    preset_library:
+      enable: true
+      weight: '-8'
+  view:
+    builder:
+      enable: true
+      weight: '-10'
+      options: main
+    preview:
+      enable: true
+      weight: '-9'
+      options: main
+    library:
+      enable: true
+      weight: '-8'
+      options: sidebar
+    layers:
+      enable: true
+      weight: '-7'
+      options: sidebar
+    tree:
+      enable: true
+      weight: '-6'
+      options: sidebar
+    logs:
+      enable: false
+      weight: '-5'
+      options: sidebar
+    state_debug:
+      enable: false
+      weight: '-4'
+      options: sidebar
+    index_debug:
+      enable: false
+      weight: '-3'
+      options: sidebar
   button:
     history:
       enable: true
@@ -12,21 +57,21 @@ island_settings:
     state:
       enable: true
       weight: '-9'
-    keyboard_help:
+    toggle_highlight:
+      enable: true
+      weight: '-8'
+    toggle_fullscreen:
       enable: true
       weight: '-7'
-    toggle_fullscreen:
+    keyboard_help:
       enable: true
       weight: '-6'
     theme_mode:
-      weight: '0'
       enable: false
-    toggle_highlight:
-      weight: '0'
-      enable: false
+      weight: '-5'
     reset:
-      weight: '0'
       enable: false
+      weight: '-4'
   contextual:
     instance_form:
       enable: true
@@ -38,54 +83,11 @@ island_settings:
       enable: true
       weight: '3'
     visibility_conditions:
-      weight: '4'
       enable: false
+      weight: '4'
     info:
       enable: true
       weight: '5'
-  view:
-    library:
-      enable: true
-      options: sidebar
-      weight: '-10'
-    builder:
-      enable: true
-      options: main
-      weight: '-10'
-    preview:
-      enable: true
-      options: main
-      weight: '-9'
-    layers:
-      enable: true
-      options: sidebar
-      weight: '-9'
-    logs:
-      options: sidebar
-      weight: '-8'
-      enable: false
-    state_debug:
-      options: sidebar
-      weight: '-3'
-      enable: false
-    tree:
-      options: sidebar
-      weight: '0'
-      enable: false
-    index_debug:
-      options: sidebar
-      weight: '0'
-      enable: false
-  library:
-    component_library:
-      enable: true
-      weight: '-10'
-    block_library:
-      enable: true
-      weight: '-9'
-    preset_library:
-      enable: true
-      weight: '-8'
   menu:
     menu:
       enable: true

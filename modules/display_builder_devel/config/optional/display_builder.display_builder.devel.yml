@@ -4,82 +4,9 @@ dependencies: {  }
 id: devel
 label: Devel
 description: 'Devel oriented Display Builder configuration.'
+library: local
+debug: true
 island_settings:
-  button:
-    history:
-      enable: true
-      weight: '-10'
-    reset:
-      weight: '-9'
-      enable: false
-    state:
-      enable: true
-      weight: '-8'
-    keyboard_help:
-      weight: '-6'
-      enable: false
-    toggle_highlight:
-      enable: true
-      weight: '-5'
-    toggle_fullscreen:
-      enable: true
-      weight: '-4'
-    theme_mode:
-      weight: '-3'
-      enable: false
-  contextual:
-    instance_form:
-      enable: true
-      weight: '1'
-    ui_styles:
-      enable: true
-      weight: '2'
-    ui_skins:
-      weight: '3'
-      enable: false
-    visibility_conditions:
-      weight: '4'
-      enable: false
-    info:
-      weight: '5'
-      enable: false
-  view:
-    library:
-      enable: true
-      options: sidebar
-      weight: '-10'
-    tree:
-      enable: true
-      options: sidebar
-      weight: '-9'
-    index_debug:
-      options: sidebar
-      weight: '-8'
-      enable: false
-    builder:
-      enable: true
-      options: main
-      weight: '-7'
-    layers:
-      enable: true
-      options: main
-      weight: '-6'
-    preview:
-      enable: true
-      options: main
-      weight: '-5'
-    logs:
-      options: sidebar
-      weight: '-4'
-      enable: false
-    hybrid:
-      options: main
-      weight: '-3'
-      enable: false
-    state_debug:
-      options: main
-      weight: '-2'
-      enable: false
   library:
     component_library:
       enable: true
@@ -90,6 +17,77 @@ island_settings:
     preset_library:
       enable: true
       weight: '-8'
+  view:
+    builder:
+      enable: true
+      weight: '-10'
+      options: main
+    layers:
+      enable: true
+      weight: '-9'
+      options: main
+    preview:
+      enable: true
+      weight: '-8'
+      options: main
+    logs:
+      enable: true
+      weight: '-7'
+      options: main
+    state_debug:
+      enable: true
+      weight: '-6'
+      options: main
+    library:
+      enable: true
+      weight: '-5'
+      options: sidebar
+    tree:
+      enable: true
+      weight: '-4'
+      options: sidebar
+    index_debug:
+      enable: true
+      weight: '-3'
+      options: sidebar
+  button:
+    history:
+      enable: true
+      weight: '-10'
+    reset:
+      enable: false
+      weight: '-9'
+    state:
+      enable: true
+      weight: '-8'
+    keyboard_help:
+      enable: false
+      weight: '-6'
+    toggle_highlight:
+      enable: true
+      weight: '-5'
+    toggle_fullscreen:
+      enable: true
+      weight: '-4'
+    theme_mode:
+      enable: false
+      weight: '-3'
+  contextual:
+    instance_form:
+      enable: true
+      weight: '1'
+    ui_styles:
+      enable: true
+      weight: '2'
+    ui_skins:
+      enable: true
+      weight: '3'
+    visibility_conditions:
+      enable: false
+      weight: '4'
+    info:
+      enable: false
+      weight: '5'
   menu:
     menu:
       enable: true
