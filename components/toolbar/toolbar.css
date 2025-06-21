@@ -5,6 +5,26 @@
   height: 4rem;
   margin-bottom: 1rem;
   padding: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.db-display-builder {
+  container-type: inline-size;
+  container-name: toolbar;
+}
+
+@container toolbar (max-width: 850px) {
+  .db-toolbar {
+    max-height: 12rem;
+    height: 100%;
+    gap: 1rem;
+  }
+  .db-toolbar__middle {
+    flex-basis: 100%;
+    order:3;
+    display: flex;
+    justify-content: center;
+  }
 }
 
 .db-toolbar--sticky {
