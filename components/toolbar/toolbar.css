@@ -1,11 +1,11 @@
 .db-toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   height: 4rem;
   margin-bottom: 1rem;
   padding: 0.5rem;
-  flex-wrap: wrap;
 }
 
 .db-display-builder {
@@ -15,15 +15,15 @@
 
 @container toolbar (max-width: 850px) {
   .db-toolbar {
-    max-height: 12rem;
     height: 100%;
+    max-height: 12rem;
     gap: 1rem;
   }
   .db-toolbar__middle {
-    flex-basis: 100%;
-    order:3;
     display: flex;
+    flex-basis: 100%;
     justify-content: center;
+    order: 3;
   }
 }
 

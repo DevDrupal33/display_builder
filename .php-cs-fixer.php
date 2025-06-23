@@ -15,10 +15,9 @@ $finder = PhpCsFixer\Finder::create()
   ->notPath('*.info.yml')
 ;
 
-// $config = new \PhpCsFixer\Config();
 $config = new Drupal8();
 
-// $config->setParallelConfig(PhpCsFixer\Runner\Parallel\ParallelConfigFactory::detect());
+$config->setParallelConfig(PhpCsFixer\Runner\Parallel\ParallelConfigFactory::detect());
 $config->setFinder($finder);
 
 $rules = [];
@@ -35,10 +34,9 @@ $local_rules = [
   'ordered_class_elements' => ['case_sensitive' => false],
   '@PHP83Migration' => true,
   '@PHP84Migration' => true,
-  'native_function_invocation' => ['include' => ['@compiler_optimized'], 'scope' => 'namespaced', 'strict' => true],
+  'native_function_invocation' => ['include' => ['@internal'], 'scope' => 'all', 'strict' => true],
 ];
 
 $config->setRules(array_merge($rules, $local_rules));
-// $config->setRules(array_merge($local_rules, $rules));
 
 return $config;
