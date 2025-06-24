@@ -24,7 +24,8 @@
   --db-active-surface: rgb(158, 158, 243);
   --db-rounded-box: 0.2rem;
   --db-light-color: oklch(94.9119% 0 0);
-  --db-shadow: 0 20px 25px -5px rgb(0, 0, 0, 0.1), 0 8px 10px -6px rgb(0, 0, 0, 0.1);
+  --db-shadow:
+    0 20px 25px -5px rgb(0, 0, 0, 0.1), 0 8px 10px -6px rgb(0, 0, 0, 0.1);
 }
 
 .db-display-builder {
