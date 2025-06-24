@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
-use Drupal\Component\Serialization\Json;
-use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns_overrides\SourcesBundlerInterface;
 
@@ -16,58 +14,50 @@ use Drupal\ui_patterns_overrides\SourcesBundlerInterface;
 class SlotSourceProxy {
 
   public function __construct(
-    protected PluginManagerInterface $source_manager,
-    private MemoryCacheInterface $memoryCache,
+    protected PluginManagerInterface $sourceManager,
   ) {}
 
   /**
-   * Get the label from data.
+   * Get the label from data, with summary.
    *
    * @param array $data
    *   The data to processed.
    * @param array $contexts
-   *   The contexts for this builder_id.
+   *   (Optional) The contexts for this builder_id.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string
-   *   The label if found.
+   *   The label if found, with summary if found.
    */
-  public function getLabel(array $data, array $contexts = []): string|TranslatableMarkup {
-    $key = 'db_slot_proxy';
-    $label_key = crc32(Json::encode($data));
-    $slot_labels = [];
+  public function getLabelWithSummary(array $data, array $contexts = []): string|TranslatableMarkup {
+    /** @var \Drupal\ui_patterns\SourcePluginManager $sourceManager */
+    $sourceManager = $this->sourceManager;
+    $source = $sourceManager->getSource($data['_instance_id'] ?? '', [], $data, $contexts);
 
-    $slot_labels_cache = $this->memoryCache->get($key);
-    if ($slot_labels_cache !== FALSE) {
-      $slot_labels = $slot_labels_cache->data;
-      if (isset($slot_labels[$label_key])) {
-        return $slot_labels[$label_key];
-      }
-    }
-
-    $slot_labels[$label_key] = $this->getLabelFromData($data, $contexts);
-    $this->memoryCache->set($key, $slot_labels);
-
-    return $slot_labels[$label_key];
-  }
-
-  /**
-   * Get the label from data.
-   *
-   * @param array $data
-   *   The data to processed.
-   * @param array $contexts
-   *   The contexts for this builder_id.
-   *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string
-   *   The label if found.
-   */
-  private function getLabelFromData(array $data, array $contexts = []): string|TranslatableMarkup {
-    $source = $this->source_manager->getSource($data['_instance_id'] ?? '', [], $data, $contexts);
     if (!$source) {
       return '';
     }
 
-    return ($source instanceof SourcesBundlerInterface) ? $source->getOptionLabel($data) : $source->label();
+    if ($source instanceof SourcesBundlerInterface) {
+      $label = $source->getOptionLabel($data);
+    }
+    else {
+      $label = $source->label();
+    }
+
+    $summary = $source->settingsSummary();
+
+    if (\is_array($summary)) {
+      $summary = \array_map(static fn ($v) => \trim((string) $v), $summary);
+
+      if (!empty(\array_filter(\array_values($summary)))) {
+        $label .= ': ' . \implode(', ', $summary);
+      }
+    }
+    elseif (\is_string($summary)) {
+      $label .= ': ' . \trim($summary);
+    }
+
+    return $label;
   }
 
 }

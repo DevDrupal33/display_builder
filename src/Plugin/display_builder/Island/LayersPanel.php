@@ -7,6 +7,7 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\IslandType;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Layers island plugin implementation.
@@ -24,6 +25,23 @@ use Drupal\display_builder\IslandType;
 class LayersPanel extends BuilderPanel {
 
   /**
+   * Proxy for slot source operations.
+   *
+   * @var \Drupal\display_builder\SlotSourceProxy
+   */
+  protected $slotSourceProxy;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->slotSourceProxy = $container->get('display_builder.slot_sources_proxy');
+
+    return $instance;
+  }
+
+  /**
    * {@inheritdoc}
    */
   protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): array {
@@ -35,11 +53,13 @@ class LayersPanel extends BuilderPanel {
     }
 
     $component = $this->sdcManager->getDefinition($component_id);
+
     if (!$component) {
       return [];
     }
 
     $slots = [];
+
     foreach ($component['slots'] ?? [] as $slot_id => $definition) {
       $dropzone = [
         '#type' => 'component',
@@ -49,7 +69,7 @@ class LayersPanel extends BuilderPanel {
           'variant' => 'highlighted',
         ],
         '#attributes' => [
-           // Required for JavaScript @see components/dropzone/dropzone.js.
+          // Required for JavaScript @see components/dropzone/dropzone.js.
           'data-db-id' => $builder_id,
           // Slot is needed for contextual menu paste.
           // @see components/contextual_menu/contextual_menu.js
@@ -99,9 +119,7 @@ class LayersPanel extends BuilderPanel {
    * {@inheritdoc}
    */
   protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): array {
-    /** @var \Drupal\display_builder\SlotSourceProxy $proxy */
-    $proxy = \Drupal::service('display_builder.slot_sources_proxy');
-    $label = $proxy->getLabel($data);
+    $label = $this->slotSourceProxy->getLabelWithSummary($data);
     $build = [
       '#type' => 'component',
       '#component' => 'display_builder:layer',

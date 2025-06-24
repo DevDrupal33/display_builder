@@ -10,6 +10,7 @@ use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 use Drupal\ui_styles\Render\Element;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Builder island plugin implementation.
@@ -25,6 +26,39 @@ use Drupal\ui_styles\Render\Element;
   ],
 )]
 class BuilderPanel extends IslandPluginBase {
+
+  /**
+   * The renderer.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
+   * Proxy for slot source operations.
+   *
+   * @var \Drupal\display_builder\SlotSourceProxy
+   */
+  protected $slotSourceProxy;
+
+  /**
+   * The component element builder.
+   *
+   * @var \Drupal\ui_patterns\Element\ComponentElementBuilder
+   */
+  protected $componentElementBuilder;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->renderer = $container->get('renderer');
+    $instance->slotSourceProxy = $container->get('display_builder.slot_sources_proxy');
+    $instance->componentElementBuilder = $container->get('ui_patterns.component_element_builder');
+
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -102,11 +136,13 @@ class BuilderPanel extends IslandPluginBase {
   protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
     $component_id = $data['source']['component']['component_id'] ?? NULL;
     $instance_id = $instance_id ?: $data['_instance_id'];
+
     if (!$instance_id && !$component_id) {
       return NULL;
     }
 
     $component = $this->sdcManager->getDefinition($component_id);
+
     if (!$component) {
       return NULL;
     }
@@ -146,11 +182,9 @@ class BuilderPanel extends IslandPluginBase {
    *   Use it or not.
    */
   protected function useAttributesVariable(array $renderable): bool {
-    /** @var \Drupal\Core\Render\Renderer $renderer */
-    $renderer = \Drupal::service('renderer');
     $random = uniqid();
     $renderable['#attributes'][$random] = $random;
-    $html = $renderer->renderInIsolation($renderable);
+    $html = $this->renderer->renderInIsolation($renderable);
 
     return str_contains((string) $html, $random);
   }
@@ -160,6 +194,7 @@ class BuilderPanel extends IslandPluginBase {
    */
   protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
     $instance_id = $instance_id ?: $data['_instance_id'];
+
     if (!$instance_id) {
       return NULL;
     }
@@ -167,6 +202,7 @@ class BuilderPanel extends IslandPluginBase {
     $label = $data['source_id'] ?? $data['_instance_id'] ?? NULL;
 
     $classes = ['db-block'];
+
     if (isset($data['source']['plugin_id'])) {
       $classes[] = 'db-block-' . strtolower(Html::cleanCssIdentifier($data['source']['plugin_id']));
     }
@@ -185,9 +221,7 @@ class BuilderPanel extends IslandPluginBase {
     // This is the placeholder without configuration or content yet.
     if ($this->isEmpty($build) || $is_empty) {
       // Keep the placeholder if the block is not renderable.
-      /** @var \Drupal\display_builder\SlotSourceProxy $proxy */
-      $proxy = \Drupal::service('display_builder.slot_sources_proxy');
-      $label = (string) $proxy->getLabel($data);
+      $label = (string) $this->slotSourceProxy->getLabelWithSummary($data);
       $build = $this->buildPlaceholderButton($label);
       // Highlight in the view to show it's a temporary block waiting for
       // configuration.
@@ -224,9 +258,7 @@ class BuilderPanel extends IslandPluginBase {
    *   The renderable array for this slot source.
    */
   protected function renderSource(array $data, array $classes = []): array {
-    /** @var \Drupal\ui_patterns\Element\ComponentElementBuilder $builder */
-    $builder = \Drupal::service('ui_patterns.component_element_builder');
-    $build = $builder->buildSource([], 'content', [], $data, []) ?? [];
+    $build = $this->componentElementBuilder->buildSource([], 'content', [], $data, []) ?? [];
     $build = $build['#slots']['content'][0] ?? [];
 
     // Fixes for token which is simple markup or html.
@@ -280,13 +312,16 @@ class BuilderPanel extends IslandPluginBase {
 
       if ($source['source_id'] === 'component') {
         $component = $this->buildSingleComponent($builder_id, '', $source, $index);
+
         if ($component) {
           $renderable[$index] = $component;
         }
+
         continue;
       }
 
       $block = $this->buildSingleBlock($builder_id, '', $source, $index);
+
       if ($block) {
         $renderable[$index] = $block;
       }
@@ -305,9 +340,7 @@ class BuilderPanel extends IslandPluginBase {
    *   TRUE if the rendered output is empty, FALSE otherwise.
    */
   private function isEmpty(array $renderable): bool {
-    /** @var \Drupal\Core\Render\Renderer $renderer */
-    $renderer = \Drupal::service('renderer');
-    $html = $renderer->renderInIsolation($renderable);
+    $html = $this->renderer->renderInIsolation($renderable);
 
     return empty(trim((string) $html));
   }

@@ -7,6 +7,7 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\IslandType;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Layers island plugin implementation.
@@ -24,18 +25,33 @@ use Drupal\display_builder\IslandType;
 class TreePanel extends BuilderPanel {
 
   /**
+   * Proxy for slot source operations.
+   *
+   * @var \Drupal\display_builder\SlotSourceProxy
+   */
+  protected $slotSourceProxy;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->slotSourceProxy = $container->get('display_builder.slot_sources_proxy');
+
+    return $instance;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function build(string $builder_id, array $data, array $options = []): array {
-    $build = [
+    return [
       '#type' => 'component',
       '#component' => 'display_builder:panel_tree',
       '#slots' => [
         'items' => $this->digFromSlot($builder_id, $data),
       ],
     ];
-
-    return $build;
   }
 
   /**
@@ -50,11 +66,13 @@ class TreePanel extends BuilderPanel {
     }
 
     $component = $this->sdcManager->getDefinition($component_id);
+
     if (!$component) {
       return [];
     }
 
     $slots = [];
+
     foreach ($component['slots'] ?? [] as $slot_id => $definition) {
       $items = [
         '#type' => 'component',
@@ -85,17 +103,18 @@ class TreePanel extends BuilderPanel {
     }
 
     // I f a single item, expand by default.
-    if (count($slots) === 1) {
+    if (\count($slots) === 1) {
       $slots[0]['#props']['expanded'] = TRUE;
     }
 
     $name = $component['name'];
     $variant = $this->getComponentVariantLabel($data, $component);
+
     if ($variant) {
       $name .= ' - ' . $variant;
     }
 
-    $build = [
+    return [
       '#type' => 'component',
       '#component' => 'display_builder:tree_item',
       '#props' => [
@@ -114,8 +133,6 @@ class TreePanel extends BuilderPanel {
         'data-menu-type' => 'component',
       ],
     ];
-
-    return $build;
   }
 
   /**
@@ -123,9 +140,7 @@ class TreePanel extends BuilderPanel {
    */
   protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): array {
     $instance_id = $instance_id ?: $data['_instance_id'];
-    /** @var \Drupal\display_builder\SlotSourceProxy $proxy */
-    $proxy = \Drupal::service('display_builder.slot_sources_proxy');
-    $label = $proxy->getLabel($data);
+    $label = $this->slotSourceProxy->getLabelWithSummary($data);
     $build = [
       '#type' => 'component',
       '#component' => 'display_builder:tree_item',
