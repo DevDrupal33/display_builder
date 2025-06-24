@@ -19,3 +19,13 @@ interrete
 oportunitatis
 videri
 vivere
+
+beyris
+dureau
+fontawesome
+meulle
+mikael
+mogtofu
+pdureau
+pymdownx
+valverde
