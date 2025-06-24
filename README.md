@@ -8,52 +8,32 @@ A display building tool by the [UI Suite](https://www.drupal.org/project/ui_suit
 
 ## Installation
 
-The module is still in heavy development. Before enabling `display_builder`, you may need to:
+Install as you would normally install a contributed Drupal module.
+See: [Installing Modules](https://www.drupal.org/docs/extending-drupal/installing-modules) for further information.
 
-- Disable JavaScript files aggregation to avoid issues with the _[Entity] ➜ [Field]_ context switcher in entity view displays.
-- Activate your component-based theme as the default front theme (to allow some temporary demo fixtures to be loaded)
-- Add some patches from [composer.json](https://git.drupalcode.org/project/display_builder/-/blob/1.0.x/composer.json) in your project's composer.json
+!!! warning "Development stage"
+  The module is still in heavy development. see [docs/index.md](./docs/index.md).
 
-With command-line:
+## Contributing
 
-```shell
-drush -y config-set system.performance js.preprocess 0
-drush theme:enable my_theme
-drush -y config-set system.theme default my_theme
-drush -y en display_builder
-```
+Join us on slack [#display_builder](https://drupal.slack.com/archives/C092EUNPCRW).
 
-### Libraries
+See [online documentation](https://project.pages.drupalcode.org/display_builder#Contributing) or local [docs/index.md](./docs/index.md#Contributing).
 
-Display builder rely on [Shoelace component library](https://shoelace.style/getting-started/installation), by default the library is loaded with CDN, but you can use local copies instead in Display Builder settings (/admin/structure/display-builder).
+## Documentation (In Progress)
 
-#### Local installation
+See [online documentation](https://project.pages.drupalcode.org/display_builder) or local [docs/index.md](./docs/index.md).
 
-Currently asset.packagist do not provide the last version of Shoelace, installation
-with package manager is recommended.
+## Maintainers
 
-From your installation libraries folder (web/libraries or app/libraries):
+Current maintainers:
 
-```shell
-mkdir -p shoelace
-cd shoelace
-npm init -y
-npm install @shoelace-style/shoelace
-```
+- Jean Valverde - [mogtofu33](https://www.drupal.org/u/mogtofu33)
+- Mikael Meulle - [just_like_good_vibes](https://www.drupal.org/u/just_like_good_vibes)
+- Pierre Dureau - [pdureau](https://www.drupal.org/u/pdureau)
 
-## Troubleshooting
+Supporting organizations:
 
-### Browser-side reset
-
-We use `localStorage` that can change anytime, be sure to clear your local storage on each new install to start fresh.
-
-- On Mozilla Firefox: `Privacy & Security` > `Cookies and Site Data` > Select the site > `Remove Selected` > `Save Changes`
-- On Google Chrome: `Developer toolbar` > `Application` > `Local storage` > Select the site > `Clear`
-
-### Server-side reset
-
-In case of a failing display builder configuration or instance:
-
-- Enable module `display_builder_devel`
-- Go to Structure > Display Builder > Devel
-- `Delete` from the _Operations_ dropdown
+- [Beyris](https://www.drupal.org/beyris) - We are leading impactful open-source
+projects and we are providing coding, training, audit and consulting.
+- You want to support us? Contact us on slack [#display_builder](https://drupal.slack.com/archives/C092EUNPCRW)

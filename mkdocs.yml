@@ -1,0 +1,56 @@
+site_name: Display Builder
+site_description: >-
+  A display building tool by the UI Suite team.
+
+repo_name: project/display_builder
+repo_url: https://git.drupalcode.org/project/display_builder
+edit_uri: /-/edit/main/docs/
+
+theme:
+  name: material
+  language: en
+  palette:
+    # Palette toggle for automatic mode
+    - media: '(prefers-color-scheme)'
+      primary: blue
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - media: '(prefers-color-scheme: light)'
+      primary: blue
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: '(prefers-color-scheme: dark)'
+      primary: blue
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+extra:
+  social:
+    - icon: fontawesome/brands/drupal
+      link: https://www.drupal.org/project/display_builder
+    - icon: fontawesome/brands/gitlab
+      link: https://git.drupalcode.org/project/display_builder
+    - icon: fontawesome/solid/bolt
+      link: https://beyris.eu
+    - icon: fontawesome/solid/blog
+      link: https://developpeur-drupal.com/en
+
+nav:
+  - Home: 'index.md'
+  - Drupal.org project: 'https://www.drupal.org/project/display_builder'
+
+plugins:
+  - search
+  - privacy:
+      enabled: !ENV [CI, false]
+
+markdown_extensions:
+  - markdown.extensions.admonition
+  - pymdownx.extra
