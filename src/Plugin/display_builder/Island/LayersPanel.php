@@ -112,7 +112,7 @@ class LayersPanel extends BuilderPanel {
       ],
     ];
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id);
+    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, (string) $component['label'], $index);
   }
 
   /**
@@ -124,17 +124,17 @@ class LayersPanel extends BuilderPanel {
       '#type' => 'component',
       '#component' => 'display_builder:layer',
       '#slots' => [
-        'title' => $label,
+        'title' => $label['summary'],
       ],
     ];
     $instance_id = $instance_id ?: $data['_instance_id'];
 
     // This label is used for contextual menu.
     // @see components/contextual_menu/contextual_menu.js
-    $build['#attributes']['data-instance-title'] = $label;
+    $build['#attributes']['data-instance-title'] = $label['summary'];
     $build['#attributes']['data-slot-position'] = $index;
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id);
+    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['label'], $index);
   }
 
   /**

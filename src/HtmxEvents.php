@@ -185,7 +185,7 @@ class HtmxEvents {
   }
 
   /**
-   * When a component or a block is clicked.
+   * When a component or block is clicked.
    *
    * @param array $build
    *   The render array.
@@ -193,11 +193,15 @@ class HtmxEvents {
    *   The builder id.
    * @param string $instance_id
    *   The instance id.
+   * @param string $title
+   *   The instance title.
+   * @param int $index
+   *   The instance index.
    *
    * @return array
    *   The render array.
    */
-  public function onInstanceClick(array $build, string $builder_id, string $instance_id): array {
+  public function onInstanceClick(array $build, string $builder_id, string $instance_id, string $title, int $index): array {
     $url = new Url(
       'display_builder.api_instance_get',
       [
@@ -206,16 +210,17 @@ class HtmxEvents {
       ]
     );
 
+    // Only for icon case, remove suffix without loading label.
+    $label = ucfirst(trim(str_replace(['renderable', '_'], ['', ' '], $title)));
+
     $attributes = [
       'tabindex' => '0',
       'data-instance-id' => $instance_id,
-      // This label is used for contextual menu.
-      // phpcs:ignore-next-line
-      // 'data-instance-title' => $label,
-      // phpcs:ignore-next-line
-      // 'data-slot-position' => $index,
-      'data-open-second-drawer' => '1',
+      // Data used for contextual menu or drawer name.
+      'data-instance-title' => $label,
+      'data-slot-position' => $index,
       'hx-on::after-swap' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this)', $builder_id),
+      'hx-on:click' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this)', $builder_id),
     ];
 
     return $this->setHtmxAttributes($build, $url, 'click consume', 'get', $attributes);

@@ -169,7 +169,7 @@ class BuilderPanel extends IslandPluginBase {
       $build = $this->wrapContent($build);
     }
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id);
+    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $component['label'], $index);
   }
 
   /**
@@ -182,11 +182,11 @@ class BuilderPanel extends IslandPluginBase {
    *   Use it or not.
    */
   protected function useAttributesVariable(array $renderable): bool {
-    $random = uniqid();
+    $random = \uniqid();
     $renderable['#attributes'][$random] = $random;
     $html = $this->renderer->renderInIsolation($renderable);
 
-    return str_contains((string) $html, $random);
+    return \str_contains((string) $html, $random);
   }
 
   /**
@@ -204,10 +204,10 @@ class BuilderPanel extends IslandPluginBase {
     $classes = ['db-block'];
 
     if (isset($data['source']['plugin_id'])) {
-      $classes[] = 'db-block-' . strtolower(Html::cleanCssIdentifier($data['source']['plugin_id']));
+      $classes[] = 'db-block-' . \strtolower(Html::cleanCssIdentifier($data['source']['plugin_id']));
     }
     else {
-      $classes[] = 'db-block-' . strtolower(Html::cleanCssIdentifier($data['source_id']));
+      $classes[] = 'db-block-' . \strtolower(Html::cleanCssIdentifier($data['source_id']));
     }
     $build = $this->renderSource($data, $classes);
     $is_empty = FALSE;
@@ -221,8 +221,8 @@ class BuilderPanel extends IslandPluginBase {
     // This is the placeholder without configuration or content yet.
     if ($this->isEmpty($build) || $is_empty) {
       // Keep the placeholder if the block is not renderable.
-      $label = (string) $this->slotSourceProxy->getLabelWithSummary($data);
-      $build = $this->buildPlaceholderButton($label);
+      $label = $this->slotSourceProxy->getLabelWithSummary($data);
+      $build = $this->buildPlaceholderButton($label['summary']);
       // Highlight in the view to show it's a temporary block waiting for
       // configuration.
       $build['#attributes']['class'][] = 'db-background';
@@ -238,10 +238,10 @@ class BuilderPanel extends IslandPluginBase {
 
     // This label is used for contextual menu.
     // @see components/contextual_menu/contextual_menu.js
-    $build['#attributes']['data-instance-title'] = $label;
+    $build['#attributes']['data-instance-title'] = $label['summary'] ?? $label;
     $build['#attributes']['data-slot-position'] = $index;
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id);
+    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['label'] ?? $label, $index);
   }
 
   /**
@@ -342,7 +342,7 @@ class BuilderPanel extends IslandPluginBase {
   private function isEmpty(array $renderable): bool {
     $html = $this->renderer->renderInIsolation($renderable);
 
-    return empty(trim((string) $html));
+    return empty(\trim((string) $html));
   }
 
   /**
@@ -376,7 +376,7 @@ class BuilderPanel extends IslandPluginBase {
         // Slot is needed for contextual menu paste.
         // @see components/contextual_menu/contextual_menu.js
         'data-slot-id' => $slot,
-        'data-slot-title' => ucfirst($definition['title']),
+        'data-slot-title' => \ucfirst($definition['title']),
         'data-instance-id' => $instance_id,
       ],
     ];

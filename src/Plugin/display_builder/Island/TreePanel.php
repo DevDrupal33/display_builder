@@ -130,6 +130,7 @@ class TreePanel extends BuilderPanel {
       '#attributes' => [
         'data-instance-id' => $instance_id,
         'data-instance-title' => $name,
+        'data-slot-position' => $index,
         'data-menu-type' => 'component',
       ],
     ];
@@ -141,27 +142,25 @@ class TreePanel extends BuilderPanel {
   protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): array {
     $instance_id = $instance_id ?: $data['_instance_id'];
     $label = $this->slotSourceProxy->getLabelWithSummary($data);
-    $build = [
+
+    return [
       '#type' => 'component',
       '#component' => 'display_builder:tree_item',
       '#props' => [
         'icon' => 'view-list',
       ],
       '#slots' => [
-        'title' => $label,
+        'title' => $label['summary'],
       ],
       '#attributes' => [
         'data-instance-id' => $instance_id,
-        'data-instance-title' => $label,
+        // This label is used for contextual menu.
+        // @see components/contextual_menu/contextual_menu.js
+        'data-instance-title' => $label['label'],
+        'data-slot-position' => $index,
         'data-menu-type' => 'block',
       ],
     ];
-
-    // This label is used for contextual menu.
-    // @see components/contextual_menu/contextual_menu.js
-    $build['#attributes']['data-instance-title'] = $label;
-
-    return $build;
   }
 
   /**

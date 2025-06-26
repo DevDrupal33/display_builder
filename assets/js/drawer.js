@@ -7,14 +7,6 @@
 
 Drupal.displayBuilder = Drupal.displayBuilder || {};
 
-Drupal.displayBuilder.clearSecondDrawerOpenedFlag = (builder) => {
-  builder
-    .querySelectorAll('[data-drawer-trigger-opened]')
-    .forEach((existingTrigger) => {
-      existingTrigger.removeAttribute('data-drawer-trigger-opened');
-    });
-};
-
 /**
  * Handles the click event for the second drawer trigger button.
  *
@@ -29,7 +21,6 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger) => {
   const secondDrawer = builder.querySelector('#db-second-drawer');
   if (!secondDrawer) return;
 
-  Drupal.displayBuilder.clearSecondDrawerOpenedFlag(builder);
   let activeSecondDrawerButton = null;
 
   if (secondDrawer?.open && trigger === activeSecondDrawerButton) {
@@ -38,7 +29,6 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger) => {
   } else {
     secondDrawer.show();
     activeSecondDrawerButton = trigger;
-    // trigger.setAttribute('data-drawer-trigger-opened', true);
   }
 };
 
@@ -58,7 +48,6 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
   const secondDrawer = builder.querySelector('#db-second-drawer');
 
   let activeFirstDrawerButton = null;
-  const activeSecondDrawerButton = null;
 
   // Attach drawer opening to any button in toolbar.
   const attachEventListenersToFirstDrawerButtons = () => {
@@ -163,14 +152,9 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
   };
 
   const onHideResetActiveTrigger = (event) => {
+    // console.log('onHideResetActiveTrigger')
     if (event.target?.id === 'db-first-drawer' && activeFirstDrawerButton) {
       activeFirstDrawerButton.variant = 'default';
-      activeFirstDrawerButton = null;
-    } else if (
-      event.target?.id === 'db-second-drawer' &&
-      activeSecondDrawerButton
-    ) {
-      activeSecondDrawerButton.removeAttribute('data-drawer-trigger-opened');
       activeFirstDrawerButton = null;
     }
   };
@@ -230,8 +214,6 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
 
   // Init the second drawer.
   if (secondDrawer) {
-    secondDrawer.addEventListener('sl-hide', onHideResetActiveTrigger);
-
     handleResizeHandler(secondDrawer, false);
   }
 

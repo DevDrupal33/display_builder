@@ -51,27 +51,27 @@ island_settings:
       weight: '-3'
       options: sidebar
   button:
-    history:
+    reset:
       enable: true
       weight: '-10'
-    reset:
-      enable: false
+    history:
+      enable: true
       weight: '-9'
     state:
       enable: true
       weight: '-8'
-    keyboard_help:
-      enable: false
-      weight: '-6'
     toggle_highlight:
       enable: true
-      weight: '-5'
+      weight: '-7'
     toggle_fullscreen:
       enable: true
-      weight: '-4'
+      weight: '-6'
+    keyboard_help:
+      enable: false
+      weight: '-5'
     theme_mode:
       enable: false
-      weight: '-3'
+      weight: '-4'
   contextual:
     instance_form:
       enable: true

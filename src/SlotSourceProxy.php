@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns_overrides\SourcesBundlerInterface;
 
 /**
@@ -25,39 +24,46 @@ class SlotSourceProxy {
    * @param array $contexts
    *   (Optional) The contexts for this builder_id.
    *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string
-   *   The label if found, with summary if found.
+   * @return array{label: string, summary: string}
+   *   Array with keys 'label' and 'summary'.
    */
-  public function getLabelWithSummary(array $data, array $contexts = []): string|TranslatableMarkup {
+  public function getLabelWithSummary(array $data, array $contexts = []): array {
     /** @var \Drupal\ui_patterns\SourcePluginManager $sourceManager */
     $sourceManager = $this->sourceManager;
     $source = $sourceManager->getSource($data['_instance_id'] ?? '', [], $data, $contexts);
 
     if (!$source) {
-      return '';
+      return [
+        'label' => '',
+        'summary' => '',
+      ];
     }
 
     if ($source instanceof SourcesBundlerInterface) {
-      $label = $source->getOptionLabel($data);
+      $label = (string) $source->getOptionLabel($data);
     }
     else {
-      $label = $source->label();
+      $label = (string) $source->label();
     }
 
     $summary = $source->settingsSummary();
+    $labelSummary = $label;
 
     if (\is_array($summary)) {
       $summary = \array_map(static fn ($v) => \trim((string) $v), $summary);
 
       if (!empty(\array_filter(\array_values($summary)))) {
-        $label .= ': ' . \implode(', ', $summary);
+        $labelSummary .= ': ' . \implode(', ', $summary);
       }
     }
     elseif (\is_string($summary)) {
-      $label .= ': ' . \trim($summary);
+      $labelSummary .= ': ' . \trim($summary);
     }
 
-    return $label;
+    return [
+      'label' => $label,
+      'summary' => $labelSummary,
+    ];
   }
 
 }
