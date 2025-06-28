@@ -14,6 +14,19 @@ interface IslandPluginManagerInterface extends PluginManagerInterface {
   /**
    * Get islands plugins instances.
    *
+   * @param string $island_id
+   *   The island id.
+   * @param array $contexts
+   *   (Optional) An array of context to pass to the display builder.
+   *
+   * @return array<string, IslandInterface>
+   *   A list of instantiated plugins.
+   */
+  public function getIsland(string $island_id, array $contexts = []): IslandInterface;
+
+  /**
+   * Get islands plugins instances.
+   *
    * @param array $contexts
    *   (Optional) An array of context to pass to the display builder.
    *

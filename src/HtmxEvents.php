@@ -54,7 +54,7 @@ class HtmxEvents {
    * @return array
    *   The render array.
    */
-  public function onClickSavePreset(array $build, string $builder_id, string $instance_id, string|MarkupInterface $prompt): array {
+  public function onClickSavePreset(array $build, string $builder_id, string $instance_id, MarkupInterface|string $prompt): array {
     $url = new Url(
       'display_builder.api_instance_save_preset',
       [
@@ -211,7 +211,7 @@ class HtmxEvents {
     );
 
     // Only for icon case, remove suffix without loading label.
-    $label = ucfirst(trim(str_replace(['renderable', '_'], ['', ' '], $title)));
+    $label = \ucfirst(\trim(\str_replace(['renderable', '_'], ['', ' '], $title)));
 
     $attributes = [
       'tabindex' => '0',
@@ -249,6 +249,7 @@ class HtmxEvents {
     );
 
     $extra_attr = [];
+
     // Specific Wysiwyg extra code to make it work.
     if (isset($build['source']['value']['#type']) && $build['source']['value']['#type'] === 'text_format') {
       $extra_attr['hx-on:htmx:config-request'] = 'fixWysiwygUpdate(this, event)';

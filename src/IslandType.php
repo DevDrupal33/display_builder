@@ -14,7 +14,6 @@ enum IslandType: string {
   // Islands acting as part of view island.
   case Library = 'library';
   case Contextual = 'contextual';
-
   case View = 'view';
   case Button = 'button';
   case Menu = 'menu';
