@@ -6,3 +6,4 @@ package: "User interface"
 dependencies:
   - display_builder:display_builder
   - display_builder:display_builder_ui
+  - ui_icons:ui_icons_patterns
