@@ -12,15 +12,15 @@ Install as you would normally install a contributed Drupal module.
 See: [Installing Modules](https://www.drupal.org/docs/extending-drupal/installing-modules) for further information.
 
 !!! warning "Development stage"
-  The module is still in heavy development. see [docs/index.md](./docs/index.md).
+  The module is still in heavy development and [some extra steps may be needed](./docs/contributing.md).
 
 ## Contributing
 
 Join us on slack [#display_builder](https://drupal.slack.com/archives/C092EUNPCRW).
 
-See [online documentation](https://project.pages.drupalcode.org/display_builder#Contributing) or local [docs/index.md](./docs/index.md#Contributing).
+See [documentation](./docs/contributing.md).
 
-## Documentation (In Progress)
+## Documentation (Work in progress)
 
 See [online documentation](https://project.pages.drupalcode.org/display_builder) or local [docs/index.md](./docs/index.md).
 
@@ -35,5 +35,5 @@ Current maintainers:
 Supporting organizations:
 
 - [Beyris](https://www.drupal.org/beyris) - We are leading impactful open-source
-projects and we are providing coding, training, audit and consulting.
+  projects and we are providing coding, training, audit and consulting.
 - You want to support us? Contact us on slack [#display_builder](https://drupal.slack.com/archives/C092EUNPCRW)
