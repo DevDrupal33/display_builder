@@ -95,7 +95,11 @@
 
     builder.addEventListener('htmx:beforeRequest', (event) => {
       // Class used for opacity until request is finished.
-      builder.classList.add('db-htmx-before-request');
+      // Avoid on preview.
+      if (!event.target.classList.contains('db-placeholder')) {
+        builder.classList.add('db-htmx-before-request');
+      }
+
       // Don't trigger api_instance_get request if already the active instance.
       // Instead open the contextual edit actions.
       const activeInstanceId = builder.getAttribute('data-active-instance');

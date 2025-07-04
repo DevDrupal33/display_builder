@@ -1,0 +1,19 @@
+{
+  "name": "display_builder_tests",
+  "private": true,
+  "version": "1.0.0",
+  "main": "playwright.db.config.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "Jean Valverde <devdrupal33@gmail.com>",
+  "license": "GPL",
+  "description": "Display Builder testing tools.",
+  "devDependencies": {
+    "@playwright/test": "^1.53.1",
+    "@types/node": "^24.0.7",
+    "dotenv": "^17.0.0",
+    "fast-xml-parser": "^4.5",
+    "junit-report-merger": "github:bhovhannes/junit-report-merger",
+    "winston": "^3.17.0"
+  }
+}

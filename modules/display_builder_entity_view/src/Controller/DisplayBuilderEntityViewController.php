@@ -112,12 +112,15 @@ final class DisplayBuilderEntityViewController extends ControllerBase {
       $bundle,
       $entity_view_display_parameters['view_mode_name']
     );
-    // For now : default display builder id.
+
+    // Load the config used by this display builder.
+    $current = $this->stateManager->load($builder_id);
+    $display_builder_id = $current['entity_config_id'];
+
     $storage = $this->entityTypeManager()->getStorage('display_builder');
-    $configs = $storage->loadMultiple();
     /** @var \Drupal\display_builder\DisplayBuilderInterface $displayBuilderConfig */
-    $displayBuilderConfig = reset($configs);
-    $display_builder_id = $displayBuilderConfig->id();
+    $displayBuilderConfig = $storage->load($display_builder_id);
+
     // We build the rendered page.
     $build = [];
     // We add the display builder.
@@ -134,7 +137,7 @@ final class DisplayBuilderEntityViewController extends ControllerBase {
       $contexts = RequirementsContext::addToContext([DisplayBuilderEntityViewEventsSubscriber::CONTEXT_REQUIREMENT], $contexts);
       $this->stateManager->create(
         $builder_id,
-        (string) $display_builder_id,
+        $current['entity_config_id'],
         [],
         $contexts,
       );

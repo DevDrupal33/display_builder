@@ -104,7 +104,7 @@ trait RenderableBuilderTrait {
     $attributes = [
       'hx-get' => $preview_url->toString(),
       'hx-target' => \sprintf('#preview-%s', $builder_id),
-      'hx-trigger' => 'mouseover',
+      'hx-trigger' => 'mouseover delay:250ms',
       'hx-on:mouseover' => \sprintf('Drupal.displayBuilder.showPreview(%s, this)', $builder_id),
       'hx-on:mousedown' => $hide_script,
       'hx-on:mouseout' => $hide_script,

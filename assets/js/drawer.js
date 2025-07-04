@@ -92,7 +92,10 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
       builder.querySelector('.db-display-builder__main').style.marginLeft =
         `${drawerWidth}px`;
     } else {
-      document.body.style.marginLeft = `${drawerWidth}px`;
+      document.body.style.setProperty(
+        '--db-body-margin-left',
+        `${drawerWidth}px`,
+      );
     }
   };
 
@@ -100,7 +103,7 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
     if (builder.classList.contains('db-display-builder--fullscreen')) {
       builder.querySelector('.db-display-builder__main').style.marginLeft = '0';
     } else {
-      document.body.style.marginLeft = '0';
+      document.body.style.setProperty('--db-body-margin-left', 0);
     }
   };
 
@@ -123,7 +126,7 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
     drawer.style.setProperty('--size', `${newWidth}px`);
 
     if (isFirst) {
-      document.body.style.marginLeft = `${newWidth}px`;
+      document.body.style.setProperty('--db-body-margin-left', `${newWidth}px`);
     }
   };
 
@@ -199,7 +202,10 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
 
       // Push the content for the first sidebar.
       const drawerWidth = getDrawerWidth() || 400;
-      document.body.style.marginLeft = `${drawerWidth}px`;
+      document.body.style.setProperty(
+        '--db-body-margin-left',
+        `${drawerWidth}px`,
+      );
     }
   };
 

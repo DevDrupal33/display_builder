@@ -1,20 +1,12 @@
 # https://git.drupalcode.org/project/gitlab_templates/
 
 include:
-  # - project: $_GITLAB_TEMPLATES_REPO
-    # ref: $_GITLAB_TEMPLATES_REF
-    # file:
-      # - "/includes/include.drupalci.main.yml"
-      # - "/includes/include.drupalci.variables.yml"
-      # - "/includes/include.drupalci.workflows.yml"
-  - remote: https://git.drupalcode.org/project/gitlab_templates/-/raw/default-ref/includes/include.drupalci.main.yml
-  - remote: https://git.drupalcode.org/project/gitlab_templates/-/raw/default-ref/includes/include.drupalci.variables.yml
-  - remote: https://git.drupalcode.org/project/gitlab_templates/-/raw/default-ref/includes/include.drupalci.hidden-variables.yml
-  - remote: https://git.drupalcode.org/project/gitlab_templates/-/raw/default-ref/includes/include.drupalci.workflows.yml
-
-# variables:
-#   SKIP_ESLINT: '1'
-
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: $_GITLAB_TEMPLATES_REF
+    file:
+      - "/includes/include.drupalci.main.yml"
+      - "/includes/include.drupalci.variables.yml"
+      - "/includes/include.drupalci.workflows.yml"
 
 .skip-phpmd-rule: &skip-phpmd-rule
   if: '$SKIP_PHPMD == "1"'
@@ -65,7 +57,7 @@ composer-lint:
 cspell:
   allow_failure: true
   variables:
-    _CSPELL_IGNORE_PATHS: '**/fixtures/*.yml, *.neon, **/*.story.yml, **/build.env, **/*.patch'
+    _CSPELL_IGNORE_PATHS: '**/fixtures/*.yml, *.neon, **/*.story.yml, **/build.env, **/*.patch, **/tests/playwright'
 eslint:
   allow_failure: false
 stylelint:

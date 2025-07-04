@@ -61,6 +61,10 @@ handle it instead of shoelace */
     var(--dropzone-slot-outline-type-light);
 }
 
+.db-drawer .db-dropzone--root:empty {
+  margin-top: 2rem;
+}
+
 .db-display-builder--fullscreen .db-dropzone--root {
   width: 98%;
   margin: 0 0 0 1rem;
