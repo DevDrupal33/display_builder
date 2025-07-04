@@ -17,7 +17,7 @@ use Drupal\ui_patterns\SourcePluginBase;
  */
 #[Source(
   id: 'page_title',
-  label: new TranslatableMarkup('Page title'),
+  label: new TranslatableMarkup('[Page] Title'),
   description: new TranslatableMarkup('The Drupal `Page title` block (page_title).'),
   prop_types: ['string'],
   tags: [],

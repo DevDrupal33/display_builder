@@ -17,7 +17,7 @@ use Drupal\display_builder\IslandWithFormInterface;
 #[Island(
   id: 'instance_form',
   label: new TranslatableMarkup('Instance form'),
-  description: new TranslatableMarkup('Configuration of the selected element.'),
+  description: new TranslatableMarkup('Configuration of the active element.'),
   type: IslandType::Contextual,
 )]
 class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterface {

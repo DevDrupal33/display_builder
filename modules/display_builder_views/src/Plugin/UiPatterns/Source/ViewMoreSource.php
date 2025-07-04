@@ -12,9 +12,8 @@ use Drupal\ui_patterns\Attribute\Source;
  * Plugin implementation of the source for views.
  */
 #[Source(
-  id: 'View_more_source',
-  label: new TranslatableMarkup('View more'),
-  description: new TranslatableMarkup('The Views more area.'),
+  id: 'view_more',
+  label: new TranslatableMarkup('[View] More'),
   context_requirements: ['is_display_builder_views'],
   prop_types: ['slot'],
   tags: ['views'],

@@ -12,9 +12,8 @@ use Drupal\ui_patterns\Attribute\Source;
  * Plugin implementation of the source for views.
  */
 #[Source(
-  id: 'View_pager_source',
-  label: new TranslatableMarkup('View pager'),
-  description: new TranslatableMarkup('The Views pager area.'),
+  id: 'view_pager',
+  label: new TranslatableMarkup('[View] Pager'),
   context_requirements: ['is_display_builder_views'],
   prop_types: ['slot'],
   tags: ['views'],

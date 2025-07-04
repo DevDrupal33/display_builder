@@ -86,7 +86,7 @@ final class DisplayBuilderForm extends EntityForm {
     $header = [
       '',
       $this->t('Enable'),
-      $this->t('Island name'),
+      $this->t('Name'),
       $this->t('Description'),
       '',
       $this->t('Provider'),

@@ -15,7 +15,7 @@ use Drupal\display_builder\IslandType;
 #[Island(
   id: 'history',
   label: new TranslatableMarkup('History'),
-  description: new TranslatableMarkup('Undo and Redo features buttons.'),
+  description: new TranslatableMarkup('Undo and Redo buttons.'),
   type: IslandType::Button,
   keyboard_shortcuts: [
     'u' => new TranslatableMarkup('Undo last change'),

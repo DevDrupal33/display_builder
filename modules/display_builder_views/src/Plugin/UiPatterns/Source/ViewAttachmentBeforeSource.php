@@ -12,9 +12,8 @@ use Drupal\ui_patterns\Attribute\Source;
  * Plugin implementation of the source for views.
  */
 #[Source(
-  id: 'View_attachment_before_source',
-  label: new TranslatableMarkup('View attachment before'),
-  description: new TranslatableMarkup('The Views attachment_before area.'),
+  id: 'view_attachment_before',
+  label: new TranslatableMarkup('[View] Attachment before'),
   context_requirements: ['is_display_builder_views'],
   prop_types: ['slot'],
   tags: ['views'],

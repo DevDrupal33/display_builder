@@ -317,7 +317,7 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
       'theme' => $theme,
       'status' => TRUE,
       'group' => '',
-      'description' => (string) $this->t('Preset created form Display Builder.'),
+      'description' => '',
       'sources' => Yaml::encode($data),
     ]);
     $preset->save();

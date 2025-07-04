@@ -12,9 +12,8 @@ use Drupal\ui_patterns\Attribute\Source;
  * Plugin implementation of the source for views.
  */
 #[Source(
-  id: 'View_feed_icons_source',
-  label: new TranslatableMarkup('View Feed Icons'),
-  description: new TranslatableMarkup('The Views feed_icons area.'),
+  id: 'view_feed_icons',
+  label: new TranslatableMarkup('[View] Feed icons'),
   context_requirements: ['is_display_builder_views'],
   prop_types: ['slot'],
   tags: ['views'],

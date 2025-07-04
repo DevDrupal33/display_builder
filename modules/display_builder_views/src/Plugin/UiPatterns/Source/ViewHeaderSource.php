@@ -12,9 +12,8 @@ use Drupal\ui_patterns\Attribute\Source;
  * Plugin implementation of the source for views.
  */
 #[Source(
-  id: 'View_header_source',
-  label: new TranslatableMarkup('View header'),
-  description: new TranslatableMarkup('The Views header area.'),
+  id: 'view_header',
+  label: new TranslatableMarkup('[View] Header'),
   context_requirements: ['is_display_builder_views'],
   prop_types: ['slot'],
   tags: ['views'],

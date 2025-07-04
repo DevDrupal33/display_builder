@@ -12,9 +12,8 @@ use Drupal\ui_patterns\Attribute\Source;
  * Plugin implementation of the source for views.
  */
 #[Source(
-  id: 'View_exposed_source',
-  label: new TranslatableMarkup('View exposed'),
-  description: new TranslatableMarkup('The Views exposed area.'),
+  id: 'view_exposed',
+  label: new TranslatableMarkup('[View] Exposed form'),
   context_requirements: ['is_display_builder_views'],
   prop_types: ['slot'],
   tags: ['views'],

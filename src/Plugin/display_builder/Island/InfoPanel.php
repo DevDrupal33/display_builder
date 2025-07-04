@@ -15,7 +15,7 @@ use Drupal\display_builder\IslandType;
 #[Island(
   id: 'info',
   label: new TranslatableMarkup('Info'),
-  description: new TranslatableMarkup('Provide element information.'),
+  description: new TranslatableMarkup('Information about the active element.'),
   type: IslandType::Contextual,
 )]
 class InfoPanel extends IslandPluginBase {

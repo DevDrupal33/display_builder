@@ -15,7 +15,7 @@ use Drupal\display_builder\IslandType;
 #[Island(
   id: 'logs',
   label: new TranslatableMarkup('Logs'),
-  description: new TranslatableMarkup('Display Builder Logs based on history.'),
+  description: new TranslatableMarkup('Logs based on changes history.'),
   type: IslandType::View,
   keyboard_shortcuts: [
     'o' => new TranslatableMarkup('Show logs view'),

@@ -18,7 +18,7 @@ use Drupal\display_builder\RenderableAltererInterface;
 #[Island(
   id: 'ui_styles',
   label: new TranslatableMarkup('UI Styles'),
-  description: new TranslatableMarkup('Styles to apply to this element.'),
+  description: new TranslatableMarkup('Style utilities to apply to the active element.'),
   type: IslandType::Contextual,
 )]
 class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {

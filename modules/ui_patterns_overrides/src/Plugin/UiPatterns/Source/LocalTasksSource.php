@@ -16,7 +16,7 @@ use Drupal\ui_patterns\Plugin\UiPatterns\Source\BlockSource;
  */
 #[Source(
   id: 'local_tasks',
-  label: new TranslatableMarkup('Tabs (Local tasks)'),
+  label: new TranslatableMarkup('[Page] Local tasks'),
   description: new TranslatableMarkup('The Drupal tabs `local tasks` block (local_tasks_block).'),
   prop_types: ['slot'],
   tags: [],

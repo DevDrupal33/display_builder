@@ -19,7 +19,7 @@ use Drupal\ui_skins\UiSkinsUtility;
 #[Island(
   id: 'ui_skins',
   label: new TranslatableMarkup('UI Skins'),
-  description: new TranslatableMarkup('CSS variables to apply to this element.'),
+  description: new TranslatableMarkup('CSS variables to override for the active element.'),
   type: IslandType::Contextual,
 )]
 class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {

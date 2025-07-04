@@ -17,7 +17,7 @@ use Drupal\ui_patterns\SourcePluginBase;
  */
 #[Source(
   id: 'main_page_content',
-  label: new TranslatableMarkup('Main page content'),
+  label: new TranslatableMarkup('[Page] Main content'),
   description: new TranslatableMarkup('The Drupal `Main page content` block (system_main_block).'),
   prop_types: ['slot'],
   tags: [],

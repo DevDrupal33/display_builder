@@ -16,9 +16,8 @@ use Drupal\ui_patterns\Attribute\Source;
  * @see display_builder_views.module
  */
 #[Source(
-  id: 'View_rows_source',
-  label: new TranslatableMarkup('View rows'),
-  description: new TranslatableMarkup('The Views rows area.'),
+  id: 'view_rows',
+  label: new TranslatableMarkup('[View] Rows'),
   context_requirements: ['is_display_builder_views'],
   prop_types: ['slot'],
   tags: ['views'],

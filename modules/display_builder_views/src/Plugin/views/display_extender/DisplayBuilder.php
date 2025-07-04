@@ -23,7 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 #[ViewsDisplayExtender(
   id: 'display_builder',
-  title: new TranslatableMarkup('Display builder extender'),
+  title: new TranslatableMarkup('Display Builder'),
   help: new TranslatableMarkup('Use display builder as output for this view.'),
   no_ui: FALSE,
 )]
@@ -79,7 +79,7 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
       ];
       $form['display_builder_id'] = [
         '#type' => 'select',
-        '#title' => $this->t('Display Builder'),
+        '#title' => $this->t('Load display builder:'),
         '#description' => $this->t('Display builder used to manage this view. <a href="@url" target="_blank">Edit here</a>', ['@url' => $url->toString()]),
         '#options' => $options,
         '#default_value' => $display_builder_id,
@@ -89,7 +89,7 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
     else {
       $form['display_builder_id'] = [
         '#type' => 'select',
-        '#title' => $this->t('Display Builder'),
+        '#title' => $this->t('Load display builder:'),
         '#description' => $this->t('Create the associated Display Builder or ignore.'),
         '#options' => ['_new' => $this->t('Create the display Builder'), '_none' => $this->t('None (Ignore)')],
         '#default_value' => '_new',
@@ -109,7 +109,7 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
 
     $form['builder_config_id'] = [
       '#type' => 'select',
-      '#title' => $this->t('Default display builder config'),
+      '#title' => $this->t('Display builder'),
       '#description' => $this->t('Display builder configuration used when editing the associated display builder.'),
       '#options' => $options,
       '#default_value' => $builder_config_id,

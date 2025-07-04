@@ -16,7 +16,7 @@ use Drupal\ui_patterns\Plugin\UiPatterns\Source\BlockSource;
  */
 #[Source(
   id: 'local_actions',
-  label: new TranslatableMarkup('Primary admin actions'),
+  label: new TranslatableMarkup('[Page] Local actions'),
   description: new TranslatableMarkup('The Drupal admin actions `local actions` block (local_actions_block).'),
   prop_types: ['slot'],
   tags: [],

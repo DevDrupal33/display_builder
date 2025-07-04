@@ -12,9 +12,8 @@ use Drupal\ui_patterns\Attribute\Source;
  * Plugin implementation of the source for views.
  */
 #[Source(
-  id: 'View_footer_source',
-  label: new TranslatableMarkup('View footer'),
-  description: new TranslatableMarkup('The Views footer area.'),
+  id: 'view_footer',
+  label: new TranslatableMarkup('[View] Footer area'),
   context_requirements: ['is_display_builder_views'],
   prop_types: ['slot'],
   tags: ['views'],

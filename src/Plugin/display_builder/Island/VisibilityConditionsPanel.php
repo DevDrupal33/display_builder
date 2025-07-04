@@ -18,7 +18,7 @@ use Drupal\display_builder\RenderableAltererInterface;
 #[Island(
   id: 'visibility_conditions',
   label: new TranslatableMarkup('Visibility'),
-  description: new TranslatableMarkup('Visibility conditions for this element.'),
+  description: new TranslatableMarkup('Visibility conditions for the active element.'),
   type: IslandType::Contextual,
 )]
 class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {
