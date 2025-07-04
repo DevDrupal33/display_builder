@@ -102,9 +102,8 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
   const resetMainMarginOnHide = () => {
     if (builder.classList.contains('db-display-builder--fullscreen')) {
       builder.querySelector('.db-display-builder__main').style.marginLeft = '0';
-    } else {
-      document.body.style.setProperty('--db-body-margin-left', 0);
     }
+    document.body.style.setProperty('--db-body-margin-left', 0);
   };
 
   const handleResize = (event, drawer, isFirst) => {

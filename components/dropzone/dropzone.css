@@ -62,7 +62,8 @@ handle it instead of shoelace */
 }
 
 .db-drawer .db-dropzone--root:empty {
-  margin-top: 2rem;
+  margin-top: 1.5rem;
+  margin-left: 0;
 }
 
 .db-display-builder--fullscreen .db-dropzone--root {

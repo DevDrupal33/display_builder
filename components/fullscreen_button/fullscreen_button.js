@@ -53,13 +53,11 @@
         true,
       );
 
-      const open = builder.querySelector('.db-modal--resizable[open]');
-      if (!open) return;
-      // Restore sidebar width.
-      const { width } = open.style;
-      const main = builder.querySelector('.db-display-builder__main');
-      if (!main) return;
-      main.style.marginLeft = width;
+      // Hide sidebar if open to avoid margin issues.
+      const firstDrawer = builder.querySelector('#db-first-drawer');
+      if (firstDrawer && firstDrawer.open) {
+        firstDrawer.hide();
+      }
     }
   }
 
