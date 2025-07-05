@@ -1,4 +1,4 @@
-.db-drawer {
+.shoelace-drawer {
   will-change: auto;
   /* Allow the contained version of drawer to get all height. */
   position: fixed;
@@ -27,11 +27,11 @@
     height: 0;
   }
 
-  .db-drawer__hidden {
+  .shoelace-drawer__hidden {
     display: none;
   }
 
-  .db-resize-handle {
+  .shoelace-resize-handle {
     position: absolute;
     top: 0;
     right: 0;
@@ -40,8 +40,8 @@
     cursor: ew-resize;
     background-color: rgb(0, 0, 0, 0.1);
   }
-  .db-resize-handle:active,
-  .db-resize-handle:hover {
+  .shoelace-resize-handle:active,
+  .shoelace-resize-handle:hover {
     background-color: var(--sl-color-primary-400, rgb(45, 25, 90, 0.2));
   }
 }

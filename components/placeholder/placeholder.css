@@ -15,6 +15,6 @@
 }
 
 /* Fix block on the builder view to stay close to preview for inline/block elements. */
-.db-display-builder__main .db-placeholder {
+.display-builder__main .db-placeholder {
   /* display: block; */
 }

@@ -144,6 +144,8 @@
   /**
    * Drupal behavior for display builder tabs.
    *
+   * @todo move to specific DB.
+   *
    * @type {Drupal~behavior}
    *
    * @prop {Drupal~behaviorAttach} attach
@@ -151,9 +153,9 @@
    */
   Drupal.behaviors.displayBuilderTabs = {
     attach(context) {
-      once('dbTabs', '.db-display-builder .shoelace-tabs', context).forEach(
+      once('shoelaceTabs', '.shoelace-tabs', context).forEach(
         (tabsComponent) => {
-          const builderId = tabsComponent.closest('.db-display-builder').id;
+          const builderId = tabsComponent.closest('.display-builder').id;
           addSwitchingMechanism(builderId, tabsComponent);
           // Restore tabs state from local storage
           restoreTabsState(builderId, tabsComponent);
@@ -168,10 +170,10 @@
         context.classList.contains('db-island-instance_form')
       ) {
         const tabsComponents = document.querySelectorAll(
-          '.db-display-builder .shoelace-tabs--contextual',
+          '.display-builder .shoelace-tabs--contextual',
         );
         Array.from(tabsComponents).forEach((tabsComponent) => {
-          const builderId = tabsComponent.closest('.db-display-builder').id;
+          const builderId = tabsComponent.closest('.display-builder').id;
           hideEmptyTabs(builderId, tabsComponent);
           restoreTabsState(builderId, tabsComponent);
         });

@@ -1,6 +1,6 @@
 {% set attributes = attributes.setAttribute('type', variant|default('text')) %}
 
-{% set attributes = id ? attributes.setAttribute('id', 'db-' ~ id) : attributes %}
+{% set attributes = id ? attributes.setAttribute('id', 'input-' ~ id) : attributes %}
 {% set attributes = label ? attributes.setAttribute('label', label) : attributes %}
 {% set attributes = placeholder ? attributes.setAttribute('placeholder', placeholder) : attributes %}
 {% set attributes = autocomplete_off ? attributes.setAttribute('autocomplete', 'off') : attributes %}

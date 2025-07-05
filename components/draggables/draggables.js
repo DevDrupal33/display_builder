@@ -45,12 +45,12 @@
       onStart() {
         draggableContainer
           .closest(`[id="${builderId}"]`)
-          .classList.add('db-display-builder--onDrag');
+          .classList.add('display-builder--onDrag');
       },
       onEnd() {
         draggableContainer
           .closest(`[id="${builderId}"]`)
-          .classList.remove('db-display-builder--onDrag');
+          .classList.remove('display-builder--onDrag');
       },
     };
 

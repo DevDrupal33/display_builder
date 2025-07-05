@@ -2,7 +2,7 @@
   --db-context-menu-z-index: 901;
 }
 
-.db-display-builder .db-context-menu {
+.display-builder .db-context-menu {
   position: absolute;
   z-index: var(--db-context-menu-z-index);
   display: none;

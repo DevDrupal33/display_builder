@@ -13,102 +13,14 @@
   /* Drupal admin toolbar is 502 */
   /* @see core/themes/claro/css/components/toolbar.module.css */
   --db-z-index: 400;
-
-  /* @todo evaluate what's needed here */
-  --db-primary-color: rgb(159, 82, 85); /* Dark maroon */
-  --db-primary-light-color: rgb(159, 82, 85, 0.3); /* Dark maroon light */
-  --db-secondary-color: rgb(243, 158, 96); /* Orange */
-  --db-disabled-stroke: rgb(128, 128, 128);
-  --db-active-color: oklch(85.4207% 0 0);
-  --db-medium-color: oklch(89.7547% 0 0);
-  --db-active-surface: rgb(158, 158, 243);
-  --db-rounded-box: 0.2rem;
-  --db-light-color: oklch(94.9119% 0 0);
-  /* stylelint-disable-next-line */
-  --db-shadow: 0 20px 25px -5px rgb(0, 0, 0, 0.1), 0 8px 10px -6px rgb(0, 0, 0, 0.1);
 }
 
-.db-display-builder {
-  box-sizing: border-box !important;
-}
-
-.db-display-builder.sl-theme-dark,
-.db-display-builder .sl-theme-dark {
-  --db-background-color: var(--sl-color-neutral-0);
-  --db-text-color: white;
-  --db-background-image: repeating-linear-gradient(
-    45deg,
-    oklch(0% 0 0),
-    oklch(0% 0 0) 13px,
-    var(--sl-color-neutral-0) 13px,
-    var(--sl-color-neutral-0) 14px
-  );
-}
-
-.db-display-builder .sl-theme-dark .db-draggables h4,
-.db-display-builder .sl-theme-dark .db-placeholder {
-  color: var(--sl-color-neutral-700) !important;
-}
-
-/* https://shoelace.style/getting-started/usage#waiting-for-components-to-load */
-:not(:defined) {
-  visibility: hidden;
-}
-
-/* Some fixes to override UI suite themes */
-*,
-::after,
-::before {
-  box-sizing: border-box;
-}
-
-/* Reset the theme focus if set by the current theme. */
-/* body .db-display-builder *:focus { */
-/* outline: none; */
-/* box-shadow: none; */
-/* } */
-
-body:has(.db-display-builder) {
+body:has(.display-builder) {
   margin: 0 0 0 var(--db-body-margin-left, 0);
 }
 
-.db-display-builder {
-  color: var(--db-text-color);
-  font-family: var(--sl-font-sans);
-  .db-display-builder__main {
-    /* padding: 1rem; */
-    margin: 2rem 0 2rem 0;
-  }
-}
-
-.db-display-builder .shoelace-tabs__tab[tabindex]:focus {
-  outline: 0 none;
-}
-
-/* Disable the builder until htmx is done. */
-.db-display-builder.db-htmx-before-request {
-  pointer-events: none;
-  > * {
-    opacity: 0.6;
-  }
-}
-
-/* Strange fix for USWDS */
-.db-display-builder .db-library-island-wrap {
-  min-height: 2.5rem;
-}
-
-/* Utilities */
-.db-background,
-.db-background.db-button::part(base) {
-  border-radius: var(--sl-border-radius-medium);
-  background-image: var(--db-background-image);
-  background-size: var(--db-background-size);
-  box-shadow: var(--sl-shadow-medium);
-}
-
 /* Fullscreen button toggle @see components/fullscreen_button. */
-.db-display-builder--fullscreen {
+.display-builder--fullscreen {
   position: fixed;
   z-index: 900;
   top: 0;
@@ -120,49 +32,69 @@ body:has(.db-display-builder) {
   background-color: var(--db-background-color);
 }
 
-/* Olivero fix */
-.db-display-builder-is-fullscreen #toolbar-administration {
-  display: none;
-}
-.db-display-builder-is-fullscreen .site-header {
-  z-index: 1;
-  opacity: 0;
+/* Olivero fix for fullscreen */
+.display-builder-is-fullscreen {
+  #toolbar-administration {
+    display: none;
+  }
+
+  .site-header {
+    z-index: 1;
+    opacity: 0;
+  }
 }
 
-/* Preview placeholders for some blocks like page title or page content */
-.db-preview-placeholder {
-  margin: 0.5rem 0;
-  padding: 0.5rem;
-  border: 1px dashed var(--db-primary-color);
-  border-radius: var(--db-rounded-box);
-}
+.display-builder {
+  /* Shoelace avoid clipping before the web components are attached */
+  :not(:defined) {
+    visibility: hidden;
+  }
 
-/* Small adjustments */
-.db-modal--dropdown .shoelace-tabs {
-  margin-bottom: 0.5rem;
-}
+  /* Disable the builder until htmx is done. */
+  /* @see assets/js/display_builder.js */
+  &.db-htmx-before-request {
+    pointer-events: none;
 
-/* Keyboard shortcut */
-.db-toolbar code {
-  color: var(--sl-color-danger-400);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 14px;
-}
+    > * {
+      opacity: 0.6;
+    }
+  }
 
-/* Full reset island specifics */
-.db-devel-reset {
-  padding: 0.5rem;
-}
+  .db-background,
+  .db-background::part(panel),
+  .db-background.shoelace-button::part(base) {
+    background-image: var(--db-background-image);
+    background-size: var(--db-background-size);
+    box-shadow: var(--sl-shadow-medium);
+  }
 
-/* Utils */
-.db-toolbar.sl-theme-dark .only-light,
-.db-toolbar:not(.sl-theme-dark) .only-dark {
-  display: none !important;
-}
+  .display-builder__main {
+    transition: margin-left 0.1s ease;
 
-/* @todo get body background color? */
-.db-modal--sidebar.db-background:has(div.db-island-preview) {
-  background-color: white;
-  background-image: none;
-  background-repeat: no-repeat;
+    .db-message {
+      margin: 1rem 0 0 0;
+    }
+
+    .display-builder__main_content {
+      margin-top: 1rem;
+      padding: 0 0.2rem 0 0.2rem;
+    }
+  }
+
+  .shoelace-tabs__tab[tabindex]:focus {
+    outline: 0 none;
+    box-shadow: unset;
+  }
+
+  /* Keyboard shortcut */
+  .db-toolbar code {
+    color: var(--sl-color-danger-400);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+  }
+
+  /* Full reset island specifics */
+  .db-devel-reset {
+    padding: 0.5rem;
+  }
 }

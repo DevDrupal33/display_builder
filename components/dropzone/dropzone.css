@@ -33,15 +33,15 @@
   min-width: var(--dropzone-slot-min-width);
   min-height: var(--dropzone-slot-min-height);
 }
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-dropzone[data-component-id][data-slot-id]:empty {
   padding: 1rem 2rem;
 }
 
 /* Because builder placeholders are normal button, reset hover as we want to
 handle it instead of shoelace */
-.db-placeholder.db-button::part(base):hover {
+.db-placeholder.shoelace-button::part(base):hover {
   color: var(--sl-color-neutral-700);
   background-color: var(--sl-color-neutral-0);
 }
@@ -52,7 +52,7 @@ handle it instead of shoelace */
 
 /* Start when builder is empty, show root and label to help start */
 /* Same when start dragging to avoid non trigger of HTMX when the mouse is out of the dropzone. */
-.db-display-builder--onDrag .db-dropzone--root,
+.display-builder--onDrag .db-dropzone--root,
 .db-dropzone--root:empty {
   width: 100%;
   height: 100%;
@@ -61,17 +61,17 @@ handle it instead of shoelace */
     var(--dropzone-slot-outline-type-light);
 }
 
-.db-drawer .db-dropzone--root:empty {
+.shoelace-drawer .db-dropzone--root:empty {
   margin-top: 1.5rem;
   margin-left: 0;
 }
 
-.db-display-builder--fullscreen .db-dropzone--root {
+.display-builder--fullscreen .db-dropzone--root {
   width: 98%;
   margin: 0 0 0 1rem;
 }
 
-.db-display-builder--highlight .db-display-builder__main .db-dropzone--root {
+.display-builder--highlight .display-builder__main .db-dropzone--root {
   padding: 0.5rem;
 }
 
@@ -101,8 +101,8 @@ handle it instead of shoelace */
   outline: var(--dropzone-slot-outline-width-light) var(--dropzone-color-light)
     var(--dropzone-slot-outline-type-light);
 }
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-dropzone
   [data-component-id]:not(
     [data-component-id^="display_builder"],
@@ -124,16 +124,16 @@ handle it instead of shoelace */
     var(--dropzone-slot-outline-type) !important;
   outline-offset: var(--dropzone-slot-outline-offset-light) !important;
 }
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-dropzone
   [data-instance-id]:not([data-component-id^="display_builder"]),
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-dropzone
   [data-instance-id]:not([data-component-id]),
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-placeholder[data-instance-id] {
   position: relative;
   margin: 0.5rem;
@@ -143,16 +143,16 @@ handle it instead of shoelace */
     var(--dropzone-slot-outline-type);
   outline-offset: var(--dropzone-slot-outline-offset);
 }
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-dropzone
   [data-instance-id]:not([data-component-id^="display_builder"])::before,
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-dropzone
   [data-instance-id]:not([data-component-id])::before,
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-placeholder[data-instance-id]::before {
   position: absolute;
   z-index: var(--dropzone-z-index-label-element);
@@ -183,29 +183,29 @@ handle it instead of shoelace */
   background-color: var(--dropzone-color-hover);
   font-size: 0.9rem;
 }
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-dropzone
   [data-instance-id]:not([data-component-id^="display_builder"])::before,
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-dropzone
   [data-instance-id]:not([data-component-id])::before,
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-placeholder[data-instance-id]::before {
   background-color: var(--dropzone-color-strong);
 }
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-dropzone
   [data-instance-id]:not([data-component-id^="display_builder"]):hover::before,
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-dropzone
   [data-instance-id]:not([data-component-id]):hover::before,
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-placeholder[data-instance-id]:hover::before {
   background-color: var(--dropzone-color-hover) !important;
 }
@@ -213,7 +213,7 @@ handle it instead of shoelace */
 /** On drag context, when something is selected **/
 
 /* Reset the slight highlight when nothing happen */
-.db-display-builder--onDrag
+.display-builder--onDrag
   .db-dropzone
   [data-component-id][data-instance-id]:not([data-slot-id]) {
   position: relative;
@@ -222,9 +222,9 @@ handle it instead of shoelace */
 }
 
 /* Expand empty slot on drag to be able to move and instance */
-.db-display-builder--highlight .db-display-builder__main [data-slot-id]:hover,
-.db-display-builder--highlight .db-display-builder__main [data-slot-id]:empty,
-.db-display-builder--onDrag [data-slot-id]:empty {
+.display-builder--highlight .display-builder__main [data-slot-id]:hover,
+.display-builder--highlight .display-builder__main [data-slot-id]:empty,
+.display-builder--onDrag [data-slot-id]:empty {
   min-width: var(--dropzone-slot-min-width);
   min-height: var(--dropzone-slot-min-height);
 }
@@ -251,42 +251,42 @@ handle it instead of shoelace */
 }
 
 /* Reset the hover effect when on drag to focus on possible targets */
-.db-display-builder--onDrag
+.display-builder--onDrag
   .db-dropzone
   [data-instance-id]:not([data-component-id^="display_builder"]):hover,
-.db-display-builder--onDrag
+.display-builder--onDrag
   .db-dropzone
   [data-instance-id]:not([data-component-id]):hover,
-.db-display-builder--onDrag .db-placeholder[data-instance-id]:hover {
+.display-builder--onDrag .db-placeholder[data-instance-id]:hover {
   outline: 0 none transparent;
   outline-offset: 0;
 }
 
 /* When on drag reset the normal slight highlight */
-.db-display-builder--onDrag .db-dropzone > * {
+.display-builder--onDrag .db-dropzone > * {
   outline: 0 none transparent;
   outline-offset: 0;
 }
 
 /* When start dragging something, highlight strongly targets and show labels */
-.db-display-builder--highlight .db-display-builder__main .db-dropzone--root,
-.db-display-builder--onDrag .db-dropzone--root {
+.display-builder--highlight .display-builder__main .db-dropzone--root,
+.display-builder--onDrag .db-dropzone--root {
   outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target-light)
     var(--dropzone-slot-outline-type) !important;
   outline-offset: 0 !important;
 }
-.db-display-builder--highlight .db-display-builder__main .db-dropzone--root {
+.display-builder--highlight .display-builder__main .db-dropzone--root {
   padding: 0.3rem;
 }
-.db-display-builder--highlight .db-display-builder__main [data-slot-id],
-.db-display-builder--onDrag [data-slot-id] {
+.display-builder--highlight .display-builder__main [data-slot-id],
+.display-builder--onDrag [data-slot-id] {
   padding: 0.5rem;
   outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target)
     var(--dropzone-slot-outline-type);
   outline-offset: var(--dropzone-slot-outline-offset);
 }
-.db-display-builder--highlight .db-display-builder__main [data-slot-id]::after,
-.db-display-builder--onDrag [data-slot-id]::after {
+.display-builder--highlight .display-builder__main [data-slot-id]::after,
+.display-builder--onDrag [data-slot-id]::after {
   position: absolute;
   z-index: var(--dropzone-z-index-label-slot);
   top: -10px;
@@ -301,10 +301,10 @@ handle it instead of shoelace */
 }
 /* Base container style when starting empty with nothing */
 .db-dropzone--root:empty::after,
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-dropzone.db-dropzone--root::after,
-.db-display-builder--onDrag .db-dropzone.db-dropzone--root::after {
+.display-builder--onDrag .db-dropzone.db-dropzone--root::after {
   position: absolute;
   z-index: var(--dropzone-z-index-label-root);
   top: -24px;
@@ -316,19 +316,19 @@ handle it instead of shoelace */
   color: var(--db-background-color);
   background-color: var(--dropzone-color-target-light);
 }
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-dropzone.db-dropzone--root::before {
   font-size: 0.9rem;
 }
 
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-dropzone
   *:not([data-slot-id], [data-component-id^="display_builder"]):has(
     [data-slot-id]
   )::before,
-.db-display-builder--onDrag
+.display-builder--onDrag
   .db-dropzone
   *:not([data-slot-id], [data-component-id^="display_builder"]):has(
     [data-slot-id]
@@ -345,8 +345,8 @@ handle it instead of shoelace */
   background-color: var(--dropzone-color-strong);
   font-size: 14px;
 }
-.db-display-builder--highlight
-  .db-display-builder__main
+.display-builder--highlight
+  .display-builder__main
   .db-dropzone
   *:not([data-slot-id], [data-component-id^="display_builder"]):has(
     [data-slot-id]
@@ -356,7 +356,7 @@ handle it instead of shoelace */
 }
 
 /* When moving something inside the builder highlight the slots. */
-.db-display-builder--onMove .db-display-builder__main [data-slot-id] {
+.display-builder--onMove .display-builder__main [data-slot-id] {
   padding: 0;
   outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target)
     var(--dropzone-slot-outline-type);
@@ -369,27 +369,27 @@ handle it instead of shoelace */
 }
 
 /* Manual fix to give token more space to be able to grab */
-.db-display-builder [data-instance-id].db-block-token,
-.db-display-builder [data-instance-id].db-block-wysiwyg {
+.display-builder [data-instance-id].db-block-token,
+.display-builder [data-instance-id].db-block-wysiwyg {
   padding: 1px 0 0 1px;
 }
 
 /* Manual fix for some inline block */
 /* @todo find a better solution */
-.db-display-builder [data-instance-id].db-block-system-branding-block,
-.db-display-builder [data-instance-id].db-block-token,
-.db-display-builder [data-instance-id].db-block-icon-renderable,
-.db-display-builder [data-instance-id].db-placeholder-token,
-.db-display-builder [data-instance-id][class*="db-block-system-menu"] {
+.display-builder [data-instance-id].db-block-system-branding-block,
+.display-builder [data-instance-id].db-block-token,
+.display-builder [data-instance-id].db-block-icon-renderable,
+.display-builder [data-instance-id].db-placeholder-token,
+.display-builder [data-instance-id][class*="db-block-system-menu"] {
   display: inline-block;
 }
 
-.db-display-builder [data-instance-id].db-block-wysiwyg {
+.display-builder [data-instance-id].db-block-wysiwyg {
   display: inline;
 }
 
 /* If token or wysiwyg has a block tag, set to block */
-.db-display-builder
+.display-builder
   [data-instance-id].db-block-wysiwyg:has(
     address,
     article,
@@ -425,7 +425,7 @@ handle it instead of shoelace */
     ul,
     video
   ),
-.db-display-builder
+.display-builder
   [data-instance-id].db-block-token:has(
     address,
     article,
@@ -463,7 +463,7 @@ handle it instead of shoelace */
   ) {
   display: block;
 }
-/* .db-display-builder [data-instance-id].db-block-wysiwyg, */
-.db-display-builder [data-instance-id].db-block-system-breadcrumb-block {
+/* .display-builder [data-instance-id].db-block-wysiwyg, */
+.display-builder [data-instance-id].db-block-system-breadcrumb-block {
   display: block;
 }

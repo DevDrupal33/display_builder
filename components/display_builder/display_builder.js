@@ -143,7 +143,7 @@
   Drupal.behaviors.displayBuilder = {
     attach(context, settings) {
       const debug = settings.dbDebug;
-      once('dbInit', '.db-display-builder', context).forEach((builder) => {
+      once('dbInit', '.display-builder', context).forEach((builder) => {
         alterHtmxEvents(builder);
         Drupal.displayBuilder.initDrawer(builder, debug);
       });

@@ -4,26 +4,26 @@
   ::part(label):hover {
     color: var(--sl-color-primary-600);
   }
-  [data-menu-type="component"] > sl-icon:not(.db-tree--action) {
+  [data-menu-type="component"] > sl-icon:not(.shoelace-tree--action) {
     color: var(--sl-color-violet-800);
   }
-  [data-menu-type="slot"] > sl-icon:not(.db-tree--action) {
+  [data-menu-type="slot"] > sl-icon:not(.shoelace-tree--action) {
     color: var(--sl-color-emerald-800);
   }
-  [data-menu-type="block"] > sl-icon:not(.db-tree--action) {
+  [data-menu-type="block"] > sl-icon:not(.shoelace-tree--action) {
     color: var(--sl-color-pink-800);
   }
 }
 
-.db-tree--action:hover {
+.shoelace-tree--action:hover {
   color: var(--sl-color-primary-600);
 }
 
-.db-tree--action {
+.shoelace-tree--action {
   position: absolute;
   right: 0;
 }
 
-.db-display-builder .db-tree-selected {
+.display-builder .db-tree-selected {
   outline: 4px solid var(--sl-color-fuchsia-800) !important;
 }

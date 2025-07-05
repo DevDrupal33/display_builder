@@ -43,7 +43,7 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger) => {
 Drupal.displayBuilder.initDrawer = (builder, debug) => {
   const firstDrawer = builder.querySelector('#db-first-drawer');
   const firstDrawerPanes = builder.querySelectorAll(
-    '.db-drawer__content_island',
+    '.shoelace-drawer__content_island',
   );
   const secondDrawer = builder.querySelector('#db-second-drawer');
 
@@ -88,8 +88,8 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
 
   const adjustMainMarginOnShow = () => {
     const drawerWidth = getDrawerWidth() || 400;
-    if (builder.classList.contains('db-display-builder--fullscreen')) {
-      builder.querySelector('.db-display-builder__main').style.marginLeft =
+    if (builder.classList.contains('display-builder--fullscreen')) {
+      builder.querySelector('.display-builder__main').style.marginLeft =
         `${drawerWidth}px`;
     } else {
       document.body.style.setProperty(
@@ -100,8 +100,8 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
   };
 
   const resetMainMarginOnHide = () => {
-    if (builder.classList.contains('db-display-builder--fullscreen')) {
-      builder.querySelector('.db-display-builder__main').style.marginLeft = '0';
+    if (builder.classList.contains('display-builder--fullscreen')) {
+      builder.querySelector('.display-builder__main').style.marginLeft = '0';
     }
     document.body.style.setProperty('--db-body-margin-left', 0);
   };
@@ -130,7 +130,7 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
   };
 
   const handleResizeHandler = (drawer, isFirst) => {
-    const resizeHandler = drawer.querySelector('.db-resize-handle');
+    const resizeHandler = drawer.querySelector('.shoelace-resize-handle');
     if (!resizeHandler) return;
 
     let isResizing = false;
@@ -164,10 +164,10 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
   const toggleFirstDrawerContent = (showId = null) => {
     firstDrawerPanes.forEach((pane) => {
       if (showId && pane.id === showId) {
-        pane.classList.remove('db-drawer__hidden');
+        pane.classList.remove('shoelace-drawer__hidden');
         if (debug) console.debug(`[drawer] Showing pane: ${pane.id}`);
       } else {
-        pane.classList.add('db-drawer__hidden');
+        pane.classList.add('shoelace-drawer__hidden');
         if (debug) console.debug(`[drawer] Hiding pane: ${pane.id}`);
       }
     });
