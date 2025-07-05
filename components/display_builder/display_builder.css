@@ -81,7 +81,7 @@ body:has(.db-display-builder) {
   }
 }
 
-.db-display-builder .db-tabs__tab[tabindex]:focus {
+.db-display-builder .shoelace-tabs__tab[tabindex]:focus {
   outline: 0 none;
 }
 
@@ -138,7 +138,7 @@ body:has(.db-display-builder) {
 }
 
 /* Small adjustments */
-.db-modal--dropdown .db-tabs {
+.db-modal--dropdown .shoelace-tabs {
   margin-bottom: 0.5rem;
 }
 

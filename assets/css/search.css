@@ -10,12 +10,12 @@
 }
 /* @todo add instance form when possible, currently only apply to styles and
  skins because instance form do not have an easy to use markup */
-/* .db-display-builder .db-form:has(.db-tabs [active][data-target$="instance_form"]) .db-search-contextual, */
+/* .db-display-builder .db-form:has(.shoelace-tabs [active][data-target$="instance_form"]) .db-search-contextual, */
 .db-display-builder
-  .db-form:has(.db-tabs [active][data-target$="ui_styles"])
+  .db-form:has(.shoelace-tabs [active][data-target$="ui_styles"])
   .db-search-contextual,
 .db-display-builder
-  .db-form:has(.db-tabs [active][data-target$="ui_skins"])
+  .db-form:has(.shoelace-tabs [active][data-target$="ui_skins"])
   .db-search-contextual {
   display: block;
 }
