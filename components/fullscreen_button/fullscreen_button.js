@@ -14,11 +14,11 @@
    * @todo move to it's own component?
    */
   function setFullscreen(builder, icon, button) {
-    if (builder.classList.contains('db-display-builder--fullscreen')) {
+    if (builder.classList.contains('display-builder--fullscreen')) {
       document.documentElement.classList.remove(
-        'db-display-builder-is-fullscreen',
+        'display-builder-is-fullscreen',
       );
-      builder.classList.remove('db-display-builder--fullscreen');
+      builder.classList.remove('display-builder--fullscreen');
       if (icon) {
         icon.setAttribute('name', 'fullscreen');
       }
@@ -32,14 +32,12 @@
       );
 
       // Clear any left margin set by sidebar width.
-      const main = builder.querySelector('.db-display-builder__main');
+      const main = builder.querySelector('.display-builder__main');
       if (!main) return;
       main.style.marginLeft = '';
     } else {
-      document.documentElement.classList.add(
-        'db-display-builder-is-fullscreen',
-      );
-      builder.classList.add('db-display-builder--fullscreen');
+      document.documentElement.classList.add('display-builder-is-fullscreen');
+      builder.classList.add('display-builder--fullscreen');
       if (icon) {
         icon.setAttribute('name', 'fullscreen-exit');
       }
@@ -90,7 +88,7 @@
     attach(context) {
       once('dbFullscreen', '[data-set-fullscreen]', context).forEach(
         (button) => {
-          const builder = button.closest('.db-display-builder');
+          const builder = button.closest('.display-builder');
           button.addEventListener('click', (event) => {
             // Click on button or icon is different.
             let icon = event.target;
@@ -103,7 +101,7 @@
         },
       );
 
-      once('dbFullscreenRestore', '.db-display-builder', context).forEach(
+      once('dbFullscreenRestore', '.display-builder', context).forEach(
         (builder) => {
           restoreFullscreen(builder);
         },

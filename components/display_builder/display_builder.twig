@@ -1,14 +1,14 @@
-{% set builder_id = builder_id|default('db-display-builder-' ~ random()) %}
-{% set attributes = attributes.setAttribute('id', builder_id).addClass('db-display-builder') %}
+{% set builder_id = builder_id|default('display-builder-' ~ random()) %}
+{% set attributes = attributes.setAttribute('id', builder_id).addClass('display-builder') %}
 
 {% set contextual_id = builder_id ~ '-contextual' %}
 
 <section{{ attributes }}>
   {% set first_drawer_content %}
-    <div class="db-resize-handle"></div>
-    <span class="db-drawer__content">
+    <div class="shoelace-resize-handle"></div>
+    <span class="shoelace-drawer__content">
       {% for island in view_sidebar %}
-        <span class="db-drawer__content_island" id="{{ island['#attributes']['id'] }}">
+        <span class="shoelace-drawer__content_island" id="{{ island['#attributes']['id'] }}">
           {{ island }}
         </span>
       {% endfor %}
@@ -21,11 +21,14 @@
     content: first_drawer_content,
     contained: true,
     footer_close: false,
+    attributes: {
+      class: 'db-background',
+    }
   }, with_context: false) }}
 
   {% set second_drawer_content %}
-    <div class="db-resize-handle"></div>
-    <span class="db-drawer__content">
+    <div class="shoelace-resize-handle"></div>
+    <span class="shoelace-drawer__content">
       {{ contextual_islands }}
     </span>
   {% endset %}
@@ -37,6 +40,9 @@
     content: second_drawer_content,
     contained: true,
     footer_close: false,
+    attributes: {
+      class: 'db-background',
+    }
   }, with_context: false) }}
 
   {% set start %}
@@ -52,13 +58,13 @@
       end: buttons,
     }, with_context: false) }}
 
-  <div class="db-display-builder__main">
+  <div class="display-builder__main">
     <span id="message-{{ builder_id }}"></span>
     {{ view_main }}
   </div>
 
   {% if menu_islands %}
-    <div class="db-display-builder__menu">
+    <div class="display-builder__menu">
       {{ menu_islands }}
     </div>
   {% endif %}

@@ -84,7 +84,7 @@
    */
   Drupal.behaviors.displayBuilderThemeMenu = {
     attach(context) {
-      once('dbThemeInit', '.db-display-builder', context).forEach((builder) => {
+      once('dbThemeInit', '.display-builder', context).forEach((builder) => {
         handleThemeSwitch(builder);
       });
     },

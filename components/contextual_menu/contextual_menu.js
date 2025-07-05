@@ -20,7 +20,7 @@
    */
   Drupal.behaviors.displayBuilderContextualMenu = {
     attach(context) {
-      once('dbContextualMenu', '.db-display-builder', context).forEach(
+      once('dbContextualMenu', '.display-builder', context).forEach(
         (builder) => {
           alterHtmxEvents(builder);
         },

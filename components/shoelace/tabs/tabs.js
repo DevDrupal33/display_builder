@@ -16,7 +16,7 @@
       if (!pane) {
         return;
       }
-      pane.style.display = tab.classList.contains('db-tabs__tab--active')
+      pane.style.display = tab.classList.contains('shoelace-tabs__tab--active')
         ? 'block'
         : 'none';
     });
@@ -33,14 +33,14 @@
    */
   function switchTab(builderId, tabs, activeTab, tabId, saveState = true) {
     tabs.forEach((tab) => {
-      tab.classList.remove('db-tabs__tab--active');
+      tab.classList.remove('shoelace-tabs__tab--active');
       tab.removeAttribute('active');
       Drupal.displayBuilder.LocalStorageManager.remove(
         builderId,
         `tabActive.${tabId}`,
       );
     });
-    activeTab.classList.add('db-tabs__tab--active');
+    activeTab.classList.add('shoelace-tabs__tab--active');
     activeTab.setAttribute('active', true);
     if (saveState) {
       Drupal.displayBuilder.LocalStorageManager.set(
@@ -61,7 +61,7 @@
    * @listens event:keydown
    */
   function addSwitchingMechanism(builderId, tabsComponent) {
-    const tabs = tabsComponent.querySelectorAll('.db-tabs__tab');
+    const tabs = tabsComponent.querySelectorAll('.shoelace-tabs__tab');
     syncPanes(tabs);
     tabs.forEach((tab) => {
       tab.addEventListener('click', () => {
@@ -95,17 +95,17 @@
    * @param {HTMLElement} tabsComponent - The tabs container element
    */
   function hideEmptyTabs(builderId, tabsComponent) {
-    const tabs = tabsComponent.querySelectorAll('.db-tabs__tab');
+    const tabs = tabsComponent.querySelectorAll('.shoelace-tabs__tab');
     Array.from(tabs).forEach((tab) => {
       const target = tab.getAttribute('data-target');
       const pane = document.querySelector(target);
-      tab.classList.remove('db-tabs__tab--hidden');
+      tab.classList.remove('shoelace-tabs__tab--hidden');
       if (isPaneEmpty(pane)) {
-        tab.classList.add('db-tabs__tab--hidden');
+        tab.classList.add('shoelace-tabs__tab--hidden');
       }
     });
     const firstVisibleTab = tabsComponent.querySelector(
-      '.db-tabs__tab:not(.db-tabs__tab--hidden)',
+      '.shoelace-tabs__tab:not(.shoelace-tabs__tab--hidden)',
     );
     if (firstVisibleTab) {
       switchTab(builderId, tabs, firstVisibleTab, null, false);
@@ -128,13 +128,13 @@
     }
 
     const tab = document.querySelector(
-      `.db-tabs__tab[data-target="${tabOpen}"]`,
+      `.shoelace-tabs__tab[data-target="${tabOpen}"]`,
     );
     if (!tab) {
       return;
     }
 
-    const tabsList = tabs.querySelectorAll('.db-tabs__tab');
+    const tabsList = tabs.querySelectorAll('.shoelace-tabs__tab');
     if (!tabsList) {
       return;
     }
@@ -144,6 +144,8 @@
   /**
    * Drupal behavior for display builder tabs.
    *
+   * @todo move to specific DB.
+   *
    * @type {Drupal~behavior}
    *
    * @prop {Drupal~behaviorAttach} attach
@@ -151,9 +153,9 @@
    */
   Drupal.behaviors.displayBuilderTabs = {
     attach(context) {
-      once('dbTabs', '.db-display-builder .db-tabs', context).forEach(
+      once('shoelaceTabs', '.shoelace-tabs', context).forEach(
         (tabsComponent) => {
-          const builderId = tabsComponent.closest('.db-display-builder').id;
+          const builderId = tabsComponent.closest('.display-builder').id;
           addSwitchingMechanism(builderId, tabsComponent);
           // Restore tabs state from local storage
           restoreTabsState(builderId, tabsComponent);
@@ -168,10 +170,10 @@
         context.classList.contains('db-island-instance_form')
       ) {
         const tabsComponents = document.querySelectorAll(
-          '.db-display-builder .db-tabs--contextual',
+          '.display-builder .shoelace-tabs--contextual',
         );
         Array.from(tabsComponents).forEach((tabsComponent) => {
-          const builderId = tabsComponent.closest('.db-display-builder').id;
+          const builderId = tabsComponent.closest('.display-builder').id;
           hideEmptyTabs(builderId, tabsComponent);
           restoreTabsState(builderId, tabsComponent);
         });

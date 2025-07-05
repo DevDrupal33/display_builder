@@ -28,12 +28,12 @@
       onStart() {
         dropzoneRoot
           .closest(`[id="${builderId}"]`)
-          .classList.add('db-display-builder--onMove');
+          .classList.add('display-builder--onMove');
       },
       onEnd() {
         dropzoneRoot
           .closest(`[id="${builderId}"]`)
-          .classList.remove('db-display-builder--onMove');
+          .classList.remove('display-builder--onMove');
       },
     };
 

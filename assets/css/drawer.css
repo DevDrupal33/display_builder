@@ -4,15 +4,15 @@ body {
   /* will-change: auto; */
 }
 
-.db-display-builder {
+.display-builder {
   /* In fullscreen on drawer is below toolbar, adapt header */
-  &.db-display-builder--fullscreen .db-drawer {
+  &.display-builder--fullscreen .shoelace-drawer {
     &::part(panel) {
       padding-top: var(--db-toolbar-height, 0);
     }
   }
 
-  #db-second-drawer .db-resize-handle {
+  #db-second-drawer .shoelace-resize-handle {
     left: 0;
   }
 }

@@ -1,14 +1,14 @@
-{% set attributes = contextual ? attributes.addClass('db-tabs--contextual') : attributes %}
-{% set attributes = attributes.addClass('db-tabs').setAttribute('id', 'db-tabs-' ~ id|default('db-tabs-' ~ random())) %}
+{% set attributes = contextual ? attributes.addClass('shoelace-tabs--contextual') : attributes %}
+{% set attributes = attributes.addClass('shoelace-tabs').setAttribute('id', 'shoelace-tabs-' ~ id|default('shoelace-tabs-' ~ random())) %}
 <sl-tab-group{{ attributes }}>
   {% for tab in tabs %}
     {% set url = tab.url|default(id ~ '-' ~ loop.index) %}
     {% if loop.first %}
-    <sl-tab slot="nav" class="db-tabs__tab db-tabs__tab--active" data-target="{{ url }}" active{{ tab.attributes }}>
+    <sl-tab slot="nav" class="shoelace-tabs__tab shoelace-tabs__tab--active" data-target="{{ url }}" active{{ tab.attributes }}>
       {{ tab.title }}
     </sl-tab>
     {% else %}
-    <sl-tab slot="nav" class="db-tabs__tab" data-target="{{ url }}"{{ tab.attributes }}>
+    <sl-tab slot="nav" class="shoelace-tabs__tab" data-target="{{ url }}"{{ tab.attributes }}>
       {{ tab.title }}
     </sl-tab>
     {% endif %}

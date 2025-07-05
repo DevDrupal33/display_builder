@@ -70,9 +70,9 @@
 }
 
 .db-form select,
-.db-island-ui_styles .db-display-builder .db-form textarea,
-.db-island-ui_skins .db-display-builder .db-form textarea,
-.db-display-builder .db-form input[type="text"] {
+.db-island-ui_styles .display-builder .db-form textarea,
+.db-island-ui_skins .display-builder .db-form textarea,
+.display-builder .db-form input[type="text"] {
   display: inline-block !important;
   width: 100% !important;
   vertical-align: middle;

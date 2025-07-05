@@ -87,7 +87,7 @@
    */
   Drupal.behaviors.displayBuilderLibraryIslands = {
     attach(context) {
-      once('dbLibraryFilterInit', '.db-button-search', context).forEach(
+      once('dbLibraryFilterInit', '.shoelace-button-search', context).forEach(
         (filterInput) => {
           // Debounce to wait for tipping ad not throw too much search.
           const eventHandler = debounce((event) => {

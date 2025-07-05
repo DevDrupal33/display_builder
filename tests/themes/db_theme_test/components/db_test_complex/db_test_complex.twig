@@ -1,0 +1,36 @@
+{% set test_attributes = create_attribute(test_attributes|default({})) %}
+{% set test_attributes = test_attributes.addClass(['test-attr']) %}
+{% set test_attributes = test_attributes.setAttribute('data-test', 'testing') %}
+
+<div{{attributes.addClass('db_test_complex')}}>
+  <div{{test_attributes}}>
+    label: {{ label|default('no label') }}
+    open: {{ open|default(false) }}
+    duration: {{ duration|default(666) }}
+    <div{{attributes.addClass('slot_1')}}>
+      {{ slot_1 }}
+      <div{{attributes.addClass('sub_slot_1_1')}}>
+        > {{ sub_slot_1_1 }}
+      </div>
+      <div{{attributes.addClass('sub_slot_1_2')}}>
+        > {{ sub_slot_1_2 }}
+      </div>
+      <div{{attributes.addClass('sub_slot_1_3')}}>
+        > {{ sub_slot_1_3 }}
+      </div>
+    </div>
+    <hr/>
+    <div{{attributes.addClass('slot_2')}}>
+      {{ slot_2 }}
+      <div{{attributes.addClass('sub_slot_2_1')}}>
+        > {{ sub_slot_2_1 }}
+        <div{{attributes.addClass('sub_slot_2_2')}}>
+          >> {{ sub_slot_2_2 }}
+          <div{{attributes.addClass('sub_slot_2_3')}}>
+            >>> {{ sub_slot_2_3 }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

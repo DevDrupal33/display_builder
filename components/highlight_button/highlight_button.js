@@ -14,8 +14,8 @@
    * @todo move to it's own component?
    */
   function setHighlight(builder, icon, button) {
-    if (builder.classList.contains('db-display-builder--highlight')) {
-      builder.classList.remove('db-display-builder--highlight');
+    if (builder.classList.contains('display-builder--highlight')) {
+      builder.classList.remove('display-builder--highlight');
       if (icon) {
         icon.setAttribute('name', 'border-all');
       }
@@ -23,7 +23,7 @@
         button.setAttribute('variant', 'default');
       }
     } else {
-      builder.classList.add('db-display-builder--highlight');
+      builder.classList.add('display-builder--highlight');
       if (icon) {
         icon.setAttribute('name', 'border');
       }
@@ -44,7 +44,7 @@
   Drupal.behaviors.displayBuilderHighlight = {
     attach(context) {
       once('dbHighlight', '[data-set-highlight]', context).forEach((button) => {
-        const builder = button.closest('.db-display-builder');
+        const builder = button.closest('.display-builder');
         button.addEventListener('click', (event) => {
           // Click on button or icon is different.
           let icon = event.target;

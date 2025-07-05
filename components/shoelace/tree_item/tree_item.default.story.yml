@@ -1,6 +1,6 @@
 name: Default
 slots:
-  label: Deciduous
+  title: Deciduous
   children:
     - type: component
       component: display_builder:tree_item
