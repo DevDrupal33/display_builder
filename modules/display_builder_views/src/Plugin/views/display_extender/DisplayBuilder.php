@@ -151,7 +151,7 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
 
       // Get fixtures if exist, fallback to default mimicking the standard view
       // blocks without markup.
-      $builder_data = DisplayBuilderHelpers::getFixtureDataFromModule('display_builder_views');
+      $builder_data = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_views');
       $this->stateManager->create($display_builder_id, $builder_config_id, $builder_data, $contexts);
     }
 

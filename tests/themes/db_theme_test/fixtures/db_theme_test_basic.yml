@@ -1,0 +1,20 @@
+-
+  source_id: component
+  source:
+    component:
+      component_id: 'db_theme_test:db_test_component'
+      slots:
+        caption:
+          sources:
+            -
+              source_id: wysiwyg
+              source:
+                value:
+                  value: '<p>This <strong>is</strong> an <em>html</em> test <strong>content</strong> for Display builder test theme.</p>'
+                  format: basic_html
+        image:
+          sources:
+            -
+              source_id: token
+              source:
+                value: 'Test title'

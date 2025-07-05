@@ -205,7 +205,7 @@ class DisplayBuilderDisplayVariant extends VariantBase implements ContainerFacto
     // Get the initial data from fixture.
     // @todo display_builder_devel module will be deleted or split.
     $fixture_id = $form_state->getValue('fixture_id');
-    $builder_data = DisplayBuilderHelpers::getFixtureDataFromModule('display_builder_page_layout', '', $fixture_id);
+    $builder_data = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_page_layout', '', $fixture_id);
 
     // Set context mark to know it's a page manager builder, and add the page
     // manager config uuid to save later builder data in the page manager

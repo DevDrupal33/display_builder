@@ -172,7 +172,7 @@ class DisplayBuilderDevelController extends ControllerBase {
 
     $contexts = $this->stateManager->getContexts($builder_id);
     $this->stateManager->delete($builder_id);
-    $builder_data = DisplayBuilderHelpers::getFixtureDataFromModule('display_builder_devel', '', 'ui_suite_bootstrap_demo');
+    $builder_data = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_devel', '', 'ui_suite_bootstrap_demo');
 
     $this->stateManager->create(
       $builder_id,

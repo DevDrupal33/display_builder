@@ -19,7 +19,7 @@ class DisplayBuilderDevelHooks {
   #[Hook('user_insert')]
   public function userInsert(EntityInterface $entity): void {
     $builder_id = \sprintf('demo_%s', uniqid());
-    $builder_data = DisplayBuilderHelpers::getFixtureDataFromModule('display_builder_devel', '', 'ui_suite_bootstrap_demo');
+    $builder_data = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_devel', '', 'ui_suite_bootstrap_demo');
     /** @var \Drupal\display_builder\StateManager\StateManagerInterface $stateManager */
     $stateManager = \Drupal::service('display_builder.state_manager');
     // Create a display builder.

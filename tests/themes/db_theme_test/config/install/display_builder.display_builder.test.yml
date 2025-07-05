@@ -1,0 +1,100 @@
+langcode: en
+status: true
+dependencies: {  }
+id: test
+label: Test
+description: 'Testing Display builder config.'
+library: local
+debug: true
+island_settings:
+  library:
+    component_library:
+      enable: true
+      weight: '-10'
+    block_library:
+      enable: true
+      weight: '-9'
+    preset_library:
+      enable: true
+      weight: '-8'
+  view:
+    builder:
+      enable: true
+      weight: '-10'
+      options: main
+    layers:
+      enable: true
+      weight: '-9'
+      options: main
+    preview:
+      enable: true
+      weight: '-8'
+      options: main
+    library:
+      enable: true
+      weight: '-7'
+      options: sidebar
+    tree:
+      enable: true
+      weight: '-6'
+      options: sidebar
+    logs:
+      enable: true
+      weight: '-5'
+      options: sidebar
+    index_debug:
+      enable: true
+      weight: '-4'
+      options: sidebar
+    state_debug:
+      enable: true
+      weight: '-3'
+      options: sidebar
+  button:
+    reset:
+      enable: true
+      weight: '-10'
+    history:
+      enable: true
+      weight: '-9'
+    state:
+      enable: true
+      weight: '-8'
+    toggle_highlight:
+      enable: true
+      weight: '-7'
+    theme_mode:
+      enable: true
+      weight: '-6'
+    toggle_fullscreen:
+      enable: true
+      weight: '-5'
+    keyboard_help:
+      enable: true
+      weight: '-4'
+  contextual:
+    instance_form:
+      enable: true
+      weight: '-10'
+    ui_styles:
+      enable: true
+      weight: '-9'
+    ui_skins:
+      enable: true
+      weight: '-8'
+    visibility_conditions:
+      enable: true
+      weight: '-7'
+    info:
+      enable: true
+      weight: '-6'
+  menu:
+    menu:
+      enable: true
+      weight: '-10'
+    menu_preset:
+      enable: true
+      weight: '-9'
+    menu_delete:
+      enable: true
+      weight: '-8'

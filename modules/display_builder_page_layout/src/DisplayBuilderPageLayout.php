@@ -55,7 +55,7 @@ final class DisplayBuilderPageLayout implements ContainerInjectionInterface, Dis
     // Generate a uniq display builder instance id.
     $builder_id = \sprintf('%s%s', self::PAGE_LAYOUT_PREFIX, uniqid());
 
-    $builder_data = DisplayBuilderHelpers::getFixtureDataFromModule('display_builder_page_layout', 'page_layout');
+    $builder_data = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_page_layout', 'page_layout');
 
     $this->newInstance($builder_data, $builder_id);
     $this->savePageLayout($builder_data, $builder_id);

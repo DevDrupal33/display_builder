@@ -16,6 +16,23 @@ use function Symfony\Component\String\u;
 class DisplayBuilderHelpers {
 
   /**
+   * Default modules to look for fixtures.
+   */
+  private static array $moduleNames = [
+    'display_builder_devel',
+    'display_builder_entity_view',
+    'display_builder_views',
+    'display_builder_page_layout',
+  ];
+
+  /**
+   * Default modules to look for fixtures.
+   */
+  private static array $themeNames = [
+    'db_theme_test',
+  ];
+
+  /**
    * Multi-array search and replace parent.
    *
    * @param array $array
@@ -114,21 +131,30 @@ class DisplayBuilderHelpers {
    */
   public static function getAllFixturesOptions(array $moduleNames = []): array {
     if (empty($moduleNames)) {
-      $moduleNames = [
-        'display_builder_devel',
-        'display_builder_entity_view',
-        'display_builder_views',
-        'display_builder_page_layout',
-      ];
+      $moduleNames = self::$moduleNames;
     }
     $output = ['blank' => new TranslatableMarkup('Blank (Empty)')];
-    $moduleHandler = \Drupal::moduleHandler();
 
     foreach ($moduleNames as $moduleName) {
       try {
-        $path = $moduleHandler->getModule($moduleName)->getPath();
+        $path = \Drupal::moduleHandler()->getModule($moduleName)->getPath();
         $filepath = \sprintf('%s/%s/fixtures/', DRUPAL_ROOT, $path);
         $output = \array_merge($output, self::getFixturesOptions([$filepath], $moduleName));
+      }
+      catch (\Throwable $th) {
+      }
+    }
+
+    $themeHandler = \Drupal::service('theme_handler');
+
+    foreach (self::$themeNames as $themeName) {
+      try {
+        if (($themeHandler->getTheme($themeName)->status ?? 0) !== 1) {
+          continue;
+        }
+        $path = $themeHandler->getTheme($themeName)->getPath();
+        $filepath = \sprintf('%s/%s/fixtures/', DRUPAL_ROOT, $path);
+        $output = \array_merge($output, self::getFixturesOptions([$filepath], $themeName));
       }
       catch (\Throwable $th) {
       }
@@ -142,24 +168,18 @@ class DisplayBuilderHelpers {
    *
    * @param string $fixture_id
    *   The fixture file name.
-   * @param array $moduleNames
-   *   (Optional) The module names.
+   * @param array $names
+   *   (Optional) The extension names.
    *
    * @return array
    *   The list of fixtures available.
    */
-  public static function getAllFixturesData(string $fixture_id, array $moduleNames = []): array {
-    if (empty($moduleNames)) {
-      $moduleNames = [
-        'display_builder_devel',
-        'display_builder_entity_view',
-        'display_builder_views',
-        'display_builder_page_layout',
-      ];
+  public static function getAllFixturesData(string $fixture_id, array $names = []): array {
+    if (empty($names)) {
+      $names = \array_merge(self::$moduleNames, self::$themeNames);
     }
-
-    foreach ($moduleNames as $moduleName) {
-      $file = self::getFixtureDataFromModule($moduleName, '', $fixture_id);
+    foreach ($names as $name) {
+      $file = self::getFixtureDataFromExtension($name, '', $fixture_id);
       if (!empty($file)) {
         return $file;
       }
@@ -169,10 +189,10 @@ class DisplayBuilderHelpers {
   }
 
   /**
-   * Load YAML data from module fixtures folder for current theme.
+   * Load YAML data from fixtures folder for current theme.
    *
-   * @param string $moduleName
-   *   The module name.
+   * @param string $name
+   *   The extension name.
    * @param string $suffix
    *   (Optional) The fixture file optional suffix.
    * @param string|null $fixture_id
@@ -181,11 +201,23 @@ class DisplayBuilderHelpers {
    * @return array
    *   The file content.
    */
-  public static function getFixtureDataFromModule(string $moduleName, string $suffix = '', ?string $fixture_id = NULL): array {
+  public static function getFixtureDataFromExtension(string $name, string $suffix = '', ?string $fixture_id = NULL): array {
+    $path = NULL;
     try {
-      $path = \Drupal::moduleHandler()->getModule($moduleName)->getPath();
+      $path = \Drupal::moduleHandler()->getModule($name)->getPath();
     }
     catch (\Throwable $th) {
+    }
+
+    if (!$path) {
+      try {
+        $path = \Drupal::service('theme_handler')->getTheme($name)->getPath();
+      }
+      catch (\Throwable $th) {
+      }
+    }
+
+    if (!$path) {
       return [];
     }
 
@@ -197,15 +229,7 @@ class DisplayBuilderHelpers {
     else {
       $name = \sprintf('%s_%s', $defaultThemeName, $suffix);
     }
-
     $filepath = \sprintf('%s/%s/fixtures/%s.yml', DRUPAL_ROOT, $path, $name);
-
-    if (!file_exists($filepath)) {
-      if (!$fixture_id) {
-        $name = \sprintf('default_%s', $suffix);
-      }
-      $filepath = \sprintf('%s/%s/fixtures/%s.yml', DRUPAL_ROOT, $path, $name);
-    }
 
     if (!file_exists($filepath)) {
       return [];
