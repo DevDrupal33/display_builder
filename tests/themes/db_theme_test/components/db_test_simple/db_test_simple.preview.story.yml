@@ -1,0 +1,5 @@
+name: Preview
+slots:
+  slot_1: "Foo"
+props:
+  label: "Bar"
