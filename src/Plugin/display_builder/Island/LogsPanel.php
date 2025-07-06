@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Logs island plugin implementation.
@@ -25,6 +27,23 @@ use Drupal\display_builder\IslandType;
 class LogsPanel extends IslandPluginBase {
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+
+    return $instance;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function build(string $builder_id, array $data, array $options = []): array {
@@ -39,10 +58,10 @@ class LogsPanel extends IslandPluginBase {
     $table_logs = [
       '#theme' => 'table',
       '#header' => [
-        ['data' => $this->t('Id')],
         ['data' => $this->t('Step')],
         ['data' => $this->t('Saved')],
         ['data' => $this->t('Time')],
+        ['data' => $this->t('User')],
         ['data' => $this->t('Message')],
       ],
       '#rows' => [],
@@ -204,13 +223,14 @@ class LogsPanel extends IslandPluginBase {
    *   A renderable array representing a table row.
    */
   private function buildRow(int $index, array $step): array {
+    $user = !empty($step['user']) ? $this->entityTypeManager->getStorage('user')->load($step['user']) : NULL;
     return [
       'hash' => $step['hash'] ?? '',
       'data' => [
-        $step['hash'] ?? '',
         (string) $index,
         '',
         $step['time'] ?? NULL,
+        $user ? $user->getDisplayName() : NULL,
         $step['log'] ?? '',
       ],
       'style' => ($index === 0) ? 'font-weight: bold;' : '',

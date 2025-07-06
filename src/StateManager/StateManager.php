@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder\SlotSourceProxy;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 
@@ -35,6 +36,7 @@ class StateManager implements StateManagerInterface {
     protected StorageInterface $stateStorage,
     protected EntityTypeManagerInterface $entityTypeManager,
     protected SampleEntityGeneratorInterface $sampleEntityGenerator,
+    protected SlotSourceProxy $slotSourceProxy,
   ) {}
 
   /**
@@ -244,7 +246,6 @@ class StateManager implements StateManagerInterface {
    * {@inheritdoc}
    */
   public function attachSourceToRoot(string $builder_id, int $position, string $source_id, array $data): string {
-    $root = $this->getCurrentState($builder_id);
     $data = [
       '_instance_id' => uniqid(),
       'source_id' => $source_id,
@@ -252,10 +253,13 @@ class StateManager implements StateManagerInterface {
     ];
     $root = $this->getCurrentState($builder_id);
     $root = $this->attachToRoot($root, $position, $data);
-    $log = $this->t('@instance @source_id has been attached to root at position @position', [
-      '@instance' => $data['_instance_id'],
+
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data);
+
+    $log = $this->t('%instance @source_id has been attached to root', [
+      '%instance' => $labelWithSummaryInstance['summary'],
       '@source_id' => $source_id,
-      '@position' => $position,
     ]);
     $this->stateStorage->setNewPresent($builder_id, $root, $log, FALSE);
 
@@ -273,12 +277,16 @@ class StateManager implements StateManagerInterface {
       'source' => $data,
     ];
     $root = $this->attachToSlot($builder_id, $root, $parent_id, $slot_id, $position, $data);
-    $log = $this->t("@instance @source_id has been attached to @parent_id's @slot_id slot at position @position", [
-      '@instance' => $data['_instance_id'],
+
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data);
+    $labelWithSummaryParent = $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id));
+
+    $log = $this->t("%instance @source_id has been attached to %parent's @slot_id", [
+      '%instance' => $labelWithSummaryInstance['summary'],
       '@source_id' => $source_id,
-      '@parent_id' => $parent_id,
+      '%parent' => $labelWithSummaryParent['summary'],
       '@slot_id' => $slot_id,
-      '@position' => $position,
     ]);
     $this->stateStorage->setNewPresent($builder_id, $root, $log);
 
@@ -294,10 +302,13 @@ class StateManager implements StateManagerInterface {
     $data = NestedArray::getValue($root, $path);
     $root = $this->doRemove($builder_id, $root, $instance_id);
     $root = $this->attachToRoot($root, $position, $data);
-    $log = $this->t('@instance @thingy has been moved to root at position @position', [
-      '@instance' => $data['_instance_id'],
+
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data);
+
+    $log = $this->t('%instance @thingy has been moved to root', [
+      '%instance' => $labelWithSummaryInstance['summary'],
       '@thingy' => $data['source_id'],
-      '@position' => $position,
     ]);
     $this->stateStorage->setNewPresent($builder_id, $root, $log);
   }
@@ -326,12 +337,15 @@ class StateManager implements StateManagerInterface {
       $root = $this->attachToSlot($builder_id, $root, $parent_id, $slot_id, $position, $data);
     }
 
-    $log = $this->t("@instance @thingy has been moved to @parent_id's @slot_id at position @position", [
-      '@instance' => $data['_instance_id'],
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data);
+    $labelWithSummaryParent = $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id));
+
+    $log = $this->t("%instance @thingy has been moved to %parent's @slot_id", [
+      '%instance' => $labelWithSummaryInstance['summary'],
       '@thingy' => $data['source_id'],
-      '@parent_id' => $parent_id,
+      '%parent' => $labelWithSummaryParent['summary'],
       '@slot_id' => $slot_id,
-      '@position' => $position,
     ]);
 
     $this->stateStorage->setNewPresent($builder_id, $root, $log);
@@ -350,8 +364,12 @@ class StateManager implements StateManagerInterface {
     }
     $existing_data['_third_party_settings'][$island_id] = $data;
     NestedArray::setValue($root, $path, $existing_data);
-    $log = $this->t('@instance has been updated by @island_id island', [
-      '@instance' => $instance_id,
+
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($existing_data);
+
+    $log = $this->t('%instance has been updated by @island_id', [
+      '%instance' => $labelWithSummaryInstance['summary'],
       '@island_id' => $island_id,
     ]);
     $this->stateStorage->setNewPresent($builder_id, $root, $log);
@@ -371,8 +389,12 @@ class StateManager implements StateManagerInterface {
     $existing_data['source_id'] = $source_id;
     $existing_data['source'] = $data;
     NestedArray::setValue($root, $path, $existing_data);
-    $log = $this->t('@instance source has been updated', [
-      '@instance' => $instance_id,
+
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($existing_data);
+
+    $log = $this->t('%instance has been updated', [
+      '%instance' => $labelWithSummaryInstance['summary'],
     ]);
     $this->stateStorage->setNewPresent($builder_id, $root, $log);
   }
@@ -382,11 +404,18 @@ class StateManager implements StateManagerInterface {
    */
   public function remove(string $builder_id, string $instance_id): void {
     $root = $this->getCurrentState($builder_id);
+    $path = $this->getPath($builder_id, $root, $instance_id);
+    $data = NestedArray::getValue($root, $path);
     $parent_id = $this->getParentId($builder_id, $root, $instance_id);
     $root = $this->doRemove($builder_id, $root, $instance_id);
-    $log = $this->t('@instance has been removed from @parent', [
-      '@instance' => $instance_id,
-      '@parent' => empty($parent_id) ? $this->t('root') : $parent_id,
+
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data);
+    $labelWithSummaryParent = empty($parent_id) ? ['label' => $this->t('root'), 'summary' => ''] : $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id));
+
+    $log = $this->t('%instance has been removed from %parent', [
+      '%instance' => $labelWithSummaryInstance['summary'],
+      '%parent' => $labelWithSummaryParent['summary'],
     ]);
     $this->stateStorage->setNewPresent($builder_id, $root, $log, FALSE);
   }
