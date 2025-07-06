@@ -10,6 +10,7 @@ use Drupal\Core\Display\PageVariantInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuilderHelpers;
+use Drupal\display_builder\StorageProperties;
 use Drupal\display_builder_page_layout\DisplayBuilderPageLayout;
 
 /**
@@ -45,7 +46,7 @@ class DisplayBuilderPageDisplayVariant extends DisplayBuilderDisplayVariant impl
   public function build(): array {
     // We can render either the page layout configuration or the current page
     // manager variant.
-    $builder_id = $this->configuration['display_builder_id'] ?? NULL;
+    $builder_id = $this->configuration[StorageProperties::InstanceId->value] ?? NULL;
 
     // This is the default page layout.
     $is_page_layout = FALSE;
@@ -57,7 +58,7 @@ class DisplayBuilderPageDisplayVariant extends DisplayBuilderDisplayVariant impl
       $is_page_layout = TRUE;
     }
     else {
-      $builder_data = $this->configuration['display_builder_sources'] ?? [];
+      $builder_data = $this->configuration[StorageProperties::Sources->value] ?? [];
     }
 
     // If no data, stop here, set a message to inform and link the display

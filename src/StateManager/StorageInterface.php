@@ -10,7 +10,7 @@ namespace Drupal\display_builder\StateManager;
  * To load and save display builded from state until integration with Drupal
  * displays.
  */
-interface StorageInterface extends ContextAwareInterface, DataSateInterface, HistoryInterface {
+interface StorageInterface extends ContextAwareInterface, DataStateInterface, HistoryInterface {
 
   /**
    * Get the entity config id.

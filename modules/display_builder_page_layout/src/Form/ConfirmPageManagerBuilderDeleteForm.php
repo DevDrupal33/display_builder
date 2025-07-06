@@ -8,6 +8,7 @@ use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\display_builder\StorageProperties;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\StateManager\StateManagerInterface;
@@ -41,11 +42,11 @@ class ConfirmPageManagerBuilderDeleteForm extends ConfirmFormBase {
       /** @var \Drupal\page_manager\PageInterface $page */
       foreach ($pages->loadMultiple() as $page) {
         foreach ($page->getVariants() as $variant) {
-          if (!isset($variant->get('variant_settings')['display_builder_id'])) {
+          if (!isset($variant->get('variant_settings')[StorageProperties::InstanceId->value])) {
             continue;
           }
 
-          if ($variant->get('variant_settings')['display_builder_id'] === $builder_id) {
+          if ($variant->get('variant_settings')[StorageProperties::InstanceId->value] === $builder_id) {
             $form = parent::buildForm($form, $form_state);
             unset($form['confirm'], $form['actions']['submit']);
             $form['#title'] = $this->t('This Display Builder can not be deleted.');

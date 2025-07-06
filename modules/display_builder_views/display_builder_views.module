@@ -12,6 +12,7 @@ declare(strict_types=1);
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
+use Drupal\display_builder\StorageProperties;
 
 /**
  * Implements hook_theme_registry_alter().
@@ -39,14 +40,14 @@ function display_builder_views_preprocess_views_view(array &$variables): void {
   }
 
   $options = $extenders['display_builder']->options;
-  $builder_config_id = $options['builder_config_id'] ?? NULL;
+  $builder_config_id = $options[StorageProperties::ConfigEntityId->value] ?? NULL;
 
   if ($builder_config_id === NULL || empty($builder_config_id)) {
     // @todo something for preview?
     return;
   }
 
-  $display_builder_id = $options['display_builder_id'] ?? NULL;
+  $display_builder_id = $options[StorageProperties::InstanceId->value] ?? NULL;
 
   if ($display_builder_id === NULL || empty($display_builder_id)) {
     // @todo something for preview?

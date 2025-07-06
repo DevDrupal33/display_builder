@@ -7,7 +7,7 @@ namespace Drupal\display_builder\StateManager;
 /**
  * Provides an interface for data actions.
  */
-interface DataSateInterface {
+interface DataStateInterface {
 
   /**
    * Load a display builder.

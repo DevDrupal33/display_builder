@@ -6,13 +6,13 @@ As a replacement of Layout Builder and many modules from its ecosystem.
 
 You need `display_builder_entity_view` module.
 
-> 🚧 2025-07-01: This "conflict" between Layout Builder and display Builder will be solved. [#3529127](https://www.drupal.org/project/display_builder/issues/3529127)
+> 🚧 2025-07-01: There is currently a "conflict" with Layout Builder module. [#3529127](https://www.drupal.org/project/display_builder/issues/3529127)
 
-TODO
+Display builder can be activated for each display:
 
 ![](images/entity-view-activate.webp)
 
-> 🚧 2025-07-01: The selector of display builders is not ready.
+> 🚧 2025-07-01: Display builder selector is not ready yet [#3534215](https://www.drupal.org/project/display_builder/issues/3534215)
 
 ## Use
 
@@ -33,7 +33,7 @@ Display Builder data is stored as a third party settings with those properties:
 - `display_builder`: the display builder config entity in use last time the config was saved
 - `sources`: a UI Patterns 2 sources tree
 
-> 🚧 2025-07-01: Property are not set yet [#3534215](https://www.drupal.org/project/display_builder/issues/3534215)
+> 🚧 2025-07-01: `enabled` may be removed [#3534215](https://www.drupal.org/project/display_builder/issues/3534215)
 
 Example:
 

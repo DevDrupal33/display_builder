@@ -12,6 +12,7 @@ use Drupal\Core\Logger\LoggerChannelTrait;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\Entity\DisplayBuilder;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\StorageProperties;
 use Drupal\page_manager\PageVariantInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 
@@ -42,7 +43,7 @@ final class DisplayBuilderPageLayout implements ContainerInjectionInterface, Dis
    */
   public function delete(): void {
     $page_layout_config = $this->configFactory->getEditable(self::PAGE_LAYOUT_CONFIG);
-    $builder_id = $page_layout_config->get('builder_id');
+    $builder_id = $page_layout_config->get(StorageProperties::InstanceId->value);
 
     $this->stateManager->delete($builder_id);
     $page_layout_config->delete();
@@ -83,7 +84,7 @@ final class DisplayBuilderPageLayout implements ContainerInjectionInterface, Dis
     $pageVariant = $this->findPageByVariantUuid($page_manager_variant_uuid);
 
     $variant_settings = $pageVariant->get('variant_settings');
-    $variant_settings['display_builder_sources'] = $this->stateManager->getCurrentState($builder_id);
+    $variant_settings[StorageProperties::Sources->value] = $this->stateManager->getCurrentState($builder_id);
     $pageVariant->set('variant_settings', $variant_settings);
 
     $pageVariant->save();
@@ -123,9 +124,9 @@ final class DisplayBuilderPageLayout implements ContainerInjectionInterface, Dis
     $builder_data ?? $builder_data = $this->stateManager->getCurrentState($builder_id);
 
     $page_layout_config
-      ->set('builder_config_id', $builder_config_id ?? DisplayBuilder::DISPLAY_BUILDER_CONFIG)
-      ->set('builder_id', $builder_id ?? $page_layout_config->get('builder_id'))
-      ->set('sources', $builder_data)
+      ->set(StorageProperties::ConfigEntityId->value, $builder_config_id ?? DisplayBuilder::DISPLAY_BUILDER_CONFIG)
+      ->set(StorageProperties::InstanceId->value, $builder_id ?? $page_layout_config->get(StorageProperties::InstanceId->value))
+      ->set(StorageProperties::Sources->value, $builder_data)
       ->save();
   }
 

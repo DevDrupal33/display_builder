@@ -18,13 +18,14 @@ use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\Entity\DisplayBuilder;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\StorageProperties;
 use Drupal\display_builder_page_layout\DisplayBuilderPageLayout;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides a Layout Builder variant.
+ * Provides a Display Builder variant.
  *
  * @todo do we need this display or only the page?
  */
@@ -108,9 +109,9 @@ class DisplayBuilderDisplayVariant extends VariantBase implements ContainerFacto
   public function build(): array {
     $build = [];
 
-    $builder_id = $this->configuration['display_builder_id'] ?? '';
+    $builder_id = $this->configuration[StorageProperties::InstanceId->value] ?? '';
 
-    if (empty($this->configuration['display_builder_id'])) {
+    if (empty($this->configuration[StorageProperties::InstanceId->value])) {
       throw new \LogicException('Missing display builder id in this page manager variant.');
     }
 
@@ -149,8 +150,8 @@ class DisplayBuilderDisplayVariant extends VariantBase implements ContainerFacto
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
-    if (isset($this->configuration['display_builder_id']) && !empty($this->configuration['display_builder_id'])) {
-      $url = Url::fromRoute('display_builder_page_layout.page_manager.manage', ['builder_id' => $this->configuration['display_builder_id']]);
+    if (isset($this->configuration[StorageProperties::InstanceId->value]) && !empty($this->configuration[StorageProperties::InstanceId->value])) {
+      $url = Url::fromRoute('display_builder_page_layout.page_manager.manage', ['builder_id' => $this->configuration[StorageProperties::InstanceId->value]]);
       $form['info'] = [
         '#markup' => '<p>' . $this->t('Got to the <a href="@url">display builder edit page</a> to edit this variant.', ['@url' => $url->toString()]) . '</p>',
       ];
@@ -164,12 +165,12 @@ class DisplayBuilderDisplayVariant extends VariantBase implements ContainerFacto
     foreach ($displayBuilderConfig as $entityId => $configEntity) {
       $options[$entityId] = $configEntity->label();
     }
-    $form['builder_config_id'] = [
+    $form[StorageProperties::ConfigEntityId->value] = [
       '#type' => 'select',
-      '#title' => $this->t('Display Builder config'),
+      '#title' => $this->t('Display builder config'),
       '#description' => $this->t('Pick a display builder configuration to use.'),
       '#options' => $options,
-      '#default_value' => $this->configuration['builder_config_id'] ?? DisplayBuilder::DISPLAY_BUILDER_CONFIG,
+      '#default_value' => $this->configuration[StorageProperties::ConfigEntityId->value] ?? DisplayBuilder::DISPLAY_BUILDER_CONFIG,
       '#required' => TRUE,
     ];
 
@@ -200,7 +201,7 @@ class DisplayBuilderDisplayVariant extends VariantBase implements ContainerFacto
     // Generate a display builder instance id, prefix is only to ease
     // identification and is never used for any process or logic.
     $display_builder_id = \sprintf('%s%s', self::PAGE_MANAGER_PREFIX, uniqid());
-    $builder_config_id = $form_state->getValue('builder_config_id');
+    $builder_config_id = $form_state->getValue(StorageProperties::ConfigEntityId->value);
 
     // Get the initial data from fixture.
     // @todo display_builder_devel module will be deleted or split.
@@ -221,9 +222,8 @@ class DisplayBuilderDisplayVariant extends VariantBase implements ContainerFacto
     $contexts['page_manager_variant_uuid'] = new Context(ContextDefinition::create('string'), $this->configuration['uuid'] ?? '');
 
     $this->stateManager->create($display_builder_id, $builder_config_id, $builder_data, $contexts);
-
-    $this->configuration['display_builder_id'] = $display_builder_id;
-    $this->configuration['display_builder_sources'] = $builder_data;
+    $this->configuration[StorageProperties::InstanceId->value] = $display_builder_id;
+    $this->configuration[StorageProperties::Sources->value] = $builder_data;
   }
 
 }

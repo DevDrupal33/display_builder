@@ -11,6 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\StorageProperties;
 
 /**
  * Confirmation form to confirm deletion of display builder instance.
@@ -41,11 +42,11 @@ class ConfirmViewsBuilderDeleteForm extends ConfirmFormBase {
       /** @var \Drupal\views\Entity\View $view */
       foreach ($views->loadMultiple() as $view) {
         foreach ($view->get('display') as $display) {
-          if (!isset($display['display_options']['display_extenders']['display_builder']['display_builder_id'])) {
+          if (!isset($display['display_options']['display_extenders']['display_builder'][StorageProperties::InstanceId->value])) {
             continue;
           }
 
-          $display_builder_id = $display['display_options']['display_extenders']['display_builder']['display_builder_id'];
+          $display_builder_id = $display['display_options']['display_extenders']['display_builder'][StorageProperties::InstanceId->value];
 
           if ($display_builder_id === $builder_id) {
             $form = parent::buildForm($form, $form_state);

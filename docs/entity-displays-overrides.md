@@ -22,7 +22,7 @@ In "Manage form display", you can pick "Display Builder":
 
 ![](images/field-widget-selector.webp)
 
-## Use
+## Use Display builder in the content
 
 There are two different ways to use this feature:
 

@@ -8,6 +8,7 @@ use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\StorageProperties;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -69,7 +70,7 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
       // Set the third_party_settings.
       $builder_data = $this->stateManager->getCurrentState($builder_id);
       $entity_view_display->setThirdPartySetting('display_builder', 'sources', $builder_data);
-      $entity_view_display->setThirdPartySetting('display_builder', 'entity_config_id', $this->stateManager->getEntityConfigId($builder_id));
+      $entity_view_display->setThirdPartySetting('display_builder', StorageProperties::ConfigEntityId->value, $this->stateManager->getEntityConfigId($builder_id));
       // Save the configuration entity.
       $entity_view_display->save();
     }

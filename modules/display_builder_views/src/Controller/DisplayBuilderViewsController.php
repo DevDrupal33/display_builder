@@ -9,6 +9,7 @@ use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\StorageProperties;
 
 /**
  * Returns responses for Display Builder ui routes.
@@ -47,11 +48,11 @@ class DisplayBuilderViewsController extends ControllerBase {
       /** @var \Drupal\views\Entity\View $view */
       foreach ($views->loadMultiple() as $view) {
         foreach ($view->get('display') as $display_id => $display) {
-          if (!isset($display['display_options']['display_extenders']['display_builder']['display_builder_id'])) {
+          if (!isset($display['display_options']['display_extenders']['display_builder'][StorageProperties::InstanceId->value])) {
             continue;
           }
 
-          $display_builder_id = $display['display_options']['display_extenders']['display_builder']['display_builder_id'];
+          $display_builder_id = $display['display_options']['display_extenders']['display_builder'][StorageProperties::InstanceId->value];
 
           if (!$display_builder_id) {
             continue;

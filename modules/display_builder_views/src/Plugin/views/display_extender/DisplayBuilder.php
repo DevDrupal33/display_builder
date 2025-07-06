@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\display_builder\StorageProperties;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\Entity\DisplayBuilder as DisplayBuilderConfigEntity;
 use Drupal\display_builder_views\DisplayBuilderViewsManager;
@@ -67,52 +68,67 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
     }
 
     $form['#title'] .= $this->t('Display Builder');
+    $form[StorageProperties::InstanceId->value] = $this->buildInstanceForm($this->options[StorageProperties::InstanceId->value] ?? NULL);
+    $form[StorageProperties::ConfigEntityId->value] = $this->buildConfigForm($this->options[StorageProperties::ConfigEntityId->value] ?? DisplayBuilderConfigEntity::DISPLAY_BUILDER_CONFIG);
+  }
 
-    $display_builder_id = $this->options['display_builder_id'] ?? NULL;
-
+  /**
+   * Build instance form.
+   *
+   * @param ?string $instance_id
+   *   The key used to retrieve a state from the State API.
+   *
+   * @return array
+   *   A form renderable array.
+   */
+  private function buildInstanceForm(?string $instance_id): array {
     // @todo no change or selection for now, just inform about the builder id.
-    if ($display_builder_id) {
-      $url = Url::fromRoute('display_builder_views.views.manage', ['builder_id' => $display_builder_id]);
-      $options = [
-        $display_builder_id => $display_builder_id,
-        '_none' => $this->t('Disable (Detach existing builder)'),
-      ];
-      $form['display_builder_id'] = [
+    if (!$instance_id) {
+      return [
         '#type' => 'select',
-        '#title' => $this->t('Load display builder:'),
-        '#description' => $this->t('Display builder used to manage this view. <a href="@url" target="_blank">Edit here</a>', ['@url' => $url->toString()]),
-        '#options' => $options,
-        '#default_value' => $display_builder_id,
-        '#required' => TRUE,
-      ];
-    }
-    else {
-      $form['display_builder_id'] = [
-        '#type' => 'select',
-        '#title' => $this->t('Load display builder:'),
-        '#description' => $this->t('Create the associated Display Builder or ignore.'),
-        '#options' => ['_new' => $this->t('Create the display Builder'), '_none' => $this->t('None (Ignore)')],
+        '#title' => $this->t('Display builder instance'),
+        '#options' => [
+          '_new' => $this->t('Create the instance'),
+          '_none' => $this->t('None (ignore)'),
+        ],
         '#default_value' => '_new',
         '#required' => TRUE,
       ];
     }
-
-    $builder_config_id = $this->options['builder_config_id'] ?? DisplayBuilderConfigEntity::DISPLAY_BUILDER_CONFIG;
-
-    $displayBuilderConfig = $this->displayBuilderConfigStorage->loadMultiple();
-
-    $options = [];
-
-    foreach ($displayBuilderConfig as $entityId => $configEntity) {
-      $options[$entityId] = $configEntity->label();
-    }
-
-    $form['builder_config_id'] = [
+    $url = Url::fromRoute('display_builder_views.views.manage', ['builder_id' => $instance_id]);
+    return [
       '#type' => 'select',
-      '#title' => $this->t('Display builder'),
-      '#description' => $this->t('Display builder configuration used when editing the associated display builder.'),
+      '#title' => $this->t('Display builder instance'),
+      '#description' => $this->t('Display builder used to manage this view. <a href="@url" target="_blank">Edit here</a>', ['@url' => $url->toString()]),
+      '#options' => [
+        $instance_id => $instance_id,
+        '_none' => $this->t('Disable (detach instance)'),
+      ],
+      '#default_value' => $instance_id,
+      '#required' => TRUE,
+    ];
+  }
+
+  /**
+   * Build 'Display builder' config entity form.
+   *
+   * @param ?string $display_builder
+   *   The entity ID of a Display builder config entity.
+   *
+   * @return array
+   *   A form renderable array.
+   */
+  private function buildConfigForm(?string $display_builder): array {
+    $display_builders = $this->displayBuilderConfigStorage->loadMultiple();
+    $options = [];
+    foreach ($display_builders as $entity_id => $config) {
+      $options[$entity_id] = $config->label();
+    }
+    return [
+      '#type' => 'select',
+      '#title' => $this->t('Display builder config'),
       '#options' => $options,
-      '#default_value' => $builder_config_id,
+      '#default_value' => $display_builder,
     ];
   }
 
@@ -126,21 +142,20 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
       return;
     }
 
-    $display_builder_id = $form_state->getValue('display_builder_id');
+    $instance = $form_state->getValue(StorageProperties::InstanceId->value);
 
-    if ($display_builder_id === '_none') {
-      unset($this->options['builder_config_id'], $this->options['display_builder_id']);
-
+    if ($instance === '_none') {
+      unset($this->options[StorageProperties::ConfigEntityId->value], $this->options[StorageProperties::InstanceId->value]);
       return;
     }
 
-    $builder_config_id = $form_state->getValue('builder_config_id');
-    $this->options['builder_config_id'] = $builder_config_id;
+    $builder_config_id = $form_state->getValue(StorageProperties::ConfigEntityId->value);
+    $this->options[StorageProperties::ConfigEntityId->value] = $builder_config_id;
 
     // Create a new display builder and set empty data in the view display
     // option. Add view uuid to allow save with ON_SAVE event.
-    if ($display_builder_id === '_new') {
-      $display_builder_id = \sprintf('%s%s', self::VIEWS_PREFIX, uniqid());
+    if ($instance === '_new') {
+      $instance = \sprintf('%s%s', self::VIEWS_PREFIX, uniqid());
 
       $contexts = [];
       // Mark for usage with views.
@@ -152,11 +167,11 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
       // Get fixtures if exist, fallback to default mimicking the standard view
       // blocks without markup.
       $builder_data = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_views');
-      $this->stateManager->create($display_builder_id, $builder_config_id, $builder_data, $contexts);
+      $this->stateManager->create($instance, $builder_config_id, $builder_data, $contexts);
     }
 
     // Re-set even if change is not yet allowed.
-    $this->options['display_builder_id'] = $display_builder_id;
+    $this->options[StorageProperties::InstanceId->value] = $instance;
   }
 
   /**
@@ -170,8 +185,8 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
     }
     $is_display_builder = FALSE;
 
-    if (isset($this->options['display_builder_id'])) {
-      $is_display_builder = $this->options['display_builder_id'];
+    if (isset($this->options[StorageProperties::InstanceId->value])) {
+      $is_display_builder = $this->options[StorageProperties::InstanceId->value];
     }
 
     $options['display_builder'] = [

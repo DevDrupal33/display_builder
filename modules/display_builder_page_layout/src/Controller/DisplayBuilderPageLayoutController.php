@@ -8,9 +8,10 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\StorageProperties;
 use Drupal\display_builder_page_layout\DisplayBuilderPageLayout;
 use Drupal\display_builder_page_layout\DisplayBuilderPageLayoutInterface;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 
 /**
  * Returns responses for Display Builder ui routes.
@@ -30,14 +31,14 @@ class DisplayBuilderPageLayoutController extends ControllerBase {
    */
   public function managePageLayout(): array {
     $page_layout_config = $this->config(DisplayBuilderPageLayout::PAGE_LAYOUT_CONFIG);
-    $builder_config_id = $page_layout_config->get('builder_config_id');
+    $builder_config_id = $page_layout_config->get(StorageProperties::ConfigEntityId->value);
 
     if ($builder_config_id === NULL || empty($builder_config_id)) {
       // @todo if config is deleted, get first available?
       throw new \LogicException('Missing display builder config id in the configuration.');
     }
 
-    $builder_id = $page_layout_config->get('builder_id');
+    $builder_id = $page_layout_config->get(StorageProperties::InstanceId->value);
 
     if ($builder_id === NULL || empty($builder_id)) {
       throw new \LogicException('Missing builder id in the configuration.');
@@ -115,10 +116,10 @@ class DisplayBuilderPageLayoutController extends ControllerBase {
       /** @var \Drupal\page_manager\PageInterface $page */
       foreach ($pages->loadMultiple() as $page) {
         foreach ($page->getVariants() as $variant) {
-          if (!isset($variant->get('variant_settings')['display_builder_id'])) {
+          if (!isset($variant->get('variant_settings')[StorageProperties::InstanceId->value])) {
             continue;
           }
-          $pages_related[$variant->get('variant_settings')['display_builder_id']] = [
+          $pages_related[$variant->get('variant_settings')[StorageProperties::InstanceId->value]] = [
             'type' => $variant->getVariantPlugin()->getPluginId(),
             'label' => $page->label(),
             'id' => $page->id(),

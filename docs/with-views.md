@@ -49,7 +49,7 @@ Display Builder is a `display_extender` plugin with those properties:
 - `instance`: ID of the instance from the Drupal State API
 - `sources`: a UI Patterns 2 sources tree
 
-> 🚧 2025-07-01: Property are not set yet [#3534215](https://www.drupal.org/project/display_builder/issues/3534215)
+> 🚧 2025-07-01: `instance` may be removed [#3534215](https://www.drupal.org/project/display_builder/issues/3534215)
 
 Example:
 

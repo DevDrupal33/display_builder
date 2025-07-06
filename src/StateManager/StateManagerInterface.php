@@ -9,7 +9,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 /**
  * Interface for display builder manager.
  */
-interface StateManagerInterface extends ContextAwareInterface, DataSateInterface, SaveContextInterface {
+interface StateManagerInterface extends ContextAwareInterface, DataStateInterface, SaveContextInterface {
 
   /**
    * Attach a new source instance to root.
