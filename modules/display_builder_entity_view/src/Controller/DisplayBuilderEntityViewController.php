@@ -10,8 +10,9 @@ use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_entity_view\Event\DisplayBuilderEntityViewEventsSubscriber;
+use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\Entity\DisplayBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -115,6 +116,11 @@ final class DisplayBuilderEntityViewController extends ControllerBase {
 
     // Load the config used by this display builder.
     $current = $this->stateManager->load($builder_id);
+
+    if (!isset($current['entity_config_id'])) {
+      $current['entity_config_id'] = DisplayBuilder::DISPLAY_BUILDER_CONFIG;
+    }
+
     $display_builder_id = $current['entity_config_id'];
 
     $storage = $this->entityTypeManager()->getStorage('display_builder');

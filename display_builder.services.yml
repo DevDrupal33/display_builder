@@ -20,6 +20,7 @@ services:
       - "@display_builder.state_storage"
       - "@entity_type.manager"
       - "@ui_patterns.sample_entity_generator"
+      - "@display_builder.slot_sources_proxy"
   Drupal\display_builder\StateManager\StateManagerInterface: "@display_builder.state_manager"
 
   display_builder.state_storage:
@@ -27,6 +28,7 @@ services:
     arguments:
       - "@state"
       - "@date.formatter"
+      - "@current_user"
   Drupal\display_builder\StateManager\StateStorageInterface: "@display_builder.state_storage"
 
   display_builder.event_subscriber:

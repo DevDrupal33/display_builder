@@ -6,6 +6,7 @@
     "require": {
         "php": ">=8.3",
         "drupal/core": "^11.1",
+        "drupal/htmx": "^1.4",
         "drupal/ui_patterns": "^2.0"
     },
     "require-dev": {

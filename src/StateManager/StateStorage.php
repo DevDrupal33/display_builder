@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder\StateManager;
 
 use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -28,6 +29,7 @@ class StateStorage implements StorageInterface {
   public function __construct(
     protected StateInterface $state,
     protected DateFormatterInterface $date,
+    protected AccountInterface $user,
   ) {}
 
   /**
@@ -183,6 +185,7 @@ class StateStorage implements StorageInterface {
       'hash' => $hash,
       'log' => $log_message,
       'time' => $this->date->format(time(), 'short'),
+      'user' => $this->user->id(),
     ];
 
     // 3. Clear the future.
