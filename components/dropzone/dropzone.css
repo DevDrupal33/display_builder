@@ -310,8 +310,9 @@ handle it instead of shoelace */
 .display-builder--onDrag .db-dropzone.db-dropzone--root::after {
   position: absolute;
   z-index: var(--dropzone-z-index-label-root);
-  top: -24px;
+  top: -9px;
   right: -2px;
+  font-size:0.7rem;
   display: inline-block;
   padding: 0 3px;
   content: attr(data-instance-title);
