@@ -55,7 +55,10 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
         ],
       ];
 
-      $build = $this->htmxEvents->onInstanceFormChange($build, $builder_id, $data['_instance_id']);
+      // @todo disable auto submit for now related to # ajax error in 3531518.
+      // phpcs:disable Drupal.Files.LineLength.TooLong
+      // $build = $this->htmxEvents->onInstanceFormChange($build, $builder_id, $data['_instance_id']);
+      // phpcs:enable Drupal.Files.LineLength.TooLong
       $build = $this->htmxEvents->onInstanceUpdateButtonClick($build, $builder_id, $data['_instance_id']);
 
       return $build;
