@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Drupal\display_builder_devel\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
-use Drupal\display_builder\DisplayBuilderHelpers;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_entity_view\Event\DisplayBuilderEntityViewEventsSubscriber;
 use Drupal\display_builder_page_layout\DisplayBuilderPageLayout;
 use Drupal\display_builder_views\DisplayBuilderViewsManager;
+use Drupal\display_builder\DisplayBuilderHelpers;
+use Drupal\display_builder\StateManager\StateManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -291,11 +292,11 @@ class DisplayBuilderDevelController extends ControllerBase {
    * @param \Drupal\Core\StringTranslation\TranslatableMarkup $log
    *   The log to format.
    *
-   * @return string
+   * @return array
    *   The formatted log.
    */
-  private function formatLog(TranslatableMarkup $log): string {
-    return $log->render();
+  private function formatLog(TranslatableMarkup $log): array {
+    return ['#markup' => Markup::create($log->render())];
   }
 
   /**

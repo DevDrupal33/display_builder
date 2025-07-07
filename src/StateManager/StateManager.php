@@ -411,7 +411,7 @@ class StateManager implements StateManagerInterface {
 
     // Get friendly label to display in log instead of ids.
     $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data);
-    $labelWithSummaryParent = empty($parent_id) ? ['label' => $this->t('root'), 'summary' => ''] : $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id));
+    $labelWithSummaryParent = empty($parent_id) ? ['summary' => $this->t('root')] : $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id));
 
     $log = $this->t('%instance has been removed from %parent', [
       '%instance' => $labelWithSummaryInstance['summary'],
