@@ -141,6 +141,7 @@
     // Selector for ui styles and ui skins forms.
     const elements = element.querySelectorAll(
       `.db-form form details .fieldset-legend,
+      .db-form form details fieldset legend,
       .db-form form details > div > label
       `,
     );
