@@ -8,7 +8,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
-use Drupal\display_builder_entity_view\Event\DisplayBuilderEntityViewEventsSubscriber;
+use Drupal\display_builder_entity_view\EventSubscriber\DisplayBuilderSubscriber;
 use Drupal\display_builder_page_layout\DisplayBuilderPageLayout;
 use Drupal\display_builder_views\DisplayBuilderViewsManager;
 use Drupal\display_builder\DisplayBuilderHelpers;
@@ -219,7 +219,7 @@ class DisplayBuilderDevelController extends ControllerBase {
       $route_name = 'display_builder_page_layout.manage';
       $type = $this->t('Page layout');
     }
-    elseif (class_exists('Drupal\display_builder_entity_view\Event\DisplayBuilderEntityViewEventsSubscriber') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderEntityViewEventsSubscriber::CONTEXT_REQUIREMENT)) {
+    elseif (class_exists('Drupal\display_builder_entity_view\Event\DisplayBuilderSubscriber') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderSubscriber::CONTEXT_REQUIREMENT)) {
       /** @var \Drupal\Core\Entity\EntityInterface $entity */
       $entity = $builder['contexts']['entity']->getContextValue();
       $entity_type_id = $entity->getEntityTypeId();

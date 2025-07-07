@@ -10,11 +10,11 @@ services:
   Drupal\display_builder_page_layout\DisplayBuilderPageLayoutInterface: "@display_builder_page_layout.config_manager"
 
   display_builder_page_layout.page_variant_subscriber:
-    class: Drupal\display_builder_page_layout\EventSubscriber\DisplayBuilderPageDisplayVariantSubscriber
+    class: Drupal\display_builder_page_layout\EventSubscriber\PageVariantSubscriber
     tags:
       - { name: event_subscriber }
-  display_builder_page_layout.page_layout_event_subscriber:
-    class: Drupal\display_builder_page_layout\EventSubscriber\DisplayBuilderPageLayoutEventsSubscriber
+  display_builder_page_layout.display_builder_subscriber:
+    class: Drupal\display_builder_page_layout\EventSubscriber\DisplayBuilderSubscriber
     arguments:
       [
         "@display_builder.state_manager",

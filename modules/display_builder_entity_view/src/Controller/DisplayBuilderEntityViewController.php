@@ -10,7 +10,7 @@ use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder_entity_view\Event\DisplayBuilderEntityViewEventsSubscriber;
+use Drupal\display_builder_entity_view\EventSubscriber\DisplayBuilderSubscriber;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder\Entity\DisplayBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
@@ -140,7 +140,7 @@ final class DisplayBuilderEntityViewController extends ControllerBase {
         'bundle' => new Context($stringContextDefinition, $bundle ?? ''),
         'view_mode' => new Context($stringContextDefinition, $entity_view_display_parameters['view_mode_name']),
       ];
-      $contexts = RequirementsContext::addToContext([DisplayBuilderEntityViewEventsSubscriber::CONTEXT_REQUIREMENT], $contexts);
+      $contexts = RequirementsContext::addToContext([DisplayBuilderSubscriber::CONTEXT_REQUIREMENT], $contexts);
       $this->stateManager->create(
         $builder_id,
         $current['entity_config_id'],

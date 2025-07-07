@@ -14,7 +14,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 /**
  * The event subscriber for display builder islands.
  */
-class DisplayBuilderPageLayoutEventsSubscriber implements EventSubscriberInterface {
+class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
   public function __construct(
     private StateManagerInterface $stateManager,

@@ -1,6 +1,6 @@
 services:
-  display_builder_views.page_layout_event_subscriber:
-    class: Drupal\display_builder_views\EventSubscriber\DisplayBuilderViewsLayoutEventsSubscriber
+  display_builder_views.display_builder_subscriber:
+    class: Drupal\display_builder_views\EventSubscriber\DisplayBuilderSubscriber
     arguments:
       [
         "@display_builder.state_manager",

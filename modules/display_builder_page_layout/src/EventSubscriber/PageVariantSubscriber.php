@@ -20,7 +20,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  *
  * @endcode
  */
-class DisplayBuilderPageDisplayVariantSubscriber implements EventSubscriberInterface {
+class PageVariantSubscriber implements EventSubscriberInterface {
 
   /**
    * {@inheritdoc}

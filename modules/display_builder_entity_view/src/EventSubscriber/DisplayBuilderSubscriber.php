@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\display_builder_entity_view\Event;
+namespace Drupal\display_builder_entity_view\EventSubscriber;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
@@ -13,12 +13,12 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 /**
  * The event subscriber for display builder islands.
  */
-class DisplayBuilderEntityViewEventsSubscriber implements EventSubscriberInterface {
+class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
   public const CONTEXT_REQUIREMENT = 'display_builder_entity_view';
 
   /**
-   * Constructs a new DisplayBuilderEntityViewEventsSubscriber object.
+   * Constructs a new DisplayBuilderSubscriber object.
    *
    * @param \Drupal\display_builder\StateManager\StateManagerInterface $stateManager
    *   The state manager service.

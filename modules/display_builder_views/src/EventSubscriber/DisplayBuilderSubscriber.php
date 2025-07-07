@@ -13,7 +13,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 /**
  * The event subscriber for display builder views.
  */
-class DisplayBuilderViewsLayoutEventsSubscriber implements EventSubscriberInterface {
+class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
   public function __construct(
     private StateManagerInterface $stateManager,
