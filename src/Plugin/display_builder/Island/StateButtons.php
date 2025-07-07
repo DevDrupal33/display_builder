@@ -106,7 +106,7 @@ class StateButtons extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function onUpdate(string $builder_id, string $instance_id): array {
+  public function onUpdate(string $builder_id, string $instance_id, ?string $current_island_id): array {
     return $this->rebuild($builder_id);
   }
 

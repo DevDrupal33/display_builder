@@ -31,6 +31,8 @@ final class DisplayBuilderEvent extends Event {
    *   The instance ID.
    * @param string|null $parent_id
    *   The parent instance ID.
+   * @param string|null $current_island_id
+   *   Optional current island ID which trigger action.
    */
   public function __construct(
     private string $builder_id,
@@ -38,6 +40,7 @@ final class DisplayBuilderEvent extends Event {
     private ?array $data = NULL,
     private ?string $instance_id = NULL,
     private ?string $parent_id = NULL,
+    private ?string $current_island_id = NULL,
   ) {}
 
   /**
@@ -98,6 +101,16 @@ final class DisplayBuilderEvent extends Event {
    */
   public function getParentId(): ?string {
     return $this->parent_id;
+  }
+
+  /**
+   * Gets the current island ID.
+   *
+   * @return string
+   *   The current island ID which trigger action.
+   */
+  public function getCurrentIslandId(): ?string {
+    return $this->current_island_id;
   }
 
   /**

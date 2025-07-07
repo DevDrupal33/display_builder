@@ -312,13 +312,13 @@ handle it instead of shoelace */
   z-index: var(--dropzone-z-index-label-root);
   top: -9px;
   right: -2px;
-  font-size:0.7rem;
   display: inline-block;
   padding: 0 3px;
   content: attr(data-instance-title);
   text-align: left;
   color: var(--db-background-color);
   background-color: var(--dropzone-color-target-light);
+  font-size: 0.7rem;
 }
 .display-builder--highlight
   .display-builder__main
