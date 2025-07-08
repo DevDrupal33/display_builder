@@ -126,6 +126,10 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
 
     if (isFirst) {
       document.body.style.setProperty('--db-body-margin-left', `${newWidth}px`);
+      if (builder.classList.contains('display-builder--fullscreen')) {
+        builder.querySelector('.display-builder__main').style.marginLeft =
+          `${newWidth}px`;
+      }
     }
   };
 
