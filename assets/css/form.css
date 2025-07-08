@@ -10,15 +10,15 @@
   .db-island-instance_form input[type="button"] {
     margin-top: 0.5rem;
     padding: 0.5rem 1rem;
-    color: var(--text-default-grey);
+    color: var(--text-default-gray);
     border-radius: 0.5rem;
-    background-color: var(--background-contrast-grey);
-    box-shadow: inset 0 -2px 0 0 var(--border-plain-grey);
+    background-color: var(--background-contrast-gray);
+    box-shadow: inset 0 -2px 0 0 var(--border-plain-gray);
     &:hover {
-      background-color: var(--background-contrast-grey-hover);
+      background-color: var(--background-contrast-gray-hover);
     }
     &:active {
-      background-color: var(--background-contrast-grey-active);
+      background-color: var(--background-contrast-gray-active);
     }
   }
 
