@@ -89,7 +89,7 @@ class IndexDebugPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function onUpdate(string $builder_id, ?string $instance_id, ?string $current_island_id): array {
+  public function onUpdate(string $builder_id, ?string $instance_id): array {
     return $this->reloadWithGlobalData($builder_id);
   }
 

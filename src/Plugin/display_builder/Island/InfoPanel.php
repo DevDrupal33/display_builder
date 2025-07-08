@@ -24,13 +24,11 @@ class InfoPanel extends IslandPluginBase {
    * {@inheritdoc}
    */
   public function build(string $builder_id, array $data, array $options = []): array {
-    $build = parent::build($builder_id, $data, $options);
-
-    if (!$this->isApplicable()) {
-      return $build;
+    if (empty($data) || !$this->isApplicable($data)) {
+      return [];
     }
-
-    $component_id = $this->data['source']['component']['component_id'];
+    $build = [];
+    $component_id = $data['source']['component']['component_id'];
     $component = $this->sdcManager->find($component_id);
     $build[] = [
       '#type' => 'html_tag',
@@ -76,7 +74,7 @@ class InfoPanel extends IslandPluginBase {
    * {@inheritdoc}
    */
   public function onActive(string $builder_id, array $data): array {
-    return $this->reloadWithLocalData($builder_id, $data, NULL);
+    return $this->reloadWithLocalData($builder_id, $data);
   }
 
   /**
@@ -87,11 +85,17 @@ class InfoPanel extends IslandPluginBase {
   }
 
   /**
-   * {@inheritdoc}
+   * Check if this island should be displayed.
+   *
+   * @param array $data
+   *   The data.
+   *
+   * @return bool
+   *   TRUE if this island should be displayed, FALSE otherwise.
    */
-  public function isApplicable(): bool {
+  private function isApplicable(array $data): bool {
     // No need for isset($data['_instance_id']) here.
-    return isset($this->data['source_id']) && ($this->data['source_id'] === 'component');
+    return isset($data['source_id']) && ($data['source_id'] === 'component');
   }
 
 }

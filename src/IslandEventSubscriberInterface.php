@@ -94,13 +94,11 @@ interface IslandEventSubscriberInterface {
    *   The builder ID.
    * @param string $instance_id
    *   The instance ID.
-   * @param string|null $current_island_id
-   *   The current island ID which trigger action.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onUpdate(string $builder_id, string $instance_id, ?string $current_island_id): array;
+  public function onUpdate(string $builder_id, string $instance_id): array;
 
   /**
    * Event triggered when a builder is saved.
