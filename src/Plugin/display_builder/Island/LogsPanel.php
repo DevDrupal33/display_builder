@@ -63,6 +63,7 @@ class LogsPanel extends IslandPluginBase {
         ['data' => $this->t('Time')],
         ['data' => $this->t('User')],
         ['data' => $this->t('Message')],
+        ['data' => $this->t('Hash')],
       ],
       '#rows' => [],
     ];
@@ -156,7 +157,7 @@ class LogsPanel extends IslandPluginBase {
       }
 
       if ($savedRow !== NULL) {
-        $savedRow['data'][2] = '✅';
+        $savedRow['data'][1] = '✅';
       }
     }
     return \array_merge($rows_past, $rows_present, $rows_future);
@@ -232,6 +233,7 @@ class LogsPanel extends IslandPluginBase {
         $step['time'] ?? NULL,
         $user ? $user->getDisplayName() : NULL,
         $step['log'] ?? '',
+        $step['hash'] ?? '',
       ],
       'style' => ($index === 0) ? 'font-weight: bold;' : '',
     ];
