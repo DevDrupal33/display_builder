@@ -1,0 +1,369 @@
+-
+
+  source_id: component
+  source:
+    component:
+      component_id: 'ui_suite_bootstrap:grid_row_1'
+      variant_id: null
+      props:
+        attributes:
+          source_id: attributes
+          source:
+            value: ''
+        container:
+          source_id: select
+          source:
+            value: container-fluid
+        container_attributes:
+          source_id: attributes
+          source:
+            value: ''
+        container_wrapper_attributes:
+          source_id: attributes
+          source:
+            value: ''
+        gutters:
+          source_id: select
+          source:
+            value: ''
+        gutters_horizontal:
+          source_id: select
+          source:
+            value: ''
+        gutters_vertical:
+          source_id: select
+          source:
+            value: ''
+        col_xs:
+          source_id: select
+          source:
+            value: '12'
+        col_sm:
+          source_id: select
+          source:
+            value: ''
+        col_md:
+          source_id: select
+          source:
+            value: ''
+        col_lg:
+          source_id: select
+          source:
+            value: ''
+        col_xl:
+          source_id: select
+          source:
+            value: ''
+        col_xxl:
+          source_id: select
+          source:
+            value: ''
+        col_offset:
+          source_id: select
+          source:
+            value: ''
+        col_attributes:
+          source_id: attributes
+          source:
+            value: ''
+      slots:
+        col_1_content:
+          sources:
+            -
+
+              source_id: entity_field
+              source:
+                derivable_context: 'field:node:article:field_image'
+                'field:node:article:field_image':
+                  value:
+                    sources:
+                      -
+                        source_id: 'field_formatter:node:article:field_image'
+                        source:
+                          type: image
+                          settings:
+                            image_style: wide
+                            image_link: ''
+                            image_loading:
+                              attribute: lazy
+
+  _third_party_settings:
+    ui_styles:
+      styles:
+        selected:
+          colors_background_color: bg-secondary-subtle
+          spacing_margin_bottom: mb-4
+-
+
+  source_id: component
+  source:
+    component:
+      component_id: 'ui_suite_bootstrap:grid_row_2'
+      variant_id: null
+      props:
+        attributes:
+          source_id: attributes
+          source:
+            value: ''
+        container:
+          source_id: select
+          source:
+            value: ''
+        container_attributes:
+          source_id: attributes
+          source:
+            value: ''
+        container_wrapper_attributes:
+          source_id: attributes
+          source:
+            value: ''
+        gutters:
+          source_id: select
+          source:
+            value: ''
+        gutters_horizontal:
+          source_id: select
+          source:
+            value: ''
+        gutters_vertical:
+          source_id: select
+          source:
+            value: ''
+        col_xs:
+          source_id: selects
+          source:
+            value:
+              - '12'
+              - '12'
+        col_sm:
+          source_id: selects
+          source:
+            value:
+              - ''
+              - ''
+        col_md:
+          source_id: selects
+          source:
+            value:
+              - '2'
+              - '10'
+        col_lg:
+          source_id: selects
+          source:
+            value:
+              - ''
+              - ''
+        col_xl:
+          source_id: selects
+          source:
+            value:
+              - ''
+              - ''
+        col_xxl:
+          source_id: selects
+          source:
+            value:
+              - ''
+              - ''
+        col_offset:
+          source_id: selects
+          source:
+            value:
+              - ''
+              - ''
+        col_1_attributes:
+          source_id: attributes
+          source:
+            value: ''
+        col_2_attributes:
+          source_id: attributes
+          source:
+            value: ''
+      slots:
+        col_2_content:
+          sources:
+            -
+
+              source_id: entity_field
+              source:
+                derivable_context: 'field:node:article:title'
+                'field:node:article:title':
+                  value:
+                    sources:
+                      -
+                        source_id: 'field_formatter:node:article:title'
+                        source:
+                          type: string
+                          settings:
+                            link_to_entity: 0
+
+              _third_party_settings:
+                ui_styles:
+                  styles:
+                    selected:
+                      typography: h2
+            -
+
+              source_id: entity_field
+              source:
+                derivable_context: 'field:node:article:created'
+                'field:node:article:created':
+                  value:
+                    sources:
+                      -
+                        source_id: 'field_formatter:node:article:created'
+                        source:
+                          type: timestamp
+                          settings:
+                            time_diff:
+                              future_format: '@interval hence'
+                              past_format: '@interval ago'
+                              granularity: '2'
+                              refresh: '60'
+                              enabled: 0
+                              description: ''
+                            date_format: medium
+                            custom_date_format: ''
+                            timezone: ''
+                            tooltip:
+                              date_format: long
+                              custom_date_format: ''
+
+                    add_more_button: ''
+              _third_party_settings:
+                ui_styles:
+                  styles:
+                    selected:
+                      colors_color: text-secondary
+                      text_font_italics: fst-italic
+                      spacing_margin_bottom: mb-2
+                      display_all: d-block
+            -
+
+              source_id: entity_field
+              source:
+                derivable_context: 'field:node:article:body'
+                'field:node:article:body':
+                  value:
+                    sources:
+                      -
+                        source_id: 'field_formatter:node:article:body'
+                        source:
+                          type: text_default
+
+        col_1_content:
+          sources:
+            -
+
+              source_id: entity_field
+              source:
+                derivable_context: 'field:node:article:uid'
+                'field:node:article:uid':
+                  value:
+                    sources:
+                      -
+                        source_id: 'field_formatter:node:article:uid'
+                        source:
+                          type: entity_reference_entity_view
+                          settings:
+                            view_mode: default
+
+              _third_party_settings:
+                ui_styles:
+                  styles:
+                    selected:
+                      text_text_alignment: text-center
+                      img_thumbnail: img-thumbnail
+            -
+
+              source_id: entity_field
+              source:
+                derivable_context: 'field:node:article:uid'
+                'field:node:article:uid':
+                  value:
+                    sources:
+                      -
+                        source_id: 'field_formatter:node:article:uid'
+                        source:
+                          type: entity_reference_label
+                          settings:
+                            link: '1'
+
+              _third_party_settings:
+                ui_styles:
+                  styles:
+                    selected:
+                      colors_color: text-secondary
+                      text_font_italics: fst-italic
+                      text_text_alignment: text-center
+  _third_party_settings:
+    ui_styles:
+      styles: {  }
+-
+
+  source_id: component
+  source:
+    component:
+      component_id: 'ui_suite_bootstrap:accordion'
+      slots:
+        content:
+          sources:
+            -
+
+              source_id: component
+              source:
+                component:
+                  component_id: 'ui_suite_bootstrap:accordion_item'
+                  variant_id: null
+                  props:
+                    attributes:
+                      source_id: attributes
+                      source:
+                        value: ''
+                    opened:
+                      source_id: checkbox
+                      source:
+                        value: null
+                    heading_level:
+                      source_id: select
+                      source:
+                        value: ''
+                    item_id:
+                      source_id: textfield
+                      source:
+                        value: ''
+                    button_attributes:
+                      source_id: attributes
+                      source:
+                        value: ''
+                  slots:
+                    title:
+                      sources:
+                        -
+
+                          source_id: token
+                          source:
+                            value: Comments
+                        -
+
+                          source_id: entity_field
+                          source:
+                            derivable_context: 'field:node:article:comment'
+                            'field:node:article:comment':
+                              value:
+                                sources:
+                                  -
+                                    source_id: 'field_property:node:comment:comment_count'
+
+                          _third_party_settings:
+                            ui_styles:
+                              styles:
+                                selected:
+                                  text_font_italics: fst-italic
+                                  spacing_margin_start: ms-2
+                    content:
+                      sources:
+                        -
+
+                                        pager_id: '0'
+                                        view_mode: default

@@ -1,0 +1,330 @@
+-
+  source_id: token
+  source:
+    value: '<hr>'
+-
+  source_id: component
+  source:
+    component:
+      component_id: 'ui_suite_dsfr:grid_row_1'
+      slots:
+        content:
+          sources:
+            -
+              source_id: component
+              source:
+                component:
+                  component_id: 'ui_suite_dsfr:button'
+                  slots:
+                    label:
+                      sources:
+                        -
+                          source_id: token
+                          source:
+                            value: 'This is a button'
+            -
+              source_id: component
+              source:
+                component:
+                  component_id: 'ui_suite_dsfr:button'
+                  props:
+                    icon_position:
+                      source_id: select
+                      source:
+                        value: right
+                    icon:
+                      source_id: icon
+                      source:
+                        value:
+                          target_id: 'dsfr:firefox-fill'
+                          settings:
+                            dsfr:
+                              size: md
+                              color: inverted--error
+                              alt: ''
+                          icon_id: 'dsfr:firefox-fill'
+                          icon_settings:
+                            dsfr:
+                              size: md
+                              color: inverted--error
+                              alt: ''
+                  slots:
+                    label:
+                      sources:
+                        -
+                          source_id: token
+                          source:
+                            value: 'This is a button'
+                saved_values: {  }
+            -
+              source_id: component
+              source:
+                component:
+                  component_id: 'ui_suite_dsfr:button'
+                  variant_id:
+                    source_id: select
+                    source:
+                      value: secondary
+                  props:
+                    icon:
+                      source_id: icon
+                      source:
+                        value:
+                          icon_id: ''
+                  slots:
+                    label:
+                      sources:
+                        -
+                          source_id: token
+                          source:
+                            value: 'This is a button'
+            -
+              source_id: component
+              source:
+                component:
+                  component_id: 'ui_suite_dsfr:button'
+                  variant_id:
+                    source_id: select
+                    source:
+                      value: tertiary
+                  props:
+                    icon:
+                      source_id: icon
+                      source:
+                        value:
+                          icon_id: ''
+                  slots:
+                    label:
+                      sources:
+                        -
+                          source_id: token
+                          source:
+                            value: 'This is a button'
+-
+  source_id: token
+  source:
+    value: '<hr>'
+-
+  source_id: component
+  source:
+    component:
+      component_id: 'ui_suite_dsfr:button_group'
+      slots:
+        buttons:
+          sources:
+            -
+              source_id: component
+              source:
+                component:
+                  component_id: 'ui_suite_dsfr:button'
+                  variant_id:
+                    source_id: select
+                    source:
+                      value: default
+                  props:
+                    icon:
+                      source_id: icon
+                      source:
+                        value:
+                          icon_id: ''
+                  slots:
+                    label:
+                      sources:
+                        -
+                          source_id: token
+                          source:
+                            value: 'This is a button'
+                        -
+                          source_id: component
+                          source:
+                            component:
+                              component_id: 'ui_suite_dsfr:button'
+                              variant_id:
+                                source_id: select
+                                source:
+                                  value: secondary
+                              props:
+                                icon:
+                                  source_id: icon
+                                  source:
+                                    value:
+                                      icon_id: ''
+                              slots:
+                                label:
+                                  sources:
+                                    -
+                                      source_id: token
+                                      source:
+                                        value: 'This is a button'
+                                    -
+                                      source_id: component
+                                      source:
+                                        component:
+                                          component_id: 'ui_suite_dsfr:button'
+                                          variant_id:
+                                            source_id: select
+                                            source:
+                                              value: tertiary
+                                          props:
+                                            icon:
+                                              source_id: icon
+                                              source:
+                                                value:
+                                                  icon_id: ''
+                                          slots:
+                                            label:
+                                              sources:
+                                                -
+                                                  source_id: token
+                                                  source:
+                                                    value: 'This is a button'
+-
+  source_id: token
+  source:
+    value: '<hr>'
+  _third_party_settings:
+    ui_styles:
+      styles:
+        selected:
+          spacing_margin: fr-m-3v
+          background: fr-background-contrast--blue-france
+-
+  source_id: component
+  source:
+    component:
+      component_id: 'ui_suite_dsfr:accordion_group'
+      slots:
+        accordions:
+          sources:
+            -
+              source_id: component
+              source:
+                component:
+                  component_id: 'ui_suite_dsfr:accordion'
+                  slots:
+                    title:
+                      sources:
+                        -
+                          source_id: token
+                          source:
+                            value: 'Accordion title'
+                    content:
+                      sources:
+                        -
+                          source_id: token
+                          source:
+                            value: 'Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.'
+            -
+              source_id: component
+              source:
+                component:
+                  component_id: 'ui_suite_dsfr:accordion'
+                  slots:
+                    title:
+                      sources:
+                        -
+                          source_id: token
+                          source:
+                            value: 'Accordion title'
+                    content:
+                      sources:
+                        -
+                          source_id: token
+                          source:
+                            value: 'Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.'
+            -
+              source_id: component
+              source:
+                component:
+                  component_id: 'ui_suite_dsfr:accordion'
+                  slots:
+                    title:
+                      sources:
+                        -
+                          source_id: token
+                          source:
+                            value: 'Accordion title'
+                    content:
+                      sources:
+                        -
+                          source_id: token
+                          source:
+                            value: 'Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.'
+-
+  source_id: token
+  source:
+    value: '<hr>'
+  _third_party_settings:
+    ui_styles:
+      styles:
+        selected:
+          background: fr-background-contrast--blue-france
+-
+  source_id: component
+  source:
+    component:
+      component_id: 'ui_suite_dsfr:display'
+      slots:
+        title:
+          sources:
+            -
+              source_id: token
+              source:
+                value: 'This is a display'
+-
+  source_id: component
+  source:
+    component:
+      component_id: 'ui_suite_dsfr:footer'
+-
+  source_id: component
+  source:
+    component:
+      component_id: 'ui_suite_dsfr:tag_group'
+      slots:
+        tags:
+          sources:
+            -
+              source_id: component
+              source:
+                component:
+                  component_id: 'ui_suite_dsfr:tag'
+                  slots:
+                    label:
+                      sources:
+                        -
+                          source_id: token
+                          source:
+                            value: 'Tag 1'
+            -
+              source_id: component
+              source:
+                component:
+                  component_id: 'ui_suite_dsfr:tag'
+                  variant_id:
+                    source_id: select
+                    source:
+                      value: sm
+                  props:
+                    icon:
+                      source_id: icon
+                      source:
+                        value:
+                          icon_id: ''
+                  slots:
+                    label:
+                      sources:
+                        -
+                          source_id: token
+                          source:
+                            value: 'Tag 2'
+-
+  source_id: component
+  source:
+    component:
+      component_id: 'ui_suite_dsfr:tabs'
+-
+  source_id: component
+  source:
+    component:
+      component_id: 'ui_suite_dsfr:follow'
