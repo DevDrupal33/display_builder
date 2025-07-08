@@ -25,12 +25,6 @@ class DisplayBuilderEntityViewHook {
   public function entityTypeAlter(array &$entity_types): void {
     /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
     $entity_types['entity_view_display']->setClass(DisplayBuilderEntityViewDisplay::class)->setStorageClass(DisplayBuilderEntityViewDisplayStorage::class)->setFormClass('display_builder', DefaultsEntityForm::class)->setFormClass('edit', DisplayBuilderEntityViewDisplayForm::class);
-    // Ensure every fieldable entity type has a layout form.
-    /*foreach ($entity_types as $entity_type) {
-    if ($entity_type->entityClassImplements(FieldableEntityInterface::class)) {
-    $entity_type->setFormClass('display_builder', OverridesEntityForm::class);
-    }
-    }*/
   }
 
   /**
@@ -51,7 +45,7 @@ class DisplayBuilderEntityViewHook {
   #[Hook('entity_view_alter')]
   public function entityViewAlter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display): void {
     // Only replace extra fields when Layout Builder has been used to alter the
-    // build. See \Drupal\display_builder\Entity\DisplayBuilderEntityViewDisplay::buildMultiple().
+    // build. @see \Drupal\display_builder\Entity\DisplayBuilderEntityViewDisplay::buildMultiple().
     if (isset($build['_display_builder']) && !Element::isEmpty($build['_display_builder'])) {
       /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $field_manager */
       $field_manager = \Drupal::service('entity_field.manager');
@@ -59,7 +53,7 @@ class DisplayBuilderEntityViewHook {
 
       if (!empty($extra_fields['display'])) {
         foreach (array_keys($extra_fields['display']) as $field_name) {
-          // Do something better other than removing extra field?? @todo
+          // @todo something better other than removing extra field
           unset($build[$field_name]);
         }
       }

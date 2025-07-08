@@ -166,8 +166,7 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     $body = $request->getPayload()->all();
 
     if (!isset($body['form_id'])) {
-      // $message = $this->t('[updateInstance] Missing payload form_id!');
-      // return $this->responseMessageError($builder_id, $message, $body);
+      // @todo log an error.
       return [];
     }
 
@@ -535,7 +534,7 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
   }
 
   /**
-   * Validates a island form.
+   * Validates an island form.
    *
    * @param string $formClass
    *   The form class.

@@ -16,7 +16,7 @@
 }
 
 body:has(.display-builder) {
-  margin: 0 0 0 var(--db-body-margin-left, 0);
+  margin-left: var(--db-body-margin-left, 0) !important;
 }
 
 /* Fullscreen button toggle @see components/fullscreen_button. */
