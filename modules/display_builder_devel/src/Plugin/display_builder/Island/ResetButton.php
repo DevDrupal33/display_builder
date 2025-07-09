@@ -38,7 +38,7 @@ class ResetButton extends IslandPluginBase implements IslandWithFormInterface {
     );
     unset($form['cancel']);
 
-    $button = $this->buildButton('Reset', $this->t('Reset'));
+    $button = $this->buildButton($this->t('Reset'), $this->t('Reset'));
     $button['#props']['variant'] = 'warning';
     $button['#attributes']['outline'] = TRUE;
 

@@ -8,6 +8,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\display_builder_devel\Helper\DisplayBuilderDevelHelper;
 use Drupal\display_builder_entity_view\EventSubscriber\DisplayBuilderSubscriber;
 use Drupal\display_builder_page_layout\DisplayBuilderPageLayout;
 use Drupal\display_builder_views\DisplayBuilderViewsManager;
@@ -274,7 +275,7 @@ class DisplayBuilderDevelController extends ControllerBase {
       $row['log']['data'] = '-';
     }
 
-    $links = $this->getOperationLinks($builder_id, $extra_links);
+    $links = DisplayBuilderDevelHelper::getOperationLinks($builder_id, $extra_links);
 
     if (\count($links) > 0) {
       $row['operations']['data']['operations'] = [
@@ -297,48 +298,6 @@ class DisplayBuilderDevelController extends ControllerBase {
    */
   private function formatLog(TranslatableMarkup $log): array {
     return ['#markup' => Markup::create($log->render())];
-  }
-
-  /**
-   * Operations for a display builder instance.
-   *
-   * @param string $builder_id
-   *   The display builder id.
-   * @param array $extra
-   *   Some more specific links.
-   *
-   * @return array
-   *   The operation links
-   */
-  private function getOperationLinks(string $builder_id, array $extra): array {
-    $links = [
-      'import' => [
-        'title' => $this->t('Import'),
-        'url' => Url::fromRoute('display_builder_devel.import', [
-          'builder_id' => $builder_id,
-        ]),
-      ],
-      'export' => [
-        'title' => $this->t('Export'),
-        'url' => Url::fromRoute('display_builder_devel.export', [
-          'builder_id' => $builder_id,
-        ]),
-      ],
-      'edit' => [
-        'title' => $this->t('Edit'),
-        'url' => Url::fromRoute('display_builder_devel.edit', [
-          'builder_id' => $builder_id,
-        ]),
-      ],
-      'delete' => [
-        'title' => $this->t('Delete'),
-        'url' => Url::fromRoute('display_builder_devel.delete', [
-          'builder_id' => $builder_id,
-        ]),
-      ],
-    ];
-
-    return array_merge($links, $extra);
   }
 
 }

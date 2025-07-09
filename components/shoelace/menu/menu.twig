@@ -11,17 +11,18 @@
       {% set item_attributes = item.type ? item_attributes.setAttribute('type', item.type) : item_attributes %}
       {% set item_attributes = item.disabled ? item_attributes.setAttribute('disabled', true) : item_attributes %}
 
+      {% if item.url %}
+        <a href="{{ item.url }}">
+      {% endif %}
       <sl-menu-item{{ item_attributes }}>
       {% if item.icon %}
         <sl-icon slot="prefix" name="{{ item.icon }}"></sl-icon>
       {% endif %}
-        {% if item.url %}
-          <a href="{{ item.url }}">{{ item.title }}</a>
-        {% else %}
-          {{ item.title }}
-        {% endif %}
+        {{ item.title }}
       </sl-menu-item>
-
+      {% if item.url %}
+        </a>
+      {% endif %}
     {% endif %}
   {% endfor %}
 </sl-menu>
