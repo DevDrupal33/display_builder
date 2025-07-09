@@ -46,7 +46,7 @@ class StateStorage implements StorageInterface {
         'data' => $builder_data,
         'hash' => self::getUniqId($builder_data),
         'log' => $this->t('Initialization of the display builder.'),
-        'time' => $this->date->format(time(), 'short'),
+        'time' => $this->date->format(\time(), 'short'),
       ],
       'future' => [],
       'save' => NULL,
@@ -141,7 +141,7 @@ class StateStorage implements StorageInterface {
     $builder_data['save'] = [
       'data' => $save_data,
       'hash' => $hash,
-      'time' => $this->date->format(time(), 'short'),
+      'time' => $this->date->format(\time(), 'short'),
     ];
 
     $this->saveData($builder_id, $builder_data);
@@ -184,7 +184,7 @@ class StateStorage implements StorageInterface {
       'data' => $data,
       'hash' => $hash,
       'log' => $log_message,
-      'time' => $this->date->format(time(), 'short'),
+      'time' => $this->date->format(\time(), 'short'),
       'user' => $this->user->id(),
     ];
 
@@ -315,16 +315,16 @@ class StateStorage implements StorageInterface {
 
     $this->state->set(self::STORAGE_INDEX, $display_builder_list);
     $this->state->delete(self::STORAGE_PREFIX . $builder_id);
+    $this->state->delete(self::STORAGE_PREFIX . $builder_id . '_hash');
   }
 
   /**
    * {@inheritdoc}
    */
   public function deleteAll(): void {
-    foreach (array_keys($this->loadAll()) as $builder_id) {
-      $this->state->delete(self::STORAGE_PREFIX . $builder_id);
+    foreach (\array_keys($this->loadAll()) as $builder_id) {
+      $this->delete($builder_id);
     }
-    $this->state->delete(self::STORAGE_INDEX);
   }
 
   /**
@@ -354,7 +354,7 @@ class StateStorage implements StorageInterface {
    */
   private static function getUniqId(array $data): string {
     // Return hash('xxh3', (string) serialize($data));
-    return (string) crc32((string) serialize($data));
+    return (string) \crc32((string) \serialize($data));
   }
 
 }
