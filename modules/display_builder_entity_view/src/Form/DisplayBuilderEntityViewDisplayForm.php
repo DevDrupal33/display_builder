@@ -9,7 +9,9 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay;
-use Drupal\field_ui\Form\EntityViewDisplayEditForm;
+use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplayStorage;
+use Drupal\layout_builder\Form\LayoutBuilderEntityViewDisplayForm;
+use Drupal\layout_builder\SectionStorageInterface;
 
 /**
  * Edit form for the DisplayBuilderEntityViewDisplay entity type.
@@ -17,7 +19,7 @@ use Drupal\field_ui\Form\EntityViewDisplayEditForm;
  * @internal
  *   Form classes are internal.
  */
-final class DisplayBuilderEntityViewDisplayForm extends EntityViewDisplayEditForm {
+final class DisplayBuilderEntityViewDisplayForm extends LayoutBuilderEntityViewDisplayForm {
 
   /**
    * The entity being used by this form.
@@ -28,22 +30,20 @@ final class DisplayBuilderEntityViewDisplayForm extends EntityViewDisplayEditFor
 
   /**
    * The storage source.
-   *
-   * @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplayStorage
    */
-  protected $sourceStorage;
+  protected ?DisplayBuilderEntityViewDisplayStorage $sourceStorage;
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, mixed $source_storage = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?SectionStorageInterface $section_storage = NULL, mixed $source_storage = NULL) {
     $this->sourceStorage = $source_storage;
 
-    return parent::buildForm($form, $form_state);
+    return parent::buildForm($form, $form_state, $section_storage);
   }
 
   /**
-   * Alter the entity form form state values..
+   * Alter the entity form form state values.
    *
    * @param string $entity_type_id
    *   The entity type ID.
@@ -56,7 +56,7 @@ final class DisplayBuilderEntityViewDisplayForm extends EntityViewDisplayEditFor
    *
    * @SuppressWarnings(PHPMD.UnusedFormalParameter)
    */
-  public function entityFormEntityBuild(string $entity_type_id, DisplayBuilderEntityViewDisplay $display, array &$form, FormStateInterface &$form_state): void {
+  public function displayBuilderEntityFormEntityBuild(string $entity_type_id, DisplayBuilderEntityViewDisplay $display, array &$form, FormStateInterface &$form_state): void {
     $set_enabled = (bool) $form_state->getValue(['display_builder', 'enabled'], FALSE);
     $already_enabled = $display->isDisplayBuilderEnabled();
 
@@ -67,7 +67,9 @@ final class DisplayBuilderEntityViewDisplayForm extends EntityViewDisplayEditFor
     }
     elseif ($already_enabled) {
       $display->disableDisplayBuilder();
-      // ? $form_state->setRedirectUrl($this->sourceStorage->getDisplayBuilderUrl('disable'));
+      // @todo Implements a confirmation step to disable Display Builder like
+      // with LayoutBuilderDisableForm.
+      // $form_state->setRedirectUrl($this->sourceStorage->getDisplayBuilderUrl('disable'));
     }
   }
 
@@ -76,38 +78,60 @@ final class DisplayBuilderEntityViewDisplayForm extends EntityViewDisplayEditFor
    */
   public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
+    $is_layout_builder_enabled = $this->entity->isLayoutBuilderEnabled();
+    $is_display_builder_enabled = $this->entity->isDisplayBuilderEnabled();
 
-    $is_enabled = $this->entity->isDisplayBuilderEnabled();
-
-    if ($is_enabled) {
+    if ($is_display_builder_enabled) {
       // Hide the table of fields.
       $form['fields']['#access'] = FALSE;
       $form['#fields'] = [];
       $form['#extra'] = [];
     }
 
-    $form['manage_layout'] = [
+    $form['manage_display_builder'] = [
       '#type' => 'link',
-      '#title' => $this->t('Display Builder'),
-      '#weight' => -10,
+      '#title' => $this->t('Display builder'),
+      '#weight' => -11,
       '#attributes' => ['class' => ['button']],
       '#url' => $this->getDisplayBuilderUrl(),
-      '#access' => $is_enabled,
+      '#access' => $is_display_builder_enabled,
     ];
+
+    if (isset($form['modes'])) {
+      $form['modes']['#weight'] = 0;
+    }
+
+    if (isset($form['layout'])) {
+      $form['layout']['#weight'] = 2;
+      $form['layout']['#open'] = $is_layout_builder_enabled;
+    }
 
     $form['display_builder'] = [
       '#type' => 'details',
       '#open' => TRUE,
-      '#title' => $this->t('Display Builder Options'),
+      '#title' => $this->t('Display Builder options'),
       '#tree' => TRUE,
+      '#weight' => 1,
     ];
+
+    if ($is_layout_builder_enabled && $is_display_builder_enabled) {
+      $form['display_builder']['status'] = [
+        '#theme' => 'status_messages',
+        '#message_list' => [
+          'warning' => [
+            $this->t('Layout Builder is enabled and will handle this display. Display Builder can still be used but will not handle the display until Layout builder is disabled.'),
+          ],
+        ],
+      ];
+    }
 
     $form['display_builder']['enabled'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Use Display Builder'),
-      '#default_value' => $is_enabled,
+      '#default_value' => $is_display_builder_enabled,
     ];
-    $form['#entity_builders']['display_builder'] = '::entityFormEntityBuild';
+
+    $form['#entity_builders']['display_builder'] = '::displayBuilderEntityFormEntityBuild';
 
     return $form;
   }
@@ -122,7 +146,7 @@ final class DisplayBuilderEntityViewDisplayForm extends EntityViewDisplayEditFor
   /**
    * {@inheritdoc}
    */
-  protected function buildExtraFieldRow($field_id, $extra_field) {
+  protected function buildExtraFieldRow($field_id, $extra_field): array {
     if ($this->entity->isDisplayBuilderEnabled()) {
       return [];
     }
@@ -133,7 +157,7 @@ final class DisplayBuilderEntityViewDisplayForm extends EntityViewDisplayEditFor
   /**
    * {@inheritdoc}
    */
-  protected function buildFieldRow(FieldDefinitionInterface $field_definition, array $form, FormStateInterface $form_state) {
+  protected function buildFieldRow(FieldDefinitionInterface $field_definition, array $form, FormStateInterface $form_state): array {
     if ($this->entity->isDisplayBuilderEnabled()) {
       return [];
     }

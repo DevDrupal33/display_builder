@@ -18,12 +18,6 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
   public const CONTEXT_REQUIREMENT = 'display_builder_entity_view';
 
-  /**
-   * Constructs a new DisplayBuilderSubscriber object.
-   *
-   * @param \Drupal\display_builder\StateManager\StateManagerInterface $stateManager
-   *   The state manager service.
-   */
   public function __construct(
     protected StateManagerInterface $stateManager,
   ) {}

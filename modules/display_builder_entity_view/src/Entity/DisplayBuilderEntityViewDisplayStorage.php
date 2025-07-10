@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_entity_view\Entity;
 
-use Drupal\Core\Config\Entity\ConfigEntityStorage;
+use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplayStorage;
 
 /**
  * Provides storage for entity view display entities that have display builder.
@@ -12,6 +12,6 @@ use Drupal\Core\Config\Entity\ConfigEntityStorage;
  * @internal
  *   Entity handlers are internal.
  */
-final class DisplayBuilderEntityViewDisplayStorage extends ConfigEntityStorage {
+final class DisplayBuilderEntityViewDisplayStorage extends LayoutBuilderEntityViewDisplayStorage {
 
 }

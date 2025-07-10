@@ -7,7 +7,8 @@ services:
     tags:
       - { name: event_subscriber }
   display_builder_entity_view.display_builder_subscriber:
-    class: '\Drupal\display_builder_entity_view\EventSubscriber\DisplayBuilderSubscriber'
-    arguments: ["@display_builder.state_manager"]
+    class: Drupal\display_builder_entity_view\EventSubscriber\DisplayBuilderSubscriber
+    arguments:
+      - "@display_builder.state_manager"
     tags:
-      - { name: "event_subscriber" }
+      - { name: event_subscriber }

@@ -6,95 +6,59 @@ namespace Drupal\display_builder_entity_view\Entity;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\Action\Attribute\ActionMethod;
-use Drupal\Core\Entity\Entity\EntityViewDisplay as BaseEntityViewDisplay;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
-use Drupal\Core\Plugin\Context\Context;
-use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\StorageProperties;
 use Drupal\display_builder_entity_view\Controller\DisplayBuilderEntityViewController;
+use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
+use Drupal\ui_patterns\Element\ComponentElementBuilder;
+use Drupal\ui_patterns\SourcePluginManager;
 
 /**
  * Provides an entity view display entity that has a display builder.
  */
-class DisplayBuilderEntityViewDisplay extends BaseEntityViewDisplay {
-
-  /**
-   * The entity field manager.
-   *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
-   */
-  protected $entityFieldManager;
+class DisplayBuilderEntityViewDisplay extends LayoutBuilderEntityViewDisplay {
 
   /**
    * The source plugin manager.
-   *
-   * @var \Drupal\ui_patterns\SourcePluginManager
    */
-  protected $sourcePluginManager;
+  protected SourcePluginManager $sourcePluginManager;
 
   /**
    * The state manager service.
-   *
-   * @var \Drupal\display_builder\StateManager\StateManagerInterface
    */
-  protected $stateManager;
+  protected StateManagerInterface $stateManager;
 
   /**
    * The component element builder service.
-   *
-   * @var \Drupal\ui_patterns\Element\ComponentElementBuilder
    */
-  protected $componentElementBuilder;
+  protected ComponentElementBuilder $componentElementBuilder;
 
   /**
    * {@inheritdoc}
    */
   public function __construct(array $values, $entity_type) {
-    // Set $entityFieldManager before calling the parent constructor because the
-    // constructor will call init() which then calls setComponent() which needs
-    // $entityFieldManager.
-    $this->entityFieldManager = \Drupal::service('entity_field.manager');
+    parent::__construct($values, $entity_type);
     $this->sourcePluginManager = \Drupal::service('plugin.manager.ui_patterns_source');
     $this->stateManager = \Drupal::service('display_builder.state_manager');
     $this->componentElementBuilder = \Drupal::service('ui_patterns.component_element_builder');
-    parent::__construct($values, $entity_type);
-  }
-
-  /**
-   * Compatibility with layout_builder module.
-   *
-   * Sadly, we need to define this method
-   * to be able to cohabit with layout_builder module.
-   *
-   * @return bool
-   *   Always returns FALSE.
-   */
-  public function isLayoutBuilderEnabled(): bool {
-    return FALSE;
-  }
-
-  /**
-   * Compatibility with layout_builder module.
-   *
-   * Sadly, we need to define this method
-   * to be able to cohabit with layout_builder module.
-   *
-   * @return bool
-   *   Always returns FALSE.
-   */
-  public function isOverridable(): bool {
-    return FALSE;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildMultiple(array $entities) {
+  public function buildMultiple(array $entities): array {
     $build_list = parent::buildMultiple($entities);
 
-    // If no display builder enable stop here.
+    // If using Layout Builder stop here.
+    if ($this->isLayoutBuilderEnabled()) {
+      return $build_list;
+    }
+
+    // If no display builder enabled stop here.
     if (!$this->isDisplayBuilderEnabled()) {
       return $build_list;
     }
@@ -110,7 +74,7 @@ class DisplayBuilderEntityViewDisplay extends BaseEntityViewDisplay {
 
       // Remove all fields with configurable display
       // from the existing build.
-      foreach (array_keys($build_list[$id]) as $name) {
+      foreach (\array_keys($build_list[$id]) as $name) {
         $field_definition = $this->getFieldDefinition($name);
 
         if ($field_definition && $field_definition->isDisplayConfigurable($this->displayContext)) {
@@ -153,7 +117,7 @@ class DisplayBuilderEntityViewDisplay extends BaseEntityViewDisplay {
    */
   #[ActionMethod(adminLabel: new TranslatableMarkup('Disable Display Builder'), pluralize: FALSE)]
   public function disableDisplayBuilder(): static {
-    $this->setThirdPartySetting('display_builder', 'enabled', FALSE);
+    $this->unsetThirdPartySetting('display_builder', 'enabled');
 
     return $this;
   }
@@ -188,23 +152,7 @@ class DisplayBuilderEntityViewDisplay extends BaseEntityViewDisplay {
       return FALSE;
     }
 
-    return (bool) $this->getThirdPartySetting('display_builder', 'enabled');
-  }
-
-  /**
-   * {@inheritdoc}
-   *
-   * @todo Move this upstream in https://www.drupal.org/node/2939931.
-   */
-  public function label() {
-    $bundle_info = \Drupal::service('entity_type.bundle.info')->getBundleInfo($this->getTargetEntityTypeId());
-    $bundle_label = $bundle_info[$this->getTargetBundle()]['label'];
-    $target_entity_type = $this->entityTypeManager()->getDefinition($this->getTargetEntityTypeId());
-
-    return new TranslatableMarkup('@bundle @label', [
-      '@bundle' => $bundle_label,
-      '@label' => $target_entity_type->getPluralLabel(),
-    ]);
+    return (bool) $this->getThirdPartySetting('display_builder', 'enabled', FALSE);
   }
 
   /**
@@ -244,13 +192,10 @@ class DisplayBuilderEntityViewDisplay extends BaseEntityViewDisplay {
     $set_enabled = $this->isDisplayBuilderEnabled();
 
     if ($already_enabled !== $set_enabled) {
-      if ($set_enabled) {
-        // Loop through all existing field-based components and add them as
-        // pre-configured sources ? (like layout builder does).
-      }
-      else {
+      if (!$set_enabled) {
         // When being disabled, remove all existing source data.
         $this->removeAllSources();
+        $this->unsetThirdPartySetting('display_builder', StorageProperties::ConfigEntityId->value);
       }
     }
   }
@@ -300,40 +245,11 @@ class DisplayBuilderEntityViewDisplay extends BaseEntityViewDisplay {
     $build = $fake_build['#slots']['content'] ?? [];
     $build['#cache'] = $fake_build['#cache'] ?? [];
     // The render array is built based on decisions made by SourceStorage
-    // plugins and therefore it needs to depend on the accumulated
+    // plugins, and therefore it needs to depend on the accumulated
     // cacheability of those decisions.
     $cacheability->applyTo($build);
 
     return $build;
-  }
-
-  /**
-   * Wraps the context repository service.
-   *
-   * @return \Drupal\Core\Plugin\Context\ContextRepositoryInterface
-   *   The context repository service.
-   */
-  protected function contextRepository() {
-    return \Drupal::service('context.repository');
-  }
-
-  /**
-   * Gets the available contexts for a given entity.
-   *
-   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
-   *   The entity.
-   *
-   * @return \Drupal\Core\Plugin\Context\ContextInterface[]
-   *   An array of context objects for a given entity.
-   */
-  protected function getContextsForEntity(FieldableEntityInterface $entity) {
-    $available_context_ids = \array_keys($this->contextRepository()->getAvailableContexts());
-
-    return [
-      'view_mode' => new Context(ContextDefinition::create('string'), $this->getMode()),
-      'entity' => EntityContext::fromEntity($entity),
-      'display' => EntityContext::fromEntity($this),
-    ] + $this->contextRepository()->getRuntimeContexts($available_context_ids);
   }
 
   /**
@@ -343,21 +259,11 @@ class DisplayBuilderEntityViewDisplay extends BaseEntityViewDisplay {
    *   The display builder ID.
    */
   protected function getDisplayBuilderId(): string {
-    $entity_type_id = $this->getTargetEntityTypeId();
-    $bundle = $this->getTargetBundle();
-    $view_mode_name = $this->getMode();
-
-    return DisplayBuilderEntityViewController::getDisplayBuilderId($entity_type_id, $bundle, $view_mode_name);
-  }
-
-  /**
-   * Indicates if this display is using the '_custom' view mode.
-   *
-   * @return bool
-   *   TRUE if this display is using the '_custom' view mode, FALSE otherwise.
-   */
-  protected function isCustomMode() {
-    return $this->getOriginalMode() === static::CUSTOM_MODE;
+    return DisplayBuilderEntityViewController::getDisplayBuilderId(
+      $this->getTargetEntityTypeId(),
+      $this->getTargetBundle(),
+      $this->getMode()
+    );
   }
 
   /**

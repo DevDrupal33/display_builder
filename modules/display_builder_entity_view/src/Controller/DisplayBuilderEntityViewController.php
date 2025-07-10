@@ -10,9 +10,9 @@ use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder_entity_view\EventSubscriber\DisplayBuilderSubscriber;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder\Entity\DisplayBuilder;
+use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder_entity_view\EventSubscriber\DisplayBuilderSubscriber;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -88,7 +88,7 @@ final class DisplayBuilderEntityViewController extends ControllerBase {
   public function title(RouteMatchInterface $route_match): TranslatableMarkup {
     $entity_view_display_parameters = self::getEntityViewDisplayParameters($route_match);
     $param = [
-      '@bundle' => ucfirst($entity_view_display_parameters['bundle']),
+      '@bundle' => \ucfirst($entity_view_display_parameters['bundle']),
       '@view_mode_name' => $entity_view_display_parameters['view_mode_name'],
     ];
 
@@ -102,7 +102,10 @@ final class DisplayBuilderEntityViewController extends ControllerBase {
    *   A render array.
    */
   public function show(RouteMatchInterface $route_match): array {
-    // Disable cache page.
+    // Builder is on the front theme, render cache is too hard and changes are
+    // not working with cache (move something and refresh, previous version
+    // will be shown).
+    // @todo fix with #3529284
     \Drupal::service('page_cache_kill_switch')->trigger(); // phpcs:ignore
 
     $entity_view_display_parameters = self::getEntityViewDisplayParameters($route_match);

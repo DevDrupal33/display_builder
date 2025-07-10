@@ -1,0 +1,14 @@
+core.entity_view_display.*.*.*.third_party.display_builder:
+  type: mapping
+  label: 'Display Builder settings'
+  mapping:
+    enabled:
+      type: boolean
+      label: 'Enabled'
+    display_builder:
+      type: string
+      label: "Used Display Builder"
+    sources:
+      # Ignore for now.
+      type: ignore
+      label: "Display Builder sources."
