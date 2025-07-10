@@ -13,17 +13,38 @@
   container-name: toolbar;
 }
 
-@container toolbar (max-width: 850px) {
+.db-toolbar__middle .shoelace-tabs {
+  max-width: 100%;
+}
+
+@container toolbar (max-width: 950px) {
   .db-toolbar {
     height: 100%;
-    max-height: 12rem;
+    max-height: 14rem;
     gap: 1rem;
   }
+
   .db-toolbar__middle {
     display: flex;
     flex-basis: 100%;
     justify-content: center;
     order: 3;
+  }
+}
+
+@container toolbar (max-width: 400px) {
+  .db-toolbar {
+    max-height: 17rem;
+  }
+
+  .db-toolbar__middle .shoelace-tabs {
+    max-width: 320px;
+  }
+
+  .db-toolbar__middle {
+    sl-tab::part(base) {
+      padding: 0 0.5rem;
+    }
   }
 }
 
