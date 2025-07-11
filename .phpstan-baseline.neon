@@ -1,36 +1,61 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method Drupal\\\\display_builder\\\\Controller\\\\ApiController\\:\\:dispatchDisplayBuilderEventRaw\\(\\) is unused\\.$#"
+			message: '#^Call to method getPath\(\) of internal class Drupal\\Core\\Extension\\ExtensionList from outside its root namespace Drupal\.$#'
+			identifier: method.internalClass
 			count: 1
-			path: src/Controller/ApiController.php
+			path: modules/display_builder_page_layout/display_builder_page_layout.module
 
 		-
-			message: "#^Cannot access offset 'icon' on array\\|Drupal\\\\Component\\\\Plugin\\\\Definition\\\\PluginDefinitionInterface\\.$#"
+			message: '#^Call to method getPath\(\) of internal class Drupal\\Core\\Extension\\ExtensionList from outside its root namespace Drupal\.$#'
+			identifier: method.internalClass
+			count: 1
+			path: modules/display_builder_views/display_builder_views.module
+
+		-
+			message: '#^Parameter \#1 \$array of function uasort contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: src/Form/DisplayBuilderForm.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function uasort contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: src/Form/DisplayBuilderForm.php
+
+		-
+			message: '#^Cannot access offset ''icon'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/IslandPluginBase.php
 
 		-
-			message: "#^Cannot access offset 'id' on array\\|Drupal\\\\Component\\\\Plugin\\\\Definition\\\\PluginDefinitionInterface\\.$#"
+			message: '#^Cannot access offset ''id'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/IslandPluginBase.php
 
 		-
-			message: "#^Cannot access offset 'keyboard_shortcuts' on array\\|Drupal\\\\Component\\\\Plugin\\\\Definition\\\\PluginDefinitionInterface\\.$#"
+			message: '#^Cannot access offset ''keyboard_shortcuts'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/IslandPluginBase.php
 
 		-
-			message: "#^Cannot access offset 'label' on array\\|Drupal\\\\Component\\\\Plugin\\\\Definition\\\\PluginDefinitionInterface\\.$#"
+			message: '#^Cannot access offset ''label'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/IslandPluginBase.php
 
 		-
-			message: "#^Cannot access offset 'type' on array\\|Drupal\\\\Component\\\\Plugin\\\\Definition\\\\PluginDefinitionInterface\\.$#"
+			message: '#^Cannot access offset ''type'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/IslandPluginBase.php
 
 		-
-			message: "#^Cannot access offset 'type' on array\\|Drupal\\\\Component\\\\Plugin\\\\Definition\\\\PluginDefinitionInterface\\.$#"
+			message: '#^Cannot access offset ''type'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/IslandPluginManager.php

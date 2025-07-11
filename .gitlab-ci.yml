@@ -64,9 +64,8 @@ stylelint:
   allow_failure: false
 phpcs:
   allow_failure: false
-# Until fix for phpstan 2.
 phpstan:
-  allow_failure: true
+  allow_failure: false
 phpunit:
   allow_failure: false
   variables:

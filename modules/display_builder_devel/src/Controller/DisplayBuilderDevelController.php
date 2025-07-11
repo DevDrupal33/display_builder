@@ -200,8 +200,6 @@ class DisplayBuilderDevelController extends ControllerBase {
    *
    * @return array
    *   A table row.
-   *
-   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    */
   protected function buildRow(string $builder_id, array $builder): array {
     $row = [];

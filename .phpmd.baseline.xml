@@ -1,10 +1,13 @@
 <?xml version="1.0"?>
 <phpmd-baseline>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/modules/display_builder_devel/src/Controller/DisplayBuilderDevelController.php" method="buildRow"/>
   <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="/builds/project/display_builder/modules/display_builder_devel/src/Plugin/display_builder/Island/IndexDebugPanel.php" method="printSimplifyPath"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_entity_view/src/Form/DisplayBuilderEntityViewDisplayForm.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/ui_patterns_overrides/src/Plugin/UiPatterns/Source/MainPageContentSource.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/ui_patterns_overrides/src/Plugin/UiPatterns/Source/PageTitleSource.php"/>
-  <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="/builds/project/display_builder/src/Controller/ApiController.php" method="dispatchDisplayBuilderEventRaw"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/ui_patterns_overrides/ui_patterns_overrides.ui_patterns.inc"/>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/src/Entity/DisplayBuilder.php" method="build"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/IslandPluginBase.php"/>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/src/Plugin/display_builder/Island/BuilderPanel.php" method="buildSingleBlock"/>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/src/Plugin/display_builder/Island/LogsPanel.php" method="buildRows"/>
 </phpmd-baseline>

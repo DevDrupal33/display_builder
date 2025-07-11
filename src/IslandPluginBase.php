@@ -261,8 +261,6 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    *
    * @return array|null
    *   A renderable array.
-   *
-   * @SuppressWarnings(PHPMD.UnusedFormalParameter)
    */
   protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
     return [];
@@ -282,8 +280,6 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    *
    * @return array|null
    *   A renderable array.
-   *
-   * @SuppressWarnings(PHPMD.UnusedFormalParameter)
    */
   protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
     return [];

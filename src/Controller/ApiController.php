@@ -420,41 +420,6 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
   }
 
   /**
-   * Dispatches a display builder event with HTML only response.
-   *
-   * @param string $event_id
-   *   The event ID.
-   * @param string $builder_id
-   *   The builder ID.
-   * @param array|null $data
-   *   (Optional) The data.
-   * @param string|null $instance_id
-   *   (Optional) instance ID.
-   * @param string|null $parent_id
-   *   (Optional) parent ID.
-   *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
-   *
-   * @phpcs:disable DrupalPractice.Objects.UnusedPrivateMethod.UnusedMethod
-   */
-  private function dispatchDisplayBuilderEventRaw(
-    string $event_id,
-    string $builder_id,
-    ?array $data = NULL,
-    ?string $instance_id = NULL,
-    ?string $parent_id = NULL,
-  ): HtmlResponse {
-    $result = $this->createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id);
-
-    $html = $this->renderer->renderInIsolation($result);
-    $response = new HtmlResponse();
-    $response->setContent($html);
-
-    return $response;
-  }
-
-  /**
    * Dispatches a display builder event with render API.
    *
    * @param string $event_id

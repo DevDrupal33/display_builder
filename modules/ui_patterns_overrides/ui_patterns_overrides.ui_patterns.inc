@@ -19,8 +19,6 @@ use Drupal\ui_patterns\SourceInterface;
  *   The data array containing information about the component.
  * @param array $source_configuration
  *   The full raw configuration used to build the source.
- *
- * @SuppressWarnings(PHPMD.UnusedFormalParameter)
  */
 function ui_patterns_overrides_ui_patterns_source_value_alter(mixed &$build, SourceInterface $source, array &$source_configuration): void {
   if (!isset($source_configuration['_third_party_settings'])) {

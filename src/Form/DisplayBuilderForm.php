@@ -159,7 +159,6 @@ final class DisplayBuilderForm extends EntityForm {
       // Order rows by weight.
       uasort($table, static function ($a, $b) {
         if (isset($a['#weight'], $b['#weight'])) {
-          // @phpstan-ignore-next-line
           return (int) $a['#weight'] - (int) $b['#weight'];
         }
       });

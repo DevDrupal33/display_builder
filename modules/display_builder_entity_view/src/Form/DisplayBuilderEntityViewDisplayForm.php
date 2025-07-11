@@ -53,8 +53,6 @@ final class DisplayBuilderEntityViewDisplayForm extends LayoutBuilderEntityViewD
    *   The form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
-   *
-   * @SuppressWarnings(PHPMD.UnusedFormalParameter)
    */
   public function displayBuilderEntityFormEntityBuild(string $entity_type_id, DisplayBuilderEntityViewDisplay $display, array &$form, FormStateInterface &$form_state): void {
     $set_enabled = (bool) $form_state->getValue(['display_builder', 'enabled'], FALSE);
