@@ -1,7 +1,7 @@
 name: "Display Builder Devel"
 description: "Some devel tools for Display Builder."
 type: module
-core_version_requirement: ^10.3.4 || ^11
+core_version_requirement: ^11.2
 package: "User interface"
 dependencies:
   - display_builder:display_builder

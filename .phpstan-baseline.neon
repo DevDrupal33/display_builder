@@ -1,18 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Call to method getPath\(\) of internal class Drupal\\Core\\Extension\\ExtensionList from outside its root namespace Drupal\.$#'
-			identifier: method.internalClass
-			count: 1
-			path: modules/display_builder_page_layout/display_builder_page_layout.module
-
-		-
-			message: '#^Call to method getPath\(\) of internal class Drupal\\Core\\Extension\\ExtensionList from outside its root namespace Drupal\.$#'
-			identifier: method.internalClass
-			count: 1
-			path: modules/display_builder_views/display_builder_views.module
-
-		-
 			message: '#^Parameter \#1 \$array of function uasort contains unresolvable type\.$#'
 			identifier: argument.unresolvableType
 			count: 1

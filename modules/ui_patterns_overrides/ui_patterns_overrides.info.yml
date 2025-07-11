@@ -1,7 +1,7 @@
 name: "Display Builder: UI Patterns 2 overrides"
 type: module
 description: "Temporary overrides for UI Patterns 2"
-core_version_requirement: ^10.3.4 || ^11
+core_version_requirement: ^11.2
 package: "User interface"
 dependencies:
   - display_builder:display_builder
