@@ -1,3 +1,10 @@
+* {
+  /* We want drawer panels display in top of everything, so be sure to display on top of admin toolbar. In case of
+  dashboard, admin-toolbar z-index is 501 by default but inherit from --admin-toolbar-z-index. --admin-toolbar-z-index
+  variable is not available in drawer context, so set same default value than navigation admin toolbar to
+  --drupal-admin-z-index so we can use it in drawer. */
+  --drupal-admin-z-index: 501;
+}
 .shoelace-drawer {
   will-change: auto;
   /* Allow the contained version of drawer to get all height. */
@@ -19,7 +26,11 @@
   }
   &::part(base) {
     position: fixed;
-    z-index: calc(var(--db-z-index, 1) + 1) !important;
+    /* In case of dashboard, admin-toolbar z-index is 501. We want drawer panels display in top of everything, so be
+    sure to display on top of admin toolbar. */
+    z-index: calc(
+      var(--db-z-index, 1) + var(--drupal-admin-z-index, 1)
+    ) !important;
   }
   &::part(overlay) {
     position: relative;
