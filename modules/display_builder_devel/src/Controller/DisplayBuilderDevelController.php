@@ -12,7 +12,6 @@ use Drupal\display_builder_devel\Helper\DisplayBuilderDevelHelper;
 use Drupal\display_builder_entity_view\EventSubscriber\DisplayBuilderSubscriber;
 use Drupal\display_builder_page_layout\DisplayBuilderPageLayout;
 use Drupal\display_builder_views\DisplayBuilderViewsManager;
-use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -123,68 +122,6 @@ class DisplayBuilderDevelController extends ControllerBase {
     $this->messenger()->addStatus($this->t('Sample @entity_type_id @bundle deleted!', $params));
 
     $redirect = $this->redirect('display_builder_devel.collection');
-    $redirect->send();
-
-    return $redirect;
-  }
-
-  /**
-   * Redirect to user DB demo.
-   *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
-   *   A message and redirect.
-   */
-  public function viewUserDemo(): RedirectResponse {
-    $user = \Drupal::currentUser(); // phpcs:ignore
-    $builder_id = \Drupal::state()->get(\sprintf('db_demo_user_%s', $user->id()), NULL); // phpcs:ignore
-    if (!$builder_id) {
-      $this->messenger()->addError($this->t('No display builder demo found for you!'));
-
-      $redirect = $this->redirect('<front>');
-      $redirect->send();
-
-      return $redirect;
-    }
-
-    $redirect = $this->redirect('display_builder_devel.view', ['builder_id' => $builder_id]);
-    $redirect->send();
-
-    return $redirect;
-  }
-
-  /**
-   * Delete associated user DB for demo.
-   *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
-   *   A message and redirect.
-   *
-   * @see modules/display_builder_devel/src/Hook/DisplayBuilderDevelHooks.php
-   */
-  public function resetUserDb(): RedirectResponse {
-    $user = \Drupal::currentUser(); // phpcs:ignore
-    $builder_id = \Drupal::state()->get(\sprintf('db_demo_user_%s', $user->id()), NULL); // phpcs:ignore
-    if (!$builder_id) {
-      $this->messenger()->addError($this->t('No display builder demo found for you!'));
-
-      $redirect = $this->redirect('<front>');
-      $redirect->send();
-
-      return $redirect;
-    }
-
-    $contexts = $this->stateManager->getContexts($builder_id);
-    $this->stateManager->delete($builder_id);
-    $builder_data = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_devel', '', 'ui_suite_bootstrap_demo');
-
-    $this->stateManager->create(
-      $builder_id,
-      'demo',
-      $builder_data,
-      $contexts,
-    );
-    $this->messenger()->addStatus($this->t('Display builder demo reset successfully!'));
-
-    $redirect = $this->redirect('display_builder_devel.view', ['builder_id' => $builder_id]);
     $redirect->send();
 
     return $redirect;

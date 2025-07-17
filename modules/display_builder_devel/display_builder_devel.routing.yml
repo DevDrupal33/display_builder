@@ -100,19 +100,3 @@ display_builder_devel.delete_sample:
     _permission: "administer display builders"
   options:
     _admin_route: true
-
-# @todo remove as it's demo purpose only, to reset the display builder when user
-# is created.
-display_builder_devel.user_demo:
-  path: "/admin/structure/display-builder/instance/my-demo"
-  defaults:
-    _controller: '\Drupal\display_builder_devel\Controller\DisplayBuilderDevelController::viewUserDemo'
-  requirements:
-    _user_is_logged_in: 'TRUE'
-
-display_builder_devel.reset_user_db:
-  path: "/admin/structure/display-builder/instance/simple_reset"
-  defaults:
-    _controller: '\Drupal\display_builder_devel\Controller\DisplayBuilderDevelController::resetUserDb'
-  requirements:
-    _permission: "administer display builders+manage devel display builders"
