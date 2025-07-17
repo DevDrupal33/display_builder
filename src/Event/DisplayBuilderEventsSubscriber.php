@@ -110,7 +110,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onUpdate(DisplayBuilderEvent $event): void {
-    $this->dispatch($event, __FUNCTION__, [$event->getInstanceId()]);
+    $this->dispatch($event, __FUNCTION__, [$event->getInstanceId(), $event->getCurrentIslandId()]);
   }
 
   /**

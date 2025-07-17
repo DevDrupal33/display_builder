@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
-use Drupal\display_builder\Form\CssVariablesForm;
 use Drupal\display_builder\IslandPluginBase;
+use Drupal\display_builder\IslandPluginFormTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
 use Drupal\display_builder\RenderableAltererInterface;
@@ -24,6 +25,8 @@ use Drupal\ui_skins\UiSkinsUtility;
 )]
 class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {
 
+  use IslandPluginFormTrait;
+
   /**
    * {@inheritdoc}
    */
@@ -34,21 +37,80 @@ class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, 
   /**
    * {@inheritdoc}
    */
-  public function build(string $builder_id, array $data, array $options = []): array {
-    if (empty($data) || !$this->isApplicable($data)) {
-      return [];
+  public function buildForm(array &$form, FormStateInterface $form_state): void {
+    $data = $form_state->getBuildInfo()['args'][0];
+    $instance = $data['instance'] ?? [];
+    $grouped_plugin_definitions = \Drupal::service('plugin.manager.ui_skins.css_variable')->getGroupedDefinitions();
+
+    if (empty($grouped_plugin_definitions)) {
+      return;
     }
 
-    $definition = $this->getPluginDefinition();
+    foreach ($grouped_plugin_definitions as $group => $definitions) {
+      $variables = [];
 
-    if (!\is_array($definition)) {
-      return [];
+      foreach ($definitions as $definition_id => $definition) {
+        $default = $definition->getDefaultValues();
+
+        if (!isset($default[':root'])) {
+          continue;
+        }
+        $variables[$definition_id] = [
+          '#type' => $definition->getType(),
+          '#title' => $definition->getLabel(),
+          '#default_value' => $instance[$definition_id] ?? $default[':root'] ?? '',
+        ];
+      }
+
+      if (!empty($variables)) {
+        $variables['#type'] = 'details';
+        $variables['#title'] = $group;
+        $form[$group] = $variables;
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    $variables = $form_state->getValues();
+    $variables = $this->filterValues($variables);
+    $variables = $form_state->setValues($variables);
+    // Those two lines are necessary to prevent the form from being rebuilt.
+    // if rebuilt, the form state values will have both the computed ones
+    // and the raw ones (wrapper key and values).
+    $form_state->setRebuild(FALSE);
+    $form_state->setExecuted();
+  }
+
+  /**
+   * Extract values to save in configuration.
+   *
+   * @param array $variables
+   *   The variables to filter.
+   */
+  protected function filterValues(array $variables): array {
+    $cleaned_variables = [];
+
+    foreach ($variables as $variable => $value) {
+      /** @var \Drupal\ui_skins\Definition\CssVariableDefinition $plugin_definition */
+      $plugin_definition = \Drupal::service('plugin.manager.ui_skins.css_variable')->getDefinition($variable, FALSE);
+
+      if (!$plugin_definition) {
+        continue;
+      }
+
+      // Remove values that do not differ from the default values of the
+      // plugin.
+      if ($plugin_definition->isDefaultScopeValue(':root', $value)) {
+        continue;
+      }
+
+      $cleaned_variables[$variable] = $value;
     }
 
-    $island_id = $definition['id'] ?? '';
-    $form = \Drupal::formBuilder()->getForm(static::getFormClass(), $data['_third_party_settings'][$island_id] ?? []);
-
-    return $this->htmxEvents->onThirdPartyFormChange($form, $builder_id, $data['_instance_id'], $island_id);
+    return $cleaned_variables;
   }
 
   /**
@@ -84,34 +146,22 @@ class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, 
    * {@inheritdoc}
    */
   public function onActive(string $builder_id, array $data): array {
-    return $this->reloadWithLocalData($builder_id, $data);
+    return $this->reloadWithLocalData($builder_id, $data, NULL);
   }
 
   /**
    * {@inheritdoc}
    */
   public function onDelete(string $builder_id, string $parent_id): array {
-    return $this->reloadWithLocalData($builder_id, []);
+    return $this->reloadWithLocalData($builder_id, [], NULL);
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
-  public static function getFormClass(): string {
-    return CssVariablesForm::class;
-  }
-
-  /**
-   * Check if this island should be displayed.
-   *
-   * @param array $data
-   *   The data.
-   *
-   * @return bool
-   *   TRUE if this island should be displayed, FALSE otherwise.
-   */
-  private function isApplicable(array $data): bool {
-    return isset($data['source_id']) && isset($data['_instance_id']);
+  public function isApplicable(): bool {
+    return parent::isApplicable() && \Drupal::service('module_handler')
+      ->moduleExists('ui_skins');
   }
 
 }

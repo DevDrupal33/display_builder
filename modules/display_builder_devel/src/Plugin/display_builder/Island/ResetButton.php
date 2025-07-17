@@ -7,6 +7,7 @@ namespace Drupal\display_builder_devel\Plugin\display_builder\Island;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\IslandPluginBase;
+use Drupal\display_builder\IslandPluginFormTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
 use Drupal\display_builder_devel\Form\ImportForm;
@@ -21,6 +22,8 @@ use Drupal\display_builder_devel\Form\ImportForm;
   type: IslandType::Button,
 )]
 class ResetButton extends IslandPluginBase implements IslandWithFormInterface {
+
+  use IslandPluginFormTrait;
 
   /**
    * {@inheritdoc}
@@ -66,7 +69,7 @@ class ResetButton extends IslandPluginBase implements IslandWithFormInterface {
    * {@inheritdoc}
    */
   public function onActive(string $builder_id, array $data): array {
-    return $this->reloadWithLocalData($builder_id, $data);
+    return $this->reloadWithLocalData($builder_id, $data, NULL);
   }
 
   /**

@@ -8,6 +8,8 @@
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/ui_patterns_overrides/ui_patterns_overrides.ui_patterns.inc"/>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/src/Entity/DisplayBuilder.php" method="build"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/IslandPluginBase.php"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/IslandPluginFormTrait.php"/>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/src/Plugin/display_builder/Island/BuilderPanel.php" method="buildSingleBlock"/>
+  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/src/Plugin/display_builder/Island/InstanceFormPanel.php" method="alterFormValues"/>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/src/Plugin/display_builder/Island/LogsPanel.php" method="buildRows"/>
 </phpmd-baseline>

@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
+use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\Core\Form\FormState;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\display_builder\StateManager\StateManagerInterface;
@@ -16,10 +19,37 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * Base class for island plugins.
  */
 abstract class IslandPluginBase extends PluginBase implements IslandInterface {
-
   use RenderableBuilderTrait;
   use HtmxTrait;
   use StringTranslationTrait;
+
+  /**
+   * The island data.
+   *
+   * @var array
+   */
+  protected array $data;
+
+  /**
+   * The builder id.
+   *
+   * @var string
+   */
+  protected string $builderId;
+
+  /**
+   * The current island id which trigger action.
+   *
+   * @var string
+   */
+  protected string $currentIslandId;
+
+  /**
+   * The instance id for this plugin.
+   *
+   * @var string|null
+   */
+  protected ?string $instanceId = NULL;
 
   /**
    * {@inheritdoc}
@@ -35,6 +65,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
     protected SourcePluginManager $sourceManager,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->data = $configuration;
   }
 
   /**
@@ -92,7 +123,80 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * {@inheritdoc}
    */
-  abstract public function build(string $builder_id, array $data, array $options = []): array;
+  public function isApplicable(): bool {
+    $definition = $this->getPluginDefinition();
+
+    return NULL !== $this->instanceId && \is_array($definition) && !empty($this->data);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function build(string $builder_id, array $data, array $options = []): array {
+    $this->builderId = $builder_id;
+    $this->instanceId = $data['_instance_id'] ?? NULL;
+
+    // First, get specific data for the plugin.
+    if (isset($data['_third_party_settings'][$this->getPluginId()])) {
+      $this->data = $data['_third_party_settings'][$this->getPluginId()];
+    }
+    // Otherwise, fallback on global data.
+    else {
+      $this->data = $data;
+    }
+
+    if (!$this->isApplicable()) {
+      return [];
+    }
+
+    if ($this instanceof IslandWithFormInterface) {
+
+      $contexts = $this->configuration['contexts'] ?? [];
+
+      $form_state = new FormState();
+
+      // We have to force form to not rebuild, otherwise, we are losing data
+      // of an island plugin when another is submitted.
+      // Example: submitting Styles Panel make lose default form values for
+      // Instance Form Panel.
+      $form_state->setRebuild(FALSE);
+      $form_state->setExecuted();
+
+      $form_state->addBuildInfo('args', [self::getArgs(), $contexts, $options]);
+      $build = \Drupal::formBuilder()->buildForm($this::getFormClass(), $form_state);
+      return $this->afterBuild($build, $form_state);
+    }
+
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function afterBuild(array $element, FormStateInterface $form_state): array {
+    if (!$this->isApplicable()) {
+      return [];
+    }
+
+    $definition = $this->getPluginDefinition();
+    $island_id = $definition instanceof PluginDefinitionInterface ? $definition->id() : ($definition['id'] ?? '');
+    return $this->htmxEvents->onThirdPartyFormChange($element, $this->builderId, $this->instanceId, $island_id);
+  }
+
+  /**
+   * Get args passed to plugin.
+   *
+   * @return array
+   *   Array of arguments.
+   */
+  protected function getArgs(): array {
+    return [
+      'island_id' => $this->getPluginId(),
+      'builder_id' => $this->builderId,
+      'instance_id' => $this->instanceId,
+      'instance' => $this->data,
+    ];
+  }
 
   /**
    * {@inheritdoc}
@@ -125,7 +229,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * {@inheritdoc}
    */
-  public function onUpdate(string $builder_id, string $instance_id): array {
+  public function onUpdate(string $builder_id, string $instance_id, ?string $current_island_id): array {
     return [];
   }
 
@@ -183,13 +287,15 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    *   The builder ID.
    * @param array $data
    *   The local data array to use for building the island.
+   * @param string|null $current_island_id
+   *   Optional current island ID which trigger action.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  protected function reloadWithLocalData(string $builder_id, array $data): array {
+  protected function reloadWithLocalData(string $builder_id, array $data, ?string $current_island_id): array {
     return $this->addOutOfBand(
-      $this->build($builder_id, $data),
+      $this->build($builder_id, $data, ['current_island_id' => $current_island_id]),
       '#' . $this->getHtmlId($builder_id),
       'innerHTML'
     );

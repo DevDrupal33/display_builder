@@ -182,7 +182,14 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     }
     $form_state = new FormState();
     // Default values are the existing values from the state.
-    $form_state->addBuildInfo('args', [$instance, [], $this->stateManager->getContexts($builder_id)]);
+    $form_state->addBuildInfo('args', [
+      [
+        'island_id' => 'instance_form',
+        'builder_id' => $builder_id,
+        'instance' => $instance,
+      ],
+      $this->stateManager->getContexts($builder_id),
+    ]);
     // The body received corresponds to raw form values.
     // We need to set them in the form state to properly
     // take them into account.
@@ -228,7 +235,14 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
 
     $form_state = new FormState();
     // Default values are the existing values from the state.
-    $form_state->addBuildInfo('args', [$instance['_third_party_settings'][$island_id] ?? [], []]);
+    $form_state->addBuildInfo('args', [
+      [
+        'island_id' => $island_id,
+        'builder_id' => $builder_id,
+        'instance' => $instance,
+      ],
+      [],
+    ]);
     // The body received corresponds to raw form values.
     // We need to set them in the form state to properly
     // take them into account.
@@ -244,6 +258,8 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
       $builder_id,
       NULL,
       $instance_id,
+      NULL,
+      $island_id
     );
   }
 
@@ -403,6 +419,8 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
    *   Optional instance ID.
    * @param string|null $parent_id
    *   Optional parent ID.
+   * @param string|null $current_island_id
+   *   Optional current island ID which trigger action.
    *
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
@@ -413,8 +431,9 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     ?array $data = NULL,
     ?string $instance_id = NULL,
     ?string $parent_id = NULL,
+    ?string $current_island_id = NULL,
   ): HtmlResponse {
-    $result = $this->createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id);
+    $result = $this->createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id, $current_island_id);
 
     return $this->bareHtmlPageRenderer->renderBarePage($result, '', 'markup');
   }
@@ -432,6 +451,8 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
    *   Optional instance ID.
    * @param string|null $parent_id
    *   Optional parent ID.
+   * @param string|null $current_island_id
+   *   Optional current island ID which trigger action.
    *
    * @return array
    *   The render array result of the event.
@@ -442,8 +463,9 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     ?array $data = NULL,
     ?string $instance_id = NULL,
     ?string $parent_id = NULL,
+    ?string $current_island_id = NULL,
   ): array {
-    return $this->createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id);
+    return $this->createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id, $current_island_id);
   }
 
   /**
@@ -522,11 +544,13 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
    *   Optional instance ID.
    * @param string|null $parent_id
    *   Optional parent ID.
+   * @param string|null $current_island_id
+   *   Current island ID which trigger action.
    *
    * @return array
    *   The event result.
    */
-  private function createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id): array {
+  private function createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id, $current_island_id): array {
     $key = \sprintf('db_%s_island_enable', $builder_id);
     $island_enabled = $this->memoryCache->get($key);
 
@@ -541,7 +565,7 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
       $island_enabled = $island_enabled->data;
     }
 
-    $event = new DisplayBuilderEvent($builder_id, $island_enabled, $data, $instance_id, $parent_id);
+    $event = new DisplayBuilderEvent($builder_id, $island_enabled, $data, $instance_id, $parent_id, $current_island_id);
     $this->eventDispatcher->dispatch($event, $event_id);
 
     return $event->getResult();

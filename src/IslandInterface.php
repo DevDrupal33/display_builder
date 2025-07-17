@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 
 /**
@@ -71,5 +72,26 @@ interface IslandInterface extends ContainerFactoryPluginInterface, IslandEventSu
    *   The icon string.
    */
   public function getIcon(): ?string;
+
+  /**
+   * Determine if the Island plugin is applicable.
+   *
+   * @return bool
+   *   TRUE if plugin is applicable, FALSE otherwise.
+   */
+  public function isApplicable(): bool;
+
+  /**
+   * Alter form element after its built.
+   *
+   * @param array $element
+   *   An associative array containing the structure of the form element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   *
+   * @return array
+   *   The altered form element.
+   */
+  public function afterBuild(array $element, FormStateInterface $form_state): array;
 
 }
