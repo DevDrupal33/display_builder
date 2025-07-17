@@ -1,11 +1,13 @@
 {% set attributes = id ? attributes.setAttribute('id', id) : attributes %}
+{% if variant and variant != 'default' %}
+  {% set attributes = attributes.setAttribute('placement', variant|default('start')) %}
+{% else %}
+  {% set attributes = attributes.setAttribute('placement', 'start') %}
+{% endif %}
+
 {% set attributes = no_header ? attributes.setAttribute('no-header', no_header) : attributes %}
 {# https://shoelace.style/components/drawer#scrolling #}
 {% set attributes = attributes.addClass(['shoelace-drawer', 'drawer-scrolling']) %}
-
-{% if placement %}
-  {% set attributes = attributes.setAttribute('placement', placement|default('end')) %}
-{% endif %}
 
 {# https://shoelace.style/components/drawer#contained-to-an-element #}
 {% if contained %}

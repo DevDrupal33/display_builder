@@ -26,8 +26,9 @@ props:
 libraryOverrides:
   dependencies:
     - core/drupal
+    - core/drupal.displace
     - core/once
-    - display_builder/drawer
+    - display_builder/db_drawer
     - display_builder/form
     - display_builder/preview
     - display_builder/search

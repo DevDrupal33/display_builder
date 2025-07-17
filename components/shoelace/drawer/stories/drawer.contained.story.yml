@@ -1,0 +1,27 @@
+name: Default
+slots:
+  content: This is a content of the drawer.
+props:
+  label: Drawer label
+  footer_close: true
+
+library_wrapper: >
+  {% set id = 'drawer-' ~ variant ~ random() %}
+  {% set props = {'#props': _story['#props']|merge({'id': id})} %}
+  {{ include('display_builder:button', {
+    'label': 'Show drawer @variant'|t({'@variant': variant}),
+    'variant': 'primary',
+    'icon': 'rocket-takeoff',
+    'attributes': {
+      'data-drawer-target': id,
+    },
+  }, with_context = false) }}
+  {{ _story|merge(props) }}
+
+  <script>
+    const drawer_{{ variant }} = document.querySelector('#{{ id }}');
+    const openButton_{{ variant }} = document.querySelector('[data-drawer-target="{{ id }}"]');
+    const closeButton_{{ variant }} = drawer_{{ variant }}.querySelector('[data-drawer-target="{{ id }}"]');
+    openButton_{{ variant }}.addEventListener('click', () => drawer_{{ variant }}.show());
+    closeButton_{{ variant }}.addEventListener('click', () => drawer_{{ variant }}.hide());
+  </script>

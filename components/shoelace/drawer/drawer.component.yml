@@ -1,7 +1,22 @@
-name: Shoelace Drawers
-description: Drawers slide in from a container to expose additional options and information.
+name: Drawer
+description: >
+  Drawers slide in from a container to expose additional options and
+  information.
+  No Javascript is included to trigger the drawer.
+group: Dialog
 links:
   - https://shoelace.style/components/drawer
+
+variants:
+  default:
+    title: Slide in From Start
+  top:
+    title: Slide in From Top
+  end:
+    title: Slide in From End
+  bottom:
+    title: Slide in From Bottom
+
 slots:
   content:
     title: Content
@@ -13,33 +28,40 @@ props:
       type: string
     label:
       title: Label
+      description: The drawer’s label as displayed in the header.
       type: string
     size:
       title: Size
+      description: >
+        The preferred size of the drawer. This will be applied to the drawer’s
+        width or height depending on its placement. Note that the drawer will
+        shrink to accommodate smaller screens.
       type: string
-    placement:
-      title: Placement
-      type: string
-      default: end
-      enum:
-        - top
-        - end
-        - bottom
-        - start
+      default: 25rem
     contained:
       title: Contained
+      description: >
+        By default, the drawer slides out of its containing block
+        (usually the viewport). To make the drawer slide out of its parent
+        element, set this attribute and add position: relative to the parent.
       type: boolean
       default: false
     no_header:
       title: Removes the header
+      description: >
+        Removes the header. This will also remove the default close button, so
+        please ensure you provide an easy, accessible way for users to dismiss
+        the drawer.
       type: boolean
       default: false
     footer_close:
       title: Footer close
+      description: Close button visible in the footer.
       type: boolean
-      default: true
+      default: false
     close_variant:
       title: Footer close variant
+      description: Footer close button variant.
       type: string
       default: primary
       enum:
@@ -49,3 +71,7 @@ props:
         - neutral
         - warning
         - danger
+
+libraryOverrides:
+  dependencies:
+    - display_builder/shoelace_local

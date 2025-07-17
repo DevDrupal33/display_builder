@@ -1,0 +1,29 @@
+name: Long content
+slots:
+  content: |
+    <p>This is some placeholder content to show the scrolling behavior for drawers. We use repeated line breaks to demonstrate how content can exceed minimum inner height, thereby showing inner scrolling. When content becomes longer than the predefined max-height of drawer, content will be cropped and scrollable within the drawer.</p>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    <p>This content should appear at the bottom after you scroll.</p>
+props:
+  label: Drawer label
+  footer_close: true
+
+library_wrapper: >
+  {% set id = variant ~ '_' ~ random() %}
+  {% set props = {'#props': _story['#props']|merge({'id': id})} %}
+  {{ include('display_builder:button', {
+    'label': 'Show drawer @variant'|t({'@variant': variant}),
+    'variant': 'primary',
+    'attributes': {
+      'data-drawer-target': id,
+    },
+  }, with_context = false) }}
+  {{ _story|merge(props) }}
+
+  <script>
+    const drawer_{{ id }} = document.querySelector('#{{ id }}');
+    const openButton_{{ id }} = document.querySelector('[data-drawer-target="{{ id }}"]');
+    const closeButton_{{ id }} = drawer_{{ id }}.querySelector('[data-drawer-target="{{ id }}"]');
+    openButton_{{ id }}.addEventListener('click', () => drawer_{{ id }}.show());
+    closeButton_{{ id }}.addEventListener('click', () => drawer_{{ id }}.hide());
+  </script>

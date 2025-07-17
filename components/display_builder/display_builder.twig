@@ -17,7 +17,6 @@
 
   {{ include('display_builder:drawer', {
     id: 'db-first-drawer',
-    placement: 'start',
     content: first_drawer_content,
     contained: true,
     footer_close: false,
@@ -36,7 +35,7 @@
   {{ include('display_builder:drawer', {
     id: 'db-second-drawer',
     label: 'Settings'|t,
-    placement: 'end',
+    variant: 'end',
     content: second_drawer_content,
     contained: true,
     footer_close: false,

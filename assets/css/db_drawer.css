@@ -1,0 +1,31 @@
+/* Normal display. */
+.display-builder .shoelace-drawer {
+  &::part(base) {
+    z-index: calc(var(--db-z-index, 1) + 1);
+    margin-top: var(--drupal-displace-offset-top, 0);
+  }
+}
+
+/* Admin toolbar vertical, we pass hover, admin toolbar z-index is 501. */
+.toolbar-tray-open.toolbar-vertical .display-builder .shoelace-drawer {
+  &::part(base) {
+    z-index: 502;
+  }
+}
+
+.toolbar-loading .display-builder .shoelace-drawer {
+  &::part(base) {
+    z-index: 1252;
+  }
+}
+
+/* Fullscreen display */
+.display-builder.display-builder--fullscreen .shoelace-drawer {
+  &::part(base) {
+    /* Ignore the top toolbar, only check the Display Builder toolbar. */
+    margin-top: var(--db-toolbar-height, 0);
+  }
+}
+.toolbar-loading .display-builder.display-builder--fullscreen {
+  z-index: 1252;
+}

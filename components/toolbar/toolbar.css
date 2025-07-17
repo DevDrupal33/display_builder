@@ -3,8 +3,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  height: 4rem;
-  margin-bottom: 0.7rem;
+  height: var(--db-toolbar-height, 4rem);
   padding: 0.5rem;
 }
 
@@ -63,12 +62,6 @@
 }
 
 .display-builder--fullscreen .db-toolbar {
-  z-index: calc(var(--db-z-index, 1) + 2);
+  z-index: calc(var(--db-z-index, 1) + 1);
   top: 0;
-}
-
-/* Compatibility with core navigation. */
-/* @todo is there a variable? */
-html[data-admin-toolbar] .db-toolbar {
-  top: 0.5em;
 }

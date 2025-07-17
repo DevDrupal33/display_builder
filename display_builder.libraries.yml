@@ -29,15 +29,16 @@ wysiwyg_fixes.js:
   js:
     ./assets/js/wysiwyg_fixes.js: {}
 
-drawer:
+db_drawer:
   css:
     component:
-      ./assets/css/drawer.css: {}
+      ./assets/css/db_drawer.css: {}
   js:
-    ./assets/js/drawer.js: {}
+    ./assets/js/db_drawer.js: {}
   dependencies:
     - core/drupal
     - core/drupalSettings
+    - core/drupal.displace
 
 search:
   css:

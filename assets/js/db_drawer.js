@@ -42,6 +42,8 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger) => {
  */
 Drupal.displayBuilder.initDrawer = (builder, debug) => {
   const firstDrawer = builder.querySelector('#db-first-drawer');
+  firstDrawer.setAttribute(`data-offset-left`, '');
+
   const firstDrawerPanes = builder.querySelectorAll(
     '.shoelace-drawer__content_island',
   );
@@ -91,19 +93,19 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
     if (builder.classList.contains('display-builder--fullscreen')) {
       builder.querySelector('.display-builder__main').style.marginLeft =
         `${drawerWidth}px`;
-    } else {
-      document.body.style.setProperty(
-        '--db-body-margin-left',
-        `${drawerWidth}px`,
-      );
     }
+
+    firstDrawer.setAttribute(`data-offset-left`, `${drawerWidth}px`);
+    Drupal.displace(true);
   };
 
   const resetMainMarginOnHide = () => {
     if (builder.classList.contains('display-builder--fullscreen')) {
       builder.querySelector('.display-builder__main').style.marginLeft = '0';
     }
-    document.body.style.setProperty('--db-body-margin-left', 0);
+
+    firstDrawer.setAttribute(`data-offset-left`, '');
+    Drupal.displace(true);
   };
 
   const handleResize = (event, drawer, isFirst) => {
@@ -125,7 +127,8 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
     drawer.style.setProperty('--size', `${newWidth}px`);
 
     if (isFirst) {
-      document.body.style.setProperty('--db-body-margin-left', `${newWidth}px`);
+      firstDrawer.setAttribute(`data-offset-left`, `${newWidth}px`);
+      Drupal.displace(true);
       if (builder.classList.contains('display-builder--fullscreen')) {
         builder.querySelector('.display-builder__main').style.marginLeft =
           `${newWidth}px`;
@@ -205,10 +208,8 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
 
       // Push the content for the first sidebar.
       const drawerWidth = getDrawerWidth() || 400;
-      document.body.style.setProperty(
-        '--db-body-margin-left',
-        `${drawerWidth}px`,
-      );
+      firstDrawer.setAttribute(`data-offset-left`, `${drawerWidth}px`);
+      Drupal.displace(true);
     }
   };
 
