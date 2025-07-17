@@ -8,7 +8,9 @@ use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
+use Drupal\display_builder\ConfigFormTrait;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 
@@ -19,8 +21,11 @@ final class AddForm extends FormBase {
 
   use AutowireTrait;
 
+  use ConfigFormTrait;
+
   public function __construct(
-    private readonly EntityTypeManagerInterface $entityTypeManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected AccountProxyInterface $currentUser,
     private readonly StateManagerInterface $stateManager,
   ) {}
 
@@ -28,30 +33,13 @@ final class AddForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $storage = $this->entityTypeManager->getStorage('display_builder');
-    $displayBuilderConfig = $storage->loadMultiple();
-
-    $options = [];
-
-    foreach ($displayBuilderConfig as $config) {
-      $options[$config->id()] = $config->label();
-    }
-    $form['display_builder_id'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Display builder'),
-      '#description' => $this->t('Choose a display builder configuration. Create a <a href="@url">new configuration</a> if needed.', ['@url' => Url::fromRoute('entity.display_builder.add_form')->toString()]),
-      '#options' => $options,
-      '#default_value' => reset($options),
-      '#required' => TRUE,
-    ];
-
-    $options = DisplayBuilderHelpers::getAllFixturesOptions();
+    $form['display_builder_id'] = $this->buildConfigForm(NULL);
 
     $form['fixture_id'] = [
       '#type' => 'select',
       '#title' => $this->t('Initial test data'),
       '#description' => $this->t('Enter the fixture to use as base for this display builder instance.'),
-      '#options' => $options,
+      '#options' => DisplayBuilderHelpers::getAllFixturesOptions(),
       '#default_value' => 'blank',
       '#required' => TRUE,
     ];

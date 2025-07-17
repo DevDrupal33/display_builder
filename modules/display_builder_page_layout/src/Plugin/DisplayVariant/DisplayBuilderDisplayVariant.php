@@ -14,7 +14,9 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
+use Drupal\display_builder\ConfigFormTrait;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\Entity\DisplayBuilder;
 use Drupal\display_builder\StateManager\StateManagerInterface;
@@ -35,6 +37,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 )]
 class DisplayBuilderDisplayVariant extends VariantBase implements ContainerFactoryPluginInterface, ContextAwareVariantInterface {
 
+  use ConfigFormTrait;
+
   private const PAGE_MANAGER_PREFIX = 'page_manager_';
 
   /**
@@ -50,13 +54,6 @@ class DisplayBuilderDisplayVariant extends VariantBase implements ContainerFacto
    * The display builder state manager.
    */
   protected StateManagerInterface $stateManager;
-
-  /**
-   * The entity type manager service.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
 
   /**
    * The display builder page layout config.
@@ -78,14 +75,17 @@ class DisplayBuilderDisplayVariant extends VariantBase implements ContainerFacto
     $plugin_definition,
     StateManagerInterface $state_manager,
     ConfigFactoryInterface $config_factory,
-    EntityTypeManagerInterface $entity_type_manager,
     ComponentElementBuilder $component_element_builder,
+    EntityTypeManagerInterface $entity_type_manager,
+    AccountProxyInterface $current_user,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->stateManager = $state_manager;
     $this->config = $config_factory->get(DisplayBuilderPageLayout::PAGE_LAYOUT_CONFIG);
-    $this->entityTypeManager = $entity_type_manager;
     $this->componentElementBuilder = $component_element_builder;
+    // Needed by ConfigFormTrait.
+    $this->entityTypeManager = $entity_type_manager;
+    $this->currentUser = $current_user;
   }
 
   /**
@@ -98,8 +98,10 @@ class DisplayBuilderDisplayVariant extends VariantBase implements ContainerFacto
       $plugin_definition,
       $container->get('display_builder.state_manager'),
       $container->get('config.factory'),
-      $container->get('entity_type.manager'),
       $container->get('ui_patterns.component_element_builder'),
+      // Needed by ConfigFormTrait.
+      $container->get('entity_type.manager'),
+      $container->get('current_user'),
     );
   }
 
@@ -158,21 +160,8 @@ class DisplayBuilderDisplayVariant extends VariantBase implements ContainerFacto
 
       return $form;
     }
-
-    $displayBuilderConfig = $this->entityTypeManager->getStorage('display_builder')->loadMultiple();
-    $options = [];
-
-    foreach ($displayBuilderConfig as $entityId => $configEntity) {
-      $options[$entityId] = $configEntity->label();
-    }
-    $form[StorageProperties::ConfigEntityId->value] = [
-      '#type' => 'select',
-      '#title' => $this->t('Display builder config'),
-      '#description' => $this->t('Pick a display builder configuration to use.'),
-      '#options' => $options,
-      '#default_value' => $this->configuration[StorageProperties::ConfigEntityId->value] ?? DisplayBuilder::DISPLAY_BUILDER_CONFIG,
-      '#required' => TRUE,
-    ];
+    $display_builder_id = $this->configuration[StorageProperties::ConfigEntityId->value] ?? DisplayBuilder::DISPLAY_BUILDER_CONFIG;
+    $form[StorageProperties::ConfigEntityId->value] = $this->buildConfigForm($display_builder_id);
 
     $form['fixture_id'] = [
       '#type' => 'select',

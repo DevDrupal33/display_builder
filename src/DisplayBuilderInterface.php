@@ -34,4 +34,12 @@ interface DisplayBuilderInterface extends ConfigEntityInterface {
    */
   public function getIslandEnabled(): array;
 
+  /**
+   * Returns the machine-readable permission name for the text format.
+   *
+   * @return string
+   *   The machine-readable permission name.
+   */
+  public function getPermissionName(): string;
+
 }

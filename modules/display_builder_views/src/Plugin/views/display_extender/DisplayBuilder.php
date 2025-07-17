@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\display_builder\ConfigFormTrait;
 use Drupal\display_builder\StorageProperties;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\Entity\DisplayBuilder as DisplayBuilderConfigEntity;
@@ -30,14 +31,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 )]
 class DisplayBuilder extends DisplayExtenderPluginBase {
 
-  private const VIEWS_PREFIX = 'views_';
+  use ConfigFormTrait;
 
-  /**
-   * The display builder storage.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected $displayBuilderConfigStorage;
+  private const VIEWS_PREFIX = 'views_';
 
   /**
    * The display builder state manager.
@@ -51,9 +47,10 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): self {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->displayBuilderConfigStorage = $container->get('entity_type.manager')->getStorage('display_builder');
     $instance->stateManager = $container->get('display_builder.state_manager');
-
+    // Needed by ConfigFormTrait.
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->currentUser = $container->get('current_user');
     return $instance;
   }
 
@@ -68,8 +65,10 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
     }
 
     $form['#title'] .= $this->t('Display Builder');
-    $form[StorageProperties::InstanceId->value] = $this->buildInstanceForm($this->options[StorageProperties::InstanceId->value] ?? NULL);
-    $form[StorageProperties::ConfigEntityId->value] = $this->buildConfigForm($this->options[StorageProperties::ConfigEntityId->value] ?? DisplayBuilderConfigEntity::DISPLAY_BUILDER_CONFIG);
+    $instance_id = $this->options[StorageProperties::InstanceId->value] ?? NULL;
+    $form[StorageProperties::InstanceId->value] = $this->buildInstanceForm($instance_id);
+    $display_builder_id = $this->options[StorageProperties::ConfigEntityId->value] ?? DisplayBuilderConfigEntity::DISPLAY_BUILDER_CONFIG;
+    $form[StorageProperties::ConfigEntityId->value] = $this->buildConfigForm($display_builder_id);
   }
 
   /**
@@ -106,29 +105,6 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
       ],
       '#default_value' => $instance_id,
       '#required' => TRUE,
-    ];
-  }
-
-  /**
-   * Build 'Display builder' config entity form.
-   *
-   * @param ?string $display_builder
-   *   The entity ID of a Display builder config entity.
-   *
-   * @return array
-   *   A form renderable array.
-   */
-  private function buildConfigForm(?string $display_builder): array {
-    $display_builders = $this->displayBuilderConfigStorage->loadMultiple();
-    $options = [];
-    foreach ($display_builders as $entity_id => $config) {
-      $options[$entity_id] = $config->label();
-    }
-    return [
-      '#type' => 'select',
-      '#title' => $this->t('Display builder config'),
-      '#options' => $options,
-      '#default_value' => $display_builder,
     ];
   }
 

@@ -208,6 +208,13 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getPermissionName(): string {
+    return 'use display builder ' . $this->id();
+  }
+
+  /**
    * Prepares view islands data.
    *
    * @param string $builder_id

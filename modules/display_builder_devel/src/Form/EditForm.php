@@ -8,7 +8,9 @@ use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
+use Drupal\display_builder\ConfigFormTrait;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Drupal\Component\Serialization\Json;
@@ -20,8 +22,11 @@ final class EditForm extends FormBase {
 
   use AutowireTrait;
 
+  use ConfigFormTrait;
+
   public function __construct(
-    private readonly EntityTypeManagerInterface $entityTypeManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected AccountProxyInterface $currentUser,
     private readonly StateManagerInterface $stateManager,
   ) {}
 
@@ -35,23 +40,8 @@ final class EditForm extends FormBase {
     }
 
     $builder_config_id = $this->stateManager->getEntityConfigId($builder_id);
-    $storage = $this->entityTypeManager->getStorage('display_builder');
-    $displayBuilderConfig = $storage->loadMultiple();
+    $form['builder_config_id'] = $this->buildConfigForm($builder_config_id);
 
-    $options = [];
-
-    foreach ($displayBuilderConfig as $config) {
-      $options[$config->id()] = $config->label();
-    }
-
-    $form['builder_config_id'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Display builder configuration'),
-      '#description' => $this->t('Choose a display builder configuration. Create a <a href="@url">new configuration</a> if needed.', ['@url' => Url::fromRoute('entity.display_builder.add_form')->toString()]),
-      '#options' => $options,
-      '#default_value' => $builder_config_id,
-      '#required' => TRUE,
-    ];
     $form['builder_id'] = [
       '#type' => 'hidden',
       '#value' => $builder_id,
