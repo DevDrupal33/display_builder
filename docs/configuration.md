@@ -10,7 +10,7 @@ Permissions:
 
 `/admin/structure/display-builder`
 
-![](images/configs.webp)
+![Display Builder configuration](images/configs.webp)
 
 ## Configuration of a single display builder
 
@@ -23,13 +23,13 @@ There are 5 type of islands:
 
 - `View` panels: They are displayed tabbed in the center of the toolbar, or as buttons in the start of the toolbar
 - `Button`s: they a re displayed as buttons in the end of the toolbar
-- `Library` panels: They are displayed tabbed into the Library View panel.
-- `Menu` items: they are displayed in the contextual menu triggered with right-click.
-- `Contextual` panels: They are displayed tabbed into the contextual sidebar.
+- `Library` panels: They are displayed tabbed into the Library View panel
+- `Menu` items: they are displayed in the contextual menu triggered with right-click
+- `Contextual` panels: They are displayed tabbed into the contextual sidebar
 
 Visual positioning:
 
-![](images/islands-regions.webp)
+![Islands region](images/islands-regions.webp)
 
 Each island can be:
 
@@ -39,7 +39,7 @@ Each island can be:
 
 For example, here is the configuration of View panels:
 
-![](images/config.webp)
+![Islands configuration](images/config.webp)
 
 View panels have an extra feature, they can be moved between 2 different regions:
 
@@ -52,10 +52,10 @@ View panels have an extra feature, they can be moved between 2 different regions
 
 Each display builder is associated to a permission:
 
-![](images/permissions.webp)
+![Permissions](images/permissions.webp)
 
 This is conditioning the builders available in the selector for a specific user:
 
-![](images/selector.webp)
+![Configuration selector](images/selector.webp)
 
 > 🚧 2025-07-01: Not implemented yet. See [#3529129](https://www.drupal.org/project/display_builder/issues/3529129)

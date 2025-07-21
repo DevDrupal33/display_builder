@@ -44,6 +44,7 @@ extra:
 
 nav:
   - Introduction: "index.md"
+  - Installation: "install.md"
   - Using Display Builder:
       - For entity displays: "entity-displays.md"
       - For entity displays overrides: "entity-displays-overrides.md"

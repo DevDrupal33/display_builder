@@ -51,7 +51,7 @@ But Experience Builder is currently targeting a deeper <strong>vertical</strong>
 
 Visual explanation:
 
-![](images/xb.webp)
+![XB](images/xb.webp)
 
 And they also differ by the technical and strategic choices. For example, Experience Builder is a complete ReactJS app, aside of Drupal, when Display Builder is just an usual Drupal module using HTMX.
 

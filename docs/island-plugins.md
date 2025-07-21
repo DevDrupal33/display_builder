@@ -10,21 +10,21 @@ There are 5 type of islands:
 
 - `View` panels: They are displayed tabbed in the center of the toolbar, or as buttons in the start of the toolbar
 - `Button`s: they a re displayed as buttons in the end of the toolbar
-- `Library` panels: They are displayed tabbed into the Library View panel.
-- `Menu` items: they are displayed in the contextual menu triggered with right-click.
-- `Contextual` panels: They are displayed tabbed into the contextual sidebar.
+- `Library` panels: They are displayed tabbed into the Library View panel
+- `Menu` items: they are displayed in the contextual menu triggered with right-click
+- `Contextual` panels: They are displayed tabbed into the contextual sidebar
 
 Visual positioning:
 
-![](images/islands-regions.webp)
+![Islands region](images/islands-regions.webp)
 
-### Interface
+## Interface
 
 Notable methods:
 
-- `IslandInterface::build()`: Build the renderable content of the island from state data. This renderable can be annotated by `HtmxEvents` to trigger HTTP requests.
-- Everything from `IslandEventSubscriberInterface`: each method (`onAttachToSlot()`, `onMove()`, ()`onUpdate()`...) is an HTMX event managed by the HTTP `ApiController`.
-- `PluginFormInterface::buildConfigurationForm`: to make the island plugin configurable in the [Display Builder config entity](configuration.md).
+- `IslandInterface::build()`: Build the renderable content of the island from state data. This renderable can be annotated by `HtmxEvents` to trigger HTTP requests
+- Everything from `IslandEventSubscriberInterface`: each method (`onAttachToSlot()`, `onMove()`, ()`onUpdate()`...) is an HTMX event managed by the HTTP `ApiController`
+- `PluginFormInterface::buildConfigurationForm`: to make the island plugin configurable in the [Display Builder config entity](configuration.md)
 
 > 🚧 2025-07-01: PluginFormInterface not implemented yet. [#3529067](https://www.drupal.org/project/display_builder/issues/3529067)
 

@@ -10,7 +10,7 @@ There are 5 type of islands:
 
 Visual positioning:
 
-![](images/islands-regions.webp)
+![Islands region](images/islands-regions.webp)
 
 Display Builder is shipped with those ones by default:
 

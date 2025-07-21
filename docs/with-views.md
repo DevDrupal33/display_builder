@@ -15,7 +15,7 @@ Display Builder is providing a nicer way of using, positioning & configuring Vie
 
 Visual representation:
 
-![](images/views-regions.webp)
+![Views region](images/views-regions.webp)
 
 ## Activate
 
@@ -23,11 +23,11 @@ You need `display_builder_views` module.
 
 On the view, Display Builder can be activated in "Other":
 
-![](images/views-activation-1.webp)
+![Views activation 1](images/views-activation-1.webp)
 
 You can pick the builder you want according to your permissions:
 
-![](images/views-activation-2.webp)
+![Views activation 2](images/views-activation-2.webp)
 
 > 🚧 2025-07-01: The UI of this pop-in may change.
 
@@ -35,11 +35,11 @@ You can pick the builder you want according to your permissions:
 
 We have access to Views related sources for slots in the _Blocks Library_ panel:
 
-![](images/views-sources.webp)
+![Views sources](images/views-sources.webp)
 
 View Title source is also available for string prop:
 
-![](images/views-title.webp)
+![Views title](images/views-title.webp)
 
 ## Under the hood
 

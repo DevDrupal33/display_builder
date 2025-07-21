@@ -8,19 +8,19 @@ Contrary to Layout Builder, there is no "Allow each content item to have its lay
 
 You start by adding a "Source (UI Patterns)"
 
-![](images/add-field.webp)
+![Add field](images/add-field.webp)
 
 > 🚧 2025-07-01: Field description may change
 
 It is better, but not mandatory, to chose unlimited number of value in field storage:
 
-![](images/field-storage.webp)
+![field storage](images/field-storage.webp)
 
 > 🚧 2025-07-01: Feature not implemented yet. [#3529125](https://www.drupal.org/project/display_builder/issues/3529125)
 
 In "Manage form display", you can pick "Display Builder":
 
-![](images/field-widget-selector.webp)
+![Field Widget selector](images/field-widget-selector.webp)
 
 ## Use Display builder in the content
 
