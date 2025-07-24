@@ -57,10 +57,9 @@ class DisplayBuilderPermissions implements ContainerInjectionInterface {
       $permission = $builder->getPermissionName();
       $permissions[$permission] = [
         'title' => $this->t(
-          'Use the <a href=":url">@label</a> display builder',
+          'Use the %label display builder',
           [
-            ':url' => $builder->toUrl()->toString(),
-            '@label' => $builder->label(),
+            '%label' => $builder->label(),
           ]
         ),
         'description' => [

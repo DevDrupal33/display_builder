@@ -28,6 +28,7 @@
   display: inline-block;
   box-sizing: border-box;
   width: 100%;
+  min-height: var(--dropzone-slot-min-height);
 }
 .db-dropzone[data-component-id][data-slot-id]:empty {
   min-width: var(--dropzone-slot-min-width);
@@ -68,6 +69,7 @@ handle it instead of shoelace */
 
 .display-builder--fullscreen .db-dropzone--root {
   width: 98%;
+  min-height: 10vh;
   margin: 0 0 0 1rem;
 }
 

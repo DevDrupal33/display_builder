@@ -17,7 +17,6 @@
 
     const builderId = draggableContainer.dataset.dbId;
     const sortableSettings = {
-      animation: 200,
       ghostClass: 'db-draggable--ghost',
       chosenClass: 'db-draggable--chosen',
       dragClass: 'db-draggable--drag',
@@ -27,8 +26,7 @@
         pull: 'clone',
         put: false,
       },
-      swapThreshold: 10,
-      emptyInsertThreshold: 10,
+      animation: 150,
       sort: false,
       onUnchoose(event) {
         // If selected is dropped out of dropzone, it is the event.item that

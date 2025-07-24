@@ -22,15 +22,15 @@ island_settings:
       enable: true
       weight: '-10'
       options: main
-    preview:
+    layers:
       enable: true
       weight: '-9'
       options: main
-    library:
+    preview:
       enable: true
       weight: '-8'
-      options: sidebar
-    layers:
+      options: main
+    library:
       enable: true
       weight: '-7'
       options: sidebar

@@ -25,9 +25,6 @@
 .db-layer:hover {
   border-color: var(--layers-color-target);
   background: var(--sl-color-neutral-200);
-  /* > .db-layer__title { */
-  /* color: var(--layers-color-strong); */
-  /* } */
 }
 
 .db-layer--block {

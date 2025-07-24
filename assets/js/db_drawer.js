@@ -42,7 +42,7 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger) => {
  */
 Drupal.displayBuilder.initDrawer = (builder, debug) => {
   const firstDrawer = builder.querySelector('#db-first-drawer');
-  firstDrawer.setAttribute(`data-offset-left`, '');
+  firstDrawer.removeAttribute('data-offset-left');
 
   const firstDrawerPanes = builder.querySelectorAll(
     '.shoelace-drawer__content_island',
@@ -95,7 +95,7 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
         `${drawerWidth}px`;
     }
 
-    firstDrawer.setAttribute(`data-offset-left`, `${drawerWidth}px`);
+    firstDrawer.setAttribute('data-offset-left', `${drawerWidth}px`);
     Drupal.displace(true);
   };
 
@@ -104,7 +104,7 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
       builder.querySelector('.display-builder__main').style.marginLeft = '0';
     }
 
-    firstDrawer.setAttribute(`data-offset-left`, '');
+    firstDrawer.removeAttribute('data-offset-left');
     Drupal.displace(true);
   };
 
@@ -127,7 +127,7 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
     drawer.style.setProperty('--size', `${newWidth}px`);
 
     if (isFirst) {
-      firstDrawer.setAttribute(`data-offset-left`, `${newWidth}px`);
+      firstDrawer.setAttribute('data-offset-left', `${newWidth}px`);
       Drupal.displace(true);
       if (builder.classList.contains('display-builder--fullscreen')) {
         builder.querySelector('.display-builder__main').style.marginLeft =
@@ -161,7 +161,6 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
   };
 
   const onHideResetActiveTrigger = (event) => {
-    // console.log('onHideResetActiveTrigger')
     if (event.target?.id === 'db-first-drawer' && activeFirstDrawerButton) {
       activeFirstDrawerButton.variant = 'default';
       activeFirstDrawerButton = null;

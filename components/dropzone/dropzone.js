@@ -12,14 +12,15 @@
   function setDropzone(dropzoneRoot) {
     const builderId = dropzoneRoot.dataset.dbId;
     const sortableSettings = {
-      animation: 200,
       // Add custom classes to style precisely.
       // @see components/dropzone/dropzone.css
       ghostClass: 'db-dropzone--ghost',
       chosenClass: 'db-dropzone--chosen',
       dragClass: 'db-dropzone--drag',
-      swapThreshold: 10,
-      emptyInsertThreshold: 10,
+      // https://sortablejs.github.io/Sortable/#thresholds
+      animation: 150,
+      direction: 'vertical',
+      swapThreshold: 0.5,
       group: {
         name: builderId,
         pull: true,
