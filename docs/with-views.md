@@ -78,3 +78,7 @@ display:
           instance: views_6861421654810
           sources: [...]
 ```
+
+Overview:
+
+![Internals](images/with-views-internals.webp)

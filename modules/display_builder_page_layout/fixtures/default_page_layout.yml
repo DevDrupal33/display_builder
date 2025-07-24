@@ -1,49 +1,26 @@
-
 - source_id: block
   source:
     plugin_id: system_branding_block
-
+- source_id: page_title
+  source: {}
 - source_id: block
   source:
-    plugin_id: page_title_block
-
+    plugin_id: "system_menu_block:main"
 - source_id: block
   source:
-    plugin_id: 'system_menu_block:main'
-
-- source_id: block
-  source:
-    plugin_id: 'system_menu_block:account'
-
+    plugin_id: "system_menu_block:account"
 - source_id: block
   source:
     plugin_id: system_breadcrumb_block
-
 - source_id: local_tasks
   source: {}
-
 - source_id: local_actions
   source: {}
-
-- source_id: wysiwyg
-  source:
-    value:
-      value: |
-        <blockquote style="
-             border: 2px dashed var(--db-primary-color); padding: 1rem; margin: 0.2rem 0 2rem 0;
-             background-image: var(--db-background-image);
-             background-size: var(--db-background-size);
-             box-shadow: var(--db-shadow);
-           ">Welcome to your new display builder layout!. Check the <b>Manage > Structure > Page Layout</b> to edit this layout.</blockquote>
-      format: full_html
-
 - source_id: main_page_content
   source: {}
-
 - source_id: block
   source:
-    plugin_id: 'system_menu_block:footer'
-
+    plugin_id: "system_menu_block:footer"
 - source_id: block
   source:
     plugin_id: system_powered_by_block

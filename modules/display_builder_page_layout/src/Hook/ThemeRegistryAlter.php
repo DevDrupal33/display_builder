@@ -30,7 +30,6 @@ class ThemeRegistryAlter {
     $theme_registry['html']['path'] = $template_uri;
     $theme_registry['page']['path'] = $template_uri;
     $theme_registry['region']['path'] = $template_uri;
-    // $theme_registry['off_canvas_page_wrapper']['path'] = $template_uri;
   }
 
 }

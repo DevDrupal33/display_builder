@@ -1,4 +1,0 @@
-entity.display_builder.instance.page_manager:
-  route_name: display_builder_page_layout.page_manager.collection
-  title: "Display builder"
-  base_route: entity.page.collection

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_page_layout\EventSubscriber;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Render\PageDisplayVariantSelectionEvent;
 use Drupal\Core\Render\RenderEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -15,63 +16,65 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * route.name:
  *  ...
  *  options:
- *    _admin_route: true
+ *    _admin_route: false
  *    _display_builder_route: true
  *
  * @endcode
  */
 class PageVariantSubscriber implements EventSubscriberInterface {
 
+  public function __construct(
+    private EntityTypeManagerInterface $entityTypeManager,
+  ) {}
+
   /**
    * {@inheritdoc}
    */
   public static function getSubscribedEvents(): array {
-    $events = [];
     // @todo check if we need to be sooner.
-    $events[RenderEvents::SELECT_PAGE_DISPLAY_VARIANT][] = ['onSelectPageDisplayVariant', -100];
-
-    return $events;
+    return [
+      RenderEvents::SELECT_PAGE_DISPLAY_VARIANT => [
+        ['onSelectPageDisplayVariant', -100],
+      ],
+    ];
   }
 
   /**
-   * Selects the simple page display variant.
+   * Selects the page display variant.
    *
    * @param \Drupal\Core\Render\PageDisplayVariantSelectionEvent $event
    *   The event to process.
    */
   public function onSelectPageDisplayVariant(PageDisplayVariantSelectionEvent $event): void {
-    $routeMatch = $event->getRouteMatch();
-    $routeObject = $routeMatch->getRouteObject();
-    $routeOptions = $routeObject->getOptions();
+    $route = $event->getRouteMatch()->getRouteObject();
+    $options = $route->getOptions();
 
-    // If we are on a display builder page, replace everything with a simple
-    // page. Keep compatibility with layout builder.
-    $isDisplayBuilderRoute = $routeOptions['_display_builder_route'] ?? FALSE;
-    $isLayoutBuilder = $routeOptions['_layout_builder'] ?? FALSE;
+    // In admin pages, we want the page.html.twig  from the admin theme.
+    if ($options['_admin_route'] ?? FALSE) {
+      return;
+    }
 
-    if ($isDisplayBuilderRoute || $isLayoutBuilder) {
+    // When we use Display Builder to build the full page, we don't want to have
+    // neither the theme's page.html.twig nor the page managed by Display
+    // Builder. We want a simple blank page.
+    // Example: entity.page_layout.display_builder.
+    if ($options['_display_builder_route'] ?? FALSE) {
       $event->setPluginId('simple_page');
 
       return;
     }
 
-    $isAdminRoute = $routeOptions['_admin_route'] ?? FALSE;
+    // Fallback to Block Layout if there is no suitable Page Layout entities.
+    /** @var \Drupal\display_builder_page_layout\AccessControlHandler $access_control */
+    $access_control = $this->entityTypeManager->getAccessControlHandler('page_layout');
+    $page_layout = $access_control->loadCurrentPageLayout();
 
-    if ($isAdminRoute) {
+    if (!$page_layout) {
       return;
     }
 
-    // Detect if on a page manager page with display of type full page.
-    $isPageDisplayContent = str_contains($routeObject->getDefault('_page_manager_page_variant') ?? '', '-display_builder_page-');
-
-    if ($isPageDisplayContent) {
-      $event->setPluginId('simple_page');
-
-      return;
-    }
-
-    // Set default to display builder.
-    $event->setPluginId('display_builder_page');
+    // Every other pages must be managed by Display Builder.
+    $event->setPluginId('display_builder');
   }
 
 }

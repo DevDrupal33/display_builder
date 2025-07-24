@@ -1,0 +1,17 @@
+.slot {
+  margin: 10px;
+  padding: 10px;
+  background-color: #66c5cc;
+  .slot {
+    margin-left: 10px;
+    background-color: #f6cf71;
+    .slot {
+      margin-left: 10px;
+      background-color: #f89c74;
+      .slot {
+        margin-left: 10px;
+        background-color: #dcb0f2;
+      }
+    }
+  }
+}

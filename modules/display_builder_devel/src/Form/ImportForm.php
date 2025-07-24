@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_devel\Form;
 
+use Drupal\Component\Serialization\Json;
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormBase;
@@ -12,7 +13,6 @@ use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
-use Drupal\Component\Serialization\Json;
 
 /**
  * Defines an add display builder instance form.
@@ -69,6 +69,7 @@ final class ImportForm extends FormBase {
 
     if ($routeParameters) {
       $parameters = [];
+
       foreach ($routeParameters as $key => $parameter) {
         $parameters[$key] = $parameter;
       }
@@ -122,12 +123,13 @@ final class ImportForm extends FormBase {
     $builder_id = $form_state->getValue('builder_id');
     $route_name = $form_state->getValue('route_name');
     $route_parameters = $form_state->getValue('route_parameters');
+
     if ($route_parameters) {
       $route_parameters = Json::decode($route_parameters);
     }
     $route_parameters['builder_id'] = $builder_id;
 
-    if ('fixture' === $import_type) {
+    if ($import_type === 'fixture') {
       $fixture_id = $form_state->getValue('fixture_id', 'blank');
       $builder_data = DisplayBuilderHelpers::getAllFixturesData($fixture_id);
     }

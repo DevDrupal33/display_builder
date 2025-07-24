@@ -14,6 +14,13 @@ services:
       - "@plugin.manager.ui_patterns_source"
       - "@entity.memory_cache"
 
+  display_builder.config_form_builder:
+    class: Drupal\display_builder\ConfigFormBuilder
+    arguments:
+      - "@entity_type.manager"
+      - "@current_user"
+  Drupal\display_builder\ConfigFormBuilderInterface: "@display_builder.config_form_builder"
+
   display_builder.state_manager:
     class: Drupal\display_builder\StateManager\StateManager
     arguments:

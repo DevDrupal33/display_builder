@@ -1,6 +1,6 @@
-<div{{attributes.addClass('db_test_simple')}}>
-  label: {{ label|default('no label') }}
-  <div{{attributes.addClass('slot_test')}}>
+<div{{ attributes.addClass('db_test_simple').setAttribute('data-test', 'testing') }}>
+  label: {{ label|default('none') }}
+  <div class="slot slot_test">
     {{ slot_1 }}
   </div>
 </div>

@@ -1,2 +1,3 @@
 **/fixtures/**.yml
-**/tests/playwright/**/**.js
+**/tests/playwright/**/**.spec.js
+**/tests/playwright/**.config.js

@@ -18,6 +18,9 @@ class DisplayBuilderEntityViewHook {
 
   /**
    * Implements hook_entity_type_alter().
+   *
+   * @param array<int,mixed> $entity_types
+   *   The entity types to alter.
    */
   #[Hook('entity_type_alter', order: new OrderAfter(['layout_builder']))]
   public function entityTypeAlter(array &$entity_types): void {

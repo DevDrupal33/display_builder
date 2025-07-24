@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_devel\Form;
 
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\DependencyInjection\AutowireTrait;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
-use Drupal\display_builder\ConfigFormTrait;
+use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
-use Drupal\Component\Serialization\Json;
 
 /**
  * Defines an edit display builder instance form.
@@ -22,11 +20,8 @@ final class EditForm extends FormBase {
 
   use AutowireTrait;
 
-  use ConfigFormTrait;
-
   public function __construct(
-    protected EntityTypeManagerInterface $entityTypeManager,
-    protected AccountProxyInterface $currentUser,
+    protected ConfigFormBuilderInterface $configFormBuilder,
     private readonly StateManagerInterface $stateManager,
   ) {}
 
@@ -40,7 +35,7 @@ final class EditForm extends FormBase {
     }
 
     $builder_config_id = $this->stateManager->getEntityConfigId($builder_id);
-    $form['builder_config_id'] = $this->buildConfigForm($builder_config_id);
+    $form['builder_config_id'] = $this->configFormBuilder->buildDisplayBuilder($builder_config_id);
 
     $form['builder_id'] = [
       '#type' => 'hidden',
@@ -54,6 +49,7 @@ final class EditForm extends FormBase {
 
     if ($routeParameters) {
       $parameters = [];
+
       foreach ($routeParameters as $key => $parameter) {
         $parameters[$key] = $parameter;
       }
@@ -96,6 +92,7 @@ final class EditForm extends FormBase {
 
     $route_name = $form_state->getValue('route_name');
     $route_parameters = $form_state->getValue('route_parameters');
+
     if ($route_parameters) {
       $route_parameters = Json::decode($route_parameters);
     }

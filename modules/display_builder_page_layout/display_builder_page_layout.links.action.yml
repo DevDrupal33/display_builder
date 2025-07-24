@@ -1,0 +1,5 @@
+entity.page_layout.add_form:
+  route_name: 'entity.page_layout.add_form'
+  title: 'Add page layout'
+  appears_on:
+    - entity.page_layout.collection

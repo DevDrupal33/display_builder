@@ -1,4 +1,16 @@
 # https://git.drupalcode.org/project/gitlab_templates/
+# variables:
+#   SKIP_COMPOSER_LINT: '1'
+#   SKIP_PHPCS: '1'
+#   SKIP_STYLELINT: '1'
+#   SKIP_ESLINT: '1'
+#   SKIP_CSPELL: '1'
+#   SKIP_PHPSTAN: '1'
+#   SKIP_PHPMD: '1'
+#   SKIP_NIGHTWATCH: '1'
+#   SKIP_PHPUNIT: '1'
+#   SKIP_TEST_ONLY_CHANGES: '1'
+#   SKIP_PAGES: '1'
 
 include:
   - project: $_GITLAB_TEMPLATES_REPO
@@ -11,6 +23,118 @@ include:
 .skip-phpmd-rule: &skip-phpmd-rule
   if: '$SKIP_PHPMD == "1"'
   when: never
+
+# Helper to setup a Drupal installation
+#
+# This should be quite fast with a warm cache, and is only used by one job
+# at the moment, so not currently worth the overhead of saving the output as
+# an artifact and starting a new job based on it.
+#
+# The drupal.org composer template creates a web/ directory and then
+# individually symlinks all the project files into module directory.
+# This causes some very strange behavior and node.js scripts will refuse to
+# run in a lot of cases, so this is an alternative job.
+.drupal: &drupal
+  # Move everything into a subdirectory
+  - mkdir tmp
+  - find . -maxdepth 1 -type f -not -path "./tmp*" -exec mv {} tmp/ \;
+  - find . -maxdepth 1 -type d -not -path "." -not -path "./tmp" -exec mv {} tmp/ \;
+  - mv tmp $CI_PROJECT_NAME
+  # Get Drupal
+  - composer create-project drupal/recommended-project:$DRUPAL_CORE _drupal
+  - cd _drupal
+  # Add core-dev, Experience Builder, and drush
+  - |
+    composer config repositories.$CI_PARENT_PROJECT_NAME --json '{"type": "path", "url": "../'$CI_PROJECT_NAME'", "options": { "symlink": false } }'
+  - composer config minimum-stability dev
+  - composer require drupal/core-dev "drupal/$CI_PARENT_PROJECT_NAME @dev" drush/drush --with-all-dependencies
+  - |
+    PACKAGE_INFO=$(composer info drupal/$CI_PARENT_PROJECT_NAME --all | grep "^dist" | awk -F": " "{print \$2}")
+    EXPECTED_PATH="[path] ../$CI_PROJECT_NAME $CI_COMMIT_SHA"
+    if [ "$PACKAGE_INFO" != "$EXPECTED_PATH" ]; then
+      echo "Unable to link to local $CI_PARENT_PROJECT_NAME package"
+      echo "Expected: $EXPECTED_PATH"
+      echo "Got: $PACKAGE_INFO"
+      exit 1
+    fi
+  # Setup webserver root
+  - rm -rf /var/www/html
+  - ln -s $CI_PROJECT_DIR/_drupal/web /var/www/html
+  - chown -R www-data:www-data /var/www/html
+  - chown -R www-data:www-data $CI_PROJECT_DIR/_drupal
+  # Setup directories
+  - chmod 777 $CI_PROJECT_DIR/_drupal/web/sites
+  - mkdir -p $CI_PROJECT_DIR/_drupal/web/sites/simpletest
+  - chmod 777 $CI_PROJECT_DIR/_drupal/web/sites/simpletest
+  - mkdir -p $CI_PROJECT_DIR/_drupal/web/sites/default/files
+  - chmod 777 $CI_PROJECT_DIR/_drupal/web/sites/default/files
+  # Start the webserver
+  - service apache2 start
+  # Set simpletest environment variables
+  - !reference [ .simpletest-db ]
+  - !reference [ .show-environment-variables ]
+  # Ensure that every test site will be able to discover and install test modules.
+  # Anything in settings.testing.php is automatically copied into the settings of
+  # individual test sites. See \Drupal\Core\Test\FunctionalTestSetupTrait::prepareSettings(),
+  # which is called (indirectly) by \Drupal\TestSite\Commands\TestSiteInstallCommand.
+  - cd $CI_PROJECT_DIR/_drupal/web/sites/default
+  - echo '<?php' >> settings.testing.php
+  - echo '$settings["extension_discovery_scan_tests"] = TRUE;' >> settings.testing.php
+  # Change to the project directory
+  - cd $CI_PROJECT_DIR/_drupal/web/modules/contrib/$CI_PARENT_PROJECT_NAME
+  # Install the UI
+  # @todo consolidate this with the UI job?
+  - cd ui
+  - npm ci
+  - npm run build
+  - cd ../
+
+.playwright:
+  stage: test
+  # image: mcr.microsoft.com/playwright:v1.54.0-noble
+  image: justafish/drupalci-environments-playwright:latest
+  cache:
+    key: cache-$CI_JOB_NAME-$CI_COMMIT_REF_SLUG
+    fallback_keys:
+      - cache-$CI_JOB_NAME-$CI_DEFAULT_BRANCH
+      - cache-$CI_JOB_NAME-default
+    paths:
+      - /root/.composer/cache
+      - /root/.npm
+      - /root/.cache/ms-playwright/ms-playwright
+      - $CI_PROJECT_DIR/_drupal/web/modules/contrib/$CI_PARENT_PROJECT_NAME/node_modules
+  extends:
+    - .test-variables
+  variables:
+    GIT_DEPTH: 1
+    _TARGET_DB_TYPE: sqlite
+    # TEST_DB_URL: sqlite://localhost/sites/default/files/db.sqlite
+    BASE_TEST_URL: http://localhost
+    TEST_WEBSERVER_USER: www-data
+    PLAYWRIGHT_SKIP_TEARDOWN: true
+  before_script:
+    - !reference [ .drupal ]
+  script:
+    - npm install
+    # - npm ci
+    - npx playwright test
+  after_script:
+    - mkdir -p $CI_PROJECT_DIR/logs
+    - cp -R /var/log/apache2 $CI_PROJECT_DIR/logs/apache2
+    - cp -R /var/log/supervisor $CI_PROJECT_DIR/logs/supervisor
+    - cp -R _drupal/web/modules/contrib/$CI_PARENT_PROJECT_NAME/test-results $CI_PROJECT_DIR/test-results
+    - cp -R _drupal/web/modules/contrib/$CI_PARENT_PROJECT_NAME/playwright-report $CI_PROJECT_DIR/playwright-report
+  artifacts:
+    expose_as: 'Playwright Test Reports'
+    when: always
+    expire_in: 6 mos
+    paths:
+      - playwright-report/
+      - test-results/
+      - logs/
+    reports:
+      junit:
+        - test-results/playwright.xml
 
 .phpmd-base:
   stage: validate
@@ -52,6 +176,7 @@ include:
 
 phpmd:
   extends: .phpmd-base
+
 composer-lint:
   allow_failure: false
 cspell:

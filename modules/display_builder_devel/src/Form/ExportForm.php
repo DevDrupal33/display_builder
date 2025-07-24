@@ -71,10 +71,12 @@ final class ExportForm extends FormBase {
    */
   private static function cleanInstanceId(array &$array): void {
     unset($array['_instance_id']);
+
     foreach ($array as $key => &$value) {
       if (\is_array($value)) {
         self::cleanInstanceId($value);
-        if (isset($value['source_id']) && isset($value['source']['value']) && empty($value['source']['value'])) {
+
+        if (isset($value['source_id'], $value['source']['value']) && empty($value['source']['value'])) {
           unset($array[$key]);
         }
       }

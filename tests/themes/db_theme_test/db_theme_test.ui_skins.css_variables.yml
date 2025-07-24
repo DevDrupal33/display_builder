@@ -1,0 +1,13 @@
+test_token_1:
+  category: "Testing"
+  type: "textfield"
+  label: "Test token 1"
+  default_values:
+    ":root": "foo"
+test_token_2:
+  category: "Testing"
+  type: "textfield"
+  label: "Test token 2"
+  default_values:
+    ":root": "bar"
+  weight: 2

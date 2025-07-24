@@ -1,0 +1,14 @@
+test_style_1:
+  category: "Style category 1"
+  label: "Test style 1"
+  options:
+    test-style-1: "Style 1"
+    test-style-2: "Style 2"
+
+test_style_2:
+  category: "Style category 2"
+  label: "Test style 2"
+  options:
+    h1: "Heading 1"
+    h2: "Heading 2"
+    h3: "Heading 3"

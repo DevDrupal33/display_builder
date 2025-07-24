@@ -8,7 +8,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
-use Drupal\display_builder\ConfigFormTrait;
 use Drupal\display_builder\StorageProperties;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\Entity\DisplayBuilder as DisplayBuilderConfigEntity;
@@ -31,8 +30,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 )]
 class DisplayBuilder extends DisplayExtenderPluginBase {
 
-  use ConfigFormTrait;
-
   private const VIEWS_PREFIX = 'views_';
 
   /**
@@ -43,14 +40,19 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
   protected $stateManager;
 
   /**
+   * The config form builder for Display Builder.
+   *
+   * @var \Drupal\display_builder\ConfigFormBuilderInterface
+   */
+  protected $configFormBuilder;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): self {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->stateManager = $container->get('display_builder.state_manager');
-    // Needed by ConfigFormTrait.
-    $instance->entityTypeManager = $container->get('entity_type.manager');
-    $instance->currentUser = $container->get('current_user');
+    $instance->configFormBuilder = $container->get('display_builder.config_form_builder');
     return $instance;
   }
 
@@ -68,7 +70,7 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
     $instance_id = $this->options[StorageProperties::InstanceId->value] ?? NULL;
     $form[StorageProperties::InstanceId->value] = $this->buildInstanceForm($instance_id);
     $display_builder_id = $this->options[StorageProperties::ConfigEntityId->value] ?? DisplayBuilderConfigEntity::DISPLAY_BUILDER_CONFIG;
-    $form[StorageProperties::ConfigEntityId->value] = $this->buildConfigForm($display_builder_id);
+    $form[StorageProperties::ConfigEntityId->value] = $this->configFormBuilder->buildDisplayBuilder($display_builder_id);
   }
 
   /**

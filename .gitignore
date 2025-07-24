@@ -3,3 +3,10 @@ package-lock.json
 .yarn/
 yarn.lock
 biome.json
+
+.env
+.auth/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

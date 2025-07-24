@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace Drupal\display_builder_devel\Form;
 
 use Drupal\Core\DependencyInjection\AutowireTrait;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
-use Drupal\display_builder\ConfigFormTrait;
+use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 
@@ -21,11 +19,8 @@ final class AddForm extends FormBase {
 
   use AutowireTrait;
 
-  use ConfigFormTrait;
-
   public function __construct(
-    protected EntityTypeManagerInterface $entityTypeManager,
-    protected AccountProxyInterface $currentUser,
+    protected ConfigFormBuilderInterface $configFormBuilder,
     private readonly StateManagerInterface $stateManager,
   ) {}
 
@@ -33,7 +28,7 @@ final class AddForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $form['display_builder_id'] = $this->buildConfigForm(NULL);
+    $form['display_builder_id'] = $this->configFormBuilder->buildDisplayBuilder(NULL);
 
     $form['fixture_id'] = [
       '#type' => 'select',
@@ -47,7 +42,7 @@ final class AddForm extends FormBase {
     $form['builder_id'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Builder ID'),
-      '#default_value' => \sprintf('db_%s', uniqid()),
+      '#default_value' => \sprintf('db_%s', \uniqid()),
       '#required' => TRUE,
     ];
 

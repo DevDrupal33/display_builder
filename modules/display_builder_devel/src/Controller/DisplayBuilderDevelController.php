@@ -8,11 +8,11 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_devel\Helper\DisplayBuilderDevelHelper;
 use Drupal\display_builder_entity_view\EventSubscriber\DisplayBuilderSubscriber;
-use Drupal\display_builder_page_layout\DisplayBuilderPageLayout;
+use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Drupal\display_builder_views\DisplayBuilderViewsManager;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -44,7 +44,10 @@ class DisplayBuilderDevelController extends ControllerBase {
       ],
     ];
 
-    foreach (array_keys($this->stateManager->loadAll()) as $builder_id) {
+    foreach (\array_keys($this->stateManager->loadAll()) as $builder_id) {
+      if (!$builder_id) {
+        continue;
+      }
       $build['display_builder_table']['#rows'][$builder_id] = $this->buildRow($builder_id, $this->stateManager->load($builder_id));
     }
 
@@ -141,27 +144,27 @@ class DisplayBuilderDevelController extends ControllerBase {
   protected function buildRow(string $builder_id, array $builder): array {
     $row = [];
 
-    $route_name = 'display_builder_devel.view';
-    $route_params = ['builder_id' => $builder_id];
     $type = $this->t('None');
     $extra_links = [];
+    $url = Url::fromRoute('display_builder_devel.view', ['builder_id' => $builder_id]);
 
     // Simple switch to url based on context.
-    if (class_exists('Drupal\display_builder_views\DisplayBuilderViewsManager') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderViewsManager::VIEWS_CONTEXT_REQUIREMENT)) {
-      $route_name = 'display_builder_views.views.manage';
+    if (\class_exists('Drupal\display_builder_views\DisplayBuilderViewsManager') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderViewsManager::VIEWS_CONTEXT_REQUIREMENT)) {
+      $url = Url::fromRoute('display_builder_views.views.manage', ['builder_id' => $builder_id]);
       $type = $this->t('Views');
     }
-    elseif (class_exists('Drupal\display_builder_page_layout\DisplayBuilderPageLayout') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderPageLayout::PAGE_LAYOUT_CONTEXT_REQUIREMENT)) {
-      $route_name = 'display_builder_page_layout.manage';
+    elseif (\class_exists('Drupal\display_builder_page_layout\Entity\PageLayout') && $this->stateManager->hasSaveContextsRequirement($builder_id, PageLayout::getContextRequirement())) {
+      $url = PageLayout::getUrlFromInstanceId($builder_id);
       $type = $this->t('Page layout');
     }
-    elseif (class_exists('Drupal\display_builder_entity_view\Event\DisplayBuilderSubscriber') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderSubscriber::CONTEXT_REQUIREMENT)) {
+    elseif (\class_exists('Drupal\display_builder_entity_view\Event\DisplayBuilderSubscriber') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderSubscriber::CONTEXT_REQUIREMENT)) {
       /** @var \Drupal\Core\Entity\EntityInterface $entity */
       $entity = $builder['contexts']['entity']->getContextValue();
       $entity_type_id = $entity->getEntityTypeId();
       $route_name = \sprintf('display_builder.%s.view', $entity_type_id);
       $bundle = $builder['contexts']['bundle']->getContextValue();
 
+      $route_params = [];
       $route_params[$entity->getEntityType()->getBundleEntityType()] = $bundle;
       $route_params['view_mode_name'] = $builder['contexts']['view_mode']->getContextValue();
       $type = $this->t('Entity');
@@ -172,18 +175,8 @@ class DisplayBuilderDevelController extends ControllerBase {
           'bundle' => $bundle,
         ]),
       ];
-    }
-    elseif (class_exists('Drupal\display_builder_page_layout\DisplayBuilderPageLayout') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderPageLayout::PAGE_MANAGER_CONTEXT_REQUIREMENT)) {
-      $route_name = 'display_builder_page_layout.page_manager.manage';
-      $type = $this->t('Page manager');
-    }
-
-    // If related module is disabled, use devel default view.
-    try {
       $url = Url::fromRoute($route_name, $route_params);
-    }
-    catch (\Throwable $th) {
-      $url = Url::fromRoute('display_builder_devel.view', $route_params);
+      $type = $this->t('Entity view');
     }
 
     $row['id']['data'] = [

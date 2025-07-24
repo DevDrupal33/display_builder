@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_page_layout\EventSubscriber;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\CachedDiscoveryClearerInterface;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\display_builder_page_layout\DisplayBuilderPageLayout;
+use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -18,8 +19,8 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
   public function __construct(
     private StateManagerInterface $stateManager,
-    private DisplayBuilderPageLayout $pageLayoutManager,
     private CachedDiscoveryClearerInterface $pluginCacheClearer,
+    private EntityTypeManagerInterface $entityTypeManager,
   ) {}
 
   /**
@@ -34,33 +35,32 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
   /**
    * Event handler for when a display builder is saved.
    *
-   * Dispatch the save process if this is the main page layout or a builder
-   * associated to a page manager variant.
-   *
    * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
    *   The event object.
    */
   public function onSave(DisplayBuilderEvent $event): void {
     $builder_id = $event->getBuilderId();
     $contexts = $event->getData();
+    // @see Drupal\display_builder_page_layout\Entity\PageLayout::getInstance()
+    $prefix = 'page_layout__';
 
-    // Context requirements is set for page manager as page layout and page
-    // manager to allow SourcePlugin when editing. We need a precedence when
-    // saving.
-    // @todo perhaps we need a third context.
-    if ($this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderPageLayout::PAGE_MANAGER_CONTEXT_REQUIREMENT, $contexts)) {
-      $this->pageLayoutManager->savePageManagerCurrentState($builder_id, $contexts);
-      // Plugin cache seems enough to get the new layout.
-      $this->pluginCacheClearer->clearCachedDefinitions();
-    }
-    elseif ($this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderPageLayout::PAGE_LAYOUT_CONTEXT_REQUIREMENT, $contexts)) {
-      $this->pageLayoutManager->savePageLayoutCurrentState($builder_id);
-
-      // Plugin cache seems enough to get the new layout.
-      $this->pluginCacheClearer->clearCachedDefinitions();
-
+    if (!\str_starts_with($builder_id, $prefix)) {
       return;
     }
+
+    // Context requirements is set to allow SourcePlugin when editing. We need
+    // a precedence when saving.
+    // @todo perhaps we need a third context.
+    if (!$this->stateManager->hasSaveContextsRequirement($builder_id, PageLayout::getContextRequirement(), $contexts)) {
+      return;
+    }
+    $page_layout_id = \substr($builder_id, \strlen($prefix));
+    /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $page_layout */
+    $page_layout = $this->entityTypeManager->getStorage('page_layout')->load($page_layout_id);
+    $page_layout->saveSources();
+    // Clearing plugin cache seems enough to get the new layout.
+    // @todo It looks very costly. Check if it is still needed.
+    $this->pluginCacheClearer->clearCachedDefinitions();
   }
 
 }
