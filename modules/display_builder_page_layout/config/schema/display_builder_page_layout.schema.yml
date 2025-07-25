@@ -25,7 +25,7 @@ display_builder_page_layout.page_layout.*:
         type: condition.plugin.[id]
         label: 'Condition'
     sources:
-      # Ignore for now.
+      # @todo set this configuration, ignore for now.
       type: ignore
       label: "Display Builder sources."
   constraints:

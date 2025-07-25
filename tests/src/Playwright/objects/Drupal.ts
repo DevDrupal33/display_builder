@@ -217,7 +217,7 @@ export class Drupal {
     const permissions = [
       'use display builder default',
       'use display builder test',
-      'manage demo display builders',
+      'manage devel display builders',
       'access display builders api',
       'administer display builders',
       'administer pattern preset',

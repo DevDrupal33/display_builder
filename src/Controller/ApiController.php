@@ -16,6 +16,7 @@ use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Render\HtmlResponseAttachmentsProcessor;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder\DisplayBuilderInterface;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\IslandPluginManagerInterface;
@@ -37,6 +38,11 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
    * The bare html page renderer.
    */
   private BareHtmlPageRenderer $bareHtmlPageRenderer;
+
+  /**
+   * The lazy loaded display builder.
+   */
+  private ?DisplayBuilderInterface $displayBuilder = NULL;
 
   public function __construct(
     private IslandPluginManagerInterface $islandPluginManager,
@@ -530,6 +536,20 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
   }
 
   /**
+   * Returns the display builder by builder ID.
+   */
+  protected function getDisplayBuilder(string $builder_id): DisplayBuilderInterface {
+    if ($this->displayBuilder !== NULL) {
+      return $this->displayBuilder;
+    }
+    $builder_config_id = $this->stateManager->getEntityConfigId($builder_id);
+    $display_builder = $this->entityTypeManager()->getStorage('display_builder')->load($builder_config_id);
+    assert($display_builder instanceof DisplayBuilderInterface);
+    $this->displayBuilder = $display_builder;
+    return $this->displayBuilder;
+  }
+
+  /**
    * Creates a display builder event with enabled islands only.
    *
    * Use a cache to avoid loading all the builder configuration.
@@ -552,20 +572,26 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
    */
   private function createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id, $current_island_id): array {
     $key = \sprintf('db_%s_island_enable', $builder_id);
+    $island_configuration_key = \sprintf('db_%s_island_configuration', $builder_id);
     $island_enabled = $this->memoryCache->get($key);
+    $island_configuration = $this->memoryCache->get($island_configuration_key);
 
+    if ($island_configuration === FALSE) {
+      $island_configuration = $this->getDisplayBuilder($builder_id)->getIslandConfigurations();
+      $this->memoryCache->set($island_configuration_key, $island_configuration);
+    }
+    else {
+      $island_configuration = $island_configuration->data;
+    }
     if ($island_enabled === FALSE) {
-      $builder_config_id = $this->stateManager->getEntityConfigId($builder_id);
-      $builder_config = $this->entityTypeManager()->getStorage('display_builder')->load($builder_config_id);
-      /** @var \Drupal\display_builder\DisplayBuilderInterface $builder_config */
-      $island_enabled = $builder_config->getIslandEnabled();
+      $island_enabled = $this->getDisplayBuilder($builder_id)->getIslandEnabled();
       $this->memoryCache->set($key, $island_enabled);
     }
     else {
       $island_enabled = $island_enabled->data;
     }
 
-    $event = new DisplayBuilderEvent($builder_id, $island_enabled, $data, $instance_id, $parent_id, $current_island_id);
+    $event = new DisplayBuilderEvent($builder_id, $island_enabled, $island_configuration, $data, $instance_id, $parent_id, $current_island_id);
     $this->eventDispatcher->dispatch($event, $event_id);
 
     return $event->getResult();

@@ -17,6 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 #[Island(
   id: 'builder',
+  enabled_by_default: TRUE,
   label: new TranslatableMarkup('Builder'),
   description: new TranslatableMarkup('The Display Builder main island, allow to build the display.'),
   type: IslandType::View,

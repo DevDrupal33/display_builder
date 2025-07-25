@@ -26,11 +26,13 @@ final class IslandFormBase extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $island_args = $form_state->getBuildInfo()['args'][0];
     $plugin = IslandFormBase::getPlugin($island_args);
+
     if (!$plugin instanceof IslandWithFormInterface) {
       return $form;
     }
     $plugin->setBuilderId($island_args['builder_id']);
     $plugin->buildForm($form, $form_state);
+
     return $form;
   }
 
@@ -40,6 +42,7 @@ final class IslandFormBase extends FormBase {
   public function validateForm(array &$form, FormStateInterface $form_state): void {
     $island_args = $form_state->getBuildInfo()['args'][0];
     $plugin = IslandFormBase::getPlugin($island_args);
+
     if (!$plugin instanceof IslandWithFormInterface) {
       return;
     }
@@ -52,6 +55,7 @@ final class IslandFormBase extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $island_args = $form_state->getBuildInfo()['args'][0];
     $plugin = IslandFormBase::getPlugin($island_args);
+
     if (!$plugin instanceof IslandWithFormInterface) {
       return;
     }

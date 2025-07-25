@@ -145,7 +145,10 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    */
   private function dispatch(DisplayBuilderEvent $event, string $method, array $parameters = []): void {
     \array_unshift($parameters, $event->getBuilderId());
-    $islands = $this->islandManager->getIslands($this->stateManager->getContexts($event->getBuilderId()));
+
+    $configuration = $event->getIslandConfiguration();
+    $contexts = $this->stateManager->getContexts($event->getBuilderId());
+    $islands = $this->islandManager->createInstances($this->islandManager->getDefinitions(), $contexts, $configuration);
 
     $island_enabled = $event->getIslandEnabled();
     foreach ($islands as $island_id => $island) {

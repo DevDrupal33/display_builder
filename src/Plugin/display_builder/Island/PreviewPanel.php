@@ -15,6 +15,7 @@ use Drupal\display_builder\IslandType;
  */
 #[Island(
   id: 'preview',
+  enabled_by_default: TRUE,
   label: new TranslatableMarkup('Preview'),
   description: new TranslatableMarkup('Show a real time preview of the display.'),
   type: IslandType::View,

@@ -14,6 +14,7 @@ use Drupal\display_builder\IslandType;
  */
 #[Island(
   id: 'toggle_fullscreen',
+  enabled_by_default: TRUE,
   label: new TranslatableMarkup('Toggle fullscreen'),
   description: new TranslatableMarkup('Toggle the builder as fullscreen.'),
   type: IslandType::Button,

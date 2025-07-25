@@ -8,9 +8,11 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuilderInterface;
 use Drupal\display_builder\Form\DisplayBuilderDeleteForm;
 use Drupal\display_builder\Form\DisplayBuilderForm;
+use Drupal\display_builder\Form\DisplayBuilderIslandPluginForm;
 use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\RenderableBuilderTrait;
@@ -35,16 +37,21 @@ use Drupal\display_builder_ui\DisplayBuilderListBuilder;
     'island_settings' => 'island_settings',
   ],
   handlers: [
+    'route_provider' => [
+      'html' => 'Drupal\display_builder\Routing\DisplayBuilderRouteProvider',
+    ],
     'list_builder' => DisplayBuilderListBuilder::class,
     'form' => [
       'add' => DisplayBuilderForm::class,
       'edit' => DisplayBuilderForm::class,
       'delete' => DisplayBuilderDeleteForm::class,
+      'edit-plugin' => DisplayBuilderIslandPluginForm::class,
     ],
   ],
   links: [
     'add-form' => '/admin/structure/display-builder/add',
     'edit-form' => '/admin/structure/display-builder/{display_builder}',
+    'edit-plugin-form' => '/admin/structure/display-builder/{display_builder}/edit/{island_id}',
     'delete-form' => '/admin/structure/display-builder/{display_builder}/delete',
     'collection' => '/admin/structure/display-builder',
   ],
@@ -61,6 +68,7 @@ use Drupal\display_builder_ui\DisplayBuilderListBuilder;
     'library',
     'description',
     'island_settings',
+    'island_configuration',
   ],
 )]
 final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInterface {
@@ -101,6 +109,11 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
   protected ?array $island_settings;
 
   /**
+   * The display builder island configuration.
+   */
+  protected ?array $island_configuration = [];
+
+  /**
    * The display builder state manager.
    */
   private StateManagerInterface $stateManager;
@@ -109,6 +122,27 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    * The display builder island plugin manager.
    */
   private IslandPluginManagerInterface $islandPluginManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getIslandConfiguration(string $island_id): array {
+    return $this->island_configuration[$island_id] ?? [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getIslandConfigurations(): array {
+    return $this->island_configuration ?? [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setIslandConfiguration(string $island_id, array $configuration = []): void {
+    $this->island_configuration[$island_id] = $configuration;
+  }
 
   /**
    * {@inheritdoc}
@@ -126,6 +160,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
     $menu_islands = $islands_enabled_sorted[IslandType::Menu->value] ?? [];
 
     $buttons = [];
+
     if (!empty($button_islands)) {
       $buttons = $this->buildPanes($builder_id, $button_islands, $this->getKeyboardKeys(), 'span');
     }
@@ -144,6 +179,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
     $view_islands_data = $this->prepareViewIslands($builder_id, $islands_enabled_sorted, $builder_data);
     $view_sidebar = $view_islands_data['view_sidebar'];
     $view_main = $view_islands_data['view_main'];
+
     // Library content can be in main or sidebar.
     // @todo Move the logic to LibrariesIsland::build().
     if (isset($view_sidebar['library']) && !empty($library_islands)) {
@@ -212,6 +248,24 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    */
   public function getPermissionName(): string {
     return 'use display builder ' . $this->id();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function toUrl($rel = NULL, array $options = []): Url {
+    if ($rel === 'edit-plugin-form' && $this->id() && isset($options['island_id'])) {
+      $island_id = $options['island_id'];
+      unset($options['island_id']);
+
+      return Url::fromRoute(
+        'entity.display_builder.edit_plugin_form',
+        ['display_builder' => $this->id(), 'island_id' => $island_id],
+        $options
+      );
+    }
+
+    return parent::toUrl($rel, $options);
   }
 
   /**
@@ -380,7 +434,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
 
       // Keep only first keyboard key.
       if ($keyboard = $island->getKeyboardShortcuts()) {
-        $build[$island_id]['#attributes']['data-keyboard'] = key($keyboard);
+        $build[$island_id]['#attributes']['data-keyboard'] = \key($keyboard);
       }
     }
 
@@ -410,8 +464,10 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
     foreach ($islands as $island) {
       $id = $island_id = $island->getHtmlId($builder_id);
       $attributes = [];
+
       if ($enableKeyboard) {
-        $key = array_keys($island->getKeyboardShortcuts());
+        $key = \array_keys($island->getKeyboardShortcuts());
+
         if (!empty($key)) {
           $attributes = ['data-keyboard' => $key[0]];
         }
@@ -458,6 +514,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
     ];
 
     $items = [];
+
     foreach ($islands as $island) {
       $items = \array_merge($items, $island->build($builder_id, $data));
     }
@@ -488,8 +545,8 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
       return [];
     }
 
-    $output = $this->getIslandPluginManager()->getIslandsKeyboard(array_flip($island_enable));
-    ksort($output, SORT_NATURAL | SORT_FLAG_CASE);
+    $output = $this->getIslandPluginManager()->getIslandsKeyboard(\array_flip($island_enable));
+    \ksort($output, \SORT_NATURAL | \SORT_FLAG_CASE);
 
     return $output;
   }
@@ -518,7 +575,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
       }
     }
 
-    return $this->getIslandPluginManager()->getIslandsByTypes($contexts, $islands_enable_by_weight);
+    return $this->getIslandPluginManager()->getIslandsByTypes($contexts, $this->getIslandConfigurations(), $islands_enable_by_weight);
   }
 
   /**

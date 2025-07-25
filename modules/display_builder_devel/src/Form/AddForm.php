@@ -42,6 +42,7 @@ final class AddForm extends FormBase {
     $form['builder_id'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Builder ID'),
+      '#description' => $this->t('Uniq identifier for this instance.'),
       '#default_value' => \sprintf('db_%s', \uniqid()),
       '#required' => TRUE,
     ];
@@ -68,6 +69,20 @@ final class AddForm extends FormBase {
    */
   public function getFormId(): string {
     return 'display_builder_devel_add';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    $builder_id = $form_state->getValue('builder_id');
+
+    if ($this->stateManager->load($builder_id)) {
+      $form_state->setErrorByName(
+        'builder_id',
+        $this->t('This id already exist, must be uniq.'),
+      );
+    }
   }
 
   /**

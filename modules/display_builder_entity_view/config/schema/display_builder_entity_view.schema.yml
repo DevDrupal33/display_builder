@@ -9,6 +9,6 @@ core.entity_view_display.*.*.*.third_party.display_builder:
       type: string
       label: "Used Display Builder"
     sources:
-      # Ignore for now.
+      # @todo set this configuration, ignore for now.
       type: ignore
       label: "Display Builder sources."

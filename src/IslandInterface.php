@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
+use Drupal\Component\Plugin\ConfigurableInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -11,7 +12,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 /**
  * Interface for island plugins.
  */
-interface IslandInterface extends ContainerFactoryPluginInterface, IslandEventSubscriberInterface, PluginInspectionInterface {
+interface IslandInterface extends ContainerFactoryPluginInterface, IslandEventSubscriberInterface, PluginInspectionInterface, ConfigurableInterface {
 
   /**
    * Build renderable from state data.

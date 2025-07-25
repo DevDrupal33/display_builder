@@ -1,6 +1,6 @@
 display_builder.add_form:
   route_name: 'entity.display_builder.add_form'
-  title: 'Add display builder'
+  title: 'Add display builder configuration'
   appears_on:
     - entity.display_builder.collection
 

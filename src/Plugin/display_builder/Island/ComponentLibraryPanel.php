@@ -15,6 +15,7 @@ use Drupal\display_builder\IslandType;
  */
 #[Island(
   id: 'component_library',
+  enabled_by_default: TRUE,
   label: new TranslatableMarkup('Components library'),
   description: new TranslatableMarkup('List of available Components to use.'),
   type: IslandType::Library,

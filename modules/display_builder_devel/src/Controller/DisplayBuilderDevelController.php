@@ -74,10 +74,10 @@ class DisplayBuilderDevelController extends ControllerBase {
   }
 
   /**
-   * Load a display builder demo by id.
+   * Load a display builder instance by id.
    *
    * @param string $builder_id
-   *   The display builder demo id.
+   *   The display builder instance id.
    *
    * @return array
    *   The display build.

@@ -35,6 +35,35 @@ interface DisplayBuilderInterface extends ConfigEntityInterface {
   public function getIslandEnabled(): array;
 
   /**
+   * Get configuration of all islands.
+   *
+   * @return array
+   *   Configuration keyed by island ID.
+   */
+  public function getIslandConfigurations(): array;
+
+  /**
+   * Gets configuration for an island.
+   *
+   * @param string $island_id
+   *   The island ID.
+   *
+   * @return array
+   *   The island configuration.
+   */
+  public function getIslandConfiguration(string $island_id): array;
+
+  /**
+   * Set configuration for an island.
+   *
+   * @param string $island_id
+   *   The island ID.
+   * @param array $configuration
+   *   The island configuration.
+   */
+  public function setIslandConfiguration(string $island_id, array $configuration = []): void;
+
+  /**
    * Returns the machine-readable permission name for the display builder.
    *
    * @return string

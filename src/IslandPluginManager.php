@@ -26,26 +26,10 @@ final class IslandPluginManager extends DefaultPluginManager implements IslandPl
   /**
    * {@inheritdoc}
    */
-  public function getIsland(string $island_id, array $contexts = []): IslandInterface {
-    /** @var \Drupal\display_builder\IslandInterface $island */
-    $island = $this->createInstance($island_id, ['contexts' => $contexts]);
-    return $island;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getIslands(array $contexts = []): array {
-    return $this->createInstances($this->getDefinitions(), $contexts);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getIslandsByTypes(array $contexts = [], ?array $filter_by_island = NULL): array {
+  public function getIslandsByTypes(array $contexts = [], array $configuration = [], ?array $filter_by_island = NULL): array {
     $result = [];
 
-    foreach ($this->getIslands($contexts) as $island_id => $island) {
+    foreach ($this->createInstances($this->getDefinitions(), $contexts, $configuration) as $island_id => $island) {
       if ($filter_by_island && !isset($filter_by_island[$island_id])) {
         continue;
       }
@@ -94,15 +78,19 @@ final class IslandPluginManager extends DefaultPluginManager implements IslandPl
    * @param array $definitions
    *   An array of definitions.
    * @param array $contexts
-   *   (Optional) An array of context to pass to the display builder.
+   *   (Optional) An array of contexts.
+   * @param array $configuration
+   *   (Optional) An array of configuration.
    *
    * @return array
    *   A list of fully configured plugin instances.
    */
-  protected function createInstances(array $definitions, array $contexts = []): array {
+  public function createInstances(array $definitions, array $contexts = [], array $configuration = []): array {
     return \array_map(
-      function ($definition) use ($contexts) {
-        return $this->createInstance($definition['id'], ['contexts' => $contexts]);
+      function ($definition) use ($configuration, $contexts) {
+        $config = $configuration[$definition['id']] ?? [];
+        $config['contexts'] = $contexts;
+        return $this->createInstance($definition['id'], $config);
       },
       $definitions,
     );

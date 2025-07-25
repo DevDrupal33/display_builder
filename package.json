@@ -1,12 +1,16 @@
 {
   "name": "display_builder",
+  "license": "ISC",
+  "description": "Tests e2e for Display builder. See tests/src/Playwright/tests",
   "version": "1.0.0",
   "private": true,
   "main": "index.js",
-  "scripts": {},
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "scripts": {
+    "test": "npx playwright test --fully-parallel",
+    "test-debug": "npx playwright test --debug",
+    "test-clean": "rm -rf playwright-report; rm -rf test-results;"
+  },
+
   "devDependencies": {
     "@playwright/test": "^1.54.1",
     "@types/node": "^24.1.0",

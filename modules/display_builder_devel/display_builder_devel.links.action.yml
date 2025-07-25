@@ -1,6 +1,6 @@
 display_builder_devel.add_form:
   route_name: display_builder_devel.add
-  title: "Add demo instance"
+  title: "Add isolated instance"
   appears_on:
     - display_builder_devel.collection
 

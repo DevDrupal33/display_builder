@@ -54,24 +54,27 @@ island_settings:
     reset:
       enable: true
       weight: '-10'
-    history:
+    operation:
       enable: true
       weight: '-9'
-    state:
+    history:
       enable: true
       weight: '-8'
-    toggle_highlight:
+    state:
       enable: true
       weight: '-7'
-    toggle_fullscreen:
+    toggle_highlight:
       enable: true
       weight: '-6'
+    toggle_fullscreen:
+      enable: true
+      weight: '-5'
     keyboard_help:
       enable: false
-      weight: '-5'
+      weight: '-4'
     theme_mode:
       enable: false
-      weight: '-4'
+      weight: '-3'
   contextual:
     instance_form:
       enable: true
@@ -98,3 +101,6 @@ island_settings:
     menu_delete:
       enable: true
       weight: '-8'
+island_configuration:
+  history:
+    display_clear_button: 1

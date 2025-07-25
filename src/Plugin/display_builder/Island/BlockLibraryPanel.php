@@ -16,6 +16,7 @@ use Drupal\ui_patterns_overrides\SourcesBundlerInterface;
  */
 #[Island(
   id: 'block_library',
+  enabled_by_default: TRUE,
   label: new TranslatableMarkup('Blocks library'),
   description: new TranslatableMarkup('List of available Drupal blocks to use.'),
   type: IslandType::Library,

@@ -14,6 +14,7 @@ use Drupal\display_builder\IslandType;
  */
 #[Island(
   id: 'library',
+  enabled_by_default: TRUE,
   label: new TranslatableMarkup('Libraries'),
   description: new TranslatableMarkup('List of elements to use in the display.'),
   type: IslandType::View,

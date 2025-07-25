@@ -12,41 +12,19 @@ use Drupal\Component\Plugin\PluginManagerInterface;
 interface IslandPluginManagerInterface extends PluginManagerInterface {
 
   /**
-   * Get islands plugins instances.
-   *
-   * @param string $island_id
-   *   The island id.
-   * @param array $contexts
-   *   (Optional) An array of context to pass to the display builder.
-   *
-   * @return IslandInterface
-   *   Tbe instantiated island.
-   */
-  public function getIsland(string $island_id, array $contexts = []): IslandInterface;
-
-  /**
-   * Get islands plugins instances.
-   *
-   * @param array $contexts
-   *   (Optional) An array of context to pass to the display builder.
-   *
-   * @return array<string, IslandInterface>
-   *   A list of instantiated plugins.
-   */
-  public function getIslands(array $contexts = []): array;
-
-  /**
    * Get islands plugins by type.
    *
    * @param array $contexts
-   *   (Optional) An array of context to pass to the display builder.
+   *   (Optional) An array of contexts.
+   * @param array $configuration
+   *   (Optional) An array of configuration.
    * @param array $filter_by_island
    *   (Optional) Filter results by island ids.
    *
    * @return array
    *   A list of enabled islands sorted by weight.
    */
-  public function getIslandsByTypes(array $contexts = [], array $filter_by_island = []): array;
+  public function getIslandsByTypes(array $contexts = [], array $configuration = [], array $filter_by_island = []): array;
 
   /**
    * Get the islands keyboard keys.
@@ -58,5 +36,10 @@ interface IslandPluginManagerInterface extends PluginManagerInterface {
    *   A list of keys.
    */
   public function getIslandsKeyboard(array $filter_by_island = []): array;
+
+  /**
+   * Create an island instance for each definition.
+   */
+  public function createInstances(array $definitions, array $contexts = [], array $configuration = []): array;
 
 }

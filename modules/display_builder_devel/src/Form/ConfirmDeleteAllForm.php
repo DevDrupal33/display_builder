@@ -39,7 +39,7 @@ class ConfirmDeleteAllForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Do you want to delete all display builder demo(s) created?');
+    return $this->t('Do you want to delete all display builder instance(s) created?');
   }
 
   /**

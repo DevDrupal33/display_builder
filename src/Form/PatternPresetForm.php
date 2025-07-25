@@ -90,7 +90,7 @@ final class PatternPresetForm extends EntityForm {
       $form_state->setErrorByName(
         'sources',
         $this->t('The value is not correct. @error', ['@error' => $th->getMessage()]),
-          );
+      );
     }
   }
 
@@ -101,9 +101,9 @@ final class PatternPresetForm extends EntityForm {
     $result = parent::save($form, $form_state);
     $message_args = ['%label' => $this->entity->label()];
     $this->messenger()->addStatus(
-      match($result) {
-        \SAVED_NEW => $this->t('Created new preset %label.', $message_args),
-        \SAVED_UPDATED => $this->t('Updated preset %label.', $message_args),
+      match ($result) {
+        SAVED_NEW => $this->t('Created new preset %label.', $message_args),
+        SAVED_UPDATED => $this->t('Updated preset %label.', $message_args),
         default => '',
       }
     );

@@ -14,6 +14,7 @@ use Drupal\display_builder\IslandType;
  */
 #[Island(
   id: 'toggle_highlight',
+  enabled_by_default: TRUE,
   label: new TranslatableMarkup('Toggle highlight'),
   description: new TranslatableMarkup('Toggle the builder highlight zones.'),
   type: IslandType::Button,

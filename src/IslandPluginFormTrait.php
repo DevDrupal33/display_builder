@@ -60,14 +60,24 @@ trait IslandPluginFormTrait {
   public function submitForm(array &$form, FormStateInterface $form_state): void {}
 
   /**
-   * {@inheritdoc}
+   * Set the builder id.
+   *
+   * @param string $builder_id
+   *   The builder id.
+   *
+   * @todo remove this, should be on base class
    */
   public function setBuilderId(string $builder_id): void {
     $this->builderId = $builder_id;
   }
 
   /**
-   * {@inheritdoc}
+   * Get the builder id.
+   *
+   * @param string|null $instance_id
+   *   The instance id.
+   *
+   * @todo remove this, should be on base class
    */
   public function setInstanceId(?string $instance_id): void {
     $this->instanceId = $instance_id;

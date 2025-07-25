@@ -56,14 +56,14 @@ export default defineConfig({
       name: 'setup',
       testMatch: /global\.setup\.ts/,
     },
-    // {
-    //   name: 'chromium',
-    //   use: { ...devices['Desktop Chrome'],
-    //     deviceScaleFactor: 1,
-    //     viewport: { width: 1280, height: 960 },
-    //   },
-    //   dependencies: ['setup'],
-    // },
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'],
+        deviceScaleFactor: 1,
+        viewport: { width: 1920, height: 1080 },
+      },
+      dependencies: ['setup'],
+    },
     {
       name: 'firefox',
       use: {

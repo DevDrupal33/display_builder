@@ -19,37 +19,35 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * Base class for island plugins.
  */
 abstract class IslandPluginBase extends PluginBase implements IslandInterface {
+
   use RenderableBuilderTrait;
   use HtmxTrait;
   use StringTranslationTrait;
 
   /**
    * The island data.
-   *
-   * @var array
    */
   protected array $data;
 
   /**
    * The builder id.
-   *
-   * @var string
    */
   protected string $builderId;
 
   /**
    * The current island id which trigger action.
-   *
-   * @var string
    */
   protected string $currentIslandId;
 
   /**
    * The instance id for this plugin.
-   *
-   * @var string|null
    */
   protected ?string $instanceId = NULL;
+
+  /**
+   * The contexts for islands.
+   */
+  protected array $contexts = [];
 
   /**
    * {@inheritdoc}
@@ -66,6 +64,9 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->data = $configuration;
+    $this->contexts = $configuration['contexts'] ?? [];
+    unset($configuration['contexts']);
+    $this->setConfiguration($configuration);
   }
 
   /**
@@ -103,7 +104,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    * {@inheritdoc}
    */
   public function getHtmlId(string $builder_id): string {
-    return implode('-', ['island', $builder_id, $this->pluginDefinition['id']]);
+    return \implode('-', ['island', $builder_id, $this->pluginDefinition['id']]);
   }
 
   /**
@@ -126,7 +127,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   public function isApplicable(): bool {
     $definition = $this->getPluginDefinition();
 
-    return NULL !== $this->instanceId && \is_array($definition) && !empty($this->data);
+    return $this->instanceId !== NULL && \is_array($definition) && !empty($this->data);
   }
 
   /**
@@ -150,7 +151,6 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
     }
 
     if ($this instanceof IslandWithFormInterface) {
-
       $contexts = $this->configuration['contexts'] ?? [];
 
       $form_state = new FormState();
@@ -164,6 +164,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
 
       $form_state->addBuildInfo('args', [self::getArgs(), $contexts, $options]);
       $build = \Drupal::formBuilder()->buildForm($this::getFormClass(), $form_state);
+
       return $this->afterBuild($build, $form_state);
     }
 
@@ -180,22 +181,8 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
 
     $definition = $this->getPluginDefinition();
     $island_id = $definition instanceof PluginDefinitionInterface ? $definition->id() : ($definition['id'] ?? '');
-    return $this->htmxEvents->onThirdPartyFormChange($element, $this->builderId, $this->instanceId, $island_id);
-  }
 
-  /**
-   * Get args passed to plugin.
-   *
-   * @return array
-   *   Array of arguments.
-   */
-  protected function getArgs(): array {
-    return [
-      'island_id' => $this->getPluginId(),
-      'builder_id' => $this->builderId,
-      'instance_id' => $this->instanceId,
-      'instance' => $this->data,
-    ];
+    return $this->htmxEvents->onThirdPartyFormChange($element, $this->builderId, $this->instanceId, $island_id);
   }
 
   /**
@@ -259,6 +246,42 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    */
   public function onPresetSave(string $builder_id): array {
     return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getConfiguration(): array {
+    return $this->configuration;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setConfiguration(array $configuration): void {
+    $this->configuration = $configuration + $this->defaultConfiguration();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration(): array {
+    return [];
+  }
+
+  /**
+   * Get args passed to plugin.
+   *
+   * @return array
+   *   Array of arguments.
+   */
+  protected function getArgs(): array {
+    return [
+      'island_id' => $this->getPluginId(),
+      'builder_id' => $this->builderId,
+      'instance_id' => $this->instanceId,
+      'instance' => $this->data,
+    ];
   }
 
   /**

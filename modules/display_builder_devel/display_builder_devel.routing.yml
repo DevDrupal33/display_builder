@@ -24,7 +24,7 @@ display_builder_devel.add:
   path: "/admin/structure/display-builder/instance/add"
   defaults:
     _form: '\Drupal\display_builder_devel\Form\AddForm'
-    _title: "Add a display builder demo instance"
+    _title: "Add a display builder instance"
   requirements:
     _permission: "administer display builders"
   options:
@@ -34,7 +34,7 @@ display_builder_devel.edit:
   path: "/admin/structure/display-builder/instance/{builder_id}/edit"
   defaults:
     _form: '\Drupal\display_builder_devel\Form\EditForm'
-    _title: "Edit a display builder demo instance"
+    _title: "Edit a display builder instance"
   requirements:
     _permission: "administer display builders"
   options:

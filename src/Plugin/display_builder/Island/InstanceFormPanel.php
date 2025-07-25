@@ -24,6 +24,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 #[Island(
   id: 'instance_form',
+  enabled_by_default: TRUE,
   label: new TranslatableMarkup('Instance form'),
   description: new TranslatableMarkup('Configuration of the active element.'),
   type: IslandType::Contextual,

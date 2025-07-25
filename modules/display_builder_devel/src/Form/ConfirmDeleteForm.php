@@ -12,7 +12,7 @@ use Drupal\Core\Url;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 
 /**
- * Confirmation form to confirm deletion of display builder demo by id.
+ * Confirmation form to confirm deletion of display builder instance by id.
  */
 class ConfirmDeleteForm extends ConfirmFormBase {
 

@@ -14,6 +14,26 @@ See: [Installing Modules](https://www.drupal.org/docs/extending-drupal/installin
 !!! warning "Development stage"
   The module is still in heavy development and [some extra steps may be needed](./docs/contributing.md).
 
+## Tests
+
+E2e tests are done with [Playwright](https://playwright.dev/docs/intro#installing-playwright).
+
+Tests are located in `tests/src/Playwright/tests`.
+
+To install Playwright run from this module folder:
+
+```shell
+npm install
+npx playwright install
+```
+
+To run tests locally, copy and adapt the `.env.dist` file as `.env`, fill the values and run:
+
+```shell
+npm install
+npx playwright test
+```
+
 ## Contributing
 
 Join us on slack [#display_builder](https://drupal.slack.com/archives/C092EUNPCRW).

@@ -24,6 +24,8 @@ final class Island extends AttributeBase {
    *   the ID must be either "foo" or "foo:bar".
    * @param \Drupal\Core\StringTranslation\TranslatableMarkup|null $label
    *   (Optional) The human-readable name of the plugin.
+   * @param bool $enabled_by_default
+   *   Island is enabled by default on new configuration. Default: False.
    * @param \Drupal\Core\StringTranslation\TranslatableMarkup|null $description
    *   (Optional) A brief description of the plugin.
    * @param class-string|null $deriver
@@ -38,6 +40,7 @@ final class Island extends AttributeBase {
   public function __construct(
     public readonly string $id,
     public readonly ?TranslatableMarkup $label,
+    public readonly bool $enabled_by_default = FALSE,
     public readonly ?TranslatableMarkup $description = NULL,
     public readonly ?string $deriver = NULL,
     public readonly ?IslandType $type = NULL,

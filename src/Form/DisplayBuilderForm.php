@@ -6,6 +6,7 @@ namespace Drupal\display_builder\Form;
 
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\display_builder\Entity\DisplayBuilder;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandTypeViewDisplay;
@@ -70,6 +71,15 @@ final class DisplayBuilderForm extends EntityForm {
       '#default_value' => $entity->get('debug'),
     ];
 
+    // Inform on two time save for the island specific configurations.
+    if ($this->entity->isNew()) {
+      $form['island_settings_notice'] = [
+        '#prefix' => '<div class="messages messages--warning">',
+        '#markup' => $this->t('Island configuration will be available only after saving this form.'),
+        '#suffix' => '</div>',
+      ];
+    }
+
     $form['island_settings'] = [
       '#type' => 'details',
       '#title' => $this->t('Islands configuration'),
@@ -90,6 +100,7 @@ final class DisplayBuilderForm extends EntityForm {
       $this->t('Description'),
       '',
       $this->t('Provider'),
+      $this->t('Actions'),
       $this->t('Weight'),
     ];
 
@@ -121,7 +132,7 @@ final class DisplayBuilderForm extends EntityForm {
           '#type' => 'checkbox',
           '#title' => $this->t('Enable'),
           '#title_display' => 'invisible',
-          '#default_value' => $default['enable'] ?? FALSE,
+          '#default_value' => $default['enable'] ?? $definition['enabled_by_default'] ?? FALSE,
         ];
         $table[$id]['name'] = [
           '#markup' => $definition['label'] ?? '',
@@ -131,20 +142,58 @@ final class DisplayBuilderForm extends EntityForm {
         ];
 
         if ($type === IslandType::View->value) {
+          // If new, only library is on sidebar by default.
+          // @todo move this position option to Island configuration.
+          if ($id !== 'library' && !isset($default['options']) && isset($definition['enabled_by_default'])) {
+            $default_option = IslandTypeViewDisplay::Main->value;
+          }
+          else {
+            $default_option = $default['options'] ?? NULL;
+          }
           $table[$id]['options'] = [
             '#type' => 'select',
             '#title' => $this->t('Display'),
             '#title_display' => 'invisible',
             '#options' => IslandTypeViewDisplay::options(),
-            '#default_value' => $default['options'] ?? NULL,
+            '#default_value' => $default_option,
           ];
         }
         else {
-          $table[$id]['variant'] = [];
+          $table[$id]['options'] = [];
         }
+
         $table[$id]['provider'] = [
           '#markup' => $definition['provider'] ?? '',
         ];
+
+        if ($island instanceof PluginFormInterface && !$this->entity->isNew()) {
+          $table[$id]['actions'] = [
+            '#type' => 'link',
+            '#title' => $this->t('Configure'),
+            '#url' => $this->entity->toUrl('edit-plugin-form', [
+              'island_id' => $id,
+              'query' => [
+                'destination' => $this->entity->toUrl()->toString(),
+              ],
+            ]),
+            '#attributes' => [
+              'class' => ['use-ajax', 'button', 'button--primary'],
+              'data-dialog-type' => 'modal',
+              'data-dialog-options' => \json_encode([
+                'width' => 700,
+              ]),
+            ],
+            '#states' => [
+              'visible' => [
+                'input[name="island_settings[button][' . $id . '][enable]"]' => ['checked' => TRUE],
+              ],
+            ],
+          ];
+        }
+        else {
+          $table[$id]['actions'] = ['#markup' => ''];
+        }
+
         $table[$id]['weight'] = [
           '#type' => 'weight',
           '#default_value' => $weight,
@@ -157,7 +206,7 @@ final class DisplayBuilderForm extends EntityForm {
       }
 
       // Order rows by weight.
-      uasort($table, static function ($a, $b) {
+      \uasort($table, static function ($a, $b) {
         if (isset($a['#weight'], $b['#weight'])) {
           return (int) $a['#weight'] - (int) $b['#weight'];
         }
@@ -193,6 +242,14 @@ final class DisplayBuilderForm extends EntityForm {
         default => '',
       }
     );
+
+    // Stay on the form for new to allow islands configuration.
+    if ($result === SAVED_NEW) {
+      $form_state->setRedirect('entity.display_builder.edit_form', ['display_builder' => $this->entity->id()]);
+    }
+    elseif ($result === SAVED_UPDATED) {
+      $form_state->setRedirect('entity.display_builder.collection');
+    }
 
     return $result;
   }

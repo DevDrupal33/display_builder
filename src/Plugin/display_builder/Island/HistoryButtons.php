@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\IslandPluginBase;
+use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
 
 /**
@@ -14,6 +17,7 @@ use Drupal\display_builder\IslandType;
  */
 #[Island(
   id: 'history',
+  enabled_by_default: TRUE,
   label: new TranslatableMarkup('History'),
   description: new TranslatableMarkup('Undo and Redo buttons.'),
   type: IslandType::Button,
@@ -23,7 +27,30 @@ use Drupal\display_builder\IslandType;
     'C' => new TranslatableMarkup('(shift c) Clear history'),
   ],
 )]
-class HistoryButtons extends IslandPluginBase {
+class HistoryButtons extends IslandPluginBase implements PluginFormInterface {
+
+  use IslandPluginConfigurationFormTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration(): array {
+    return ['display_clear_button' => FALSE];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
+    $form['display_clear_button'] = [
+      '#title' => $this->t('Enable the "Clear" button'),
+      '#description' => $this->t('This button allow top remove all past and future history of the builder.'),
+      '#type' => 'checkbox',
+      '#default_value' => $this->getConfiguration()['display_clear_button'],
+    ];
+
+    return $form;
+  }
 
   /**
    * {@inheritdoc}
@@ -36,7 +63,7 @@ class HistoryButtons extends IslandPluginBase {
     $redo = $this->buildButton($future ? (string) $future : '', $this->t('Redo'), 'r', empty($future), 'arrow-clockwise');
     $clear = [];
 
-    if (!empty($past) || !empty($future)) {
+    if ($this->getConfiguration()['display_clear_button'] === 1 && !empty($past) || !empty($future)) {
       $clear = $this->buildButton($this->t('Clear'), '', 'C', (empty($past) && empty($future)));
       $clear['#props']['variant'] = 'warning';
       $clear['#attributes']['outline'] = TRUE;

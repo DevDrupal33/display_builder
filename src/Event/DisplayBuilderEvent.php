@@ -25,6 +25,8 @@ final class DisplayBuilderEvent extends Event {
    *   The display builder ID.
    * @param array $island_enabled
    *   The enabled islands.
+   * @param array $island_configuration
+   *   The island configuration.
    * @param array|null $data
    *   The data associated with this event.
    * @param string|null $instance_id
@@ -37,6 +39,7 @@ final class DisplayBuilderEvent extends Event {
   public function __construct(
     private string $builder_id,
     private array $island_enabled,
+    private array $island_configuration,
     private ?array $data = NULL,
     private ?string $instance_id = NULL,
     private ?string $parent_id = NULL,
@@ -81,6 +84,16 @@ final class DisplayBuilderEvent extends Event {
    */
   public function getInstanceId(): ?string {
     return $this->instance_id;
+  }
+
+  /**
+   * Gets the enabled islands.
+   *
+   * @return array
+   *   The enabled islands.
+   */
+  public function getIslandConfiguration(): array {
+    return $this->island_configuration;
   }
 
   /**

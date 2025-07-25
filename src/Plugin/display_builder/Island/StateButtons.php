@@ -14,6 +14,7 @@ use Drupal\display_builder\IslandType;
  */
 #[Island(
   id: 'state',
+  enabled_by_default: TRUE,
   label: new TranslatableMarkup('State'),
   description: new TranslatableMarkup('Buttons to publish and reset the display.'),
   type: IslandType::Button,
