@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Form;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
+use Drupal\display_builder\DisplayBuilderInterface;
 use Drupal\display_builder\Entity\DisplayBuilder;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandTypeViewDisplay;
+use Drupal\user\RoleInterface;
 
 /**
  * Display builder form.
@@ -21,7 +24,7 @@ final class DisplayBuilderForm extends EntityForm {
    */
   public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
-    /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $entity */
+    /** @var \Drupal\display_builder\DisplayBuilderInterface $entity */
     $entity = $this->entity;
 
     $form['label'] = [
@@ -41,35 +44,23 @@ final class DisplayBuilderForm extends EntityForm {
       '#disabled' => !$entity->isNew(),
     ];
 
-    $form['status'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Enabled'),
-      '#default_value' => $entity->status(),
-    ];
-
     $form['description'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Description'),
       '#default_value' => $entity->get('description'),
     ];
 
-    $form['library'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Shoelace library'),
-      '#description' => $this->t('Select the library mode. If local must be installed in libraries folder, see README.'),
-      '#options' => [
-        'cdn' => $this->t('CDN'),
-        'local' => $this->t('Local'),
-      ],
-      '#default_value' => $entity->get('library'),
-    ];
-
-    $form['debug'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Debug mode'),
-      '#description' => $this->t('Enable verbose JavaScript and error logs.'),
-      '#default_value' => $entity->get('debug'),
-    ];
+    // Add user role access selection. Not available at creation because the
+    // permissions are not set yet by DisplayBuilderPermissions.
+    if (!$entity->isNew()) {
+      $roles = $this->entityTypeManager->getStorage('user_role')->loadMultiple();
+      $form['roles'] = [
+        '#type' => 'checkboxes',
+        '#title' => $this->t('Roles'),
+        '#options' => array_map(fn(RoleInterface $role) => Html::escape((string) $role->label()), $roles),
+        '#default_value' => array_keys($entity->getRoles()),
+      ];
+    }
 
     // Inform on two time save for the island specific configurations.
     if ($this->entity->isNew()) {
@@ -99,7 +90,6 @@ final class DisplayBuilderForm extends EntityForm {
       $this->t('Name'),
       $this->t('Description'),
       '',
-      $this->t('Provider'),
       $this->t('Actions'),
       $this->t('Weight'),
     ];
@@ -162,10 +152,6 @@ final class DisplayBuilderForm extends EntityForm {
           $table[$id]['options'] = [];
         }
 
-        $table[$id]['provider'] = [
-          '#markup' => $definition['provider'] ?? '',
-        ];
-
         if ($island instanceof PluginFormInterface && !$this->entity->isNew()) {
           $table[$id]['actions'] = [
             '#type' => 'link',
@@ -177,7 +163,7 @@ final class DisplayBuilderForm extends EntityForm {
               ],
             ]),
             '#attributes' => [
-              'class' => ['use-ajax', 'button', 'button--primary'],
+              'class' => ['use-ajax', 'button', 'button--small'],
               'data-dialog-type' => 'modal',
               'data-dialog-options' => \json_encode([
                 'width' => 700,
@@ -220,7 +206,49 @@ final class DisplayBuilderForm extends EntityForm {
       $form['island_settings'][$type] = $table;
     }
 
+    $form['library'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Shoelace library'),
+      '#description' => $this->t('Select the library mode. If local must be installed in libraries folder, see README.'),
+      '#options' => [
+        'cdn' => $this->t('CDN'),
+        'local' => $this->t('Local'),
+      ],
+      '#default_value' => $entity->get('library'),
+    ];
+
+    $form['debug'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Debug mode'),
+      '#description' => $this->t('Enable verbose JavaScript and error logs.'),
+      '#default_value' => $entity->get('debug'),
+    ];
+
+    $form['status'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enabled'),
+      '#default_value' => $entity->status(),
+    ];
+
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state): DisplayBuilderInterface {
+    parent::submitForm($form, $form_state);
+
+    // Save user permissions.
+    /** @var \Drupal\display_builder\DisplayBuilderInterface $entity */
+    $entity = $this->entity;
+    if ($permission = $entity->getPermissionName()) {
+      foreach ($form_state->getValue('roles') ?? [] as $rid => $enabled) {
+        user_role_change_permissions($rid, [$permission => $enabled]);
+      }
+    }
+
+    return $entity;
   }
 
   /**

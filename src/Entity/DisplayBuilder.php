@@ -18,6 +18,8 @@ use Drupal\display_builder\IslandType;
 use Drupal\display_builder\RenderableBuilderTrait;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_ui\DisplayBuilderListBuilder;
+use Drupal\user\Entity\Role;
+use Drupal\user\RoleInterface;
 
 /**
  * Defines the display builder entity type.
@@ -31,10 +33,8 @@ use Drupal\display_builder_ui\DisplayBuilderListBuilder;
   entity_keys: [
     'id' => 'id',
     'label' => 'label',
-    'debug' => 'debug',
-    'library' => 'library',
     'description' => 'description',
-    'island_settings' => 'island_settings',
+    'weight' => 'weight',
   ],
   handlers: [
     'route_provider' => [
@@ -64,11 +64,12 @@ use Drupal\display_builder_ui\DisplayBuilderListBuilder;
   config_export: [
     'id',
     'label',
-    'debug',
     'library',
     'description',
     'island_settings',
     'island_configuration',
+    'debug',
+    'weight',
   ],
 )]
 final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInterface {
@@ -112,6 +113,15 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    * The display builder island configuration.
    */
   protected ?array $island_configuration = [];
+
+  /**
+   * Weight of this page layout when negotiating the page variant.
+   *
+   * The first/lowest that is accessible according to conditions is loaded.
+   *
+   * @var int
+   */
+  protected $weight = 0;
 
   /**
    * The display builder state manager.
@@ -248,6 +258,20 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    */
   public function getPermissionName(): string {
     return 'use display builder ' . $this->id();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRoles(): array {
+    // Do not list any roles if the permission does not exist.
+    $permission = $this->getPermissionName();
+    if (empty($permission)) {
+      return [];
+    }
+
+    $roles = array_filter(Role::loadMultiple(), fn(RoleInterface $role) => $role->hasPermission($permission));
+    return array_map(fn(RoleInterface $role) => $role->label(), $roles);
   }
 
   /**

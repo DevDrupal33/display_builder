@@ -3,7 +3,7 @@ status: true
 dependencies: {  }
 id: default
 label: Default
-description: 'Default display builder configuration.'
+description: 'With sensible configuration, for the common usage.'
 library: cdn
 debug: false
 island_settings:

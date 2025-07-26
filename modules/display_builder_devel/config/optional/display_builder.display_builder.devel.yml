@@ -3,7 +3,7 @@ status: true
 dependencies: {  }
 id: devel
 label: Devel
-description: 'Devel oriented Display Builder configuration.'
+description: 'Configuration for people developing Display Builder module.'
 library: local
 debug: true
 island_settings:

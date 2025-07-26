@@ -10,7 +10,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Entity\DisplayBuilder;
 use Drupal\display_builder\IslandInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
@@ -42,11 +41,11 @@ final class DisplayBuilderIslandPluginForm extends EntityForm {
   /**
    * Returns the title of the edit plugin form.
    */
-  public static function editFormTitle(string $island_id): TranslatableMarkup {
+  public static function editFormTitle(string $island_id): string {
     /** @var \Drupal\display_builder\IslandInterface $island */
     $island = \Drupal::service('plugin.manager.db_island')->createInstance($island_id, []);
 
-    return t('Edit Plugin: @island', ['@island' => $island->label()]);
+    return $island->label();
   }
 
   /**

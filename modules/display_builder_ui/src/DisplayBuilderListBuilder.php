@@ -4,13 +4,52 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_ui;
 
-use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
+use Drupal\Core\Config\Entity\DraggableListBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder\DisplayBuilderInterface;
+use Drupal\display_builder\IslandPluginManagerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a listing of display builders.
  */
-final class DisplayBuilderListBuilder extends ConfigEntityListBuilder {
+final class DisplayBuilderListBuilder extends DraggableListBuilder {
+
+  /**
+   * Island plugin manager.
+   *
+   * @var \Drupal\display_builder\IslandPluginManagerInterface
+   */
+  protected $islandManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, IslandPluginManagerInterface $island_manager) {
+    parent::__construct($entity_type, $storage);
+    $this->islandManager = $island_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
+    return new static(
+      $entity_type,
+      $container->get('entity_type.manager')->getStorage($entity_type->id()),
+      $container->get('plugin.manager.db_island'),
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormId(): string {
+    return 'display_builder_list_builder';
+  }
 
   /**
    * {@inheritdoc}
@@ -19,8 +58,8 @@ final class DisplayBuilderListBuilder extends ConfigEntityListBuilder {
     $header = [];
     $header['label'] = $this->t('Label');
     $header['description'] = $this->t('Description');
-    $header['id'] = $this->t('Machine name');
-
+    $header['roles'] = $this->t('Roles');
+    $header['status'] = $this->t('Status');
     return $header + parent::buildHeader();
   }
 
@@ -31,8 +70,16 @@ final class DisplayBuilderListBuilder extends ConfigEntityListBuilder {
     $row = [];
     /** @var \Drupal\display_builder\DisplayBuilderInterface $entity */
     $row['label'] = $entity->label();
-    $row['description'] = $entity->get('description');
-    $row['id'] = $entity->id();
+    // List enabled view panels instead of showing an empty description.
+    $description = $entity->get('description') ? $entity->get('description') : $this->listViewPanels($entity);
+    $row['description']['data']['#plain_text'] = $description;
+    $row['roles']['data'] = [
+      '#theme' => 'item_list',
+      '#items' => $entity->getRoles(),
+      '#empty' => $this->t('No roles may use this display builder'),
+      '#context' => ['list_style' => 'comma-list'],
+    ];
+    $row['status']['data']['#plain_text'] = $entity->status() ? $this->t('Enabled') : $this->t('Disabled');
 
     return $row + parent::buildRow($entity);
   }
@@ -44,12 +91,26 @@ final class DisplayBuilderListBuilder extends ConfigEntityListBuilder {
     $build = parent::render();
     $build['notice'] = [
       '#markup' => $this->t('A display builder is a configuration of the builder itself. Each display builder configuration can be used to build a display.'),
-      '#prefix' => '<div class="description">',
-      '#suffix' => '</div>',
       '#weight' => -100,
     ];
 
     return $build;
+  }
+
+  /**
+   * List enabled view panels as a description fallback.
+   *
+   * @param \Drupal\display_builder\DisplayBuilderInterface $entity
+   *   The entity.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The description listing the panels.
+   */
+  protected function listViewPanels(DisplayBuilderInterface $entity): TranslatableMarkup {
+    $view_panels = $this->islandManager->getIslandsByTypes()['view'];
+    $view_panels = array_intersect_key($view_panels, $entity->getIslandEnabled());
+    $view_panels = array_map(fn($island) => $island->label(), $view_panels);
+    return $this->t('With: @panels', ['@panels' => implode(', ', $view_panels)]);
   }
 
 }

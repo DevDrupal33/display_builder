@@ -71,4 +71,12 @@ interface DisplayBuilderInterface extends ConfigEntityInterface {
    */
   public function getPermissionName(): string;
 
+  /**
+   * Get roles allowed to use the Display builder.
+   *
+   * @return array
+   *   List of roles.
+   */
+  public function getRoles(): array;
+
 }

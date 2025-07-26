@@ -87,15 +87,16 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
    */
   protected function getAllowedDisplayBuilders(): array {
     $options = [];
+    $storage = $this->entityTypeManager->getStorage('display_builder');
+    $entity_ids = $storage->getQuery()->accessCheck(TRUE)->sort('weight', 'ASC')->execute();
     /** @var \Drupal\display_builder\DisplayBuilderInterface[] $display_builders */
-    $display_builders = $this->entityTypeManager->getStorage('display_builder')->loadMultiple();
+    $display_builders = $storage->loadMultiple($entity_ids);
 
     foreach ($display_builders as $entity_id => $entity) {
       if ($this->currentUser->hasPermission($entity->getPermissionName())) {
         $options[$entity_id] = $entity->label();
       }
     }
-
     return $options;
   }
 

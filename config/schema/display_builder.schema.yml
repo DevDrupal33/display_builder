@@ -51,6 +51,9 @@ display_builder.display_builder.*:
       label: 'Island configuration'
       # @todo set this configuration, ignore for now.
       type: ignore
+    weight:
+      type: weight
+      label: Weight
 
 display_builder.island_settings.*:
   type: mapping
