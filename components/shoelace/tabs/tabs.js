@@ -161,10 +161,13 @@
     attach(context) {
       once('shoelaceTabs', '.shoelace-tabs', context).forEach(
         (tabsComponent) => {
-          const builderId = tabsComponent.closest('.display-builder').id;
-          addSwitchingMechanism(builderId, tabsComponent);
-          // Restore tabs state from local storage
-          restoreTabsState(builderId, tabsComponent);
+          const displayBuilder = tabsComponent.closest('.display-builder');
+          if (displayBuilder !== null) {
+            const builderId = tabsComponent.closest('.display-builder').id;
+            addSwitchingMechanism(builderId, tabsComponent);
+            // Restore tabs state from local storage
+            restoreTabsState(builderId, tabsComponent);
+          }
         },
       );
 

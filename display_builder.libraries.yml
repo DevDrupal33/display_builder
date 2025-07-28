@@ -150,3 +150,8 @@ _fix:
   css:
     theme:
       ./assets/css/_fix.css: {}
+
+navigation:
+  css:
+    theme:
+      assets/css/navigation.css: {}

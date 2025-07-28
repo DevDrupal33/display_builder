@@ -1,0 +1,8 @@
+:where([data-drupal-admin-styles] :not(svg *)) sl-icon {
+  display: inline-block;
+}
+
+/* @todo not working yet. */
+:where([data-drupal-admin-styles] :not(svg *)) .button__label::slotted(sl-icon) {
+  vertical-align: -2px;
+}

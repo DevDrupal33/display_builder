@@ -2,16 +2,10 @@ name: Display builder
 noUi: true
 group: Display builder
 slots:
-  view_sidebar_buttons:
-    title: View sidebar buttons
   view_sidebar:
     title: View sidebar
-  view_main_tabs:
-    title: View main tabs
   view_main:
     title: View main
-  buttons:
-    title: Action buttons
   contextual_islands:
     title: Contextual islands
   menu_islands:
