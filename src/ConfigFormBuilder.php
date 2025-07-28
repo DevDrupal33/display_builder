@@ -31,13 +31,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
     }
 
     $options = $mandatory ? $options : ['' => $this->t('- Disabled -')] + $options;
-    $form = [
-      '#type' => 'select',
-      '#title' => $this->t('Configuration'),
-      '#description' => $this->t('Select a Display builder configuration for this instance, can be changed later.'),
-      '#options' => $options,
-      '#default_value' => $entity->getDisplayBuilder()?->id() ?? '',
-    ];
+    $form = $this->profileSelector($options, (string) $entity->getDisplayBuilder()?->id());
 
     if ($entity->getInstanceId()) {
       $form['#description'] = [
@@ -72,18 +66,15 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
         '#type' => 'hidden',
         '#default_value' => \array_keys($options)[0],
       ],
-      default => [
-        '#type' => 'select',
-        '#title' => $this->t('Configuration'),
-        '#description' => $this->t('Select a Display builder configuration for this instance, can be changed later.'),
-        '#options' => $options,
-        '#default_value' => $display_builder,
-      ]
+      default => $this->profileSelector($options, $display_builder),
     };
   }
 
   /**
    * Get display builders allowed for the current user.
+   *
+   * @return array
+   *   The list of allowed profiles.
    */
   protected function getAllowedDisplayBuilders(): array {
     $options = [];
@@ -97,7 +88,29 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
         $options[$entity_id] = $entity->label();
       }
     }
+
     return $options;
+  }
+
+  /**
+   * Build a profile selector.
+   *
+   * @param array $options
+   *   The list of profiles.
+   * @param string|null $default_value
+   *   The default value.
+   *
+   * @return array
+   *   The selector form api.
+   */
+  private function profileSelector(array $options, ?string $default_value = NULL): array {
+    return [
+      '#type' => 'select',
+      '#title' => $this->t('Profile'),
+      '#description' => $this->t('Select a Display builder profile for this instance, can be changed later.'),
+      '#options' => $options,
+      '#default_value' => $default_value ?? '',
+    ];
   }
 
 }

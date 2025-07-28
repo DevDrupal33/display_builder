@@ -42,11 +42,12 @@ class HistoryButtons extends IslandPluginBase implements PluginFormInterface {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
+    $configuration = $this->getConfiguration();
     $form['display_clear_button'] = [
       '#title' => $this->t('Enable the "Clear" button'),
       '#description' => $this->t('This button allow top remove all past and future history of the builder.'),
       '#type' => 'checkbox',
-      '#default_value' => $this->getConfiguration()['display_clear_button'],
+      '#default_value' => $configuration['display_clear_button'],
     ];
 
     return $form;
@@ -63,7 +64,9 @@ class HistoryButtons extends IslandPluginBase implements PluginFormInterface {
     $redo = $this->buildButton($future ? (string) $future : '', $this->t('Redo'), 'r', empty($future), 'arrow-clockwise');
     $clear = [];
 
-    if ($this->getConfiguration()['display_clear_button'] === 1 && !empty($past) || !empty($future)) {
+    $configuration = $this->getConfiguration();
+
+    if ($configuration['display_clear_button'] === 1 && !empty($past) || !empty($future)) {
       $clear = $this->buildButton($this->t('Clear'), '', 'C', (empty($past) && empty($future)));
       $clear['#props']['variant'] = 'warning';
       $clear['#attributes']['outline'] = TRUE;

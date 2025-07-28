@@ -266,12 +266,14 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
   public function getRoles(): array {
     // Do not list any roles if the permission does not exist.
     $permission = $this->getPermissionName();
+
     if (empty($permission)) {
       return [];
     }
 
-    $roles = array_filter(Role::loadMultiple(), fn(RoleInterface $role) => $role->hasPermission($permission));
-    return array_map(fn(RoleInterface $role) => $role->label(), $roles);
+    $roles = \array_filter(Role::loadMultiple(), static fn (RoleInterface $role) => $role->hasPermission($permission));
+
+    return \array_map(static fn (RoleInterface $role) => $role->label(), $roles);
   }
 
   /**

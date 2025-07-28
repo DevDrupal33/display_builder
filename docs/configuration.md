@@ -6,15 +6,15 @@ Permissions:
 
 - "Administer display builder"
 
-## List of display builders
+## List of Display builder profiles
 
 `/admin/structure/display-builder`
 
-![Display Builder configuration](images/configs.webp)
+![Display builder profiles](images/configs.webp)
 
-## Configuration of a single display builder
+## Configuration of a single Display builder profile (config entity)
 
-Each Display Builder is a configuration entity with:
+Each Display builder profile is a configuration entity with:
 
 - Metadata: a label and a description
 - The islands configuration, by type
@@ -50,7 +50,7 @@ View panels have an extra feature, they can be moved between 2 different regions
 
 ## Access & permissions
 
-Each display builder is associated to a permission:
+Each Display builder profile is associated to a permission:
 
 ![Permissions](images/permissions.webp)
 

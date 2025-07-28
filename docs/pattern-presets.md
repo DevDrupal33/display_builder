@@ -12,7 +12,7 @@ They must not be confused with UI components:
 
 ## Activate
 
-"Preset actions" menu island must be enabled in the display builder's configuration:
+"Preset actions" menu island must be enabled in the Display Builder's profile:
 
 ![Menu island configuration](images/menu-islands-config.webp)
 
@@ -30,7 +30,7 @@ Your preset must have a name:
 
 The pattern preset is now available in the `Patterns Library` panel if:
 
-- it shares the same context(s) (Page, Content, Entity, Field, Field item, View...) as the current display builder:
+- it shares the same context(s) (Page, Content, Entity, Field, Field item, View...) as the current Display Builder:
 - the Drupal theme used when creating the pattern preset is activated
 
 ![Presets library](images/presets-library.webp)

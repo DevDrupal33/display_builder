@@ -67,7 +67,7 @@ We hope both will be usable in a same project if this is needed by a team. Anywa
 
 `layout_builder_restrictions_by_role` allows restricting what roles can place what blocks or use what layout (so, what component).
 
-This is doable with Display Builder by creating different display builders by role and [to configure](configuration.md) the _Components library_ and _Block library panels_ differently.
+This is doable with Display Builder by creating different Display builder profiles by role and [to configure](configuration.md) the _Components library_ and _Block library panels_ differently.
 
 ### What is the equivalent of [Layout Builder Lock](https://www.drupal.org/project/layout_builder_lock)?
 

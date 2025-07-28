@@ -57,8 +57,8 @@ final class DisplayBuilderForm extends EntityForm {
       $form['roles'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Roles'),
-        '#options' => array_map(fn(RoleInterface $role) => Html::escape((string) $role->label()), $roles),
-        '#default_value' => array_keys($entity->getRoles()),
+        '#options' => \array_map(static fn (RoleInterface $role) => Html::escape((string) $role->label()), $roles),
+        '#default_value' => \array_keys($entity->getRoles()),
       ];
     }
 
@@ -242,6 +242,7 @@ final class DisplayBuilderForm extends EntityForm {
     // Save user permissions.
     /** @var \Drupal\display_builder\DisplayBuilderInterface $entity */
     $entity = $this->entity;
+
     if ($permission = $entity->getPermissionName()) {
       foreach ($form_state->getValue('roles') ?? [] as $rid => $enabled) {
         user_role_change_permissions($rid, [$permission => $enabled]);

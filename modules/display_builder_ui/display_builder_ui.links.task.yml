@@ -1,6 +1,6 @@
 entity.display_builder.collection:
   route_name: entity.display_builder.collection
-  title: 'Display builders'
+  title: 'Profiles'
   base_route: entity.display_builder.collection
 
 entity.display_builder.preset.collection:

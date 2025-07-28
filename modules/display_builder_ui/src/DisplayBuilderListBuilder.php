@@ -36,8 +36,8 @@ final class DisplayBuilderListBuilder extends DraggableListBuilder {
   /**
    * {@inheritdoc}
    */
-  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
-    return new static(
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type): self {
+    return new self(
       $entity_type,
       $container->get('entity_type.manager')->getStorage($entity_type->id()),
       $container->get('plugin.manager.db_island'),
@@ -60,6 +60,7 @@ final class DisplayBuilderListBuilder extends DraggableListBuilder {
     $header['description'] = $this->t('Description');
     $header['roles'] = $this->t('Roles');
     $header['status'] = $this->t('Status');
+
     return $header + parent::buildHeader();
   }
 
@@ -90,7 +91,7 @@ final class DisplayBuilderListBuilder extends DraggableListBuilder {
   public function render(): array {
     $build = parent::render();
     $build['notice'] = [
-      '#markup' => $this->t('A display builder is a configuration of the builder itself. Each display builder configuration can be used to build a display.'),
+      '#markup' => $this->t('A Display builder profile is a configuration of the builder itself.<br>Each Display builder configuration can be used to build a display with specific configuration and capabilities.'),
       '#weight' => -100,
     ];
 
@@ -108,9 +109,10 @@ final class DisplayBuilderListBuilder extends DraggableListBuilder {
    */
   protected function listViewPanels(DisplayBuilderInterface $entity): TranslatableMarkup {
     $view_panels = $this->islandManager->getIslandsByTypes()['view'];
-    $view_panels = array_intersect_key($view_panels, $entity->getIslandEnabled());
-    $view_panels = array_map(fn($island) => $island->label(), $view_panels);
-    return $this->t('With: @panels', ['@panels' => implode(', ', $view_panels)]);
+    $view_panels = \array_intersect_key($view_panels, $entity->getIslandEnabled());
+    $view_panels = \array_map(static fn ($island) => $island->label(), $view_panels);
+
+    return $this->t('With: @panels', ['@panels' => \implode(', ', $view_panels)]);
   }
 
 }

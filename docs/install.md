@@ -4,7 +4,7 @@
 
 ## Patches
 
-Display builder could require patches, always check and include what's in [composer.json](https://git.drupalcode.org/project/display_builder/-/blob/1.0.x/composer.json).
+Display Builder could require patches, always check and include what's in [composer.json](https://git.drupalcode.org/project/display_builder/-/blob/1.0.x/composer.json).
 
 It's recommended to ease this step using [Composer Merge Plugin](https://github.com/wikimedia/composer-merge-plugin) with this configuration in your main composer file:
 
@@ -28,7 +28,7 @@ It's recommended to ease this step using [Composer Merge Plugin](https://github.
 }
 ```
 
-So your installation will be sync with Display builder specific patches.
+So your installation will be sync with Display Builder specific patches.
 
 ## Configuration steps
 
@@ -51,9 +51,10 @@ See: [Installing Modules](https://www.drupal.org/docs/extending-drupal/installin
 
 ## Libraries for local development
 
-Display builder rely on [Shoelace component library](https://shoelace.style/getting-started/installation),
+Display Builder rely on [Shoelace component library](https://shoelace.style/getting-started/installation),
 by default the library is loaded with CDN, but you can use local copies instead
-in Display Builder settings (/admin/structure/display-builder).
+
+in Display builder profiles (/admin/structure/display-builder).
 
 ### Local development installation
 
@@ -79,7 +80,7 @@ We use `localStorage` that can change anytime, be sure to clear your local stora
 
 ### Server-side reset
 
-In case of a failing display builder configuration or instance:
+In case of a failing Display builder profile (config entity) or instance:
 
 - Enable module `display_builder_devel`
 - Go to Structure > Display Builder > Devel

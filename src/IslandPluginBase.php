@@ -252,14 +252,14 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    * {@inheritdoc}
    */
   public function getConfiguration(): array {
-    return $this->configuration;
+    return \array_merge($this->defaultConfiguration(), $this->configuration);
   }
 
   /**
    * {@inheritdoc}
    */
   public function setConfiguration(array $configuration): void {
-    $this->configuration = $configuration + $this->defaultConfiguration();
+    $this->configuration = \array_merge($this->defaultConfiguration(), $configuration);
   }
 
   /**

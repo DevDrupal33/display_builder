@@ -37,29 +37,21 @@ class ActiveUsers extends IslandPluginBase implements PluginFormInterface {
 
   /**
    * The current user.
-   *
-   * @var \Drupal\Core\Session\AccountInterface
    */
   protected AccountInterface $currentUser;
 
   /**
    * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * The date formatter.
-   *
-   * @var \Drupal\Core\Datetime\DateFormatterInterface
    */
   protected DateFormatterInterface $dateFormatter;
 
   /**
    * The entity field manager.
-   *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
    */
   protected EntityFieldManagerInterface $entityFieldManager;
 
@@ -72,6 +64,7 @@ class ActiveUsers extends IslandPluginBase implements PluginFormInterface {
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->dateFormatter = $container->get('date.formatter');
     $instance->entityFieldManager = $container->get('entity_field.manager');
+
     return $instance;
   }
 
@@ -92,7 +85,10 @@ class ActiveUsers extends IslandPluginBase implements PluginFormInterface {
     $options = [
       '' => $this->t('- None -'),
     ];
+    $configuration = $this->getConfiguration();
+
     $fields = $this->entityFieldManager->getFieldDefinitions('user', 'user');
+
     foreach ($fields as $field_id => $field) {
       if ($field->getType() === 'image') {
         $options[$field_id] = $field->getLabel();
@@ -101,7 +97,7 @@ class ActiveUsers extends IslandPluginBase implements PluginFormInterface {
     $form['image_field'] = [
       '#title' => $this->t('Image field'),
       '#type' => 'select',
-      '#default_value' => $this->getConfiguration()['image_field'],
+      '#default_value' => $configuration['image_field'],
       '#options' => $options,
     ];
 
@@ -109,13 +105,14 @@ class ActiveUsers extends IslandPluginBase implements PluginFormInterface {
     $options = [
       '' => $this->t('- None -'),
     ];
+
     foreach ($styles as $name => $style) {
       $options[$name] = $style->label();
     }
     $form['image_style'] = [
       '#title' => $this->t('Image style'),
       '#type' => 'select',
-      '#default_value' => $this->getConfiguration()['image_style'],
+      '#default_value' => $configuration['image_style'],
       '#options' => $options,
     ];
 
@@ -129,99 +126,29 @@ class ActiveUsers extends IslandPluginBase implements PluginFormInterface {
     $users = $this->stateManager->getUsers($builder_id);
     $current_user = $this->currentUser->id();
     $users = $this->removeInactiveUsers($users);
+
     // If no users (this situation must not happen), don't show anything.
-    if (count($users) === 0) {
+    if (\count($users) === 0) {
       return [];
     }
-    if (array_key_exists($current_user, $users)) {
+
+    if (\array_key_exists($current_user, $users)) {
       // If the only user is the current user, don't show anything.
-      if (count($users) === 1) {
+      if (\count($users) === 1) {
         return [];
       }
       // Move current user at the beginning of the list.
       $users = [$current_user => $users[$current_user]] + $users;
+
       return $this->buildRenderable($users);
     }
+
     // If the only user is not the current user, add they at the start.
-    if (count($users) === 1) {
+    if (\count($users) === 1) {
       $users = [$current_user => NULL] + $users;
     }
+
     return $this->buildRenderable($users);
-  }
-
-  /**
-   * Remove inactive users.
-   *
-   * @param array $users
-   *   Each key is an User entity ID, each value is a timestamp.
-   *
-   * @return array
-   *   Each key is an User entity ID, each value is a timestamp.
-   */
-  protected function removeInactiveUsers(array $users): array {
-    foreach ($users as $user_id => $time) {
-      if (\time() - $time > self::SECONDS_IN_15_MINUTES) {
-        unset($users[$user_id]);
-      }
-    }
-    return $users;
-  }
-
-  /**
-   * Build renderable.
-   *
-   * @param array $users
-   *   Each key is an User entity ID, each value is a timestamp.
-   *
-   * @return array
-   *   A renderable array.
-   */
-  protected function buildRenderable(array $users): array {
-    $avatars = [];
-    foreach ($users as $user_id => $time) {
-      $user = $this->entityTypeManager->getStorage('user')->load($user_id);
-      if (!$user) {
-        // For example, if the user was deleted.
-        continue;
-      }
-      $avatar = [
-        '#type' => 'component',
-        '#component' => 'display_builder:avatar',
-        '#props' => [
-          'name' => $user->getDisplayName(),
-        ],
-        '#attributes' => [
-          'style' => '--size: 38px',
-        ],
-      ];
-      if ($time) {
-        // We can't use DateFormatterInterface::formatTimeDiffSince() because
-        // the displayed value will become obsolete if the island is not updated
-        // for a while.
-        $time = $this->dateFormatter->format($time, 'custom', 'G:i');
-        $avatar['#props']['name'] .= ', ' . $this->t('at @time', ['@time' => $time]);
-      }
-      $image_field = $this->getConfiguration()['image_field'];
-      if ($image_field && !$user->get($image_field)->isEmpty()) {
-        /** @var \Drupal\file\FileInterface $image */
-        $image = $user->get($image_field)->entity;
-        $image_style = $this->getConfiguration()['image_style'];
-        $style = $this->entityTypeManager->getStorage('image_style')->load($image_style);
-        $avatar['#props']['image'] = $style ? $style->buildUri($image->getFileUri()) : $image->getFileUri();
-      }
-      $avatars[] = $avatar;
-    }
-    if (count($avatars) === 0) {
-      return [];
-    }
-    return [
-      '#type' => 'html_tag',
-      '#tag' => 'span',
-      '#attributes' => [
-        'class' => 'sl-avatar-group',
-      ],
-      'avatars' => $avatars,
-    ];
   }
 
   /**
@@ -267,6 +194,89 @@ class ActiveUsers extends IslandPluginBase implements PluginFormInterface {
   }
 
   /**
+   * Remove inactive users.
+   *
+   * @param array $users
+   *   Each key is an User entity ID, each value is a timestamp.
+   *
+   * @return array
+   *   Each key is an User entity ID, each value is a timestamp.
+   */
+  protected function removeInactiveUsers(array $users): array {
+    foreach ($users as $user_id => $time) {
+      if (\time() - $time > self::SECONDS_IN_15_MINUTES) {
+        unset($users[$user_id]);
+      }
+    }
+
+    return $users;
+  }
+
+  /**
+   * Build renderable.
+   *
+   * @param array $users
+   *   Each key is an User entity ID, each value is a timestamp.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function buildRenderable(array $users): array {
+    $avatars = [];
+    $configuration = $this->getConfiguration();
+
+    foreach ($users as $user_id => $time) {
+      /** @var \Drupal\user\UserInterface $user */
+      $user = $this->entityTypeManager->getStorage('user')->load($user_id);
+
+      if (!$user) {
+        // For example, if the user was deleted.
+        continue;
+      }
+      $avatar = [
+        '#type' => 'component',
+        '#component' => 'display_builder:avatar',
+        '#props' => [
+          'name' => $user->getDisplayName(),
+        ],
+        '#attributes' => [
+          'style' => '--size: 38px',
+        ],
+      ];
+
+      if ($time) {
+        // We can't use DateFormatterInterface::formatTimeDiffSince() because
+        // the displayed value will become obsolete if the island is not updated
+        // for a while.
+        $time = $this->dateFormatter->format($time, 'custom', 'G:i');
+        $avatar['#props']['name'] .= ', ' . $this->t('at @time', ['@time' => $time]);
+      }
+
+      if (isset($configuration['image_field']) && $user->hasField($configuration['image_field'])) {
+        /** @var \Drupal\file\FileInterface $image */
+        $image = $user->get($configuration['image_field'])->entity;
+        $image_style = $configuration['image_style'];
+        $style = $this->entityTypeManager->getStorage('image_style')->load($image_style);
+        $avatar['#props']['image'] = $style ? $style->buildUri($image->getFileUri()) : $image->getFileUri();
+      }
+      $avatars[] = $avatar;
+    }
+
+    if (\count($avatars) === 0) {
+      return [];
+    }
+
+    return [
+      '#type' => 'html_tag',
+      '#tag' => 'span',
+      '#attributes' => [
+        'class' => 'sl-avatar-group',
+      ],
+      'avatars' => $avatars,
+    ];
+  }
+
+  /**
    * Rebuilds the island with the given builder ID.
    *
    * @param string $builder_id
@@ -277,9 +287,9 @@ class ActiveUsers extends IslandPluginBase implements PluginFormInterface {
    */
   private function rebuild(string $builder_id): array {
     return $this->addOutOfBand(
-    $this->build($builder_id, []),
-    '#' . $this->getHtmlId($builder_id),
-    'innerHTML'
+      $this->build($builder_id, []),
+      '#' . $this->getHtmlId($builder_id),
+      'innerHTML'
     );
   }
 

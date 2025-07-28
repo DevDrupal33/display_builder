@@ -26,4 +26,4 @@ Commit message structure **must** have the issue ID and **can** have the contrib
 Naming rules:
 
 - "Display Builder" with upper-case "B" for the module
-- "Display builder" with lower-case "b" for the config entity or for a plugin
+- "Display builder" with lower-case "b" for the config entity (profile) or for a plugin

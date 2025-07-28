@@ -45,7 +45,7 @@ View Title source is also available for string prop:
 
 Display Builder is a `display_extender` plugin with those properties:
 
-- `display_builder`: the display builder config entity in use last time the config was saved
+- `display_builder`: the Display builder profile (config entity) (profile) in use last time the config was saved
 - `instance`: ID of the instance from the Drupal State API
 - `sources`: a UI Patterns 2 sources tree
 

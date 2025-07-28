@@ -13,7 +13,7 @@ There is no page layout activated by default. You need to create your owns in Ad
 Adding a page layout is simple:
 
 - Set the Label
-- Pick your Display Builder
+- Pick your Display builder
 - Set your conditions
 
 ![Add page layout](images/page-layout-add.webp)
@@ -33,7 +33,7 @@ You will be able to build the display once the Page Layout is created:
 
 > 🚧 2025-07-21: UX may change.
 
-The display builder is a normal one with some data preloaded (but not already saved) and some sources specific to the "Page" context:
+The Display Builder instance is a normal one with some data preloaded (but not already saved) and some sources specific to the "Page" context:
 
 - Page title
 - Main content
@@ -70,7 +70,7 @@ If no Page layout matches, _Block Layout_ still manage the page.
 
 Each page is its own config entity
 
-- `display_builder`: the display builder config entity in use last time the config was saved
+- `display_builder`: the Display builder profile (config entity) in use last time the config was saved
 - `instance`: ID of the instance from the Drupal State API
 - `sources`: a UI Patterns 2 sources tree
 

@@ -1,4 +1,4 @@
-# Entity view displays overrides with Display Builder
+# Entity view displays overrides with Display builder
 
 ## Activate
 
@@ -18,7 +18,7 @@ It is better, but not mandatory, to chose unlimited number of value in field sto
 
 > 🚧 2025-07-01: Feature not implemented yet. [#3529125](https://www.drupal.org/project/display_builder/issues/3529125)
 
-In "Manage form display", you can pick "Display Builder":
+In "Manage form display", you can pick "Display builder":
 
 ![Field Widget selector](images/field-widget-selector.webp)
 
