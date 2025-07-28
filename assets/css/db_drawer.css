@@ -7,7 +7,9 @@
 }
 
 /* Admin toolbar vertical, we pass hover, admin toolbar z-index is 501. */
-.toolbar-tray-open.toolbar-vertical .display-builder .shoelace-drawer {
+.toolbar-tray-open.toolbar-vertical .display-builder .shoelace-drawer,
+.gin--navigation .display-builder .shoelace-drawer,
+.gin--vertical-toolbar .display-builder .shoelace-drawer {
   &::part(base) {
     z-index: 502;
   }
