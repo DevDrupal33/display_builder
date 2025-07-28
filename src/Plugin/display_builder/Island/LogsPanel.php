@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
+use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
@@ -27,6 +28,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class LogsPanel extends IslandPluginBase {
 
   /**
+   * Seconds in a day.
+   */
+  private const SECONDS_IN_A_DAY = 86400;
+
+  /**
    * The entity type manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -34,12 +40,19 @@ class LogsPanel extends IslandPluginBase {
   protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
+   * The date formatter.
+   *
+   * @var \Drupal\Core\Datetime\DateFormatterInterface
+   */
+  protected DateFormatterInterface $dateFormatter;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->entityTypeManager = $container->get('entity_type.manager');
-
+    $instance->dateFormatter = $container->get('date.formatter');
     return $instance;
   }
 
@@ -63,7 +76,6 @@ class LogsPanel extends IslandPluginBase {
         ['data' => $this->t('Time')],
         ['data' => $this->t('User')],
         ['data' => $this->t('Message')],
-        ['data' => $this->t('Hash')],
       ],
       '#rows' => [],
     ];
@@ -76,7 +88,8 @@ class LogsPanel extends IslandPluginBase {
     $build[] = $table_logs;
 
     if ($saveHash && !$saveInFuture && !$saveInPresent && !$saveInPast) {
-      $params = ['%hash' => $saveHash, '%time' => $load['save']['time']];
+      $time = $this->formatTime($load['save']['time']);
+      $params = ['%hash' => $saveHash, '%time' => $time];
       $build[] = [
         '#type' => 'html_tag',
         '#tag' => 'p',
@@ -230,13 +243,29 @@ class LogsPanel extends IslandPluginBase {
       'data' => [
         (string) $index,
         '',
-        $step['time'] ?? NULL,
+        $step['time'] ? $this->formatTime($step['time']) : NULL,
         $user ? $user->getDisplayName() : NULL,
         $step['log'] ?? '',
-        $step['hash'] ?? '',
       ],
       'style' => ($index === 0) ? 'font-weight: bold;' : '',
     ];
+  }
+
+  /**
+   * Print the date for humans.
+   *
+   * @param int $timestamp
+   *   The timestamp integer.
+   *
+   * @return string
+   *   The formatted date.
+   */
+  protected function formatTime(int $timestamp): string {
+    $delta = \time() - $timestamp;
+    if ($delta < self::SECONDS_IN_A_DAY) {
+      return $this->dateFormatter->format($timestamp, 'custom', 'G:i');
+    }
+    return $this->dateFormatter->format($timestamp, 'short');
   }
 
 }

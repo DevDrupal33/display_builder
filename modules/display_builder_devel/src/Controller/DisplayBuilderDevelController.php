@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder_devel\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
@@ -20,8 +21,14 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  */
 class DisplayBuilderDevelController extends ControllerBase {
 
+  /**
+   * Seconds in a day.
+   */
+  private const SECONDS_IN_A_DAY = 86400;
+
   public function __construct(
     private readonly StateManagerInterface $stateManager,
+    private readonly DateFormatterInterface $dateFormatter,
   ) {}
 
   /**
@@ -35,7 +42,7 @@ class DisplayBuilderDevelController extends ControllerBase {
     $build['display_builder_table'] = [
       '#theme' => 'table',
       '#header' => [
-        'id' => ['data' => $this->t('Id')],
+        'id' => ['data' => $this->t('Instance')],
         'type' => ['data' => $this->t('Type')],
         'display_builder_config' => ['data' => $this->t('Config')],
         'updated' => ['data' => $this->t('Updated')],
@@ -194,7 +201,7 @@ class DisplayBuilderDevelController extends ControllerBase {
     if (!$present) {
       $present = ['time' => NULL, 'log' => NULL];
     }
-    $row['updated']['data'] = $present['time'] ?? '-';
+    $row['updated']['data'] = $present['time'] ? $this->formatTime($present['time']) : '-';
 
     if (isset($present['log']) && $present['log'] instanceof TranslatableMarkup) {
       $row['log']['data'] = $this->formatLog($present['log']);
@@ -226,6 +233,23 @@ class DisplayBuilderDevelController extends ControllerBase {
    */
   private function formatLog(TranslatableMarkup $log): array {
     return ['#markup' => Markup::create($log->render())];
+  }
+
+  /**
+   * Print the date for humans.
+   *
+   * @param int $timestamp
+   *   The timestamp integer.
+   *
+   * @return string
+   *   The formatted date.
+   */
+  private function formatTime(int $timestamp): string {
+    $delta = \time() - $timestamp;
+    if ($delta < self::SECONDS_IN_A_DAY) {
+      return $this->dateFormatter->format($timestamp, 'custom', 'G:i');
+    }
+    return $this->dateFormatter->format($timestamp, 'short');
   }
 
 }

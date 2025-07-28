@@ -1,0 +1,6 @@
+{% set attributes = image ? attributes.setAttribute('image', image) : attributes %}
+{% set attributes = name ? attributes.setAttribute('label', name).setAttribute('title', name) : attributes %}
+{% set attributes = not image and name ? attributes.setAttribute('initials', name|slice(0, 2)) : attributes %}
+{% set attributes = not image and not name ? attributes.setAttribute('initials', '??') : attributes %}
+
+<sl-avatar{{ attributes }}></sl-avatar>

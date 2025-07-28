@@ -34,7 +34,6 @@ services:
     class: Drupal\display_builder\StateManager\StateStorage
     arguments:
       - "@state"
-      - "@date.formatter"
       - "@current_user"
   Drupal\display_builder\StateManager\StateStorageInterface: "@display_builder.state_storage"
 

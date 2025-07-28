@@ -1,0 +1,9 @@
+/* This CSS snippet is recommended by Shoelace documentation: https://shoelace.style/components/avatar */
+
+.sl-avatar-group sl-avatar:not(:first-of-type) {
+  margin-left: -1rem;
+}
+
+.sl-avatar-group sl-avatar::part(base) {
+  border: solid 2px var(--sl-color-neutral-0);
+}

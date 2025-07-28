@@ -279,4 +279,18 @@ interface StateManagerInterface extends ContextAwareInterface, DataStateInterfac
    */
   public function getCountFuture(string $builder_id): int;
 
+  /**
+   * Get  users.
+   *
+   * All users which have authored a step in present, past or future, with the
+   * most recent date of action.
+   *
+   * @param string $builder_id
+   *   The display builder id.
+   *
+   * @return array
+   *   Each key is an User entity ID, each value is a timestamp.
+   */
+  public function getUsers(string $builder_id): array;
+
 }

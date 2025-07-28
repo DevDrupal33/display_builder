@@ -1,0 +1,13 @@
+name: Shoelace Avatar
+description: Represent a person or object.
+links:
+  - https://shoelace.style/components/avatar
+props:
+  type: object
+  properties:
+    name:
+      title: name
+      type: string
+    image:
+      title: Image
+      $ref: ui-patterns://url

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\StateManager;
 
-use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -28,7 +27,6 @@ class StateStorage implements StorageInterface {
    */
   public function __construct(
     protected StateInterface $state,
-    protected DateFormatterInterface $date,
     protected AccountInterface $user,
   ) {}
 
@@ -46,7 +44,8 @@ class StateStorage implements StorageInterface {
         'data' => $builder_data,
         'hash' => self::getUniqId($builder_data),
         'log' => $this->t('Initialization of the display builder.'),
-        'time' => $this->date->format(\time(), 'short'),
+        'time' => \time(),
+        'user' => $this->user->id(),
       ],
       'future' => [],
       'save' => NULL,
@@ -141,7 +140,7 @@ class StateStorage implements StorageInterface {
     $builder_data['save'] = [
       'data' => $save_data,
       'hash' => $hash,
-      'time' => $this->date->format(\time(), 'short'),
+      'time' => \time(),
     ];
 
     $this->saveData($builder_id, $builder_data);
@@ -184,7 +183,7 @@ class StateStorage implements StorageInterface {
       'data' => $data,
       'hash' => $hash,
       'log' => $log_message,
-      'time' => $this->date->format(\time(), 'short'),
+      'time' => \time(),
       'user' => $this->user->id(),
     ];
 

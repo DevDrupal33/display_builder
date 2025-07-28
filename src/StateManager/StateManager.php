@@ -477,6 +477,26 @@ class StateManager implements StateManagerInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getUsers(string $builder_id): array {
+    $users = [];
+    $storage = $this->stateStorage->load($builder_id);
+    $steps = array_merge(
+      $storage['past'],
+      [$storage['present']],
+      $storage['future']
+    );
+    foreach ($steps as $step) {
+      $user_id = $step['user'] ?? NULL;
+      if ($user_id && ($users[$user_id] ?? 0 < $step['time'])) {
+        $users[$user_id] = $step['time'];
+      }
+    }
+    return $users;
+  }
+
+  /**
    * Refresh contexts after loaded from storage.
    *
    * @param array $contexts
