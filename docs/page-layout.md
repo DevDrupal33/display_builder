@@ -31,8 +31,6 @@ You will be able to build the display once the Page Layout is created:
 
 ![Edit page layout](images/page-layout-edit.webp)
 
-> 🚧 2025-07-21: UX may change.
-
 The Display Builder instance is a normal one with some data preloaded (but not already saved) and some sources specific to the "Page" context:
 
 - Page title
@@ -71,7 +69,6 @@ If no Page layout matches, _Block Layout_ still manage the page.
 Each page is its own config entity
 
 - `display_builder`: the Display builder profile (config entity) in use last time the config was saved
-- `instance`: ID of the instance from the Drupal State API
 - `sources`: a UI Patterns 2 sources tree
 
 Example:
@@ -81,7 +78,6 @@ id: users
 label: Users
 weight: -9
 display_builder: default
-instance: page_layout__users
 sources: [...]
 conditions:
   request_path:

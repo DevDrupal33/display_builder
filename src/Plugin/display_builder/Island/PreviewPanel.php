@@ -34,12 +34,16 @@ class PreviewPanel extends IslandPluginBase {
       return [];
     }
 
-    $content_placeholder = '<div class="db-background db-preview-placeholder"><h2>Content placeholder</h2></div>';
-    $title_placeholder = '<div class="db-background db-preview-placeholder"><h1 class="title">Title placeholder</h1></div>';
+    // Page layout display need preview. We don't have source for title and
+    // content, so let replace it on the fly for preview.
+    if (\str_starts_with($builder_id, 'page_layout__')) {
+      $content_placeholder = '<div class="db-background db-preview-placeholder"><h2>[Page] Content placeholder</h2></div>';
+      $title_placeholder = '<div class="db-background db-preview-placeholder"><h1 class="title">[Page] Title placeholder</h1></div>';
 
-    // @todo one pass and placeholder style?
-    DisplayBuilderHelpers::findArrayReplaceSource($data, ['source_id' => 'page_title'], ['#markup' => $title_placeholder]);
-    DisplayBuilderHelpers::findArrayReplaceSource($data, ['source_id' => 'main_page_content'], ['#markup' => $content_placeholder]);
+      // @todo one pass and placeholder style?
+      DisplayBuilderHelpers::findArrayReplaceSource($data, ['source_id' => 'page_title'], ['#markup' => $title_placeholder]);
+      DisplayBuilderHelpers::findArrayReplaceSource($data, ['source_id' => 'main_page_content'], ['#markup' => $content_placeholder]);
+    }
 
     /** @var \Drupal\ui_patterns\Element\ComponentElementBuilder $builder */
     $builder = \Drupal::service('ui_patterns.component_element_builder');

@@ -14,7 +14,7 @@ use Drupal\ui_patterns\Attribute\Source;
 #[Source(
   id: 'view_pager',
   label: new TranslatableMarkup('[View] Pager'),
-  context_requirements: ['is_display_builder_views'],
+  context_requirements: ['views:style'],
   prop_types: ['slot'],
   tags: ['views'],
 )]

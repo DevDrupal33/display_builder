@@ -8,6 +8,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Returns responses for Display Builder ui routes.
@@ -42,7 +43,18 @@ class PageLayoutController extends ControllerBase {
    */
   public function getBuilder(PageLayoutInterface $page_layout): array {
     $display_builder = $page_layout->getDisplayBuilder();
+    if (!$display_builder) {
+      // Display Builder is not activated for this page layout. This is not
+      // supposed to happen because Display Builder is mandatory.
+      throw new NotFoundHttpException();
+    }
+
     $instance_id = $page_layout->getInstanceId();
+    if (!$this->stateManager->load($instance_id)) {
+      // Display Builder instance was not created yet, or was deleted, for this
+      // page layout.
+      throw new NotFoundHttpException();
+    }
     $contexts = $this->stateManager->getContexts($instance_id) ?? [];
 
     return $display_builder->build($instance_id, $contexts);

@@ -7,6 +7,7 @@ namespace Drupal\display_builder_page_layout;
 use Drupal\Component\Plugin\Exception\ContextException;
 use Drupal\Component\Plugin\Exception\MissingValueContextException;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Condition\ConditionAccessResolverTrait;
@@ -105,7 +106,7 @@ class AccessControlHandler extends EntityAccessControlHandler implements EntityH
   /**
    * {@inheritdoc}
    */
-  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
+  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account): AccessResultInterface {
     /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $entity */
     if ($operation !== 'view') {
       return parent::checkAccess($entity, $operation, $account);
@@ -144,6 +145,16 @@ class AccessControlHandler extends EntityAccessControlHandler implements EntityH
 
   /**
    * Get access result.
+   *
+   * @param bool $missing_value
+   *   Whether any of the contexts are missing a value.
+   * @param bool $missing_context
+   *   Whether any of the contexts are missing.
+   * @param \Drupal\Core\Condition\ConditionInterface[] $conditions
+   *   List of visibility conditions.
+   *
+   * @return \Drupal\Core\Access\AccessResult
+   *   The access result.
    */
   protected function getAccessResult(bool $missing_value, bool $missing_context, array $conditions): AccessResult {
     if ($missing_context) {

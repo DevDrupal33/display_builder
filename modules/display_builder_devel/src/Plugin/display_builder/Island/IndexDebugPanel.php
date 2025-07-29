@@ -34,7 +34,7 @@ class IndexDebugPanel extends IslandPluginBase {
     ];
     $index = $this->stateManager->getPathIndex($builder_id);
     $index = \array_map([$this, 'printSimplifyPath'], $index);
-    asort($index);
+    \asort($index);
     $duplicates = \array_diff_assoc($index, \array_unique($index));
 
     foreach ($index as $instance_id => $path) {
@@ -107,10 +107,10 @@ class IndexDebugPanel extends IslandPluginBase {
    *   The simplified path.
    */
   private function printSimplifyPath(array $path): string {
-    $path = '/' . implode('/', $path);
-    $path = str_replace('/source/component/slots/', '/', $path);
+    $path = '/' . \implode('/', $path);
+    $path = \str_replace('/source/component/slots/', '/', $path);
 
-    return str_replace('/sources/', '/', $path);
+    return \str_replace('/sources/', '/', $path);
   }
 
 }

@@ -252,6 +252,11 @@ class StateManager implements StateManagerInterface {
       'source' => $data,
       '_third_party_settings' => $third_party_settings,
     ];
+
+    if ($third_party_settings) {
+      $data['_third_party_settings'] = $third_party_settings;
+    }
+
     $root = $this->getCurrentState($builder_id);
     $root = $this->attachToRoot($root, $position, $data);
 
@@ -278,6 +283,11 @@ class StateManager implements StateManagerInterface {
       'source' => $data,
       '_third_party_settings' => $third_party_settings,
     ];
+
+    if ($third_party_settings) {
+      $data['_third_party_settings'] = $third_party_settings;
+    }
+
     $root = $this->attachToSlot($builder_id, $root, $parent_id, $slot_id, $position, $data);
 
     // Get friendly label to display in log instead of ids.

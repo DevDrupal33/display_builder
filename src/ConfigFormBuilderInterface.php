@@ -24,21 +24,4 @@ interface ConfigFormBuilderInterface {
    */
   public function build(EntityWithDisplayBuilderInterface $entity, bool $mandatory = TRUE): array;
 
-  /**
-   * Build 'Display builder' form widget.
-   *
-   * Temporary method, while EntityWithDisplayBuilderInterface is not already
-   * implemented by EntityViewDisplay & Views's DisplayExtender.
-   * Will be removed by www.drupal.org/project/display_builder/issues/3534215
-   *
-   * @param ?string $display_builder
-   *   The entity ID of a Display builder config entity.
-   * @param bool $mandatory
-   *   (Optional). Mandatory.
-   *
-   * @return array
-   *   A form renderable array.
-   */
-  public function buildDisplayBuilder(?string $display_builder, bool $mandatory = TRUE): array;
-
 }

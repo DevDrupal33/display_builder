@@ -11,7 +11,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\display_builder\StorageProperties;
 
 /**
  * Confirmation form to confirm deletion of display builder instance.
@@ -35,32 +34,6 @@ class ConfirmViewsBuilderDeleteForm extends ConfirmFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state, ?string $builder_id = NULL): array {
     $this->builderId = $builder_id;
-
-    try {
-      $views = $this->entityTypeManager->getStorage('view');
-
-      /** @var \Drupal\views\Entity\View $view */
-      foreach ($views->loadMultiple() as $view) {
-        foreach ($view->get('display') as $display) {
-          if (!isset($display['display_options']['display_extenders']['display_builder'][StorageProperties::InstanceId->value])) {
-            continue;
-          }
-
-          $display_builder_id = $display['display_options']['display_extenders']['display_builder'][StorageProperties::InstanceId->value];
-
-          if ($display_builder_id === $builder_id) {
-            $form = parent::buildForm($form, $form_state);
-            unset($form['confirm'], $form['actions']['submit']);
-            $form['#title'] = $this->t('This Display Builder can not be deleted.');
-            $form['description']['#markup'] = $this->t('This Display Builder is used as a display in view %id, you must delete this display to be able to delete this Display builder.', ['%id' => $view->id()]);
-
-            return $form;
-          }
-        }
-      }
-    }
-    catch (\Throwable $th) {
-    }
 
     return parent::buildForm($form, $form_state);
   }
@@ -91,7 +64,23 @@ class ConfirmViewsBuilderDeleteForm extends ConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $this->stateManager->delete($this->builderId);
+    $this->unsetDisplayBuilder();
     $form_state->setRedirectUrl(new Url('display_builder_views.views.collection'));
+  }
+
+  /**
+   * Unset display builder.
+   */
+  protected function unsetDisplayBuilder(): void {
+    $view_id = \explode('__', $this->builderId)[1];
+    $display_id = \explode('__', $this->builderId)[2];
+    $view = $this->entityTypeManager->getStorage('view')->load($view_id);
+    // It is risky to alter a View like that. We need to be careful to not
+    // break the storage integrity, but we didn't find a better way.
+    $displays = $view->get('display');
+    $displays[$display_id]['display_options']['display_extenders']['display_builder']['display_builder'] = '';
+    $view->set('display', $displays);
+    $view->save();
   }
 
 }

@@ -20,8 +20,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 abstract class IslandPluginBase extends PluginBase implements IslandInterface {
 
-  use RenderableBuilderTrait;
   use HtmxTrait;
+  use RenderableBuilderTrait;
   use StringTranslationTrait;
 
   /**

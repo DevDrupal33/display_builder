@@ -20,6 +20,9 @@ class ThemeRegistryAlter {
 
   /**
    * Implements hook_theme_registry_alter().
+   *
+   * @param array $theme_registry
+   *   The theme registry to alter.
    */
   #[Hook('theme_registry_alter')]
   public function themeRegistryAlter(array &$theme_registry): void {

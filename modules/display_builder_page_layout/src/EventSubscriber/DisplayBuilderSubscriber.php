@@ -41,7 +41,7 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
   public function onSave(DisplayBuilderEvent $event): void {
     $builder_id = $event->getBuilderId();
     $contexts = $event->getData();
-    // @see Drupal\display_builder_page_layout\Entity\PageLayout::getInstance()
+    // @see Drupal\display_builder_page_layout\Entity\PageLayout::getInstanceId()
     $prefix = 'page_layout__';
 
     if (!\str_starts_with($builder_id, $prefix)) {

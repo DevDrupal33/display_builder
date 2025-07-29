@@ -16,9 +16,9 @@ use Drupal\ui_patterns\Attribute\Source;
  * @see display_builder_views.module
  */
 #[Source(
-  id: 'view_rows',
-  label: new TranslatableMarkup('[View] Rows'),
-  context_requirements: ['is_display_builder_views'],
+  id: 'view_rows_tmp',
+  label: new TranslatableMarkup('[View] Rows (Display Builder)'),
+  context_requirements: ['views:style'],
   prop_types: ['slot'],
   tags: ['views'],
   context_definitions: [
@@ -39,18 +39,17 @@ class ViewRowsSource extends ViewsUiPatternsSourceBase {
    */
   public function getPropValue(): mixed {
     // Values are injected as context from
-    // display_builder_views_preprocess_views_view.
+    // modules/display_builder_views/src/Hook/PreprocessViewsView.php.
     $view = $this->getView();
 
-    // This is for builder and preview.
     if (!$view) {
-      return $this->t('View rows placeholder');
+      return [];
     }
 
-    $rows = $this->getContextValue('ui_patterns_views:variables')['rows'] ?? NULL;
+    $rows = $this->getContextValue('ui_patterns_views:rows');
 
-    // From ViewRowsSource::getPropValue().
-    // $rows = $this->getContextValue('ui_patterns_views:rows');.
+    // Specific case for empty view, still showing everything in the empty
+    // display.
     if (!\is_array($rows) || \count($rows) < 1) {
       if (!$view->empty || empty($view->empty)) {
         return [];

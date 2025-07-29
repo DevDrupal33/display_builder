@@ -34,7 +34,11 @@ class OperationButton extends IslandPluginBase {
     $button['#attributes']['outline'] = TRUE;
 
     // @phpstan-ignore-next-line
-    $current_route = Url::FromRoute(\Drupal::routeMatch()->getRouteName(), ['builder_id' => $builder_id])->toString();
+    $current_route = Url::FromRoute(
+      \Drupal::routeMatch()->getRouteName(),
+      \Drupal::routeMatch()->getRawParameters()->all()
+    )->toString();
+
     $items = [];
 
     foreach (DisplayBuilderDevelHelper::getOperationLinks($builder_id) as $item) {
@@ -45,6 +49,10 @@ class OperationButton extends IslandPluginBase {
         'title' => $item['title'],
         'url' => $url,
       ];
+    }
+
+    if (empty($items)) {
+      return [];
     }
 
     return [

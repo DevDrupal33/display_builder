@@ -11,6 +11,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\StorageProperties;
+use Drupal\display_builder_devel\MockEntity;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
@@ -22,7 +24,7 @@ final class EditForm extends FormBase {
 
   public function __construct(
     protected ConfigFormBuilderInterface $configFormBuilder,
-    private readonly StateManagerInterface $stateManager,
+    protected StateManagerInterface $stateManager,
   ) {}
 
   /**
@@ -34,8 +36,8 @@ final class EditForm extends FormBase {
       $routeParameters = ['builder_id' => $builder_id];
     }
 
-    $builder_config_id = $this->stateManager->getEntityConfigId($builder_id);
-    $form['builder_config_id'] = $this->configFormBuilder->buildDisplayBuilder($builder_config_id);
+    $display_builder = new MockEntity($builder_id, 'default', []);
+    $form[StorageProperties::ConfigEntityId->value] = $this->configFormBuilder->build($display_builder);
 
     $form['builder_id'] = [
       '#type' => 'hidden',
@@ -87,28 +89,18 @@ final class EditForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    $entity_config_id = $form_state->getValue('builder_config_id');
+    $entity_config_id = $form_state->getValue(StorageProperties::ConfigEntityId->value);
     $builder_id = $form_state->getValue('builder_id');
-
-    $route_name = $form_state->getValue('route_name');
-    $route_parameters = $form_state->getValue('route_parameters');
-
-    if ($route_parameters) {
-      $route_parameters = Json::decode($route_parameters);
-    }
-    $route_parameters['builder_id'] = $builder_id;
 
     $this->stateManager->setEntityConfigId($builder_id, $entity_config_id);
 
     // phpcs:ignore
     \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
 
-    $form_state->setRedirectUrl(
-      new Url(
-        $route_name,
-        $route_parameters,
-      )
-    );
+    $builder_data = $this->stateManager->getCurrent($builder_id);
+    $display_builder = new MockEntity($builder_id, $entity_config_id, $builder_data);
+    $display_builder->initInstanceIfMissing();
+    $form_state->setRedirectUrl($display_builder->getBuilderUrl());
   }
 
 }

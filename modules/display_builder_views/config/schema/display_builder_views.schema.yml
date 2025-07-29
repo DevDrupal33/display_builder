@@ -3,7 +3,8 @@ views.display_extender.display_builder:
   mapping:
     display_builder:
       type: string
-      label: 'Display builder config'
-    instance:
-      type: string
-      label: 'Display builder instance'
+      label: "Display builder config"
+    sources:
+      # @todo set this configuration, ignore for now.
+      type: ignore
+      label: "Display Builder sources."

@@ -29,9 +29,11 @@ You can pick the builder you want according to your permissions:
 
 ![Views activation 2](images/views-activation-2.webp)
 
-> 🚧 2025-07-01: The UI of this pop-in may change.
-
 ## Use Display Builder
+
+Once you have submitted your display builder selection, a link is available:
+
+![Views activation 2](images/views-activation-3.webp)
 
 We have access to Views related sources for slots in the _Blocks Library_ panel:
 
@@ -46,10 +48,7 @@ View Title source is also available for string prop:
 Display Builder is a `display_extender` plugin with those properties:
 
 - `display_builder`: the Display builder profile (config entity) (profile) in use last time the config was saved
-- `instance`: ID of the instance from the Drupal State API
 - `sources`: a UI Patterns 2 sources tree
-
-> 🚧 2025-07-01: `instance` may be removed [#3534215](https://www.drupal.org/project/display_builder/issues/3534215)
 
 Example:
 
@@ -75,7 +74,6 @@ display:
       display_extenders:
         display_builder:
           display_builder: default
-          instance: views_6861421654810
           sources: [...]
 ```
 

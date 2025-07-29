@@ -7,6 +7,8 @@ namespace Drupal\display_builder;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Url;
+use Drupal\display_builder\StateManager\StateManagerInterface;
 
 /**
  * Config form builder.
@@ -18,6 +20,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
     protected AccountProxyInterface $currentUser,
+    protected StateManagerInterface $stateManager,
   ) {}
 
   /**
@@ -30,44 +33,62 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
       return [];
     }
 
-    $options = $mandatory ? $options : ['' => $this->t('- Disabled -')] + $options;
-    $form = $this->profileSelector($options, (string) $entity->getDisplayBuilder()?->id());
+    $form = [];
 
-    if ($entity->getInstanceId()) {
-      $form['#description'] = [
-        '#type' => 'link',
-        '#title' => $this->t('Build the display'),
-        '#url' => $entity->getBuilderUrl(),
+    $description = $this->t('Select a Display builder profile for this instance. Can be changed anytime.');
+    $description .= '<br>';
+    $description .= $this->t('Profiles allow to include specific functionalities available in the builder.');
+
+    $options = $mandatory ? $options : ['' => $this->t('- Disabled -')] + $options;
+    $form[StorageProperties::ConfigEntityId->value] = [
+      '#type' => 'select',
+      '#title' => $this->t('Profile'),
+      '#description' => $description,
+      '#options' => $options,
+    ];
+
+    // Set default value based on state as the mock can be empty for unattached
+    // builder.
+    $instance_id = $entity->getInstanceId();
+    $state = $this->stateManager->load($instance_id);
+    if ($state) {
+      $form[StorageProperties::ConfigEntityId->value]['#default_value'] = (string) $state['entity_config_id'];
+    }
+
+    // Add the builder link to edit.
+    if ($entity->getDisplayBuilder() && $state) {
+      $params = [
+        '@url' => $entity->getBuilderUrl()->toString(),
+      ];
+      $message = $this->t('Click o this link to edit the display: <a href="@url" target="_blank">build the display</a>.', $params);
+      $form[] = [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#attributes' => [
+          'class' => ['form-item__description'],
+        ],
+        '#value' => $message,
+      ];
+    }
+
+    // Add admin information to link the profiles.
+    if ($this->currentUser->hasPermission('administer display builders')) {
+      $params = [
+        '@url' => Url::fromRoute('entity.display_builder.collection')->toString(),
+      ];
+      $message = $this->t('Display builder profiles can be configured from the <a href="@url" target="_blank">Display builder profiles</a>.', $params);
+      $form[] = [
+        '#type' => 'html_tag',
+        '#prefix' => '<hr>',
+        '#tag' => 'p',
+        '#attributes' => [
+          'class' => ['form-item__description'],
+        ],
+        '#value' => $message,
       ];
     }
 
     return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildDisplayBuilder(?string $display_builder, bool $mandatory = TRUE): array {
-    /** @var \Drupal\display_builder\DisplayBuilderInterface[] $display_builders */
-    $display_builders = $this->entityTypeManager->getStorage('display_builder')->loadMultiple();
-    $options = $mandatory ? [] : ['' => $this->t('- Disabled -')];
-
-    foreach ($display_builders as $entity_id => $entity) {
-      if ($this->currentUser->hasPermission($entity->getPermissionName())) {
-        $options[$entity_id] = $entity->label();
-      }
-    }
-
-    return match (\count($options)) {
-      // No form input if no display builders.
-      0 => [],
-      // Hidden form input if only one display builder.
-      1 => [
-        '#type' => 'hidden',
-        '#default_value' => \array_keys($options)[0],
-      ],
-      default => $this->profileSelector($options, $display_builder),
-    };
   }
 
   /**
@@ -90,27 +111,6 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
     }
 
     return $options;
-  }
-
-  /**
-   * Build a profile selector.
-   *
-   * @param array $options
-   *   The list of profiles.
-   * @param string|null $default_value
-   *   The default value.
-   *
-   * @return array
-   *   The selector form api.
-   */
-  private function profileSelector(array $options, ?string $default_value = NULL): array {
-    return [
-      '#type' => 'select',
-      '#title' => $this->t('Profile'),
-      '#description' => $this->t('Select a Display builder profile for this instance, can be changed later.'),
-      '#options' => $options,
-      '#default_value' => $default_value ?? '',
-    ];
   }
 
 }

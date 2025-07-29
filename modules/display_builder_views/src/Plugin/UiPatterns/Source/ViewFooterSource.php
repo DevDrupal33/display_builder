@@ -14,7 +14,7 @@ use Drupal\ui_patterns\Attribute\Source;
 #[Source(
   id: 'view_footer',
   label: new TranslatableMarkup('[View] Footer area'),
-  context_requirements: ['is_display_builder_views'],
+  context_requirements: ['views:style'],
   prop_types: ['slot'],
   tags: ['views'],
 )]
@@ -25,29 +25,6 @@ class ViewFooterSource extends ViewsUiPatternsSourceBase {
    */
   public static function setVariableId(): string {
     return 'footer';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getPropValue(): mixed {
-    $view = $this->getView();
-
-    if (!$view) {
-      return $this->t('View Footer placeholder');
-    }
-
-    if (!$view->footer || empty($view->footer)) {
-      return '';
-    }
-
-    $output = [];
-
-    foreach ($view->footer as $key => $value) {
-      $output[$key] = $value->render();
-    }
-
-    return $output;
   }
 
 }

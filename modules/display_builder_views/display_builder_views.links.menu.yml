@@ -1,6 +1,6 @@
 entity.display_builder.views.collection:
-  title: Views builder
+  title: Display builders
   parent: entity.view.collection
-  description: "Manage Display Builder used in Views."
+  description: "Manage display builders used in Views."
   route_name: display_builder_views.views.collection
   weight: -10

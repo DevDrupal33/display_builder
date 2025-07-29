@@ -1,0 +1,85 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Drupal\display_builder_views\Controller;
+
+use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\views\ViewEntityInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
+/**
+ * Returns responses for Display Builder ui routes.
+ */
+class ViewsController extends ControllerBase {
+
+  public function __construct(
+    private readonly StateManagerInterface $stateManager,
+  ) {}
+
+  /**
+   * Provides a generic title callback for a display used in pages.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The title for the display page, if found.
+   */
+  public function title(ViewEntityInterface $view, string $display): TranslatableMarkup {
+    $params = [
+      '@view' => $view->label(),
+      '@display' => $view->getDisplay($display)['display_title'] ?? '',
+    ];
+
+    return $this->t('Display builder for @view @display', $params);
+  }
+
+  /**
+   * Load the display builder for views.
+   *
+   * @param \Drupal\views\ViewEntityInterface $view
+   *   The view to be edited.
+   * @param string $display
+   *   The display ID being edited.
+   *
+   * @return array
+   *   The display builder renderable.
+   */
+  public function getBuilder(ViewEntityInterface $view, string $display): array {
+    // Disable cache page.
+    \Drupal::service('page_cache_kill_switch')->trigger(); // phpcs:ignore
+
+    // The view here is not a "real" View storage, but the copy from the
+    // tempstore provided by `view_ui` module. So, we have access to the state
+    // not yet saved in config.
+    $view = $view->getExecutable();
+    $view->setDisplay($display);
+    $extenders = $view->getDisplay()->getExtenders();
+
+    if (!isset($extenders['display_builder'])) {
+      return [];
+    }
+    /** @var \Drupal\display_builder\EntityWithDisplayBuilderInterface $extender */
+    $extender = $extenders['display_builder'];
+
+    /** @var \Drupal\display_builder\DisplayBuilderInterface $display_builder */
+    $display_builder = $extender->getDisplayBuilder();
+
+    if (!$display_builder) {
+      // Display Builder is not activated for this entity view display.
+      throw new NotFoundHttpException();
+    }
+
+    $instance_id = $extender->getInstanceId();
+
+    if (!$this->stateManager->load($instance_id)) {
+      // Display Builder instance was not created yet for this entity.
+      throw new NotFoundHttpException();
+    }
+
+    $contexts = $this->stateManager->getContexts($instance_id);
+
+    return $display_builder->build($instance_id, $contexts);
+  }
+
+}

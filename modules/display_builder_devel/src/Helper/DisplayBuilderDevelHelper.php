@@ -43,7 +43,7 @@ class DisplayBuilderDevelHelper {
       ],
     ];
 
-    return array_merge($links, $extra);
+    return \array_merge($links, $extra);
   }
 
 }

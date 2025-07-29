@@ -7,7 +7,7 @@ namespace Drupal\display_builder_views\EventSubscriber;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\display_builder_views\DisplayBuilderViewsManager;
+use Drupal\display_builder_views\Plugin\views\display_extender\DisplayBuilder;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -38,7 +38,7 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     $builder_id = $event->getBuilderId();
     $contexts = $event->getData();
 
-    if (!$this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderViewsManager::VIEWS_CONTEXT_REQUIREMENT, $contexts)) {
+    if (!$this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilder::getContextRequirement(), $contexts)) {
       return;
     }
 
@@ -48,34 +48,16 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     if (!$view) {
       return;
     }
+    $display_id = \explode('__', $builder_id)[2];
+    $view->getExecutable()->setDisplay($display_id);
+    $extenders = $view->getExecutable()->getDisplay()->getExtenders();
 
-    $builder_data = $this->stateManager->getCurrentState($builder_id);
-
-    foreach ($view->get('display') as $display_id => $display) {
-      if (!isset($display['display_options']['display_extenders']['display_builder']['display_builder_id'])) {
-        continue;
-      }
-
-      $display_builder_id = $display['display_options']['display_extenders']['display_builder']['display_builder_id'];
-
-      if ($display_builder_id !== $builder_id) {
-        continue;
-      }
-
-      $display = &$view->getDisplay($display_id);
-      $display['display_options']['display_extenders']['display_builder']['sources'] = $builder_data;
-      $view->save();
-
-      $view->invalidateCaches();
-
-      // Seems invalidate is not enough, clear views cache, but again seems not
-      // enough as we have a Page not found.
-      // @todo find a way to clear only views cache.
-      // views_invalidate_cache();
-      drupal_flush_all_caches();
-
-      continue;
+    if (!isset($extenders['display_builder'])) {
+      return;
     }
+    /** @var \Drupal\display_builder\EntityWithDisplayBuilderInterface $extender */
+    $extender = $extenders['display_builder'];
+    $extender->saveSources();
   }
 
 }

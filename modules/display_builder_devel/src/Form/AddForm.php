@@ -11,6 +11,8 @@ use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\StorageProperties;
+use Drupal\display_builder_devel\MockEntity;
 
 /**
  * Defines an add display builder instance form.
@@ -21,18 +23,19 @@ final class AddForm extends FormBase {
 
   public function __construct(
     protected ConfigFormBuilderInterface $configFormBuilder,
-    private readonly StateManagerInterface $stateManager,
+    protected StateManagerInterface $stateManager,
   ) {}
 
   /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $form['display_builder_id'] = $this->configFormBuilder->buildDisplayBuilder(NULL);
+    $display_builder = new MockEntity('', '', []);
+    $form[StorageProperties::ConfigEntityId->value] = $this->configFormBuilder->build($display_builder);
 
     $form['fixture_id'] = [
       '#type' => 'select',
-      '#title' => $this->t('Initial test data'),
+      '#title' => $this->t('Initial data'),
       '#description' => $this->t('Enter the fixture to use as base for this display builder instance.'),
       '#options' => DisplayBuilderHelpers::getAllFixturesOptions(),
       '#default_value' => 'blank',
@@ -89,31 +92,18 @@ final class AddForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    $display_builder_id = $form_state->getValue('display_builder_id');
+    $display_builder_id = $form_state->getValue(StorageProperties::ConfigEntityId->value);
     $fixture_id = $form_state->getValue('fixture_id', 'blank');
     $builder_id = $form_state->getValue('builder_id');
 
-    $builder_data = DisplayBuilderHelpers::getFixtureData([
+    $sources = DisplayBuilderHelpers::getFixtureData([
       __DIR__ . '/../../fixtures/' . $fixture_id,
       __DIR__ . '/../../../display_builder_page_layout/fixtures/' . $fixture_id,
     ]);
 
-    // Create the display builder instance with this data.
-    $this->stateManager->create(
-      $builder_id,
-      $display_builder_id,
-      $builder_data,
-      [],
-    );
-
-    $form_state->setRedirectUrl(
-      new Url(
-        'display_builder_devel.view',
-        [
-          'builder_id' => $builder_id,
-        ]
-      )
-    );
+    $display_builder = new MockEntity($builder_id, $display_builder_id, $sources);
+    $display_builder->initInstanceIfMissing();
+    $form_state->setRedirectUrl($display_builder->getBuilderUrl());
   }
 
 }

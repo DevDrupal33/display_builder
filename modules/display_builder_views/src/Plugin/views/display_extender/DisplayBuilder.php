@@ -8,10 +8,10 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
-use Drupal\display_builder\StorageProperties;
 use Drupal\display_builder\DisplayBuilderHelpers;
-use Drupal\display_builder\Entity\DisplayBuilder as DisplayBuilderConfigEntity;
-use Drupal\display_builder_views\DisplayBuilderViewsManager;
+use Drupal\display_builder\DisplayBuilderInterface;
+use Drupal\display_builder\EntityWithDisplayBuilderInterface;
+use Drupal\display_builder\StorageProperties;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\views\Attribute\ViewsDisplayExtender;
 use Drupal\views\Plugin\views\display_extender\DisplayExtenderPluginBase;
@@ -28,9 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   help: new TranslatableMarkup('Use display builder as output for this view.'),
   no_ui: FALSE,
 )]
-class DisplayBuilder extends DisplayExtenderPluginBase {
-
-  private const VIEWS_PREFIX = 'views_';
+class DisplayBuilder extends DisplayExtenderPluginBase implements EntityWithDisplayBuilderInterface {
 
   /**
    * The display builder state manager.
@@ -47,12 +45,21 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
   protected $configFormBuilder;
 
   /**
+   * The entity type interface.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): self {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->stateManager = $container->get('display_builder.state_manager');
     $instance->configFormBuilder = $container->get('display_builder.config_form_builder');
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+
     return $instance;
   }
 
@@ -67,47 +74,7 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
     }
 
     $form['#title'] .= $this->t('Display Builder');
-    $instance_id = $this->options[StorageProperties::InstanceId->value] ?? NULL;
-    $form[StorageProperties::InstanceId->value] = $this->buildInstanceForm($instance_id);
-    $display_builder_id = $this->options[StorageProperties::ConfigEntityId->value] ?? DisplayBuilderConfigEntity::DISPLAY_BUILDER_CONFIG;
-    $form[StorageProperties::ConfigEntityId->value] = $this->configFormBuilder->buildDisplayBuilder($display_builder_id);
-  }
-
-  /**
-   * Build instance form.
-   *
-   * @param ?string $instance_id
-   *   The key used to retrieve a state from the State API.
-   *
-   * @return array
-   *   A form renderable array.
-   */
-  private function buildInstanceForm(?string $instance_id): array {
-    // @todo no change or selection for now, just inform about the builder id.
-    if (!$instance_id) {
-      return [
-        '#type' => 'select',
-        '#title' => $this->t('Display builder instance'),
-        '#options' => [
-          '_new' => $this->t('Create the instance'),
-          '_none' => $this->t('None (ignore)'),
-        ],
-        '#default_value' => '_new',
-        '#required' => TRUE,
-      ];
-    }
-    $url = Url::fromRoute('display_builder_views.views.manage', ['builder_id' => $instance_id]);
-    return [
-      '#type' => 'select',
-      '#title' => $this->t('Display builder instance'),
-      '#description' => $this->t('Display builder used to manage this view. <a href="@url" target="_blank">Edit here</a>', ['@url' => $url->toString()]),
-      '#options' => [
-        $instance_id => $instance_id,
-        '_none' => $this->t('Disable (detach instance)'),
-      ],
-      '#default_value' => $instance_id,
-      '#required' => TRUE,
-    ];
+    $form[StorageProperties::ConfigEntityId->value] = $this->configFormBuilder->build($this, FALSE);
   }
 
   /**
@@ -120,36 +87,23 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
       return;
     }
 
-    $instance = $form_state->getValue(StorageProperties::InstanceId->value);
-
-    if ($instance === '_none') {
-      unset($this->options[StorageProperties::ConfigEntityId->value], $this->options[StorageProperties::InstanceId->value]);
-      return;
-    }
-
     $builder_config_id = $form_state->getValue(StorageProperties::ConfigEntityId->value);
     $this->options[StorageProperties::ConfigEntityId->value] = $builder_config_id;
 
-    // Create a new display builder and set empty data in the view display
-    // option. Add view uuid to allow save with ON_SAVE event.
-    if ($instance === '_new') {
-      $instance = \sprintf('%s%s', self::VIEWS_PREFIX, uniqid());
+    if ($builder_config_id) {
+      $this->initInstanceIfMissing();
+      if ($builder_id = $this->getInstanceId()) {
+        $this->stateManager->setEntityConfigId($builder_id, $builder_config_id);
+      }
 
-      $contexts = [];
-      // Mark for usage with views.
-      $contexts = RequirementsContext::addToContext([DisplayBuilderViewsManager::VIEWS_CONTEXT_REQUIREMENT], $contexts);
-      // Add view entity that we need in our sources or even UI Patterns Views
-      // sources.
-      $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($this->view->storage->load($this->view->id()));
-
-      // Get fixtures if exist, fallback to default mimicking the standard view
-      // blocks without markup.
-      $builder_data = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_views');
-      $this->stateManager->create($instance, $builder_config_id, $builder_data, $contexts);
+      return;
     }
 
-    // Re-set even if change is not yet allowed.
-    $this->options[StorageProperties::InstanceId->value] = $instance;
+    // If no Display Builder selected, we delete the related instance.
+    // @todo Do we move that to the View's EntityInterface::delete() method?
+    // @todo Also, when the changed are canceled from UI leaving the View
+    // without Display Builder.
+    $this->stateManager->delete($this->getInstanceId() ?? '');
   }
 
   /**
@@ -161,18 +115,126 @@ class DisplayBuilder extends DisplayExtenderPluginBase {
     if (!$this->isApplicable()) {
       return;
     }
-    $is_display_builder = FALSE;
-
-    if (isset($this->options[StorageProperties::InstanceId->value])) {
-      $is_display_builder = $this->options[StorageProperties::InstanceId->value];
-    }
 
     $options['display_builder'] = [
       'category' => 'other',
       'title' => $this->t('Display Builder'),
       'desc' => $this->t('Use display builder as output for this view.'),
-      'value' => $is_display_builder ? $this->t('Yes') : $this->t('No'),
+      'value' => $this->getDisplayBuilder()?->label() ?? $this->t('Disabled'),
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getContextRequirement(): string {
+    // @see Drupal\ui_patterns_views\Plugin\UiPatterns\Source\ViewRowsSource.
+    return 'views:style';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getBuilderUrl(): Url {
+    $params = [
+      'view' => $this->view->id(),
+      'display' => $this->view->current_display,
+    ];
+
+    return Url::fromRoute('display_builder_views.views.manage', $params);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getUrlFromInstanceId(string $instance_id): Url {
+    $view = \explode('__', $instance_id)[1];
+    $display = \explode('__', $instance_id)[2];
+    $params = ['view' => $view, 'display' => $display];
+
+    return Url::fromRoute('display_builder_views.views.manage', $params);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDisplayBuilder(): ?DisplayBuilderInterface {
+    if (!isset($this->options[StorageProperties::ConfigEntityId->value])) {
+      return NULL;
+    }
+    $display_builder_id = $this->options[StorageProperties::ConfigEntityId->value];
+
+    if (empty($display_builder_id)) {
+      return NULL;
+    }
+    $storage = $this->entityTypeManager->getStorage('display_builder');
+
+    /** @var \Drupal\display_builder\DisplayBuilderInterface $display_builder */
+    $display_builder = $storage->load($display_builder_id);
+
+    return $display_builder;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getInstanceId(): ?string {
+    // Examples: view__articles__default, view__people__grid.
+    return 'view__' . $this->view->id() . '__' . $this->view->current_display;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function initInstanceIfMissing(): void {
+    $instance_id = $this->getInstanceId();
+    // One instance in State API by page layout view display.
+    $instance = $this->stateManager->load($instance_id);
+
+    if ($instance !== NULL) {
+      // The instance already exists in State Manager, so nothing to do.
+      return;
+    }
+    // Init instance if missing in State Manager because the View display is new
+    // or because the instance was deleted in the State API.
+    $contexts = [];
+    // Mark for usage with views.
+    $contexts = RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
+    // Add view entity that we need in our sources or even UI Patterns Views
+    // sources.
+    $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($this->view->storage);
+
+    // Get the sources stored in config.
+    $sources = $this->getSources();
+
+    if (empty($sources)) {
+      // Fallback to a fixture mimicking the standard view layout.
+      $sources = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_views', '', 'default_view');
+    }
+    $this->stateManager->create($instance_id, (string) $this->getDisplayBuilder()->id(), $sources, $contexts);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSources(): array {
+    return $this->options[StorageProperties::Sources->value] ?? [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function saveSources(): void {
+    $sources = $this->stateManager->getCurrentState($this->getInstanceId());
+    $displays = $this->view->storage->get('display');
+    $display_id = $this->view->current_display;
+    // It is risky to alter a View like that. We need to be careful to not
+    // break the storage integrity, but we didn't find a better way.
+    $displays[$display_id]['display_options']['display_extenders']['display_builder']['sources'] = $sources;
+    $this->view->storage->set('display', $displays);
+    $this->view->storage->save();
+    // @todo Test if we still need to invalidate the cache manually here.
+    $this->view->storage->invalidateCaches();
   }
 
   /**

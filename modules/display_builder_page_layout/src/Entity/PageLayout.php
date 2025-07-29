@@ -196,7 +196,12 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
     // or because the instance was deleted in the State API.
     $contexts = [];
     $contexts = RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
-    $data = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_page_layout', '', 'page_layout');
+    // Get the sources stored in config.
+    $data = $this->getSources();
+    if (empty($data)) {
+      // Fallback to a fixture mimicking the standard page layout.
+      $data = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_page_layout', '', 'page_layout');
+    }
     $this->stateManager()->create($instance_id, $this->display_builder, $data, $contexts);
   }
 

@@ -14,7 +14,7 @@ use Drupal\ui_patterns\Attribute\Source;
 #[Source(
   id: 'view_feed_icons',
   label: new TranslatableMarkup('[View] Feed icons'),
-  context_requirements: ['is_display_builder_views'],
+  context_requirements: ['views:style'],
   prop_types: ['slot'],
   tags: ['views'],
 )]

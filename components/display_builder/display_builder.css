@@ -98,4 +98,9 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
   .db-devel-reset {
     padding: 0.5rem;
   }
+
+  /* Preview Island specific */
+  .db-preview-placeholder {
+    padding: 0.3rem;
+  }
 }

@@ -10,7 +10,6 @@ use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\display_builder\StorageProperties;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -22,39 +21,30 @@ class PreprocessViewsView {
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
     protected StateManagerInterface $stateManager,
-    #[Autowire('@ui_patterns.component_element_builder')] protected ComponentElementBuilder $componentElementBuilder,
+    #[Autowire('@ui_patterns.component_element_builder')]
+    protected ComponentElementBuilder $componentElementBuilder,
   ) {}
 
   /**
    * Implements hook_preprocess_HOOK() for 'views_view'.
+   *
+   * @param array $variables
+   *   An associative array containing the variables to pass to the template.
    */
   #[Hook('preprocess_views_view')]
   public function preprocessViewsView(array &$variables): void {
     $view = $variables['view'];
-    $current_display = $view->getDisplay();
-    $extenders = $current_display->getExtenders();
+    $extenders = $view->getDisplay()->getExtenders();
 
     if (!isset($extenders['display_builder'])) {
       return;
     }
 
-    $options = $extenders['display_builder']->options;
-    $builder_config_id = $options[StorageProperties::ConfigEntityId->value] ?? NULL;
+    $extender = $extenders['display_builder'];
+    $sources = $extender->getSources();
 
-    if ($builder_config_id === NULL || empty($builder_config_id)) {
-      // @todo something for preview?
-      return;
-    }
-
-    $display_builder_id = $options[StorageProperties::InstanceId->value] ?? NULL;
-
-    if ($display_builder_id === NULL || empty($display_builder_id)) {
-      // @todo something for preview?
-      return;
-    }
-
-    if ($this->stateManager->load($display_builder_id) === NULL) {
-      // @todo if instance is deleted, create a blank one?
+    // We fallback on normal View if Display Builder is empty or disabled!
+    if (empty($sources) || !$extender->getDisplayBuilder()) {
       return;
     }
 
@@ -69,9 +59,9 @@ class PreprocessViewsView {
     $contexts['ui_patterns_views:variables'] = new Context(new ContextDefinition('any'), $variables);
 
     $fake_build = [];
-    $builder_data = $this->stateManager->getCurrentState($display_builder_id);
-    foreach ($builder_data as $source_data) {
-      $fake_build = $this->componentElementBuilder->buildSource($fake_build, 'content', [], $source_data, $contexts);
+
+    foreach ($sources as $source) {
+      $fake_build = $this->componentElementBuilder->buildSource($fake_build, 'content', [], $source, $contexts);
     }
 
     // Init the variable to render in views-view.html.twig.
