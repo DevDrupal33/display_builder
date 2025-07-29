@@ -5,17 +5,11 @@ declare(strict_types=1);
 namespace Drupal\display_builder_entity_view\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Plugin\Context\Context;
-use Drupal\Core\Plugin\Context\ContextDefinition;
-use Drupal\Core\Plugin\Context\EntityContext;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder\Entity\DisplayBuilder;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\display_builder_entity_view\EventSubscriber\DisplayBuilderSubscriber;
-use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
-use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Defines a controller to get access the Display Builder admin UI.
@@ -27,54 +21,7 @@ final class DisplayBuilderEntityViewController extends ControllerBase {
 
   public function __construct(
     protected StateManagerInterface $stateManager,
-    #[Autowire(service: 'ui_patterns.sample_entity_generator')]
-    protected SampleEntityGeneratorInterface $sampleEntityGenerator,
   ) {}
-
-  /**
-   * Get the display builder ID for the entity view display.
-   *
-   * @param string $entity_type_id
-   *   The entity type ID.
-   * @param string $bundle
-   *   The bundle.
-   * @param string $view_mode_name
-   *   The view mode name.
-   *
-   * @return string
-   *   The display builder ID.
-   */
-  public static function getDisplayBuilderId($entity_type_id, $bundle, $view_mode_name): string {
-    return "display_builder_entity_view__{$entity_type_id}" . '__' . ($bundle ? $bundle . '__' : '') . $view_mode_name;
-  }
-
-  /**
-   * Get the entity view display parameters from the route.
-   *
-   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
-   *   The route match object.
-   *
-   * @return array<string, string>
-   *   The entity view display parameters.
-   */
-  public static function getEntityViewDisplayParameters(RouteMatchInterface $route_match): array {
-    $entity_type_id = $route_match->getParameter('entity_type_id');
-    $bundle_key = $route_match->getParameter('bundle_key');
-    $bundle = $bundle_key ? $route_match->getParameter($bundle_key) : '';
-
-    if (\is_object($bundle)) {
-      /** @var \Drupal\Core\Entity\EntityInterface $bundle */
-      // @phpstan-ignore-next-line
-      $bundle = $bundle->id();
-    }
-    $view_mode_name = $route_match->getParameter('view_mode_name');
-
-    return [
-      'entity_type_id' => $entity_type_id,
-      'bundle' => $bundle,
-      'view_mode_name' => $view_mode_name,
-    ];
-  }
 
   /**
    * Provides a generic title callback for a display used in entities.
@@ -86,10 +33,9 @@ final class DisplayBuilderEntityViewController extends ControllerBase {
    *   The title for the display page.
    */
   public function title(RouteMatchInterface $route_match): TranslatableMarkup {
-    $entity_view_display_parameters = self::getEntityViewDisplayParameters($route_match);
     $param = [
-      '@bundle' => \ucfirst($entity_view_display_parameters['bundle']),
-      '@view_mode_name' => $entity_view_display_parameters['view_mode_name'],
+      '@bundle' => \ucfirst($route_match->getParameter('bundle')),
+      '@view_mode_name' => $route_match->getParameter('view_mode_name'),
     ];
 
     return $this->t('Display builder for @bundle, @view_mode_name', $param);
@@ -101,59 +47,59 @@ final class DisplayBuilderEntityViewController extends ControllerBase {
    * @return array
    *   A render array.
    */
-  public function show(RouteMatchInterface $route_match): array {
+  public function getBuilder(RouteMatchInterface $route_match): array {
     // Builder is on the front theme, render cache is too hard and changes are
     // not working with cache (move something and refresh, previous version
     // will be shown).
     // @todo fix with #3529284
     \Drupal::service('page_cache_kill_switch')->trigger(); // phpcs:ignore
 
-    $entity_view_display_parameters = self::getEntityViewDisplayParameters($route_match);
-    $entity_type_id = $entity_view_display_parameters['entity_type_id'];
-    $bundle = $entity_view_display_parameters['bundle'];
-    $builder_id = self::getDisplayBuilderId(
-      $entity_type_id,
-      $bundle,
-      $entity_view_display_parameters['view_mode_name']
-    );
+    $entity_type_id = $route_match->getParameter('entity_type_id');
+    $bundle = $route_match->getParameter('bundle');
+    $view_mode = $route_match->getParameter('view_mode_name');
 
-    // Load the config used by this display builder.
-    $current = $this->stateManager->load($builder_id);
+    /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay $entity_display */
+    $entity_display = $this->getEntityViewDisplay($entity_type_id, $bundle, $view_mode);
 
-    if (!isset($current['entity_config_id'])) {
-      $current['entity_config_id'] = DisplayBuilder::DISPLAY_BUILDER_CONFIG;
+    /** @var \Drupal\display_builder\DisplayBuilderInterface $display_builder */
+    $display_builder = $entity_display->getDisplayBuilder();
+
+    if (!$display_builder) {
+      // Display Builder is not activated for this entity view display.
+      throw new NotFoundHttpException();
     }
 
-    $display_builder_id = $current['entity_config_id'];
+    $builder_id = $entity_display->getInstanceId();
 
-    $storage = $this->entityTypeManager()->getStorage('display_builder');
-    /** @var \Drupal\display_builder\DisplayBuilderInterface $displayBuilderConfig */
-    $displayBuilderConfig = $storage->load($display_builder_id);
+    if (!$this->stateManager->load($builder_id)) {
+      // Display Builder instance was not created yet for this entity.
+      throw new NotFoundHttpException();
+    }
 
     // We build the rendered page.
-    $build = [];
-    // We add the display builder.
     $contexts = $this->stateManager->getContexts($builder_id);
 
-    if ($contexts === NULL) {
-      $sampleEntity = $this->sampleEntityGenerator->get($entity_type_id, $bundle);
-      $stringContextDefinition = ContextDefinition::create('string');
-      $contexts = [
-        'entity' => EntityContext::fromEntity($sampleEntity),
-        'bundle' => new Context($stringContextDefinition, $bundle ?? ''),
-        'view_mode' => new Context($stringContextDefinition, $entity_view_display_parameters['view_mode_name']),
-      ];
-      $contexts = RequirementsContext::addToContext([DisplayBuilderSubscriber::CONTEXT_REQUIREMENT], $contexts);
-      $this->stateManager->create(
-        $builder_id,
-        $current['entity_config_id'],
-        [],
-        $contexts,
-      );
-    }
-    $build[] = $displayBuilderConfig->build($builder_id, $contexts);
+    return $display_builder->build($builder_id, $contexts);
+  }
 
-    return $build;
+  /**
+   * Get entity view display entity.
+   *
+   * @param string $entity_type_id
+   *   Entity type ID.
+   * @param string $bundle
+   *   Fieldable entity's bundle.
+   * @param string $view_mode
+   *   View mode of the display.
+   *
+   * @return \Drupal\Core\Entity\Display\EntityViewDisplayInterface
+   *   The corresponding entity view display.
+   */
+  protected function getEntityViewDisplay(string $entity_type_id, string $bundle, string $view_mode): EntityViewDisplayInterface {
+    $display_id = "{$entity_type_id}.{$bundle}.{$view_mode}";
+    $storage = $this->entityTypeManager()->getStorage('entity_view_display');
+
+    return $storage->load($display_id);
   }
 
 }

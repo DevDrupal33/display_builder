@@ -11,13 +11,14 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Routing\RouteBuildEvent;
 use Drupal\Core\Routing\RoutingEvents;
+use Drupal\display_builder_entity_view\Controller\DisplayBuilderEntityViewController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
- * Provides routes for the Layout Builder UI.
+ * Provides routes for the Display Builder UI.
  *
  * @internal
  *   Tagged services are internal.
@@ -28,8 +29,8 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public function __construct(
-    protected EntityTypeManagerInterface $entityTypeManager,
-    protected ModuleHandlerInterface $module_handler,
+    private EntityTypeManagerInterface $entityTypeManager,
+    private ModuleHandlerInterface $module_handler,
   ) {}
 
   /**
@@ -40,81 +41,6 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
       $container->get('entity_type.manager'),
       $container->get('module_handler'),
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildRoutes(RouteCollection $collection): void {
-    if (!$this->module_handler->moduleExists('field_ui')) {
-      return;
-    }
-
-    foreach ($this->getEntityTypes() as $entity_type_id => $entity_type) {
-      // Try to get the route from the current collection.
-      if (!$entity_route = $collection->get($entity_type->get('field_ui_base_route'))) {
-        continue;
-      }
-
-      $path = $entity_route->getPath() . '/display/{view_mode_name}/display_builder';
-
-      $defaults = [];
-      $defaults['entity_type_id'] = $entity_type_id;
-
-      // If the entity type has no bundles and it doesn't use {bundle} in its
-      // admin path, use the entity type.
-      if (!str_contains($path, '{bundle}')) {
-        if (!$entity_type->hasKey('bundle')) {
-          $defaults['bundle'] = $entity_type_id;
-        }
-        else {
-          $defaults['bundle_key'] = $entity_type->getBundleEntityType();
-        }
-      }
-
-      $requirements = [];
-      $requirements['_field_ui_view_mode_access'] = 'administer ' . $entity_type_id . ' display';
-
-      $options = $entity_route->getOptions();
-      $options['_admin_route'] = FALSE;
-
-      // @todo Add the display builder access check.
-      // $requirements['_display_builder_access'] = 'view';
-      // Trigger the display builder RouteEnhancer.
-      $options['_display_builder'] = TRUE;
-      $parameters = [];
-      // Merge the passed in options in after Layout Builder's parameters.
-      $options = NestedArray::mergeDeep(['parameters' => $parameters], $options);
-
-      $route_name_prefix = 'display_builder.' . $entity_type_id;
-
-      $main_defaults = $defaults;
-      $main_options = $options;
-      $main_defaults['_controller'] = '\Drupal\display_builder_entity_view\Controller\DisplayBuilderEntityViewController::show';
-      $main_defaults['_title_callback'] = '\Drupal\display_builder_entity_view\Controller\DisplayBuilderEntityViewController::title';
-      $route = (new Route($path))
-        ->setDefaults($main_defaults)
-        ->setRequirements($requirements)
-        ->setOptions($main_options);
-      $collection->add("{$route_name_prefix}.view", $route);
-
-      $route_save = (new Route("{$path}/save"))
-        ->setDefaults($main_defaults + ['_form' => '\Drupal\display_builder_entity_view\Form\DisplayBuilderEntityViewDisplaySaveForm'])
-        ->setRequirements($requirements)
-      // Only post for ajax.
-        ->setMethods(['POST'])
-        ->setOptions($main_options);
-      $collection->add("{$route_name_prefix}.view.save", $route_save);
-
-      // Set field_ui.route_enhancer to run on the manage layout form. ?
-      if (isset($defaults['bundle_key'])) {
-        $collection->get("{$route_name_prefix}.view")
-          ->setOption('_field_ui', TRUE)
-          ->setDefault('bundle', '');
-        $collection->get("{$route_name_prefix}.view.save")
-          ->setDefault('bundle', '');
-      }
-    }
   }
 
   /**
@@ -137,6 +63,71 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
   public function onAlterRoutes(RouteBuildEvent $event): void {
     $collection = $event->getRouteCollection();
     $this->buildRoutes($collection);
+  }
+
+  /**
+   * Build Display Builder routes for each existing entity view display.
+   */
+  private function buildRoutes(RouteCollection $collection): void {
+    if (!$this->module_handler->moduleExists('field_ui')) {
+      return;
+    }
+
+    foreach ($this->getEntityTypes() as $entity_type_id => $entity_type) {
+      // Try to get the route from the current collection.
+      if (!$entity_route = $collection->get($entity_type->get('field_ui_base_route'))) {
+        continue;
+      }
+      $route_name = 'display_builder_entity_view.' . $entity_type_id;
+      $route = $this->buildDisplayBuilderRoute($entity_type, $entity_route);
+      $collection->add($route_name, $route);
+    }
+  }
+
+  /**
+   * Build a Display Builder route from an existing Entity View Display route.
+   */
+  private function buildDisplayBuilderRoute(EntityTypeInterface $entity_type, Route $entity_route): Route {
+    $path = $entity_route->getPath() . '/display/{view_mode_name}/display_builder';
+
+    $defaults = [];
+    $entity_type_id = $entity_type->id();
+    $defaults['entity_type_id'] = $entity_type_id;
+
+    // If the entity type has no bundles and it doesn't use {bundle} in its
+    // admin path, use the entity type.
+    if (!\str_contains($path, '{bundle}')) {
+      if (!$entity_type->hasKey('bundle')) {
+        $defaults['bundle'] = $entity_type_id;
+      }
+      else {
+        $defaults['bundle_key'] = $entity_type->getBundleEntityType();
+      }
+    }
+
+    $requirements = [];
+    $requirements['_field_ui_view_mode_access'] = 'administer ' . $entity_type_id . ' display';
+
+    $options = $entity_route->getOptions();
+    $options['_admin_route'] = FALSE;
+
+    // @todo Add the display builder access check.
+    // $requirements['_display_builder_access'] = 'view';
+    // Trigger the display builder RouteEnhancer.
+    $parameters = [];
+    // Merge the passed in options in after parameters.
+    $options = NestedArray::mergeDeep(['parameters' => $parameters], $options);
+
+    $defaults['_controller'] = DisplayBuilderEntityViewController::class . '::getBuilder';
+    $defaults['_title_callback'] = DisplayBuilderEntityViewController::class . '::title';
+    $route = (new Route($path))->setDefaults($defaults)->setRequirements($requirements)->setOptions($options);
+
+    // Set field_ui.route_enhancer to run on the manage layout form. ?
+    if (isset($defaults['bundle_key'])) {
+      $route->setOption('_field_ui', TRUE)->setDefault('bundle', '');
+    }
+
+    return $route;
   }
 
   /**

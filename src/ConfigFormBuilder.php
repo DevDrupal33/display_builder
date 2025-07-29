@@ -51,7 +51,11 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
     // builder.
     $instance_id = $entity->getInstanceId();
     $state = $this->stateManager->load($instance_id);
-    if ($state) {
+
+    if ($entity->getDisplayBuilder()?->id()) {
+      $form[StorageProperties::ConfigEntityId->value]['#default_value'] = (string) $entity->getDisplayBuilder()->id();
+    }
+    elseif ($state && $entity->getDisplayBuilder()) {
       $form[StorageProperties::ConfigEntityId->value]['#default_value'] = (string) $state['entity_config_id'];
     }
 

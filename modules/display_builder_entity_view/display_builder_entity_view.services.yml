@@ -10,5 +10,6 @@ services:
     class: Drupal\display_builder_entity_view\EventSubscriber\DisplayBuilderSubscriber
     arguments:
       - "@display_builder.state_manager"
+      - "@entity_type.manager"
     tags:
       - { name: event_subscriber }

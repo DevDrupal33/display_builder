@@ -31,6 +31,13 @@ final class EditForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, ?string $builder_id = NULL, ?string $routeName = NULL, ?ParameterBag $routeParameters = NULL): array {
+    // @todo have a way for saving.
+    if (\str_starts_with($builder_id, 'page_layout__') || \str_starts_with($builder_id, 'view__')) {
+      return [
+        '#markup' => $this->t('This configuration must be managed directly from the entity type.'),
+      ];
+    }
+
     if (!$routeName) {
       $routeName = 'display_builder_devel.view';
       $routeParameters = ['builder_id' => $builder_id];

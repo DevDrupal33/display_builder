@@ -5,5 +5,6 @@ core_version_requirement: ^11.2
 package: "User interface"
 dependencies:
   - drupal:layout_builder
+  - drupal:field_ui
   - display_builder:display_builder
   - ui_patterns:ui_patterns_field_formatters

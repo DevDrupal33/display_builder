@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_entity_view\Form;
 
+use Drupal\Component\Plugin\PluginManagerBase;
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
-use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay;
+use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\StorageProperties;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplayStorage;
 use Drupal\layout_builder\Form\LayoutBuilderEntityViewDisplayForm;
 use Drupal\layout_builder\SectionStorageInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Edit form for the DisplayBuilderEntityViewDisplay entity type.
@@ -34,41 +39,44 @@ final class DisplayBuilderEntityViewDisplayForm extends LayoutBuilderEntityViewD
   protected ?DisplayBuilderEntityViewDisplayStorage $sourceStorage;
 
   /**
+   * The config form builder for Display Builder.
+   */
+  protected ConfigFormBuilderInterface $configFormBuilder;
+
+  /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ?SectionStorageInterface $section_storage = NULL, mixed $source_storage = NULL) {
-    $this->sourceStorage = $source_storage;
-
-    return parent::buildForm($form, $form_state, $section_storage);
+  public function __construct(
+    FieldTypePluginManagerInterface $field_type_manager,
+    PluginManagerBase $plugin_manager,
+    EntityDisplayRepositoryInterface $entity_display_repository,
+    EntityFieldManagerInterface $entity_field_manager,
+    ConfigFormBuilderInterface $config_form_builder,
+  ) {
+    parent::__construct($field_type_manager, $plugin_manager, $entity_display_repository, $entity_field_manager);
+    $this->configFormBuilder = $config_form_builder;
   }
 
   /**
-   * Alter the entity form form state values.
-   *
-   * @param string $entity_type_id
-   *   The entity type ID.
-   * @param \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay $display
-   *   The entity display.
-   * @param array $form
-   *   The form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The form state.
+   * {@inheritdoc}
    */
-  public function displayBuilderEntityFormEntityBuild(string $entity_type_id, DisplayBuilderEntityViewDisplay $display, array &$form, FormStateInterface &$form_state): void {
-    $set_enabled = (bool) $form_state->getValue(['display_builder', 'enabled'], FALSE);
-    $already_enabled = $display->isDisplayBuilderEnabled();
+  public static function create(ContainerInterface $container): self {
+    return new self(
+      $container->get('plugin.manager.field.field_type'),
+      $container->get('plugin.manager.field.formatter'),
+      $container->get('entity_display.repository'),
+      $container->get('entity_field.manager'),
+      $container->get('display_builder.config_form_builder')
+    );
+  }
 
-    if ($set_enabled) {
-      if (!$already_enabled) {
-        $display->enableDisplayBuilder();
-      }
-    }
-    elseif ($already_enabled) {
-      $display->disableDisplayBuilder();
-      // @todo Implements a confirmation step to disable Display Builder like
-      // with LayoutBuilderDisableForm.
-      // $form_state->setRedirectUrl($this->sourceStorage->getDisplayBuilderUrl('disable'));
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public function buildForm(array $form, FormStateInterface $form_state, ?SectionStorageInterface $section_storage = NULL, mixed $source_storage = NULL): array {
+    $this->sourceStorage = $source_storage;
+
+    return parent::buildForm($form, $form_state, $section_storage);
   }
 
   /**
@@ -76,6 +84,7 @@ final class DisplayBuilderEntityViewDisplayForm extends LayoutBuilderEntityViewD
    */
   public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
+
     $is_layout_builder_enabled = $this->entity->isLayoutBuilderEnabled();
     $is_display_builder_enabled = $this->entity->isDisplayBuilderEnabled();
 
@@ -91,7 +100,7 @@ final class DisplayBuilderEntityViewDisplayForm extends LayoutBuilderEntityViewD
       '#title' => $this->t('Display builder'),
       '#weight' => -11,
       '#attributes' => ['class' => ['button']],
-      '#url' => $this->getDisplayBuilderUrl(),
+      '#url' => $this->entity->getBuilderUrl(),
       '#access' => $is_display_builder_enabled,
     ];
 
@@ -104,32 +113,14 @@ final class DisplayBuilderEntityViewDisplayForm extends LayoutBuilderEntityViewD
       $form['layout']['#open'] = $is_layout_builder_enabled;
     }
 
-    $form['display_builder'] = [
+    $form['wrapper'] = [
       '#type' => 'details',
       '#open' => TRUE,
-      '#title' => $this->t('Display Builder options'),
-      '#tree' => TRUE,
+      '#title' => $this->t('Display builder'),
       '#weight' => 1,
     ];
 
-    if ($is_layout_builder_enabled && $is_display_builder_enabled) {
-      $form['display_builder']['status'] = [
-        '#theme' => 'status_messages',
-        '#message_list' => [
-          'warning' => [
-            $this->t('Layout Builder is enabled and will handle this display. Display Builder can still be used but will not handle the display until Layout builder is disabled.'),
-          ],
-        ],
-      ];
-    }
-
-    $form['display_builder']['enabled'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Use Display Builder'),
-      '#default_value' => $is_display_builder_enabled,
-    ];
-
-    $form['#entity_builders']['display_builder'] = '::displayBuilderEntityFormEntityBuild';
+    $form['wrapper'][StorageProperties::ConfigEntityId->value] = $this->configFormBuilder->build($this->entity, FALSE);
 
     return $form;
   }
@@ -137,8 +128,12 @@ final class DisplayBuilderEntityViewDisplayForm extends LayoutBuilderEntityViewD
   /**
    * {@inheritdoc}
    */
-  public function getDisplayBuilderUrl(string $rel = 'view'): Url {
-    return Url::fromRoute("display_builder.{$this->entity->getTargetEntityTypeId()}.{$rel}", $this->getRouteParameters());
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
+    parent::submitForm($form, $form_state);
+
+    $display_builder = $form_state->getValue('display_builder')[StorageProperties::ConfigEntityId->value] ?? '';
+    $this->entity->setThirdPartySetting('display_builder', StorageProperties::ConfigEntityId->value, $display_builder);
+    $this->entity->save();
   }
 
   /**
@@ -178,23 +173,6 @@ final class DisplayBuilderEntityViewDisplayForm extends LayoutBuilderEntityViewD
     }
 
     parent::copyFormValuesToEntity($entity, $form, $form_state);
-  }
-
-  /**
-   * Provides the route parameters needed to generate a URL for this object.
-   *
-   * @return mixed[]
-   *   An associative array of parameter names and values.
-   */
-  protected function getRouteParameters() {
-    $display = $this->entity;
-    $entity_type = $this->entityTypeManager->getDefinition($display->getTargetEntityTypeId());
-    $bundle_parameter_key = $entity_type->getBundleEntityType() ?: 'bundle';
-
-    return [
-      $bundle_parameter_key => $display->getTargetBundle(),
-      'view_mode_name' => $display->getMode(),
-    ];
   }
 
 }

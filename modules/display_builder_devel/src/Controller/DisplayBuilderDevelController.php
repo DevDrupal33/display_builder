@@ -9,12 +9,12 @@ use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_devel\Helper\DisplayBuilderDevelHelper;
 use Drupal\display_builder_devel\MockEntity;
-use Drupal\display_builder_entity_view\EventSubscriber\DisplayBuilderSubscriber;
+use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Drupal\display_builder_views\Plugin\views\display_extender\DisplayBuilder as DisplayExtender;
+use Drupal\display_builder\StateManager\StateManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -165,17 +165,15 @@ class DisplayBuilderDevelController extends ControllerBase {
       $url = PageLayout::getUrlFromInstanceId($builder_id);
       $type = $this->t('Page layout');
     }
-    elseif (\class_exists('Drupal\display_builder_entity_view\Event\DisplayBuilderSubscriber') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderSubscriber::CONTEXT_REQUIREMENT)) {
+    elseif (\class_exists('Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderEntityViewDisplay::getContextRequirement())) {
+      $url = DisplayBuilderEntityViewDisplay::getUrlFromInstanceId($builder_id);
+      $type = $this->t('Entity view');
+
       /** @var \Drupal\Core\Entity\EntityInterface $entity */
       $entity = $builder['contexts']['entity']->getContextValue();
       $entity_type_id = $entity->getEntityTypeId();
-      $route_name = \sprintf('display_builder.%s.view', $entity_type_id);
       $bundle = $builder['contexts']['bundle']->getContextValue();
 
-      $route_params = [];
-      $route_params[$entity->getEntityType()->getBundleEntityType()] = $bundle;
-      $route_params['view_mode_name'] = $builder['contexts']['view_mode']->getContextValue();
-      $type = $this->t('Entity view');
       $extra_links['refresh_sample'] = [
         'title' => $this->t('Refresh sample'),
         'url' => Url::fromRoute('display_builder_devel.delete_sample', [
@@ -183,7 +181,6 @@ class DisplayBuilderDevelController extends ControllerBase {
           'bundle' => $bundle,
         ]),
       ];
-      $url = Url::fromRoute($route_name, $route_params);
     }
 
     $row['id']['data'] = [
@@ -201,7 +198,7 @@ class DisplayBuilderDevelController extends ControllerBase {
     if (!$present) {
       $present = ['time' => NULL, 'log' => NULL];
     }
-    $row['updated']['data'] = $present['time'] ? $this->formatTime($present['time']) : '-';
+    $row['updated']['data'] = $present['time'] ? $this->formatTime((int) $present['time']) : '-';
 
     if (isset($present['log']) && $present['log'] instanceof TranslatableMarkup) {
       $row['log']['data'] = $this->formatLog($present['log']);

@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_entity_view\EventSubscriber;
 
-use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Plugin\Context\ContextInterface;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\display_builder\StorageProperties;
+use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -16,10 +17,9 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
-  public const CONTEXT_REQUIREMENT = 'display_builder_entity_view';
-
   public function __construct(
     protected StateManagerInterface $stateManager,
+    private EntityTypeManagerInterface $entityTypeManager,
   ) {}
 
   /**
@@ -41,33 +41,34 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     $builder_id = $event->getBuilderId();
     $contexts = $this->stateManager->getContexts($builder_id);
 
-    if (!$this->stateManager->hasSaveContextsRequirement($builder_id, self::CONTEXT_REQUIREMENT, $contexts)) {
+    if (!$this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderEntityViewDisplay::getContextRequirement(), $contexts)) {
       return;
     }
 
     // Entity view display parameters are also in route match.
-    /** @var \Drupal\Core\Plugin\Context\EntityContext $entity_context */
-    $entity_context = $contexts['entity'];
+    /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay $display */
+    $display = $this->getEntityViewDisplayEntity($contexts['entity'], $contexts['view_mode']);
+
+    if ($display) {
+      $display->saveSources();
+    }
+  }
+
+  /**
+   * Get entity view display entity.
+   */
+  protected function getEntityViewDisplayEntity(ContextInterface $entity_context, ContextInterface $view_mode_context): ?DisplayBuilderEntityViewDisplay {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
     $entity = $entity_context->getContextValue();
     $entity_type_id = $entity->getEntityTypeId();
     $bundle = $entity->bundle();
-    $view_mode = $contexts['view_mode']->getContextValue();
-    // Save to the config entity.
-    // @todo Implement this.
-    /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay $entity_view_display */
-    // phpcs:disable DrupalPractice.Objects.GlobalClass.GlobalClass
-    // @phpstan-ignore-next-line
-    $entity_view_display = EntityViewDisplay::load("{$entity_type_id}.{$bundle}.{$view_mode}");
+    $view_mode = $view_mode_context->getContextValue();
+    $display_id = "{$entity_type_id}.{$bundle}.{$view_mode}";
 
-    if ($entity_view_display) {
-      // Set the third_party_settings.
-      $builder_data = $this->stateManager->getCurrentState($builder_id);
-      $entity_view_display->setThirdPartySetting('display_builder', 'sources', $builder_data);
-      $entity_view_display->setThirdPartySetting('display_builder', StorageProperties::ConfigEntityId->value, $this->stateManager->getEntityConfigId($builder_id));
-      // Save the configuration entity.
-      $entity_view_display->save();
-    }
+    /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay|null $display */
+    $display = $this->entityTypeManager->getStorage('entity_view_display')->load($display_id);
+
+    return $display;
   }
 
 }

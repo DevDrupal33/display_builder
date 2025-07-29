@@ -92,6 +92,7 @@ class DisplayBuilder extends DisplayExtenderPluginBase implements EntityWithDisp
 
     if ($builder_config_id) {
       $this->initInstanceIfMissing();
+      // Sync with the state.
       if ($builder_id = $this->getInstanceId()) {
         $this->stateManager->setEntityConfigId($builder_id, $builder_config_id);
       }

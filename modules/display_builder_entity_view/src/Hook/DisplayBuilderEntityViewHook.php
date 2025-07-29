@@ -9,7 +9,6 @@ use Drupal\Core\Hook\Order\OrderAfter;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplayStorage;
 use Drupal\display_builder_entity_view\Form\DisplayBuilderEntityViewDisplayForm;
-use Drupal\layout_builder\Form\DefaultsEntityForm;
 
 /**
  * Hook implementations for display_builder_entity_view.
@@ -28,7 +27,6 @@ class DisplayBuilderEntityViewHook {
     $entity_types['entity_view_display']
       ->setClass(DisplayBuilderEntityViewDisplay::class)
       ->setStorageClass(DisplayBuilderEntityViewDisplayStorage::class)
-      ->setFormClass('display_builder', DefaultsEntityForm::class)
       ->setFormClass('edit', DisplayBuilderEntityViewDisplayForm::class);
   }
 
