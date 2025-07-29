@@ -59,8 +59,12 @@ preview:
   js:
     ./assets/js/preview.js: {}
 
+contextual_menu:
+  js:
+    ./assets/js/contextual_menu.js: {}
+
 # Keyboard mapping behavior.
-keyboard.js:
+keyboard:
   js:
     ./assets/js/keyboard.js: {}
 

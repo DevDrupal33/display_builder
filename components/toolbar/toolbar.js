@@ -5,7 +5,7 @@
 
 ((Drupal, once) => {
   /**
-   * Enable Display builder Toolbar feature.
+   * Enable Display builder Toolbar switch on smaller width.
    *
    * @type {Drupal~behavior}
    */

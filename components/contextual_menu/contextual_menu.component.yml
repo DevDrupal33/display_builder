@@ -1,16 +1,9 @@
 name: Contextual Menu
 description: A list of menu item for the user to choose from.
+group: Display builder
+no_ui: true
 slots:
   label:
     title: Label
   items:
     title: Items
-libraryOverrides:
-  dependencies:
-    - core/drupal
-    - core/once
-    - display_builder/contextual-menu-helper
-    - display_builder/local-storage-manager
-    - htmx/drupal
-    # Introduced by navigation module, internal but we can rely on it for now.
-    - core/internal.floating-ui

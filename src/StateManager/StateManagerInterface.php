@@ -22,14 +22,16 @@ interface StateManagerInterface extends ContextAwareInterface, DataStateInterfac
    *   The source ID.
    * @param array $data
    *   The source data.
+   * @param array $third_party_settings
+   *   (Optional) The source third party settings. Used for paste/duplicate.
    *
    * @return string
    *   The instance ID of the new component.
    */
-  public function attachSourceToRoot(string $builder_id, int $position, string $source_id, array $data): string;
+  public function attachSourceToRoot(string $builder_id, int $position, string $source_id, array $data, ?array $third_party_settings = NULL): string;
 
   /**
-   * Attach a new source instance a slot.
+   * Attach a new source instance to a slot.
    *
    * @param string $builder_id
    *   The display builder id.
@@ -43,8 +45,13 @@ interface StateManagerInterface extends ContextAwareInterface, DataStateInterfac
    *   The source ID.
    * @param array $data
    *   The source data.
+   * @param array $third_party_settings
+   *   (Optional) The source third party settings. Used for paste/duplicate.
+   *
+   * @return string
+   *   The instance ID of the new component.
    */
-  public function attachSourceToSlot(string $builder_id, string $parent_id, string $slot_id, int $position, string $source_id, array $data): string;
+  public function attachSourceToSlot(string $builder_id, string $parent_id, string $slot_id, int $position, string $source_id, array $data, ?array $third_party_settings = NULL): string;
 
   /**
    * Create a display builder.
@@ -280,7 +287,7 @@ interface StateManagerInterface extends ContextAwareInterface, DataStateInterfac
   public function getCountFuture(string $builder_id): int;
 
   /**
-   * Get  users.
+   * Get users.
    *
    * All users which have authored a step in present, past or future, with the
    * most recent date of action.

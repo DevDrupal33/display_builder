@@ -1,5 +1,7 @@
 name: Menu toggle Button
 description: Display builder theme menu toggle.
+group: Display builder
+no_ui: true
 slots:
   button:
     title: Button

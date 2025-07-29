@@ -1,5 +1,7 @@
 name: Fullscreen Button
 description: Display builder specific button to handle fullscreen.
+group: Display builder
+no_ui: true
 props:
   type: object
   properties:

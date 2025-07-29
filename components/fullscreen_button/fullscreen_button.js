@@ -71,6 +71,8 @@
       Drupal.displayBuilder.LocalStorageManager.get(builder.id, 'fullscreen')
     ) {
       const button = builder.querySelector('[data-set-fullscreen]');
+      // Specific shoelace event handler.
+      // @todo avoid using this kind of specific.
       const icon = button.querySelector('sl-icon');
       setFullscreen(builder, icon, button);
     }
@@ -92,6 +94,8 @@
           button.addEventListener('click', (event) => {
             // Click on button or icon is different.
             let icon = event.target;
+            // Specific shoelace event handler.
+            // @todo avoid using this kind of specific.
             if (event.target.tagName !== 'SL-ICON') {
               icon = event.target.querySelector('sl-icon');
             }

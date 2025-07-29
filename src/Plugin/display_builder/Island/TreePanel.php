@@ -84,7 +84,7 @@ class TreePanel extends BuilderPanel {
           'title' => $definition['title'],
         ],
         // Slot is needed for contextual menu paste.
-        // @see components/contextual_menu/contextual_menu.js
+        // @see assets/js/contextual_menu.js
         '#attributes' => [
           'data-slot-id' => $slot_id,
           'data-slot-title' => $definition['title'],
@@ -126,7 +126,7 @@ class TreePanel extends BuilderPanel {
         'children' => $slots,
       ],
       // Required for the context menu label.
-      // @see components/contextual_menu/contextual_menu.js
+      // @see assets/js/contextual_menu.js
       '#attributes' => [
         'data-instance-id' => $instance_id,
         'data-instance-title' => $name,
@@ -155,7 +155,7 @@ class TreePanel extends BuilderPanel {
       '#attributes' => [
         'data-instance-id' => $instance_id,
         // This label is used for contextual menu.
-        // @see components/contextual_menu/contextual_menu.js
+        // @see assets/js/contextual_menu.js
         'data-instance-title' => $label['label'],
         'data-slot-position' => $index,
         'data-menu-type' => 'block',

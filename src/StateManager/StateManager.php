@@ -245,11 +245,12 @@ class StateManager implements StateManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function attachSourceToRoot(string $builder_id, int $position, string $source_id, array $data): string {
+  public function attachSourceToRoot(string $builder_id, int $position, string $source_id, array $data, ?array $third_party_settings = NULL): string {
     $data = [
       '_instance_id' => uniqid(),
       'source_id' => $source_id,
       'source' => $data,
+      '_third_party_settings' => $third_party_settings,
     ];
     $root = $this->getCurrentState($builder_id);
     $root = $this->attachToRoot($root, $position, $data);
@@ -269,12 +270,13 @@ class StateManager implements StateManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function attachSourceToSlot(string $builder_id, string $parent_id, string $slot_id, int $position, string $source_id, array $data): string {
+  public function attachSourceToSlot(string $builder_id, string $parent_id, string $slot_id, int $position, string $source_id, array $data, ?array $third_party_settings = NULL): string {
     $root = $this->getCurrentState($builder_id);
     $data = [
       '_instance_id' => uniqid(),
       'source_id' => $source_id,
       'source' => $data,
+      '_third_party_settings' => $third_party_settings,
     ];
     $root = $this->attachToSlot($builder_id, $root, $parent_id, $slot_id, $position, $data);
 

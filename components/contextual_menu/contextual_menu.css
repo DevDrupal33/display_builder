@@ -1,31 +1,32 @@
 :root {
-  --db-context-menu-z-index: 901;
+  --db-menu-z-index: 901;
 }
 
-.display-builder .db-context-menu {
+.display-builder .db-menu {
   position: absolute;
-  z-index: var(--db-context-menu-z-index);
+  z-index: var(--db-menu-z-index);
   display: none;
   border: 1px dashed var(--sl-color-neutral-200) !important;
   box-shadow: var(--sl-shadow-x-large);
 
-  sl-menu-label::part(base) {
+  .db-menu__label::part(base) {
     padding-left: 0.5rem;
     color: var(--sl-color-primary-800);
     font-style: italic;
   }
-  sl-menu-item::part(checked-icon) {
+  .menu__item::part(checked-icon) {
     width: 0.5rem;
   }
-  sl-menu-item[hx-delete]::part(base) {
+  .menu__item[hx-delete]::part(base) {
     color: var(--sl-color-danger-600);
   }
-}
 
-.debug-info {
-  margin: 0;
-  padding: 3px;
-  border: 1px solid gray;
-  background-color: white;
-  font-size: 0.8rem;
+  pre.debug-info {
+    min-width: 20rem;
+    margin: 0;
+    padding: 3px;
+    border: 1px solid gray;
+    background-color: white;
+    font-size: 0.8rem;
+  }
 }

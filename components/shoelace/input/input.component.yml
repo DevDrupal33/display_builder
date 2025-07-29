@@ -3,10 +3,8 @@ description: Inputs collect data from the user.
 links:
   - https://shoelace.style/components/input
 variants:
-  # button:
-  #   title: Button
-  # checkbox:
-  #   title: Checkbox
+  button:
+    title: Button
   color:
     title: Color
   date:
@@ -15,28 +13,16 @@ variants:
     title: Datetime local
   email:
     title: Email
-  # file:
-  #   title: File
-  # hidden:
-  #   title: Hidden
-  # image:
-  #   title: Image
   month:
     title: Month
   number:
     title: Number
-  # password:
-  #   title: Password
-  # radio:
-  #   title: Radio
-  # range:
-  #   title: Range
-  # reset:
-  #   title: Reset
+  reset:
+    title: Reset
   search:
     title: Search
-  # submit:
-  #   title: Submit
+  submit:
+    title: Submit
   tel:
     title: Tel
   text:

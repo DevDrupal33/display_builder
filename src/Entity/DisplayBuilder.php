@@ -522,7 +522,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    * @return array
    *   The islands render array.
    *
-   * @see components/contextual_menu/contextual_menu.js
+   * @see assets/js/contextual_menu.js
    */
   private function buildMenuWrapper(string $builder_id, array $islands, array $data = []): array {
     $build = [
@@ -532,9 +532,9 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
         'label' => $this->t('Select an action'),
       ],
       '#attributes' => [
-        'class' => ['db-background', 'db-context-menu'],
+        'class' => ['db-background', 'db-menu'],
         // Require for JavaScript.
-        // @see components/contextual_menu/contextual_menu.js
+        // @see assets/js/contextual_menu.js
         'data-db-id' => $builder_id,
       ],
     ];

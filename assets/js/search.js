@@ -15,6 +15,8 @@
         const eventHandler = debounce((event) => {
           triggerContextualSearch(context, event.target);
         }, 300);
+        // Specific shoelace event handler.
+        // @todo avoid using this kind of specific.
         input.addEventListener('sl-input', eventHandler);
       });
 

@@ -150,7 +150,7 @@ class BuilderPanel extends IslandPluginBase {
 
     $build = $this->renderSource($data);
     // Required for the context menu label.
-    // @see components/contextual_menu/contextual_menu.js
+    // @see assets/js/contextual_menu.js
     $build['#attributes']['data-instance-title'] = $component['label'];
     $build['#attributes']['data-slot-position'] = $index;
 
@@ -238,7 +238,7 @@ class BuilderPanel extends IslandPluginBase {
     }
 
     // This label is used for contextual menu.
-    // @see components/contextual_menu/contextual_menu.js
+    // @see assets/js/contextual_menu.js
     $build['#attributes']['data-instance-title'] = $label['summary'] ?? $label;
     $build['#attributes']['data-slot-position'] = $index;
 
@@ -375,7 +375,7 @@ class BuilderPanel extends IslandPluginBase {
         // Required for JavaScript @see components/dropzone/dropzone.js.
         'data-db-id' => $builder_id,
         // Slot is needed for contextual menu paste.
-        // @see components/contextual_menu/contextual_menu.js
+        // @see assets/js/contextual_menu.js
         'data-slot-id' => $slot,
         'data-slot-title' => \ucfirst($definition['title']),
         'data-instance-id' => $instance_id,

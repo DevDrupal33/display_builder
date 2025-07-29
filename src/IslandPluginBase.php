@@ -45,11 +45,6 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   protected ?string $instanceId = NULL;
 
   /**
-   * The contexts for islands.
-   */
-  protected array $contexts = [];
-
-  /**
    * {@inheritdoc}
    */
   public function __construct(
@@ -64,8 +59,6 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->data = $configuration;
-    $this->contexts = $configuration['contexts'] ?? [];
-    unset($configuration['contexts']);
     $this->setConfiguration($configuration);
   }
 

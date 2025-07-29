@@ -48,6 +48,8 @@
         button.addEventListener('click', (event) => {
           // Click on button or icon is different.
           let icon = event.target;
+          // Specific shoelace event handler.
+          // @todo avoid using this kind of specific.
           if (event.target.tagName !== 'SL-ICON') {
             icon = event.target.querySelector('sl-icon');
           }

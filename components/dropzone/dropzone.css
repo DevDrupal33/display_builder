@@ -121,7 +121,7 @@ handle it instead of shoelace */
 .db-dropzone [data-instance-id]:not([data-component-id]):hover,
 .db-placeholder[data-instance-id]:hover {
   position: relative;
-  cursor: move !important;
+  cursor: hand !important;
   outline: var(--dropzone-slot-outline-width) var(--dropzone-color-hover)
     var(--dropzone-slot-outline-type) !important;
   outline-offset: var(--dropzone-slot-outline-offset-light) !important;
@@ -140,7 +140,7 @@ handle it instead of shoelace */
   position: relative;
   margin: 0.5rem;
   padding: 0.5rem;
-  cursor: move !important;
+  cursor: hand !important;
   outline: var(--dropzone-slot-outline-width) var(--dropzone-color-strong)
     var(--dropzone-slot-outline-type);
   outline-offset: var(--dropzone-slot-outline-offset);

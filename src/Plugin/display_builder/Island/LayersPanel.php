@@ -72,7 +72,7 @@ class LayersPanel extends BuilderPanel {
           // Required for JavaScript @see components/dropzone/dropzone.js.
           'data-db-id' => $builder_id,
           // Slot is needed for contextual menu paste.
-          // @see components/contextual_menu/contextual_menu.js
+          // @see assets/js/contextual_menu.js
           'data-slot-id' => $slot_id,
           'data-slot-title' => $definition['title'],
           'data-instance-title' => $component['label'],
@@ -106,7 +106,7 @@ class LayersPanel extends BuilderPanel {
         'children' => $slots,
       ],
       // Required for the context menu label.
-      // @see components/contextual_menu/contextual_menu.js
+      // @see assets/js/contextual_menu.js
       '#attributes' => [
         'data-instance-title' => $name,
       ],
@@ -130,7 +130,7 @@ class LayersPanel extends BuilderPanel {
     $instance_id = $instance_id ?: $data['_instance_id'];
 
     // This label is used for contextual menu.
-    // @see components/contextual_menu/contextual_menu.js
+    // @see assets/js/contextual_menu.js
     $build['#attributes']['data-instance-title'] = $label['summary'];
     $build['#attributes']['data-slot-position'] = $index;
 

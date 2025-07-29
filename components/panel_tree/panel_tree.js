@@ -42,12 +42,16 @@
       ) {
         const menu = document.querySelector('.db-tree');
         if (!menu) return;
+        // Specific shoelace event handler.
+        // @todo avoid using this kind of specific.
         menu.addEventListener('sl-selection-change', (event) => {
           highlightInstance(event, context);
         });
       }
 
       once('dbTreeInit', '.db-tree', context).forEach((tree) => {
+        // Specific shoelace event handler.
+        // @todo avoid using this kind of specific.
         tree.addEventListener('sl-selection-change', (event) => {
           highlightInstance(event, context);
         });

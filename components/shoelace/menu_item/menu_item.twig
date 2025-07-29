@@ -1,4 +1,4 @@
-{% set attributes = attributes.addClass('shoelace-button') %}
+{% set attributes = attributes.addClass('menu__item') %}
 {% set attributes = (variant and variant != 'default') ? attributes.setAttribute('variant', variant) : attributes %}
 {% set attributes = disabled ? attributes.setAttribute('disabled', true) : attributes %}
 {% set attributes = attributes.setAttribute('type', 'checkbox') %}
@@ -10,7 +10,12 @@
   <sl-menu-item{{ attributes }}>
     {{ title }}
     {% if icon %}
-      <sl-icon slot="{{ icon_position }}" name="{{ icon }}"></sl-icon>
+      <sl-icon slot="{{ icon_position|default('prefix') }}" name="{{ icon }}"></sl-icon>
+    {% endif %}
+    {% if submenu %}
+    <sl-menu slot="submenu">
+      {{ submenu }}
+    </sl-menu>
     {% endif %}
   </sl-menu-item>
 {% endif %}

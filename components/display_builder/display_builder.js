@@ -1,22 +1,24 @@
 /**
  * @file
- * Specific behaviors for the display builder.
+ * Specific behaviors for the Display builder.
  */
-((Drupal, once) => {
+/* cspell:ignore uidom */
+((Drupal, once, { computePosition, offset, shift, flip }) => {
   /**
-   * Disable all links in builder and preview islands.
+   * Disable all links in preview islands.
    *
-   * @param {HTMLElement} builder - The builder element to disable links inside
+   * @param {HTMLElement} island
+   *   The builder element to disable links inside
    * @listens event:click
    */
-  function disableInsideLinks(builder) {
+  function disableInsideLinks(island) {
     if (
-      !builder.classList.contains('db-island-builder') &&
-      !builder.classList.contains('db-island-preview')
+      !island.classList.contains('db-island-builder') &&
+      !island.classList.contains('db-island-preview')
     ) {
       return;
     }
-    builder.querySelectorAll('a').forEach((link) => {
+    island.querySelectorAll('a').forEach((link) => {
       if (link.closest('div').classList === 'contextual') {
         return;
       }
@@ -133,23 +135,66 @@
   }
 
   /**
-   * Initialize the display builder mechanics with drag and drop and htmx.
+   * Initialize the Display builder mechanics.
    *
    * @type {Drupal~behavior}
    *
    * @prop {Drupal~behaviorAttach} attach
-   *   Attaches the behaviors for display builder functionality.
+   *   Attaches the behaviors for Display builder functionality.
    */
   Drupal.behaviors.displayBuilder = {
     attach(context, settings) {
       const debug = settings.dbDebug;
+
       once('dbInit', '.display-builder', context).forEach((builder) => {
         alterHtmxEvents(builder);
         Drupal.displayBuilder.initDrawer(builder, debug);
       });
-      once('dbIslandInit', '.db-island-view', context).forEach((builder) => {
-        disableInsideLinks(builder);
+
+      once('dbContextualMenu', '.display-builder', context).forEach(
+        (builder) => {
+          Drupal.displayBuilder.menuAlterHtmxEvents(builder, debug);
+        },
+      );
+
+      // @todo limit to islands with possible menu.
+      once(
+        'dbIslandInit',
+        '.db-island-builder, .db-island-layers, .db-island-tree',
+        context,
+      ).forEach((island) => {
+        disableInsideLinks(island);
+
+        const menu = document.querySelector('.db-menu');
+        if (!menu) return;
+
+        const contextualMenu = new Drupal.displayBuilder.ContextualMenu(
+          island,
+          {
+            computePosition,
+            offset,
+            shift,
+            flip,
+          },
+          menu,
+          debug,
+        );
+
+        // Register all plugins from the namespace
+        const plugins = Drupal.displayBuilder.ContextualMenuPlugin || {};
+        Object.keys(plugins).forEach((key) => {
+          const plugin = plugins[key];
+          // Register only if it's an object and has at least one hook (e.g., onMenuOpen)
+          if (
+            plugin &&
+            typeof plugin === 'object' &&
+            typeof plugin.onMenuOpen === 'function'
+            // || add other hooks here if needed
+          ) {
+            contextualMenu.registerPlugin(plugin);
+          }
+        });
       });
     },
   };
-})(Drupal, once);
+})(Drupal, once, FloatingUIDOM);

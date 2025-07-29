@@ -58,19 +58,6 @@ interface ApiControllerInterface {
   public function getInstance(Request $request, string $builder_id, string $instance_id): array;
 
   /**
-   * Save builder.
-   *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   HTTP Request.
-   * @param string $builder_id
-   *   Builder ID.
-   *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
-   */
-  public function save(Request $request, string $builder_id): HtmlResponse;
-
-  /**
    * Update instance_id.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -103,6 +90,27 @@ interface ApiControllerInterface {
   public function thirdPartySettingsUpdate(Request $request, string $builder_id, string $instance_id, string $island_id): HtmlResponse;
 
   /**
+   * Paste an instance in a builder.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   HTTP Request.
+   * @param string $builder_id
+   *   Builder ID.
+   * @param string $instance_id
+   *   Instance ID.
+   * @param string $parent_id
+   *   Parent ID.
+   * @param string $slot_id
+   *   Slot ID.
+   * @param string $slot_position
+   *   Slot position.
+   *
+   * @return \Drupal\Core\Render\HtmlResponse
+   *   The HTML response.
+   */
+  public function pasteInstance(Request $request, string $builder_id, string $instance_id, string $parent_id, string $slot_id, string $slot_position): HtmlResponse;
+
+  /**
    * Delete an instance in a builder.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -133,6 +141,32 @@ interface ApiControllerInterface {
   public function saveInstanceAsPreset(Request $request, string $builder_id, string $instance_id): HtmlResponse;
 
   /**
+   * Save builder.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   HTTP Request.
+   * @param string $builder_id
+   *   Builder ID.
+   *
+   * @return \Drupal\Core\Render\HtmlResponse
+   *   The HTML response.
+   */
+  public function save(Request $request, string $builder_id): HtmlResponse;
+
+  /**
+   * Restore to last save.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   HTTP Request.
+   * @param string $builder_id
+   *   Builder ID.
+   *
+   * @return \Drupal\Core\Render\HtmlResponse
+   *   The HTML response.
+   */
+  public function restore(Request $request, string $builder_id): HtmlResponse;
+
+  /**
    * Move history to the last past state.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -159,7 +193,7 @@ interface ApiControllerInterface {
   public function redo(Request $request, string $builder_id): HtmlResponse;
 
   /**
-   * Restore to last save.
+   * Clear history.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
@@ -169,6 +203,6 @@ interface ApiControllerInterface {
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function restore(Request $request, string $builder_id): HtmlResponse;
+  public function clear(Request $request, string $builder_id): HtmlResponse;
 
 }

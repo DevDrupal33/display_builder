@@ -93,6 +93,8 @@
           const eventHandler = debounce((event) => {
             triggerSearch(context, event.target);
           }, 300);
+          // Specific shoelace event handler.
+          // @todo avoid using this kind of specific.
           filterInput.addEventListener('sl-input', eventHandler);
         },
       );

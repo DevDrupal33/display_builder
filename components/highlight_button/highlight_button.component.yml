@@ -1,5 +1,7 @@
 name: Highlight Button
 description: Display builder specific button to highlight the builder areas.
+group: Display builder
+no_ui: true
 props:
   type: object
   properties:

@@ -20,7 +20,9 @@
       // https://sortablejs.github.io/Sortable/#thresholds
       animation: 150,
       direction: 'vertical',
-      swapThreshold: 0.5,
+      swapThreshold: 0.65,
+      // fallbackOnBody: true,
+      // fallbackTolerance: 50,
       group: {
         name: builderId,
         pull: true,

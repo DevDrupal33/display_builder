@@ -25,7 +25,7 @@ class Menu extends IslandPluginBase {
    */
   public function build(string $builder_id, array $data, array $options = []): array {
     // Attribute data-contextual-menu is important for the js mapping.
-    // @see components/contextual_menu/contextual_menu.js
+    // @see assets/js/contextual_menu.js
     // Urls are generated with placeholders to be replaced in the js.
     $duplicate = $this->buildMenuItem($this->t('Duplicate'), 'duplicate');
     $duplicate = $this->htmxEvents->onClickDuplicate($duplicate, $builder_id, '__instance_id__', '__parent_id__', '__slot_id__', '__slot_position__');

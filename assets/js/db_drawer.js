@@ -214,6 +214,7 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
 
   // Init the first drawer.
   if (firstDrawer) {
+    // @todo avoid using this kind of shoelace specific.
     firstDrawer.addEventListener('sl-show', adjustMainMarginOnShow);
     firstDrawer.addEventListener('sl-hide', resetMainMarginOnHide);
     firstDrawer.addEventListener('sl-hide', onHideResetActiveTrigger);

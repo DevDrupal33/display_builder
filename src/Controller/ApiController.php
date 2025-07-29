@@ -70,7 +70,7 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     }
     elseif ($request->request->has('source_id')) {
       $source_id = (string) $request->request->get('source_id');
-      $data = $request->request->has('source') ? json_decode((string) $request->request->get('source'), TRUE) : [];
+      $data = $request->request->has('source') ? \json_decode((string) $request->request->get('source'), TRUE) : [];
       $instance_id = $this->stateManager->attachSourceToRoot($builder_id, $position, $source_id, $data);
     }
     elseif ($request->request->has('preset_id')) {
@@ -80,14 +80,17 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
       /** @var \Drupal\display_builder\PatternPresetInterface $preset */
       $preset = $presetStorage->load($preset_id);
       $data = $preset->getSources();
+
       if (!isset($data['source_id']) || !isset($data['source'])) {
         $message = $this->t('[attachToRoot] Missing preset source_id data');
+
         return $this->responseMessageError($builder_id, $message, $data);
       }
       $instance_id = $this->stateManager->attachSourceToRoot($builder_id, $position, $data['source_id'], $data['source']);
     }
     else {
       $message = \sprintf('[attachToRoot] Missing content (source_id, instance_id or preset_id)');
+
       return $this->responseMessageError($builder_id, $message, $request->request->all());
     }
 
@@ -115,7 +118,7 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     }
     elseif ($request->request->has('source_id')) {
       $source_id = (string) $request->request->get('source_id');
-      $data = $request->request->has('source') ? json_decode((string) $request->request->get('source'), TRUE) : [];
+      $data = $request->request->has('source') ? \json_decode((string) $request->request->get('source'), TRUE) : [];
       $instance_id = $this->stateManager->attachSourceToSlot($builder_id, $parent_id, $slot, $position, $source_id, $data);
     }
     elseif ($request->request->has('preset_id')) {
@@ -125,8 +128,10 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
       /** @var \Drupal\display_builder\PatternPresetInterface $preset */
       $preset = $presetStorage->load($preset_id);
       $data = $preset->getSources();
+
       if (!isset($data['source_id']) || !isset($data['source'])) {
         $message = $this->t('[attachToSlot] Missing preset source_id data');
+
         return $this->responseMessageError($builder_id, $message, $data);
       }
       $instance_id = $this->stateManager->attachSourceToSlot($builder_id, $parent_id, $slot, $position, $data['source_id'], $data['source']);
@@ -138,6 +143,7 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
         'slot' => $slot,
         'request' => $request->request->all(),
       ];
+
       return $this->responseMessageError($builder_id, $message, $debug);
     }
 
@@ -230,7 +236,8 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     $body = $request->getPayload()->all();
 
     if (!isset($body['form_id'])) {
-      $message = $this->t('[thirdPartySettingsUpdate] Missing payload');
+      $message = $this->t('[thirdPartySettingsUpdate] Missing payload!');
+
       return $this->responseMessageError($builder_id, $message, $body);
     }
 
@@ -274,19 +281,24 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
    */
   public function pasteInstance(Request $request, string $builder_id, string $instance_id, string $parent_id, string $slot_id, string $slot_position): HtmlResponse {
     $dataToCopy = $this->stateManager->get($builder_id, $instance_id);
+
     // Keep flag for move or attach to root.
     $is_paste_root = FALSE;
-    if (isset($dataToCopy['source_id']) && isset($dataToCopy['source'])) {
+
+    if (isset($dataToCopy['source_id'], $dataToCopy['source'])) {
       $source_id = $dataToCopy['source_id'];
       $data = $dataToCopy['source'];
+
       self::recursiveRefreshInstanceId($data);
+
       // If no parent we are on root.
-      if ('__root__' === $parent_id) {
+      // @todo for duplicate and not parent root seems not detected and copy is inside the slot.
+      if ($parent_id === '__root__') {
         $is_paste_root = TRUE;
-        $this->stateManager->attachSourceToRoot($builder_id, 0, $source_id, $data);
+        $this->stateManager->attachSourceToRoot($builder_id, 0, $source_id, $data, $dataToCopy['_third_party_settings'] ?? NULL);
       }
       else {
-        $this->stateManager->attachSourceToSlot($builder_id, $parent_id, $slot_id, (int) $slot_position, $source_id, $data);
+        $this->stateManager->attachSourceToSlot($builder_id, $parent_id, $slot_id, (int) $slot_position, $source_id, $data, $dataToCopy['_third_party_settings'] ?? NULL);
       }
     }
 
@@ -320,9 +332,11 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
    */
   public function saveInstanceAsPreset(Request $request, string $builder_id, string $instance_id): HtmlResponse {
     $label = $this->t('New preset');
+
     foreach ($request->headers as $key => $value) {
       if ($key === 'hx-prompt' && !empty($value[0])) {
         $label = $value[0];
+
         break;
       }
     }
@@ -333,7 +347,7 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
 
     $preset_storage = $this->entityTypeManager()->getStorage('pattern_preset');
     $preset = $preset_storage->create([
-      'id' => uniqid(),
+      'id' => \uniqid(),
       'label' => (string) $label,
       'theme' => $theme,
       'status' => TRUE,
@@ -475,33 +489,6 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
   }
 
   /**
-   * Render an error message in the display builder.
-   *
-   * @param string $builder_id
-   *   The builder ID.
-   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $message
-   *   The error message.
-   * @param array $debug
-   *   The debug code.
-   *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The response with the component.
-   */
-  private function responseMessageError(
-    string $builder_id,
-    string|TranslatableMarkup $message,
-    array $debug,
-  ): HtmlResponse {
-    $build = $this->buildError($builder_id, $message, print_r($debug, TRUE), NULL, TRUE);
-
-    $html = $this->renderer->renderInIsolation($build);
-    $response = new HtmlResponse();
-    $response->setContent($html);
-
-    return $response;
-  }
-
-  /**
    * Validates an island form.
    *
    * @param string $formClass
@@ -544,9 +531,37 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     }
     $builder_config_id = $this->stateManager->getEntityConfigId($builder_id);
     $display_builder = $this->entityTypeManager()->getStorage('display_builder')->load($builder_config_id);
-    assert($display_builder instanceof DisplayBuilderInterface);
+    \assert($display_builder instanceof DisplayBuilderInterface);
     $this->displayBuilder = $display_builder;
+
     return $this->displayBuilder;
+  }
+
+  /**
+   * Render an error message in the display builder.
+   *
+   * @param string $builder_id
+   *   The builder ID.
+   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $message
+   *   The error message.
+   * @param array $debug
+   *   The debug code.
+   *
+   * @return \Drupal\Core\Render\HtmlResponse
+   *   The response with the component.
+   */
+  private function responseMessageError(
+    string $builder_id,
+    string|TranslatableMarkup $message,
+    array $debug,
+  ): HtmlResponse {
+    $build = $this->buildError($builder_id, $message, \print_r($debug, TRUE), NULL, TRUE);
+
+    $html = $this->renderer->renderInIsolation($build);
+    $response = new HtmlResponse();
+    $response->setContent($html);
+
+    return $response;
   }
 
   /**
@@ -583,6 +598,7 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     else {
       $island_configuration = $island_configuration->data;
     }
+
     if ($island_enabled === FALSE) {
       $island_enabled = $this->getDisplayBuilder($builder_id)->getIslandEnabled();
       $this->memoryCache->set($key, $island_enabled);
@@ -605,7 +621,7 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
    */
   private static function recursiveRefreshInstanceId(array &$array): void {
     if (isset($array['_instance_id'])) {
-      $array['_instance_id'] = uniqid();
+      $array['_instance_id'] = \uniqid();
     }
 
     foreach ($array as &$value) {
@@ -625,10 +641,12 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
    */
   private static function cleanInstanceId(array &$array): void {
     unset($array['_instance_id']);
+
     foreach ($array as $key => &$value) {
       if (\is_array($value)) {
         self::cleanInstanceId($value);
-        if (isset($value['source_id']) && isset($value['source']['value']) && empty($value['source']['value'])) {
+
+        if (isset($value['source_id'], $value['source']['value']) && empty($value['source']['value'])) {
           unset($array[$key]);
         }
       }

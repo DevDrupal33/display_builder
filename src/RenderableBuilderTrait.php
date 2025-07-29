@@ -274,7 +274,6 @@ trait RenderableBuilderTrait {
       ],
       '#attributes' => [
         'data-contextual-menu' => TRUE,
-        'data-contextual-action' => $value,
       ],
     ];
 

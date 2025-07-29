@@ -10,6 +10,8 @@ variants:
 slots:
   title:
     title: Title
+  submenu:
+    title: Sub menu
 props:
   type: object
   properties:
@@ -25,6 +27,7 @@ props:
       enum:
         - prefix
         - suffix
+      default: prefix
     disabled:
       title: Disabled
       type: boolean

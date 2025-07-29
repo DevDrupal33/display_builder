@@ -238,7 +238,7 @@ class ComponentLibraryPanel extends IslandPluginBase {
    */
   private function getDefinitionsForProvider(): array {
     // @phpstan-ignore-next-line
-    $definitions = $this->sdcManager->getSortedDefinitions($this->sdcManager->getDefinitions());
+    $definitions = $this->sdcManager->getSortedDefinitions();
     $default_active_theme = \Drupal::service('theme.manager')->getActiveTheme();
     $all_active_themes = array_merge([$default_active_theme->getName()], array_keys($default_active_theme->getBaseThemeExtensions()));
 
