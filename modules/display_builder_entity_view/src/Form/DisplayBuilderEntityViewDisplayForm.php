@@ -132,8 +132,15 @@ final class DisplayBuilderEntityViewDisplayForm extends LayoutBuilderEntityViewD
     parent::submitForm($form, $form_state);
 
     // @todo we should have always a fallback.
-    $display_builder = $form_state->getValue([StorageProperties::ConfigEntityId->value]) ?? 'default';
-    $this->entity->setThirdPartySetting('display_builder', StorageProperties::ConfigEntityId->value, $display_builder);
+    $display_builder_config = $form_state->getValue([StorageProperties::ConfigEntityId->value]) ?? 'default';
+    // Empty mean disabled.
+    if (empty($display_builder_config)) {
+      $this->entity->unsetThirdPartySetting('display_builder', StorageProperties::ConfigEntityId->value);
+    }
+    else {
+      $this->entity->setThirdPartySetting('display_builder', StorageProperties::ConfigEntityId->value, $display_builder_config);
+    }
+
     $this->entity->save();
   }
 

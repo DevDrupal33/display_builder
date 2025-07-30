@@ -12,7 +12,7 @@ interface ConfigFormBuilderInterface {
   /**
    * Build form for integration with Display Builder.
    *
-   * @param EntityWithDisplayBuilderInterface $entity
+   * @param \Drupal\display_builder\EntityWithDisplayBuilderInterface $entity
    *   An entity allowing the use of Display Builder.
    * @param bool $mandatory
    *   (Optional). Is it mandatory to use Display Builder? (for example, in

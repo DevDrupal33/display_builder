@@ -65,7 +65,11 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
 
     if ($request->request->has('instance_id')) {
       $instance_id = (string) $request->request->get('instance_id');
-      $this->stateManager->moveToRoot($builder_id, $instance_id, $position);
+      if (!$this->stateManager->moveToRoot($builder_id, $instance_id, $position)) {
+        $message = $this->t('[attachToRoot] moveToRoot failed with invalid data');
+        return $this->responseMessageError($builder_id, $message, $request->request->all());
+      }
+
       $is_move = TRUE;
     }
     elseif ($request->request->has('source_id')) {
@@ -89,7 +93,7 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
       $instance_id = $this->stateManager->attachSourceToRoot($builder_id, $position, $data['source_id'], $data['source']);
     }
     else {
-      $message = \sprintf('[attachToRoot] Missing content (source_id, instance_id or preset_id)');
+      $message = '[attachToRoot] Missing content (source_id, instance_id or preset_id)';
 
       return $this->responseMessageError($builder_id, $message, $request->request->all());
     }
@@ -113,7 +117,11 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     // First, we update the data state.
     if ($request->request->has('instance_id')) {
       $instance_id = (string) $request->request->get('instance_id');
-      $this->stateManager->moveToSlot($builder_id, $instance_id, $parent_id, $slot, $position);
+      if (!$this->stateManager->moveToSlot($builder_id, $instance_id, $parent_id, $slot, $position)) {
+        $message = $this->t('[attachToRoot] moveToRoot failed with invalid data');
+        return $this->responseMessageError($builder_id, $message, $request->request->all());
+      }
+
       $is_move = TRUE;
     }
     elseif ($request->request->has('source_id')) {

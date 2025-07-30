@@ -52,6 +52,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
     $instance_id = $entity->getInstanceId();
     $state = $this->stateManager->load($instance_id);
 
+    // @todo get rid of the state fallback when replaced for unattached instances.
     if ($entity->getDisplayBuilder()?->id()) {
       $form[StorageProperties::ConfigEntityId->value]['#default_value'] = (string) $entity->getDisplayBuilder()->id();
     }

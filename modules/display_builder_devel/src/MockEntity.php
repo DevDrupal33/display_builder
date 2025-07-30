@@ -18,9 +18,9 @@ class MockEntity implements EntityWithDisplayBuilderInterface {
   /**
    * Instance ID as managed by the State Manager.
    *
-   * @var string
+   * @var string|null
    */
-  protected $instanceId;
+  protected ?string $instanceId;
 
   /**
    * Entity ID of the Display Builder config entity.
@@ -42,6 +42,16 @@ class MockEntity implements EntityWithDisplayBuilderInterface {
    */
   protected EntityTypeManagerInterface $entityTypeManager;
 
+  /**
+   * MockEntity constructor.
+   *
+   * @param string $instance_id
+   *   The instance ID as managed by the State Manager.
+   * @param string $display_builder_id
+   *   The entity ID of the Display Builder config entity.
+   * @param array $sources
+   *   The UI Patterns source tree.
+   */
   public function __construct(string $instance_id, string $display_builder_id, array $sources) {
     $this->instanceId = $instance_id;
     $this->displayBuilderId = $display_builder_id;
@@ -94,7 +104,9 @@ class MockEntity implements EntityWithDisplayBuilderInterface {
    * {@inheritdoc}
    */
   public function initInstanceIfMissing(): void {
-    $instance_id = $this->getInstanceId();
+    if (!$instance_id = $this->getInstanceId()) {
+      return;
+    }
 
     if (!$this->stateManager->load($instance_id)) {
       $this->stateManager->create($instance_id, (string) $this->getDisplayBuilder()->id(), $this->sources, []);

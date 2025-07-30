@@ -153,8 +153,11 @@ interface StateManagerInterface extends ContextAwareInterface, DataStateInterfac
    *   The instance id.
    * @param int $position
    *   The position.
+   *
+   * @return bool
+   *   True if success, false otherwise.
    */
-  public function moveToRoot(string $builder_id, string $instance_id, int $position): void;
+  public function moveToRoot(string $builder_id, string $instance_id, int $position): bool;
 
   /**
    * Move an instance to a slot.
@@ -169,8 +172,11 @@ interface StateManagerInterface extends ContextAwareInterface, DataStateInterfac
    *   The slot id.
    * @param int $position
    *   The position.
+   *
+   * @return bool
+   *   True if success, false otherwise.
    */
-  public function moveToSlot(string $builder_id, string $instance_id, string $parent_id, string $slot_id, int $position): void;
+  public function moveToSlot(string $builder_id, string $instance_id, string $parent_id, string $slot_id, int $position): bool;
 
   /**
    * Move history to the first future state.

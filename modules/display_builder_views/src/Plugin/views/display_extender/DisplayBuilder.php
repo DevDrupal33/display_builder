@@ -88,16 +88,11 @@ class DisplayBuilder extends DisplayExtenderPluginBase implements EntityWithDisp
     }
 
     // @todo we should have always a fallback.
-    $builder_config_id = $form_state->getValue(StorageProperties::ConfigEntityId->value, 'default');
-    $this->options[StorageProperties::ConfigEntityId->value] = $builder_config_id;
+    $display_builder_config = $form_state->getValue(StorageProperties::ConfigEntityId->value, 'default');
+    $this->options[StorageProperties::ConfigEntityId->value] = $display_builder_config;
 
-    if ($builder_config_id) {
+    if (!empty($display_builder_config)) {
       $this->initInstanceIfMissing();
-      // Sync with the state.
-      if ($builder_id = $this->getInstanceId()) {
-        $this->stateManager->setEntityConfigId($builder_id, $builder_config_id);
-      }
-
       return;
     }
 

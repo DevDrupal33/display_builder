@@ -171,16 +171,18 @@ class DisplayBuilderDevelController extends ControllerBase {
 
       /** @var \Drupal\Core\Entity\EntityInterface $entity */
       $entity = $builder['contexts']['entity']->getContextValue();
-      $entity_type_id = $entity->getEntityTypeId();
-      $bundle = $builder['contexts']['bundle']->getContextValue();
+      if ($entity) {
+        $entity_type_id = $entity->getEntityTypeId();
+        $bundle = $builder['contexts']['bundle']->getContextValue();
 
-      $extra_links['refresh_sample'] = [
-        'title' => $this->t('Refresh sample'),
-        'url' => Url::fromRoute('display_builder_devel.delete_sample', [
-          'entity_type_id' => $entity_type_id,
-          'bundle' => $bundle,
-        ]),
-      ];
+        $extra_links['refresh_sample'] = [
+          'title' => $this->t('Refresh sample'),
+          'url' => Url::fromRoute('display_builder_devel.delete_sample', [
+            'entity_type_id' => $entity_type_id,
+            'bundle' => $bundle,
+          ]),
+        ];
+      }
     }
 
     $row['id']['data'] = [

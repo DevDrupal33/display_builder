@@ -308,10 +308,15 @@ class StateManager implements StateManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function moveToRoot(string $builder_id, string $instance_id, int $position): void {
+  public function moveToRoot(string $builder_id, string $instance_id, int $position): bool {
     $root = $this->getCurrentState($builder_id);
     $path = $this->getPath($builder_id, $root, $instance_id);
     $data = NestedArray::getValue($root, $path);
+
+    if (empty($data) || !isset($data['source_id'])) {
+      return FALSE;
+    }
+
     $root = $this->doRemove($builder_id, $root, $instance_id);
     $root = $this->attachToRoot($root, $position, $data);
 
@@ -323,15 +328,22 @@ class StateManager implements StateManagerInterface {
       '@thingy' => $data['source_id'],
     ]);
     $this->stateStorage->setNewPresent($builder_id, $root, $log);
+
+    return TRUE;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function moveToSlot(string $builder_id, string $instance_id, string $parent_id, string $slot_id, int $position): void {
+  public function moveToSlot(string $builder_id, string $instance_id, string $parent_id, string $slot_id, int $position): bool {
     $root = $this->getCurrentState($builder_id);
     $path = $this->getPath($builder_id, $root, $instance_id);
     $data = NestedArray::getValue($root, $path);
+
+    if (empty($data) || !isset($data['source_id'])) {
+      return FALSE;
+    }
+
     $parent_slot = \array_slice($path, \count($path) - 3, 1)[0];
 
     if (($parent_id === $this->getParentId($builder_id, $root, $instance_id)) && ($slot_id === $parent_slot)) {
@@ -361,6 +373,8 @@ class StateManager implements StateManagerInterface {
     ]);
 
     $this->stateStorage->setNewPresent($builder_id, $root, $log);
+
+    return TRUE;
   }
 
   /**
