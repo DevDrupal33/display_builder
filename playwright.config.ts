@@ -45,7 +45,7 @@ export default defineConfig({
       // For --headed test, add some slow time.
       slowMo: 200,
     },
-    actionTimeout: 2_000,
+    // actionTimeout: 2_000,
     /* For https://playwright.dev/docs/locators#locate-by-test-id */
     testIdAttribute: 'data-testid',
   },

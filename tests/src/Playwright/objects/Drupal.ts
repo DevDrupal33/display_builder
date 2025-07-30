@@ -55,8 +55,9 @@ export class Drupal {
     await this.writeBaseUrl();
   }
 
-  async setupMinimalTestSite() {
-    await this.installModules(['display_builder', 'display_builder_ui', 'display_builder_devel']);
+  async setupMinimalTestSite(modules?: string[] | null) {
+    modules = [...new Set([...(modules || []), 'display_builder', 'display_builder_ui', 'display_builder_devel'])];
+    await this.installModules(modules);
     await this.installTheme('db_theme_test');
   }
 

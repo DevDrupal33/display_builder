@@ -12,6 +12,12 @@ export default {
   dbDeleteAllUrl: "admin/structure/display-builder/instance/delete-all",
   dbEditUrl: "admin/structure/display-builder/instance/{db_id}/edit",
 
+  viewsList: "admin/structure/views",
+  viewsAddUrl: "admin/structure/views/add",
+  viewsEditUrl: "admin/structure/views/view/{view_id}/edit",
+  viewsDbList: "admin/structure/views/display_builder",
+  viewsTestName: "test_db_view", // Must match the view ID in the test config.
+
   logInUrl: "user/login",
   logOutUrl: "user/logout",
 

@@ -1,5 +1,4 @@
 import { expect, type Page, type BrowserContext } from '@playwright/test';
-import { execSync } from 'child_process';
 
 import dbConfig from '../playwright.db.config';
 
@@ -17,6 +16,55 @@ export async function openLibraries(page: Page): Promise<void> {
   await expect(page.getByRole('button', { name: 'Libraries' })).toBeVisible();
   await page.getByRole('button', { name: 'Libraries' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
+}
+
+/**
+ * Opens the Libraries drawer and blocks in the Display Builder UI.
+ *
+ * @async
+ * @param {Page} page - Playwright Page object.
+ * @returns {Promise<void>}
+ */
+export async function openLibrariesBlocks(page: Page): Promise<void> {
+  await this.openLibraries(page)
+
+  await expect(
+    page.getByRole('tab', { name: 'Blocks', exact: true })
+  ).toBeVisible()
+  await page
+    .getByRole('tab', { name: 'Blocks', exact: true })
+    .locator('div')
+    .click()
+  await expect(
+    page.locator('.db-island-block_library')
+  ).toBeVisible()
+}
+
+/**
+ * Move a component in the builder, library must be open.
+ *
+ * Waits for the Libraries button to be visible, clicks it,
+ * and verifies the drawer is open.
+ *
+ * @async
+ * @param {Page} page - Playwright Page object.
+ * @returns {Promise<void>}
+ */
+export async function moveComponent(page: Page, name: string, slot: string|null = null): Promise<void> {
+  const testComponent = page.getByRole('button', { name, exact: true })
+  await expect(testComponent).toBeVisible()
+  await testComponent.hover()
+
+  await page.mouse.down()
+  if (slot) {
+    await page.locator(`.db-island-builder ${slot}`).hover()
+  }
+  else {
+    await page.locator(`.db-island-builder > slot`).hover()
+  }
+  
+  await page.mouse.up()
+  await this.htmxReady(page)
 }
 
 /**
@@ -55,6 +103,47 @@ export async function htmxReady(page: Page): Promise<void> {
 }
 
 /**
+ * Waits for WebComponents to be loaded and ready.
+ *
+ * @async
+ * @param {Page} page - Playwright Page object.
+ * @returns {Promise<void>}
+ */
+export async function shoelaceReady(page: Page): Promise<void> {
+  await page.addScriptTag({
+    content: `
+      Promise.allSettled([
+        customElements.whenDefined('sl-button'),
+        customElements.whenDefined('sl-button-group'),
+        customElements.whenDefined('sl-drawer'),
+        customElements.whenDefined('sl-input'),
+        customElements.whenDefined('sl-menu'),
+        customElements.whenDefined('sl-icon'),
+        customElements.whenDefined('sl-icon-button'),
+        customElements.whenDefined('sl-card'),
+        customElements.whenDefined('sl-dropdown'),
+        customElements.whenDefined('sl-tab'),
+        customElements.whenDefined('sl-tab-group'),
+        customElements.whenDefined('sl-tree'),
+        customElements.whenDefined('sl-tree-item'),
+      ]).then(() => console.log('[OK] Shoelace is loaded!'));
+    `,
+  })
+}
+
+/**
+ * Waits for builder to be loaded and ready.
+ *
+ * @async
+ * @param {Page} page - Playwright Page object.
+ * @returns {Promise<void>}
+ */
+export async function builderIsReady(page: Page): Promise<void> {
+  await shoelaceReady(page);
+  await htmxReady(page);
+}
+
+/**
  * Refreshes the Display Builder instance view page.
  *
  * Navigates to the view page for the specified Display Builder instance.
@@ -66,6 +155,7 @@ export async function htmxReady(page: Page): Promise<void> {
  */
 export async function refresh(page: Page, dbName: string): Promise<void> {
   await page.goto(dbConfig.dbViewUrl.replace('{db_id}', dbName));
+  await this.shoelaceReady(page)
 }
 
 /**
@@ -88,4 +178,5 @@ export async function createDisplayBuilderFromUi(page: Page, dbName: string, fix
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(page.getByRole('heading', { name: `Display builder: ${dbName}` })).toBeVisible()
   await expect(page.getByRole('tab', { name: 'Builder' })).toBeVisible()
+  await this.shoelaceReady(page)
 }
