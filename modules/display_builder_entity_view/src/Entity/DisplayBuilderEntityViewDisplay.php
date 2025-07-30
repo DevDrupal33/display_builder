@@ -273,7 +273,10 @@ class DisplayBuilderEntityViewDisplay extends LayoutBuilderEntityViewDisplay imp
    * {@inheritdoc}
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE): void {
-    $this->initInstanceIfMissing();
+    if ($this->getDisplayBuilder()) {
+      $this->initInstanceIfMissing();
+    }
+
     parent::postSave($storage, $update);
   }
 

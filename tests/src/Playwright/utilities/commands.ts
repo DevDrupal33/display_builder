@@ -80,7 +80,7 @@ export async function refresh(page: Page, dbName: string): Promise<void> {
 export async function createDisplayBuilderFromUi(page: Page, dbName: string, fixture: string|null = null): Promise<void> {
   await page.goto(dbConfig.dbAddUrl)
   await page.getByRole('textbox', { name: 'Builder ID' }).fill(dbName)
-  await page.locator('select[name="display_builder_id"]').selectOption('test')
+  await page.locator('select[name="display_builder"]').selectOption('test')
   // @todo select a fixture
   if (fixture) {
     await page.locator('select[name="fixture_id"]').selectOption(fixture)

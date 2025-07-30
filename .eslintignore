@@ -1,3 +1,5 @@
 **/fixtures/**.yml
 **/tests/playwright/**/**.spec.js
 **/tests/playwright/**.config.js
+**/playwright-report/*
+**/test-results/*
