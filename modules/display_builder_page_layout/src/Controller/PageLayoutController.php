@@ -51,10 +51,11 @@ class PageLayoutController extends ControllerBase {
 
     $instance_id = $page_layout->getInstanceId();
     if (!$this->stateManager->load($instance_id)) {
-      // Display Builder instance was not created yet, or was deleted, for this
-      // page layout.
-      throw new NotFoundHttpException();
+      // Display Builder instance was not created yet or deleted, create it on
+      // the fly.
+      $page_layout->initInstanceIfMissing();
     }
+
     $contexts = $this->stateManager->getContexts($instance_id) ?? [];
 
     return $display_builder->build($instance_id, $contexts);

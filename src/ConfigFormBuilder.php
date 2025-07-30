@@ -47,26 +47,20 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
       '#options' => $options,
     ];
 
-    // Set default value based on state as the mock can be empty for unattached
-    // builder.
-    $instance_id = $entity->getInstanceId();
-    $state = $this->stateManager->load($instance_id);
-
-    // @todo get rid of the state fallback when replaced for unattached instances.
     if ($entity->getDisplayBuilder()?->id()) {
       $form[StorageProperties::ConfigEntityId->value]['#default_value'] = (string) $entity->getDisplayBuilder()->id();
     }
-    elseif ($state && $entity->getDisplayBuilder()) {
-      $form[StorageProperties::ConfigEntityId->value]['#default_value'] = (string) $state['entity_config_id'];
-    }
+
+    $instance_id = $entity->getInstanceId();
 
     // Add the builder link to edit.
-    if ($entity->getDisplayBuilder() && $state) {
+    if ($instance_id && $entity->getDisplayBuilder()) {
       $params = [
         '@url' => $entity->getBuilderUrl()->toString(),
       ];
+
       $message = $this->t('Click o this link to edit the display: <a href="@url" target="_blank">build the display</a>.', $params);
-      $form[] = [
+      $form['link'] = [
         '#type' => 'html_tag',
         '#tag' => 'p',
         '#attributes' => [
@@ -82,7 +76,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
         '@url' => Url::fromRoute('entity.display_builder.collection')->toString(),
       ];
       $message = $this->t('Display builder profiles can be configured from the <a href="@url" target="_blank">Display builder profiles</a>.', $params);
-      $form[] = [
+      $form['admin_link'] = [
         '#type' => 'html_tag',
         '#prefix' => '<hr>',
         '#tag' => 'p',

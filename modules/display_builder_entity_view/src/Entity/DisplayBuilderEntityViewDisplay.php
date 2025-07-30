@@ -104,7 +104,15 @@ class DisplayBuilderEntityViewDisplay extends LayoutBuilderEntityViewDisplay imp
    */
   public function calculateDependencies(): self {
     parent::calculateDependencies();
+    if (!$this->getInstanceId()) {
+      // If there is no instance ID, we cannot calculate dependencies.
+      return $this;
+    }
+
     $contexts = $this->stateManager->getContexts($this->getInstanceId());
+    if (!$contexts) {
+      return $this;
+    }
 
     foreach ($this->getSources() as $source_data) {
       /** @var \Drupal\ui_patterns\SourceInterface $source */

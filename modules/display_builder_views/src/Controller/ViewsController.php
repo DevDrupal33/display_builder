@@ -73,8 +73,9 @@ class ViewsController extends ControllerBase {
     $instance_id = $extender->getInstanceId();
 
     if (!$this->stateManager->load($instance_id)) {
-      // Display Builder instance was not created yet for this entity.
-      throw new NotFoundHttpException();
+      // Display Builder instance was not created yet or deleted, create it on
+      // the fly.
+      $extender->initInstanceIfMissing();
     }
 
     $contexts = $this->stateManager->getContexts($instance_id);

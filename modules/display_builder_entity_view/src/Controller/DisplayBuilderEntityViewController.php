@@ -72,8 +72,9 @@ final class DisplayBuilderEntityViewController extends ControllerBase {
     $builder_id = $entity_display->getInstanceId();
 
     if (!$this->stateManager->load($builder_id)) {
-      // Display Builder instance was not created yet for this entity.
-      throw new NotFoundHttpException();
+      // Display Builder instance was not created yet or deleted, create it on
+      // the fly.
+      $entity_display->initInstanceIfMissing();
     }
 
     // We build the rendered page.
