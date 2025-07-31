@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\ui_patterns_overrides\SourcesBundlerInterface;
 
@@ -62,7 +63,8 @@ class SlotSourceProxy {
 
     return [
       'label' => $label,
-      'summary' => $labelSummary,
+      // Block token can contain markup.
+      'summary' => Html::escape($labelSummary),
     ];
   }
 
