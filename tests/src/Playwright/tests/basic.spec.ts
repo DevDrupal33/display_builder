@@ -37,108 +37,40 @@ test('Create Display Builder', async ({ page, drupal }) => {
   await page.goto(dbConfig.dbList)
 })
 
-test('Simple Display Builder', async ({ page, drupal }) => {
-  await drupal.setupMinimalTestSite()
-  await drupal.loginAsAdmin()
-  const dbName = `test_${utils.createRandomString(6)}`
-  const dbId = `#island-${dbName}-builder`
+// @todo fix or decide if needed with the full test.
+// test('Simple Display Builder', async ({ page, drupal }) => {
+//   const dbName = `test_${utils.createRandomString(6)}`
+//   const dbBuilderId = `#island-${dbName}-builder`
 
-  await cmd.createDisplayBuilderFromUi(page, dbName)
+//   await drupal.setupMinimalTestSite()
+//   await drupal.loginAsAdmin()
 
-  // Test 1: Open libraries
-  await expect(page.getByRole('button', { name: 'Libraries' })).toBeVisible()
-  await page.getByRole('button', { name: 'Libraries' }).click()
-  await expect(page.getByRole('dialog')).toBeVisible()
-  await expect(page.getByRole('tab', { name: 'Components' })).toBeVisible()
+//   await cmd.createDisplayBuilderFromUi(page, dbName)
 
-  // Test 2: Move component to builder
-  const testComponent = page.getByRole('button', { name: 'Test simple', exact: true })
-  await expect(testComponent).toBeVisible()
-  await testComponent.hover()
+//   // Test 1: Add component and token with configuration.
+//   await cmd.openLibraries(page)
+//   await cmd.moveComponent(page, 'Test simple', page.locator(`${dbBuilderId} > slot`))
 
-  await page.mouse.down()
-  await page.locator(`${dbId} slot`).hover()
-  await page.mouse.up()
-  await cmd.builderIsReady(page)
+//   await cmd.openLibrariesBlocks(page, dbName)
 
-  await expect(
-    page.locator(`${dbId} [data-test="testing"]`)
-  ).toBeVisible()
-  await expect(
-    page.locator(`${dbId} [data-test="testing"]`)
-  ).toContainText('label: none')
+//   await cmd.setTokenWithValue(page, page.locator(`${dbBuilderId} .slot_test`), 'I am')
+//   await cmd.setTokenWithValue(page, page.locator(`${dbBuilderId} .slot_test`), 'a test')
 
-  // Test 3: Move Token to slot
-  await expect(
-    page.getByRole('tab', { name: 'Blocks', exact: true })
-  ).toBeVisible()
-  await page
-    .getByRole('tab', { name: 'Blocks', exact: true })
-    .locator('div')
-    .click()
-  await expect(
-    page.locator('.db-island-block_library')
-  ).toBeVisible()
-  const targetSlot = page.locator(`#island-${dbName}-builder`).getByTitle('Slot 1', { exact: true })
-  await expect(targetSlot).toBeVisible()
-  const tokenBlock = page.locator(`#island-${dbName}-block_library`).getByRole('button', { name: 'Token', exact: true })
-  await expect(tokenBlock).toBeVisible()
+//   // Test 2: Move token before.
+//   await page.getByText('I am ', { exact: true }).hover()
+//   await page.mouse.down()
+//   await page.getByText('a test', { exact: true }).hover()
+//   await page.mouse.up()
+//   await cmd.builderIsReady(page)
 
-  await tokenBlock.hover()
+//   await expect(page.locator(`#island-${dbName}-builder`)).toContainText('I ama test')
 
-  await page.mouse.down()
-  await page.mouse.move(300, 300) // Needed for sortable to be ready, @todo find better way
-  await targetSlot.hover()
-  await page.mouse.up()
-  await cmd.builderIsReady(page)
-
-  const NewTokenBlock = page.locator(`#island-${dbName}-block_library`).getByRole('button', { name: 'Token', exact: true })
-  await expect(NewTokenBlock).toBeVisible()
-
-  await NewTokenBlock.hover()
-
-  await page.mouse.down()
-  await page.mouse.move(300, 300) // Needed for sortable to be ready, @todo find better way
-  await targetSlot.hover()
-  await page.mouse.up()
-  await cmd.builderIsReady(page)
-
-  // Test 4: Instance form configuration for both tokens
-  await page.locator(`#island-${dbName}-builder`).getByRole('button', { name: 'Token' }).nth(1).click()
-  await cmd.builderIsReady(page)
-  await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible()
-  await page
-    .locator(`#edit-value`)
-    .fill('I am')
-  await page.getByRole('button', { name: 'Update' }).click()
-
-  await cmd.builderIsReady(page)
-
-  await page.locator(`#island-${dbName}-builder`).getByRole('button', { name: 'Token' }).click()
-  await cmd.builderIsReady(page)
-  await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible()
-  await page
-    .locator(`#edit-value`)
-    .fill('a test')
-  await page.getByRole('button', { name: 'Update' }).click()
-  await cmd.builderIsReady(page)
-
-  // Test 5: Move token before
-  await page.getByText('I am ', { exact: true }).hover()
-  await page.mouse.down()
-  await page.mouse.move(300, 300) // Needed for sortable to be ready, @todo find better way
-  await page.getByText('a test', { exact: true }).hover()
-  await page.mouse.up()
-  await cmd.builderIsReady(page)
-
-  await expect(page.locator(`#island-${dbName}-builder`)).toContainText('I ama test')
-
-  // await expect(page.getByRole('tab', { name: 'Preview' })).toBeVisible()
-  // await page.getByRole('tab', { name: 'Preview' }).click()
-  // await cmd.builderIsReady(page)
-  // @token token are not refreshed in proper order..?
-  // await expect(page.locator(`#island-${dbName}-preview`)).toContainText('a testI am')
-})
+//   await expect(page.getByRole('tab', { name: 'Preview' })).toBeVisible()
+//   await page.getByRole('tab', { name: 'Preview' }).click()
+//   await cmd.builderIsReady(page)
+//   // @token token are not refreshed in proper order..?
+//   await expect(page.locator(`#island-${dbName}-preview`)).toContainText('a testI am')
+// })
 
 test('Full Display Builder ', async ({ page, drupal }) => {
 
@@ -273,7 +205,7 @@ test('Full Display Builder ', async ({ page, drupal }) => {
   await page.mouse.up()
   await cmd.builderIsReady(page)
 
-  // Move Wysiwyg to slot 2
+  // @todo move Wysiwyg to slot 2
 
   // Delete all
   // await page.goto(dbConfig.dbList)

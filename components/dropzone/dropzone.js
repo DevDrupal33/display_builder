@@ -3,7 +3,7 @@
  * Attaches behaviors for Drupal's Display Builder Dropzone.
  */
 
-((Drupal, once) => {
+((Drupal, once, Sortable) => {
   /**
    * Set up sortable dropzone for the display builder.
    *
@@ -42,8 +42,7 @@
 
     // Init the dropzone root itself.
     if (!Sortable.get(dropzoneRoot)) {
-      // eslint-disable-next-line no-new
-      new Sortable(dropzoneRoot, sortableSettings);
+      Sortable.create(dropzoneRoot, sortableSettings);
     }
 
     const dropzoneList = dropzoneRoot.getElementsByClassName('db-dropzone');
@@ -53,8 +52,7 @@
     for (let i = 0; i < dropzoneLength; i++) {
       const dropzone = dropzoneList[i];
       if (!Sortable.get(dropzone)) {
-        // eslint-disable-next-line no-new
-        new Sortable(dropzone, sortableSettings);
+        Sortable.create(dropzone, sortableSettings);
       }
     }
   }
@@ -73,4 +71,4 @@
       );
     },
   };
-})(Drupal, once);
+})(Drupal, once, Sortable);

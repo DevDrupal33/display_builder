@@ -56,9 +56,9 @@ export class Drupal {
   }
 
   async setupMinimalTestSite(modules?: string[] | null) {
-    modules = [...new Set([...(modules || []), 'display_builder', 'display_builder_ui', 'display_builder_devel'])];
-    await this.installModules(modules);
-    await this.installTheme('db_theme_test');
+    if (modules) {
+      await this.installModules(modules);
+    }
   }
 
   async loginAsAdmin() {
@@ -228,13 +228,6 @@ export class Drupal {
     await this.addPermissions({ role: role, permissions })
     await this.createUser(user)
     await this.login(user)
-  }
-
-  async installTheme(theme: string) {
-    if (this.drupalSite.hasDrush) {
-      await this.drush(`theme:install ${theme}`);
-      await this.drush(`config:set -y system.theme default ${theme}`);
-    }
   }
 
   async installModules(modules: string[]) {

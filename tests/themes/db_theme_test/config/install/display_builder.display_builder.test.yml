@@ -22,10 +22,6 @@ island_settings:
       enable: true
       weight: '-10'
       options: main
-    layers:
-      enable: true
-      weight: '-9'
-      options: main
     preview:
       enable: true
       weight: '-8'

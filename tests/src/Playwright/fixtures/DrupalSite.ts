@@ -22,9 +22,8 @@ export type DrupalSiteInstall = {
 const drupalSite = base.extend<DrupalSiteInstall>({
   drupalSite: [
     async ({}, use, workerInfo) => {
-      // const isLocal = process.env.PLAYWRIGHT_LOCAL ?? 0
       const stdout = await exec(
-        `php core/scripts/test-site.php install --no-interaction --install-profile minimal --base-url ${process.env.BASE_TEST_URL} --db-url ${process.env.TEST_DB_URL}-${workerInfo.workerIndex} --json`,
+        `php core/scripts/test-site.php install --no-interaction --install-profile minimal --base-url ${process.env.BASE_TEST_URL} --db-url ${process.env.TEST_DB_URL}-${workerInfo.workerIndex} --setup-file modules/custom/display_builder/tests/src/TestSite/DisplayBuilderTestSetup.php --json`,
       );
       const installData = JSON.parse(stdout.toString());
 

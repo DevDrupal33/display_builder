@@ -3,7 +3,7 @@
  * Attaches behaviors for Drupal's Display Builder Draggables.
  */
 
-((Drupal, once) => {
+((Drupal, once, Sortable) => {
   /**
    * Sets up draggable elements within a builder using Sortable.js.
    *
@@ -52,8 +52,7 @@
       },
     };
 
-    // eslint-disable-next-line no-new
-    new Sortable(draggableContainer, sortableSettings);
+    Sortable.create(draggableContainer, sortableSettings);
   }
 
   /**
@@ -70,4 +69,4 @@
       );
     },
   };
-})(Drupal, once);
+})(Drupal, once, Sortable);

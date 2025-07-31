@@ -55,9 +55,10 @@ handle it instead of shoelace */
 /* Same when start dragging to avoid non trigger of HTMX when the mouse is out of the dropzone. */
 .display-builder--onDrag .db-dropzone--root,
 .db-dropzone--root:empty {
-  width: 100%;
+  width: 98%;
   height: 100%;
   min-height: 50vh;
+  margin: 0 0 0.5rem 1rem;
   outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target-light)
     var(--dropzone-slot-outline-type-light);
 }

@@ -44,6 +44,22 @@ class LayersPanel extends BuilderPanel {
   /**
    * {@inheritdoc}
    */
+  public function build(string $builder_id, array $data, array $options = []): array {
+    $build = parent::build($builder_id, $data, $options);
+    if (empty($build['#slots']['content'] ?? [])) {
+      // Load en empty component to have any assets with it.
+      $build['#slots']['content'] = [
+        '#type' => 'component',
+        '#component' => 'display_builder:layer',
+      ];
+    }
+
+    return $build;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): array {
     $component_id = $data['source']['component']['component_id'] ?? NULL;
     $instance_id = $instance_id ?: $data['_instance_id'];

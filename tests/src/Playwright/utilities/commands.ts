@@ -1,4 +1,4 @@
-import { expect, type Page, type BrowserContext } from '@playwright/test';
+import { expect, type Page, type BrowserContext, Locator } from '@playwright/test';
 
 import dbConfig from '../playwright.db.config';
 
@@ -23,11 +23,10 @@ export async function openLibraries(page: Page): Promise<void> {
  *
  * @async
  * @param {Page} page - Playwright Page object.
+ * @param {string} builderId - The id of the builder.
  * @returns {Promise<void>}
  */
-export async function openLibrariesBlocks(page: Page): Promise<void> {
-  await this.openLibraries(page)
-
+export async function openLibrariesBlocks(page: Page, builderId: string): Promise<void> {
   await expect(
     page.getByRole('tab', { name: 'Blocks', exact: true })
   ).toBeVisible()
@@ -35,9 +34,7 @@ export async function openLibrariesBlocks(page: Page): Promise<void> {
     .getByRole('tab', { name: 'Blocks', exact: true })
     .locator('div')
     .click()
-  await expect(
-    page.locator('.db-island-block_library')
-  ).toBeVisible()
+  await this.builderIsReady(page)
 }
 
 /**
@@ -48,23 +45,73 @@ export async function openLibrariesBlocks(page: Page): Promise<void> {
  *
  * @async
  * @param {Page} page - Playwright Page object.
+ * @param {string} name - The name of the component to move.
+ * @param {Locator} targetSlot - The Locator for the slot where the token should be dropped.
  * @returns {Promise<void>}
  */
-export async function moveComponent(page: Page, name: string, slot: string|null = null): Promise<void> {
+export async function moveComponent(page: Page, name: string, targetSlot: Locator): Promise<void> {
+  await expect(targetSlot).toBeVisible()
+
   const testComponent = page.getByRole('button', { name, exact: true })
   await expect(testComponent).toBeVisible()
   await testComponent.hover()
 
   await page.mouse.down()
-  if (slot) {
-    await page.locator(`.db-island-builder ${slot}`).hover()
-  }
-  else {
-    await page.locator(`.db-island-builder > slot`).hover()
-  }
+  await targetSlot.hover({ position: { x: 10, y: 10 } })
   
   await page.mouse.up()
   await this.htmxReady(page)
+}
+
+/**
+ * Drags a token block into a target slot and sets its value in a Playwright test.
+ *
+ * @async
+ * @param {Page} page - The Playwright Page object representing the browser page.
+ * @param {Locator} targetSlot - The Locator for the slot where the token should be dropped.
+ * @param {string} value - The string value to set for the token in the settings dialog.
+ * @returns {Promise<void>}
+ */
+export async function setTokenWithValue(page: Page, targetSlot: Locator, value: string): Promise<void> {
+  await this.builderIsReady(page)
+
+  await expect(targetSlot).toBeVisible()
+  const tokenBlock = page.locator(`.db-island-block_library [hx-vals*="token"]`)
+  await expect(tokenBlock).toBeVisible()
+
+  await tokenBlock.hover()
+
+  await page.mouse.down()
+  await expect(tokenBlock).toContainClass('db-draggable--chosen')
+  await targetSlot.hover({position: { x: 10, y: 10 }})
+  await expect(page.locator('.display-builder')).toContainClass('display-builder--onDrag')
+  await page.mouse.up()
+  await expect(page.locator('.display-builder')).not.toContainClass('display-builder--onDrag')
+
+  await this.builderIsReady(page)
+
+  await page.locator(`.db-island-builder`).getByRole('button', { name: 'Token' }).click()
+  await this.builderIsReady(page)
+  await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible()
+  await page
+    .locator(`#edit-value`)
+    .fill(value)
+  await page.getByRole('button', { name: 'Update' }).click()
+
+  await this.builderIsReady(page)
+}
+
+/**
+ * Saves the current state in the Display Builder fromt the UI
+ *
+ * @async
+ * @param {Page} page - The Playwright Page object representing the browser page.
+ * @returns {Promise<void>}
+ */
+export async function saveDisplayBuilder(page: Page): Promise<void> {
+  await this.builderIsReady(page)
+  await page.getByRole('button', { name: 'Save' }).click()
+  await this.builderIsReady(page)
 }
 
 /**
@@ -85,6 +132,19 @@ export async function closeDialog(page: Page, targetDrawer: string = 'first'): P
   }
   await drawer.getByRole('button', { name: 'Close' }).click();
   await expect(drawer).toBeHidden();
+}
+
+/**
+ * Waits for Drupal ajax requests and transitions to complete on the page.
+ *
+ * @async
+ * @param {Page} page - Playwright Page object.
+ * @returns {Promise<void>}
+ */
+export async function ajaxReady(page: Page): Promise<void> {
+  await expect(
+    page.locator('.ajax-progress, .ajax-progress--throbber, .ajax-progress--message'),
+  ).toHaveCount(0);
 }
 
 /**

@@ -27,7 +27,8 @@ export default defineConfig({
     ['html', { host: '0.0.0.0', open: 'never' }],
   ],
   /* https://playwright.dev/docs/test-timeouts */
-  timeout: 120_000,
+  timeout: 60_000,
+  // timeout: 120_000,
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -43,7 +44,7 @@ export default defineConfig({
     },
     launchOptions: {
       // For --headed test, add some slow time.
-      slowMo: 200,
+      slowMo: 500,
     },
     // actionTimeout: 2_000,
     /* For https://playwright.dev/docs/locators#locate-by-test-id */

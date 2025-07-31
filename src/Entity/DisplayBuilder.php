@@ -172,7 +172,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
     $buttons = [];
 
     if (!empty($button_islands)) {
-      $buttons = $this->buildPanes($builder_id, $button_islands, $this->getKeyboardKeys(), 'span');
+      $buttons = $this->buildPanes($builder_id, $button_islands, $this->getKeyboardKeys(), [], 'span');
     }
 
     if (!empty($menu_islands)) {
@@ -340,7 +340,8 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
     }
 
     $view_sidebar = $this->buildPanes($builder_id, $view_islands_sidebar, $builder_data);
-    $view_main = $this->buildPanes($builder_id, $view_islands_main, $builder_data);
+    // Default hidden.
+    $view_main = $this->buildPanes($builder_id, $view_islands_main, $builder_data, ['shoelace-tabs__tab--hidden']);
 
     return [
       'view_sidebar_buttons' => $view_sidebar_buttons,
@@ -397,21 +398,23 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    *   The islands to build tabs for.
    * @param array $data
    *   (Optional) The data to pass to the islands.
+   * @param array $classes
+   *   (Optional) The HTML classes to start with.
    * @param string $tag
    *   (Optional) The HTML tag, defaults to 'div'.
    *
    * @return array
    *   The tabs render array.
    */
-  private function buildPanes(string $builder_id, array $islands, array $data = [], string $tag = 'div'): array {
+  private function buildPanes(string $builder_id, array $islands, array $data = [], array $classes = [], string $tag = 'div'): array {
     $panes = [];
 
     foreach ($islands as $island_id => $island) {
-      $classes = [
+      $classes = \array_merge($classes, [
         'db-island',
         \sprintf('db-island-%s', $island->getTypeId()),
         \sprintf('db-island-%s', $island->getPluginId()),
-      ];
+      ]);
 
       $panes[$island_id] = [
         '#type' => 'html_tag',

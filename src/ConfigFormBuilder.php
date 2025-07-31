@@ -59,7 +59,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
         '@url' => $entity->getBuilderUrl()->toString(),
       ];
 
-      $message = $this->t('Click o this link to edit the display: <a href="@url" target="_blank">build the display</a>.', $params);
+      $message = $this->t('Click o this link to edit the display: <a href="@url">build the display</a>.', $params);
       $form['link'] = [
         '#type' => 'html_tag',
         '#tag' => 'p',
@@ -75,7 +75,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
       $params = [
         '@url' => Url::fromRoute('entity.display_builder.collection')->toString(),
       ];
-      $message = $this->t('Display builder profiles can be configured from the <a href="@url" target="_blank">Display builder profiles</a>.', $params);
+      $message = $this->t('Display builder profiles can be configured from the <a href="@url">Display builder profiles</a>.', $params);
       $form['admin_link'] = [
         '#type' => 'html_tag',
         '#prefix' => '<hr>',

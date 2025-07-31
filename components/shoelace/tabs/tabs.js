@@ -16,9 +16,12 @@
       if (!pane) {
         return;
       }
-      pane.style.display = tab.classList.contains('shoelace-tabs__tab--active')
-        ? 'block'
-        : 'none';
+
+      if (tab.classList.contains('shoelace-tabs__tab--active')) {
+        pane.classList.remove('shoelace-tabs__tab--hidden');
+      } else {
+        pane.classList.add('shoelace-tabs__tab--hidden');
+      }
     });
   }
 

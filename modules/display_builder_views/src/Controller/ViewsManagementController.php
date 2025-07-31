@@ -37,6 +37,7 @@ class ViewsManagementController extends ControllerBase {
         'log' => ['data' => $this->t('Last log')],
         'operations' => ['data' => $this->t('Operations')],
       ],
+      '#empty' => $this->t('No Display builder enabled on any view.'),
     ];
 
     foreach (\array_keys($this->stateManager->loadAll()) as $builder_id) {
