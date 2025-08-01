@@ -46,6 +46,7 @@ class LayersPanel extends BuilderPanel {
    */
   public function build(string $builder_id, array $data, array $options = []): array {
     $build = parent::build($builder_id, $data, $options);
+
     if (empty($build['#slots']['content'] ?? [])) {
       // Load en empty component to have any assets with it.
       $build['#slots']['content'] = [

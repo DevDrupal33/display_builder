@@ -4,12 +4,22 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
+use Drupal\Core\Extension\ModuleExtensionList;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\HtmxEvents;
 use Drupal\display_builder\IslandPluginBase;
+use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
+use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\ui_patterns_overrides\SourcesBundlerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Block library island plugin implementation.
@@ -21,7 +31,9 @@ use Drupal\ui_patterns_overrides\SourcesBundlerInterface;
   description: new TranslatableMarkup('List of available Drupal blocks to use.'),
   type: IslandType::Library,
 )]
-class BlockLibraryPanel extends IslandPluginBase {
+class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface {
+
+  use IslandPluginConfigurationFormTrait;
 
   private const HIDE_BLOCK = [
     'help_block',
@@ -36,6 +48,88 @@ class BlockLibraryPanel extends IslandPluginBase {
     'block',
     'component',
   ];
+
+  /**
+   * Component provider to exclude by default.
+   *
+   * @var array
+   *   The providers to exclude.
+   */
+  private const PROVIDER_EXCLUDE = [
+    'ui_patterns_blocks',
+  ];
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    protected ComponentPluginManager $sdcManager,
+    protected HtmxEvents $htmxEvents,
+    protected StateManagerInterface $stateManager,
+    protected EventSubscriberInterface $eventSubscriber,
+    protected SourcePluginManager $sourceManager,
+    protected ModuleExtensionList $modules,
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $sdcManager, $htmxEvents, $stateManager, $eventSubscriber, $sourceManager);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration(): array {
+    return [
+      'providers' => $this->getDefaultProviders(),
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('plugin.manager.sdc'),
+      $container->get('display_builder.htmx_events'),
+      $container->get('display_builder.state_manager'),
+      $container->get('display_builder.event_subscriber'),
+      $container->get('plugin.manager.ui_patterns_source'),
+      $container->get('extension.list.module'),
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
+    $configuration = $this->getConfiguration();
+
+    $form['providers'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Allowed modules'),
+      '#options' => $this->getProvidersOptions(),
+      '#default_value' => $configuration['providers'],
+    ];
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function configurationSummary(): array {
+    $configuration = $this->getConfiguration();
+
+    return [
+      $this->t('Allowed modules: @providers', [
+        '@providers' => \implode(', ', \array_filter($configuration['providers'] ?? []) ?: [$this->t('None')]),
+      ]),
+    ];
+  }
 
   /**
    * {@inheritdoc}
@@ -90,6 +184,42 @@ class BlockLibraryPanel extends IslandPluginBase {
   }
 
   /**
+   * Filter definitions according to configuration.
+   *
+   * @param array $definitions
+   *   An associative array of module definitions keyed by module ID.
+   *
+   * @@return array
+   *  An associative array of module definitions keyed by module ID.
+   */
+  protected function filterDefinitions(array $definitions): array {
+    $configuration = $this->getConfiguration();
+    $allowed_providers = $configuration['providers'];
+
+    if (!$allowed_providers) {
+      return [];
+    }
+    $filtered = [];
+
+    foreach ($definitions as $block_id => $definition) {
+      if (\in_array($block_id, self::HIDE_BLOCK, TRUE)) {
+        continue;
+      }
+
+      if (\in_array($definition['provider'], self::PROVIDER_EXCLUDE, TRUE)) {
+        continue;
+      }
+
+      if (!\in_array($definition['provider'], $allowed_providers, TRUE)) {
+        continue;
+      }
+      $filtered[$block_id] = $definition;
+    }
+
+    return $filtered;
+  }
+
+  /**
    * Get Drupal block plugins.
    *
    * @param string $builder_id
@@ -102,17 +232,18 @@ class BlockLibraryPanel extends IslandPluginBase {
    */
   protected function buildDrupalBlocks(string $builder_id, SourcesBundlerInterface $block_source): array {
     $definitions = $block_source->getOptions();
-    $names = array_column($definitions, 'admin_label');
-    array_multisort($names, \SORT_ASC, $definitions);
+    $definitions = $this->filterDefinitions($definitions);
+    $names = \array_column($definitions, 'admin_label');
+    \array_multisort($names, \SORT_ASC, $definitions);
     $views_blocks = [];
     $menu_blocks = [];
     $other_blocks = [];
 
     foreach ($definitions as $block_id => $definition) {
-      if (str_starts_with($block_id, 'views_block:')) {
+      if (\str_starts_with($block_id, 'views_block:')) {
         $views_blocks[$block_id] = $definition;
       }
-      elseif (str_starts_with($block_id, 'system_menu_block:')) {
+      elseif (\str_starts_with($block_id, 'system_menu_block:')) {
         $menu_blocks[$block_id] = $definition;
       }
       else {
@@ -157,13 +288,6 @@ class BlockLibraryPanel extends IslandPluginBase {
     ];
 
     foreach ($definitions as $block_id => $definition) {
-      if ($definition['provider'] === 'ui_patterns_blocks') {
-        continue;
-      }
-
-      if (\in_array($block_id, self::HIDE_BLOCK, TRUE)) {
-        continue;
-      }
       $data = $block_source->getDataSkeleton($block_id);
       $keywords = \sprintf('%s %s %s', $definition['id'], $definition['admin_label'] ?? '', $definition['category'] ?? '');
       $block_preview_url = Url::fromRoute('display_builder.api_block_preview', ['block_id' => $block_id]);
@@ -171,6 +295,72 @@ class BlockLibraryPanel extends IslandPluginBase {
     }
 
     return $build;
+  }
+
+  /**
+   * Get providers options for select input.
+   *
+   * @return array
+   *   An associative array with module ID as key and module description as
+   *   value.
+   */
+  protected function getProvidersOptions(): array {
+    $options = [];
+
+    foreach ($this->getProviders() as $provider_id => $provider) {
+      $params = [
+        '@name' => $provider['name'],
+        '@count' => $provider['count'],
+      ];
+      $options[$provider_id] = $this->formatPlural($provider['count'], '@name (@count block)', '@name (@count blocks)', $params);
+    }
+
+    return $options;
+  }
+
+  /**
+   * Get all providers.
+   *
+   * @return array
+   *   Drupal modules definitions, keyed by extension ID
+   */
+  protected function getProviders(): array {
+    /** @var \Drupal\ui_patterns_overrides\SourcesBundlerInterface $block_source */
+    $block_source = $this->sourceManager->createInstance('block', $this->configuration);
+    $modules = $this->modules->getAllInstalledInfo();
+    $providers = [];
+
+    foreach ($block_source->getOptions() as $block_id => $block) {
+      if (\in_array($block_id, self::HIDE_BLOCK, TRUE)) {
+        continue;
+      }
+      $provider = $block['provider'];
+      $definition = $modules[$provider];
+      $definition['count'] = isset($providers[$provider]) ? ($providers[$provider]['count']) + 1 : 1;
+      $providers[$provider] = $definition;
+    }
+
+    return $providers;
+  }
+
+  /**
+   * Get default providers.
+   *
+   * @return array
+   *   A list of Drupal modules IDs.
+   */
+  protected function getDefaultProviders(): array {
+    $providers = [];
+
+    foreach (\array_keys($this->getProviders()) as $provider_id) {
+      // If the provider is part of the excluded list, skip it.
+      if (\in_array($provider_id, self::PROVIDER_EXCLUDE, TRUE)) {
+        continue;
+      }
+      $providers[] = $provider_id;
+    }
+
+    return $providers;
   }
 
 }

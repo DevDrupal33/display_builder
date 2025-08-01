@@ -1,6 +1,6 @@
 name: Display builder
+noUi: true
 group: Display builder
-no_ui: true
 slots:
   view_sidebar_buttons:
     title: View sidebar buttons

@@ -28,6 +28,7 @@ class KeyboardHelpButton extends IslandPluginBase {
    */
   public function build(string $builder_id, array $data, array $options = []): array {
     $items = [];
+
     foreach ($data as $key => $label) {
       $items[] = [
         'title' => $this->t('<code>@key</code> @label', ['@key' => $key, '@label' => $label]),

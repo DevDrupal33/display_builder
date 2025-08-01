@@ -1,4 +1,6 @@
-name: Shoelace Menu
+name: Menu
+noUi: true
+group: Navigation
 description: A list of options for the user to choose from.
 links:
   - https://shoelace.style/components/menu

@@ -30,12 +30,10 @@ class MenuPreset extends IslandPluginBase {
     $save_preset = $this->buildMenuItem($this->t('Save as preset'), 'save_preset');
     $save_preset = $this->htmxEvents->onClickSavePreset($save_preset, $builder_id, '__instance_id__', $this->t('Name of preset'));
 
-    $items = [
+    return [
       $this->buildMenuDivider(),
       $save_preset,
     ];
-
-    return $items;
   }
 
 }

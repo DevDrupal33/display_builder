@@ -34,15 +34,11 @@ class LogsPanel extends IslandPluginBase {
 
   /**
    * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * The date formatter.
-   *
-   * @var \Drupal\Core\Datetime\DateFormatterInterface
    */
   protected DateFormatterInterface $dateFormatter;
 
@@ -53,6 +49,7 @@ class LogsPanel extends IslandPluginBase {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->dateFormatter = $container->get('date.formatter');
+
     return $instance;
   }
 
@@ -98,82 +95,6 @@ class LogsPanel extends IslandPluginBase {
     }
 
     return $build;
-  }
-
-  /**
-   * Build rows for the logs table.
-   *
-   * @param array $past
-   *   Steps with time and log message.
-   * @param array $present
-   *   A step with time and log message.
-   * @param array $future
-   *   Steps with time and log message.
-   * @param string|null $saveHash
-   *   Hash of the saved state.
-   * @param bool $saveInPast
-   *   Is the saved stated in the past?
-   * @param bool $saveInPresent
-   *   Is the saved stated in the present?
-   * @param bool $saveInFuture
-   *   Is the saved stated in the future?
-   *
-   * @return array
-   *   A renderable array representing a table row.
-   */
-  protected function buildRows(array $past, array $present, array $future, string|NULL $saveHash, bool &$saveInPast, bool &$saveInPresent, bool &$saveInFuture): array {
-    $rows_past = [];
-    $rows_present = [];
-    $rows_future = [];
-
-    foreach ($future as $index => $step) {
-      if ($saveHash && $step['hash'] === $saveHash && !$saveInPresent) {
-        $saveInFuture = TRUE;
-      }
-      $rows_future[] = $this->buildRow($index + 1, $step);
-    }
-
-    foreach ($past as $index => $step) {
-      if ($saveHash && $step['hash'] === $saveHash) {
-        $saveInPast = TRUE;
-      }
-      $rows_past[] = $this->buildRow(-\count($past) + $index, $step);
-    }
-
-    // Present data.
-    $rows_present[] = $this->buildRow(0, $present);
-
-    // Process the saved mark.
-    $savedRow = NULL;
-
-    if ($saveHash) {
-      if ($saveInPresent) {
-        $savedRow = &$rows_present[0];
-      }
-      elseif ($saveInFuture) {
-        foreach ($rows_future as &$row) {
-          if ($row['hash'] === $saveHash) {
-            $savedRow = &$row;
-
-            // Get closest to present future.
-            break;
-          }
-        }
-      }
-      elseif ($saveInPast) {
-        foreach ($rows_past as &$row) {
-          if ($row['hash'] === $saveHash) {
-            $savedRow = &$row;
-            // Do not break to get closest to present.
-          }
-        }
-      }
-
-      if ($savedRow !== NULL) {
-        $savedRow['data'][1] = '✅';
-      }
-    }
-    return \array_merge($rows_past, $rows_present, $rows_future);
   }
 
   /**
@@ -226,29 +147,80 @@ class LogsPanel extends IslandPluginBase {
   }
 
   /**
-   * Build a single row for the logs table.
+   * Build rows for the logs table.
    *
-   * @param int $index
-   *   The row index.
-   * @param array $step
-   *   The step data containing time and log message.
+   * @param array $past
+   *   Steps with time and log message.
+   * @param array $present
+   *   A step with time and log message.
+   * @param array $future
+   *   Steps with time and log message.
+   * @param string|null $saveHash
+   *   Hash of the saved state.
+   * @param bool $saveInPast
+   *   Is the saved stated in the past?
+   * @param bool $saveInPresent
+   *   Is the saved stated in the present?
+   * @param bool $saveInFuture
+   *   Is the saved stated in the future?
    *
    * @return array
    *   A renderable array representing a table row.
    */
-  private function buildRow(int $index, array $step): array {
-    $user = !empty($step['user']) ? $this->entityTypeManager->getStorage('user')->load($step['user']) : NULL;
-    return [
-      'hash' => $step['hash'] ?? '',
-      'data' => [
-        (string) $index,
-        '',
-        $step['time'] ? $this->formatTime($step['time']) : NULL,
-        $user ? $user->getDisplayName() : NULL,
-        $step['log'] ?? '',
-      ],
-      'style' => ($index === 0) ? 'font-weight: bold;' : '',
-    ];
+  protected function buildRows(array $past, array $present, array $future, ?string $saveHash, bool &$saveInPast, bool &$saveInPresent, bool &$saveInFuture): array {
+    $rows_past = [];
+    $rows_present = [];
+    $rows_future = [];
+
+    foreach ($future as $index => $step) {
+      if ($saveHash && $step['hash'] === $saveHash && !$saveInPresent) {
+        $saveInFuture = TRUE;
+      }
+      $rows_future[] = $this->buildRow($index + 1, $step);
+    }
+
+    foreach ($past as $index => $step) {
+      if ($saveHash && $step['hash'] === $saveHash) {
+        $saveInPast = TRUE;
+      }
+      $rows_past[] = $this->buildRow(-\count($past) + $index, $step);
+    }
+
+    // Present data.
+    $rows_present[] = $this->buildRow(0, $present);
+
+    // Process the saved mark.
+    $savedRow = NULL;
+
+    if ($saveHash) {
+      if ($saveInPresent) {
+        $savedRow = &$rows_present[0];
+      }
+      elseif ($saveInFuture) {
+        foreach ($rows_future as &$row) {
+          if ($row['hash'] === $saveHash) {
+            $savedRow = &$row;
+
+            // Get closest to present future.
+            break;
+          }
+        }
+      }
+      elseif ($saveInPast) {
+        foreach ($rows_past as &$row) {
+          if ($row['hash'] === $saveHash) {
+            $savedRow = &$row;
+            // Do not break to get closest to present.
+          }
+        }
+      }
+
+      if ($savedRow !== NULL) {
+        $savedRow['data'][1] = '✅';
+      }
+    }
+
+    return \array_merge($rows_past, $rows_present, $rows_future);
   }
 
   /**
@@ -262,10 +234,39 @@ class LogsPanel extends IslandPluginBase {
    */
   protected function formatTime(int $timestamp): string {
     $delta = \time() - $timestamp;
+
     if ($delta < self::SECONDS_IN_A_DAY) {
       return $this->dateFormatter->format($timestamp, 'custom', 'G:i');
     }
+
     return $this->dateFormatter->format($timestamp, 'short');
+  }
+
+  /**
+   * Build a single row for the logs table.
+   *
+   * @param int $index
+   *   The row index.
+   * @param array $step
+   *   The step data containing time and log message.
+   *
+   * @return array
+   *   A renderable array representing a table row.
+   */
+  private function buildRow(int $index, array $step): array {
+    $user = !empty($step['user']) ? $this->entityTypeManager->getStorage('user')->load($step['user']) : NULL;
+
+    return [
+      'hash' => $step['hash'] ?? '',
+      'data' => [
+        (string) $index,
+        '',
+        $step['time'] ? $this->formatTime($step['time']) : NULL,
+        $user ? $user->getDisplayName() : NULL,
+        $step['log'] ?? '',
+      ],
+      'style' => ($index === 0) ? 'font-weight: bold;' : '',
+    ];
   }
 
 }

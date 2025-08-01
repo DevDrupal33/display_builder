@@ -45,12 +45,29 @@ class HistoryButtons extends IslandPluginBase implements PluginFormInterface {
     $configuration = $this->getConfiguration();
     $form['display_clear_button'] = [
       '#title' => $this->t('Enable the "Clear" button'),
-      '#description' => $this->t('This button allow top remove all past and future history of the builder.'),
+      '#description' => $this->t('A button to clear the logs history (past and future).'),
       '#type' => 'checkbox',
       '#default_value' => $configuration['display_clear_button'],
     ];
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function configurationSummary(): array {
+    $configuration = $this->getConfiguration();
+
+    if ($configuration['display_clear_button']) {
+      return [
+        $this->t('With clear button.'),
+      ];
+    }
+
+    return [
+      $this->t('Without clear button.'),
+    ];
   }
 
   /**

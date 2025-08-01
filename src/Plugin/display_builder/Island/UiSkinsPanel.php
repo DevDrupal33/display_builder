@@ -85,35 +85,6 @@ class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, 
   }
 
   /**
-   * Extract values to save in configuration.
-   *
-   * @param array $variables
-   *   The variables to filter.
-   */
-  protected function filterValues(array $variables): array {
-    $cleaned_variables = [];
-
-    foreach ($variables as $variable => $value) {
-      /** @var \Drupal\ui_skins\Definition\CssVariableDefinition $plugin_definition */
-      $plugin_definition = \Drupal::service('plugin.manager.ui_skins.css_variable')->getDefinition($variable, FALSE);
-
-      if (!$plugin_definition) {
-        continue;
-      }
-
-      // Remove values that do not differ from the default values of the
-      // plugin.
-      if ($plugin_definition->isDefaultScopeValue(':root', $value)) {
-        continue;
-      }
-
-      $cleaned_variables[$variable] = $value;
-    }
-
-    return $cleaned_variables;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function alterElement(array $element, array $data = []): array {
@@ -123,7 +94,7 @@ class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, 
       $variable = UiSkinsUtility::getCssVariableName($variable);
       $inline_css[] = "{$variable}: {$value};";
     }
-    $element['#attributes']['style'] = implode(' ', $inline_css);
+    $element['#attributes']['style'] = \implode(' ', $inline_css);
 
     return $element;
   }
@@ -162,6 +133,35 @@ class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, 
   public function isApplicable(): bool {
     return parent::isApplicable() && \Drupal::service('module_handler')
       ->moduleExists('ui_skins');
+  }
+
+  /**
+   * Extract values to save in configuration.
+   *
+   * @param array $variables
+   *   The variables to filter.
+   */
+  protected function filterValues(array $variables): array {
+    $cleaned_variables = [];
+
+    foreach ($variables as $variable => $value) {
+      /** @var \Drupal\ui_skins\Definition\CssVariableDefinition $plugin_definition */
+      $plugin_definition = \Drupal::service('plugin.manager.ui_skins.css_variable')->getDefinition($variable, FALSE);
+
+      if (!$plugin_definition) {
+        continue;
+      }
+
+      // Remove values that do not differ from the default values of the
+      // plugin.
+      if ($plugin_definition->isDefaultScopeValue(':root', $value)) {
+        continue;
+      }
+
+      $cleaned_variables[$variable] = $value;
+    }
+
+    return $cleaned_variables;
   }
 
 }

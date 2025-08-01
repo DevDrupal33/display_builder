@@ -1,4 +1,6 @@
-name: Shoelace Button group
+name: Button group
+noUi: true
+group: Button
 description: Group related buttons into sections.
 links:
   - https://shoelace.style/components/button-group

@@ -1,4 +1,6 @@
 name: Layer
+noUi: true
+group: Display builder
 slots:
   title:
     title: Title

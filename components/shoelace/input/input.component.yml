@@ -1,4 +1,6 @@
 name: Input
+noUi: true
+group: Form
 description: Inputs collect data from the user.
 links:
   - https://shoelace.style/components/input

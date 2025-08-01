@@ -15,7 +15,7 @@ use Drupal\display_builder\IslandType;
  */
 #[Island(
   id: 'state_debug',
-  label: new TranslatableMarkup('State'),
+  label: new TranslatableMarkup('[Debug] State'),
   type: IslandType::View,
 )]
 class StateDebugPanel extends IslandPluginBase {

@@ -1,4 +1,6 @@
-name: Shoelace Avatar
+name: Avatar
+noUi: true
+group: Display builder
 description: Represent a person or object.
 links:
   - https://shoelace.style/components/avatar

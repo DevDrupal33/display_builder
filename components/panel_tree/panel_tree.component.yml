@@ -1,7 +1,7 @@
 name: Island tree
 description: Display a hierarchical list of selectable tree items in an island.
+noUi: true
 group: Display builder
-no_ui: true
 slots:
   items:
     title: Items

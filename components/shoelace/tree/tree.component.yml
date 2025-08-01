@@ -1,4 +1,6 @@
-name: Shoelace Tree
+name: Tree
+noUi: true
+group: Navigation
 description: Display a hierarchical list of selectable tree items. Items with children can be expanded and collapsed as desired by the user.
 links:
   - https://shoelace.style/components/tree

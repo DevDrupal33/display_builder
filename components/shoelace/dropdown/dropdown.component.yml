@@ -1,4 +1,6 @@
-name: Shoelace Dropdown
+name: Dropdown
+noUi: true
+group: Dropdown
 description: Additional content that “drops down” in an island.
 links:
   - https://shoelace.style/components/dropdown

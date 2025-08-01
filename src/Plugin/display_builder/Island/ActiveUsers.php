@@ -122,6 +122,18 @@ class ActiveUsers extends IslandPluginBase implements PluginFormInterface {
   /**
    * {@inheritdoc}
    */
+  public function configurationSummary(): array {
+    $conf = $this->getConfiguration();
+    $with_picture_text = $conf['image_style'] ? $this->t('With @style picture.', ['@style' => $conf['image_style']]) : $this->t('With picture');
+
+    return [
+      $conf['image_field'] ? $with_picture_text : $this->t('Without picture.'),
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function build(string $builder_id, array $data, array $options = []): array {
     $users = $this->stateManager->getUsers($builder_id);
     $current_user = $this->currentUser->id();

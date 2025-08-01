@@ -1,4 +1,6 @@
-name: Shoelace Tabs
+name: Tabs
+noUi: true
+group: Tabs
 description: Organize content into a container that shows one section at a time.
 links:
   - https://shoelace.style/components/tab-group

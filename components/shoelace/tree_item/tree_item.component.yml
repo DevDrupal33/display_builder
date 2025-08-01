@@ -1,4 +1,6 @@
-name: Shoelace Tree item
+name: Tree item
+noUi: true
+group: Navigation
 description: A tree item serves as a hierarchical node that lives inside a tree.
 links:
   - https://shoelace.style/components/tree-item

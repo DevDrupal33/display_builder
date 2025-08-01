@@ -1,6 +1,4 @@
 name: Block
 description: A block doesn't have children.
-group: Display builder
-no_ui: true
 slots:
   title: Lorem ipsum

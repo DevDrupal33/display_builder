@@ -1,7 +1,7 @@
 name: Placeholder
 description: Display builder placeholder.
+noUi: true
 group: Display builder
-no_ui: true
 variants:
   default:
     title: Default

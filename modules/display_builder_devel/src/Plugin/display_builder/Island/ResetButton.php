@@ -17,7 +17,7 @@ use Drupal\display_builder_devel\Form\ImportForm;
  */
 #[Island(
   id: 'reset',
-  label: new TranslatableMarkup('Reset'),
+  label: new TranslatableMarkup('[Debug] Reset'),
   description: new TranslatableMarkup('Buttons to completely reset the content on the builder with a fixture.'),
   type: IslandType::Button,
 )]

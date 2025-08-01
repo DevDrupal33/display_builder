@@ -91,6 +91,7 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
       }
 
       $component_id = ($this->data['source_id'] === 'component') ? $this->data['source']['component']['component_id'] ?? NULL : NULL;
+
       if ($component_id && ($this->data['source_id'] === 'component')) {
         $this->alterFormForComponent($form, $component_id);
       }
@@ -124,6 +125,7 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
     ];
 
     $build = $this->htmxEvents->onInstanceFormChange($build, $this->builderId, $this->data['_instance_id']);
+
     return $this->htmxEvents->onInstanceUpdateButtonClick($build, $this->builderId, $this->data['_instance_id']);
   }
 
@@ -154,6 +156,7 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
   public function onUpdate(string $builder_id, ?string $instance_id, ?string $current_island_id): array {
     // Reload the form itself on update.
     $data = $this->stateManager->get($builder_id, $instance_id);
+
     return $this->reloadWithLocalData($builder_id, $data, $current_island_id);
   }
 
@@ -183,6 +186,7 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
     // When this is an Ajax CALL, we directly inject the data into the source
     // settings, but not during the rebuilt.
     $values = $form_state->getValues();
+
     if (isset($values['_drupal_ajax']) && $values['_drupal_ajax'] && !$form_state->isRebuilding()) {
       if ($this->data['source_id'] !== 'component') {
         $this->data['source'] = $values;

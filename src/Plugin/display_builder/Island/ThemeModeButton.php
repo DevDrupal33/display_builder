@@ -24,7 +24,7 @@ class ThemeModeButton extends IslandPluginBase {
    * {@inheritdoc}
    */
   public function build(string $builder_id, array $data, array $options = []): array {
-    $build = [
+    return [
       '#type' => 'component',
       '#component' => 'display_builder:theme_menu',
       '#attributes' => [
@@ -39,10 +39,7 @@ class ThemeModeButton extends IslandPluginBase {
         'icon' => 'sun',
         'keyboard' => '\\',
       ],
-
     ];
-
-    return $build;
   }
 
 }

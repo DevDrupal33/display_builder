@@ -79,9 +79,7 @@ handle it instead of shoelace */
 }
 
 /* Enough to make something with empty slot selectable */
-[data-instance-id][data-component-id]:not(
-    [data-component-id^="display_builder"]
-  ):has([data-slot-id]:empty) {
+[data-instance-id][data-component-id]:has([data-slot-id]:empty) {
   min-width: var(--dropzone-placeholder-min-height);
   min-height: var(--dropzone-placeholder-min-height);
 }
@@ -96,29 +94,21 @@ handle it instead of shoelace */
 /** Hover context, when something is to be dropped **/
 
 /* When nothing happen, slightly highlight containers of slot */
-.db-dropzone
-  [data-component-id]:not(
-    [data-component-id^="display_builder"],
-    [data-slot-id]
-  ) {
+.db-dropzone [data-component-id]:not([data-slot-id]) {
   outline: var(--dropzone-slot-outline-width-light) var(--dropzone-color-light)
     var(--dropzone-slot-outline-type-light);
 }
 .display-builder--highlight
   .display-builder__main
   .db-dropzone
-  [data-component-id]:not(
-    [data-component-id^="display_builder"],
-    [data-slot-id]
-  ) {
+  [data-component-id]:not([data-slot-id]) {
   padding: 1rem;
   outline: var(--dropzone-slot-outline-width) var(--dropzone-color-light)
     var(--dropzone-slot-outline-type);
 }
 
 /* On hover, highlight only possible selectable elements */
-.db-dropzone
-  [data-instance-id]:not([data-component-id^="display_builder"]):hover,
+.db-dropzone [data-instance-id]:hover,
 .db-dropzone [data-instance-id]:not([data-component-id]):hover,
 .db-placeholder[data-instance-id]:hover {
   position: relative;
@@ -130,7 +120,7 @@ handle it instead of shoelace */
 .display-builder--highlight
   .display-builder__main
   .db-dropzone
-  [data-instance-id]:not([data-component-id^="display_builder"]),
+  [data-instance-id],
 .display-builder--highlight
   .display-builder__main
   .db-dropzone
@@ -149,7 +139,7 @@ handle it instead of shoelace */
 .display-builder--highlight
   .display-builder__main
   .db-dropzone
-  [data-instance-id]:not([data-component-id^="display_builder"])::before,
+  [data-instance-id]::before,
 .display-builder--highlight
   .display-builder__main
   .db-dropzone
@@ -170,8 +160,7 @@ handle it instead of shoelace */
   font-size: 14px;
 }
 
-.db-dropzone
-  [data-instance-id]:not([data-component-id^="display_builder"]):hover::before,
+.db-dropzone [data-instance-id]:hover::before,
 .db-dropzone [data-instance-id]:not([data-component-id]):hover::before,
 .db-placeholder[data-instance-id]:hover::before {
   position: absolute;
@@ -192,7 +181,7 @@ handle it instead of shoelace */
 .display-builder--highlight
   .display-builder__main
   .db-dropzone
-  [data-instance-id]:not([data-component-id^="display_builder"])::before,
+  [data-instance-id]::before,
 .display-builder--highlight
   .display-builder__main
   .db-dropzone
@@ -205,7 +194,7 @@ handle it instead of shoelace */
 .display-builder--highlight
   .display-builder__main
   .db-dropzone
-  [data-instance-id]:not([data-component-id^="display_builder"]):hover::before,
+  [data-instance-id]:hover::before,
 .display-builder--highlight
   .display-builder__main
   .db-dropzone
@@ -257,9 +246,7 @@ handle it instead of shoelace */
 }
 
 /* Reset the hover effect when on drag to focus on possible targets */
-.display-builder--onDrag
-  .db-dropzone
-  [data-instance-id]:not([data-component-id^="display_builder"]):hover,
+.display-builder--onDrag .db-dropzone [data-instance-id]:hover,
 .display-builder--onDrag
   .db-dropzone
   [data-instance-id]:not([data-component-id]):hover,
@@ -332,14 +319,10 @@ handle it instead of shoelace */
 .display-builder--highlight
   .display-builder__main
   .db-dropzone
-  *:not([data-slot-id], [data-component-id^="display_builder"]):has(
-    [data-slot-id]
-  )::before,
+  *:not([data-slot-id]):has([data-slot-id])::before,
 .display-builder--onDrag
   .db-dropzone
-  *:not([data-slot-id], [data-component-id^="display_builder"]):has(
-    [data-slot-id]
-  )::before {
+  *:not([data-slot-id]):has([data-slot-id])::before {
   position: absolute;
   z-index: var(--dropzone-z-index-label-element, 1);
   top: -2px;
@@ -355,9 +338,7 @@ handle it instead of shoelace */
 .display-builder--highlight
   .display-builder__main
   .db-dropzone
-  *:not([data-slot-id], [data-component-id^="display_builder"]):has(
-    [data-slot-id]
-  )::before {
+  *:not([data-slot-id]):has([data-slot-id])::before {
   z-index: calc(var(--dropzone-z-index-label-element, 1) + 1);
   top: -2px;
   left: -2px;

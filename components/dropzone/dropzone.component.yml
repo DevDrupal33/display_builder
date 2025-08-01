@@ -1,6 +1,6 @@
 name: Dropzone
+noUi: true
 group: Display builder
-no_ui: true
 variants:
   default:
     title: Default

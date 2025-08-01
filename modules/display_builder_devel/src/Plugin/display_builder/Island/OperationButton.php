@@ -17,7 +17,7 @@ use Drupal\display_builder_devel\Helper\DisplayBuilderDevelHelper;
  */
 #[Island(
   id: 'operation',
-  label: new TranslatableMarkup('Operations'),
+  label: new TranslatableMarkup('[Debug] Operations'),
   description: new TranslatableMarkup('Buttons to provide some direct operations.'),
   type: IslandType::Button,
 )]

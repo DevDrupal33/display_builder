@@ -1,4 +1,6 @@
 name: Menu Item
+noUi: true
+group: Navigation
 description: Menu items provide options for the user to pick from in a menu.
 links:
   - https://shoelace.style/components/menu-item

@@ -1,4 +1,6 @@
-name: Shoelace Button
+name: Button
+noUi: true
+group: Button
 description: Actions that are available to the user.
 links:
   - https://shoelace.style/components/button

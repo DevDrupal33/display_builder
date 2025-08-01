@@ -1,0 +1,37 @@
+name: Default
+slots:
+  content: Can be used to wrap something in HTML.
+library_wrapper: >
+  {% set tags = [
+    'a',
+    'p',
+    'b',
+    'h2',
+    'h3',
+    'area',
+    'article',
+    'aside',
+    'nav',
+    'section',
+    'header',
+    'footer',
+    'div',
+    'span',
+    'blockquote',
+    'figure',
+    'details',
+  ] %}
+
+  {% for tag in tags %}
+    {% set app_props = {'#props': _story['#props']|merge({
+        'tag': tag,
+      })}
+    %}
+    {% set content_slots = {'#slots': _story['#slots']|merge({
+      'content': 'Vestibulum ante ipsum primis in faucibus.' ~ ' (&lt;' ~ tag ~ '&gt;)',
+    })} %}
+
+    {% set app_story = _story %}
+    {{ app_story|merge(app_props)|merge(content_slots) }}
+  <hr/>
+  {% endfor %}

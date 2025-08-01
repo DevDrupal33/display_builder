@@ -29,10 +29,10 @@ enum IslandType: string {
    */
   public static function description(string $type): TranslatableMarkup {
     return match ($type) {
-      self::View->value => new TranslatableMarkup('Islands displayable as a main area tabs or as a offcanvas sidebar.'),
-      self::Library->value => new TranslatableMarkup('Islands available in the Library island.'),
-      self::Button->value => new TranslatableMarkup('Toolbar buttons.'),
-      self::Contextual->value => new TranslatableMarkup('Islands visible only when the related instance is active.'),
+      self::View->value => new TranslatableMarkup('Islands shown as a main area tabs or as an offcanvas sidebar.'),
+      self::Library->value => new TranslatableMarkup('Islands available as tab in the Library island.'),
+      self::Button->value => new TranslatableMarkup('Toolbar buttons are displayed on the end of the toolbar and allow direct actions in the builder.'),
+      self::Contextual->value => new TranslatableMarkup('Islands visible only when the related instance is active and selected. They allow actions on an element selected in the builder.'),
       self::Menu->value => new TranslatableMarkup('Islands that act on the contextual menu, providing specific entries.'),
       default => new TranslatableMarkup('Unknown island type.'),
     };

@@ -1,6 +1,6 @@
 name: Library island
+noUi: true
 group: Display builder
-no_ui: true
 slots:
   tabs:
     title: Tabs

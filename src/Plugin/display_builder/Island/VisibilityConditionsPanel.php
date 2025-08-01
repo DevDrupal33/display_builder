@@ -38,7 +38,7 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
     unset($conditions['response_status']);
 
     foreach ($conditions as $condition_id => $definition) {
-      if (str_starts_with($condition_id, 'entity_bundle:')) {
+      if (\str_starts_with($condition_id, 'entity_bundle:')) {
         continue;
       }
       /** @var \Drupal\Core\Condition\ConditionInterface $condition */
@@ -69,7 +69,7 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
     /** @var \Drupal\Core\Condition\ConditionManager $manager */
     $manager = \Drupal::service('plugin.manager.condition');
 
-    foreach (array_keys($data) as $condition_id) {
+    foreach (\array_keys($data) as $condition_id) {
       /** @var \Drupal\Core\Condition\ConditionInterface $condition */
       $condition = $manager->createInstance($condition_id, $data[$condition_id] ?? []);
 

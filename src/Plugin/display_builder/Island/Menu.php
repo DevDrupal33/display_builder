@@ -33,13 +33,11 @@ class Menu extends IslandPluginBase {
     $paste = $this->buildMenuItem($this->t('Paste'), 'paste');
     $paste = $this->htmxEvents->onClickPaste($paste, $builder_id, '__instance_id__', '__parent_id__', '__slot_id__', '__slot_position__');
 
-    $items = [
+    return [
       $this->buildMenuItem($this->t('Copy'), 'copy'),
       $paste,
       $duplicate,
     ];
-
-    return $items;
   }
 
 }

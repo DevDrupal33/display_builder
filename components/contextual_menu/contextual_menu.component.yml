@@ -1,7 +1,7 @@
 name: Contextual Menu
 description: A list of menu item for the user to choose from.
+noUi: true
 group: Display builder
-no_ui: true
 slots:
   label:
     title: Label

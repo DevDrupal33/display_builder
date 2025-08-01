@@ -16,7 +16,7 @@ use Drupal\display_builder\IslandType;
   id: 'library',
   enabled_by_default: TRUE,
   label: new TranslatableMarkup('Libraries'),
-  description: new TranslatableMarkup('List of elements to use in the display.'),
+  description: new TranslatableMarkup('List of elements from library islands to use in the display.'),
   type: IslandType::View,
   keyboard_shortcuts: [
     'l' => new TranslatableMarkup('Show libraries view'),

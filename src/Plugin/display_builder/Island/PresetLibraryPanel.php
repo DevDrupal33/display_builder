@@ -52,6 +52,7 @@ class PresetLibraryPanel extends IslandPluginBase {
   public function build(string $builder_id, array $data, array $options = []): array {
     /** @var \Drupal\display_builder\PatternPresetInterface[] $presets */
     $presets = $this->presetConfigStorage->loadByProperties(['status' => TRUE]);
+
     if (empty($presets)) {
       $content = [
         '#type' => 'html_tag',
@@ -93,6 +94,7 @@ class PresetLibraryPanel extends IslandPluginBase {
   protected function buildPresets(string $builder_id, array $presets): array {
     $theme = \Drupal::configFactory()->get('system.theme')->get('default');
     $build = [];
+
     foreach ($presets as $preset_id => $preset) {
       if ($preset->get('theme') !== $theme) {
         continue;

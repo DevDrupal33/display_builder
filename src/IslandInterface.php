@@ -12,7 +12,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 /**
  * Interface for island plugins.
  */
-interface IslandInterface extends ContainerFactoryPluginInterface, IslandEventSubscriberInterface, PluginInspectionInterface, ConfigurableInterface {
+interface IslandInterface extends ConfigurableInterface, ContainerFactoryPluginInterface, IslandEventSubscriberInterface, PluginInspectionInterface {
 
   /**
    * Build renderable from state data.
@@ -94,5 +94,15 @@ interface IslandInterface extends ContainerFactoryPluginInterface, IslandEventSu
    *   The altered form element.
    */
   public function afterBuild(array $element, FormStateInterface $form_state): array;
+
+  /**
+   * Returns a short summary for the current configuration.
+   *
+   * The configuration is managed by the ConfigurableInterface implementation.
+   *
+   * @return array<string|\Stringable>
+   *   A short summary of the configuration.
+   */
+  public function configurationSummary(): array;
 
 }

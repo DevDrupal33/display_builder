@@ -1,0 +1,18 @@
+name: HTML Wrapper
+description: Allow to create an HTML wrapper for any content.
+links:
+  - https://en.wikipedia.org/wiki/HTML_element
+status: experimental
+group: Other
+slots:
+  content:
+    title: Content
+    description: The content of the element.
+props:
+  type: object
+  properties:
+    tag:
+      title: Tag
+      description: HTML tag, only letters and dash allowed.
+      type: string
+      pattern: '^[a-zA-Z0-9-]+$'

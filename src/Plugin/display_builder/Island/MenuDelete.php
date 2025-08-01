@@ -31,12 +31,10 @@ class MenuDelete extends IslandPluginBase {
     $remove = $this->buildMenuItem($this->t('Remove'), 'remove');
     $remove = $this->htmxEvents->onClickDelete($remove, $builder_id, '__instance_id__');
 
-    $items = [
+    return [
       $this->buildMenuDivider(),
       $remove,
     ];
-
-    return $items;
   }
 
 }

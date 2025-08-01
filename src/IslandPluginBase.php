@@ -263,6 +263,13 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function configurationSummary(): array {
+    return [];
+  }
+
+  /**
    * Get args passed to plugin.
    *
    * @return array

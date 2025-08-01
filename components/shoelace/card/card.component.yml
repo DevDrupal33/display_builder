@@ -1,4 +1,6 @@
-name: Shoelace Card
+name: Card
+noUi: true
+group: Card
 description: Can be used to group related subjects in a container.
 links:
   - https://shoelace.style/components/card

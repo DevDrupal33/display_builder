@@ -54,6 +54,7 @@ final class DisplayBuilderForm extends EntityForm {
     // permissions are not set yet by DisplayBuilderPermissions.
     if (!$entity->isNew()) {
       $roles = $this->entityTypeManager->getStorage('user_role')->loadMultiple();
+      ksort($roles);
       $form['roles'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Roles'),
@@ -79,22 +80,25 @@ final class DisplayBuilderForm extends EntityForm {
     ];
 
     $island_settings = $entity->get('island_settings') ?? [];
+    $island_configuration = $entity->get('island_configuration') ?? [];
 
     /** @var \Drupal\display_builder\IslandPluginManagerInterface $islandPluginManager */
     $islandPluginManager = \Drupal::service('plugin.manager.db_island'); // phpcs:ignore
     $island_by_types = $islandPluginManager->getIslandsByTypes();
+    ksort($island_by_types);
 
     $header = [
-      '',
-      $this->t('Enable'),
-      $this->t('Name'),
-      $this->t('Description'),
-      '',
-      $this->t('Actions'),
-      $this->t('Weight'),
+      'drag' => '',
+      'enable' => $this->t('Enable'),
+      'name' => $this->t('Island'),
+      'summary' => $this->t('Configuration'),
+      'options' => $this->t('Options'),
+      'actions' => '',
+      'weight' => $this->t('Weight'),
     ];
 
     foreach ($island_by_types as $type => $islands) {
+      $table_has_options = FALSE;
       $table = [
         '#type' => 'table',
         '#header' => $header,
@@ -110,6 +114,9 @@ final class DisplayBuilderForm extends EntityForm {
 
       foreach ($islands as $id => $island) {
         $definition = $island->getPluginDefinition();
+        $configuration = $island_configuration[$id] ?? [];
+        /** @var \Drupal\display_builder\IslandInterface $instance */
+        $instance = $islandPluginManager->createInstance($id, $configuration);
         $default = $island_settings[$type][$id] ?? [];
         $weight = isset($default['weight']) ? (string) $default['weight'] : '0';
 
@@ -125,10 +132,15 @@ final class DisplayBuilderForm extends EntityForm {
           '#default_value' => $default['enable'] ?? $definition['enabled_by_default'] ?? FALSE,
         ];
         $table[$id]['name'] = [
-          '#markup' => $definition['label'] ?? '',
+          '#type' => 'inline_template',
+          '#template' => '<strong >{{ name }}</strong><br>{{ description }}',
+          '#context' => [
+            'name' => $definition['label'] ?? '',
+            'description' => $definition['description'] ?? '',
+          ],
         ];
-        $table[$id]['description'] = [
-          '#markup' => $definition['description'] ?? '',
+        $table[$id]['summary'] = [
+          '#markup' => \implode('<br>', $instance->configurationSummary()),
         ];
 
         if ($type === IslandType::View->value) {
@@ -141,12 +153,13 @@ final class DisplayBuilderForm extends EntityForm {
             $default_option = $default['options'] ?? NULL;
           }
           $table[$id]['options'] = [
-            '#type' => 'select',
+            '#type' => 'radios',
             '#title' => $this->t('Display'),
             '#title_display' => 'invisible',
             '#options' => IslandTypeViewDisplay::options(),
             '#default_value' => $default_option,
           ];
+          $table_has_options = TRUE;
         }
         else {
           $table[$id]['options'] = [];
@@ -203,6 +216,10 @@ final class DisplayBuilderForm extends EntityForm {
         '#title' => $this->t('@type islands', ['@type' => $type]),
         '#description' => IslandType::description($type),
       ];
+
+      if (!$table_has_options && isset($table['#header']['options'])) {
+        $table['#header']['options'] = '';
+      }
       $form['island_settings'][$type] = $table;
     }
 
