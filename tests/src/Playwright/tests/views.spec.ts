@@ -18,7 +18,7 @@ test('Views Display Builder', {tag: '@db_views'} , async ({ page, drupal }) => {
   await page.goto(dbConfig.viewsEditUrl.replace('{view_id}', dbConfig.viewsTestName))
   await cmd.ajaxReady(page)
 
-  // Test 1: Set the buillder profile on a view.
+  // Test 1: Set the builder profile on a view.
   await page.getByText('Display Builder: Disabled').getByRole('link', { name: 'Disabled' }).click()
   await expect(page.getByRole('dialog')).toBeVisible()
   await page.locator('select[name="display_builder"]').selectOption('default')

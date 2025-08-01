@@ -102,7 +102,7 @@ export async function setTokenWithValue(page: Page, targetSlot: Locator, value: 
 }
 
 /**
- * Saves the current state in the Display Builder fromt the UI
+ * Saves the current state in the Display Builder from the UI
  *
  * @async
  * @param {Page} page - The Playwright Page object representing the browser page.
