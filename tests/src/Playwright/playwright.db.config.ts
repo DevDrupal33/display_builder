@@ -18,6 +18,10 @@ export default {
   viewsDbList: "admin/structure/views/display_builder",
   viewsTestName: "test_db_view", // Must match the view ID in the test config.
 
+  pageListUrl: "admin/structure/page-layout",
+  pageAddUrl: "admin/structure/page-layout/add",
+  pageTestName: "page_layout__test",
+
   logInUrl: "user/login",
   logOutUrl: "user/logout",
 

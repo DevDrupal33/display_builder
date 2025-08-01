@@ -11,7 +11,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\display_builder\ConfigFormBuilderInterface;
-use Drupal\display_builder\StorageProperties;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -56,7 +55,8 @@ final class PageLayoutForm extends EntityForm {
 
     /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $entity */
     $entity = $this->entity;
-    $form[StorageProperties::ConfigEntityId->value] = $this->configFormBuilder->build($entity);
+    $form = \array_merge($form, $this->configFormBuilder->build($entity));
+
     $form['conditions'] = $this->buildConditionsForm([], $form_state);
     $form['status'] = [
       '#type' => 'checkbox',

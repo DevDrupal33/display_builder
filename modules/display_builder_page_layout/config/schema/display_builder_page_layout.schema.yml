@@ -10,8 +10,6 @@ display_builder_page_layout.page_layout.*:
       label: Label
     uuid:
       type: string
-    description:
-      type: string
     display_builder:
       type: string
       label: "Used Display Builder"

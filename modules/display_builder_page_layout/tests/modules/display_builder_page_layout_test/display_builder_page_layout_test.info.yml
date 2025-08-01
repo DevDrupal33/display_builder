@@ -1,0 +1,6 @@
+name: 'Display Builder Page defaults test'
+type: module
+description: 'Support module for testing Display building with page defaults.'
+package: Testing
+dependencies:
+  - drupal:display_builder_page_layout
