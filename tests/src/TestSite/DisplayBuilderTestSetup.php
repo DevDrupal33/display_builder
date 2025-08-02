@@ -22,7 +22,15 @@ class DisplayBuilderTestSetup implements TestSetupInterface {
     // Install required modules.
     $module_installer = \Drupal::service('module_installer');
     assert($module_installer instanceof ModuleInstallerInterface);
-    $module_installer->install(['display_builder', 'display_builder_ui', 'display_builder_devel', 'ui_patterns', 'ui_patterns_overrides', 'ui_styles']);
+    $modules = [
+      'display_builder',
+      'display_builder_ui',
+      'display_builder_devel',
+      'ui_patterns',
+      'ui_patterns_overrides',
+      'ui_styles',
+    ];
+    $module_installer->install($modules);
 
     // Install DB test theme and set it as the default theme.
     $theme_installer = \Drupal::service('theme_installer');

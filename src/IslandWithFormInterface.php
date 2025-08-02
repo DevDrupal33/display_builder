@@ -20,7 +20,7 @@ interface IslandWithFormInterface {
   public static function getFormClass(): string;
 
   /**
-   * Is this Island has form class ?
+   * This Island declare a form class.
    *
    * @return bool
    *   TRUE if Island has form class, FALSE otherwise.

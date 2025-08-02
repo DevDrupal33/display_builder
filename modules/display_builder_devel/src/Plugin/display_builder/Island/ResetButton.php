@@ -17,8 +17,8 @@ use Drupal\display_builder_devel\Form\ImportForm;
  */
 #[Island(
   id: 'reset',
-  label: new TranslatableMarkup('[Debug] Reset'),
-  description: new TranslatableMarkup('Buttons to completely reset the content on the builder with a fixture.'),
+  label: new TranslatableMarkup('Reset'),
+  description: new TranslatableMarkup('[Debug] Reset the content on the builder with a fixture or manual sources.'),
   type: IslandType::Button,
 )]
 class ResetButton extends IslandPluginBase implements IslandWithFormInterface {
@@ -29,16 +29,11 @@ class ResetButton extends IslandPluginBase implements IslandWithFormInterface {
    * {@inheritdoc}
    */
   public function build(string $builder_id, array $data, array $options = []): array {
-    // No DI here as this is a devel island. If moved to more stable need to be
-    // updated.
-    /** @var \Drupal\Core\Routing\CurrentRouteMatch $currentRouteMatch */
-    $currentRouteMatch = \Drupal::service('current_route_match');
     $form = \Drupal::formBuilder()->getForm(
       static::getFormClass(),
       $builder_id,
-      $currentRouteMatch->getRouteName(),
-      $currentRouteMatch->getParameters(),
     );
+
     unset($form['cancel']);
 
     $button = $this->buildButton($this->t('Reset'), $this->t('Reset'));

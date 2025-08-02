@@ -14,8 +14,8 @@ use Drupal\display_builder\IslandType;
  */
 #[Island(
   id: 'menu_debug',
-  label: new TranslatableMarkup('[Debug] Debug information'),
-  description: new TranslatableMarkup('Provide debug information in the menu.'),
+  label: new TranslatableMarkup('Debug information'),
+  description: new TranslatableMarkup('[Debug] Provide debug information in the menu of the clicked element and context from DOM.'),
   type: IslandType::Menu,
 )]
 class MenuDebug extends IslandPluginBase {

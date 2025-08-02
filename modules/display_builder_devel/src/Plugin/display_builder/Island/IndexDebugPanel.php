@@ -14,7 +14,8 @@ use Drupal\display_builder\IslandType;
  */
 #[Island(
   id: 'index_debug',
-  label: new TranslatableMarkup('[Debug] Index'),
+  label: new TranslatableMarkup('Index'),
+  description: new TranslatableMarkup('[Debug] Provide internal index information.'),
   type: IslandType::View,
 )]
 class IndexDebugPanel extends IslandPluginBase {
