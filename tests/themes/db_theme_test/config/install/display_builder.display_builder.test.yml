@@ -30,10 +30,6 @@ island_settings:
       enable: true
       weight: '-7'
       options: sidebar
-    tree:
-      enable: true
-      weight: '-6'
-      options: sidebar
     logs:
       enable: true
       weight: '-5'

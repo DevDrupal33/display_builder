@@ -55,6 +55,7 @@ class ComponentSource extends Upstream implements SourcesBundlerInterface {
    */
   public function getOptionLabel(array $data): string|TranslatableMarkup {
     $component_id = $data['source']['component']['component_id'] ?? NULL;
+
     if (!$component_id) {
       return 'n/a';
     }

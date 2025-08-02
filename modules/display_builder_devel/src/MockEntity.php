@@ -7,18 +7,16 @@ namespace Drupal\display_builder_devel;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuilderInterface;
-use Drupal\display_builder\EntityWithDisplayBuilderInterface;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\WithDisplayBuilderInterface;
 
 /**
- * A class implementing EntityWithDisplayBuilderInterface for the demos.
+ * A class implementing WithDisplayBuilderInterface for the demos.
  */
-class MockEntity implements EntityWithDisplayBuilderInterface {
+class MockEntity implements WithDisplayBuilderInterface {
 
   /**
    * Instance ID as managed by the State Manager.
-   *
-   * @var string|null
    */
   protected ?string $instanceId;
 

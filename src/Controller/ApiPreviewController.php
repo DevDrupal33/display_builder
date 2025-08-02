@@ -94,17 +94,19 @@ class ApiPreviewController extends ControllerBase implements ContainerInjectionI
     $ui_patterns_library = $this->moduleHandler()->moduleExists('ui_patterns_library');
 
     $build = [];
+
     if (!$ui_patterns_library) {
       $build = $this->generateComponent($component_id);
     }
     else {
       $stories = $this->storyPluginManager->getComponentStories($component_id);
+
       if (empty($stories)) {
         $build = $this->generateComponent($component_id);
       }
       else {
         $story = [];
-        $first_story = reset($stories);
+        $first_story = \reset($stories);
         $story[$first_story['machineName'] ?? 'default'] = $first_story;
         $build = $this->generateStory($component_id, $variant_id, $story);
       }
@@ -115,6 +117,26 @@ class ApiPreviewController extends ControllerBase implements ContainerInjectionI
     $response->setContent($html);
 
     return $response;
+  }
+
+  /**
+   * Build renderable block.
+   *
+   * @param string $block_id
+   *   The block id to preview.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function generateBlock(string $block_id): array {
+    $data = [
+      'source_id' => 'block',
+      'source' => [
+        'plugin_id' => $block_id,
+      ],
+    ];
+
+    return $this->renderSource($data);
   }
 
   /**
@@ -133,7 +155,7 @@ class ApiPreviewController extends ControllerBase implements ContainerInjectionI
   private function generateStory(string $component_id, string $variant_id, array $stories): array {
     $html = [];
 
-    foreach (array_keys($stories) as $story_id) {
+    foreach (\array_keys($stories) as $story_id) {
       $html[$story_id] = [
         '#type' => 'component',
         '#component' => $component_id,
@@ -162,38 +184,20 @@ class ApiPreviewController extends ControllerBase implements ContainerInjectionI
       '#type' => 'component',
       '#component' => $component_id,
     ];
+
     foreach ($definition['slots'] ?? [] as $slot_id => $slot) {
-      if (isset($slot['examples']) && is_array($slot['examples']) && !empty($slot['examples'])) {
+      if (isset($slot['examples']) && \is_array($slot['examples']) && !empty($slot['examples'])) {
         $html['#slots'][$slot_id] = $slot['examples'][0];
       }
     }
+
     foreach ($definition['props']['properties'] ?? [] as $prop_id => $prop) {
-      if (isset($prop['examples']) && is_array($prop['examples']) && !empty($prop['examples'])) {
+      if (isset($prop['examples']) && \is_array($prop['examples']) && !empty($prop['examples'])) {
         $html['#props'][$prop_id] = $prop['examples'][0];
       }
     }
 
     return $html;
-  }
-
-  /**
-   * Build renderable block.
-   *
-   * @param string $block_id
-   *   The block id to preview.
-   *
-   * @return array
-   *   A renderable array.
-   */
-  protected function generateBlock(string $block_id): array {
-    $data = [
-      'source_id' => 'block',
-      'source' => [
-        'plugin_id' => $block_id,
-      ],
-    ];
-
-    return $this->renderSource($data);
   }
 
   /**

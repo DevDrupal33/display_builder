@@ -36,7 +36,7 @@ class DisplayBuilderRouteProvider extends AdminHtmlRouteProvider {
    * @return \Symfony\Component\Routing\Route|null
    *   The generated route, if available.
    */
-  protected function getEditPluginFormRoute(EntityTypeInterface $entity_type): Route|null {
+  protected function getEditPluginFormRoute(EntityTypeInterface $entity_type): ?Route {
     if ($entity_type->hasLinkTemplate('edit-plugin-form')
       && \is_string($entity_type->getLinkTemplate('edit-plugin-form'))) {
       $entity_type_id = $entity_type->id();

@@ -70,11 +70,11 @@ class DisplayBuilderHelpers {
         $filepath = $filepath . '.yml';
       }
 
-      if (!file_exists($filepath)) {
+      if (!\file_exists($filepath)) {
         continue;
       }
 
-      $content = file_get_contents($filepath);
+      $content = \file_get_contents($filepath);
 
       if (!$content) {
         continue;
@@ -101,7 +101,7 @@ class DisplayBuilderHelpers {
     $output = [];
 
     foreach ($paths as $path) {
-      if (!file_exists($path)) {
+      if (!\file_exists($path)) {
         continue;
       }
 
@@ -110,7 +110,8 @@ class DisplayBuilderHelpers {
 
       foreach ($finder as $file) {
         $name = $file->getFilenameWithoutExtension();
-        $output[$name] = u(str_replace('_', ' ', $name))->title();
+        $output[$name] = u(\str_replace('_', ' ', $name))->title();
+
         if ($moduleName) {
           $output[$name] = \sprintf('[%s] %s', $moduleName, $output[$name]);
         }
@@ -178,8 +179,10 @@ class DisplayBuilderHelpers {
     if (empty($names)) {
       $names = \array_merge(self::$moduleNames, self::$themeNames);
     }
+
     foreach ($names as $name) {
       $file = self::getFixtureDataFromExtension($name, '', $fixture_id);
+
       if (!empty($file)) {
         return $file;
       }
@@ -203,6 +206,7 @@ class DisplayBuilderHelpers {
    */
   public static function getFixtureDataFromExtension(string $name, string $suffix = '', ?string $fixture_id = NULL): array {
     $path = NULL;
+
     try {
       $path = \Drupal::moduleHandler()->getModule($name)->getPath();
     }
@@ -231,7 +235,7 @@ class DisplayBuilderHelpers {
     }
     $filepath = \sprintf('%s/%s/fixtures/%s.yml', DRUPAL_ROOT, $path, $name);
 
-    if (!file_exists($filepath)) {
+    if (!\file_exists($filepath)) {
       return [];
     }
 

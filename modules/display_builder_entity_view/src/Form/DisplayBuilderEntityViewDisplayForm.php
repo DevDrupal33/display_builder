@@ -12,7 +12,6 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\display_builder\ConfigFormBuilderInterface;
-use Drupal\display_builder\StorageProperties;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplayStorage;
 use Drupal\layout_builder\Form\LayoutBuilderEntityViewDisplayForm;
 use Drupal\layout_builder\SectionStorageInterface;
@@ -120,7 +119,7 @@ final class DisplayBuilderEntityViewDisplayForm extends LayoutBuilderEntityViewD
       '#weight' => 1,
     ];
 
-    $form['wrapper'][StorageProperties::ConfigEntityId->value] = $this->configFormBuilder->build($this->entity, FALSE);
+    $form['wrapper'][ConfigFormBuilderInterface::PROFILE_PROPERTY] = $this->configFormBuilder->build($this->entity, FALSE);
 
     return $form;
   }
@@ -132,13 +131,14 @@ final class DisplayBuilderEntityViewDisplayForm extends LayoutBuilderEntityViewD
     parent::submitForm($form, $form_state);
 
     // @todo we should have always a fallback.
-    $display_builder_config = $form_state->getValue([StorageProperties::ConfigEntityId->value]) ?? 'default';
+    $display_builder_config = $form_state->getValue([ConfigFormBuilderInterface::PROFILE_PROPERTY]) ?? 'default';
+
     // Empty mean disabled.
     if (empty($display_builder_config)) {
-      $this->entity->unsetThirdPartySetting('display_builder', StorageProperties::ConfigEntityId->value);
+      $this->entity->unsetThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY);
     }
     else {
-      $this->entity->setThirdPartySetting('display_builder', StorageProperties::ConfigEntityId->value, $display_builder_config);
+      $this->entity->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY, $display_builder_config);
     }
 
     $this->entity->save();

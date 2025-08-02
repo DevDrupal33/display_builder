@@ -55,7 +55,7 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     if (!isset($extenders['display_builder'])) {
       return;
     }
-    /** @var \Drupal\display_builder\EntityWithDisplayBuilderInterface $extender */
+    /** @var \Drupal\display_builder\WithDisplayBuilderInterface $extender */
     $extender = $extenders['display_builder'];
     $extender->saveSources();
   }

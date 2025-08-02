@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\layout_builder\Kernel;
 
-use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay;
+use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
-use Drupal\display_builder\StorageProperties;
 
 /**
  * Test the DisplayBuilderEntityViewDisplay.
+ *
+ * @internal
  */
 #[CoversClass('\Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay')]
 #[Group('display_builder')]
-class DisplayBuilderEntityViewDisplayTest extends EntityKernelTestBase {
+final class DisplayBuilderEntityViewDisplayTest extends EntityKernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -37,20 +39,6 @@ class DisplayBuilderEntityViewDisplayTest extends EntityKernelTestBase {
   }
 
   /**
-   * Provides test data for ::testIsDisplayBuilderEnabled().
-   *
-   * @return array
-   *   The data to test.
-   */
-  public static function providerTestIsDisplayBuilderEnabled(): array {
-    $data = [];
-    $data['default enabled'] = [TRUE, 'default'];
-    $data['full enabled'] = [TRUE, 'full'];
-
-    return $data;
-  }
-
-  /**
    * Test the ::isDisplayBuilderEnabled method.
    *
    * @param bool $expected
@@ -67,14 +55,28 @@ class DisplayBuilderEntityViewDisplayTest extends EntityKernelTestBase {
       'status' => TRUE,
       'third_party_settings' => [
         'display_builder' => [
-          StorageProperties::ConfigEntityId->value => 'default',
+          ConfigFormBuilderInterface::PROFILE_PROPERTY => 'default',
         ],
       ],
     ]);
 
     $result = $display->isDisplayBuilderEnabled();
 
-    $this->assertSame($expected, $result);
+    self::assertSame($expected, $result);
+  }
+
+  /**
+   * Provides test data for ::testIsDisplayBuilderEnabled().
+   *
+   * @return array
+   *   The data to test.
+   */
+  public static function providerTestIsDisplayBuilderEnabled(): array {
+    $data = [];
+    $data['default enabled'] = [TRUE, 'default'];
+    $data['full enabled'] = [TRUE, 'full'];
+
+    return $data;
   }
 
 }

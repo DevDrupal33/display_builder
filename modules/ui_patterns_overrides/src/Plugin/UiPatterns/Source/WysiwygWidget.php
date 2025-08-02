@@ -37,13 +37,11 @@ class WysiwygWidget extends Upstream implements SourcesBundlerInterface {
    * {@inheritdoc}
    */
   public function getPropValue(): mixed {
-    $value = [
+    return [
       '#type' => 'processed_text',
       '#text' => $this->getSetting('value')['value'],
       '#format' => $this->getSetting('value')['format'],
     ];
-
-    return $value;
   }
 
   /**

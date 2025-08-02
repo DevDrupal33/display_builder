@@ -9,10 +9,16 @@ namespace Drupal\display_builder;
  */
 interface ConfigFormBuilderInterface {
 
+  // Storage property for the profile config entity ID.
+  public const PROFILE_PROPERTY = 'display_builder';
+
+  // Storage property for the nestable list of UI Patterns 2 sources.
+  public const SOURCES_PROPERTY = 'sources';
+
   /**
    * Build form for integration with Display Builder.
    *
-   * @param \Drupal\display_builder\EntityWithDisplayBuilderInterface $entity
+   * @param \Drupal\display_builder\WithDisplayBuilderInterface $entity
    *   An entity allowing the use of Display Builder.
    * @param bool $mandatory
    *   (Optional). Is it mandatory to use Display Builder? (for example, in
@@ -22,6 +28,6 @@ interface ConfigFormBuilderInterface {
    * @return array
    *   A form renderable array.
    */
-  public function build(EntityWithDisplayBuilderInterface $entity, bool $mandatory = TRUE): array;
+  public function build(WithDisplayBuilderInterface $entity, bool $mandatory = TRUE): array;
 
 }

@@ -6,12 +6,12 @@ namespace Drupal\display_builder\Entity;
 
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\display_builder\PatternPresetInterface;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
+use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Form\PatternPresetForm;
+use Drupal\display_builder\PatternPresetInterface;
 use Drupal\display_builder_ui\PatternPresetListBuilder;
-use Drupal\Core\Entity\EntityDeleteForm;
 
 /**
  * Defines the Pattern preset entity type.
@@ -97,8 +97,8 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
   public function getSources(array $contexts = [], bool $fillInstanceId = TRUE): array {
     $data = Yaml::decode($this->get('sources') ?? []);
 
-    if (isset($data[0]) && count($data) === 1) {
-      $data = reset($data);
+    if (isset($data[0]) && \count($data) === 1) {
+      $data = \reset($data);
     }
 
     if (empty($data) || !isset($data['source_id'])) {
@@ -120,7 +120,7 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
    */
   private static function fillInstanceId(array &$array): void {
     if (isset($array['source_id']) && !isset($array['_instance_id'])) {
-      $array['_instance_id'] = uniqid();
+      $array['_instance_id'] = \uniqid();
     }
 
     foreach ($array as &$value) {

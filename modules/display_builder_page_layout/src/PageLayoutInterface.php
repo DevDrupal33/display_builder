@@ -7,12 +7,12 @@ namespace Drupal\display_builder_page_layout;
 use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
-use Drupal\display_builder\EntityWithDisplayBuilderInterface;
+use Drupal\display_builder\WithDisplayBuilderInterface;
 
 /**
  * Provides an interface defining a page layout entity type.
  */
-interface PageLayoutInterface extends ConfigEntityInterface, EntityWithDisplayBuilderInterface, EntityWithPluginCollectionInterface {
+interface PageLayoutInterface extends ConfigEntityInterface, EntityWithPluginCollectionInterface, WithDisplayBuilderInterface {
 
   /**
    * Get conditions plugins.

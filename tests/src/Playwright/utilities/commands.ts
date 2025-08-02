@@ -3,19 +3,25 @@ import { expect, type Page, type BrowserContext, Locator } from '@playwright/tes
 import dbConfig from '../playwright.db.config';
 
 /**
- * Opens the Libraries drawer in the Display Builder UI.
- *
- * Waits for the Libraries button to be visible, clicks it,
- * and verifies the drawer is open.
+ * Toggles the sidebar first drawer in the Display Builder UI.
  *
  * @async
  * @param {Page} page - Playwright Page object.
+ * @param {string} [targetId='library'] - The target ID for the toolbar button. Default is the Libraries button.
  * @returns {Promise<void>}
  */
-export async function openLibraries(page: Page): Promise<void> {
-  await expect(page.getByRole('button', { name: 'Libraries' })).toBeVisible();
-  await page.getByRole('button', { name: 'Libraries' }).click();
-  await expect(page.getByRole('dialog')).toBeVisible();
+export async function toggleSidebarView(page: Page, targetId: string = 'library'): Promise<void> {
+  const sidebarFirst = page.locator('#db-first-drawer');
+  const toolbarButton = page.locator(`.db-toolbar__start [data-target="${targetId}"]`);
+  await expect(toolbarButton).toBeVisible();
+
+  if (await sidebarFirst.isVisible()) {
+    await toolbarButton.click();
+    await expect(sidebarFirst).toBeHidden();
+  } else {
+    await toolbarButton.click();
+    await expect(sidebarFirst).toBeVisible();
+  }
 }
 
 /**
@@ -23,44 +29,84 @@ export async function openLibraries(page: Page): Promise<void> {
  *
  * @async
  * @param {Page} page - Playwright Page object.
- * @param {string} builderId - The id of the builder.
  * @returns {Promise<void>}
  */
-export async function openLibrariesBlocks(page: Page, builderId: string): Promise<void> {
+export async function openLibrariesTab(page: Page, name: string = 'Blocks'): Promise<void> {
+  const sidebarFirst = page.locator('#db-first-drawer');
+  if (await sidebarFirst.isHidden()) {
+    await toggleSidebarView(page);
+  }
   await expect(
-    page.getByRole('tab', { name: 'Blocks', exact: true })
+    sidebarFirst.getByRole('tab', { name, exact: true })
   ).toBeVisible()
-  await page
-    .getByRole('tab', { name: 'Blocks', exact: true })
+  await sidebarFirst
+    .getByRole('tab', { name, exact: true })
     .locator('div')
     .click()
+
   await this.builderIsReady(page)
 }
 
 /**
  * Move a component in the builder, library must be open.
  *
- * Waits for the Libraries button to be visible, clicks it,
- * and verifies the drawer is open.
+ * @async
+ * @param {Page} page - Playwright Page object.
+ * @param {Locator} element - The element to drag to the target.
+ * @param {Locator} target - The target where the component must be dragged.
+ * @returns {Promise<void>}
+ */
+export async function dragElementFromLibraryById(page: Page, type: string = 'Components', id: string, target: Locator): Promise<void> {
+  const element = page.locator(`.db-island-library [hx-vals*="${id}"]`).first()
+  await this.dragElementFromLibrary(page, type, element, target)
+}
+
+/**
+ * Move a component in the builder, library must be open.
  *
  * @async
  * @param {Page} page - Playwright Page object.
- * @param {string} name - The name of the component to move.
- * @param {Locator} targetSlot - The Locator for the slot where the token should be dropped.
+ * @param {Locator} element - The element to drag to the target.
+ * @param {Locator} target - The target where the component must be dragged.
  * @returns {Promise<void>}
  */
-export async function moveComponent(page: Page, name: string, targetSlot: Locator): Promise<void> {
-  await expect(targetSlot).toBeVisible()
+export async function dragElementFromLibrary(page: Page, type: string = 'Components', element: Locator, target: Locator): Promise<void> {
+  await this.openLibrariesTab(page, type)
+  await this.dragElement(page, element, target)
+}
 
-  const testComponent = page.getByRole('button', { name, exact: true })
-  await expect(testComponent).toBeVisible()
-  await testComponent.hover()
+/**
+ * Move a component in the builder, library must be open.
+ *
+ * @async
+ * @param {Page} page - Playwright Page object.
+ * @param {Locator} element - The element to drag to the target.
+ * @param {Locator} target - The target where the component must be dragged.
+ * @returns {Promise<void>}
+ */
+export async function dragElement(page: Page, element: Locator, target: Locator): Promise<void> {
+  await this.builderIsReady(page)
 
-  await page.mouse.down()
-  await targetSlot.hover({ position: { x: 10, y: 10 } })
-  
-  await page.mouse.up()
-  await this.htmxReady(page)
+  await expect(target).toBeVisible()
+  await expect(element).toBeVisible()
+
+  // Js step by step drag.
+  // await component.hover({ position: { x: 10, y: 10 } })
+  // await expect(page.locator('.display-builder')).toContainClass('display-builder--onDrag')
+  // await page.mouse.down()
+  // await targetSlot.hover({ position: { x: 10, y: 10 } })
+  // await page.mouse.up()
+  // await expect(page.locator('.display-builder')).not.toContainClass('display-builder--onDrag')
+
+  await element.dragTo(target, {
+    force: true,
+    targetPosition: {
+      x: 10,
+      y: 10,
+    },
+  });
+
+  await this.builderIsReady(page)
 }
 
 /**
@@ -72,33 +118,35 @@ export async function moveComponent(page: Page, name: string, targetSlot: Locato
  * @param {string} value - The string value to set for the token in the settings dialog.
  * @returns {Promise<void>}
  */
-export async function setTokenWithValue(page: Page, targetSlot: Locator, value: string): Promise<void> {
-  await this.builderIsReady(page)
+export async function setElementValue(
+  page: Page,
+  element: Locator,
+  value: string,
+  valuePath?: Array<{ action: 'click' | 'fill'; locator: Locator }>
+): Promise<void> {
+  await expect(element).toBeVisible();
 
-  await expect(targetSlot).toBeVisible()
-  const tokenBlock = page.locator(`.db-island-block_library [hx-vals*="token"]`)
-  await expect(tokenBlock).toBeVisible()
+  await element.click();
+  await this.builderIsReady(page);
 
-  await tokenBlock.hover()
+  await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
 
-  await page.mouse.down()
-  await expect(tokenBlock).toContainClass('db-draggable--chosen')
-  await targetSlot.hover({position: { x: 10, y: 10 }})
-  await expect(page.locator('.display-builder')).toContainClass('display-builder--onDrag')
-  await page.mouse.up()
-  await expect(page.locator('.display-builder')).not.toContainClass('display-builder--onDrag')
+  if (valuePath && Array.isArray(valuePath)) {
+    for (const step of valuePath) {
+      await expect(step.locator).toBeVisible();
+      if (step.action === 'click') {
+        await step.locator.click();
+      } else if (step.action === 'fill') {
+        await step.locator.fill(value);
+      }
+    }
+  } else {
+    await page.locator('#edit-value').fill(value);
+  }
 
-  await this.builderIsReady(page)
+  await page.getByRole('button', { name: 'Update' }).click();
 
-  await page.locator(`.db-island-builder`).getByRole('button', { name: 'Token' }).click()
-  await this.builderIsReady(page)
-  await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible()
-  await page
-    .locator(`#edit-value`)
-    .fill(value)
-  await page.getByRole('button', { name: 'Update' }).click()
-
-  await this.builderIsReady(page)
+  await this.builderIsReady(page);
 }
 
 /**
@@ -215,7 +263,7 @@ export async function builderIsReady(page: Page): Promise<void> {
  */
 export async function refresh(page: Page, dbName: string): Promise<void> {
   await page.goto(dbConfig.dbViewUrl.replace('{db_id}', dbName));
-  await this.shoelaceReady(page)
+  await this.builderIsReady(page)
 }
 
 /**

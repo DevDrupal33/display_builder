@@ -9,12 +9,12 @@ use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_devel\Helper\DisplayBuilderDevelHelper;
 use Drupal\display_builder_devel\MockEntity;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Drupal\display_builder_views\Plugin\views\display_extender\DisplayBuilder as DisplayExtender;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -171,6 +171,7 @@ class DisplayBuilderDevelController extends ControllerBase {
 
       /** @var \Drupal\Core\Entity\EntityInterface $entity */
       $entity = $builder['contexts']['entity']->getContextValue();
+
       if ($entity) {
         $entity_type_id = $entity->getEntityTypeId();
         $bundle = $builder['contexts']['bundle']->getContextValue();

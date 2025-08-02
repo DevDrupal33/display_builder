@@ -17,6 +17,6 @@ test('Page Layout', {tag: '@db_page'} , async ({ page, drupal }) => {
 
   await cmd.builderIsReady(page)
 
-  await cmd.openLibraries(page)
-  await cmd.moveComponent(page, 'Test simple', page.locator(`#island-${dbConfig.pageTestName}-builder slot`))
+  await cmd.toggleSidebarView(page)
+  await cmd.dragElementFromLibraryById(page, 'Components', 'test_simple', page.locator(`.db-island-builder > slot.db-dropzone`))
 })

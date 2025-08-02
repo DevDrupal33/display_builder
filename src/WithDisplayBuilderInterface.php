@@ -12,7 +12,7 @@ use Drupal\Core\Url;
  * So, it fits for `page_layout` entities, but not for `view` and
  * `entity_view_display` where Display builder is a non-native addition.
  */
-interface EntityWithDisplayBuilderInterface {
+interface WithDisplayBuilderInterface {
 
   /**
    * Get the context requirement.

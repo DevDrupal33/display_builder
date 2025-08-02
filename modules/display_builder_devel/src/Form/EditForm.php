@@ -11,7 +11,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\display_builder\StorageProperties;
 use Drupal\display_builder_devel\MockEntity;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
@@ -44,8 +43,8 @@ final class EditForm extends FormBase {
     }
 
     $display_builder = new MockEntity($builder_id, 'default', []);
-    $form[StorageProperties::ConfigEntityId->value] = $this->configFormBuilder->build($display_builder);
-    unset($form[StorageProperties::ConfigEntityId->value]['admin_link']);
+    $form[ConfigFormBuilderInterface::PROFILE_PROPERTY] = $this->configFormBuilder->build($display_builder);
+    unset($form[ConfigFormBuilderInterface::PROFILE_PROPERTY]['admin_link']);
 
     $form['builder_id'] = [
       '#type' => 'hidden',
@@ -97,7 +96,7 @@ final class EditForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    $entity_config_id = $form_state->getValue(StorageProperties::ConfigEntityId->value);
+    $entity_config_id = $form_state->getValue(ConfigFormBuilderInterface::PROFILE_PROPERTY);
     $builder_id = $form_state->getValue('builder_id');
 
     $this->stateManager->setEntityConfigId($builder_id, $entity_config_id);

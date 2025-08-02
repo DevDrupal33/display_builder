@@ -11,10 +11,10 @@ use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\DisplayBuilderInterface;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\display_builder\StorageProperties;
 use Drupal\display_builder_page_layout\AccessControlHandler;
 use Drupal\display_builder_page_layout\Form\PageLayoutForm;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
@@ -63,8 +63,8 @@ use Drupal\ui_patterns\SourcePluginManager;
     'id',
     'label',
     'weight',
-    StorageProperties::ConfigEntityId->value,
-    StorageProperties::Sources->value,
+    ConfigFormBuilderInterface::PROFILE_PROPERTY,
+    ConfigFormBuilderInterface::SOURCES_PROPERTY,
     'conditions',
   ],
 )]
@@ -198,6 +198,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
     $contexts = RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
     // Get the sources stored in config.
     $data = $this->getSources();
+
     if (empty($data)) {
       // Fallback to a fixture mimicking the standard page layout.
       $data = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_page_layout', '', 'page_layout');

@@ -14,10 +14,10 @@ use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuilderInterface;
-use Drupal\display_builder\EntityWithDisplayBuilderInterface;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\display_builder\StorageProperties;
+use Drupal\display_builder\WithDisplayBuilderInterface;
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
@@ -27,7 +27,7 @@ use Drupal\ui_patterns\SourcePluginManager;
 /**
  * Provides an entity view display entity that has a display builder.
  */
-class DisplayBuilderEntityViewDisplay extends LayoutBuilderEntityViewDisplay implements EntityWithDisplayBuilderInterface {
+class DisplayBuilderEntityViewDisplay extends LayoutBuilderEntityViewDisplay implements WithDisplayBuilderInterface {
 
   /**
    * The source plugin manager.
@@ -104,12 +104,14 @@ class DisplayBuilderEntityViewDisplay extends LayoutBuilderEntityViewDisplay imp
    */
   public function calculateDependencies(): self {
     parent::calculateDependencies();
+
     if (!$this->getInstanceId()) {
       // If there is no instance ID, we cannot calculate dependencies.
       return $this;
     }
 
     $contexts = $this->stateManager->getContexts($this->getInstanceId());
+
     if (!$contexts) {
       return $this;
     }
@@ -211,7 +213,7 @@ class DisplayBuilderEntityViewDisplay extends LayoutBuilderEntityViewDisplay imp
    * {@inheritdoc}
    */
   public function getDisplayBuilder(): ?DisplayBuilderInterface {
-    $display_builder_id = $this->getThirdPartySetting('display_builder', StorageProperties::ConfigEntityId->value, '');
+    $display_builder_id = $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY, '');
 
     if (empty($display_builder_id)) {
       return NULL;
@@ -265,7 +267,7 @@ class DisplayBuilderEntityViewDisplay extends LayoutBuilderEntityViewDisplay imp
    * {@inheritdoc}
    */
   public function getSources(): array {
-    return $this->getThirdPartySetting('display_builder', StorageProperties::Sources->value, []);
+    return $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::SOURCES_PROPERTY, []);
   }
 
   /**
@@ -273,7 +275,7 @@ class DisplayBuilderEntityViewDisplay extends LayoutBuilderEntityViewDisplay imp
    */
   public function saveSources(): void {
     $data = $this->stateManager->getCurrentState($this->getInstanceId());
-    $this->setThirdPartySetting('display_builder', StorageProperties::Sources->value, $data);
+    $this->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::SOURCES_PROPERTY, $data);
     $this->save();
   }
 

@@ -8,10 +8,10 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\DisplayBuilderInterface;
-use Drupal\display_builder\EntityWithDisplayBuilderInterface;
-use Drupal\display_builder\StorageProperties;
+use Drupal\display_builder\WithDisplayBuilderInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\views\Attribute\ViewsDisplayExtender;
 use Drupal\views\Plugin\views\display_extender\DisplayExtenderPluginBase;
@@ -28,7 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   help: new TranslatableMarkup('Use display builder as output for this view.'),
   no_ui: FALSE,
 )]
-class DisplayBuilder extends DisplayExtenderPluginBase implements EntityWithDisplayBuilderInterface {
+class DisplayBuilder extends DisplayExtenderPluginBase implements WithDisplayBuilderInterface {
 
   /**
    * The display builder state manager.
@@ -74,7 +74,7 @@ class DisplayBuilder extends DisplayExtenderPluginBase implements EntityWithDisp
     }
 
     $form['#title'] .= $this->t('Display Builder');
-    $form[StorageProperties::ConfigEntityId->value] = $this->configFormBuilder->build($this, FALSE);
+    $form[ConfigFormBuilderInterface::PROFILE_PROPERTY] = $this->configFormBuilder->build($this, FALSE);
   }
 
   /**
@@ -88,11 +88,12 @@ class DisplayBuilder extends DisplayExtenderPluginBase implements EntityWithDisp
     }
 
     // @todo we should have always a fallback.
-    $display_builder_config = $form_state->getValue(StorageProperties::ConfigEntityId->value, 'default');
-    $this->options[StorageProperties::ConfigEntityId->value] = $display_builder_config;
+    $display_builder_config = $form_state->getValue(ConfigFormBuilderInterface::PROFILE_PROPERTY, 'default');
+    $this->options[ConfigFormBuilderInterface::PROFILE_PROPERTY] = $display_builder_config;
 
     if (!empty($display_builder_config)) {
       $this->initInstanceIfMissing();
+
       return;
     }
 
@@ -156,10 +157,10 @@ class DisplayBuilder extends DisplayExtenderPluginBase implements EntityWithDisp
    * {@inheritdoc}
    */
   public function getDisplayBuilder(): ?DisplayBuilderInterface {
-    if (!isset($this->options[StorageProperties::ConfigEntityId->value])) {
+    if (!isset($this->options[ConfigFormBuilderInterface::PROFILE_PROPERTY])) {
       return NULL;
     }
-    $display_builder_id = $this->options[StorageProperties::ConfigEntityId->value];
+    $display_builder_id = $this->options[ConfigFormBuilderInterface::PROFILE_PROPERTY];
 
     if (empty($display_builder_id)) {
       return NULL;
@@ -215,7 +216,7 @@ class DisplayBuilder extends DisplayExtenderPluginBase implements EntityWithDisp
    * {@inheritdoc}
    */
   public function getSources(): array {
-    return $this->options[StorageProperties::Sources->value] ?? [];
+    return $this->options[ConfigFormBuilderInterface::SOURCES_PROPERTY] ?? [];
   }
 
   /**

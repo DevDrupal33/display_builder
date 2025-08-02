@@ -54,7 +54,7 @@ final class DisplayBuilderForm extends EntityForm {
     // permissions are not set yet by DisplayBuilderPermissions.
     if (!$entity->isNew()) {
       $roles = $this->entityTypeManager->getStorage('user_role')->loadMultiple();
-      ksort($roles);
+      \ksort($roles);
       $form['roles'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Roles'),
@@ -85,7 +85,7 @@ final class DisplayBuilderForm extends EntityForm {
     /** @var \Drupal\display_builder\IslandPluginManagerInterface $islandPluginManager */
     $islandPluginManager = \Drupal::service('plugin.manager.db_island'); // phpcs:ignore
     $island_by_types = $islandPluginManager->getIslandsByTypes();
-    ksort($island_by_types);
+    \ksort($island_by_types);
 
     $header = [
       'drag' => '',

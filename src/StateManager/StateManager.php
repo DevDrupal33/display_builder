@@ -247,7 +247,7 @@ class StateManager implements StateManagerInterface {
    */
   public function attachSourceToRoot(string $builder_id, int $position, string $source_id, array $data, ?array $third_party_settings = NULL): string {
     $data = [
-      '_instance_id' => uniqid(),
+      '_instance_id' => \uniqid(),
       'source_id' => $source_id,
       'source' => $data,
       '_third_party_settings' => $third_party_settings,
@@ -278,7 +278,7 @@ class StateManager implements StateManagerInterface {
   public function attachSourceToSlot(string $builder_id, string $parent_id, string $slot_id, int $position, string $source_id, array $data, ?array $third_party_settings = NULL): string {
     $root = $this->getCurrentState($builder_id);
     $data = [
-      '_instance_id' => uniqid(),
+      '_instance_id' => \uniqid(),
       'source_id' => $source_id,
       'source' => $data,
       '_third_party_settings' => $third_party_settings,
@@ -508,18 +508,38 @@ class StateManager implements StateManagerInterface {
   public function getUsers(string $builder_id): array {
     $users = [];
     $storage = $this->stateStorage->load($builder_id);
-    $steps = array_merge(
+    $steps = \array_merge(
       $storage['past'],
       [$storage['present']],
       $storage['future']
     );
+
     foreach ($steps as $step) {
       $user_id = $step['user'] ?? NULL;
-      if ($user_id && ($users[$user_id] ?? 0 < $step['time'])) {
+
+      if ($user_id && ($users[$user_id] ?? $step['time'] > 0)) {
         $users[$user_id] = $step['time'];
       }
     }
+
     return $users;
+  }
+
+  /**
+   * Get the path to an instance.
+   *
+   * @param string $builder_id
+   *   The builder id.
+   * @param array $root
+   *   The root state.
+   * @param string $instance_id
+   *   The instance id.
+   *
+   * @return array
+   *   The path, one array item by level.
+   */
+  public function getPath(string $builder_id, array $root, string $instance_id): array {
+    return $this->getPathIndex($builder_id, $root)[$instance_id] ?? [];
   }
 
   /**
@@ -584,23 +604,6 @@ class StateManager implements StateManagerInterface {
   }
 
   /**
-   * Get the path to an instance.
-   *
-   * @param string $builder_id
-   *   The builder id.
-   * @param array $root
-   *   The root state.
-   * @param string $instance_id
-   *   The instance id.
-   *
-   * @return array
-   *   The path, one array item by level.
-   */
-  public function getPath(string $builder_id, array $root, string $instance_id): array {
-    return $this->getPathIndex($builder_id, $root)[$instance_id] ?? [];
-  }
-
-  /**
    * Get the instance ID from a path.
    *
    * @todo may be slow.
@@ -659,7 +662,7 @@ class StateManager implements StateManagerInterface {
    */
   protected function buildIndexFromInstance(string $builder_id, array $path, array $data = []): array {
     // First job: Add missing _instance_id keys.
-    $instance_id = $data['_instance_id'] ?? uniqid();
+    $instance_id = $data['_instance_id'] ?? \uniqid();
     $data['_instance_id'] = $instance_id;
     // Second job: Save the path to the index.
     $this->pathIndex[$builder_id][$instance_id] = $path;

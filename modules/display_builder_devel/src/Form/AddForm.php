@@ -11,7 +11,6 @@ use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\display_builder\StorageProperties;
 use Drupal\display_builder_devel\MockEntity;
 
 /**
@@ -31,7 +30,7 @@ final class AddForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $display_builder = new MockEntity('', '', []);
-    $form[StorageProperties::ConfigEntityId->value] = $this->configFormBuilder->build($display_builder);
+    $form[ConfigFormBuilderInterface::PROFILE_PROPERTY] = $this->configFormBuilder->build($display_builder);
 
     $form['fixture_id'] = [
       '#type' => 'select',
@@ -92,7 +91,7 @@ final class AddForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    $display_builder_id = $form_state->getValue(StorageProperties::ConfigEntityId->value);
+    $display_builder_id = $form_state->getValue(ConfigFormBuilderInterface::PROFILE_PROPERTY);
     $fixture_id = $form_state->getValue('fixture_id', 'blank');
     $builder_id = $form_state->getValue('builder_id');
 

@@ -77,8 +77,6 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
   use RenderableBuilderTrait;
   use StringTranslationTrait;
 
-  public const DISPLAY_BUILDER_CONFIG = 'default';
-
   /**
    * The display builder description.
    */

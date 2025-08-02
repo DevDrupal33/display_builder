@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
-use Drupal\Component\Utility\Html;
 use Drupal\Component\Plugin\PluginManagerInterface;
+use Drupal\Component\Utility\Html;
 use Drupal\ui_patterns_overrides\SourcesBundlerInterface;
 
 /**

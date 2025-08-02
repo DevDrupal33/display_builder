@@ -6,13 +6,13 @@ namespace Drupal\ui_patterns_overrides\Plugin\UiPatterns\Source;
 
 use Drupal\Core\Config\Entity\ConfigEntityType;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\SourcePluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 
 /**
  * Plugin implementation of the source.
@@ -95,8 +95,10 @@ class ContentEntitySource extends SourcePluginBase {
     $form = parent::settingsForm($form, $form_state);
 
     $entity_type = $this->getSetting('entity_type');
-    if (NULL === $entity_type || empty($entity_type)) {
+
+    if ($entity_type === NULL || empty($entity_type)) {
       $options = [];
+
       foreach ($this->entityTypeManager->getDefinitions() as $key => $value) {
         if (!$value instanceof ConfigEntityType) {
           $options[$key] = $value->getLabel();
@@ -154,7 +156,7 @@ class ContentEntitySource extends SourcePluginBase {
       return NULL;
     }
 
-    if (!is_numeric($entity_id)) {
+    if (!\is_numeric($entity_id)) {
       return NULL;
     }
 

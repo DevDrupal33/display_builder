@@ -64,6 +64,7 @@ class ViewsManagementController extends ControllerBase {
     $view_id = \explode('__', $builder_id)[1];
     $display_id = \explode('__', $builder_id)[2];
     $view = $this->entityTypeManager()->getStorage('view')->load($view_id);
+
     if (!$view) {
       return [];
     }

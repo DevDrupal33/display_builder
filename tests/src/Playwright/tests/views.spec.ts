@@ -61,8 +61,7 @@ test('Views Display Builder', {tag: '@db_views'} , async ({ page, drupal }) => {
   await page.getByRole('link', { name: 'Build display' }).click()
   await cmd.shoelaceReady(page)
 
-  await cmd.openLibraries(page)
-  await cmd.openLibrariesBlocks(page, `view__${dbConfig.viewsTestName}__page_test`)
+  await cmd.openLibrariesTab(page)
   // @todo check the proper views row.
   const sources = {
     'view_attachment_after': '[View] Footer area',
@@ -83,18 +82,28 @@ test('Views Display Builder', {tag: '@db_views'} , async ({ page, drupal }) => {
     await expect(page.locator(`.db-island-builder [data-instance-title="${label}"]`)).toHaveCount(1)
   }
 
-  // Add a token before first source in the builder.
-  const target = page.locator('.db-island-builder').getByText('[View] Header')
-  await cmd.setTokenWithValue(page, target, 'Test views')
+  await cmd.dragElementFromLibraryById(page, 'Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
+  await cmd.setElementValue(page,
+    page.locator(`.db-island-builder [data-instance-title="Token"]`),
+    'I am a test token in a views',
+      [
+      {
+        action: 'fill',
+        locator: page.locator('#edit-value'),
+      }
+    ]
+  )
   await cmd.saveDisplayBuilder(page)
+  await cmd.shoelaceReady(page)
 
   // Test 4: Check the builder result from the view.
   await page.goto(dbConfig.viewsEditUrl.replace('{view_id}', dbConfig.viewsTestName))
   await cmd.ajaxReady(page)
   await page.getByRole('link', { name: 'View Page' }).click()
   await expect(page.getByRole('heading', { name: 'Test page with Display builder' })).toBeVisible()
-  // @todo this is failing...
-  // await expect(page.getByText('Test views')).toBeVisible();
+
+  // @todo not working... fix it!
+  // await expect(page.getByText('I am a test token in a views')).toBeVisible();
 
   // Test 5: Delete the builder.
   await page.goto(dbConfig.viewsEditUrl.replace('{view_id}', dbConfig.viewsTestName))

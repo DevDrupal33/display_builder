@@ -10,9 +10,6 @@ display_builder_page_layout.page_layout.*:
       label: Label
     uuid:
       type: string
-    display_builder:
-      type: string
-      label: "Used Display Builder"
     weight:
       type: weight
       label: Weight
@@ -22,9 +19,16 @@ display_builder_page_layout.page_layout.*:
       sequence:
         type: condition.plugin.[id]
         label: 'Condition'
+    display_builder:
+      label: "Display Builder profile"
+      type: string
+      constraints:
+        ConfigExists:
+          prefix: 'display_builder.display_builder.'
     sources:
-      # @todo set this configuration, ignore for now.
-      type: ignore
-      label: "Display Builder sources."
+      label: "UI Patterns sources"
+      type: sequence
+      sequence:
+        type: ui_patterns_source.[source_id]
   constraints:
     FullyValidatable: ~

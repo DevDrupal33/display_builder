@@ -6,7 +6,7 @@ import * as cmd from '../utilities/commands'
 
 import dbConfig from '../playwright.db.config'
 
-test('Create Display Builder', async ({ page, drupal }) => {
+test('Create instance', {tag: '@db_devel'}, async ({ page, drupal }) => {
 
   await drupal.setupMinimalTestSite()
   await drupal.loginAsAdmin()
@@ -19,6 +19,7 @@ test('Create Display Builder', async ({ page, drupal }) => {
   // @todo select a fixture
   // await page.locator('select[name="fixture_id"]').selectOption(fixture)
   await page.getByRole('button', { name: 'Save' }).click()
+
   await expect(page.getByRole('heading', { name: `Display builder: ${dbName}` })).toBeVisible()
   await cmd.shoelaceReady(page)
   await expect(page.getByRole('tab', { name: 'Builder' })).toBeVisible()
@@ -29,48 +30,71 @@ test('Create Display Builder', async ({ page, drupal }) => {
   await expect(page.getByRole('dialog')).toBeVisible()
   await expect(page.getByRole('tab', { name: 'Components' })).toBeVisible()
 
-  // Delete all
+  // Test 3: Delete this instance
   await page.goto(dbConfig.dbList)
   await expect(page.getByRole('link', { name: dbName })).toBeVisible()
-  await page.goto(dbConfig.dbDeleteAllUrl)
+  await page.getByRole('button', { name: 'List additional actions' }).click()
+  await page.getByRole('link', { name: 'Delete', exact: true }).click()
+  await expect(page.getByRole('heading', { name: `Do you want to delete ${dbName}?` })).toBeVisible()
   await page.getByRole('button', { name: 'Confirm' }).click()
-  await page.goto(dbConfig.dbList)
+  await expect(page.getByRole('link', { name: dbName })).not.toBeVisible()
 })
 
-// @todo fix or decide if needed with the full test.
-// test('Simple Display Builder', async ({ page, drupal }) => {
-//   const dbName = `test_${utils.createRandomString(6)}`
-//   const dbBuilderId = `#island-${dbName}-builder`
+test('Actions and cmd', {tag: '@db_devel'}, async ({ page, drupal }) => {
+  const dbId = `test_${utils.createRandomString(6)}`
 
-//   await drupal.setupMinimalTestSite()
-//   await drupal.loginAsAdmin()
+  await drupal.setupMinimalTestSite()
+  await drupal.loginAsAdmin()
 
-//   await cmd.createDisplayBuilderFromUi(page, dbName)
+  // Test 1: Create a Display builder
+  await cmd.createDisplayBuilderFromUi(page, dbId)
 
-//   // Test 1: Add component and token with configuration.
-//   await cmd.openLibraries(page)
-//   await cmd.moveComponent(page, 'Test simple', page.locator(`${dbBuilderId} > slot`))
+  // @todo seems needed because of failing SortableJs on empty builder
+  await cmd.refresh(page, dbId)
 
-//   await cmd.openLibrariesBlocks(page, dbName)
+  // Test 2: Open libraries and drag elements and set some values
+  await cmd.dragElementFromLibraryById(page, 'Components', 'test_simple', page.locator(`.db-island-builder > slot.db-dropzone`))
+  // page.locator(`.db-island-builder > slot.db-dropzone`).highlight()
+  await cmd.dragElementFromLibraryById(page, 'Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
+  // page.locator(`.db-island-builder > slot.db-dropzone`).highlight()
 
-//   await cmd.setTokenWithValue(page, page.locator(`${dbBuilderId} .slot_test`), 'I am')
-//   await cmd.setTokenWithValue(page, page.locator(`${dbBuilderId} .slot_test`), 'a test')
+  await cmd.dragElement(page,
+    page.locator(`.db-island-builder [data-instance-title="Token"]`),
+    page.locator(`.db-island-builder [data-slot-id="slot_1"]`),
+  )
 
-//   // Test 2: Move token before.
-//   await page.getByText('I am ', { exact: true }).hover()
-//   await page.mouse.down()
-//   await page.getByText('a test', { exact: true }).hover()
-//   await page.mouse.up()
-//   await cmd.builderIsReady(page)
+  await cmd.setElementValue(page,
+    page.locator(`.db-island-builder [data-instance-title="Token"]`),
+    'I am a test token in a slot',
+      [
+      {
+        action: 'fill',
+        locator: page.locator('#edit-value'),
+      }
+    ]
+  )
 
-//   await expect(page.locator(`#island-${dbName}-builder`)).toContainText('I ama test')
+  await cmd.setElementValue(page,
+    page.locator(`.db-island-builder [data-instance-title="Test simple"]`),
+    'I am a component with a token',
+    [
+      {
+        action: 'click',
+        locator: page.getByRole('button', { name: 'Label' }),
+      },
+      {
+        action: 'fill',
+        locator: page.locator('input[name="component[props][label][source][value]"]'),
+      }
+    ]
+  )
 
-//   await expect(page.getByRole('tab', { name: 'Preview' })).toBeVisible()
-//   await page.getByRole('tab', { name: 'Preview' }).click()
-//   await cmd.builderIsReady(page)
-//   // @token token are not refreshed in proper order..?
-//   await expect(page.locator(`#island-${dbName}-preview`)).toContainText('a testI am')
-// })
+  await cmd.closeDialog(page)
+  await cmd.closeDialog(page, 'second')
+
+  await page.getByRole('tab', { name: 'Preview' }).click()
+  await expect(page.locator(`#island-${dbId}-preview`)).toMatchAriaSnapshot('- text: "label: I am a component with a token I am a test token in a slot"')
+})
 
 test('Full Display Builder ', async ({ page, drupal }) => {
 

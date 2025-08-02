@@ -26,7 +26,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
   /**
    * {@inheritdoc}
    */
-  public function build(EntityWithDisplayBuilderInterface $entity, bool $mandatory = TRUE): array {
+  public function build(WithDisplayBuilderInterface $entity, bool $mandatory = TRUE): array {
     $options = $this->getAllowedDisplayBuilders();
 
     if (empty($options)) {
@@ -40,7 +40,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
     $description .= $this->t('Profiles allow to include specific functionalities available in the builder.');
 
     $options = $mandatory ? $options : ['' => $this->t('- Disabled -')] + $options;
-    $form[StorageProperties::ConfigEntityId->value] = [
+    $form[ConfigFormBuilderInterface::PROFILE_PROPERTY] = [
       '#type' => 'select',
       '#title' => $this->t('Profile'),
       '#description' => $description,
@@ -48,7 +48,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
     ];
 
     if ($entity->getDisplayBuilder()?->id()) {
-      $form[StorageProperties::ConfigEntityId->value]['#default_value'] = (string) $entity->getDisplayBuilder()->id();
+      $form[ConfigFormBuilderInterface::PROFILE_PROPERTY]['#default_value'] = (string) $entity->getDisplayBuilder()->id();
     }
 
     $instance_id = $entity->getInstanceId();

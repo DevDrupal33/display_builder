@@ -86,15 +86,13 @@ trait HtmxTrait {
    *   An array of attributes for the HTMX request.
    */
   protected function setTrigger(string $trigger, string $method, Url $url): array {
-    $attr = [
+    return [
       'hx-' . $method => $url->toString(),
       'hx-trigger' => $trigger,
       // Most HTMX responses will use OOB swaps so let's de activate swapping by
       // default.
       'hx-swap' => 'none',
     ];
-
-    return $attr;
   }
 
 }

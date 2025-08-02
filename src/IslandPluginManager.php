@@ -90,6 +90,7 @@ final class IslandPluginManager extends DefaultPluginManager implements IslandPl
       function ($definition) use ($configuration, $contexts) {
         $config = $configuration[$definition['id']] ?? [];
         $config['contexts'] = $contexts;
+
         return $this->createInstance($definition['id'], $config);
       },
       $definitions,
@@ -109,7 +110,7 @@ final class IslandPluginManager extends DefaultPluginManager implements IslandPl
    */
   private function sortListByWeight(array $list, array $weight): array {
     foreach ($list as &$items) {
-      uksort($items, static function ($a, $b) use ($weight) {
+      \uksort($items, static function ($a, $b) use ($weight) {
         return $weight[$a] <=> $weight[$b];
       });
     }

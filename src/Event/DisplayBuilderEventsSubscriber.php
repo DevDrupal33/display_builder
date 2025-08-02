@@ -151,11 +151,13 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
     $islands = $this->islandManager->createInstances($this->islandManager->getDefinitions(), $contexts, $configuration);
 
     $island_enabled = $event->getIslandEnabled();
+
     foreach ($islands as $island_id => $island) {
       if (!isset($island_enabled[$island_id])) {
         continue;
       }
-      if (!method_exists($island, $method)) {
+
+      if (!\method_exists($island, $method)) {
         continue;
       }
       $result = $island->{$method}(...$parameters);

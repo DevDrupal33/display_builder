@@ -2,9 +2,13 @@ views.display_extender.display_builder:
   type: views_display_extender
   mapping:
     display_builder:
+      label: "Display Builder profile"
       type: string
-      label: "Display builder config"
+      constraints:
+        ConfigExists:
+          prefix: 'display_builder.display_builder.'
     sources:
-      # @todo set this configuration, ignore for now.
-      type: ignore
-      label: "Display Builder sources."
+      label: "UI Patterns sources"
+      type: sequence
+      sequence:
+        type: ignore

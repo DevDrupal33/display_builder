@@ -3,9 +3,12 @@ core.entity_view_display.*.*.*.third_party.display_builder:
   label: 'Display Builder settings'
   mapping:
     display_builder:
-      type: string
-      label: "Used Display Builder"
+      label: "Display Builder profile"
+      constraints:
+        ConfigExists:
+          prefix: 'display_builder.display_builder.'
     sources:
-      # @todo set this configuration, ignore for now.
-      type: ignore
-      label: "Display Builder sources."
+      label: "UI Patterns sources"
+      type: sequence
+      sequence:
+        type: ui_patterns_source.[id]

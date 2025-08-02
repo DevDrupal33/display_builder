@@ -14,6 +14,57 @@ use Drupal\Core\Url;
 trait RenderableBuilderTrait {
 
   /**
+   * Build error message.
+   *
+   * @param string $builder_id
+   *   The builder id.
+   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $message
+   *   The message to display.
+   * @param string|null $debug
+   *   (Optional) Debug information to print.
+   * @param int|null $duration
+   *   (Optional) Alert duration before closing.
+   * @param bool $global
+   *   (Optional) Try to use the default builder message placeholder.
+   *
+   * @return array
+   *   The input render array.
+   */
+  public function buildError(string $builder_id, string|TranslatableMarkup $message, ?string $debug = NULL, ?int $duration = NULL, bool $global = FALSE): array {
+    $build = [
+      '#type' => 'component',
+      '#component' => 'display_builder:alert',
+      '#slots' => [
+        'content' => $message,
+      ],
+      '#props' => [
+        'variant' => 'danger',
+        'icon' => 'exclamation-octagon',
+        'open' => TRUE,
+        'closable' => TRUE,
+      ],
+      '#attributes' => [
+        'class' => 'db-message',
+      ],
+    ];
+
+    if ($debug) {
+      $build['#slots']['debug'] = $debug;
+    }
+
+    if ($duration) {
+      $build['#props']['duration'] = $duration;
+    }
+
+    if ($global) {
+      $build['#props']['id'] = \sprintf('message-%s', $builder_id);
+      $build['#attributes']['hx-swap-oob'] = 'true';
+    }
+
+    return $build;
+  }
+
+  /**
    * Build placeholder.
    *
    * @param string $label
@@ -50,7 +101,7 @@ trait RenderableBuilderTrait {
     }
 
     if (!empty($vals)) {
-      $build['#attributes']['hx-vals'] = json_encode($vals);
+      $build['#attributes']['hx-vals'] = \json_encode($vals);
     }
 
     return $build;
@@ -183,8 +234,8 @@ trait RenderableBuilderTrait {
     ?string $icon = NULL,
     ?string $tooltip = NULL,
   ): array {
-    if (empty(trim((string) $label))) {
-      $id = uniqid();
+    if (empty(\trim((string) $label))) {
+      $id = \uniqid();
     }
     else {
       $id = Html::getUniqueId((string) $label);
@@ -262,7 +313,7 @@ trait RenderableBuilderTrait {
     string $icon_position = 'prefix',
     bool $disabled = FALSE,
   ): array {
-    $menu_item = [
+    return [
       '#type' => 'component',
       '#component' => 'display_builder:menu_item',
       '#props' => [
@@ -276,8 +327,6 @@ trait RenderableBuilderTrait {
         'data-contextual-menu' => TRUE,
       ],
     ];
-
-    return $menu_item;
   }
 
   /**
@@ -287,15 +336,13 @@ trait RenderableBuilderTrait {
    *   The menu item render array.
    */
   protected function buildMenuDivider(): array {
-    $menu_item = [
+    return [
       '#type' => 'component',
       '#component' => 'display_builder:menu_item',
       '#props' => [
         'variant' => 'divider',
       ],
     ];
-
-    return $menu_item;
   }
 
   /**
@@ -400,67 +447,21 @@ trait RenderableBuilderTrait {
     if ($id) {
       $build['#props']['id'] = $id;
     }
+
     if ($autocomplete) {
       $build['#props']['autocomplete'] = $autocomplete;
     }
+
     if ($placeholder) {
       $build['#props']['placeholder'] = $placeholder;
     }
+
     if ($clearable) {
       $build['#props']['clearable'] = TRUE;
     }
+
     if ($icon) {
       $build['#props']['icon'] = $icon;
-    }
-
-    return $build;
-  }
-
-  /**
-   * Build error message.
-   *
-   * @param string $builder_id
-   *   The builder id.
-   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $message
-   *   The message to display.
-   * @param string|null $debug
-   *   (Optional) Debug information to print.
-   * @param int|null $duration
-   *   (Optional) Alert duration before closing.
-   * @param bool $global
-   *   (Optional) Try to use the default builder message placeholder.
-   *
-   * @return array
-   *   The input render array.
-   */
-  public function buildError(string $builder_id, string|TranslatableMarkup $message, ?string $debug = NULL, ?int $duration = NULL, bool $global = FALSE): array {
-    $build = [
-      '#type' => 'component',
-      '#component' => 'display_builder:alert',
-      '#slots' => [
-        'content' => $message,
-      ],
-      '#props' => [
-        'variant' => 'danger',
-        'icon' => 'exclamation-octagon',
-        'open' => TRUE,
-        'closable' => TRUE,
-      ],
-      '#attributes' => [
-        'class' => 'db-message',
-      ],
-    ];
-
-    if ($debug) {
-      $build['#slots']['debug'] = $debug;
-    }
-    if ($duration) {
-      $build['#props']['duration'] = $duration;
-    }
-
-    if ($global) {
-      $build['#props']['id'] = \sprintf('message-%s', $builder_id);
-      $build['#attributes']['hx-swap-oob'] = 'true';
     }
 
     return $build;

@@ -43,6 +43,7 @@ class PageLayoutController extends ControllerBase {
    */
   public function getBuilder(PageLayoutInterface $page_layout): array {
     $display_builder = $page_layout->getDisplayBuilder();
+
     if (!$display_builder) {
       // Display Builder is not activated for this page layout. This is not
       // supposed to happen because Display Builder is mandatory.
@@ -50,6 +51,7 @@ class PageLayoutController extends ControllerBase {
     }
 
     $instance_id = $page_layout->getInstanceId();
+
     if (!$this->stateManager->load($instance_id)) {
       // Display Builder instance was not created yet or deleted, create it on
       // the fly.

@@ -52,7 +52,8 @@ class DisplayBuilderPermissions implements ContainerInjectionInterface {
     // that any of them are potentially unsafe.
     /** @var \Drupal\display_builder\DisplayBuilderInterface[] $builders */
     $builders = $this->entityTypeManager->getStorage('display_builder')->loadMultiple();
-    uasort($builders, 'Drupal\Core\Config\Entity\ConfigEntityBase::sort');
+    \uasort($builders, 'Drupal\Core\Config\Entity\ConfigEntityBase::sort');
+
     foreach ($builders as $builder) {
       $permission = $builder->getPermissionName();
       $permissions[$permission] = [
@@ -76,6 +77,7 @@ class DisplayBuilderPermissions implements ContainerInjectionInterface {
         ],
       ];
     }
+
     return $permissions;
   }
 

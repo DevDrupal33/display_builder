@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\display_builder_page_layout\Kernel;
 
-use Drupal\display_builder_page_layout\Entity\PageLayout;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormState;
+use Drupal\display_builder_page_layout\Entity\PageLayout;
+use Drupal\KernelTests\KernelTestBase;
 
 /**
  * Kernel test for the PageLayout config entity and its form.
  *
  * @group display_builder
+ *
+ * @internal
+ *
+ * @coversNothing
  */
 final class PageLayoutEntityTest extends KernelTestBase {
 
@@ -30,8 +34,6 @@ final class PageLayoutEntityTest extends KernelTestBase {
 
   /**
    * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected EntityTypeManagerInterface $entityTypeManager;
 
@@ -61,15 +63,15 @@ final class PageLayoutEntityTest extends KernelTestBase {
 
     // Load the entity.
     $loaded = PageLayout::load('test_layout');
-    $this->assertNotNull($loaded, 'PageLayout entity loaded.');
-    $this->assertEquals('Test Layout', $loaded->label());
+    self::assertNotNull($loaded, 'PageLayout entity loaded.');
+    self::assertSame('Test Layout', $loaded->label());
 
     // Test getInstanceId().
-    $this->assertEquals('page_layout__test_layout', $loaded->getInstanceId());
+    self::assertSame('page_layout__test_layout', $loaded->getInstanceId());
 
     // Delete the entity.
     $entity->delete();
-    $this->assertNull(PageLayout::load('test_layout'), 'Entity deleted.');
+    self::assertNull(PageLayout::load('test_layout'), 'Entity deleted.');
   }
 
   /**
@@ -94,10 +96,10 @@ final class PageLayoutEntityTest extends KernelTestBase {
     $form_state = new FormState();
     $form = $form_object->buildForm([], $form_state);
 
-    $this->assertArrayHasKey('label', $form, 'Form has label field.');
-    $this->assertArrayHasKey('id', $form, 'Form has id field.');
-    $this->assertArrayHasKey('conditions', $form, 'Form has conditions field.');
-    $this->assertArrayHasKey('status', $form, 'Form has status field.');
+    self::assertArrayHasKey('label', $form, 'Form has label field.');
+    self::assertArrayHasKey('id', $form, 'Form has id field.');
+    self::assertArrayHasKey('conditions', $form, 'Form has conditions field.');
+    self::assertArrayHasKey('status', $form, 'Form has status field.');
   }
 
   /**
@@ -117,7 +119,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
 
     // Load and edit the entity.
     $loaded = PageLayout::load('edit_layout');
-    $this->assertEquals('Original Label', $loaded->label());
+    self::assertSame('Original Label', $loaded->label());
 
     // Change label and weight.
     $loaded->set('label', 'Updated Label');
@@ -126,8 +128,8 @@ final class PageLayoutEntityTest extends KernelTestBase {
 
     // Reload and assert changes.
     $updated = PageLayout::load('edit_layout');
-    $this->assertEquals('Updated Label', $updated->label());
-    $this->assertEquals(10, $updated->get('weight'));
+    self::assertSame('Updated Label', $updated->label());
+    self::assertSame(10, $updated->get('weight'));
   }
 
 }
