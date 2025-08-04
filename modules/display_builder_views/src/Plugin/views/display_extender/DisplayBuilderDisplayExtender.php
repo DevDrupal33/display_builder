@@ -207,7 +207,7 @@ class DisplayBuilderDisplayExtender extends DisplayExtenderPluginBase implements
 
     if (empty($sources)) {
       // Fallback to a fixture mimicking the standard view layout.
-      $sources = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_views', '', 'default_view');
+      $sources = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_views', 'default_view');
     }
     $this->stateManager->create($instance_id, (string) $this->getDisplayBuilder()->id(), $sources, $contexts);
   }

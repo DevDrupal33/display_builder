@@ -201,7 +201,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
 
     if (empty($data)) {
       // Fallback to a fixture mimicking the standard page layout.
-      $data = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_page_layout', '', 'default_page_layout');
+      $data = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_page_layout', 'default_page_layout');
     }
     $this->stateManager()->create($instance_id, $this->display_builder, $data, $contexts);
   }

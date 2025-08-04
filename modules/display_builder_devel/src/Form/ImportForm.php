@@ -9,7 +9,7 @@ use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\display_builder\DisplayBuilderHelpers;
+use Drupal\display_builder_devel\FixturesHelpers;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 
 /**
@@ -27,7 +27,7 @@ final class ImportForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, ?string $builder_id = NULL): array {
-    $options = DisplayBuilderHelpers::getAllFixturesOptions();
+    $options = FixturesHelpers::getAllFixturesOptions();
 
     $form['type'] = [
       '#type' => 'select',
@@ -100,7 +100,7 @@ final class ImportForm extends FormBase {
 
     if ($import_type === 'fixture') {
       $fixture_id = $form_state->getValue('fixture_id', 'blank');
-      $builder_data = DisplayBuilderHelpers::getAllFixturesData($fixture_id);
+      $builder_data = FixturesHelpers::getAllFixturesData($fixture_id);
     }
     else {
       $builder_data = Yaml::decode($form_state->getValue('data'));

@@ -11,6 +11,7 @@ use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder_devel\FixturesHelpers;
 use Drupal\display_builder_devel\MockEntity;
 
 /**
@@ -36,7 +37,7 @@ final class AddForm extends FormBase {
       '#type' => 'select',
       '#title' => $this->t('Initial data'),
       '#description' => $this->t('Enter the fixture to use as base for this display builder instance.'),
-      '#options' => DisplayBuilderHelpers::getAllFixturesOptions(),
+      '#options' => FixturesHelpers::getAllFixturesOptions(),
       '#default_value' => 'blank',
       '#required' => TRUE,
     ];

@@ -5,32 +5,11 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 use Drupal\Component\Serialization\Yaml;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Symfony\Component\Finder\Finder;
-
-use function Symfony\Component\String\u;
 
 /**
  * Helpers related class for Display builder.
  */
 class DisplayBuilderHelpers {
-
-  /**
-   * Default modules to look for fixtures.
-   */
-  private static array $moduleNames = [
-    'display_builder_devel',
-    'display_builder_entity_view',
-    'display_builder_views',
-    'display_builder_page_layout',
-  ];
-
-  /**
-   * Default modules to look for fixtures.
-   */
-  private static array $themeNames = [
-    'db_theme_test',
-  ];
 
   /**
    * Multi-array search and replace parent.
@@ -87,124 +66,17 @@ class DisplayBuilderHelpers {
   }
 
   /**
-   * Load fixtures folder data.
-   *
-   * @param array $paths
-   *   The paths to look in.
-   * @param string|null $moduleName
-   *   (Optional) Module name prefix.
-   *
-   * @return array
-   *   The list of fixtures available.
-   */
-  public static function getFixturesOptions(array $paths, ?string $moduleName = NULL): array {
-    $output = [];
-
-    foreach ($paths as $path) {
-      if (!\file_exists($path)) {
-        continue;
-      }
-
-      $finder = new Finder();
-      $finder->files()->name('*.yml')->in($path);
-
-      foreach ($finder as $file) {
-        $name = $file->getFilenameWithoutExtension();
-        $output[$name] = u(\str_replace('_', ' ', $name))->title();
-
-        if ($moduleName) {
-          $output[$name] = \sprintf('[%s] %s', $moduleName, $output[$name]);
-        }
-      }
-    }
-
-    return $output;
-  }
-
-  /**
-   * Load fixtures options from modules fixtures folder.
-   *
-   * @param array $moduleNames
-   *   (Optional) The module names.
-   *
-   * @return array
-   *   The list of fixtures available.
-   */
-  public static function getAllFixturesOptions(array $moduleNames = []): array {
-    if (empty($moduleNames)) {
-      $moduleNames = self::$moduleNames;
-    }
-    $output = ['blank' => new TranslatableMarkup('Blank (Empty)')];
-
-    foreach ($moduleNames as $moduleName) {
-      try {
-        $path = \Drupal::moduleHandler()->getModule($moduleName)->getPath();
-        $filepath = \sprintf('%s/%s/fixtures/', DRUPAL_ROOT, $path);
-        $output = \array_merge($output, self::getFixturesOptions([$filepath], $moduleName));
-      }
-      catch (\Throwable $th) {
-      }
-    }
-
-    $themeHandler = \Drupal::service('theme_handler');
-
-    foreach (self::$themeNames as $themeName) {
-      try {
-        if (($themeHandler->getTheme($themeName)->status ?? 0) !== 1) {
-          continue;
-        }
-        $path = $themeHandler->getTheme($themeName)->getPath();
-        $filepath = \sprintf('%s/%s/fixtures/', DRUPAL_ROOT, $path);
-        $output = \array_merge($output, self::getFixturesOptions([$filepath], $themeName));
-      }
-      catch (\Throwable $th) {
-      }
-    }
-
-    return $output;
-  }
-
-  /**
-   * Load fixtures options from modules fixtures folder.
-   *
-   * @param string $fixture_id
-   *   The fixture file name.
-   * @param array $names
-   *   (Optional) The extension names.
-   *
-   * @return array
-   *   The list of fixtures available.
-   */
-  public static function getAllFixturesData(string $fixture_id, array $names = []): array {
-    if (empty($names)) {
-      $names = \array_merge(self::$moduleNames, self::$themeNames);
-    }
-
-    foreach ($names as $name) {
-      $file = self::getFixtureDataFromExtension($name, '', $fixture_id);
-
-      if (!empty($file)) {
-        return $file;
-      }
-    }
-
-    return [];
-  }
-
-  /**
    * Load YAML data from fixtures folder for current theme.
    *
    * @param string $name
    *   The extension name.
-   * @param string $suffix
-   *   (Optional) The fixture file optional suffix.
    * @param string|null $fixture_id
    *   (Optional) The fixture file name.
    *
    * @return array
    *   The file content.
    */
-  public static function getFixtureDataFromExtension(string $name, string $suffix = '', ?string $fixture_id = NULL): array {
+  public static function getFixtureDataFromExtension(string $name, ?string $fixture_id = NULL): array {
     $path = NULL;
 
     try {
@@ -225,15 +97,7 @@ class DisplayBuilderHelpers {
       return [];
     }
 
-    $defaultThemeName = \Drupal::configFactory()->get('system.theme')->get('default');
-
-    if ($fixture_id) {
-      $name = $fixture_id;
-    }
-    else {
-      $name = \sprintf('%s_%s', $defaultThemeName, $suffix);
-    }
-    $filepath = \sprintf('%s/%s/fixtures/%s.yml', DRUPAL_ROOT, $path, $name);
+    $filepath = \sprintf('%s/%s/fixtures/%s.yml', DRUPAL_ROOT, $path, $fixture_id);
 
     if (!\file_exists($filepath)) {
       return [];
