@@ -59,7 +59,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
         '@url' => $entity->getBuilderUrl()->toString(),
       ];
 
-      $message = $this->t('Click o this link to edit the display: <a href="@url">build the display</a>.', $params);
+      $message = $this->t('Click on this link to edit the display: <a href="@url">build the display</a>.', $params);
       $form['link'] = [
         '#type' => 'html_tag',
         '#tag' => 'p',
