@@ -9,8 +9,10 @@ use Drupal\Core\Display\Attribute\PageDisplayVariant;
 use Drupal\Core\Display\PageVariantInterface;
 use Drupal\Core\Display\VariantBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ExtensionList;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Theme\Registry;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
@@ -21,9 +23,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 #[PageDisplayVariant(
   id: 'display_builder',
-  admin_label: new TranslatableMarkup('Display Builder')
+  admin_label: new TranslatableMarkup('Display Builder page')
 )]
-class DisplayBuilder extends VariantBase implements ContainerFactoryPluginInterface, PageVariantInterface {
+class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryPluginInterface, PageVariantInterface {
 
   private const SOURCE_CONTENT_ID = 'main_page_content';
 
@@ -31,17 +33,15 @@ class DisplayBuilder extends VariantBase implements ContainerFactoryPluginInterf
 
   /**
    * The render array representing the main content.
-   *
-   * @var array
    */
-  protected $mainContent;
+  protected array $mainContent;
 
   /**
-   * The page title: a string (plain title) or a render array (formatted title).
+   * The page title.
    *
-   * @var string|array
+   * Can be a string (plain title), Markup or a render array (formatted title).
    */
-  protected $title = '';
+  protected array|string|MarkupInterface $title;
 
   /**
    * The display builder state manager.
@@ -58,6 +58,16 @@ class DisplayBuilder extends VariantBase implements ContainerFactoryPluginInterf
    */
   protected EntityTypeManagerInterface $entityTypeManager;
 
+  /**
+   * The theme registry.
+   */
+  protected Registry $themeRegistry;
+
+  /**
+   * The list of modules.
+   */
+  protected ExtensionList $modules;
+
   public function __construct(
     array $configuration,
     $plugin_id,
@@ -65,11 +75,15 @@ class DisplayBuilder extends VariantBase implements ContainerFactoryPluginInterf
     StateManagerInterface $state_manager,
     ComponentElementBuilder $component_element_builder,
     EntityTypeManagerInterface $entity_type_manager,
+    Registry $theme_registry,
+    ExtensionList $modules,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->stateManager = $state_manager;
     $this->componentElementBuilder = $component_element_builder;
     $this->entityTypeManager = $entity_type_manager;
+    $this->themeRegistry = $theme_registry;
+    $this->modules = $modules;
   }
 
   /**
@@ -83,6 +97,8 @@ class DisplayBuilder extends VariantBase implements ContainerFactoryPluginInterf
       $container->get('display_builder.state_manager'),
       $container->get('ui_patterns.component_element_builder'),
       $container->get('entity_type.manager'),
+      $container->get('theme.registry'),
+      $container->get('extension.list.module'),
     );
   }
 
@@ -101,6 +117,25 @@ class DisplayBuilder extends VariantBase implements ContainerFactoryPluginInterf
       // @todo raise an error
       return [];
     }
+
+    // We alter the registry here instead of implementing
+    // hook_theme_registry_alter in order keep the alteration specific to each
+    // page.
+    $theme_registry = $this->themeRegistry->get();
+    $template_uri = $this->modules->getPath('display_builder_page_layout') . '/templates';
+    $runtime = $this->themeRegistry->getRuntime();
+    $theme_registry['page']['path'] = $template_uri;
+    $runtime->set('page', $theme_registry['page']);
+    $theme_registry['region']['path'] = $template_uri;
+    $runtime->set('region', $theme_registry['region']);
+
+    // Also skip the related template suggestions.
+    foreach (\array_keys($theme_registry) as $renderable_id) {
+      if (\str_starts_with($renderable_id, 'page__') || \str_starts_with($renderable_id, 'region__')) {
+        $runtime->delete($renderable_id);
+      }
+    }
+
     $sources = $page_layout->getSources();
     $instance_id = $page_layout->getInstanceId();
     $this->replaceTitleAndContent($sources, $this->title, $this->mainContent);
@@ -120,7 +155,7 @@ class DisplayBuilder extends VariantBase implements ContainerFactoryPluginInterf
           '#weight' => -1000,
           '#include_fallback' => TRUE,
         ],
-        'display_builder' => [
+        'display_builder_content' => [
           'data' => $data,
           '#weight' => -800,
         ],

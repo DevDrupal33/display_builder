@@ -14,7 +14,7 @@ use Drupal\display_builder_devel\Helper\DisplayBuilderDevelHelper;
 use Drupal\display_builder_devel\MockEntity;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
-use Drupal\display_builder_views\Plugin\views\display_extender\DisplayBuilder as DisplayExtender;
+use Drupal\display_builder_views\Plugin\views\display_extender\DisplayBuilderDisplayExtender;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -157,8 +157,8 @@ class DisplayBuilderDevelController extends ControllerBase {
     $url = MockEntity::getUrlFromInstanceId($builder_id);
 
     // Simple switch to url based on context.
-    if (\class_exists('Drupal\display_builder_views\Plugin\views\display_extender\DisplayBuilder') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayExtender::getContextRequirement())) {
-      $url = DisplayExtender::getUrlFromInstanceId($builder_id);
+    if (\class_exists('Drupal\display_builder_views\Plugin\views\display_extender\DisplayBuilderDisplayExtender') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderDisplayExtender::getContextRequirement())) {
+      $url = DisplayBuilderDisplayExtender::getUrlFromInstanceId($builder_id);
       $type = $this->t('Views');
     }
     elseif (\class_exists('Drupal\display_builder_page_layout\Entity\PageLayout') && $this->stateManager->hasSaveContextsRequirement($builder_id, PageLayout::getContextRequirement())) {

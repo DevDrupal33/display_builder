@@ -9,7 +9,7 @@ use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\display_builder_views\Plugin\views\display_extender\DisplayBuilder as DisplayExtender;
+use Drupal\display_builder_views\Plugin\views\display_extender\DisplayBuilderDisplayExtender;
 
 /**
  * Returns responses for Display Builder ui routes.
@@ -121,7 +121,7 @@ class ViewsManagementController extends ControllerBase {
     return [
       'manage' => [
         'title' => $this->t('Build display'),
-        'url' => DisplayExtender::getUrlFromInstanceId($builder_id),
+        'url' => DisplayBuilderDisplayExtender::getUrlFromInstanceId($builder_id),
       ],
       'delete' => [
         'title' => $this->t('Delete'),

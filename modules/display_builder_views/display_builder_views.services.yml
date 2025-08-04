@@ -2,8 +2,6 @@ services:
   display_builder_views.display_builder_subscriber:
     class: Drupal\display_builder_views\EventSubscriber\DisplayBuilderSubscriber
     arguments:
-      [
-        "@display_builder.state_manager",
-      ]
+      - "@display_builder.state_manager"
     tags:
       - { name: "event_subscriber" }
