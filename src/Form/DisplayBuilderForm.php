@@ -11,6 +11,7 @@ use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\display_builder\DisplayBuilderInterface;
 use Drupal\display_builder\Entity\DisplayBuilder;
 use Drupal\display_builder\IslandType;
+use Drupal\display_builder\IslandInterface;
 use Drupal\display_builder\IslandTypeViewDisplay;
 use Drupal\user\RoleInterface;
 
@@ -85,142 +86,15 @@ final class DisplayBuilderForm extends EntityForm {
     /** @var \Drupal\display_builder\IslandPluginManagerInterface $islandPluginManager */
     $islandPluginManager = \Drupal::service('plugin.manager.db_island'); // phpcs:ignore
     $island_by_types = $islandPluginManager->getIslandsByTypes();
+
     \ksort($island_by_types);
-
-    $header = [
-      'drag' => '',
-      'enable' => $this->t('Enable'),
-      'name' => $this->t('Island'),
-      'summary' => $this->t('Configuration'),
-      'options' => $this->t('Options'),
-      'actions' => '',
-      'weight' => $this->t('Weight'),
-    ];
-
     foreach ($island_by_types as $type => $islands) {
-      $table_has_options = FALSE;
-      $table = [
-        '#type' => 'table',
-        '#header' => $header,
-        '#attributes' => ['id' => 'db-islands-' . $type],
-        '#tabledrag' => [
-          [
-            'action' => 'order',
-            'relationship' => 'sibling',
-            'group' => 'draggable-weight-' . $type,
-          ],
-        ],
-      ];
-
-      foreach ($islands as $id => $island) {
-        $definition = $island->getPluginDefinition();
-        $configuration = $island_configuration[$id] ?? [];
-        /** @var \Drupal\display_builder\IslandInterface $instance */
-        $instance = $islandPluginManager->createInstance($id, $configuration);
-        $default = $island_settings[$type][$id] ?? [];
-        $weight = isset($default['weight']) ? (string) $default['weight'] : '0';
-
-        $table[$id] = [];
-        $table[$id]['#attributes']['class'] = ['draggable'];
-        $table[$id]['#weight'] = (int) $weight;
-
-        $table[$id][''] = [];
-        $table[$id]['enable'] = [
-          '#type' => 'checkbox',
-          '#title' => $this->t('Enable'),
-          '#title_display' => 'invisible',
-          '#default_value' => $default['enable'] ?? $definition['enabled_by_default'] ?? FALSE,
-        ];
-        $table[$id]['name'] = [
-          '#type' => 'inline_template',
-          '#template' => '<strong >{{ name }}</strong><br>{{ description }}',
-          '#context' => [
-            'name' => $definition['label'] ?? '',
-            'description' => $definition['description'] ?? '',
-          ],
-        ];
-        $table[$id]['summary'] = [
-          '#markup' => \implode('<br>', $instance->configurationSummary()),
-        ];
-
-        if ($type === IslandType::View->value) {
-          // If new, only library is on sidebar by default.
-          // @todo move this position option to Island configuration.
-          if ($id !== 'library' && !isset($default['options']) && isset($definition['enabled_by_default'])) {
-            $default_option = IslandTypeViewDisplay::Main->value;
-          }
-          else {
-            $default_option = $default['options'] ?? NULL;
-          }
-          $table[$id]['options'] = [
-            '#type' => 'radios',
-            '#title' => $this->t('Display'),
-            '#title_display' => 'invisible',
-            '#options' => IslandTypeViewDisplay::options(),
-            '#default_value' => $default_option,
-          ];
-          $table_has_options = TRUE;
-        }
-        else {
-          $table[$id]['options'] = [];
-        }
-
-        if ($island instanceof PluginFormInterface && !$this->entity->isNew()) {
-          $table[$id]['actions'] = [
-            '#type' => 'link',
-            '#title' => $this->t('Configure'),
-            '#url' => $this->entity->toUrl('edit-plugin-form', [
-              'island_id' => $id,
-              'query' => [
-                'destination' => $this->entity->toUrl()->toString(),
-              ],
-            ]),
-            '#attributes' => [
-              'class' => ['use-ajax', 'button', 'button--small'],
-              'data-dialog-type' => 'modal',
-              'data-dialog-options' => \json_encode([
-                'width' => 700,
-              ]),
-            ],
-            '#states' => [
-              'visible' => [
-                'input[name="island_settings[button][' . $id . '][enable]"]' => ['checked' => TRUE],
-              ],
-            ],
-          ];
-        }
-        else {
-          $table[$id]['actions'] = ['#markup' => ''];
-        }
-
-        $table[$id]['weight'] = [
-          '#type' => 'weight',
-          '#default_value' => $weight,
-          '#title' => $this->t('Weight'),
-          '#title_display' => 'invisible',
-          '#attributes' => [
-            'class' => ['draggable-weight-' . $type],
-          ],
-        ];
-      }
-
-      // Order rows by weight.
-      \uasort($table, static function ($a, $b) {
-        if (isset($a['#weight'], $b['#weight'])) {
-          return (int) $a['#weight'] - (int) $b['#weight'];
-        }
-      });
-
       $form['island_settings']['title_' . $type] = [
         '#type' => 'fieldgroup',
         '#title' => $this->t('@type islands', ['@type' => $type]),
         '#description' => IslandType::description($type),
       ];
-
-      if (!$table_has_options && isset($table['#header']['options'])) {
-        $table['#header']['options'] = '';
-      }
-      $form['island_settings'][$type] = $table;
+      $form['island_settings'][$type] = $this->buildIslandTypeTable(IslandType::from($type), $islands, $island_configuration, $island_settings[$type] ?? []);
     }
 
     $form['library'] = [
@@ -298,6 +172,172 @@ final class DisplayBuilderForm extends EntityForm {
     }
 
     return $result;
+  }
+
+  /**
+   * Build island type table.
+   *
+   * @param \Drupal\display_builder\IslandType $type
+   *   Island type from IslandType enum.
+   * @param array $islands
+   *   List of island plugins.
+   * @param array $configuration
+   *   Configuration of all islands from this type.
+   * @param array $settings
+   *   Settings of all islands from this type.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function buildIslandTypeTable(IslandType $type, array $islands, array $configuration, array $settings): array {
+    $type = $type->value;
+    $table_has_options = FALSE;
+    $table = [
+      '#type' => 'table',
+      '#header' => [
+        'drag' => '',
+        'enable' => $this->t('Enable'),
+        'name' => $this->t('Island'),
+        'summary' => $this->t('Configuration'),
+        'options' => $this->t('Options'),
+        'actions' => '',
+        'weight' => $this->t('Weight'),
+      ],
+      '#attributes' => ['id' => 'db-islands-' . $type],
+      '#tabledrag' => [
+        [
+          'action' => 'order',
+          'relationship' => 'sibling',
+          'group' => 'draggable-weight-' . $type,
+        ],
+      ],
+    ];
+
+    foreach ($islands as $id => $island) {
+      $table[$id] = $this->buildIslandRow($island, $configuration[$id] ?? [], $settings[$id] ?? [], $table_has_options);
+    }
+
+    // Order rows by weight.
+    \uasort($table, static function ($a, $b) {
+      if (isset($a['#weight'], $b['#weight'])) {
+        return (int) $a['#weight'] - (int) $b['#weight'];
+      }
+    });
+
+    if (!$table_has_options && isset($table['#header']['options'])) {
+      $table['#header']['options'] = '';
+    }
+    return $table;
+  }
+
+  /**
+   * Build island row.
+   *
+   * @param \Drupal\display_builder\IslandInterface $island
+   *   Island plugin.
+   * @param array $configuration
+   *   Configuration of this specific island.
+   * @param array $default
+   *   Settings of this specific island.
+   * @param bool $table_has_options
+   *   Table has options?
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function buildIslandRow(IslandInterface $island, array $configuration, array $default, bool &$table_has_options): array {
+    $id = $island->getPluginId();
+    $definition = (array) $island->getPluginDefinition();
+    $type = $island->getTypeId();
+    /** @var \Drupal\display_builder\IslandPluginManagerInterface $islandPluginManager */
+    $islandPluginManager = \Drupal::service('plugin.manager.db_island'); // phpcs:ignore
+    /** @var \Drupal\display_builder\IslandInterface $instance */
+    $instance = $islandPluginManager->createInstance($id, $configuration);
+    $weight = isset($default['weight']) ? (string) $default['weight'] : '0';
+
+    $row = [];
+    $row['#attributes']['class'] = ['draggable'];
+    $row['#weight'] = (int) $weight;
+
+    $row[''] = [];
+    $row['enable'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable'),
+      '#title_display' => 'invisible',
+      '#default_value' => $default['enable'] ?? $definition['enabled_by_default'] ?? FALSE,
+    ];
+    $row['name'] = [
+      '#type' => 'inline_template',
+      '#template' => '<strong >{{ name }}</strong><br>{{ description }}',
+      '#context' => [
+        'name' => $definition['label'] ?? '',
+        'description' => $definition['description'] ?? '',
+      ],
+    ];
+    $row['summary'] = [
+      '#markup' => \implode('<br>', $instance->configurationSummary()),
+    ];
+
+    if ($type === IslandType::View->value) {
+      // If new, only library is on sidebar by default.
+      // @todo move this position option to Island configuration.
+      if ($id !== 'library' && !isset($default['options']) && isset($definition['enabled_by_default'])) {
+        $default_option = IslandTypeViewDisplay::Main->value;
+      }
+      else {
+        $default_option = $default['options'] ?? NULL;
+      }
+      $row['options'] = [
+        '#type' => 'radios',
+        '#title' => $this->t('Display'),
+        '#title_display' => 'invisible',
+        '#options' => IslandTypeViewDisplay::options(),
+        '#default_value' => $default_option,
+      ];
+      $table_has_options = TRUE;
+    }
+    else {
+      $row['options'] = [];
+    }
+
+    if ($island instanceof PluginFormInterface && !$this->entity->isNew()) {
+      $row['actions'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Configure'),
+        '#url' => $this->entity->toUrl('edit-plugin-form', [
+          'island_id' => $id,
+          'query' => [
+            'destination' => $this->entity->toUrl()->toString(),
+          ],
+        ]),
+        '#attributes' => [
+          'class' => ['use-ajax', 'button', 'button--small'],
+          'data-dialog-type' => 'modal',
+          'data-dialog-options' => \json_encode([
+            'width' => 700,
+          ]),
+        ],
+        '#states' => [
+          'visible' => [
+            'input[name="island_settings[button][' . $id . '][enable]"]' => ['checked' => TRUE],
+          ],
+        ],
+      ];
+    }
+    else {
+      $row['actions'] = ['#markup' => ''];
+    }
+
+    $row['weight'] = [
+      '#type' => 'weight',
+      '#default_value' => $weight,
+      '#title' => $this->t('Weight'),
+      '#title_display' => 'invisible',
+      '#attributes' => [
+        'class' => ['draggable-weight-' . $type],
+      ],
+    ];
+    return $row;
   }
 
 }
