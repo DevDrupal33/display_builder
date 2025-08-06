@@ -49,7 +49,7 @@ class PageVariantSubscriber implements EventSubscriberInterface {
     $options = $route->getOptions();
 
     // In admin pages, we want the page.html.twig from the admin theme.
-    // For now we don't build pages for Admin routes, bit this will be possible
+    // For now we don't build pages for Admin routes, but this will be possible
     // in the future.
     if ($options['_admin_route'] ?? FALSE) {
       return;

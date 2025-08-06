@@ -9,7 +9,7 @@ entity.display_builder.collection:
     _admin_route: true
 
 entity.display_builder.add_form:
-  path: '/admin/structure/display_builder/add'
+  path: '/admin/structure/display-builder/add'
   defaults:
     _entity_form: 'display_builder.add'
     _title: 'Add display builder'

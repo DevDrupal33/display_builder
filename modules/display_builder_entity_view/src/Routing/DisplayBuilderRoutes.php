@@ -88,7 +88,7 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
    * Build a Display Builder route from an existing Entity View Display route.
    */
   private function buildDisplayBuilderRoute(EntityTypeInterface $entity_type, Route $entity_route): Route {
-    $path = $entity_route->getPath() . '/display/{view_mode_name}/display_builder';
+    $path = $entity_route->getPath() . '/display/{view_mode_name}/display-builder';
 
     $defaults = [];
     $entity_type_id = $entity_type->id();
