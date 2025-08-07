@@ -28,7 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   help: new TranslatableMarkup('Use display builder as output for this view.'),
   no_ui: FALSE,
 )]
-class DisplayBuilderDisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBuilderInterface {
+class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBuilderInterface {
 
   /**
    * The display builder state manager.

@@ -9,7 +9,8 @@ use Drupal\Core\Plugin\Context\ContextInterface;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay;
+use Drupal\display_builder\WithDisplayBuilderInterface;
+use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -19,7 +20,7 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
   public function __construct(
     protected StateManagerInterface $stateManager,
-    private EntityTypeManagerInterface $entityTypeManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
   ) {}
 
   /**
@@ -41,23 +42,19 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     $builder_id = $event->getBuilderId();
     $contexts = $this->stateManager->getContexts($builder_id);
 
-    if (!$this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderEntityViewDisplay::getContextRequirement(), $contexts)) {
+    if (!$this->stateManager->hasSaveContextsRequirement($builder_id, EntityViewDisplay::getContextRequirement(), $contexts)) {
       return;
     }
 
     // Entity view display parameters are also in route match.
-    /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay $display */
     $display = $this->getEntityViewDisplayEntity($contexts['entity'], $contexts['view_mode']);
-
-    if ($display) {
-      $display->saveSources();
-    }
+    $display?->saveSources();
   }
 
   /**
    * Get entity view display entity.
    */
-  protected function getEntityViewDisplayEntity(ContextInterface $entity_context, ContextInterface $view_mode_context): ?DisplayBuilderEntityViewDisplay {
+  protected function getEntityViewDisplayEntity(ContextInterface $entity_context, ContextInterface $view_mode_context): ?WithDisplayBuilderInterface {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
     $entity = $entity_context->getContextValue();
     $entity_type_id = $entity->getEntityTypeId();
@@ -65,8 +62,9 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     $view_mode = $view_mode_context->getContextValue();
     $display_id = "{$entity_type_id}.{$bundle}.{$view_mode}";
 
-    /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay|null $display */
-    $display = $this->entityTypeManager->getStorage('entity_view_display')->load($display_id);
+    /** @var \Drupal\display_builder\WithDisplayBuilderInterface|null $display */
+    $display = $this->entityTypeManager->getStorage('entity_view_display')
+      ->load($display_id);
 
     return $display;
   }

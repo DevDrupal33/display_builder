@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\layout_builder\Kernel;
+namespace Drupal\Tests\display_builder_entity_view\Kernel;
 
 use Drupal\display_builder\ConfigFormBuilderInterface;
-use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay;
+use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Test the DisplayBuilderEntityViewDisplay.
+ * Test the Display Builder EntityViewDisplay.
  *
  * @internal
  */
-#[CoversClass('\Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay')]
+#[CoversClass('\Drupal\display_builder_entity_view\Entity\EntityViewDisplay')]
 #[Group('display_builder')]
-final class DisplayBuilderEntityViewDisplayTest extends EntityKernelTestBase {
+final class EntityViewDisplayTest extends EntityKernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -48,7 +48,7 @@ final class DisplayBuilderEntityViewDisplayTest extends EntityKernelTestBase {
    */
   #[DataProvider('providerTestIsDisplayBuilderEnabled')]
   public function testIsDisplayBuilderEnabled($expected, $view_mode): void {
-    $display = DisplayBuilderEntityViewDisplay::create([
+    $display = EntityViewDisplay::create([
       'targetEntityType' => 'entity_test',
       'bundle' => 'entity_test',
       'mode' => $view_mode,

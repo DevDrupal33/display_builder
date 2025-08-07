@@ -10,7 +10,6 @@
         "drupal/ui_patterns": "^2.0"
     },
     "require-dev": {
-        "drupal/page_manager": "^4",
         "drupal/ui_icons": "^1.1",
         "drupal/ui_skins": "^1.1",
         "drupal/ui_styles": "^1.16"
@@ -18,10 +17,7 @@
     "extra": {
         "patches": {
             "drupal/core": {
-                "#3127026 LayoutBuilderEntityViewDisplay class does not correspond to an entity type": "https://git.drupalcode.org/project/drupal/-/merge_requests/12680.patch"
-            },
-            "drupal/page_manager": {
-                "Some mandatory parameters are missing": "https://www.drupal.org/files/issues/2024-08-14/page-manager-3438993-MR34-24.patch"
+                "https://drupal.org/i/3127026 #3127026 LayoutBuilderEntityViewDisplay class does not correspond to an entity type": "https://git.drupalcode.org/project/drupal/-/merge_requests/12799.patch"
             }
         }
     }

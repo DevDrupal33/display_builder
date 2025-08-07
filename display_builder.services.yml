@@ -20,6 +20,7 @@ services:
       - "@entity_type.manager"
       - "@current_user"
       - "@display_builder.state_manager"
+      - "@module_handler"
   Drupal\display_builder\ConfigFormBuilderInterface: "@display_builder.config_form_builder"
 
   display_builder.state_manager:

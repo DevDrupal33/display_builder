@@ -11,7 +11,7 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Routing\RouteBuildEvent;
 use Drupal\Core\Routing\RoutingEvents;
-use Drupal\display_builder_entity_view\Controller\DisplayBuilderEntityViewController;
+use Drupal\display_builder_entity_view\Controller\EntityViewController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Routing\Route;
@@ -118,8 +118,8 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
     // Merge the passed in options in after parameters.
     $options = NestedArray::mergeDeep(['parameters' => $parameters], $options);
 
-    $defaults['_controller'] = DisplayBuilderEntityViewController::class . '::getBuilder';
-    $defaults['_title_callback'] = DisplayBuilderEntityViewController::class . '::title';
+    $defaults['_controller'] = EntityViewController::class . '::getBuilder';
+    $defaults['_title_callback'] = EntityViewController::class . '::title';
     $route = (new Route($path))->setDefaults($defaults)->setRequirements($requirements)->setOptions($options);
 
     // Set field_ui.route_enhancer to run on the manage layout form. ?

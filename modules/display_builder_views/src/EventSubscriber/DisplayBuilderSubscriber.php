@@ -7,7 +7,7 @@ namespace Drupal\display_builder_views\EventSubscriber;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\display_builder_views\Plugin\views\display_extender\DisplayBuilderDisplayExtender;
+use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -38,7 +38,7 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     $builder_id = $event->getBuilderId();
     $contexts = $event->getData();
 
-    if (!$this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderDisplayExtender::getContextRequirement(), $contexts)) {
+    if (!$this->stateManager->hasSaveContextsRequirement($builder_id, DisplayExtender::getContextRequirement(), $contexts)) {
       return;
     }
 

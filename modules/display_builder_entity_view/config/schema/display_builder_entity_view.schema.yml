@@ -1,9 +1,10 @@
 core.entity_view_display.*.*.*.third_party.display_builder:
-  type: mapping
   label: 'Display Builder settings'
+  type: mapping
   mapping:
     display_builder:
       label: "Display Builder profile"
+      type: string
       constraints:
         ConfigExists:
           prefix: 'display_builder.display_builder.'
@@ -11,4 +12,6 @@ core.entity_view_display.*.*.*.third_party.display_builder:
       label: "UI Patterns sources"
       type: sequence
       sequence:
-        type: ui_patterns_source.[id]
+        type: ui_patterns_source.[source_id]
+  constraints:
+    FullyValidatable: ~

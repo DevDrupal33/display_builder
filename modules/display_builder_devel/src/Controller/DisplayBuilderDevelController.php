@@ -12,9 +12,9 @@ use Drupal\Core\Url;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_devel\Helper\DisplayBuilderDevelHelper;
 use Drupal\display_builder_devel\MockEntity;
-use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay;
+use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
-use Drupal\display_builder_views\Plugin\views\display_extender\DisplayBuilderDisplayExtender;
+use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -157,16 +157,16 @@ class DisplayBuilderDevelController extends ControllerBase {
     $url = MockEntity::getUrlFromInstanceId($builder_id);
 
     // Simple switch to url based on context.
-    if (\class_exists('Drupal\display_builder_views\Plugin\views\display_extender\DisplayBuilderDisplayExtender') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderDisplayExtender::getContextRequirement())) {
-      $url = DisplayBuilderDisplayExtender::getUrlFromInstanceId($builder_id);
+    if (\class_exists('Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayExtender::getContextRequirement())) {
+      $url = DisplayExtender::getUrlFromInstanceId($builder_id);
       $type = $this->t('Views');
     }
     elseif (\class_exists('Drupal\display_builder_page_layout\Entity\PageLayout') && $this->stateManager->hasSaveContextsRequirement($builder_id, PageLayout::getContextRequirement())) {
       $url = PageLayout::getUrlFromInstanceId($builder_id);
       $type = $this->t('Page layout');
     }
-    elseif (\class_exists('Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderEntityViewDisplay::getContextRequirement())) {
-      $url = DisplayBuilderEntityViewDisplay::getUrlFromInstanceId($builder_id);
+    elseif (\class_exists('Drupal\display_builder_entity_view\Entity\EntityViewDisplay') && $this->stateManager->hasSaveContextsRequirement($builder_id, EntityViewDisplay::getContextRequirement())) {
+      $url = EntityViewDisplay::getUrlFromInstanceId($builder_id);
       $type = $this->t('Entity view');
 
       /** @var \Drupal\Core\Entity\EntityInterface $entity */

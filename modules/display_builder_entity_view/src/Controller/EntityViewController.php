@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Drupal\display_builder_entity_view\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\WithDisplayBuilderInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * @internal
  *   Controller classes are internal.
  */
-final class DisplayBuilderEntityViewController extends ControllerBase {
+final class EntityViewController extends ControllerBase {
 
   public function __construct(
     protected StateManagerInterface $stateManager,
@@ -51,17 +51,20 @@ final class DisplayBuilderEntityViewController extends ControllerBase {
     // Builder is on the front theme, render cache is too hard and changes are
     // not working with cache (move something and refresh, previous version
     // will be shown).
-    // @todo fix with #3529284
+    // @todo evaluate with #3529284
     \Drupal::service('page_cache_kill_switch')->trigger(); // phpcs:ignore
 
     $entity_type_id = $route_match->getParameter('entity_type_id');
     $bundle = $route_match->getParameter('bundle');
     $view_mode = $route_match->getParameter('view_mode_name');
 
-    /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityViewDisplay $entity_display */
     $entity_display = $this->getEntityViewDisplay($entity_type_id, $bundle, $view_mode);
 
-    /** @var \Drupal\display_builder\DisplayBuilderInterface $display_builder */
+    if (!$entity_display) {
+      // No entity view display.
+      throw new NotFoundHttpException();
+    }
+
     $display_builder = $entity_display->getDisplayBuilder();
 
     if (!$display_builder) {
@@ -93,14 +96,17 @@ final class DisplayBuilderEntityViewController extends ControllerBase {
    * @param string $view_mode
    *   View mode of the display.
    *
-   * @return \Drupal\Core\Entity\Display\EntityViewDisplayInterface
+   * @return \Drupal\display_builder\WithDisplayBuilderInterface|null
    *   The corresponding entity view display.
    */
-  protected function getEntityViewDisplay(string $entity_type_id, string $bundle, string $view_mode): EntityViewDisplayInterface {
+  protected function getEntityViewDisplay(string $entity_type_id, string $bundle, string $view_mode): ?WithDisplayBuilderInterface {
     $display_id = "{$entity_type_id}.{$bundle}.{$view_mode}";
-    $storage = $this->entityTypeManager()->getStorage('entity_view_display');
 
-    return $storage->load($display_id);
+    /** @var \Drupal\display_builder\WithDisplayBuilderInterface|null $display */
+    $display = $this->entityTypeManager()->getStorage('entity_view_display')
+      ->load($display_id);
+
+    return $display;
   }
 
 }

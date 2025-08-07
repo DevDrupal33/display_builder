@@ -7,7 +7,6 @@ namespace Drupal\display_builder_entity_view\Entity;
 use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
@@ -17,17 +16,15 @@ use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuilderInterface;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\display_builder\WithDisplayBuilderInterface;
-use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\ui_patterns\SourcePluginManager;
 
 /**
- * Provides an entity view display entity that has a display builder.
+ * Common methods for entity view display.
  */
-class DisplayBuilderEntityViewDisplay extends LayoutBuilderEntityViewDisplay implements WithDisplayBuilderInterface {
+trait EntityViewDisplayTrait {
 
   /**
    * The source plugin manager.
@@ -45,38 +42,45 @@ class DisplayBuilderEntityViewDisplay extends LayoutBuilderEntityViewDisplay imp
   protected ComponentElementBuilder $componentElementBuilder;
 
   /**
-   * The entity type manager.
-   */
-  protected EntityTypeManagerInterface $entityTypeManager;
-
-  /**
    * The sample entity generator.
    */
   protected SampleEntityGeneratorInterface $sampleEntityGenerator;
 
   /**
-   * {@inheritdoc}
+   * The entity field manager.
+   *
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
    */
-  public function __construct(array $values, $entity_type) {
-    parent::__construct($values, $entity_type);
-    $this->sourcePluginManager = \Drupal::service('plugin.manager.ui_patterns_source');
-    $this->stateManager = \Drupal::service('display_builder.state_manager');
-    $this->componentElementBuilder = \Drupal::service('ui_patterns.component_element_builder');
-    $this->entityTypeManager = \Drupal::service('entity_type.manager');
-    $this->sampleEntityGenerator = \Drupal::service('ui_patterns.sample_entity_generator');
-  }
+  protected $entityFieldManager;
 
   /**
    * {@inheritdoc}
    */
-  public function buildMultiple(array $entities): array {
-    $build_list = parent::buildMultiple($entities);
+  public function __construct(array $values, $entity_type) {
+    // Set $entityFieldManager before calling the parent constructor because the
+    // constructor will call init() which then calls setComponent() which needs
+    // $entityFieldManager.
+    $this->entityFieldManager = \Drupal::service('entity_field.manager');
+    parent::__construct($values, $entity_type);
+    $this->sourcePluginManager = \Drupal::service('plugin.manager.ui_patterns_source');
+    $this->stateManager = \Drupal::service('display_builder.state_manager');
+    $this->componentElementBuilder = \Drupal::service('ui_patterns.component_element_builder');
+    $this->sampleEntityGenerator = \Drupal::service('ui_patterns.sample_entity_generator');
+  }
 
-    // If using Layout Builder stop here.
-    if ($this->isLayoutBuilderEnabled()) {
-      return $build_list;
-    }
-
+  /**
+   * Actual BuildMultiple.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface[] $entities
+   *   The entities being displayed.
+   * @param array $build_list
+   *   Intermediary renderable array for the entities.
+   *
+   * @return array
+   *   A renderable array for the entities, indexed by the same keys as the
+   *   $entities array parameter.
+   */
+  protected function displayBuilderBuildMultiple(array $entities, array $build_list): array {
     // If no display builder enabled stop here.
     if (!$this->isDisplayBuilderEnabled()) {
       return $build_list;
@@ -134,7 +138,7 @@ class DisplayBuilderEntityViewDisplay extends LayoutBuilderEntityViewDisplay imp
   public function isDisplayBuilderEnabled(): bool {
     // Display Builder must not be enabled for the '_custom' view mode that is
     // used for on-the-fly rendering of fields in isolation from the entity.
-    if ($this->isCustomMode()) {
+    if ($this->getOriginalMode() === static::CUSTOM_MODE) {
       return FALSE;
     }
 
@@ -182,7 +186,7 @@ class DisplayBuilderEntityViewDisplay extends LayoutBuilderEntityViewDisplay imp
    * {@inheritdoc}
    */
   public function getBuilderUrl(): Url {
-    $fieldable_entity_type = $this->entityTypeManager->getDefinition($this->getTargetEntityTypeId());
+    $fieldable_entity_type = $this->entityTypeManager()->getDefinition($this->getTargetEntityTypeId());
     $bundle_parameter_key = $fieldable_entity_type->getBundleEntityType() ?: 'bundle';
     $parameters = [
       $bundle_parameter_key => $this->getTargetBundle(),
@@ -413,6 +417,34 @@ class DisplayBuilderEntityViewDisplay extends LayoutBuilderEntityViewDisplay imp
     $cacheability->applyTo($build);
 
     return $build;
+  }
+
+  /**
+   * Gets the available contexts for a given entity.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   The entity.
+   *
+   * @return \Drupal\Core\Plugin\Context\ContextInterface[]
+   *   An array of context objects for a given entity.
+   */
+  protected function getContextsForEntity(FieldableEntityInterface $entity) {
+    $available_context_ids = array_keys($this->contextRepository()->getAvailableContexts());
+    return [
+      'view_mode' => new Context(ContextDefinition::create('string'), $this->getMode()),
+      'entity' => EntityContext::fromEntity($entity),
+      'display' => EntityContext::fromEntity($this),
+    ] + $this->contextRepository()->getRuntimeContexts($available_context_ids);
+  }
+
+  /**
+   * Wraps the context repository service.
+   *
+   * @return \Drupal\Core\Plugin\Context\ContextRepositoryInterface
+   *   The context repository service.
+   */
+  protected function contextRepository() {
+    return \Drupal::service('context.repository');
   }
 
 }

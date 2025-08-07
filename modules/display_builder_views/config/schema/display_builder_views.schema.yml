@@ -9,6 +9,7 @@ views.display_extender.display_builder:
           prefix: 'display_builder.display_builder.'
     sources:
       label: "UI Patterns sources"
-      type: sequence
       sequence:
-        type: ignore
+        type: ui_patterns_source.[source_id]
+  constraints:
+    FullyValidatable: ~
