@@ -94,7 +94,7 @@ class TreePanel extends BuilderPanel {
         ],
       ];
 
-      if (isset($data['source']['component']['slots'][$slot_id])) {
+      if (isset($data['source']['component']['slots'][$slot_id]['sources'])) {
         $sources = $data['source']['component']['slots'][$slot_id]['sources'];
         $items['#slots']['children'] = $this->digFromSlot($builder_id, $sources);
       }

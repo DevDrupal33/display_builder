@@ -96,7 +96,7 @@ class LayersPanel extends BuilderPanel {
         ],
       ];
 
-      if (isset($data['source']['component']['slots'][$slot_id])) {
+      if (isset($data['source']['component']['slots'][$slot_id]['sources'])) {
         $sources = $data['source']['component']['slots'][$slot_id]['sources'];
         $dropzone['#slots']['content'] = $this->digFromSlot($builder_id, $sources);
       }

@@ -351,7 +351,7 @@ class BuilderPanel extends IslandPluginBase {
    *
    * @param string $builder_id
    *   The builder ID.
-   * @param string $slot
+   * @param string $slot_id
    *   The slot ID.
    * @param array $definition
    *   The slot definition.
@@ -363,7 +363,7 @@ class BuilderPanel extends IslandPluginBase {
    * @return array
    *   A renderable array for the slot.
    */
-  private function buildComponentSlot(string $builder_id, string $slot, array $definition, array $data, string $instance_id): array {
+  private function buildComponentSlot(string $builder_id, string $slot_id, array $definition, array $data, string $instance_id): array {
     $dropzone = [
       '#type' => 'component',
       '#component' => 'display_builder:dropzone',
@@ -376,18 +376,18 @@ class BuilderPanel extends IslandPluginBase {
         'data-db-id' => $builder_id,
         // Slot is needed for contextual menu paste.
         // @see assets/js/contextual_menu.js
-        'data-slot-id' => $slot,
+        'data-slot-id' => $slot_id,
         'data-slot-title' => \ucfirst($definition['title']),
         'data-instance-id' => $instance_id,
       ],
     ];
 
-    if (isset($data['source']['component']['slots'][$slot])) {
-      $sources = $data['source']['component']['slots'][$slot]['sources'];
+    if (isset($data['source']['component']['slots'][$slot_id]['sources'])) {
+      $sources = $data['source']['component']['slots'][$slot_id]['sources'];
       $dropzone['#slots']['content'] = $this->digFromSlot($builder_id, $sources);
     }
 
-    return $this->htmxEvents->onSlotDrop($dropzone, $builder_id, $instance_id, $slot);
+    return $this->htmxEvents->onSlotDrop($dropzone, $builder_id, $instance_id, $slot_id);
   }
 
 }
