@@ -10,8 +10,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\display_builder\DisplayBuilderInterface;
 use Drupal\display_builder\Entity\DisplayBuilder;
-use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandInterface;
+use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandTypeViewDisplay;
 use Drupal\user\RoleInterface;
 
@@ -88,6 +88,7 @@ final class DisplayBuilderForm extends EntityForm {
     $island_by_types = $islandPluginManager->getIslandsByTypes();
 
     \ksort($island_by_types);
+
     foreach ($island_by_types as $type => $islands) {
       $form['island_settings']['title_' . $type] = [
         '#type' => 'fieldgroup',
@@ -227,6 +228,7 @@ final class DisplayBuilderForm extends EntityForm {
     if (!$table_has_options && isset($table['#header']['options'])) {
       $table['#header']['options'] = '';
     }
+
     return $table;
   }
 
@@ -337,6 +339,7 @@ final class DisplayBuilderForm extends EntityForm {
         'class' => ['draggable-weight-' . $type],
       ],
     ];
+
     return $row;
   }
 

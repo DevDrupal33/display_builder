@@ -60,9 +60,9 @@ Example:
 
 ```yaml
 id: 68679ab4e1797
-label: "My button with a title"
-description: ""
-group: ""
+label: 'My button with a title'
+description: ''
+group: ''
 theme: usb_sub
 sources: [...]
 ```

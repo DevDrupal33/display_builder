@@ -33,7 +33,6 @@ class OperationButton extends IslandPluginBase {
     $button['#props']['variant'] = 'neutral';
     $button['#attributes']['outline'] = TRUE;
 
-    // @phpstan-ignore-next-line
     $current_route = Url::FromRoute(
       \Drupal::routeMatch()->getRouteName(),
       \Drupal::routeMatch()->getRawParameters()->all()

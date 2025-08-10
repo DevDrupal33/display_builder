@@ -33,41 +33,6 @@ class FixturesHelpers {
   ];
 
   /**
-   * Load fixtures folder data.
-   *
-   * @param array $paths
-   *   The paths to look in.
-   * @param string|null $moduleName
-   *   (Optional) Module name prefix.
-   *
-   * @return array
-   *   The list of fixtures available.
-   */
-  private static function getFixturesOptions(array $paths, ?string $moduleName = NULL): array {
-    $output = [];
-
-    foreach ($paths as $path) {
-      if (!\file_exists($path)) {
-        continue;
-      }
-
-      $finder = new Finder();
-      $finder->files()->name('*.yml')->in($path);
-
-      foreach ($finder as $file) {
-        $name = $file->getFilenameWithoutExtension();
-        $output[$name] = u(\str_replace('_', ' ', $name))->title();
-
-        if ($moduleName) {
-          $output[$name] = \sprintf('[%s] %s', $moduleName, $output[$name]);
-        }
-      }
-    }
-
-    return $output;
-  }
-
-  /**
    * Load fixtures options from modules fixtures folder.
    *
    * @param array $moduleNames
@@ -135,6 +100,41 @@ class FixturesHelpers {
     }
 
     return [];
+  }
+
+  /**
+   * Load fixtures folder data.
+   *
+   * @param array $paths
+   *   The paths to look in.
+   * @param string|null $moduleName
+   *   (Optional) Module name prefix.
+   *
+   * @return array
+   *   The list of fixtures available.
+   */
+  private static function getFixturesOptions(array $paths, ?string $moduleName = NULL): array {
+    $output = [];
+
+    foreach ($paths as $path) {
+      if (!\file_exists($path)) {
+        continue;
+      }
+
+      $finder = new Finder();
+      $finder->files()->name('*.yml')->in($path);
+
+      foreach ($finder as $file) {
+        $name = $file->getFilenameWithoutExtension();
+        $output[$name] = u(\str_replace('_', ' ', $name))->title();
+
+        if ($moduleName) {
+          $output[$name] = \sprintf('[%s] %s', $moduleName, $output[$name]);
+        }
+      }
+    }
+
+    return $output;
   }
 
 }

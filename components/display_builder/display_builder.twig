@@ -1,8 +1,6 @@
 {% set builder_id = builder_id|default('display-builder-' ~ random()) %}
 {% set attributes = attributes.setAttribute('id', builder_id).addClass('display-builder') %}
 
-{% set contextual_id = builder_id ~ '-contextual' %}
-
 <section{{ attributes }}>
   {% set first_drawer_content %}
     <div class="shoelace-resize-handle"></div>

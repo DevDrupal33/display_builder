@@ -562,10 +562,8 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
     // Order list ignoring starting '(' that is used for components names that
     // are sub components.
     \uasort($filtered_definitions, static function ($a, $b) {
-      // @phpstan-ignore-next-line
       $nameA = \ltrim($a['name'] ?? $a['label'], '(');
 
-      // @phpstan-ignore-next-line
       return \strnatcasecmp($nameA, \ltrim($b['name'] ?? $b['label'], '('));
     });
 

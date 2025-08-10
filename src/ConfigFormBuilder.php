@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\display_builder\StateManager\StateManagerInterface;
-use Drupal\Core\Extension\ModuleHandlerInterface;
 
 /**
  * Config form builder.
@@ -73,7 +73,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
     }
 
     // Add admin information to link the profiles.
-    if ($this->moduleHandler->moduleExists('display_builder_ui') &&$this->currentUser->hasPermission('administer display builders')) {
+    if ($this->moduleHandler->moduleExists('display_builder_ui') && $this->currentUser->hasPermission('administer display builders')) {
       $params = [
         '@url' => Url::fromRoute('entity.display_builder.collection')->toString(),
       ];

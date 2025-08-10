@@ -1,16 +1,46 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Parameter \#1 \$array of function uasort contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
+			message: '#^Cannot access offset ''class'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/Form/DisplayBuilderForm.php
+			path: modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php
 
 		-
-			message: '#^Parameter \#2 \$callback of function uasort contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
+			message: '#^Method Drupal\\display_builder_views\\Plugin\\views\\display_extender\\DisplayExtender\:\:buildOptionsForm\(\) has parameter \$form with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
-			path: src/Form/DisplayBuilderForm.php
+			path: modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php
+
+		-
+			message: '#^Method Drupal\\display_builder_views\\Plugin\\views\\display_extender\\DisplayExtender\:\:optionsSummary\(\) has parameter \$categories with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php
+
+		-
+			message: '#^Method Drupal\\display_builder_views\\Plugin\\views\\display_extender\\DisplayExtender\:\:optionsSummary\(\) has parameter \$options with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php
+
+		-
+			message: '#^Method Drupal\\ui_patterns_overrides\\Plugin\\UiPatterns\\Source\\ContentEntitySource\:\:getEntity\(\) should return Drupal\\Core\\Entity\\ContentEntityInterface\|null but returns Drupal\\Core\\Entity\\EntityInterface\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: modules/ui_patterns_overrides/src/Plugin/UiPatterns/Source/ContentEntitySource.php
+
+		-
+			message: '#^Parameter \#1 \$id of method Drupal\\Core\\Entity\\EntityStorageInterface\:\:load\(\) expects int\|string, float\|int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: modules/ui_patterns_overrides/src/Plugin/UiPatterns/Source/ContentEntitySource.php
+
+		-
+			message: '#^Cannot access offset ''label'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: modules/ui_patterns_overrides/src/Plugin/UiPatterns/Source/WysiwygWidget.php
 
 		-
 			message: '#^Cannot access offset ''icon'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
@@ -41,9 +71,3 @@ parameters:
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/IslandPluginBase.php
-
-		-
-			message: '#^Cannot access offset ''type'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/IslandPluginManager.php

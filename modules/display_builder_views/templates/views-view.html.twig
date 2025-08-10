@@ -1,8 +1,6 @@
-{%
-  set classes = [
+{% set classes = [
     dom_id ? 'js-view-dom-id-' ~ dom_id,
-  ]
-%}
+] %}
 <div{{ attributes.addClass(classes) }}>
   {% if display_builder.0 %}
     {{ display_builder }}

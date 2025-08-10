@@ -41,7 +41,7 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
    *
    * Can be a string (plain title), Markup or a render array (formatted title).
    */
-  protected array|string|MarkupInterface $title;
+  protected array|MarkupInterface|string $title;
 
   /**
    * The display builder state manager.

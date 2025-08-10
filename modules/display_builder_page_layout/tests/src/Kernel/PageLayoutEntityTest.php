@@ -8,16 +8,14 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Kernel test for the PageLayout config entity and its form.
  *
- * @group display_builder
- *
  * @internal
- *
- * @coversNothing
  */
+#[Group('display_builder')]
 final class PageLayoutEntityTest extends KernelTestBase {
 
   /**

@@ -56,7 +56,8 @@ class DisplayBuilderDevelController extends ControllerBase {
       if (!$builder_id) {
         continue;
       }
-      $build['display_builder_table']['#rows'][$builder_id] = $this->buildRow($builder_id, $this->stateManager->load($builder_id));
+      $data = $this->stateManager->load($builder_id);
+      $build['display_builder_table']['#rows'][$builder_id] = $this->buildRow($builder_id, $data ?? []);
     }
 
     $build['pager'] = ['#type' => 'pager'];

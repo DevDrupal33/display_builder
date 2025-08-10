@@ -65,8 +65,6 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
 
   /**
    * {@inheritdoc}
-   *
-   * @phpstan-ignore-next-line
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state): void {
     if ($form_state->get('section') !== 'display_builder') {
@@ -79,8 +77,6 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
 
   /**
    * {@inheritdoc}
-   *
-   * @phpstan-ignore-next-line
    */
   public function submitOptionsForm(&$form, FormStateInterface $form_state): void {
     if ($form_state->get('section') !== 'display_builder') {
@@ -106,8 +102,6 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
 
   /**
    * {@inheritdoc}
-   *
-   * @phpstan-ignore-next-line
    */
   public function optionsSummary(&$categories, &$options): void {
     if (!$this->isApplicable()) {
@@ -245,7 +239,6 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
     $display = $this->view->getDisplay();
     $display_definition = $display->getPluginDefinition();
 
-    // @phpstan-ignore-next-line
     if (!isset($display_definition['class'])) {
       return FALSE;
     }

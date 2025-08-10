@@ -69,41 +69,6 @@ trait EntityViewDisplayTrait {
   }
 
   /**
-   * Actual BuildMultiple.
-   *
-   * @param \Drupal\Core\Entity\FieldableEntityInterface[] $entities
-   *   The entities being displayed.
-   * @param array $build_list
-   *   Intermediary renderable array for the entities.
-   *
-   * @return array
-   *   A renderable array for the entities, indexed by the same keys as the
-   *   $entities array parameter.
-   */
-  protected function displayBuilderBuildMultiple(array $entities, array $build_list): array {
-    // If no display builder enabled stop here.
-    if (!$this->isDisplayBuilderEnabled()) {
-      return $build_list;
-    }
-
-    foreach ($entities as $id => $entity) {
-      $build_list[$id]['_display_builder'] = $this->buildSources($entity);
-
-      // Remove all fields with configurable display
-      // from the existing build.
-      foreach (\array_keys($build_list[$id]) as $name) {
-        $field_definition = $this->getFieldDefinition($name);
-
-        if ($field_definition && $field_definition->isDisplayConfigurable($this->displayContext)) {
-          unset($build_list[$id][$name]);
-        }
-      }
-    }
-
-    return $build_list;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function calculateDependencies(): self {
@@ -305,6 +270,41 @@ trait EntityViewDisplayTrait {
   }
 
   /**
+   * Actual BuildMultiple.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface[] $entities
+   *   The entities being displayed.
+   * @param array $build_list
+   *   Intermediary renderable array for the entities.
+   *
+   * @return array
+   *   A renderable array for the entities, indexed by the same keys as the
+   *   $entities array parameter.
+   */
+  protected function displayBuilderBuildMultiple(array $entities, array $build_list): array {
+    // If no display builder enabled stop here.
+    if (!$this->isDisplayBuilderEnabled()) {
+      return $build_list;
+    }
+
+    foreach ($entities as $id => $entity) {
+      $build_list[$id]['_display_builder'] = $this->buildSources($entity);
+
+      // Remove all fields with configurable display
+      // from the existing build.
+      foreach (\array_keys($build_list[$id]) as $name) {
+        $field_definition = $this->getFieldDefinition($name);
+
+        if ($field_definition && $field_definition->isDisplayConfigurable($this->displayContext)) {
+          unset($build_list[$id][$name]);
+        }
+      }
+    }
+
+    return $build_list;
+  }
+
+  /**
    * Convert "Manage display" formatters to sources.
    *
    * @return array
@@ -429,7 +429,8 @@ trait EntityViewDisplayTrait {
    *   An array of context objects for a given entity.
    */
   protected function getContextsForEntity(FieldableEntityInterface $entity) {
-    $available_context_ids = array_keys($this->contextRepository()->getAvailableContexts());
+    $available_context_ids = \array_keys($this->contextRepository()->getAvailableContexts());
+
     return [
       'view_mode' => new Context(ContextDefinition::create('string'), $this->getMode()),
       'entity' => EntityContext::fromEntity($entity),

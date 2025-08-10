@@ -10,21 +10,16 @@ It's recommended to ease this step using [Composer Merge Plugin](https://github.
 
 ```yaml
 {
-    # [...]
-    "config": {
-        "allow-plugins": {
-            # [...]
-            "wikimedia/composer-merge-plugin": true
-        }
+  # [...]
+  'config': { 'allow-plugins': {
+          # [...]
+          'wikimedia/composer-merge-plugin': true,
+        } },
+  'extra': {
+      # [...]
+      'merge-plugin':
+        { 'include': ['web/modules/*/display_builder/composer.json'] },
     },
-    "extra": {
-        # [...]
-        "merge-plugin": {
-            "include": [
-                "web/modules/*/display_builder/composer.json"
-            ]
-        },
-    }
 }
 ```
 

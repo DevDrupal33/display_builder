@@ -83,7 +83,7 @@ conditions:
   request_path:
     id: request_path
     pages: /user/1
-    negate: "0"
+    negate: '0'
 ```
 
 Overview:

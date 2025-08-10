@@ -9,8 +9,8 @@ use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\display_builder_devel\FixturesHelpers;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder_devel\FixturesHelpers;
 
 /**
  * Defines an add display builder instance form.

@@ -29,14 +29,19 @@ $local_rules = [
   'ordered_imports' => true,
   'ordered_interfaces' => true,
   'php_unit_strict' => true,
+  'return_assignment' => false,
+  'php_unit_test_class_requires_covers' => false,
+  'new_expression_parentheses' => ['use_parentheses' => true],
   'php_unit_data_provider_method_order' => true,
   'method_argument_space' => ['on_multiline' => 'ensure_fully_multiline'],
   'ordered_class_elements' => ['case_sensitive' => false],
   '@PHP83Migration' => true,
-  '@PHP84Migration' => true,
+  '@PHP84Migration' => false,
   'native_function_invocation' => ['include' => ['@internal'], 'scope' => 'all', 'strict' => true],
 ];
 
-$config->setRules(array_merge($rules, $local_rules));
+$rules = \array_merge($rules, $local_rules);
+
+$config->setRules($rules);
 
 return $config;

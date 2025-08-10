@@ -5,13 +5,14 @@ includes:
 parameters:
   level: 7
 
+  editorUrl: 'vscode://file/%%file%%:%%line%%'
+
   excludePaths:
     analyseAndScan:
       - */node_modules/*
       - */vendor/*
       - */tests/*
-      # Always fail because of missing ui_patterns module.
-      - */modules/ui_patterns_overrides/src/Plugin/UiPatterns/Source/*.php
+
   fileExtensions:
     - php
     - module
