@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Controller;
 
-use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
@@ -352,8 +351,6 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
         break;
       }
     }
-    // phpcs:ignore
-    $theme = \Drupal::configFactory()->get('system.theme')->get('default');
     $data = $this->stateManager->get($builder_id, $instance_id);
     self::cleanInstanceId($data);
 
@@ -361,11 +358,10 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     $preset = $preset_storage->create([
       'id' => \uniqid(),
       'label' => (string) $label,
-      'theme' => $theme,
       'status' => TRUE,
       'group' => '',
       'description' => '',
-      'sources' => Yaml::encode($data),
+      'sources' => $data,
     ]);
     $preset->save();
 

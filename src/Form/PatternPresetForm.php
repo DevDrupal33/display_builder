@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Form;
 
-// Use Drupal\Component\Serialization\Yaml;.
+use Drupal\Component\Serialization\Exception\InvalidDataTypeException;
+use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\display_builder\Entity\PatternPreset;
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * Pattern preset form.
@@ -41,24 +42,19 @@ final class PatternPresetForm extends EntityForm {
       '#disabled' => !$entity->isNew(),
     ];
 
+    $form['description'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Description'),
+      '#default_value' => $entity->get('description'),
+      '#rows' => 2,
+    ];
+
     $form['theme'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Theme'),
       '#description' => $this->t('The theme this preset is meant to be used with.'),
       '#default_value' => $entity->get('theme'),
       '#required' => TRUE,
-    ];
-
-    $form['status'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Enabled'),
-      '#default_value' => $entity->status(),
-    ];
-
-    $form['description'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Description'),
-      '#default_value' => $entity->get('description'),
     ];
 
     $form['group'] = [
@@ -70,28 +66,17 @@ final class PatternPresetForm extends EntityForm {
     $form['sources'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Sources'),
-      '#default_value' => $entity->get('sources'),
-      '#required' => TRUE,
+      '#default_value' => Yaml::encode($entity->get('sources')),
+      '#rows' => 16,
+    ];
+
+    $form['status'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enabled'),
+      '#default_value' => $entity->status(),
     ];
 
     return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function validateForm(array &$form, FormStateInterface $form_state): void {
-    $sources = $form_state->getValue('sources');
-
-    try {
-      Yaml::parse($sources);
-    }
-    catch (\Throwable $th) {
-      $form_state->setErrorByName(
-        'sources',
-        $this->t('The value is not correct. @error', ['@error' => $th->getMessage()]),
-      );
-    }
   }
 
   /**
@@ -110,6 +95,25 @@ final class PatternPresetForm extends EntityForm {
     $form_state->setRedirectUrl($this->entity->toUrl('collection'));
 
     return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state): void {
+    $sources = $form_state->getValue('sources');
+
+    try {
+      $sources = \is_string($sources) ? Yaml::decode($sources) : $sources;
+    }
+    catch (InvalidDataTypeException $e) {
+      // We do it here instead of FormInterface::validateForm() because it is
+      // the earliest call of EntityInterface::set().
+      $form_state->setErrorByName('sources', $this->t('The import failed with the following message: %message', ['%message' => $e->getMessage()]));
+    }
+    $form_state->setValue('sources', $sources);
+
+    parent::copyFormValuesToEntity($entity, $form, $form_state);
   }
 
 }

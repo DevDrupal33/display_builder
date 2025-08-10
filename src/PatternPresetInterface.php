@@ -14,6 +14,9 @@ interface PatternPresetInterface extends ConfigEntityInterface {
   /**
    * Return the ready to use sources.
    *
+   * This is not the same as WithDisplayBuilderInterface::getSources() because
+   * the root level is a single nestable source plugin instead of a list.
+   *
    * @param array $contexts
    *   (Optional) Contexts for the sources.
    * @param bool $fillInstanceId

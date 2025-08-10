@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Entity;
 
-use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Entity\EntityDeleteForm;
@@ -12,6 +11,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Form\PatternPresetForm;
 use Drupal\display_builder\PatternPresetInterface;
 use Drupal\display_builder_ui\PatternPresetListBuilder;
+use Drupal\ui_patterns\SourcePluginManager;
 
 /**
  * Defines the Pattern preset entity type.
@@ -53,7 +53,6 @@ use Drupal\display_builder_ui\PatternPresetListBuilder;
   config_export: [
     'id',
     'label',
-    'theme',
     'description',
     'group',
     'sources',
@@ -72,11 +71,6 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
   protected string $label;
 
   /**
-   * The preset theme.
-   */
-  protected string $theme;
-
-  /**
    * The preset description.
    */
   protected string $description;
@@ -89,13 +83,13 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
   /**
    * The preset sources.
    */
-  protected string $sources;
+  protected array $sources;
 
   /**
    * {@inheritdoc}
    */
   public function getSources(array $contexts = [], bool $fillInstanceId = TRUE): array {
-    $data = Yaml::decode($this->get('sources') ?? []);
+    $data = $this->get('sources') ?? [];
 
     if (isset($data[0]) && \count($data) === 1) {
       $data = \reset($data);
@@ -110,6 +104,39 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
     }
 
     return $data;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    parent::calculateDependencies();
+    // The root level is a single nestable source plugin.
+    $source = $this->sources;
+
+    if (!isset($source['source_id'])) {
+      return $this;
+    }
+    // This will automatically be done by parent::calculateDependencies() if we
+    // implement EntityWithPluginCollectionInterface.
+    $configuration = [
+      'settings' => $source['source'] ?? [],
+    ];
+    /** @var \Drupal\ui_patterns\SourceInterface $source */
+    $source = $this->getSourceManager()->createInstance($source['source_id'], $configuration);
+    $this->addDependencies($source->calculateDependencies());
+
+    return $this;
+  }
+
+  /**
+   * Gets the source plugin manager.
+   *
+   * @return \Drupal\ui_patterns\SourcePluginManager
+   *   The source plugin manager.
+   */
+  protected static function getSourceManager(): SourcePluginManager {
+    return \Drupal::service('plugin.manager.ui_patterns_source');
   }
 
   /**

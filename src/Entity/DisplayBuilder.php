@@ -6,11 +6,11 @@ namespace Drupal\display_builder\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
+use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuilderInterface;
-use Drupal\display_builder\Form\DisplayBuilderDeleteForm;
 use Drupal\display_builder\Form\DisplayBuilderForm;
 use Drupal\display_builder\Form\DisplayBuilderIslandPluginForm;
 use Drupal\display_builder\IslandPluginManagerInterface;
@@ -44,7 +44,7 @@ use Drupal\user\RoleInterface;
     'form' => [
       'add' => DisplayBuilderForm::class,
       'edit' => DisplayBuilderForm::class,
-      'delete' => DisplayBuilderDeleteForm::class,
+      'delete' => EntityDeleteForm::class,
       'edit-plugin' => DisplayBuilderIslandPluginForm::class,
     ],
   ],

@@ -18,9 +18,8 @@ final class PatternPresetListBuilder extends ConfigEntityListBuilder {
   public function buildHeader(): array {
     $header = [];
     $header['label'] = $this->t('Label');
-    $header['theme'] = $this->t('Theme');
     $header['description'] = $this->t('Description');
-    $header['id'] = $this->t('Machine name');
+    $header['themes'] = $this->t('Themes');
 
     return $header + parent::buildHeader();
   }
@@ -32,9 +31,8 @@ final class PatternPresetListBuilder extends ConfigEntityListBuilder {
     $row = [];
     /** @var \Drupal\display_builder\DisplayBuilderInterface $entity */
     $row['label'] = $entity->label();
-    $row['theme'] = $entity->get('theme');
     $row['description'] = $entity->get('description');
-    $row['id'] = $entity->id();
+    $row['themes'] = \implode(', ', $entity->getDependencies()['theme'] ?? []);
 
     return $row + parent::buildRow($entity);
   }

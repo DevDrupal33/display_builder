@@ -83,3 +83,19 @@ display_builder.pattern_preset.*:
       type: string
     description:
       type: string
+    theme:
+      type: string
+    group:
+      type: string
+    sources:
+      label: "UI Patterns sources"
+      type: mapping
+      mapping:
+        source_id:
+          type: string
+          label: 'Prop source ID'
+        source:
+          type: ui_patterns_source.[%parent.source_id]
+          label: 'Prop source configuration'
+        _third_party_settings:
+          type: mapping
