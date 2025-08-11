@@ -62,15 +62,11 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
 
   /**
    * The sources.
-   *
-   * @var array|null
    */
   protected ?array $sources = NULL;
 
   /**
    * The choices from all sources.
-   *
-   * @var array|null
    */
   protected ?array $choices = NULL;
 
@@ -154,66 +150,12 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
   }
 
   /**
-   * Get the choices grouped by category.
-   */
-  protected function getGroupedChoices(): array {
-    $choices = $this->getChoices();
-    $categories = [];
-    foreach ($choices as $choice) {
-      $category = $choice['group'] ?? '';
-      if ($category instanceof MarkupInterface) {
-        $category = (string) $category;
-      }
-      if (!isset($categories[$category])) {
-        $categories[$category] = [
-          'label' => $category,
-          'metadata' => $choice,
-          'choices' => [],
-        ];
-      }
-      $categories[$category]['choices'][] = $choice;
-    }
-    $this->sortGroupedChoices($categories);
-    return $categories;
-  }
-
-  /**
-   * Sorts the grouped choices.
-   *
-   * This method sorts the categories by their labels,
-   * placing empty category first,
-   * views blocks are sorted to the end of the list.
-   *
-   * @param array $categories
-   *   The categories to sort.
-   */
-  protected function sortGroupedChoices(array &$categories) : void {
-    // Sort categories : empty first, views at the end.
-    usort($categories, function ($a, $b) {
-      if (empty($a['label'])) {
-        return -1;
-      }
-      if (empty($b['label'])) {
-        return 1;
-      }
-      $source_id_a = $a['metadata']['data']['source_id'] ?? '';
-      $source_id_b = $b['metadata']['data']['source_id'] ?? '';
-      if (($source_id_a === 'block') && ($source_id_b !== 'block')) {
-        return 1;
-      }
-      if (($source_id_b === 'block') && ($source_id_a !== 'block')) {
-        return -1;
-      }
-      return strnatcmp($a['label'], $b['label']);
-    });
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function build(string $builder_id, array $data, array $options = []): array {
     $categories = $this->getGroupedChoices();
     $build = [];
+
     foreach ($categories as $category_data) {
       if (!empty($category_data['label'])) {
         $build[] = [
@@ -227,6 +169,7 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
         ];
       }
       $category_choices = $category_data['choices'];
+
       foreach ($category_choices as $choice) {
         $build[] = $this->buildPlaceholderButton(
           $choice['label'],
@@ -235,21 +178,132 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
         );
       }
     }
+
     return $this->buildDraggables($builder_id, $build);
+  }
+
+  /**
+   * Get the group label for a choice.
+   *
+   * @param array $choice
+   *   The choice to get the group for.
+   * @param array $source_definition
+   *   The source definition to use for the group.
+   *
+   * @return string|null
+   *   The group label for the choice.
+   */
+  public function getChoiceGroup(array &$choice, array &$source_definition): ?string {
+    $group = $source_definition['label'] ?? '';
+
+    switch ($source_definition['id']) {
+      case 'block':
+        $block_id = $choice['original_id'] ?? '';
+
+        if (\str_starts_with($block_id, 'views_block:') && $choice['group']) {
+          $group = $choice['group'];
+        }
+        elseif (\str_starts_with($block_id, 'system_menu_block:') && $choice['group']) {
+          $group = $choice['group'];
+        }
+        else {
+          $group = $this->t('Others');
+        }
+        break;
+
+      case 'entity_reference':
+        $group = $this->t('Referenced entities');
+
+        break;
+
+      case 'entity_field':
+        $group = $this->t('Fields');
+
+        break;
+
+      default:
+        break;
+    }
+
+    return ($group instanceof MarkupInterface) ? (string) $group : $group;
+  }
+
+  /**
+   * Get the choices grouped by category.
+   */
+  protected function getGroupedChoices(): array {
+    $choices = $this->getChoices();
+    $categories = [];
+
+    foreach ($choices as $choice) {
+      $category = $choice['group'] ?? '';
+
+      if ($category instanceof MarkupInterface) {
+        $category = (string) $category;
+      }
+
+      if (!isset($categories[$category])) {
+        $categories[$category] = [
+          'label' => $category,
+          'metadata' => $choice,
+          'choices' => [],
+        ];
+      }
+      $categories[$category]['choices'][] = $choice;
+    }
+    $this->sortGroupedChoices($categories);
+
+    return $categories;
+  }
+
+  /**
+   * Sorts the grouped choices.
+   *
+   * This method sorts the categories by their labels,
+   * placing empty category first,
+   * views blocks are sorted to the end of the list.
+   *
+   * @param array $categories
+   *   The categories to sort.
+   */
+  protected function sortGroupedChoices(array &$categories): void {
+    // Sort categories : empty first, views at the end.
+    \usort($categories, static function ($a, $b) {
+      if (empty($a['label'])) {
+        return -1;
+      }
+
+      if (empty($b['label'])) {
+        return 1;
+      }
+      $source_id_a = $a['metadata']['data']['source_id'] ?? '';
+      $source_id_b = $b['metadata']['data']['source_id'] ?? '';
+
+      if (($source_id_a === 'block') && ($source_id_b !== 'block')) {
+        return 1;
+      }
+
+      if (($source_id_b === 'block') && ($source_id_a !== 'block')) {
+        return -1;
+      }
+
+      return \strnatcmp($a['label'], $b['label']);
+    });
   }
 
   /**
    * Returns all possible sources.
    *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   *
    * @return array<string, array>
    *   An array of sources.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
   protected function getSources(): array {
     if ($this->sources === NULL) {
       $definitions = $this->sourceManager->getDefinitionsForPropType('slot', $this->configuration['contexts'] ?? []);
       $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager->getSlotPropType()]];
+
       foreach ($definitions as $source_id => $definition) {
         if (\in_array($source_id, self::HIDE_SOURCE, TRUE)) {
           continue;
@@ -261,11 +315,13 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
           'definition' => $definition,
           'source' => $source,
         ];
+
         if ($source instanceof SourceWithChoicesInterface) {
           $this->sources[$source_id]['choices'] = $source->getChoices();
         }
       }
     }
+
     return $this->sources;
   }
 
@@ -284,62 +340,26 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
    */
   protected function isChoiceValid(array &$choice, array &$source_definition, $allowed_providers): bool {
     $provider = $choice['provider'] ?? '';
+
     if ($provider) {
       if (!$allowed_providers) {
         return FALSE;
       }
-      if (is_array($allowed_providers) && (\in_array($provider, self::PROVIDER_EXCLUDE, TRUE) || !\in_array($provider, $allowed_providers, TRUE))) {
+
+      if (\is_array($allowed_providers) && (\in_array($provider, self::PROVIDER_EXCLUDE, TRUE) || !\in_array($provider, $allowed_providers, TRUE))) {
         return FALSE;
       }
     }
+
     if ($source_definition['id'] === 'block') {
       $block_id = $choice['original_id'] ?? '';
+
       if ($block_id && \in_array($block_id, self::HIDE_BLOCK, TRUE)) {
         return FALSE;
       }
     }
+
     return TRUE;
-  }
-
-  /**
-   * Get the group label for a choice.
-   *
-   * @param array $choice
-   *   The choice to get the group for.
-   * @param array $source_definition
-   *   The source definition to use for the group.
-   *
-   * @return string|null
-   *   The group label for the choice.
-   */
-  public function getChoiceGroup(array &$choice, array &$source_definition): ?string {
-    $group = $source_definition['label'] ?? '';
-    switch ($source_definition['id']) {
-      case 'block':
-        $block_id = $choice['original_id'] ?? '';
-        if (\str_starts_with($block_id, 'views_block:') && $choice['group']) {
-          $group = $choice['group'];
-        }
-        elseif (\str_starts_with($block_id, 'system_menu_block:') && $choice['group']) {
-          $group = $choice['group'];
-        }
-        else {
-          $group = $this->t('Others');
-        }
-        break;
-
-      case 'entity_reference':
-        $group = $this->t('Referenced entities');
-        break;
-
-      case 'entity_field':
-        $group = $this->t('Fields');
-        break;
-
-      default:
-        break;
-    }
-    return ($group instanceof MarkupInterface) ? (string) $group : $group;
   }
 
   /**
@@ -351,18 +371,22 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
       $configuration = $this->getConfiguration();
       $allowed_providers = $configuration['providers'] ?? TRUE;
       $sources = $this->getSources();
+
       foreach ($sources as $source_id => $source_data) {
         $definition = $source_data['definition'];
         $source = $source_data['source'];
+
         if (!isset($source_data['choices'])) {
           $this->choices[] = [
             'label' => $definition['label'] ?? $source_id,
             'data' => ['source_id' => $source_id],
             'keywords' => \sprintf('%s %s %s', $definition['id'], $definition['label'] ?? $source_id, $definition['description'] ?? ''),
           ];
+
           continue;
         }
         $choices = $source_data['choices'];
+
         foreach ($choices as $choice_id => $choice) {
           if (!$this->isChoiceValid($choice, $definition, $allowed_providers)) {
             continue;
@@ -381,6 +405,7 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
         }
       }
     }
+
     return $this->choices;
   }
 
@@ -415,27 +440,33 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
     $sources = $this->getSources();
     $providers = [];
     $modules = $this->modules->getAllInstalledInfo();
+
     foreach ($sources as $source_data) {
       if (!isset($source_data['choices'])) {
         continue;
       }
       $choices = $source_data['choices'];
+
       foreach ($choices as $choice) {
         $provider = $choice['provider'] ?? '';
+
         if (!$provider || \in_array($provider, self::PROVIDER_EXCLUDE, TRUE)) {
           continue;
         }
+
         if (!isset($modules[$provider])) {
           // If the provider is not a module, skip it.
           continue;
         }
+
         if (!isset($providers[$provider])) {
           $providers[$provider] = $modules[$provider];
           $providers[$provider]['count'] = 0;
         }
-        $providers[$provider]['count']++;
+        ++$providers[$provider]['count'];
       }
     }
+
     return $providers;
   }
 
