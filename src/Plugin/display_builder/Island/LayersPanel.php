@@ -136,7 +136,7 @@ class LayersPanel extends BuilderPanel {
    * {@inheritdoc}
    */
   protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): array {
-    $label = $this->slotSourceProxy->getLabelWithSummary($data);
+    $label = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
     $build = [
       '#type' => 'component',
       '#component' => 'display_builder:layer',

@@ -141,7 +141,7 @@ class TreePanel extends BuilderPanel {
    */
   protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): array {
     $instance_id = $instance_id ?: $data['_instance_id'];
-    $label = $this->slotSourceProxy->getLabelWithSummary($data);
+    $label = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
 
     return [
       '#type' => 'component',

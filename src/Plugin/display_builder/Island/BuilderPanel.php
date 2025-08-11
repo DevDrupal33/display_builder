@@ -222,7 +222,7 @@ class BuilderPanel extends IslandPluginBase {
     // This is the placeholder without configuration or content yet.
     if ($this->isEmpty($build) || $is_empty) {
       // Keep the placeholder if the block is not renderable.
-      $label = $this->slotSourceProxy->getLabelWithSummary($data);
+      $label = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
       $build = $this->buildPlaceholderButton($label['summary']);
       // Highlight in the view to show it's a temporary block waiting for
       // configuration.

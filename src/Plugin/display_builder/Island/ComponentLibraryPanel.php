@@ -404,7 +404,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
   private function getComponentsGrouped(string $builder_id): array {
     $build = [];
 
-    /** @var \Drupal\ui_patterns_overrides\SourcesBundlerInterface $source */
+    /** @var \Drupal\ui_patterns\SourceWithChoicesInterface $source */
     $source = $this->sourceManager->createInstance('component');
 
     foreach ($this->definitionsGrouped as $group_name => $group) {
@@ -421,7 +421,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
         $component_id = (string) $component_id;
         $component_preview_url = Url::fromRoute('display_builder.api_component_preview', ['component_id' => $component_id]);
 
-        $data = $source->getDataSkeleton($component_id);
+        $data = $source->getChoiceSettings($component_id);
         // Used for search filter.
         $keywords = \sprintf('%s %s', $definition['label'], $definition['provider']);
         $build[] = $this->buildPlaceholderButtonWithPreview($builder_id, $definition['annotated_name'], $data, $component_preview_url, $keywords);
@@ -443,7 +443,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
   private function getComponentsVariants(string $builder_id): array {
     $build = [];
 
-    /** @var \Drupal\ui_patterns_overrides\SourcesBundlerInterface $source */
+    /** @var \Drupal\ui_patterns\SourceWithChoicesInterface $source */
     $source = $this->sourceManager->createInstance('component');
 
     foreach ($this->definitionsFiltered as $component_id => $definition) {
@@ -455,7 +455,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
           'data-filter-parent' => $definition['machineName'],
         ],
       ];
-      $data = $source->getDataSkeleton($component_id);
+      $data = $source->getChoiceSettings($component_id);
 
       if (!isset($definition['variants'])) {
         $component_preview_url = Url::fromRoute('display_builder.api_component_preview', ['component_id' => $component_id]);
@@ -500,6 +500,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
   private function getComponentsMosaic(string $builder_id): array {
     $components = [];
 
+    /** @var \Drupal\ui_patterns\SourceInterface $source */
     $source = $this->sourceManager->createInstance('component');
 
     foreach (\array_keys($this->definitionsFiltered) as $component_id) {
@@ -507,8 +508,8 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
       $component = $this->sdcManager->find($component_id);
       $component_preview_url = Url::fromRoute('display_builder.api_component_preview', ['component_id' => $component_id]);
 
-      /** @var \Drupal\ui_patterns_overrides\SourcesBundlerInterface $source */
-      $vals = $source->getDataSkeleton($component_id);
+      /** @var \Drupal\ui_patterns\SourceWithChoicesInterface $source */
+      $vals = $source->getChoiceSettings($component_id);
       $thumbnail = $component->metadata->getThumbnailPath();
 
       // Used for search filter.

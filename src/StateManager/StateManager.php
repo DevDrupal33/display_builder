@@ -261,7 +261,7 @@ class StateManager implements StateManagerInterface {
     $root = $this->attachToRoot($root, $position, $data);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data);
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data, $this->getContexts($builder_id) ?? []);
 
     $log = $this->t('%instance @source_id has been attached to root', [
       '%instance' => $labelWithSummaryInstance['summary'],
@@ -291,7 +291,7 @@ class StateManager implements StateManagerInterface {
     $root = $this->attachToSlot($builder_id, $root, $parent_id, $slot_id, $position, $data);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data);
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data, $this->getContexts($builder_id));
     $labelWithSummaryParent = $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id));
 
     $log = $this->t("%instance @source_id has been attached to %parent's @slot_id", [
@@ -321,7 +321,7 @@ class StateManager implements StateManagerInterface {
     $root = $this->attachToRoot($root, $position, $data);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data);
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data, $this->getContexts($builder_id));
 
     $log = $this->t('%instance @thingy has been moved to root', [
       '%instance' => $labelWithSummaryInstance['summary'],
@@ -362,7 +362,7 @@ class StateManager implements StateManagerInterface {
     }
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data);
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data, $this->getContexts($builder_id));
     $labelWithSummaryParent = $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id));
 
     $log = $this->t("%instance @thingy has been moved to %parent's @slot_id", [
@@ -392,7 +392,7 @@ class StateManager implements StateManagerInterface {
     NestedArray::setValue($root, $path, $existing_data);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($existing_data);
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($existing_data, $this->getContexts($builder_id));
 
     $log = $this->t('%instance has been updated by @island_id', [
       '%instance' => $labelWithSummaryInstance['summary'],
@@ -417,7 +417,7 @@ class StateManager implements StateManagerInterface {
     NestedArray::setValue($root, $path, $existing_data);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($existing_data);
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($existing_data, $this->getContexts($builder_id));
 
     $log = $this->t('%instance has been updated', [
       '%instance' => $labelWithSummaryInstance['summary'],
@@ -436,8 +436,8 @@ class StateManager implements StateManagerInterface {
     $root = $this->doRemove($builder_id, $root, $instance_id);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data);
-    $labelWithSummaryParent = empty($parent_id) ? ['summary' => $this->t('root')] : $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id));
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data, $this->getContexts($builder_id));
+    $labelWithSummaryParent = empty($parent_id) ? ['summary' => $this->t('root')] : $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id), $this->getContexts($builder_id));
 
     $log = $this->t('%instance has been removed from %parent', [
       '%instance' => $labelWithSummaryInstance['summary'],

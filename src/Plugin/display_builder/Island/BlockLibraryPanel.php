@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\ComponentPluginManager;
-use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\HtmxEvents;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\ui_patterns\SourcePluginManager;
-use Drupal\ui_patterns_overrides\SourcesBundlerInterface;
+use Drupal\ui_patterns\SourceWithChoicesInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -45,7 +46,7 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
   ];
 
   private const HIDE_SOURCE = [
-    'block',
+    // 'block',
     'component',
   ];
 
@@ -58,6 +59,20 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
   private const PROVIDER_EXCLUDE = [
     'ui_patterns_blocks',
   ];
+
+  /**
+   * The sources.
+   *
+   * @var array|null
+   */
+  protected ?array $sources = NULL;
+
+  /**
+   * The choices from all sources.
+   *
+   * @var array|null
+   */
+  protected ?array $choices = NULL;
 
   /**
    * {@inheritdoc}
@@ -139,162 +154,234 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
   }
 
   /**
+   * Get the choices grouped by category.
+   */
+  protected function getGroupedChoices(): array {
+    $choices = $this->getChoices();
+    $categories = [];
+    foreach ($choices as $choice) {
+      $category = $choice['group'] ?? '';
+      if ($category instanceof MarkupInterface) {
+        $category = (string) $category;
+      }
+      if (!isset($categories[$category])) {
+        $categories[$category] = [
+          'label' => $category,
+          'metadata' => $choice,
+          'choices' => [],
+        ];
+      }
+      $categories[$category]['choices'][] = $choice;
+    }
+    $this->sortGroupedChoices($categories);
+    return $categories;
+  }
+
+  /**
+   * Sorts the grouped choices.
+   *
+   * This method sorts the categories by their labels,
+   * placing empty category first,
+   * views blocks are sorted to the end of the list.
+   *
+   * @param array $categories
+   *   The categories to sort.
+   */
+  protected function sortGroupedChoices(array &$categories) : void {
+    // Sort categories : empty first, views at the end.
+    usort($categories, function ($a, $b) {
+      if (empty($a['label'])) {
+        return -1;
+      }
+      if (empty($b['label'])) {
+        return 1;
+      }
+      $source_id_a = $a['metadata']['data']['source_id'] ?? '';
+      $source_id_b = $b['metadata']['data']['source_id'] ?? '';
+      if (($source_id_a === 'block') && ($source_id_b !== 'block')) {
+        return 1;
+      }
+      if (($source_id_b === 'block') && ($source_id_a !== 'block')) {
+        return -1;
+      }
+      return strnatcmp($a['label'], $b['label']);
+    });
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function build(string $builder_id, array $data, array $options = []): array {
-    $source_contexts = $this->configuration['contexts'] ?? [];
-
-    $sources = $this->sourceManager->getDefinitionsForPropType('slot', $source_contexts);
-    /** @var \Drupal\ui_patterns_overrides\SourcesBundlerInterface $block_source */
-    $block_source = $this->sourceManager->createInstance('block', $this->configuration);
-
-    return [
-      $this->buildOtherSources($builder_id, $sources),
-      $this->buildDrupalBlocks($builder_id, $block_source),
-    ];
+    $categories = $this->getGroupedChoices();
+    $build = [];
+    foreach ($categories as $category_data) {
+      if (!empty($category_data['label'])) {
+        $build[] = [
+          [
+            '#type' => 'html_tag',
+            '#tag' => 'h4',
+            // We hide the group titles on search.
+            '#attributes' => ['class' => 'db-filter-hide-on-search'],
+            '#value' => $category_data['label'],
+          ],
+        ];
+      }
+      $category_choices = $category_data['choices'];
+      foreach ($category_choices as $choice) {
+        $build[] = $this->buildPlaceholderButton(
+          $choice['label'],
+          $choice['data'] ?? [],
+          $choice['keywords'] ?? ''
+        );
+      }
+    }
+    return $this->buildDraggables($builder_id, $build);
   }
 
   /**
-   * Build other sources.
+   * Returns all possible sources.
    *
-   * @param string $builder_id
-   *   Builder ID.
-   * @param array $sources
-   *   Array of source definitions.
+   * @return array<string, array>
+   *   An array of sources.
    *
-   * @return array
-   *   Render array for the other sources section.
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
-  protected function buildOtherSources(string $builder_id, array $sources): array {
-    $placeholders = [];
-
-    foreach ($sources as $source_id => $definition) {
-      if (\in_array($source_id, self::HIDE_SOURCE, TRUE)) {
-        continue;
+  protected function getSources(): array {
+    if ($this->sources === NULL) {
+      $definitions = $this->sourceManager->getDefinitionsForPropType('slot', $this->configuration['contexts'] ?? []);
+      $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager->getSlotPropType()]];
+      foreach ($definitions as $source_id => $definition) {
+        if (\in_array($source_id, self::HIDE_SOURCE, TRUE)) {
+          continue;
+        }
+        $source = $this->sourceManager->createInstance($source_id,
+          SourcePluginBase::buildConfiguration('slot', $slot_definition, ['source' => []], $this->configuration['contexts'] ?? [])
+        );
+        $this->sources[$source_id] = [
+          'definition' => $definition,
+          'source' => $source,
+        ];
+        if ($source instanceof SourceWithChoicesInterface) {
+          $this->sources[$source_id]['choices'] = $source->getChoices();
+        }
       }
-      $data = [
-        'source_id' => $source_id,
-      ];
-      $keywords = \sprintf('%s %s %s', $definition['id'], $definition['label'] ?? '', $definition['description'] ?? '');
-      $build = $this->buildPlaceholderButton($definition['label'], $data, $keywords);
-      $placeholders[] = $build;
     }
-
-    return $this->buildDraggables($builder_id, $placeholders);
+    return $this->sources;
   }
 
   /**
-   * Filter definitions according to configuration.
+   * Validate a choice against the source definition and allowed providers.
    *
-   * @param array $definitions
-   *   An associative array of module definitions keyed by module ID.
+   * @param array $choice
+   *   The choice to validate.
+   * @param array $source_definition
+   *   The source definition.
+   * @param array|bool $allowed_providers
+   *   The allowed providers, or TRUE to allow all.
    *
-   * @@return array
-   *  An associative array of module definitions keyed by module ID.
+   * @return bool
+   *   Whether the choice is valid or not.
    */
-  protected function filterDefinitions(array $definitions): array {
-    $configuration = $this->getConfiguration();
-    $allowed_providers = $configuration['providers'];
-
-    if (!$allowed_providers) {
-      return [];
+  protected function isChoiceValid(array &$choice, array &$source_definition, $allowed_providers): bool {
+    $provider = $choice['provider'] ?? '';
+    if ($provider) {
+      if (!$allowed_providers) {
+        return FALSE;
+      }
+      if (is_array($allowed_providers) && (\in_array($provider, self::PROVIDER_EXCLUDE, TRUE) || !\in_array($provider, $allowed_providers, TRUE))) {
+        return FALSE;
+      }
     }
-    $filtered = [];
-
-    foreach ($definitions as $block_id => $definition) {
-      if (\in_array($block_id, self::HIDE_BLOCK, TRUE)) {
-        continue;
+    if ($source_definition['id'] === 'block') {
+      $block_id = $choice['original_id'] ?? '';
+      if ($block_id && \in_array($block_id, self::HIDE_BLOCK, TRUE)) {
+        return FALSE;
       }
-
-      if (\in_array($definition['provider'], self::PROVIDER_EXCLUDE, TRUE)) {
-        continue;
-      }
-
-      if (!\in_array($definition['provider'], $allowed_providers, TRUE)) {
-        continue;
-      }
-      $filtered[$block_id] = $definition;
     }
-
-    return $filtered;
+    return TRUE;
   }
 
   /**
-   * Get Drupal block plugins.
+   * Get the group label for a choice.
    *
-   * @param string $builder_id
-   *   Builder ID.
-   * @param \Drupal\ui_patterns_overrides\SourcesBundlerInterface $block_source
-   *   The block source to build.
+   * @param array $choice
+   *   The choice to get the group for.
+   * @param array $source_definition
+   *   The source definition to use for the group.
    *
-   * @return array
-   *   Array of block plugins, keyed by block ID with admin label as value.
+   * @return string|null
+   *   The group label for the choice.
    */
-  protected function buildDrupalBlocks(string $builder_id, SourcesBundlerInterface $block_source): array {
-    $definitions = $block_source->getOptions();
-    $definitions = $this->filterDefinitions($definitions);
-    $names = \array_column($definitions, 'admin_label');
-    \array_multisort($names, \SORT_ASC, $definitions);
-    $views_blocks = [];
-    $menu_blocks = [];
-    $other_blocks = [];
+  public function getChoiceGroup(array &$choice, array &$source_definition): ?string {
+    $group = $source_definition['label'] ?? '';
+    switch ($source_definition['id']) {
+      case 'block':
+        $block_id = $choice['original_id'] ?? '';
+        if (\str_starts_with($block_id, 'views_block:') && $choice['group']) {
+          $group = $choice['group'];
+        }
+        elseif (\str_starts_with($block_id, 'system_menu_block:') && $choice['group']) {
+          $group = $choice['group'];
+        }
+        else {
+          $group = $this->t('Others');
+        }
+        break;
 
-    foreach ($definitions as $block_id => $definition) {
-      if (\str_starts_with($block_id, 'views_block:')) {
-        $views_blocks[$block_id] = $definition;
-      }
-      elseif (\str_starts_with($block_id, 'system_menu_block:')) {
-        $menu_blocks[$block_id] = $definition;
-      }
-      else {
-        $other_blocks[$block_id] = $definition;
-      }
+      case 'entity_reference':
+        $group = $this->t('Referenced entities');
+        break;
+
+      case 'entity_field':
+        $group = $this->t('Fields');
+        break;
+
+      default:
+        break;
     }
-    $build = [
-      $views_blocks ? $this->buildDrupalBlocksGroup($builder_id, $this->t('List (Views)'), $views_blocks, $block_source) : [],
-      $menu_blocks ? $this->buildDrupalBlocksGroup($builder_id, $this->t('Menus'), $menu_blocks, $block_source) : [],
-      $other_blocks ? $this->buildDrupalBlocksGroup($builder_id, $this->t('Others'), $other_blocks, $block_source) : [],
-    ];
-    $build = $this->buildDraggables($builder_id, $build);
-    $build['#source_contexts'] = $this->configuration['contexts'] ?? [];
-
-    return $build;
+    return ($group instanceof MarkupInterface) ? (string) $group : $group;
   }
 
   /**
-   * Build a group of block placeholders.
-   *
-   * @param string $builder_id
-   *   Builder ID.
-   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $title
-   *   The group title.
-   * @param array $definitions
-   *   Block plugin definitions.
-   * @param \Drupal\ui_patterns_overrides\SourcesBundlerInterface $block_source
-   *   The block source to build.
-   *
-   * @return array
-   *   A renderable array.
+   * {@inheritdoc}
    */
-  protected function buildDrupalBlocksGroup(string $builder_id, string|TranslatableMarkup $title, array $definitions, SourcesBundlerInterface $block_source): array {
-    $build = [
-      [
-        '#type' => 'html_tag',
-        '#tag' => 'h4',
-        // We hide the group titles on search.
-        '#attributes' => ['class' => 'db-filter-hide-on-search'],
-        '#value' => $title,
-      ],
-    ];
-
-    foreach ($definitions as $block_id => $definition) {
-      $data = $block_source->getDataSkeleton($block_id);
-      $keywords = \sprintf('%s %s %s', $definition['id'], $definition['admin_label'] ?? '', $definition['category'] ?? '');
-      $block_preview_url = Url::fromRoute('display_builder.api_block_preview', ['block_id' => $block_id]);
-      $build[] = $this->buildPlaceholderButtonWithPreview($builder_id, $definition['admin_label'], $data, $block_preview_url, $keywords);
+  protected function getChoices(): array {
+    if ($this->choices === NULL) {
+      $this->choices = [];
+      $configuration = $this->getConfiguration();
+      $allowed_providers = $configuration['providers'] ?? TRUE;
+      $sources = $this->getSources();
+      foreach ($sources as $source_id => $source_data) {
+        $definition = $source_data['definition'];
+        $source = $source_data['source'];
+        if (!isset($source_data['choices'])) {
+          $this->choices[] = [
+            'label' => $definition['label'] ?? $source_id,
+            'data' => ['source_id' => $source_id],
+            'keywords' => \sprintf('%s %s %s', $definition['id'], $definition['label'] ?? $source_id, $definition['description'] ?? ''),
+          ];
+          continue;
+        }
+        $choices = $source_data['choices'];
+        foreach ($choices as $choice_id => $choice) {
+          if (!$this->isChoiceValid($choice, $definition, $allowed_providers)) {
+            continue;
+          }
+          $choice_label = $choice['label'] ?? $choice_id;
+          $group = $this->getChoiceGroup($choice, $definition);
+          $this->choices[] = [
+            'group' => $group,
+            'label' => $choice_label,
+            'data' => [
+              'source_id' => $source_id,
+              'source' => $source->getChoiceSettings($choice_id),
+            ],
+            'keywords' => \sprintf('%s %s %s %s', $definition['id'], $choice_label, $definition['description'] ?? '', $choice_id),
+          ];
+        }
+      }
     }
-
-    return $build;
+    return $this->choices;
   }
 
   /**
@@ -325,21 +412,30 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
    *   Drupal modules definitions, keyed by extension ID
    */
   protected function getProviders(): array {
-    /** @var \Drupal\ui_patterns_overrides\SourcesBundlerInterface $block_source */
-    $block_source = $this->sourceManager->createInstance('block', $this->configuration);
-    $modules = $this->modules->getAllInstalledInfo();
+    $sources = $this->getSources();
     $providers = [];
-
-    foreach ($block_source->getOptions() as $block_id => $block) {
-      if (\in_array($block_id, self::HIDE_BLOCK, TRUE)) {
+    $modules = $this->modules->getAllInstalledInfo();
+    foreach ($sources as $source_data) {
+      if (!isset($source_data['choices'])) {
         continue;
       }
-      $provider = $block['provider'];
-      $definition = $modules[$provider];
-      $definition['count'] = isset($providers[$provider]) ? ($providers[$provider]['count']) + 1 : 1;
-      $providers[$provider] = $definition;
+      $choices = $source_data['choices'];
+      foreach ($choices as $choice) {
+        $provider = $choice['provider'] ?? '';
+        if (!$provider || \in_array($provider, self::PROVIDER_EXCLUDE, TRUE)) {
+          continue;
+        }
+        if (!isset($modules[$provider])) {
+          // If the provider is not a module, skip it.
+          continue;
+        }
+        if (!isset($providers[$provider])) {
+          $providers[$provider] = $modules[$provider];
+          $providers[$provider]['count'] = 0;
+        }
+        $providers[$provider]['count']++;
+      }
     }
-
     return $providers;
   }
 

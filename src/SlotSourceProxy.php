@@ -6,7 +6,6 @@ namespace Drupal\display_builder;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Component\Utility\Html;
-use Drupal\ui_patterns_overrides\SourcesBundlerInterface;
 
 /**
  * Provide methods missing in UI Patterns.
@@ -39,13 +38,7 @@ class SlotSourceProxy {
         'summary' => '',
       ];
     }
-
-    if ($source instanceof SourcesBundlerInterface) {
-      $label = (string) $source->getOptionLabel($data);
-    }
-    else {
-      $label = (string) $source->label();
-    }
+    $label = (string) $source->label();
 
     $summary = $source->settingsSummary();
     $labelSummary = $label;
