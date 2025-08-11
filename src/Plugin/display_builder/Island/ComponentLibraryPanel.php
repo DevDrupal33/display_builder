@@ -422,6 +422,8 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
         $component_preview_url = Url::fromRoute('display_builder.api_component_preview', ['component_id' => $component_id]);
 
         $data = $source->getChoiceSettings($component_id);
+        $data = $this->getDataSkeleton($component_id);
+
         // Used for search filter.
         $keywords = \sprintf('%s %s', $definition['label'], $definition['provider']);
         $build[] = $this->buildPlaceholderButtonWithPreview($builder_id, $definition['annotated_name'], $data, $component_preview_url, $keywords);
@@ -455,7 +457,9 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
           'data-filter-parent' => $definition['machineName'],
         ],
       ];
+
       $data = $source->getChoiceSettings($component_id);
+      $data = $this->getDataSkeleton($component_id);
 
       if (!isset($definition['variants'])) {
         $component_preview_url = Url::fromRoute('display_builder.api_component_preview', ['component_id' => $component_id]);
@@ -510,6 +514,8 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
 
       /** @var \Drupal\ui_patterns\SourceWithChoicesInterface $source */
       $vals = $source->getChoiceSettings($component_id);
+      $vals = $this->getDataSkeleton($component_id);
+
       $thumbnail = $component->metadata->getThumbnailPath();
 
       // Used for search filter.
@@ -571,6 +577,26 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
     return [
       'grouped' => $grouped_definitions,
       'filtered' => $filtered_definitions,
+    ];
+  }
+
+  /**
+   * Get data skeleton for component.
+   *
+   * @param string $component_id
+   *   The component ID.
+   *
+   * @return array
+   *   The data skeleton for the component.
+   */
+  private static function getDataSkeleton(string $component_id): array {
+    return [
+      'source_id' => 'component',
+      'source' => [
+        'component' => [
+          'component_id' => $component_id,
+        ],
+      ],
     ];
   }
 
