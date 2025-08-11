@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_devel\Form;
 
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormBase;
@@ -29,11 +30,20 @@ final class ExportForm extends FormBase {
     $data = $this->stateManager->getCurrentState($builder_id);
     self::cleanInstanceId($data);
 
+    try {
+      $data = Yaml::encode($data);
+    }
+    catch (\Throwable $th) {
+      $this->messenger()->addError($this->t('Failed to decode sources: @message', ['@message' => $th->getMessage()]));
+
+      return $form;
+    }
+
     $form['data'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Export data'),
       '#rows' => '20',
-      '#default_value' => Yaml::encode($data),
+      '#default_value' => $data,
     ];
 
     $form['cancel'] = [
@@ -79,6 +89,10 @@ final class ExportForm extends FormBase {
         if (isset($value['source_id'], $value['source']['value']) && empty($value['source']['value'])) {
           unset($array[$key]);
         }
+      }
+
+      if ($value instanceof MarkupInterface) {
+        $array[$key] = (string) $value;
       }
     }
   }

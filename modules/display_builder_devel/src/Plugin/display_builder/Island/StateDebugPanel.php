@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder_devel\Plugin\display_builder\Island;
 
 use Drupal\Component\Serialization\Yaml;
+use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\IslandPluginBase;
@@ -21,10 +22,21 @@ use Drupal\display_builder\IslandType;
 )]
 class StateDebugPanel extends IslandPluginBase {
 
+  use MessengerTrait;
+
   /**
    * {@inheritdoc}
    */
   public function build(string $builder_id, array $data, array $options = []): array {
+    try {
+      $data = Yaml::encode($data);
+    }
+    catch (\Throwable $th) {
+      $this->messenger()->addError($this->t('Failed to print sources: @message', ['@message' => $th->getMessage()]));
+
+      return [];
+    }
+
     return [
       [
         '#type' => 'html_tag',
@@ -35,7 +47,7 @@ class StateDebugPanel extends IslandPluginBase {
         'content' => [
           '#type' => 'html_tag',
           '#tag' => 'code',
-          '#value' => Yaml::encode($data),
+          '#value' => $data,
           '#attributes' => [
             'style' => 'font-size: 11px; white-space:pre-wrap;',
           ],

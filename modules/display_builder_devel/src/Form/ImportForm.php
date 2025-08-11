@@ -6,11 +6,17 @@ namespace Drupal\display_builder_devel\Form;
 
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\DependencyInjection\AutowireTrait;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\Context\ContextInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\WithDisplayBuilderInterface;
 use Drupal\display_builder_devel\FixturesHelpers;
+use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
+use Drupal\display_builder_page_layout\Entity\PageLayout;
+use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
 
 /**
  * Defines an add display builder instance form.
@@ -21,6 +27,7 @@ final class ImportForm extends FormBase {
 
   public function __construct(
     private readonly StateManagerInterface $stateManager,
+    private EntityTypeManagerInterface $entityTypeManager,
   ) {}
 
   /**
@@ -117,8 +124,70 @@ final class ImportForm extends FormBase {
       $contexts,
     );
 
+    // Save is different for each target: entity, page or views.
+    // We copy the DisplayBuilderEvents::ON_SAVE.
+    if ($this->stateManager->hasSaveContextsRequirement($builder_id, EntityViewDisplay::getContextRequirement(), $contexts)) {
+      $display = $this->getEntityViewDisplayEntity($contexts['entity'], $contexts['view_mode']);
+      $display?->saveSources();
+    }
+
+    // @see Drupal\display_builder_page_layout\Entity\PageLayout::getInstanceId()
+    $prefix = 'page_layout__';
+
+    if (\str_starts_with($builder_id, $prefix) && $this->stateManager->hasSaveContextsRequirement($builder_id, PageLayout::getContextRequirement(), $contexts)) {
+      $page_layout_id = \substr($builder_id, \strlen($prefix));
+      /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $page_layout */
+      $page_layout = $this->entityTypeManager->getStorage('page_layout')->load($page_layout_id);
+      $page_layout->saveSources();
+    }
+
+    if ($this->stateManager->hasSaveContextsRequirement($builder_id, DisplayExtender::getContextRequirement(), $contexts)) {
+      /** @var \Drupal\views\Entity\View $view */
+      $view = $contexts['ui_patterns_views:view_entity']->getContextValue() ?? NULL;
+
+      if (!$view) {
+        return;
+      }
+      $display_id = \explode('__', $builder_id)[2];
+      $view->getExecutable()->setDisplay($display_id);
+      $extenders = $view->getExecutable()->getDisplay()->getExtenders();
+
+      if (!isset($extenders['display_builder'])) {
+        return;
+      }
+      /** @var \Drupal\display_builder\WithDisplayBuilderInterface $extender */
+      $extender = $extenders['display_builder'];
+      $extender->saveSources();
+    }
+
     // phpcs:ignore
     \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
+  }
+
+  /**
+   * Get entity view display entity.
+   *
+   * @param \Drupal\Core\Plugin\Context\ContextInterface $entity_context
+   *   The entity context.
+   * @param \Drupal\Core\Plugin\Context\ContextInterface $view_mode_context
+   *   The view mode context.
+   *
+   * @return \Drupal\display_builder\WithDisplayBuilderInterface|null
+   *   The entity view display entity or NULL if not found.
+   */
+  private function getEntityViewDisplayEntity(ContextInterface $entity_context, ContextInterface $view_mode_context): ?WithDisplayBuilderInterface {
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+    $entity = $entity_context->getContextValue();
+    $entity_type_id = $entity->getEntityTypeId();
+    $bundle = $entity->bundle();
+    $view_mode = $view_mode_context->getContextValue();
+    $display_id = "{$entity_type_id}.{$bundle}.{$view_mode}";
+
+    /** @var \Drupal\display_builder\WithDisplayBuilderInterface|null $display */
+    $display = $this->entityTypeManager->getStorage('entity_view_display')
+      ->load($display_id);
+
+    return $display;
   }
 
 }

@@ -37,12 +37,6 @@ parameters:
 			path: modules/ui_patterns_overrides/src/Plugin/UiPatterns/Source/ContentEntitySource.php
 
 		-
-			message: '#^Cannot access offset ''label'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: modules/ui_patterns_overrides/src/Plugin/UiPatterns/Source/WysiwygWidget.php
-
-		-
 			message: '#^Cannot access offset ''icon'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1

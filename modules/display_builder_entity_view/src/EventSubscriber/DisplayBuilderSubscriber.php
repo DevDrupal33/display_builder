@@ -53,6 +53,14 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
   /**
    * Get entity view display entity.
+   *
+   * @param \Drupal\Core\Plugin\Context\ContextInterface $entity_context
+   *   The entity context.
+   * @param \Drupal\Core\Plugin\Context\ContextInterface $view_mode_context
+   *   The view mode context.
+   *
+   * @return \Drupal\display_builder\WithDisplayBuilderInterface|null
+   *   The entity view display entity or NULL if not found.
    */
   protected function getEntityViewDisplayEntity(ContextInterface $entity_context, ContextInterface $view_mode_context): ?WithDisplayBuilderInterface {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */

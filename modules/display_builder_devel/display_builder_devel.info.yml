@@ -6,4 +6,7 @@ package: "User interface"
 dependencies:
   - display_builder:display_builder
   - display_builder:display_builder_ui
+  - display_builder:display_builder_entity_view
+  - display_builder:display_builder_page_layout
+  - display_builder:display_builder_views
   - ui_icons:ui_icons_patterns

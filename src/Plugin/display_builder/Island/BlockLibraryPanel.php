@@ -230,6 +230,9 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
 
   /**
    * Get the choices grouped by category.
+   *
+   * @return array
+   *   An array of grouped choices.
    */
   protected function getGroupedChoices(): array {
     $choices = $this->getChoices();
@@ -259,12 +262,11 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
   /**
    * Sorts the grouped choices.
    *
-   * This method sorts the categories by their labels,
-   * placing empty category first,
-   * views blocks are sorted to the end of the list.
+   * This method sorts the categories by their labels, placing empty category
+   * first, views blocks are sorted to the end of the list.
    *
    * @param array $categories
-   *   The categories to sort.
+   *   The categories to sort, passed by reference.
    */
   protected function sortGroupedChoices(array &$categories): void {
     // Sort categories : empty first, views at the end.
@@ -363,7 +365,10 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
   }
 
   /**
-   * {@inheritdoc}
+   * Get the choices from all sources.
+   *
+   * @return array
+   *   An array of choices.
    */
   protected function getChoices(): array {
     if ($this->choices === NULL) {

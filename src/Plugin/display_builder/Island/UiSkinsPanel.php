@@ -140,6 +140,9 @@ class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, 
    *
    * @param array $variables
    *   The variables to filter.
+   *
+   * @return array
+   *   An array of filtered variables.
    */
   protected function filterValues(array $variables): array {
     $cleaned_variables = [];
@@ -152,8 +155,7 @@ class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, 
         continue;
       }
 
-      // Remove values that do not differ from the default values of the
-      // plugin.
+      // Remove values that do not differ from the default values of the plugin.
       if ($plugin_definition->isDefaultScopeValue(':root', $value)) {
         continue;
       }
