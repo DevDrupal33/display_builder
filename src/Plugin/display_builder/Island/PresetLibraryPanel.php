@@ -92,13 +92,9 @@ class PresetLibraryPanel extends IslandPluginBase {
    *   Array of preset plugins.
    */
   protected function buildPresets(string $builder_id, array $presets): array {
-    $theme = \Drupal::configFactory()->get('system.theme')->get('default');
     $build = [];
 
     foreach ($presets as $preset_id => $preset) {
-      if ($preset->get('theme') !== $theme) {
-        continue;
-      }
       $keywords = \sprintf('%s %s', $preset->get('label'), $preset->get('description') ?? '');
       $preset_preview_url = Url::fromRoute('display_builder.api_preset_preview', ['preset_id' => $preset_id]);
       $build[] = $this->buildPlaceholderButtonWithPreview($builder_id, $preset->get('label'), ['preset_id' => $preset_id], $preset_preview_url, $keywords);

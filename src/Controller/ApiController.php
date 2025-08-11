@@ -342,22 +342,14 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
    * {@inheritdoc}
    */
   public function saveInstanceAsPreset(Request $request, string $builder_id, string $instance_id): HtmlResponse {
-    $label = $this->t('New preset');
-
-    foreach ($request->headers as $key => $value) {
-      if ($key === 'hx-prompt' && !empty($value[0])) {
-        $label = $value[0];
-
-        break;
-      }
-    }
+    $label = (string) $this->t('New preset');
     $data = $this->stateManager->get($builder_id, $instance_id);
     self::cleanInstanceId($data);
 
     $preset_storage = $this->entityTypeManager()->getStorage('pattern_preset');
     $preset = $preset_storage->create([
       'id' => \uniqid(),
-      'label' => (string) $label,
+      'label' => $request->headers->get('hx-prompt', $label) ?: $label,
       'status' => TRUE,
       'group' => '',
       'description' => '',
