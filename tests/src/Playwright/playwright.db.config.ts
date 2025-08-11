@@ -15,7 +15,7 @@ export default {
   viewsList: "admin/structure/views",
   viewsAddUrl: "admin/structure/views/add",
   viewsEditUrl: "admin/structure/views/view/{view_id}/edit",
-  viewsDbList: "admin/structure/views/display_builder",
+  viewsDbList: "admin/structure/views/display-builder",
   viewsTestName: "test_db_view", // Must match the view ID in the test config.
 
   pageListUrl: "admin/structure/page-layout",

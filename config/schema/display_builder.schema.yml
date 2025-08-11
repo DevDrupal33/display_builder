@@ -3,88 +3,124 @@ display_builder.display_builder.*:
   label: Display builder
   mapping:
     id:
-      type: string
+      type: machine_name
       label: ID
     label:
       type: label
       label: Label
     uuid:
-      type: string
+      type: uuid
     description:
-      type: string
+      type: text
     library:
       type: string
-      label: 'Library type'
+      label: "Library type"
     debug:
       type: boolean
-      label: 'Debug mode'
-    island_settings:
-      type: mapping
-      label: 'Island settings'
-      mapping:
-        library:
-          type: sequence
-          label: 'Library island'
-          sequence:
-            type: display_builder.island_settings.[%key]
-        view:
-          type: sequence
-          label: 'Library island'
-          sequence:
-            type: display_builder.island_settings.[%key]
-        button:
-          type: sequence
-          label: 'Library island'
-          sequence:
-            type: display_builder.island_settings.[%key]
-        contextual:
-          type: sequence
-          label: 'Library island'
-          sequence:
-            type: display_builder.island_settings.[%key]
-        menu:
-          type: sequence
-          label: 'Library island'
-          sequence:
-            type: display_builder.island_settings.[%key]
-    island_configuration:
-      label: 'Island configuration'
-      # @todo set this configuration, ignore for now.
-      type: ignore
+      label: "Debug mode"
+    islands:
+      type: sequence
+      label: "Islands"
+      sequence:
+        type: display_builder.islands.[%key]
     weight:
       type: weight
       label: Weight
 
-display_builder.island_settings.*:
+display_builder.islands.*:
   type: mapping
-  label: 'Island settings'
+  label: "Island configuration"
   mapping:
     enable:
       type: boolean
       label: Enabled
     weight:
-      type: string
+      type: weight
       label: Weight
-    options:
-      type: string
-      label: Options
+    region:
+      type: machine_name
+      label: Region
+
+display_builder.islands.history:
+  type: mapping
+  mapping:
+    display_clear_button:
+      type: boolean
+    enable:
+      type: boolean
+      label: Enabled
+    weight:
+      type: weight
+      label: Weight
+
+display_builder.islands.component_library:
+  type: mapping
+  mapping:
+    providers:
+      type: sequence
+      sequence:
+        type: string
+    status:
+      type: sequence
+      sequence:
+        type: string
+    include_no_ui:
+      type: boolean
+    show_grouped:
+      type: boolean
+    show_variants:
+      type: boolean
+    show_mosaic:
+      type: boolean
+    enable:
+      type: boolean
+      label: Enabled
+    weight:
+      type: weight
+      label: Weight
+
+display_builder.islands.block_library:
+  type: mapping
+  mapping:
+    providers:
+      type: sequence
+      sequence:
+        type: string
+    enable:
+      type: boolean
+      label: Enabled
+    weight:
+      type: weight
+      label: Weight
+
+display_builder.islands.active_users:
+  type: mapping
+  mapping:
+    image_field:
+      type: machine_name
+    image_style:
+      type: machine_name
+    enable:
+      type: boolean
+      label: Enabled
+    weight:
+      type: weight
+      label: Weight
 
 display_builder.pattern_preset.*:
   type: config_entity
   label: Display builder Preset
   mapping:
     id:
-      type: string
+      type: machine_name
       label: ID
     label:
       type: label
       label: Label
     uuid:
-      type: string
+      type: uuid
     description:
-      type: string
-    theme:
-      type: string
+      type: text
     group:
       type: string
     sources:
@@ -92,7 +128,7 @@ display_builder.pattern_preset.*:
       type: mapping
       mapping:
         source_id:
-          type: string
+          type: machine_name
           label: 'Prop source ID'
         source:
           type: ui_patterns_source.[%parent.source_id]

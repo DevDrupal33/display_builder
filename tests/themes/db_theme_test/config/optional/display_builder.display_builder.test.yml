@@ -1,0 +1,125 @@
+langcode: en
+status: true
+dependencies: {  }
+id: test
+label: Test
+description: 'Testing Display builder config.'
+library: local
+debug: true
+islands:
+  state:
+    enable: true
+    weight: -10
+  toggle_fullscreen:
+    enable: true
+    weight: -9
+  toggle_highlight:
+    enable: true
+    weight: -8
+  active_users:
+    enable: false
+    weight: -1
+  history:
+    enable: true
+    weight: -7
+  keyboard_help:
+    enable: false
+    weight: -6
+  theme_mode:
+    enable: false
+    weight: -5
+  reset:
+    enable: false
+    weight: -4
+  operation:
+    enable: false
+    weight: -3
+  test_island_button:
+    enable: false
+    weight: -2
+  info:
+    enable: true
+    weight: -7
+  ui_styles:
+    enable: true
+    weight: -9
+  instance_form:
+    enable: true
+    weight: -10
+  ui_skins:
+    enable: false
+    weight: -8
+  visibility_conditions:
+    enable: false
+    weight: -6
+  test_island_contextual:
+    enable: false
+    weight: -5
+  component_library:
+    enable: true
+    weight: -10
+  block_library:
+    enable: true
+    weight: -9
+  preset_library:
+    enable: true
+    weight: -8
+  test_island_library:
+    enable: false
+    weight: -7
+  menu:
+    enable: true
+    weight: 0
+  menu_delete:
+    enable: true
+    weight: 0
+  menu_preset:
+    enable: true
+    weight: 0
+  menu_debug:
+    enable: false
+    weight: 0
+  test_island_menu:
+    enable: false
+    weight: 0
+  preview:
+    enable: true
+    weight: -8
+    region: main
+  library:
+    enable: true
+    weight: -10
+    region: sidebar
+  logs:
+    enable: false
+    weight: -7
+    region: main
+  builder:
+    enable: true
+    weight: -9
+    region: main
+  layers:
+    enable: false
+    weight: -6
+    region: main
+  tree:
+    enable: false
+    weight: -5
+    region: main
+  index_debug:
+    enable: false
+    weight: -4
+    region: main
+  state_debug:
+    enable: false
+    weight: -3
+    region: main
+  test_island_view:
+    enable: false
+    weight: -2
+    region: main
+    string_value: test
+    bool_value: 0
+    string_array:
+      bar: bar
+weight: 0

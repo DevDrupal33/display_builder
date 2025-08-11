@@ -1,0 +1,25 @@
+display_builder.islands.test_island_view:
+  type: mapping
+  mapping:
+    enable:
+      type: boolean
+      label: Enabled
+    weight:
+      type: weight
+      label: Weight
+    region:
+      type: machine_name
+      label: Region
+    string_value:
+      type: string
+    bool_value:
+      type: integer
+    string_array:
+      type: mapping
+      mapping:
+        foo:
+          type: string
+        bar:
+          type: string
+        baz:
+          type: string

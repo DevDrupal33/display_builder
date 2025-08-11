@@ -49,12 +49,12 @@ enum IslandTypeViewDisplay: string {
   case Main = 'main';
 
   /**
-   * Get the type list options.
+   * Get the type list regions.
    *
    * @return array
-   *   The type list options as key => description.
+   *   The type list regions as key => description.
    */
-  public static function options(): array {
+  public static function regions(): array {
     return [
       IslandTypeViewDisplay::Sidebar->value => new TranslatableMarkup('Sidebar (OffCanvas)'),
       IslandTypeViewDisplay::Main->value => new TranslatableMarkup('Main area (Tabs in the toolbar)'),

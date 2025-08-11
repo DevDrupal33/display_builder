@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Form;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\display_builder\DisplayBuilderInterface;
@@ -66,22 +69,21 @@ final class DisplayBuilderForm extends EntityForm {
 
     // Inform on two time save for the island specific configurations.
     if ($this->entity->isNew()) {
-      $form['island_settings_notice'] = [
+      $form['islands_notice'] = [
         '#prefix' => '<div class="messages messages--warning">',
         '#markup' => $this->t('Island configuration will be available only after saving this form.'),
         '#suffix' => '</div>',
       ];
     }
 
-    $form['island_settings'] = [
+    $form['islands'] = [
       '#type' => 'details',
       '#title' => $this->t('Islands configuration'),
       '#tree' => TRUE,
       '#open' => TRUE,
     ];
 
-    $island_settings = $entity->get('island_settings') ?? [];
-    $island_configuration = $entity->get('island_configuration') ?? [];
+    $island_configuration = $entity->get('islands') ?? [];
 
     /** @var \Drupal\display_builder\IslandPluginManagerInterface $islandPluginManager */
     $islandPluginManager = \Drupal::service('plugin.manager.db_island'); // phpcs:ignore
@@ -90,12 +92,12 @@ final class DisplayBuilderForm extends EntityForm {
     \ksort($island_by_types);
 
     foreach ($island_by_types as $type => $islands) {
-      $form['island_settings']['title_' . $type] = [
+      $form['islands']['title_' . $type] = [
         '#type' => 'fieldgroup',
         '#title' => $this->t('@type islands', ['@type' => $type]),
         '#description' => IslandType::description($type),
       ];
-      $form['island_settings'][$type] = $this->buildIslandTypeTable(IslandType::from($type), $islands, $island_configuration, $island_settings[$type] ?? []);
+      $form['islands'][$type] = $this->buildIslandTypeTable(IslandType::from($type), $islands, $island_configuration);
     }
 
     $form['library'] = [
@@ -184,15 +186,12 @@ final class DisplayBuilderForm extends EntityForm {
    *   List of island plugins.
    * @param array $configuration
    *   Configuration of all islands from this type.
-   * @param array $settings
-   *   Settings of all islands from this type.
    *
    * @return array
    *   A renderable array.
    */
-  protected function buildIslandTypeTable(IslandType $type, array $islands, array $configuration, array $settings): array {
+  protected function buildIslandTypeTable(IslandType $type, array $islands, array $configuration): array {
     $type = $type->value;
-    $table_has_options = FALSE;
     $table = [
       '#type' => 'table',
       '#header' => [
@@ -200,8 +199,8 @@ final class DisplayBuilderForm extends EntityForm {
         'enable' => $this->t('Enable'),
         'name' => $this->t('Island'),
         'summary' => $this->t('Configuration'),
-        'options' => $this->t('Options'),
-        'actions' => '',
+        'region' => ($type === IslandType::View->value) ? $this->t('Region') : '',
+        'actions' => $this->t('Actions'),
         'weight' => $this->t('Weight'),
       ],
       '#attributes' => ['id' => 'db-islands-' . $type],
@@ -212,10 +211,14 @@ final class DisplayBuilderForm extends EntityForm {
           'group' => 'draggable-weight-' . $type,
         ],
       ],
+      // We don't want to submit the island type level. We already know the
+      // type of each islands thanks to IslandInterface::getTypeId() so let's
+      // keep the storage flat.
+      '#parents' => ['islands'],
     ];
 
     foreach ($islands as $id => $island) {
-      $table[$id] = $this->buildIslandRow($island, $configuration[$id] ?? [], $settings[$id] ?? [], $table_has_options);
+      $table[$id] = $this->buildIslandRow($island, $configuration[$id] ?? []);
     }
 
     // Order rows by weight.
@@ -224,10 +227,6 @@ final class DisplayBuilderForm extends EntityForm {
         return (int) $a['#weight'] - (int) $b['#weight'];
       }
     });
-
-    if (!$table_has_options && isset($table['#header']['options'])) {
-      $table['#header']['options'] = '';
-    }
 
     return $table;
   }
@@ -239,15 +238,11 @@ final class DisplayBuilderForm extends EntityForm {
    *   Island plugin.
    * @param array $configuration
    *   Configuration of this specific island.
-   * @param array $default
-   *   Settings of this specific island.
-   * @param bool $table_has_options
-   *   Table has options?
    *
    * @return array
    *   A renderable array.
    */
-  protected function buildIslandRow(IslandInterface $island, array $configuration, array $default, bool &$table_has_options): array {
+  protected function buildIslandRow(IslandInterface $island, array $configuration): array {
     $id = $island->getPluginId();
     $definition = (array) $island->getPluginDefinition();
     $type = $island->getTypeId();
@@ -255,7 +250,7 @@ final class DisplayBuilderForm extends EntityForm {
     $islandPluginManager = \Drupal::service('plugin.manager.db_island'); // phpcs:ignore
     /** @var \Drupal\display_builder\IslandInterface $instance */
     $instance = $islandPluginManager->createInstance($id, $configuration);
-    $weight = isset($default['weight']) ? (string) $default['weight'] : '0';
+    $weight = isset($configuration['weight']) ? (string) $configuration['weight'] : '0';
 
     $row = [];
     $row['#attributes']['class'] = ['draggable'];
@@ -266,7 +261,7 @@ final class DisplayBuilderForm extends EntityForm {
       '#type' => 'checkbox',
       '#title' => $this->t('Enable'),
       '#title_display' => 'invisible',
-      '#default_value' => $default['enable'] ?? $definition['enabled_by_default'] ?? FALSE,
+      '#default_value' => $configuration['enable'] ?? $definition['enabled_by_default'] ?? FALSE,
     ];
     $row['name'] = [
       '#type' => 'inline_template',
@@ -283,23 +278,22 @@ final class DisplayBuilderForm extends EntityForm {
     if ($type === IslandType::View->value) {
       // If new, only library is on sidebar by default.
       // @todo move this position option to Island configuration.
-      if ($id !== 'library' && !isset($default['options']) && isset($definition['enabled_by_default'])) {
-        $default_option = IslandTypeViewDisplay::Main->value;
+      if ($id !== 'library' && !isset($configuration['region']) && isset($definition['enabled_by_default'])) {
+        $region = IslandTypeViewDisplay::Main->value;
       }
       else {
-        $default_option = $default['options'] ?? NULL;
+        $region = $configuration['region'] ?? NULL;
       }
-      $row['options'] = [
+      $row['region'] = [
         '#type' => 'radios',
         '#title' => $this->t('Display'),
         '#title_display' => 'invisible',
-        '#options' => IslandTypeViewDisplay::options(),
-        '#default_value' => $default_option,
+        '#options' => IslandTypeViewDisplay::regions(),
+        '#default_value' => $region,
       ];
-      $table_has_options = TRUE;
     }
     else {
-      $row['options'] = [];
+      $row['region'] = [];
     }
 
     if ($island instanceof PluginFormInterface && !$this->entity->isNew()) {
@@ -321,7 +315,7 @@ final class DisplayBuilderForm extends EntityForm {
         ],
         '#states' => [
           'visible' => [
-            'input[name="island_settings[button][' . $id . '][enable]"]' => ['checked' => TRUE],
+            'input[name="islands[button][' . $id . '][enable]"]' => ['checked' => TRUE],
           ],
         ],
       ];
@@ -341,6 +335,28 @@ final class DisplayBuilderForm extends EntityForm {
     ];
 
     return $row;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state): void {
+    $values = $form_state->getValues();
+
+    /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $entity */
+    $entity = $entity;
+
+    if ($this->entity instanceof EntityWithPluginCollectionInterface) {
+      // Do not manually update values represented by plugin collections.
+      $values = \array_diff_key($values, $this->entity->getPluginCollections());
+    }
+
+    foreach ($values as $key => $value) {
+      if ($key === 'islands') {
+        $value = NestedArray::mergeDeep($entity->get('islands'), $value);
+      }
+      $entity->set($key, $value);
+    }
   }
 
 }

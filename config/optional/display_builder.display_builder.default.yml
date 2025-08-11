@@ -1,11 +1,11 @@
 langcode: en
 status: true
 dependencies: {  }
-id: devel
-label: Devel
-description: 'Configuration for people developing Display Builder module.'
-library: local
-debug: true
+id: default
+label: Default
+description: 'With sensible configuration, for the common usage.'
+library: cdn
+debug: false
 islands:
   component_library:
     enable: true
@@ -18,23 +18,15 @@ islands:
     weight: -8
   builder:
     enable: true
-    weight: -7
+    weight: -8
     region: main
   layers:
     enable: true
-    weight: -6
+    weight: -7
     region: main
   preview:
     enable: true
-    weight: -5
-    region: main
-  logs:
-    enable: true
-    weight: -4
-    region: main
-  state_debug:
-    enable: true
-    weight: -3
+    weight: -6
     region: main
   library:
     enable: true
@@ -44,35 +36,29 @@ islands:
     enable: true
     weight: -9
     region: sidebar
-  index_debug:
-    enable: true
-    weight: -8
+  logs:
+    enable: false
+    weight: -5
     region: sidebar
-  reset:
-    enable: true
-    weight: -10
-  operation:
+  history:
+    display_clear_button: false
     enable: true
     weight: -9
-  history:
-    display_clear_button: true
-    enable: true
-    weight: -8
   state:
     enable: true
-    weight: -7
+    weight: -10
   toggle_highlight:
     enable: true
-    weight: -6
+    weight: -8
   toggle_fullscreen:
     enable: true
-    weight: -5
+    weight: -7
   keyboard_help:
-    enable: false
-    weight: -4
+    enable: true
+    weight: -6
   theme_mode:
     enable: false
-    weight: -3
+    weight: -5
   instance_form:
     enable: true
     weight: 1
@@ -86,7 +72,7 @@ islands:
     enable: false
     weight: 4
   info:
-    enable: false
+    enable: true
     weight: 5
   menu:
     enable: true
@@ -99,8 +85,5 @@ islands:
     weight: -8
   active_users:
     enable: false
-    weight: 0
-  menu_debug:
-    enable: false
-    weight: 0
+    weight: -3
 weight: 0

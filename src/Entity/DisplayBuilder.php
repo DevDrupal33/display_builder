@@ -66,8 +66,7 @@ use Drupal\user\RoleInterface;
     'label',
     'library',
     'description',
-    'island_settings',
-    'island_configuration',
+    'islands',
     'debug',
     'weight',
   ],
@@ -103,14 +102,9 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
   protected bool $debug = FALSE;
 
   /**
-   * The display builder enabled islands.
+   * The islands configuration for storage.
    */
-  protected ?array $island_settings;
-
-  /**
-   * The display builder island configuration.
-   */
-  protected ?array $island_configuration = [];
+  protected ?array $islands = [];
 
   /**
    * Weight of this page layout when negotiating the page variant.
@@ -135,21 +129,32 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    * {@inheritdoc}
    */
   public function getIslandConfiguration(string $island_id): array {
-    return $this->island_configuration[$island_id] ?? [];
+    return $this->islands[$island_id] ?? [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function getIslandConfigurations(): array {
-    return $this->island_configuration ?? [];
+    return $this->islands ?? [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function setIslandConfiguration(string $island_id, array $configuration = []): void {
-    $this->island_configuration[$island_id] = $configuration;
+    // When $configuration is updated from DisplayBuilderIslandPluginForm,
+    // 'weight', 'enable' and 'region' properties are missing but they must not
+    // be reset.
+    $configuration['weight'] = $configuration['weight'] ?? $this->islands[$island_id]['weight'] ?? 0;
+    $configuration['enable'] = $configuration['enable'] ?? $this->islands[$island_id]['enable'] ?? FALSE;
+
+    // Only View islands have regions.
+    if (isset($this->islands[$island_id]['region'])) {
+      $configuration['region'] = $configuration['region'] ?? $this->islands[$island_id]['region'];
+    }
+
+    $this->islands[$island_id] = $configuration;
   }
 
   /**
@@ -166,6 +171,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
     $library_islands = $islands_enabled_sorted[IslandType::Library->value] ?? [];
     $contextual_islands = $islands_enabled_sorted[IslandType::Contextual->value] ?? [];
     $menu_islands = $islands_enabled_sorted[IslandType::Menu->value] ?? [];
+    $view_islands = $islands_enabled_sorted[IslandType::View->value] ?? [];
 
     $buttons = [];
 
@@ -184,7 +190,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
       ];
     }
 
-    $view_islands_data = $this->prepareViewIslands($builder_id, $islands_enabled_sorted, $builder_data);
+    $view_islands_data = $this->prepareViewIslands($builder_id, $view_islands, $builder_data);
     $view_sidebar = $view_islands_data['view_sidebar'];
     $view_main = $view_islands_data['view_main'];
 
@@ -240,11 +246,9 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
   public function getIslandEnabled(): array {
     $island_enabled = [];
 
-    foreach ($this->island_settings as $settings) {
-      foreach ($settings as $key => $value) {
-        if (isset($value['enable']) && (bool) $value['enable']) {
-          $island_enabled[$key] = $value['weight'] ?? 0;
-        }
+    foreach ($this->islands as $island_id => $configuration) {
+      if (isset($configuration['enable']) && (bool) $configuration['enable']) {
+        $island_enabled[$island_id] = $configuration['weight'] ?? 0;
       }
     }
 
@@ -297,35 +301,34 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    *
    * @param string $builder_id
    *   The builder ID.
-   * @param array $islands_enabled_sorted
-   *   The sorted, enabled islands.
+   * @param array $islands
+   *   The sorted, enabled View islands.
    * @param array $builder_data
    *   The builder data.
    *
    * @return array
    *   The prepared view islands data.
    */
-  private function prepareViewIslands(string $builder_id, array $islands_enabled_sorted, array $builder_data): array {
+  private function prepareViewIslands(string $builder_id, array $islands, array $builder_data): array {
     $view_islands_sidebar = [];
     $view_islands_main = [];
     $view_sidebar_buttons = [];
     $view_main_tabs = [];
-    $view_islands = $islands_enabled_sorted[IslandType::View->value] ?? [];
 
-    if (isset($this->island_settings[IslandType::View->value])) {
-      foreach ($this->island_settings[IslandType::View->value] as $id => $settings) {
-        if (!isset($view_islands[$id])) {
-          continue;
-        }
+    foreach ($islands as $id => $island) {
+      if ($island->getTypeId() !== IslandType::View->value) {
+        continue;
+      }
 
-        if ($settings['options'] === 'sidebar') {
-          $view_islands_sidebar[$id] = $view_islands[$id];
-          $view_sidebar_buttons[$id] = $view_islands[$id];
-        }
-        else {
-          $view_islands_main[$id] = $view_islands[$id];
-          $view_main_tabs[$id] = $view_islands[$id];
-        }
+      $configuration = $island->getConfiguration();
+
+      if ($configuration['region'] === 'sidebar') {
+        $view_islands_sidebar[$id] = $islands[$id];
+        $view_sidebar_buttons[$id] = $islands[$id];
+      }
+      else {
+        $view_islands_main[$id] = $islands[$id];
+        $view_main_tabs[$id] = $islands[$id];
       }
     }
 
@@ -557,21 +560,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    *   The keyboard array list as key => description.
    */
   private function getKeyboardKeys(): array {
-    $island_enable = [];
-
-    foreach ($this->island_settings as $island_settings) {
-      foreach ($island_settings as $island_id => $island_setting) {
-        if (!$island_setting['enable']) {
-          continue;
-        }
-        $island_enable[] = $island_id;
-      }
-    }
-
-    if (empty($island_enable)) {
-      return [];
-    }
-
+    $island_enable = \array_keys($this->getIslandEnabled());
     $output = $this->getIslandPluginManager()->getIslandsKeyboard(\array_flip($island_enable));
     \ksort($output, \SORT_NATURAL | \SORT_FLAG_CASE);
 
@@ -592,15 +581,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
   private function getIslandsEnableSorted(array $contexts): array {
     // Set island by weight.
     // @todo just key by weight and default weight in Island?
-    $islands_enable_by_weight = [];
-
-    foreach ($this->island_settings as $settings) {
-      foreach ($settings as $key => $value) {
-        if (isset($value['enable']) && (bool) $value['enable']) {
-          $islands_enable_by_weight[$key] = $value['weight'] ?? 0;
-        }
-      }
-    }
+    $islands_enable_by_weight = $this->getIslandEnabled();
 
     return $this->getIslandPluginManager()->getIslandsByTypes($contexts, $this->getIslandConfigurations(), $islands_enable_by_weight);
   }

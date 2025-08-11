@@ -13,7 +13,7 @@ test('Page Layout', {tag: '@db_page'} , async ({ page, drupal }) => {
   await drupal.loginAsAdmin()
 
   await page.goto(dbConfig.pageListUrl)
-  await page.getByRole('link', { name: 'Build display' }).nth(1).click()
+  await page.getByRole('link', { name: 'Build display' }).click()
 
   await cmd.builderIsReady(page)
 

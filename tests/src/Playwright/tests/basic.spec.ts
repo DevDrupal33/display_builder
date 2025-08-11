@@ -119,6 +119,7 @@ test('Full Display Builder ', async ({ page, drupal }) => {
   await page.getByRole('button', { name: 'Libraries' }).click()
   await expect(page.getByRole('dialog')).toBeVisible()
   await expect(page.getByRole('tab', { name: 'Components' })).toBeVisible()
+  await page.getByRole('tab', { name: 'Components' }).click()
 
   // Test 3: check preview on hover
   const testComponent = page.getByRole('button', { name: 'Test complex', exact: true })

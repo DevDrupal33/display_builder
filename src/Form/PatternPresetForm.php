@@ -66,7 +66,7 @@ final class PatternPresetForm extends EntityForm {
     $form['sources'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Sources'),
-      '#default_value' => Yaml::encode($entity->get('sources')),
+      '#default_value' => Yaml::encode($entity->get('sources') ?? []),
       '#rows' => 16,
     ];
 
