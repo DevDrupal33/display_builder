@@ -423,7 +423,11 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
 
         $data = [
           'source_id' => 'component',
-          'source' => $source->getChoiceSettings($component_id),
+          'source' => [
+            'component' => [
+              'component_id' => $source->getChoiceSettings($component_id),
+            ],
+          ],
         ];
         // Used for search filter.
         $keywords = \sprintf('%s %s', $definition['label'], $definition['provider']);
@@ -461,7 +465,11 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
 
       $data = [
         'source_id' => 'component',
-        'source' => $source->getChoiceSettings($component_id),
+        'source' => [
+          'component' => [
+            'component_id' => $source->getChoiceSettings($component_id),
+          ],
+        ],
       ];
 
       if (!isset($definition['variants'])) {
@@ -518,7 +526,11 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
       /** @var \Drupal\ui_patterns\SourceWithChoicesInterface $source */
       $vals = [
         'source_id' => 'component',
-        'source' => $source->getChoiceSettings($component_id),
+        'source' => [
+          'component' => [
+            'component_id' => $source->getChoiceSettings($component_id),
+          ],
+        ],
       ];
       $thumbnail = $component->metadata->getThumbnailPath();
 
