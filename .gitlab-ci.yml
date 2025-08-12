@@ -1,17 +1,3 @@
-# https://git.drupalcode.org/project/gitlab_templates/
-# variables:
-#   SKIP_COMPOSER_LINT: '1'
-#   SKIP_PHPCS: '1'
-#   SKIP_STYLELINT: '1'
-#   SKIP_ESLINT: '1'
-#   SKIP_CSPELL: '1'
-#   SKIP_PHPSTAN: '1'
-#   SKIP_PHPMD: '1'
-#   SKIP_NIGHTWATCH: '1'
-#   SKIP_PHPUNIT: '1'
-#   SKIP_TEST_ONLY_CHANGES: '1'
-#   SKIP_PAGES: '1'
-
 include:
   - project: $_GITLAB_TEMPLATES_REPO
     ref: $_GITLAB_TEMPLATES_REF
@@ -21,14 +7,10 @@ include:
       - "/includes/include.drupalci.workflows.yml"
 
 variables:
-  # Opt in to testing Drupal 11.2.
-  # @todo Remove when 11.2 is the default in the GitLab CI template.
-  CORE_STABLE: '11.2.2'
   # Needed to allow this to run locally.
   # https://project.pages.drupalcode.org/gitlab_templates/info/test-locally/
   DRUPALORG_CI_SERVER_URL: https://git.drupalcode.org
   PHPUNIT_FAIL_ON_PHPUNIT_DEPRECATION: 0
-  _CONCURRENCY_THREADS: '12'
 
 .skip-phpmd-rule: &skip-phpmd-rule
   if: '$SKIP_PHPMD == "1"'
@@ -146,18 +128,6 @@ stylelint:
     - *is-push-rule
     - *css-files-change-rule
     - *manual-rule
-  # @todo Remove when https://www.drupal.org/project/gitlab_templates/issues/3492697 lands.
-  script:
-    - cd $_WEB_ROOT/core && corepack enable && yarn add @gitlab-formatters/stylelint-formatter-gitlab
-    - cd $CI_PROJECT_DIR/$_WEB_ROOT/modules/custom/$CI_PROJECT_NAME
-    - echo "Stylelint version $(${CI_PROJECT_DIR}/${_WEB_ROOT}/core/node_modules/.bin/stylelint --version)"
-    - $CI_PROJECT_DIR/$_WEB_ROOT/core/node_modules/.bin/stylelint --ignore-path ./.stylelintignore --config $CI_PROJECT_DIR/$_WEB_ROOT/core/.stylelintrc.json ./**/*.css --formatter verbose --color $_STYLELINT_EXTRA || true
-    - $CI_PROJECT_DIR/$_WEB_ROOT/core/node_modules/.bin/stylelint --ignore-path ./.stylelintignore --config $CI_PROJECT_DIR/$_WEB_ROOT/core/.stylelintrc.json ./**/*.css --custom-formatter=@gitlab-formatters/stylelint-formatter-gitlab --output-file=$CI_PROJECT_DIR/gl-codequality.json $_STYLELINT_EXTRA
-  artifacts:
-    paths:
-      - gl-codequality.json
-    reports:
-      codequality: gl-codequality.json
 
 phpstan:
   allow_failure: false
@@ -200,7 +170,7 @@ cspell:
   - find . -maxdepth 1 -type d -not -path "." -not -path "./tmp" -exec mv {} tmp/ \;
   - mv tmp $CI_PROJECT_NAME
   # Get Drupal
-  - composer create-project drupal/recommended-project:$DRUPAL_CORE _drupal
+  - composer create-project drupal/recommended-project:$CORE_STABLE _drupal
   - cd _drupal
   # Add core-dev, Experience Builder, and drush
   - |

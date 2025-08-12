@@ -1,6 +1,5 @@
+{% set attributes = attributes.addClass('db-tree') %}
 {{ include('display_builder:tree', {
   items: items,
-  attributes: {
-    class: ['db-tree'],
-  },
+  attributes: attributes,
 }, with_context: false) }}

@@ -169,12 +169,16 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
 
   const toggleFirstDrawerContent = (showId = null) => {
     firstDrawerPanes.forEach((pane) => {
-      if (showId && pane.id === showId) {
+      // Island is wrapped in a span in the drawer
+      // @see components/display_builder/display_builder.twig
+      if (showId && pane.firstElementChild.id === showId) {
         pane.classList.remove('shoelace-drawer__hidden');
-        if (debug) console.debug(`[drawer] Showing pane: ${pane.id}`);
+        if (debug)
+          console.debug(`[drawer] Showing pane: ${pane.firstElementChild.id}`);
       } else {
         pane.classList.add('shoelace-drawer__hidden');
-        if (debug) console.debug(`[drawer] Hiding pane: ${pane.id}`);
+        if (debug)
+          console.debug(`[drawer] Hiding pane: ${pane.firstElementChild.id}`);
       }
     });
   };

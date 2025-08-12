@@ -3,10 +3,11 @@
 
 <section{{ attributes }}>
   {% set first_drawer_content %}
+    {# @todo create a component for drawer resizable? #}
     <div class="shoelace-resize-handle"></div>
     <span class="shoelace-drawer__content">
       {% for island in view_sidebar %}
-        <span class="shoelace-drawer__content_island" id="{{ island['#attributes']['id'] }}">
+        <span class="shoelace-drawer__content_island">
           {{ island }}
         </span>
       {% endfor %}

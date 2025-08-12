@@ -72,7 +72,3 @@ props:
         - neutral
         - warning
         - danger
-
-libraryOverrides:
-  dependencies:
-    - display_builder/shoelace_local

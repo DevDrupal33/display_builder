@@ -1,15 +1,11 @@
 name: Default
 slots:
-  title: Deciduous
-  children:
-    - type: component
-      component: display_builder:tree_item
-      slots:
-        label: Birch
-    - type: component
-      component: display_builder:tree_item
-      slots:
-        label: Maple
+  content: "Lorem ipsum"
+  image:
+    type: html_tag
+    tag: img
+    attributes:
+      src: https://images.unsplash.com/photo-1547191783-94d5f8f6d8b1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80
 library_wrapper: >
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
   <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>

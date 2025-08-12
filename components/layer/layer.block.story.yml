@@ -1,4 +1,0 @@
-name: Block
-description: A block doesn't have children.
-slots:
-  title: Lorem ipsum

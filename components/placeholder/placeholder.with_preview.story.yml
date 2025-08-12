@@ -1,5 +1,0 @@
-name: With preview
-slots:
-  title: "Lorem ipsum"
-props:
-  thumbnail: https://img.daisyui.com/images/components/calendar.webp

@@ -22,9 +22,6 @@ props:
     builder_id:
       title: HTML ID
       $ref: ui-patterns://identifier
-    hash:
-      title: Hash
-      type: string
 libraryOverrides:
   dependencies:
     - core/drupal

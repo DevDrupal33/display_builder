@@ -5,6 +5,9 @@ group: Display builder
 props:
   type: object
   properties:
+    id:
+      title: HTML ID
+      $ref: ui-patterns://identifier
     label:
       title: Label
       type: string

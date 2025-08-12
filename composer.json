@@ -12,7 +12,8 @@
     "require-dev": {
         "drupal/ui_icons": "^1.1",
         "drupal/ui_skins": "^1.1",
-        "drupal/ui_styles": "^1.16"
+        "drupal/ui_styles": "^1.16",
+        "npm-asset/shoelace-style--shoelace": "2.20.1"
     },
     "extra": {
         "patches": {
