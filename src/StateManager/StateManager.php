@@ -250,7 +250,6 @@ class StateManager implements StateManagerInterface {
       '_instance_id' => \uniqid(),
       'source_id' => $source_id,
       'source' => $data,
-      '_third_party_settings' => $third_party_settings,
     ];
 
     if ($third_party_settings) {
@@ -281,7 +280,6 @@ class StateManager implements StateManagerInterface {
       '_instance_id' => \uniqid(),
       'source_id' => $source_id,
       'source' => $data,
-      '_third_party_settings' => $third_party_settings,
     ];
 
     if ($third_party_settings) {
