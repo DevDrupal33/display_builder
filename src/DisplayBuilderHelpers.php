@@ -82,6 +82,7 @@ class DisplayBuilderHelpers {
     try {
       $path = \Drupal::moduleHandler()->getModule($name)->getPath();
     }
+    // @phpcs:ignore SlevomatCodingStandard.Exceptions.RequireNonCapturingCatch.NonCapturingCatchRequired
     catch (\Throwable $th) {
     }
 
@@ -89,6 +90,7 @@ class DisplayBuilderHelpers {
       try {
         $path = \Drupal::service('theme_handler')->getTheme($name)->getPath();
       }
+      // @phpcs:ignore SlevomatCodingStandard.Exceptions.RequireNonCapturingCatch.NonCapturingCatchRequired
       catch (\Throwable $th) {
       }
     }

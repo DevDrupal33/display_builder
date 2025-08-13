@@ -53,6 +53,7 @@ class FixturesHelpers {
         $filepath = \sprintf('%s/%s/fixtures/', DRUPAL_ROOT, $path);
         $output = \array_merge($output, self::getFixturesOptions([$filepath], $moduleName));
       }
+      // @phpcs:ignore SlevomatCodingStandard.Exceptions.RequireNonCapturingCatch.NonCapturingCatchRequired
       catch (\Throwable $th) {
       }
     }
@@ -68,6 +69,7 @@ class FixturesHelpers {
         $filepath = \sprintf('%s/%s/fixtures/', DRUPAL_ROOT, $path);
         $output = \array_merge($output, self::getFixturesOptions([$filepath], $themeName));
       }
+      // @phpcs:ignore SlevomatCodingStandard.Exceptions.RequireNonCapturingCatch.NonCapturingCatchRequired
       catch (\Throwable $th) {
       }
     }

@@ -209,6 +209,7 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
         else {
           $group = $this->t('Others');
         }
+
         break;
 
       case 'entity_reference':

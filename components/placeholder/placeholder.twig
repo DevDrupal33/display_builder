@@ -6,12 +6,12 @@
 
 {% if variant == 'button' %}
   {{ include('display_builder:button', {
-    attributes,
+    attributes: attributes,
     label: content,
   }, with_context: false) }}
 {% else %}
   {{ include('display_builder:card', {
-    attributes,
+    attributes: attributes,
     content: content,
     image: image,
   }, with_context: false) }}

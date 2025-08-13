@@ -13,7 +13,10 @@ use Drupal\display_builder\Form\IslandFormBase;
 trait IslandPluginFormTrait {
 
   /**
-   * {@inheritDoc}
+   * Get the form class.
+   *
+   * @return string
+   *   The form class.
    */
   public static function getFormClass(): string {
     return IslandFormBase::class;

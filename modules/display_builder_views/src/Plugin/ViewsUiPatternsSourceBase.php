@@ -45,6 +45,7 @@ abstract class ViewsUiPatternsSourceBase extends ViewsSourceBase {
 
       return [];
     }
+    // @phpcs:ignore SlevomatCodingStandard.Exceptions.RequireNonCapturingCatch.NonCapturingCatchRequired
     catch (\Throwable $th) {
       // If no context will fail with:
       // "The ui_patterns_views:variables context is not a valid context."
