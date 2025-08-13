@@ -20,6 +20,13 @@ oportunitatis
 videri
 vivere
 
+analyse
+drupol
+friendsoftwig
+phpcsfixer
+twigcs
+vincentlanglet
+
 beyris
 dureau
 fontawesome
