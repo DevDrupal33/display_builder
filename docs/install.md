@@ -4,9 +4,7 @@
 
 ## Patches
 
-Display Builder could require patches, always check and include what's in [composer.json](https://git.drupalcode.org/project/display_builder/-/blob/1.0.x/composer.json).
-
-It's recommended to ease this step using [Composer Merge Plugin](https://github.com/wikimedia/composer-merge-plugin) with this configuration in your main composer file:
+Display Builder require specific dependencies, it's recommended to ease this step using [Composer Merge Plugin](https://github.com/wikimedia/composer-merge-plugin) with this configuration in your main composer file:
 
 ```yaml
 {
@@ -23,7 +21,36 @@ It's recommended to ease this step using [Composer Merge Plugin](https://github.
 }
 ```
 
-So your installation will be sync with Display Builder specific patches.
+Display Builder **could** require patches, always check and include what's in [composer.json](https://git.drupalcode.org/project/display_builder/-/blob/1.0.x/composer.json).
+
+It's recommended to ease this step using [Composer patches Plugin](https://github.com/cweagans/composer-patches) with this configuration in your main composer file:
+
+```yaml
+{
+  "require": {
+    "cweagans/composer-patches": "^1.7",
+    # [...]
+  },
+  "config": {
+    "allow-plugins": {
+      "cweagans/composer-patches": true,
+      # [...]
+    },
+  },
+  "extra": {
+    "enable-patching": true,
+    "patchLevel": {
+      "drupal/core": "-p2"
+    },
+    # [...]
+    "patches": {
+      "drupal/core": {
+         "__ADD_ANY_DISPLAY_BUILDER_PATCH_CORE_HERE__": "__ADD_ANY_DISPLAY_BUILDER_PATCH_CORE_HERE__"
+      }
+    }
+  }
+}
+```
 
 ## Configuration steps
 
@@ -41,7 +68,7 @@ drush -y config-set system.theme default my_theme
 drush -y en display_builder
 ```
 
-Install as you would normally install a contributed Drupal module.  
+Install as you would normally install a contributed Drupal module.
 See: [Installing Modules](https://www.drupal.org/docs/extending-drupal/installing-modules) for further information.
 
 ## Libraries for local development

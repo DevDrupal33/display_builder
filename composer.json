@@ -17,7 +17,7 @@
     "extra": {
         "patches": {
             "drupal/core": {
-                "https://drupal.org/i/3127026 #3127026 LayoutBuilderEntityViewDisplay class does not correspond to an entity type": "https://git.drupalcode.org/project/drupal/-/merge_requests/12799.patch"
+                "1 - LayoutBuilderEntityViewDisplay class does not correspond to an entity type - https://www.drupal.org/project/drupal/issues/3127026#comment-13617105": "https://www.drupal.org/files/issues/2020-05-15/3127026-originalclass-12.patch"
             }
         }
     }
