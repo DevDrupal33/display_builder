@@ -1,16 +1,19 @@
 import { expect } from '@playwright/test'
 import { test } from '../fixtures/DrupalSite'
+import { getRootDir } from '../utilities/DrupalFilesystem';
 
 import * as utils from '../utilities/utils'
 import * as cmd from '../utilities/commands'
 
 import dbConfig from '../playwright.db.config'
 
-test('Create instance', {tag: '@db_devel'}, async ({ page, drupal }) => {
-
-  await drupal.setupMinimalTestSite()
-  await drupal.loginAsAdmin()
+test('Create instance', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
   const dbName = `test_${utils.createRandomString(6)}`
+
+  await drupal.loginAsAdmin()
+  // Test 0: Check status page
+  await page.goto('admin/reports/status')
+  await page.screenshot({ path: `${getRootDir()}/../test-results/status_page.png`, fullPage: true });
 
   // Test 1: Create a Display builder
   await page.goto(dbConfig.dbAddUrl)
@@ -40,10 +43,9 @@ test('Create instance', {tag: '@db_devel'}, async ({ page, drupal }) => {
   await expect(page.getByRole('link', { name: dbName })).not.toBeVisible()
 })
 
-test('Actions and cmd', {tag: '@db_devel'}, async ({ page, drupal }) => {
+test('Actions and cmd', {tag: '@display_builder'}, async ({ page, drupal }) => {
   const dbId = `test_${utils.createRandomString(6)}`
 
-  await drupal.setupMinimalTestSite()
   await drupal.loginAsAdmin()
 
   // Test 1: Create a Display builder
@@ -96,9 +98,8 @@ test('Actions and cmd', {tag: '@db_devel'}, async ({ page, drupal }) => {
   await expect(page.locator(`#island-${dbId}-preview`)).toMatchAriaSnapshot('- text: "label: I am a component with a token I am a test token in a slot"')
 })
 
-test('Full Display Builder ', async ({ page, drupal }) => {
+test('Full Display Builder ', {tag: '@display_builder'}, async ({ page, drupal }) => {
 
-  await drupal.setupMinimalTestSite()
   await drupal.loginAsAdmin()
   const dbName = `test_${utils.createRandomString(6)}`
   const dbId = `#island-${dbName}-builder`

@@ -12,7 +12,7 @@ test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.drush('config:set -y views.settings ui.show.preview_information true');
 });
 
-test('Views Display Builder', {tag: '@db_views'} , async ({ page, drupal }) => {
+test('Views Display Builder', {tag: ['@display_builder', '@display_builder_views', '@display_builder_min']} , async ({ page, drupal }) => {
   await drupal.loginAsAdmin()
 
   await page.goto(dbConfig.viewsEditUrl.replace('{view_id}', dbConfig.viewsTestName))

@@ -6,7 +6,7 @@ import { promisify } from 'util';
 const exec = promisify(execNode);
 
 export const getRootDir = (): string => {
-  let dir = process.cwd();
+  let dir = process.cwd() + '/' + process.env.DRUPAL_WEB_ROOT;
   let found = false;
   for (let i = 0; i < 15; i++) {
     if (

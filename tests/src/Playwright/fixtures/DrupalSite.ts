@@ -22,9 +22,18 @@ export type DrupalSiteInstall = {
 const drupalSite = base.extend<DrupalSiteInstall>({
   drupalSite: [
     async ({}, use, workerInfo) => {
+
+      const setupFile = process.env.DRUPAL_TEST_SETUP_FILE ? `--setup-file "${process.env.DRUPAL_TEST_SETUP_FILE}"` : '';
+      const installProfile = `--install-profile "${process.env.DRUPAL_TEST_SETUP_PROFILE || 'minimal'}"`;
+      const langcodeOption = process.env.DRUPAL_TEST_SETUP_LANGCODE ? `--langcode "${process.env.DRUPAL_TEST_SETUP_LANGCODE}"` : '';
+      const dbOption =
+        process.env.DRUPAL_TEST_DB_URL && process.env.DRUPAL_TEST_DB_URL.length > 0
+          ? `--db-url "${process.env.DRUPAL_TEST_DB_URL}"`
+          : '';
       const stdout = await exec(
-        `php core/scripts/test-site.php install --no-interaction --install-profile minimal --base-url ${process.env.BASE_TEST_URL} --db-url ${process.env.TEST_DB_URL}-${workerInfo.workerIndex} --setup-file modules/custom/display_builder/tests/src/TestSite/DisplayBuilderTestSetup.php --json`,
+        `php ./core/scripts/test-site.php install ${setupFile} ${installProfile} ${langcodeOption} --base-url ${process.env.DRUPAL_TEST_BASE_URL} ${dbOption} --json`,
       );
+
       const installData = JSON.parse(stdout.toString());
 
       const withDrush = await hasDrush();
@@ -33,7 +42,7 @@ const drupalSite = base.extend<DrupalSiteInstall>({
         dbPrefix: installData.db_prefix,
         userAgent: installData.user_agent,
         sitePath: installData.site_path,
-        url: process.env.BASE_TEST_URL ?? '',
+        url: process.env.DRUPAL_TEST_BASE_URL ?? '',
         hasDrush: withDrush,
         teardown: async () => {
           if (
@@ -43,7 +52,7 @@ const drupalSite = base.extend<DrupalSiteInstall>({
             return Promise.resolve('');
           }
           return await exec(
-            `php core/scripts/test-site.php tear-down --no-interaction --db-url ${process.env.TEST_DB_URL}-${workerInfo.workerIndex} ${installData.db_prefix}`,
+            `php core/scripts/test-site.php tear-down --no-interaction --db-url ${process.env.DRUPAL_TEST_DB_URL}-${workerInfo.workerIndex} ${installData.db_prefix}`,
           );
         },
       });

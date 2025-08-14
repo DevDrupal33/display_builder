@@ -41,6 +41,7 @@ variables:
     changes:
       # config schema and/or default config
       - config
+      - modules/**/config
     when: on_success
 
 .phpmd-base:
@@ -77,6 +78,15 @@ variables:
     paths:
       - phpmd-quality-report.json
 
+composer-lint:
+  rules:
+    - *is-push-rule
+    - *php-files-change-rule
+    - changes:
+        - composer.json
+      when: on_success
+    - *manual-rule
+
 phpmd:
   extends: .phpmd-base
   rules:
@@ -89,6 +99,7 @@ phpmd:
 
 composer-lint:
   rules:
+    - !reference [.skip-composer-lint-rule]
     - *is-push-rule
     - *php-files-change-rule
     - changes:
@@ -100,11 +111,13 @@ composer-lint:
 phpcs:
   allow_failure: false
   rules:
+    - !reference [.skip-phpcs-rule]
     - *is-push-rule
     - *php-files-change-rule
     # Also run whenever we catch up to the upstream PHPCS rules.
     - changes:
         - core.phpcs.xml.dist
+        - .phpcs.xml
       when: on_success
     - *manual-rule
 
@@ -115,6 +128,7 @@ eslint:
     - rm -rf tests/src/Playwright playwright.config.ts
   # @todo Remove when https://www.drupal.org/project/gitlab_templates/issues/3452183 lands.
   rules:
+    - !reference [.skip-eslint-rule]
     - *is-push-rule
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
@@ -125,6 +139,7 @@ eslint:
 stylelint:
   allow_failure: false
   rules:
+    - !reference [.skip-stylelint-rule]
     - *is-push-rule
     - *css-files-change-rule
     - *manual-rule
@@ -132,6 +147,7 @@ stylelint:
 phpstan:
   allow_failure: false
   rules:
+    - !reference [.skip-phpstan-rule]
     - *is-push-rule
     - *php-files-change-rule
     - *manual-rule
@@ -141,6 +157,7 @@ phpunit:
   variables:
     _PHPUNIT_EXTRA: ''
   rules:
+    - !reference [.skip-phpunit-rule]
     - *is-push-rule
     - *php-files-change-rule
     - *module-config-files-change-rule
@@ -153,106 +170,78 @@ cspell:
 
 ### Work in progress to have Playwright tests in ci. ###
 
-# Helper to setup a Drupal installation
-#
-# This should be quite fast with a warm cache, and is only used by one job
-# at the moment, so not currently worth the overhead of saving the output as
-# an artifact and starting a new job based on it.
-#
-# The drupal.org composer template creates a web/ directory and then
-# individually symlinks all the project files into module directory.
-# This causes some very strange behavior and node.js scripts will refuse to
-# run in a lot of cases, so this is an alternative job.
-.drupal: &drupal
-  # Move everything into a subdirectory
-  - mkdir tmp
-  - find . -maxdepth 1 -type f -not -path "./tmp*" -exec mv {} tmp/ \;
-  - find . -maxdepth 1 -type d -not -path "." -not -path "./tmp" -exec mv {} tmp/ \;
-  - mv tmp $CI_PROJECT_NAME
-  # Get Drupal
-  - composer create-project drupal/recommended-project:$CORE_STABLE _drupal
-  - cd _drupal
-  # Add core-dev, Experience Builder, and drush
-  - |
-    composer config repositories.$CI_PARENT_PROJECT_NAME --json '{"type": "path", "url": "../'$CI_PROJECT_NAME'", "options": { "symlink": false } }'
-  - composer config minimum-stability dev
-  - composer require drupal/core-dev "drupal/$CI_PARENT_PROJECT_NAME @dev" drush/drush --with-all-dependencies
-  - |
-    PACKAGE_INFO=$(composer info drupal/$CI_PARENT_PROJECT_NAME --all | grep "^dist" | awk -F": " "{print \$2}")
-    EXPECTED_PATH="[path] ../$CI_PROJECT_NAME $CI_COMMIT_SHA"
-    if [ "$PACKAGE_INFO" != "$EXPECTED_PATH" ]; then
-      echo "Unable to link to local $CI_PARENT_PROJECT_NAME package"
-      echo "Expected: $EXPECTED_PATH"
-      echo "Got: $PACKAGE_INFO"
-      exit 1
-    fi
-  # Setup webserver root
-  - rm -rf /var/www/html
-  - ln -s $CI_PROJECT_DIR/_drupal/web /var/www/html
-  - chown -R www-data:www-data /var/www/html
-  - chown -R www-data:www-data $CI_PROJECT_DIR/_drupal
-  # Setup directories
-  - chmod 777 $CI_PROJECT_DIR/_drupal/web/sites
-  - mkdir -p $CI_PROJECT_DIR/_drupal/web/sites/simpletest
-  - chmod 777 $CI_PROJECT_DIR/_drupal/web/sites/simpletest
-  - mkdir -p $CI_PROJECT_DIR/_drupal/web/sites/default/files
-  - chmod 777 $CI_PROJECT_DIR/_drupal/web/sites/default/files
-  # Start the webserver
-  - service apache2 start
-  # Set simpletest environment variables
-  - !reference [ .simpletest-db ]
-  - !reference [ .show-environment-variables ]
-  # Ensure that every test site will be able to discover and install test modules.
-  # Anything in settings.testing.php is automatically copied into the settings of
-  # individual test sites. See \Drupal\Core\Test\FunctionalTestSetupTrait::prepareSettings(),
-  # which is called (indirectly) by \Drupal\TestSite\Commands\TestSiteInstallCommand.
-  - cd $CI_PROJECT_DIR/_drupal/web/sites/default
-  - echo '<?php' >> settings.testing.php
-  - echo '$settings["extension_discovery_scan_tests"] = TRUE;' >> settings.testing.php
-  # Change to the project directory
-  - cd $CI_PROJECT_DIR/_drupal/web/modules/contrib/$CI_PARENT_PROJECT_NAME
-  # Install the UI
-  # @todo consolidate this with the UI job?
-  - cd ui
-  - npm ci
-  - npm run build
-  - cd ../
+.skip-playwright-rule: &skip-playwright-rule
+  if: '$SKIP_PLAYWRIGHT == "1"'
+  when: never
 
-.playwright:
-  stage: test
-  # image: mcr.microsoft.com/playwright:v1.54.0-noble
-  image: justafish/drupalci-environments-playwright:latest
+.playwright-tests-exist-rule: &playwright-tests-exist-rule
+  - exists:
+      - tests/src/Playwright/Tests/*.spec.*
+      - modules/*/tests/src/Playwright/Tests/*.spec.*
+      - tests/modules/*/tests/src/Playwright/Tests/*.spec.*
+    when: on_success
+
+.playwright-base:
+  extends: .testing-job-base
+  needs: [composer]
+  # @todo have a full tests on all browsers on a release.
+  # parallel: 3
+  # parallel:
+  #   matrix:
+  #     - PROJECT: ['chromium', 'firefox', 'webkit']
+  #       SHARD: ['1/10', '2/10', '3/10', '4/10', '5/10', '6/10', '7/10', '8/10', '9/10', '10/10']
+  rules:
+    # @todo opt in when stabilize
+    # - !reference [.opt-in-current-rule]
+    # - *skip-playwright-rule
+    # - *playwright-tests-exist-rule
+    - *manual-rule
   cache:
     key: cache-$CI_JOB_NAME-$CI_COMMIT_REF_SLUG
     fallback_keys:
       - cache-$CI_JOB_NAME-$CI_DEFAULT_BRANCH
       - cache-$CI_JOB_NAME-default
     paths:
-      - /root/.composer/cache
-      - /root/.npm
-      - /root/.cache/ms-playwright/ms-playwright
-      - $CI_PROJECT_DIR/_drupal/web/modules/contrib/$CI_PARENT_PROJECT_NAME/node_modules
-  extends:
-    - .test-variables
+      - ${CI_PROJECT_DIR}/$_WEB_ROOT/libraries/shoelace
+      - ${CI_PROJECT_DIR}/node_modules
+      - ${CI_PROJECT_DIR}/pw-browsers
   variables:
-    GIT_DEPTH: 1
-    _TARGET_DB_TYPE: sqlite
-    # TEST_DB_URL: sqlite://localhost/sites/default/files/db.sqlite
-    BASE_TEST_URL: http://localhost
-    TEST_WEBSERVER_USER: www-data
+    DRUPAL_TEST_BASE_URL: "${SIMPLETEST_BASE_URL}"
+    DRUPAL_TEST_SETUP_FILE: '${CI_PROJECT_DIR}/tests/src/TestSite/DisplayBuilderTestSetup.php'
+    DRUPAL_WEB_ROOT: $_WEB_ROOT
+    DRUPAL_TEST_WEBSERVER_USER: www-data
     PLAYWRIGHT_SKIP_TEARDOWN: true
+    PLAYWRIGHT_DEBUG_LEVEL: info
+    PLAYWRIGHT_BROWSERS_PATH: ${CI_PROJECT_DIR}/pw-browsers
   before_script:
-    - !reference [ .drupal ]
-  script:
+    - !reference [.check-composer-end-code]
+    - !reference [.setup-webserver]
+    - !reference [.simpletest-db]
+    # Important to set here to have a value from simpletest-db.
+    - export DRUPAL_TEST_DB_URL=$SIMPLETEST_DB
+    - !reference [.show-environment-variables]
+    - !reference [.show-context]
+    # Install local shoelace library for tests
+    - if [ ! -f ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/shoelace/node_modules/@shoelace-style/shoelace/cdn/shoelace.js ]; then
+        mkdir -p ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/shoelace;
+        cd ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/shoelace && npm init -y && npm install @shoelace-style/shoelace;
+        cd ${CI_PROJECT_DIR};
+      fi
+    - mkdir -p ./web/sites/simpletest ./web/sites/default/files ./playwright-report ./test-results ./logs
+    - chmod -R 777 ./web/sites/simpletest ./web/sites/default ./web/sites/default/files ./playwright-report ./test-results ./logs
+    # Install playwright and what's needed.
     - npm install
-    # - npm ci
-    - npx playwright test
+    - npx playwright --version
+    - echo -e "\e[0Ksection_start:`date +%s`:playwright_install[collapsed=true]\r\e[0KPlaywright install..."
+    - PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH} npx playwright install --with-deps
+    - echo -e "\e[0Ksection_end:`date +%s`:playwright_install\r\e[0K"
+  script:
+    # @todo for now running only minimum tests with firefox
+    - PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH} npx playwright test --project=firefox --grep @display_builder_min
   after_script:
     - mkdir -p $CI_PROJECT_DIR/logs
     - cp -R /var/log/apache2 $CI_PROJECT_DIR/logs/apache2
     - cp -R /var/log/supervisor $CI_PROJECT_DIR/logs/supervisor
-    - cp -R _drupal/web/modules/contrib/$CI_PARENT_PROJECT_NAME/test-results $CI_PROJECT_DIR/test-results
-    - cp -R _drupal/web/modules/contrib/$CI_PARENT_PROJECT_NAME/playwright-report $CI_PROJECT_DIR/playwright-report
   artifacts:
     expose_as: 'Playwright Test Reports'
     when: always
@@ -264,3 +253,7 @@ cspell:
     reports:
       junit:
         - test-results/playwright.xml
+
+playwright:
+  extends: .playwright-base
+  allow_failure: true

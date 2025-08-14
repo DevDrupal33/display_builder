@@ -8,9 +8,10 @@ setup('Create sites/simpletest folder', async () => {
   const simpletestDir = `${sitesDir}/simpletest`;
   if (!existsSync(simpletestDir)) {
     mkdirSync(simpletestDir, {
-      mode: 0o775,
+      mode: 0o777,
     });
   }
+
   chmodSync(`${sitesDir}/default`, 0o755);
   const filesDir = `${sitesDir}/default/files`;
   if (!existsSync(filesDir)) {
@@ -18,4 +19,5 @@ setup('Create sites/simpletest folder', async () => {
       mode: 0o777,
     });
   }
+
 });

@@ -9,10 +9,10 @@ const execPromise = promisify(execNode);
 export const exec = async (command: string, cwd?: string): Promise<string> => {
   let sudo = ``;
   if (
-    process.env.TEST_WEBSERVER_USER &&
-    process.env.TEST_WEBSERVER_USER.length > 0
+    process.env.DRUPAL_TEST_WEBSERVER_USER &&
+    process.env.DRUPAL_TEST_WEBSERVER_USER.length > 0
   ) {
-    sudo = `sudo -u ${process.env.TEST_WEBSERVER_USER} `;
+    sudo = `sudo -u ${process.env.DRUPAL_TEST_WEBSERVER_USER} `;
   }
   try {
     const { stdout }: { stdout: string } = await execPromise(

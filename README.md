@@ -18,7 +18,7 @@ See: [Installing Modules](https://www.drupal.org/docs/extending-drupal/installin
 
 E2e tests are done with [Playwright](https://playwright.dev/docs/intro#installing-playwright).
 
-Tests are located in `tests/src/Playwright/tests`.
+Tests are located in `tests/src/Playwright/Tests`.
 
 To install Playwright run from this module folder:
 
@@ -30,9 +30,10 @@ npx playwright install
 To run tests locally, copy and adapt the `.env.dist` file as `.env`, fill the values and run:
 
 ```shell
-npm install
 npx playwright test
 ```
+
+More information on [Playwright running and debugging tests](https://playwright.dev/docs/running-tests).
 
 ## Contributing
 
