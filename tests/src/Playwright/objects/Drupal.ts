@@ -67,12 +67,14 @@ export class Drupal {
       if (!this.drupalSite.hasDrush) {
         throw new Error('Drush is not available ofr local tests.');
       }
+      console.log('Login with Drush...')
       const loginUrl = await this.drush(
         `user:login --uid=1`,
       );
       await this.page.goto(loginUrl);
     }
     else {
+      console.log('Login with test-site...')
       const stdout = await exec(
         `php core/scripts/test-site.php user-login 1 --site-path ${this.drupalSite.sitePath}`,
       );

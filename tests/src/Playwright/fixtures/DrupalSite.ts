@@ -23,7 +23,8 @@ const drupalSite = base.extend<DrupalSiteInstall>({
   drupalSite: [
     async ({}, use, workerInfo) => {
       if (process.env.DRUPAL_TEST_NO_INSTALL || process.env.DRUPAL_TEST_NO_INSTALL_DDEV) {
-       const withDrush = await hasDrush();
+        const withDrush = await hasDrush();
+        console.log('Consider Drupal is installed')
         await use({
           userAgent: '',
           sitePath: '',
@@ -33,7 +34,7 @@ const drupalSite = base.extend<DrupalSiteInstall>({
         });
         return;
       }
-
+      console.log('Install Drupal test...')
       const setupFile = process.env.DRUPAL_TEST_SETUP_FILE ? `--setup-file "${process.env.DRUPAL_TEST_SETUP_FILE}"` : '';
       const installProfile = `--install-profile "${process.env.DRUPAL_TEST_SETUP_PROFILE || 'minimal'}"`;
       const langcodeOption = process.env.DRUPAL_TEST_SETUP_LANGCODE ? `--langcode "${process.env.DRUPAL_TEST_SETUP_LANGCODE}"` : '';
