@@ -68,9 +68,6 @@ export class Drupal {
     );
     await this.page.goto(`${this.drupalSite.url}${stdout.toString()}`);
     await expect(this.page.locator('h1')).toHaveText('admin');
-
-    await this.page.goto('/web/admin/reports/status')
-    await this.page.screenshot({ path: `${getRootDir()}/../test-results/status_${utils.createRandomString(6)}.png`, fullPage: true });
   }
 
   async login(
