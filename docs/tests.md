@@ -1,0 +1,53 @@
+# Tests e2e
+
+E2e tests are done with [Playwright](https://playwright.dev/docs/intro#installing-playwright).
+
+Tests are located in `tests/src/Playwright/Tests`.
+
+To install Playwright run from this module folder:
+
+```shell
+npm install
+npx playwright install --with-deps
+```
+
+Tests run in ci, they can run locally in 2 modes, with an integrated Drupal
+installation for tests or just on a local installed Drupal.
+
+For local tests, some modules must be enabled:
+
+- layout_builder
+- display_builder_test
+- display_builder_devel
+- display_builder_ui
+- display_builder_entity_view
+- display_builder_page_layout
+
+And the theme must be `db_theme_test`, unless test is specific for a theme.
+
+To run tests, copy and adapt the `.env.dist` file as `.env`, fill the values and run:
+_Note_: Webkit test can not be run in a non MacOS env.
+
+```shell
+npm run test
+```
+
+Or a specific test:
+
+```shell
+npx playwright test --project=firefox -g 'Create instance'
+```
+
+On local run, you can see what's happening with a running test:
+
+```shell
+npx playwright test --project=firefox -g 'Create instance' --headed
+```
+
+Or you can run the test step by step:
+
+```shell
+npx playwright test --project=firefox -g 'Create instance' --ui
+```
+
+More information on [Playwright running and debugging tests](https://playwright.dev/docs/running-tests).

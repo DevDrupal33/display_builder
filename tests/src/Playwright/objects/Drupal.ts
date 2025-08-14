@@ -63,10 +63,22 @@ export class Drupal {
   }
 
   async loginAsAdmin() {
-    const stdout = await exec(
-      `php core/scripts/test-site.php user-login 1 --site-path ${this.drupalSite.sitePath}`,
-    );
-    await this.page.goto(`${this.drupalSite.url}${stdout.toString()}`);
+    if (process.env.DRUPAL_TEST_NO_INSTALL || process.env.DRUPAL_TEST_NO_INSTALL_DDEV) {
+      if (!this.drupalSite.hasDrush) {
+        throw new Error('Drush is not available ofr local tests.');
+      }
+      const loginUrl = await this.drush(
+        `user:login --uid=1`,
+      );
+      await this.page.goto(loginUrl);
+    }
+    else {
+      const stdout = await exec(
+        `php core/scripts/test-site.php user-login 1 --site-path ${this.drupalSite.sitePath}`,
+      );
+      await this.page.goto(`${this.drupalSite.url}${stdout.toString()}`);
+    }
+
     await expect(this.page.locator('h1')).toHaveText('admin');
   }
 

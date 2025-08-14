@@ -32,9 +32,15 @@ export const execDrush = async (
 ): Promise<string> => {
   const vendorDir = await getVendorDir();
   const rootDir = path.resolve(getRootDir());
+
+  let cmdDrush = `HTTP_USER_AGENT=${drupalSiteInstall.userAgent} ${path.relative(rootDir, vendorDir)}/bin/drush ${command} -y --uri=${drupalSiteInstall.url}`;
+  if (process.env.DRUPAL_TEST_NO_INSTALL_DDEV) {
+    cmdDrush = `ddev drush -y ${command}`;
+  }
+
   try {
     const { stdout }: { stdout: string } = await execPromise(
-      `HTTP_USER_AGENT=${drupalSiteInstall.userAgent} ${path.relative(rootDir, vendorDir)}/bin/drush ${command} -y --uri=${drupalSiteInstall.url}`,
+      cmdDrush,
       { cwd: rootDir },
     );
     return stdout.toString().trim();

@@ -21,6 +21,7 @@ test('Create instance', {tag: ['@display_builder', '@display_builder_min']}, asy
   await page.locator('select[name="display_builder"]').selectOption('test')
   // @todo select a fixture
   // await page.locator('select[name="fixture_id"]').selectOption(fixture)
+  await expect(page.getByRole('button', { name: 'Save' })).toBeVisible()
   await page.getByRole('button', { name: 'Save' }).click()
 
   await expect(page.getByRole('heading', { name: `Display builder: ${dbName}` })).toBeVisible()
@@ -98,7 +99,7 @@ test('Actions and cmd', {tag: '@display_builder'}, async ({ page, drupal }) => {
   await expect(page.locator(`#island-${dbId}-preview`)).toMatchAriaSnapshot('- text: "label: I am a component with a token I am a test token in a slot"')
 })
 
-test('Full Display Builder ', {tag: '@display_builder'}, async ({ page, drupal }) => {
+test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal }) => {
 
   await drupal.loginAsAdmin()
   const dbName = `test_${utils.createRandomString(6)}`

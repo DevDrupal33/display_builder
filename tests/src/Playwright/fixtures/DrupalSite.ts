@@ -22,6 +22,17 @@ export type DrupalSiteInstall = {
 const drupalSite = base.extend<DrupalSiteInstall>({
   drupalSite: [
     async ({}, use, workerInfo) => {
+      if (process.env.DRUPAL_TEST_NO_INSTALL || process.env.DRUPAL_TEST_NO_INSTALL_DDEV) {
+       const withDrush = await hasDrush();
+        await use({
+          userAgent: '',
+          sitePath: '',
+          url: process.env.DRUPAL_TEST_BASE_URL ?? '',
+          hasDrush: withDrush,
+          teardown: async () => { return Promise.resolve(''); },
+        });
+        return;
+      }
 
       const setupFile = process.env.DRUPAL_TEST_SETUP_FILE ? `--setup-file "${process.env.DRUPAL_TEST_SETUP_FILE}"` : '';
       const installProfile = `--install-profile "${process.env.DRUPAL_TEST_SETUP_PROFILE || 'minimal'}"`;
