@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\ui_patterns_overrides\Plugin\UiPatterns\Source;
+namespace Drupal\display_builder_entity_view\Plugin\UiPatterns\Source;
 
 use Drupal\Core\Config\Entity\ConfigEntityType;
 use Drupal\Core\Entity\ContentEntityInterface;

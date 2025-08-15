@@ -28,7 +28,6 @@ class DisplayBuilderTestSetup implements TestSetupInterface {
       'display_builder_devel',
       'display_builder_test',
       'ui_patterns',
-      'ui_patterns_overrides',
       'ui_styles',
     ];
     $module_installer->install($modules);

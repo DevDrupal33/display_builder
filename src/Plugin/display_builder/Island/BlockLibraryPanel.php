@@ -46,7 +46,6 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
   ];
 
   private const HIDE_SOURCE = [
-    // 'block',
     'component',
   ];
 

@@ -2,8 +2,8 @@
 <phpmd-baseline>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/modules/display_builder_devel/src/Controller/DisplayBuilderDevelController.php" method="buildRow"/>
   <violation rule="PHPMD\Rule\UnusedPrivateMethod" file="/builds/project/display_builder/modules/display_builder_devel/src/Plugin/display_builder/Island/IndexDebugPanel.php" method="printSimplifyPath"/>
-  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/ui_patterns_overrides/src/Plugin/UiPatterns/Source/MainPageContentSource.php"/>
-  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/ui_patterns_overrides/src/Plugin/UiPatterns/Source/PageTitleSource.php"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/MainPageContentSource.php"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageTitleSource.php"/>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/src/Entity/DisplayBuilder.php" method="build"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/IslandPluginBase.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/IslandPluginConfigurationFormTrait.php"/>

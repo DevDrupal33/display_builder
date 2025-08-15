@@ -4,7 +4,6 @@ description: "An advanced display builder for Drupal"
 core_version_requirement: ^11.2
 package: "User interface"
 dependencies:
-  - display_builder:ui_patterns_overrides
   - ui_patterns:ui_patterns_library
   - ui_skins:ui_skins
   - ui_styles:ui_styles

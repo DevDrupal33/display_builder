@@ -32,3 +32,19 @@ display_builder_page_layout.page_layout.*:
         type: ui_patterns_source.[source_id]
   constraints:
     FullyValidatable: ~
+
+ui_patterns_source.main_page_content:
+  type: ignore
+  label: 'Source: Main page content'
+
+ui_patterns_source.local_actions:
+  type: ignore
+  label: 'Source: Local actions'
+
+ui_patterns_source.local_tasks:
+  type: ignore
+  label: 'Source: Local tasks'
+
+ui_patterns_source.page_title:
+  type: ignore
+  label: 'Source: Page title'

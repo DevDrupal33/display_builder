@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\ui_patterns_overrides\Plugin\UiPatterns\Source;
+namespace Drupal\display_builder_page_layout\Plugin\UiPatterns\Source;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
@@ -21,7 +21,7 @@ use Drupal\ui_patterns\SourcePluginBase;
   description: new TranslatableMarkup('The Drupal `Main page content` block (system_main_block).'),
   prop_types: ['slot'],
   tags: [],
-  context_requirements: ['is_display_builder_page_layout'],
+  context_requirements: ['page'],
   context_definitions: []
 )]
 class MainPageContentSource extends SourcePluginBase {

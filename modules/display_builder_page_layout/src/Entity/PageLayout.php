@@ -126,9 +126,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
    * {@inheritdoc}
    */
   public static function getContextRequirement(): string {
-    // @todo Change the context ID.
-    // See https://www.drupal.org/project/display_builder/issues/3534579
-    return 'is_display_builder_page_layout';
+    return 'page';
   }
 
   /**
