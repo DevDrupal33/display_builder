@@ -1,6 +1,11 @@
 name: Display builder
 noUi: true
 group: Display builder
+variants:
+  full:
+    title: Full (default)
+  mini:
+    title: Only the main region.
 slots:
   view_sidebar_buttons:
     title: View sidebar buttons

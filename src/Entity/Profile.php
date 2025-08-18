@@ -11,6 +11,8 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Form\ProfileForm;
 use Drupal\display_builder\Form\ProfileIslandPluginForm;
+use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\ProfileAccessControlHandler;
 use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder\ProfileViewBuilder;
@@ -197,6 +199,66 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
    */
   public function isDebugModeActivated(): bool {
     return $this->debug;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildSingleIsland(InstanceInterface $builder, string $island_id): array {
+    $builder_id = (string) $builder->id();
+
+    if (!isset($this->islands[$island_id])) {
+      // @todo throw HTTP exception instead.
+      return [
+        '#plain_text' => 'Not found',
+      ];
+    }
+    $configuration = $this->islands[$island_id];
+
+    if (!isset($configuration['enable']) || !$configuration['enable']) {
+      // @todo throw HTTP exception instead.
+      return [
+        '#plain_text' => 'Not allowed',
+      ];
+    }
+    /** @var \Drupal\display_builder\IslandInterface $island */
+    $island = $this->islandManager()->createInstance($island_id, $configuration);
+
+    $data = $builder->getCurrentState();
+
+    $hash = $builder->getCurrent()->hash;
+
+    $build = [
+      '#type' => 'component',
+      '#component' => 'display_builder:display_builder',
+      '#variant' => 'mini',
+      '#props' => [
+        'builder_id' => $builder_id,
+        'hash' => $hash,
+      ],
+      '#slots' => [
+        'view_main' => $island->build($builder, $data, []),
+      ],
+    ];
+
+    if ($this->library === 'local') {
+      $build['#attached']['library'][] = 'display_builder/shoelace_local';
+    }
+    else {
+      $build['#attached']['library'][] = 'display_builder/shoelace_cdn';
+    }
+
+    return $build;
+  }
+
+  /**
+   * Gets the Island plugins manager.
+   *
+   * @return \Drupal\display_builder\IslandPluginManagerInterface
+   *   The manager for islands plugins.
+   */
+  private function islandManager(): IslandPluginManagerInterface {
+    return \Drupal::service('plugin.manager.db_island');
   }
 
 }

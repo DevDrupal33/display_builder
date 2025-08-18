@@ -241,3 +241,16 @@ display_builder.api_preset_preview:
     _role: 'authenticated'
   options:
     _htmx_route: true
+
+display_builder.iframe:
+  path: "/api/display-builder/{builder}/iframe/{island_id}"
+  methods: [GET]
+  defaults:
+    _controller: '\Drupal\display_builder\Controller\IframeController::getIsland'
+  requirements:
+    _permission: "administer display builders+access display builders api"
+  options:
+    _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
