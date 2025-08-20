@@ -22,9 +22,12 @@ export type DrupalSiteInstall = {
 const drupalSite = base.extend<DrupalSiteInstall>({
   drupalSite: [
     async ({}, use, workerInfo) => {
-      if (process.env.DRUPAL_TEST_NO_INSTALL || process.env.DRUPAL_TEST_NO_INSTALL_DDEV) {
+      if (
+        process.env.DRUPAL_TEST_SKIP_INSTALL &&
+        process.env.DRUPAL_TEST_SKIP_INSTALL === 'true'
+      ) {
         const withDrush = await hasDrush();
-        console.log('Consider Drupal is installed')
+        console.debug('[Info] Drupal is installed, skip installation for tests');
         await use({
           userAgent: '',
           sitePath: '',
@@ -34,7 +37,8 @@ const drupalSite = base.extend<DrupalSiteInstall>({
         });
         return;
       }
-      console.log('Install Drupal test...')
+
+      console.debug('[Info] Install Drupal with test environement...')
       const setupFile = process.env.DRUPAL_TEST_SETUP_FILE ? `--setup-file "${process.env.DRUPAL_TEST_SETUP_FILE}"` : '';
       const installProfile = `--install-profile "${process.env.DRUPAL_TEST_SETUP_PROFILE || 'minimal'}"`;
       const langcodeOption = process.env.DRUPAL_TEST_SETUP_LANGCODE ? `--langcode "${process.env.DRUPAL_TEST_SETUP_LANGCODE}"` : '';

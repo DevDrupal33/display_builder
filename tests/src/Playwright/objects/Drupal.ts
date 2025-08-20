@@ -63,18 +63,18 @@ export class Drupal {
   }
 
   async loginAsAdmin() {
-    if (process.env.DRUPAL_TEST_NO_INSTALL || process.env.DRUPAL_TEST_NO_INSTALL_DDEV) {
+    if (process.env.DRUPAL_TEST_SKIP_INSTALL && process.env.DRUPAL_TEST_SKIP_INSTALL === 'true') {
       if (!this.drupalSite.hasDrush) {
-        throw new Error('Drush is not available ofr local tests.');
+        throw new Error('Drush is not available for local tests! Please install.');
       }
-      console.log('Login with Drush...')
+      console.debug('[Info] Login with Drush...')
       const loginUrl = await this.drush(
         `user:login --uid=1`,
       );
       await this.page.goto(loginUrl);
     }
     else {
-      console.log('Login with test-site...')
+      console.debug('[Info] Login with test-site.php...')
       const stdout = await exec(
         `php core/scripts/test-site.php user-login 1 --site-path ${this.drupalSite.sitePath}`,
       );

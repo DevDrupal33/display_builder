@@ -34,10 +34,11 @@ export const execDrush = async (
   const rootDir = path.resolve(getRootDir());
 
   let cmdDrush = `HTTP_USER_AGENT=${drupalSiteInstall.userAgent} ${path.relative(rootDir, vendorDir)}/bin/drush ${command} -y --uri=${drupalSiteInstall.url}`;
-  if (process.env.DRUPAL_TEST_NO_INSTALL_DDEV) {
-    cmdDrush = `ddev drush -y ${command}`;
+  if (process.env.DRUPAL_TEST_DRUSH_PREFIX) {
+    cmdDrush = `${process.env.DRUPAL_TEST_DRUSH_PREFIX} drush -y ${command}`;
   }
 
+  console.debug(`[Info] Drush command: ${cmdDrush}`);
   try {
     const { stdout }: { stdout: string } = await execPromise(
       cmdDrush,

@@ -37,14 +37,26 @@ test('Create instance', {tag: ['@display_builder', '@display_builder_min']}, asy
   // Test 3: Delete this instance
   await page.goto(dbConfig.dbList)
   await expect(page.getByRole('link', { name: dbName })).toBeVisible()
-  await page.getByRole('button', { name: 'List additional actions' }).click()
+  await page.getByRole('row', { name: `${dbName}` }).getByRole('button').click()
   await page.getByRole('link', { name: 'Delete', exact: true }).click()
   await expect(page.getByRole('heading', { name: `Do you want to delete ${dbName}?` })).toBeVisible()
   await page.getByRole('button', { name: 'Confirm' }).click()
   await expect(page.getByRole('link', { name: dbName })).not.toBeVisible()
 })
 
-test('Actions and cmd', {tag: '@display_builder'}, async ({ page, drupal }) => {
+test('Drag and drop', {tag: ['@display_builder']}, async ({ page, drupal }) => {
+  const dbId = `test_dnd`
+  await drupal.loginAsAdmin()
+  await page.goto(dbConfig.dbViewUrl.replace('{db_id}', dbId))
+
+  await cmd.shoelaceReady(page)
+  await cmd.htmxReady(page)
+
+  await cmd.dragElementFromLibraryById(page, 'Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
+  await cmd.dragElementFromLibraryById(page, 'Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
+})
+
+test('Actions and cmd', {tag: ['@display_builder']}, async ({ page, drupal }) => {
   const dbId = `test_${utils.createRandomString(6)}`
 
   await drupal.loginAsAdmin()
@@ -127,7 +139,7 @@ test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal })
   const testComponent = page.getByRole('button', { name: 'Test complex', exact: true })
   await expect(testComponent).toBeVisible()
   await testComponent.hover()
-  await cmd.builderIsReady(page)
+  await cmd.htmxReady(page)
   await expect(page.getByRole('tooltip')).toBeVisible()
   // From the test component.
   await expect(page.getByRole('tooltip')).toContainText('label: Bar, open: true, duration: 123')
@@ -136,7 +148,7 @@ test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal })
   await page.mouse.down()
   await page.locator(`${dbId} slot`).hover()
   await page.mouse.up()
-  await cmd.builderIsReady(page)
+  await cmd.htmxReady(page)
   await expect(
     page.locator(`${dbId} [data-test="testing"]`)
   ).toBeVisible()
@@ -148,7 +160,7 @@ test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal })
   await page
     .locator(`${dbId} [data-test="testing"]`)
     .click()
-  await cmd.builderIsReady(page)
+  await cmd.htmxReady(page)
   await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible()
 
   // Test 5-1: Apply multiple config
@@ -156,13 +168,13 @@ test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal })
   await page
     .locator(`input[name='component[props][label][source][value]']`)
     .fill('I am a test')
-  await cmd.builderIsReady(page)
+  await cmd.htmxReady(page)
 
   await page.getByRole('button', { name: 'Open' }).click()
   await page
     .locator(`input[name='component[props][open][source][value]']`)
     .check()
-  await cmd.builderIsReady(page)
+  await cmd.htmxReady(page)
 
   await page.getByRole('button', { name: 'Duration' }).click()
   await page
@@ -170,7 +182,7 @@ test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal })
     .fill('22')
   // click somewhere for htmx submit
   await page.getByRole('tab', { name: 'Builder' }).click()
-  await cmd.builderIsReady(page)
+  await cmd.htmxReady(page)
 
   await expect(
     page.locator(`${dbId} [data-test="testing"]`)
@@ -188,7 +200,7 @@ test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal })
   const styleOption = page.locator(`input[value="test-style-1"]`)
   await expect(styleOption).toBeVisible()
   await styleOption.click()
-  await cmd.builderIsReady(page)
+  await cmd.htmxReady(page)
 
   // Test 5-3: Apply a token
   // await page.getByRole('tab', { name: 'Tokens', exact: true }).click()
@@ -197,7 +209,7 @@ test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal })
   // await page
   //   .locator(`input[name='test_token_1']`)
   //   .fill('test-token-1')
-  // await cmd.builderIsReady(page)
+  // await cmd.htmxReady(page)
 
   await page.getByRole('dialog', { name: 'Settings' }).getByLabel('Close').click()
 
@@ -220,7 +232,7 @@ test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal })
   await page.mouse.down()
   await targetSlot.hover()
   await page.mouse.up()
-  await cmd.builderIsReady(page)
+  await cmd.htmxReady(page)
 
   const builderTokenBlock = page.locator(`#island-${dbName}-builder`).getByRole('button', { name: 'Token', exact: true })
   await expect(builderTokenBlock).toBeVisible()
@@ -230,7 +242,7 @@ test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal })
   await page.mouse.down()
   await targetSlot.hover()
   await page.mouse.up()
-  await cmd.builderIsReady(page)
+  await cmd.htmxReady(page)
 
   // @todo move Wysiwyg to slot 2
 

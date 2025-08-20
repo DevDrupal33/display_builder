@@ -15,7 +15,7 @@ test('Page Layout', {tag: ['@display_builder', '@display_builder_page_layout', '
   await page.goto(dbConfig.pageListUrl)
   await page.getByRole('link', { name: 'Build display' }).click()
 
-  await cmd.builderIsReady(page)
+  await cmd.htmxReady(page)
 
   await cmd.toggleSidebarView(page)
   await cmd.dragElementFromLibraryById(page, 'Components', 'test_simple', page.locator(`.db-island-builder > slot.db-dropzone`))

@@ -13,7 +13,7 @@ use Drupal\ui_patterns\Attribute\Source;
  */
 #[Source(
   id: 'view_footer',
-  label: new TranslatableMarkup('[View] Footer area'),
+  label: new TranslatableMarkup('[View] Footer'),
   context_requirements: ['views:style'],
   prop_types: ['slot'],
   tags: ['views'],

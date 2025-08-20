@@ -44,7 +44,7 @@ export async function openLibrariesTab(page: Page, name: string = 'Blocks'): Pro
     .locator('div')
     .click()
 
-  await this.builderIsReady(page)
+  await this.htmxReady(page)
 }
 
 /**
@@ -85,7 +85,7 @@ export async function dragElementFromLibrary(page: Page, type: string = 'Compone
  * @returns {Promise<void>}
  */
 export async function dragElement(page: Page, element: Locator, target: Locator): Promise<void> {
-  await this.builderIsReady(page)
+  await this.htmxReady(page)
 
   await expect(target).toBeVisible()
   await expect(element).toBeVisible()
@@ -98,15 +98,16 @@ export async function dragElement(page: Page, element: Locator, target: Locator)
   // await page.mouse.up()
   // await expect(page.locator('.display-builder')).not.toContainClass('display-builder--onDrag')
 
+  // Position is important, otherwise the drag is not working. X must > 10.
   await element.dragTo(target, {
     force: true,
     targetPosition: {
-      x: 10,
+      x: 20,
       y: 10,
     },
   });
 
-  await this.builderIsReady(page)
+  await this.htmxReady(page)
 }
 
 /**
@@ -127,7 +128,7 @@ export async function setElementValue(
   await expect(element).toBeVisible();
 
   await element.click();
-  await this.builderIsReady(page);
+  await this.htmxReady(page);
 
   await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
 
@@ -146,7 +147,7 @@ export async function setElementValue(
 
   await page.getByRole('button', { name: 'Update' }).click();
 
-  await this.builderIsReady(page);
+  await this.htmxReady(page);
 }
 
 /**
@@ -157,9 +158,9 @@ export async function setElementValue(
  * @returns {Promise<void>}
  */
 export async function saveDisplayBuilder(page: Page): Promise<void> {
-  await this.builderIsReady(page)
+  await this.htmxReady(page)
   await page.getByRole('button', { name: 'Save' }).click()
-  await this.builderIsReady(page)
+  await this.htmxReady(page)
 }
 
 /**
@@ -240,18 +241,6 @@ export async function shoelaceReady(page: Page): Promise<void> {
 }
 
 /**
- * Waits for builder to be loaded and ready.
- *
- * @async
- * @param {Page} page - Playwright Page object.
- * @returns {Promise<void>}
- */
-export async function builderIsReady(page: Page): Promise<void> {
-  await shoelaceReady(page);
-  await htmxReady(page);
-}
-
-/**
  * Refreshes the Display Builder instance view page.
  *
  * Navigates to the view page for the specified Display Builder instance.
@@ -263,7 +252,7 @@ export async function builderIsReady(page: Page): Promise<void> {
  */
 export async function refresh(page: Page, dbName: string): Promise<void> {
   await page.goto(dbConfig.dbViewUrl.replace('{db_id}', dbName));
-  await this.builderIsReady(page)
+  await this.htmxReady(page)
 }
 
 /**

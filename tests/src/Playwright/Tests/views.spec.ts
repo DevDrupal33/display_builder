@@ -19,7 +19,7 @@ test('Views Display Builder', {tag: ['@display_builder', '@display_builder_views
   await cmd.ajaxReady(page)
 
   // Test 1: Set the builder profile on a view.
-  await page.getByText('Display Builder: Disabled').getByRole('link', { name: 'Disabled' }).click()
+  await page.locator('#views-page-test-display-builder').click()
   await expect(page.getByRole('dialog')).toBeVisible()
   await page.locator('select[name="display_builder"]').selectOption('default')
   await page.getByText('ApplyCancel').getByText('Apply').click()
@@ -50,7 +50,7 @@ test('Views Display Builder', {tag: ['@display_builder', '@display_builder_views
   await cmd.ajaxReady(page)
   // Save the View.
   await page.getByRole('button', { name: 'Save' }).click()
-  await expect(page.locator('.messages__content')).toContainText('The view Test Display builder has been saved.')
+  await expect(page.getByText('The view Test Display builder has been saved.')).toBeVisible()
 
   // Ensure the good profile is set.
   await page.goto(dbConfig.viewsDbList)
@@ -64,21 +64,21 @@ test('Views Display Builder', {tag: ['@display_builder', '@display_builder_views
   await cmd.openLibrariesTab(page)
   // @todo check the proper views row.
   const sources = {
-    'view_attachment_after': '[View] Footer area',
-    'view_attachment_before': '[View] Footer area',
-    'view_exposed': '[View] Footer area',
-    'view_feed_icons': '[View] Footer area',
-    'view_footer': '[View] Footer area',
-    'view_header': '[View] Footer area',
-    'view_more': '[View] Footer area',
-    'view_pager': '[View] Footer area',
+    'view_attachment_after': '[View] Attachment after',
+    'view_attachment_before': '[View] Attachment before',
+    'view_exposed': '[View] Exposed form',
+    'view_feed_icons': '[View] Feed icons',
+    'view_footer': '[View] Footer',
+    'view_header': '[View] Header',
+    'view_more': '[View] More',
+    'view_pager': '[View] Pager',
     'view_rows_tmp': '[View] Rows (Display Builder)',
     // 'view_rows': 'View rows',
   };
 
   for (const [source, label] of Object.entries(sources)) {
     // await expect(page.locator(`.db-island-block_library [hx-vals*="${source}"]`)).toHaveCount(1)
-    await expect( page.locator('.db-island-block_library').getByRole('button', { name: label })).toHaveCount(1)
+    await expect(page.locator('.db-island-block_library').getByRole('button', { name: label })).toHaveCount(1)
     await expect(page.locator(`.db-island-builder [data-instance-title="${label}"]`)).toHaveCount(1)
   }
 
@@ -93,14 +93,16 @@ test('Views Display Builder', {tag: ['@display_builder', '@display_builder_views
       }
     ]
   )
+  await cmd.closeDialog(page)
+  await cmd.closeDialog(page, 'second')
   await cmd.saveDisplayBuilder(page)
-  await cmd.shoelaceReady(page)
 
   // Test 4: Check the builder result from the view.
   await page.goto(dbConfig.viewsEditUrl.replace('{view_id}', dbConfig.viewsTestName))
   await cmd.ajaxReady(page)
   await page.getByRole('link', { name: 'View Page' }).click()
   await expect(page.getByRole('heading', { name: 'Test page with Display builder' })).toBeVisible()
+  await expect(page.getByText('I am a test token in a views')).toBeVisible()
 
   // @todo not working... fix it!
   // await expect(page.getByText('I am a test token in a views')).toBeVisible();
@@ -115,6 +117,7 @@ test('Views Display Builder', {tag: ['@display_builder', '@display_builder_views
   await page.getByText('ApplyCancel').getByText('Apply').click()
   await expect(page.getByRole('dialog')).toBeHidden()
   await cmd.ajaxReady(page)
+  await page.getByRole('button', { name: 'Save' }).click()
 
   // Ensure the profile is deleted and the view is working.
   await page.goto(dbConfig.viewsDbList)
@@ -123,4 +126,5 @@ test('Views Display Builder', {tag: ['@display_builder', '@display_builder_views
   await cmd.ajaxReady(page)
   await page.getByRole('link', { name: 'View Page' }).click()
   await expect(page.getByRole('heading', { name: 'Test page with Display builder' })).toBeVisible()
+  await expect(page.getByText('I am a test token in a views')).not.toBeVisible()
 })
