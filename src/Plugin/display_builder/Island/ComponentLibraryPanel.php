@@ -563,9 +563,6 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
       if (isset($definition['provider']) && !\in_array($definition['provider'], $configuration['providers'], TRUE)) {
         continue;
       }
-      // Because of multiple themes, annotated name contains the theme name.
-      // We do not need it.
-      $definition['annotated_name'] = $definition['name'] ?? 'n/a';
       $filtered_definitions[$id] = $definition;
       $grouped_definitions[(string) $definition['category']][$id] = $definition;
     }

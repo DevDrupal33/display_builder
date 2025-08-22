@@ -28,7 +28,7 @@ interface StateManagerInterface extends ContextAwareInterface, DataStateInterfac
    * @return string
    *   The instance ID of the new component.
    */
-  public function attachSourceToRoot(string $builder_id, int $position, string $source_id, array $data, ?array $third_party_settings = NULL): string;
+  public function attachSourceToRoot(string $builder_id, int $position, string $source_id, array $data, array $third_party_settings = []): string;
 
   /**
    * Attach a new source instance to a slot.
@@ -51,7 +51,7 @@ interface StateManagerInterface extends ContextAwareInterface, DataStateInterfac
    * @return string
    *   The instance ID of the new component.
    */
-  public function attachSourceToSlot(string $builder_id, string $parent_id, string $slot_id, int $position, string $source_id, array $data, ?array $third_party_settings = NULL): string;
+  public function attachSourceToSlot(string $builder_id, string $parent_id, string $slot_id, int $position, string $source_id, array $data, array $third_party_settings = []): string;
 
   /**
    * Create a display builder.

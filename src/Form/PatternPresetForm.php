@@ -49,14 +49,6 @@ final class PatternPresetForm extends EntityForm {
       '#rows' => 2,
     ];
 
-    $form['theme'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Theme'),
-      '#description' => $this->t('The theme this preset is meant to be used with.'),
-      '#default_value' => $entity->get('theme'),
-      '#required' => TRUE,
-    ];
-
     $form['group'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Group'),

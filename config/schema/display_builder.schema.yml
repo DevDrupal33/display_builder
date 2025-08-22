@@ -125,13 +125,12 @@ display_builder.pattern_preset.*:
       type: string
     sources:
       label: "UI Patterns sources"
-      type: mapping
-      mapping:
-        source_id:
-          type: machine_name
-          label: 'Prop source ID'
-        source:
-          type: ui_patterns_source.[%parent.source_id]
-          label: 'Prop source configuration'
-        _third_party_settings:
-          type: mapping
+      # See Drupal\display_builder\Hook\UiPatternsHooks::schemaInfoAlter().
+      type: ui_patterns_slot_source
+
+ui_patterns_slot_source.third_party_setting.ui_styles:
+  label: 'UI Styles settings'
+  type: mapping
+  mapping:
+    styles:
+      type: ui_styles.selected_mapping

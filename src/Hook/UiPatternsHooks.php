@@ -43,4 +43,24 @@ class UiPatternsHooks {
     }
   }
 
+  /**
+   * Add third-party-settings to UI Patterns slot source schema.
+   *
+   * Can be removed once
+   * https://www.drupal.org/project/ui_patterns/issues/3540614 is merged.
+   *
+   * @param array $definitions
+   *   Associative array of configuration type definitions keyed by schema type
+   *   names. The elements are themselves array with information about the type.
+   */
+  #[Hook('config_schema_info_alter')]
+  public function schemaInfoAlter(array &$definitions): void {
+    $definitions['ui_patterns_slot_source']['mapping']['_third_party_settings'] = [
+      'type' => 'sequence',
+      'sequence' => [
+        'type' => 'ui_patterns_slot_source.third_party_setting.[%key]',
+      ],
+    ];
+  }
+
 }

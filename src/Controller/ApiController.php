@@ -306,10 +306,10 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
       // @todo for duplicate and not parent root seems not detected and copy is inside the slot.
       if ($parent_id === '__root__') {
         $is_paste_root = TRUE;
-        $this->stateManager->attachSourceToRoot($builder_id, 0, $source_id, $data, $dataToCopy['_third_party_settings'] ?? NULL);
+        $this->stateManager->attachSourceToRoot($builder_id, 0, $source_id, $data, $dataToCopy['_third_party_settings'] ?? []);
       }
       else {
-        $this->stateManager->attachSourceToSlot($builder_id, $parent_id, $slot_id, (int) $slot_position, $source_id, $data, $dataToCopy['_third_party_settings'] ?? NULL);
+        $this->stateManager->attachSourceToSlot($builder_id, $parent_id, $slot_id, (int) $slot_position, $source_id, $data, $dataToCopy['_third_party_settings'] ?? []);
       }
     }
 
