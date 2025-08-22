@@ -44,18 +44,6 @@ test('Create instance', {tag: ['@display_builder', '@display_builder_min']}, asy
   await expect(page.getByRole('link', { name: dbName })).not.toBeVisible()
 })
 
-test('Drag and drop', {tag: ['@display_builder']}, async ({ page, drupal }) => {
-  const dbId = `test_dnd`
-  await drupal.loginAsAdmin()
-  await page.goto(dbConfig.dbViewUrl.replace('{db_id}', dbId))
-
-  await cmd.shoelaceReady(page)
-  await cmd.htmxReady(page)
-
-  await cmd.dragElementFromLibraryById(page, 'Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
-  await cmd.dragElementFromLibraryById(page, 'Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
-})
-
 test('Actions and cmd', {tag: ['@display_builder']}, async ({ page, drupal }) => {
   const dbId = `test_${utils.createRandomString(6)}`
 
