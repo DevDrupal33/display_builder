@@ -161,7 +161,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    * {@inheritdoc}
    */
   public function build(string $builder_id, array $contexts = []): array {
-    $stateManager = $this->getStateManager();
+    $stateManager = $this->stateManager();
 
     $builder_data = $stateManager->getCurrentState($builder_id);
     $islands_enabled_sorted = $this->getIslandsEnableSorted($contexts);
@@ -606,12 +606,8 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    * @return \Drupal\display_builder\StateManager\StateManagerInterface
    *   The state manager.
    */
-  private function getStateManager(): StateManagerInterface {
-    if (!isset($this->stateManager)) {
-      $this->stateManager = \Drupal::service('display_builder.state_manager');
-    }
-
-    return $this->stateManager;
+  private function stateManager(): StateManagerInterface {
+    return $this->stateManager ??= \Drupal::service('display_builder.state_manager');
   }
 
 }

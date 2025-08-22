@@ -8,10 +8,36 @@ core.entity_view_display.*.*.*.third_party.display_builder:
       constraints:
         ConfigExists:
           prefix: 'display_builder.display_builder.'
+    override_display_builder:
+      label: "Display Builder override profile"
+      type: string
+      constraints:
+        ConfigExists:
+          prefix: 'display_builder.display_builder.'
+    # @todo add the field constraint, tricky because of current format:
+    # field.storage.node.field_sources.yml where we have entity type.
+    override_field:
+      label: "Display Builder field"
+      type: string
     sources:
       label: "UI Patterns sources"
       type: sequence
       sequence:
-        type: ui_patterns_source.[source_id]
+        type: ignore
   constraints:
     FullyValidatable: ~
+
+# @todo find the proper schema, problem is the sources can go very deep.
+# display_builder_sources:
+#   type: mapping
+#   label: 'UI Patterns sources'
+#   mapping:
+#     source_id:
+#       type: string
+#       label: 'Source ID'
+#     source:
+#       type: ui_patterns_source.[%parent.source_id]
+#       label: 'Source configuration'
+#     _instance_id:
+#       type: string
+#       label: 'Instance id'

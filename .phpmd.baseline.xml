@@ -5,6 +5,7 @@
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/MainPageContentSource.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageTitleSource.php"/>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/src/Entity/DisplayBuilder.php" method="build"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Hook/UiPatternsHooks.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/IslandPluginBase.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/IslandPluginConfigurationFormTrait.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/IslandPluginFormTrait.php"/>

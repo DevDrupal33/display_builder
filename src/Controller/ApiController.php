@@ -524,6 +524,12 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
 
   /**
    * Returns the display builder by builder ID.
+   *
+   * @param string $builder_id
+   *   The builder ID.
+   *
+   * @return \Drupal\display_builder\DisplayBuilderInterface
+   *   The display builder instance.
    */
   protected function getDisplayBuilder(string $builder_id): DisplayBuilderInterface {
     if ($this->displayBuilder !== NULL) {

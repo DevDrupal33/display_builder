@@ -13,6 +13,7 @@ use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_devel\Helper\DisplayBuilderDevelHelper;
 use Drupal\display_builder_devel\MockEntity;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
+use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -185,6 +186,10 @@ class DisplayBuilderDevelController extends ControllerBase {
           ]),
         ];
       }
+    }
+    elseif (\class_exists('Drupal\display_builder_entity_view\Field\DisplayBuilderItemList') && $this->stateManager->hasSaveContextsRequirement($builder_id, DisplayBuilderItemList::getContextRequirement())) {
+      $url = DisplayBuilderItemList::getUrlFromInstanceId($builder_id);
+      $type = $this->t('Entity view override');
     }
 
     $row['id']['data'] = [

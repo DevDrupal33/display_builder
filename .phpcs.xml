@@ -39,7 +39,37 @@
 
   <rule ref="Squiz.Strings.DoubleQuoteUsage.NotRequired" />
   <rule ref="Squiz.Strings.DoubleQuoteUsage.ContainsVar">
-    <severity>0</severity>
+    <severity>warning</severity>
   </rule>
 
+  <!-- Detect missing doc -->
+  <rule ref="Squiz.Commenting.FunctionComment.MissingParamTag" />
+  <rule ref="Squiz.Commenting.FunctionComment">
+    <properties>
+      <property name="skipIfInheritdoc" value="true" />
+    </properties>
+  </rule>
+  <!-- <rule ref="Squiz.Commenting.FunctionComment.MissingReturn" /> -->
+
+  <rule ref="Generic.CodeAnalysis.UnusedFunctionParameter"/>
+  <rule ref="Generic.Commenting.Todo"/>
+  <rule ref="Generic.ControlStructures.InlineControlStructure"/>
+  <rule ref="Generic.Commenting.Todo.TaskFound">
+    <severity>0</severity>
+  </rule>
+  <rule ref="Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClassAfterLastUsed">
+    <severity>0</severity>
+  </rule>
+  <rule ref="Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClass">
+    <severity>0</severity>
+  </rule>
+  <rule ref="Generic.Commenting.Todo.CommentFound">
+    <severity>0</severity>
+  </rule>
+  <rule ref="Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClassBeforeLastUsed">
+    <severity>0</severity>
+  </rule>
+  <rule ref="Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed">
+    <severity>0</severity>
+  </rule>
 </ruleset>

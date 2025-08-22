@@ -14,9 +14,6 @@ use Drupal\display_builder\Attribute\Island;
  */
 final class IslandPluginManager extends DefaultPluginManager implements IslandPluginManagerInterface {
 
-  /**
-   * Constructs the object.
-   */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
     parent::__construct('Plugin/display_builder/Island', $namespaces, $module_handler, IslandInterface::class, Island::class);
     $this->alterInfo('island_info');

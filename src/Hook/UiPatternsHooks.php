@@ -27,8 +27,6 @@ class UiPatternsHooks {
    *   The data array containing information about the component.
    * @param array $source_configuration
    *   The full raw configuration used to build the source.
-   *
-   * @SuppressWarnings("PHPMD.UnusedFormalParameter") $source is not used here.
    */
   #[Hook('ui_patterns_source_value_alter')]
   public function sourceValueAlter(mixed &$build, SourceInterface $source, array &$source_configuration): void {

@@ -42,12 +42,12 @@ interface WithDisplayBuilderInterface {
   public static function getUrlFromInstanceId(string $instance_id): Url;
 
   /**
-   * Get display builder config entity.
+   * Get display builder profile config entity.
    *
    * If NULL, the Display Builder is not activated for this entity.
    *
    * @return ?DisplayBuilderInterface
-   *   The display builder config entity.
+   *   The display builder profile config entity.
    */
   public function getDisplayBuilder(): ?DisplayBuilderInterface;
 

@@ -22,6 +22,11 @@ class ViewsController extends ControllerBase {
   /**
    * Provides a generic title callback for a display used in pages.
    *
+   * @param \Drupal\views\ViewEntityInterface $view
+   *   The view to be edited.
+   * @param string $display
+   *   The display ID being edited.
+   *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The title for the display page, if found.
    */

@@ -1,0 +1,3 @@
+display_builder_entity_view.display_builder_tabs:
+  class: \Drupal\Core\Menu\LocalTaskDefault
+  deriver: \Drupal\display_builder_entity_view\Plugin\Derivative\EntityOverrideViewLocalTask

@@ -36,3 +36,7 @@ mogtofu
 pdureau
 pymdownx
 valverde
+
+libicu
+libjpeg
+libwebp

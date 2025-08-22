@@ -31,15 +31,18 @@ final class DisplayBuilderIslandPluginForm extends EntityForm {
    */
   private ?IslandInterface $island = NULL;
 
-  /**
-   * Constructs a new DisplayBuilderIslandPluginForm.
-   */
   public function __construct(
     protected IslandPluginManagerInterface $islandPluginManager,
   ) {}
 
   /**
    * Returns the title of the edit plugin form.
+   *
+   * @param string $island_id
+   *   The island ID.
+   *
+   * @return string
+   *   The title of the edit plugin form.
    */
   public static function editFormTitle(string $island_id): string {
     /** @var \Drupal\display_builder\IslandInterface $island */

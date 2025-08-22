@@ -67,6 +67,9 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
 
   /**
    * Build Display Builder routes for each existing entity view display.
+   *
+   * @param \Symfony\Component\Routing\RouteCollection $collection
+   *   The route collection to add the routes to.
    */
   private function buildRoutes(RouteCollection $collection): void {
     if (!$this->module_handler->moduleExists('field_ui')) {
@@ -86,6 +89,14 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
 
   /**
    * Build a Display Builder route from an existing Entity View Display route.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type for which to build the route.
+   * @param \Symfony\Component\Routing\Route $entity_route
+   *   The existing entity view display route.
+   *
+   * @return \Symfony\Component\Routing\Route
+   *   The new route for the Display Builder.
    */
   private function buildDisplayBuilderRoute(EntityTypeInterface $entity_type, Route $entity_route): Route {
     $path = $entity_route->getPath() . '/display/{view_mode_name}/display-builder';
@@ -111,7 +122,7 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
     $options = $entity_route->getOptions();
     $options['_admin_route'] = FALSE;
 
-    // @todo Add the display builder access check.
+    // @todo add the display builder access check
     // $requirements['_display_builder_access'] = 'view';
     // Trigger the display builder RouteEnhancer.
     $parameters = [];
@@ -122,7 +133,7 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
     $defaults['_title_callback'] = EntityViewController::class . '::title';
     $route = (new Route($path))->setDefaults($defaults)->setRequirements($requirements)->setOptions($options);
 
-    // Set field_ui.route_enhancer to run on the manage layout form. ?
+    // Set field_ui.route_enhancer to run on the manage layout form?
     if (isset($defaults['bundle_key'])) {
       $route->setOption('_field_ui', TRUE)->setDefault('bundle', '');
     }

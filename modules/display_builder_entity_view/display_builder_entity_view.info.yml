@@ -1,9 +1,11 @@
-name: "Display Builder for entity view"
-description: "Provide integration of Display Builder to entity view."
+name: 'Display Builder for entity view'
+description: 'Provide integration of Display Builder to entity view.'
 type: module
 core_version_requirement: ^11.2
-package: "User interface"
+package: 'User interface'
 dependencies:
   - drupal:field_ui
   - display_builder:display_builder
+  - ui_patterns:ui_patterns_field
+  # @todo remove when https://www.drupal.org/project/display_builder/issues/3541423
   - ui_patterns:ui_patterns_field_formatters

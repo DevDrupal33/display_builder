@@ -21,7 +21,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   id: 'content_entity',
   label: new TranslatableMarkup('Content entity'),
   description: new TranslatableMarkup('A content entity with a specific display.'),
-  prop_types: ['slot']
+  prop_types: ['slot'],
+  context_requirements: ['content'],
 )]
 class ContentEntitySource extends SourcePluginBase {
 

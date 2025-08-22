@@ -3,6 +3,8 @@
 /**
  * @file
  * Functions to support theming in the DB test theme.
+ *
+ * phpcs:disable Squiz.Commenting.FunctionComment.MissingParamTag
  */
 
 declare(strict_types=1);

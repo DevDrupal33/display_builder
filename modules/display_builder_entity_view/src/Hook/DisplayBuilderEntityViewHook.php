@@ -9,6 +9,7 @@ use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay;
+use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
 use Drupal\display_builder_entity_view\Form\EntityViewDisplayForm;
 use Drupal\display_builder_entity_view\Form\LayoutBuilderEntityViewDisplayForm;
 
@@ -22,7 +23,21 @@ class DisplayBuilderEntityViewHook {
   ) {}
 
   /**
+   * Implements hook_entity_field_type_alter().
+   *
+   * @param array $info
+   *   The field types to alter.
+   */
+  #[Hook('field_info_alter', order: new OrderAfter(['layout_builder']))]
+  public function fieldInfoAlter(array &$info): void {
+    $info['ui_patterns_source']['list_class'] = DisplayBuilderItemList::class;
+  }
+
+  /**
    * Implements hook_entity_type_alter().
+   *
+   * @param array $entity_types
+   *   An associative array of entity type definitions.
    */
   #[Hook('entity_type_alter', order: new OrderAfter(['layout_builder']))]
   public function entityTypeAlter(array &$entity_types): void {

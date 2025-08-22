@@ -37,68 +37,61 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
 
     $form = [];
 
-    $description = $this->t('Select a Display builder profile for this instance. Can be changed anytime.');
-    $description .= '<br>';
-    $description .= $this->t('Profiles allow to include specific functionalities available in the builder.');
-
     $options = $mandatory ? $options : ['' => $this->t('- Disabled -')] + $options;
     $form[ConfigFormBuilderInterface::PROFILE_PROPERTY] = [
       '#type' => 'select',
       '#title' => $this->t('Profile'),
-      '#description' => $description,
+      '#description' => $this->t('The profile defines the features available in the builder. It can be changed anytime.'),
       '#options' => $options,
     ];
 
-    if ($entity->getDisplayBuilder()?->id()) {
-      $form[ConfigFormBuilderInterface::PROFILE_PROPERTY]['#default_value'] = (string) $entity->getDisplayBuilder()->id();
+    // Add admin information to link the profiles.
+    if ($this->moduleHandler->moduleExists('display_builder_ui') && $this->currentUser->hasPermission('administer display builders')) {
+      $form[ConfigFormBuilderInterface::PROFILE_PROPERTY]['#description'] = [
+        [
+          '#markup' => $form[ConfigFormBuilderInterface::PROFILE_PROPERTY]['#description'] . '<br>',
+        ],
+        [
+          '#type' => 'link',
+          '#title' => $this->t('Add and configure display builder profiles'),
+          '#url' => Url::fromRoute('entity.display_builder.collection'),
+          '#suffix' => '.',
+        ],
+      ];
     }
 
+    // Add the builder link to edit.
     $instance_id = $entity->getInstanceId();
 
-    // Add the builder link to edit.
     if ($instance_id && $entity->getDisplayBuilder()) {
-      $params = [
-        '@url' => $entity->getBuilderUrl()->toString(),
-      ];
-
-      $message = $this->t('Click on this link to edit the display: <a href="@url">build the display</a>.', $params);
       $form['link'] = [
         '#type' => 'html_tag',
         '#tag' => 'p',
         '#attributes' => [
           'class' => ['form-item__description'],
         ],
-        '#value' => $message,
+        'content' => [
+          '#type' => 'link',
+          '#title' => $this->t('Build the display'),
+          '#url' => $entity->getBuilderUrl(),
+          '#attributes' => [
+            'class' => ['button', 'button--small'],
+          ],
+        ],
       ];
     }
 
-    // Add admin information to link the profiles.
-    if ($this->moduleHandler->moduleExists('display_builder_ui') && $this->currentUser->hasPermission('administer display builders')) {
-      $params = [
-        '@url' => Url::fromRoute('entity.display_builder.collection')->toString(),
-      ];
-      $message = $this->t('Display builder profiles can be configured from the <a href="@url">Display builder profiles</a>.', $params);
-      $form['admin_link'] = [
-        '#type' => 'html_tag',
-        '#prefix' => '<hr>',
-        '#tag' => 'p',
-        '#attributes' => [
-          'class' => ['form-item__description'],
-        ],
-        '#value' => $message,
-      ];
+    if ($entity->getDisplayBuilder()?->id()) {
+      $form[ConfigFormBuilderInterface::PROFILE_PROPERTY]['#default_value'] = (string) $entity->getDisplayBuilder()->id();
     }
 
     return $form;
   }
 
   /**
-   * Get display builders allowed for the current user.
-   *
-   * @return array
-   *   The list of allowed profiles.
+   * {@inheritdoc}
    */
-  protected function getAllowedDisplayBuilders(): array {
+  public function getAllowedDisplayBuilders(): array {
     $options = [];
     $storage = $this->entityTypeManager->getStorage('display_builder');
     $entity_ids = $storage->getQuery()->accessCheck(TRUE)->sort('weight', 'ASC')->execute();

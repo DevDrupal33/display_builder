@@ -116,7 +116,6 @@ phpcs:
     - *php-files-change-rule
     # Also run whenever we catch up to the upstream PHPCS rules.
     - changes:
-        - core.phpcs.xml.dist
         - .phpcs.xml
       when: on_success
     - *manual-rule

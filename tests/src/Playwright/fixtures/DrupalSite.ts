@@ -38,7 +38,7 @@ const drupalSite = base.extend<DrupalSiteInstall>({
         return;
       }
 
-      console.debug('[Info] Install Drupal with test environement...')
+      console.debug('[Info] Install Drupal with test environment...')
       const setupFile = process.env.DRUPAL_TEST_SETUP_FILE ? `--setup-file "${process.env.DRUPAL_TEST_SETUP_FILE}"` : '';
       const installProfile = `--install-profile "${process.env.DRUPAL_TEST_SETUP_PROFILE || 'minimal'}"`;
       const langcodeOption = process.env.DRUPAL_TEST_SETUP_LANGCODE ? `--langcode "${process.env.DRUPAL_TEST_SETUP_LANGCODE}"` : '';

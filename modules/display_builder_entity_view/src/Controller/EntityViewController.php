@@ -44,6 +44,9 @@ final class EntityViewController extends ControllerBase {
   /**
    * Renders the Layout UI.
    *
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match object.
+   *
    * @return array
    *   A render array.
    */
@@ -72,18 +75,18 @@ final class EntityViewController extends ControllerBase {
       throw new NotFoundHttpException();
     }
 
-    $builder_id = $entity_display->getInstanceId();
+    $builder_instance_id = $entity_display->getInstanceId();
 
-    if (!$this->stateManager->load($builder_id)) {
+    if (!$this->stateManager->load($builder_instance_id)) {
       // Display Builder instance was not created yet or deleted, create it on
       // the fly.
       $entity_display->initInstanceIfMissing();
     }
 
     // We build the rendered page.
-    $contexts = $this->stateManager->getContexts($builder_id);
+    $contexts = $this->stateManager->getContexts($builder_instance_id);
 
-    return $display_builder->build($builder_id, $contexts);
+    return $display_builder->build($builder_instance_id, $contexts);
   }
 
   /**

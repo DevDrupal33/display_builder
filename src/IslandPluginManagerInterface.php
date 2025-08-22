@@ -39,6 +39,16 @@ interface IslandPluginManagerInterface extends PluginManagerInterface {
 
   /**
    * Create an island instance for each definition.
+   *
+   * @param array $definitions
+   *   An array of plugin definitions.
+   * @param array $contexts
+   *   (Optional) An array of contexts.
+   * @param array $configuration
+   *   (Optional) An array of configuration.
+   *
+   * @return array<string, \Drupal\display_builder\IslandInterface>
+   *   An array of island instances keyed by plugin ID.
    */
   public function createInstances(array $definitions, array $contexts = [], array $configuration = []): array;
 
