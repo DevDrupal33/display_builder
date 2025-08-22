@@ -60,6 +60,7 @@
    *
    * @param {string} builderId - The builder id.
    * @param {HTMLElement} tabsComponent - The tabs container element
+   *
    * @listens event:click
    * @listens event:keydown
    */
@@ -147,12 +148,12 @@
   /**
    * Drupal behavior for display builder tabs.
    *
-   * @todo move to specific DB.
+   * @todo move to specific DB JavaScript as it's not generic enough.
    *
    * @type {Drupal~behavior}
    *
    * @prop {Drupal~behaviorAttach} attach
-   *   Attaches the behaviors for display builder functionality.
+   *   Attaches the behaviors for display builder tabs.
    */
   Drupal.behaviors.displayBuilderTabs = {
     attach(context) {

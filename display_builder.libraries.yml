@@ -75,3 +75,8 @@ form:
   css:
     theme:
       ./assets/css/form.css: {}
+
+# Viewport switcher island.
+viewport_switcher:
+  js:
+    ./assets/js/viewport_switcher.js: {}

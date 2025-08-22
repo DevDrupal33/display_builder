@@ -9,6 +9,7 @@
    *
    * @param {HTMLElement} island
    *   The builder element to disable links inside
+   *
    * @listens event:click
    */
   function disableInsideLinks(island) {
@@ -82,7 +83,9 @@
   /**
    * Sets up event listeners for HTMX requests on a builder element.
    *
-   * @param {HTMLElement} builder - The builder element to attach events to
+   * @param {HTMLElement} builder
+   *   The builder element to attach events to.
+   *
    * @listens htmx:configRequest
    * @listens htmx:beforeRequest
    * @listens htmx:afterRequest
@@ -140,7 +143,7 @@
    * @type {Drupal~behavior}
    *
    * @prop {Drupal~behaviorAttach} attach
-   *   Attaches the behaviors for Display builder functionality.
+   *   Attaches the behaviors for Display builder overall.
    */
   Drupal.behaviors.displayBuilder = {
     attach(context, settings) {

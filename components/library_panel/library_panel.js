@@ -11,7 +11,6 @@
    *   The builder element containing dropzone.
    * @param {HTMLElement} input
    *   The input to trigger search on.
-   * @listen event:sl-input
    */
   function triggerSearch(context, input) {
     const wrapper = context.getElementById(input.dataset.target);
@@ -77,13 +76,14 @@
     });
   }
   /**
-   * Drupal behavior for display builder library islands.
+   * Drupal behavior for display builder search library.
    *
    * @type {Drupal~behavior}
    *
    * @prop {Drupal~behaviorAttach} attach
-   *   Attaches the behavior.
-   * @listens event:sl-input
+   *   Attaches the behavior for display builder search library.
+   *
+   * @listens shoelace:sl-input
    */
   Drupal.behaviors.displayBuilderLibraryIslands = {
     attach(context) {

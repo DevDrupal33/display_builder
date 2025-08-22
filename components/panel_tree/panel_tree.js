@@ -31,8 +31,9 @@
    * @type {Drupal~behavior}
    *
    * @prop {Drupal~behaviorAttach} attach
-   *   Attaches the behaviors for display builder functionality.
-   * @listens event:sl-selection-change
+   *   Attaches the behaviors for display builder panel tree.
+   *
+   * @listens shoelace:sl-selection-change
    */
   Drupal.behaviors.displayBuilderPanelTree = {
     attach(context) {

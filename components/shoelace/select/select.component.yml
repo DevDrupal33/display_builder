@@ -1,0 +1,20 @@
+name: Select
+noUi: true
+description: Additional content that “drops down” in an island.
+links:
+  - https://shoelace.style/components/select
+props:
+  type: object
+  properties:
+    icon:
+      # Not a ui-patterns://icon prop yet, to avoid a dependency to
+      # ui_icons_patterns until the icon form element will land in Core.
+      title: Icon
+      type: string
+      default: window
+    empty_option:
+      title: Empty option label
+      type: string
+    options:
+      title: A Drupal Form API select option structure.
+      type: object

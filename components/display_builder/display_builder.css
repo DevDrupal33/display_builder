@@ -69,16 +69,13 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
   }
 
   .display-builder__main {
-    margin-top: 1rem;
+    max-width: 100%;
+    margin: 1rem auto 0;
     transition: margin-left 0.1s ease;
+    transition: max-width 0.3s ease;
 
     .db-message {
       margin: 1rem 0 0 0;
-    }
-
-    .display-builder__main_content {
-      margin-top: 1rem;
-      padding: 0 0.2rem 0 0.2rem;
     }
   }
 

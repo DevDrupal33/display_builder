@@ -34,26 +34,22 @@
   }
 
   /**
-   * Drupal behavior for display builder fullscreen .
+   * Drupal behavior for display builder highlight.
    *
    * @type {Drupal~behavior}
    *
    * @prop {Drupal~behaviorAttach} attach
-   *   Attaches the behavior.
+   *   Attaches the behavior for display builder highlight.
+   *
+   * @listens event:click
    */
   Drupal.behaviors.displayBuilderHighlight = {
     attach(context) {
       once('dbHighlight', '[data-set-highlight]', context).forEach((button) => {
         const builder = button.closest('.display-builder');
-        button.addEventListener('click', (event) => {
-          // Click on button or icon is different.
-          let icon = event.target;
-          // Specific shoelace event handler.
+        button.addEventListener('click', () => {
           // @todo avoid using this kind of specific.
-          if (event.target.tagName !== 'SL-ICON') {
-            icon = event.target.querySelector('sl-icon');
-          }
-
+          const icon = button.querySelector('sl-icon');
           setHighlight(builder, icon, button);
         });
       });

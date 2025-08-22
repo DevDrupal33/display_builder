@@ -1,0 +1,13 @@
+name: Default
+props:
+  icon: window
+  empty_option: Fluid
+  options:
+    Bootstrap:
+      bootstrap.small: Small
+      bootstrap.medium: Medium
+      bootstrap.wide: Wide
+    Olivero:
+      olivero.small: Small
+      olivero.medium: Medium
+      olivero.wide: Wide

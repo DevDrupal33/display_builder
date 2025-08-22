@@ -39,10 +39,14 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger) => {
  *   The Display Builder element.
  * @param {Boolean} debug
  *   The debug flag.
+ *
+ * @listens event:click
  */
 Drupal.displayBuilder.initDrawer = (builder, debug) => {
   const firstDrawer = builder.querySelector('#db-first-drawer');
-  firstDrawer.removeAttribute('data-offset-left');
+  if (firstDrawer) {
+    firstDrawer.removeAttribute('data-offset-left');
+  }
 
   const firstDrawerPanes = builder.querySelectorAll(
     '.shoelace-drawer__content_island',
@@ -136,6 +140,18 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
     }
   };
 
+  /**
+   * Sets up mouse event listeners for resizing the drawer.
+   *
+   * @param {HTMLElement} drawer
+   *   The drawer element.
+   * @param {boolean} isFirst
+   *   Whether it's the first drawer.
+   *
+   * @listens event:mousedown
+   * @listens event:mousemove
+   * @listens event:mouseup
+   */
   const handleResizeHandler = (drawer, isFirst) => {
     const resizeHandler = drawer.querySelector('.shoelace-resize-handle');
     if (!resizeHandler) return;
@@ -190,6 +206,9 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
    *   The trigger button element that was clicked.
    * @prop {string} trigger.variant
    *   The current variant of the trigger button (e.g., 'default', 'primary').
+   *
+   * @listens shoelace:sl-show
+   * @listens shoelace:sl-hide
    */
   const handleFirstDrawerTriggerClick = (trigger) => {
     if (firstDrawer.open && trigger === activeFirstDrawerButton) {
@@ -231,7 +250,11 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
     handleResizeHandler(secondDrawer, false);
   }
 
-  // Add Escape key support, as we use shoelace contained drawer version.
+  /**
+   * Add Escape key support, as we use shoelace contained drawer version.
+   *
+   * @listens event:keydown
+   */
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       if (secondDrawer && secondDrawer.open) {

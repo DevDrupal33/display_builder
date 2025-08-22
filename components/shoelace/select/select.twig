@@ -1,0 +1,15 @@
+<sl-select {{ attributes }}>
+  {% if icon %}
+    <sl-icon name="{{ icon }}" slot="prefix"></sl-icon>
+  {% endif %}
+  {% if empty_option %}
+    <sl-option value="">{{ empty_option }}</sl-option>
+  {% endif %}
+  {% for group_label, group in options %}
+    <sl-divider></sl-divider>
+    <small>{{ group_label }}</small>
+    {% for option_value, option_label in group %}
+       <sl-option value="{{ option_value }}">{{ option_label }}</sl-option>
+    {% endfor %}
+  {% endfor %}
+</sl-dropdown>

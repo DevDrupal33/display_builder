@@ -6,6 +6,16 @@
 /* eslint no-console: 0 */
 
 ((Drupal, debounce, once) => {
+  /**
+   * Drupal behavior for display builder search.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behavior.
+   *
+   * @listens shoelace:sl-input
+   */
   Drupal.behaviors.builderSearchBehaviors = {
     attach(context, settings) {
       const debug = settings?.dbDebug ?? false;
@@ -41,8 +51,6 @@
    *   The input to trigger search on.
    * @param {boolean} debug
    *   The debug flag.
-   *
-   * @listen event:sl-input
    */
   const triggerLibrarySearch = (element, input, debug) => {
     if (!input.dataset?.elementsSelector) return;
@@ -114,8 +122,6 @@
    *   The element containing the search input and results to filter.
    * @param {HTMLElement} input
    *   The input to trigger search on.
-   *
-   * @listen event:sl-input
    */
   const triggerContextualSearch = (element, input) => {
     const query = input.value.trim().toLowerCase();

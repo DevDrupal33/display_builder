@@ -17,6 +17,7 @@ use Drupal\display_builder\HtmxEvents;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
+use Drupal\display_builder\PluginProvidersTrait;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -35,14 +36,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterface {
 
   use IslandPluginConfigurationFormTrait;
-
-  /**
-   * Component provider to exclude by default.
-   *
-   * @var array
-   *   The providers to exclude.
-   */
-  private const PROVIDER_EXCLUDE = ['display_builder', 'sdc_devel'];
+  use PluginProvidersTrait;
 
   /**
    * The definitions filtered for current theme.
@@ -109,8 +103,10 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
    * {@inheritdoc}
    */
   public function defaultConfiguration(): array {
+    $components = $this->sdcManager->getDefinitions();
+
     return [
-      'providers' => $this->getDefaultProviders(),
+      'providers' => $this->getDefaultProviders($components),
       'status' => [
         'experimental',
       ],
@@ -126,11 +122,12 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
     $configuration = $this->getConfiguration();
+    $components = $this->sdcManager->getDefinitions();
 
     $form['providers'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Allowed providers'),
-      '#options' => $this->getProvidersOptions(),
+      '#options' => $this->getProvidersOptions($components, $this->t('component'), $this->t('components')),
       '#default_value' => $configuration['providers'],
     ];
 
@@ -293,103 +290,6 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
         'content' => $content,
       ],
     ];
-  }
-
-  /**
-   * Get providers for ConfigurableInterface::defaultConfiguration().
-   *
-   * @return array
-   *   An associative array of providers ID and definitions.
-   */
-  protected function getDefaultProviders(): array {
-    $providers = [];
-    $default_theme = \Drupal::config('system.theme')->get('default');
-    $active_themes = $this->buildRecursiveListOfParentThemes($default_theme, [$default_theme]);
-
-    foreach ($this->getProviders() as $provider_id => $provider) {
-      // If the provider is not the active theme or its parents, skip it.
-      if ($provider['type'] === 'theme' && !\in_array($provider_id, $active_themes, TRUE)) {
-        continue;
-      }
-
-      // If the provider is part of the excluded list, skip it.
-      if (\in_array($provider_id, self::PROVIDER_EXCLUDE, TRUE)) {
-        continue;
-      }
-      $providers[] = $provider_id;
-    }
-
-    return $providers;
-  }
-
-  /**
-   * Build recursive list of parent themes.
-   *
-   * @param string $current
-   *   The extension ID of the current (in the recursive loop context) theme.
-   * @param array $themes
-   *   The list from the previous recursive step.
-   *
-   * @return array
-   *   The updated list of extensions ID.
-   */
-  protected function buildRecursiveListOfParentThemes(string $current, array $themes): array {
-    $info = $this->themes->get($current)->info;
-
-    if (!isset($info['base theme'])) {
-      return $themes;
-    }
-    $parent = $info['base theme'];
-
-    return $this->buildRecursiveListOfParentThemes($parent, \array_merge($themes, [$parent]));
-  }
-
-  /**
-   * Get providers options for select input.
-   *
-   * @return array
-   *   An associative array with extension ID as key and extension description
-   *   as value.
-   */
-  protected function getProvidersOptions(): array {
-    $options = [];
-
-    foreach ($this->getProviders() as $provider_id => $provider) {
-      $params = [
-        '@name' => $provider['name'],
-        '@type' => $provider['type'],
-        '@count' => $provider['count'],
-      ];
-      $options[$provider_id] = $this->formatPlural($provider['count'], '@name (@type, @count component)', '@name (@type, @count components)', $params);
-    }
-
-    return $options;
-  }
-
-  /**
-   * Get all providers.
-   *
-   * @return array
-   *   Drupal extension definitions, keyed by extension ID
-   */
-  protected function getProviders(): array {
-    $themes = $this->themes->getAllInstalledInfo();
-    $modules = $this->modules->getAllInstalledInfo();
-    $providers = [];
-    $components = $this->sdcManager->getDefinitions();
-
-    foreach ($components as $component) {
-      $provider = $component['provider'];
-      $definition = $themes[$provider] ?? $modules[$provider] ?? NULL;
-
-      if (!$definition) {
-        continue;
-      }
-      $definition['count'] = isset($providers[$provider]) ? ($providers[$provider]['count']) + 1 : 1;
-      $providers[$provider] = $definition;
-    }
-
-    return $providers;
   }
 
   /**

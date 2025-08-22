@@ -107,6 +107,23 @@ display_builder.islands.active_users:
       type: weight
       label: Weight
 
+display_builder.islands.viewport:
+  type: mapping
+  mapping:
+    providers:
+      type: sequence
+      sequence:
+        type: string
+    format:
+      type: string
+      label: Format
+    enable:
+      type: boolean
+      label: Enabled
+    weight:
+      type: weight
+      label: Weight
+
 display_builder.pattern_preset.*:
   type: config_entity
   label: Display builder Preset

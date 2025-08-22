@@ -59,6 +59,9 @@
    * Enable Display builder Draggables feature.
    *
    * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behaviors for Display builder draggable.
    */
   Drupal.behaviors.displayBuilderDraggable = {
     attach(context) {

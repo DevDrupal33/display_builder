@@ -14,7 +14,8 @@
    *
    * @prop {Drupal~behaviorAttach} attach
    *   Attaches the behaviors for display builder functionality.
-   * @listens event:keypress
+   *
+   * @listens event:keydown
    */
   Drupal.behaviors.displayBuilderKeyboard = {
     attach(context) {

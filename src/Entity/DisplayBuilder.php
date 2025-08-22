@@ -411,7 +411,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
     $panes = [];
 
     foreach ($islands as $island_id => $island) {
-      $classes = \array_merge($classes, [
+      $island_classes = \array_merge($classes, [
         'db-island',
         \sprintf('db-island-%s', $island->getTypeId()),
         \sprintf('db-island-%s', $island->getPluginId()),
@@ -423,7 +423,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
         'children' => $island->build($builder_id, $data),
         '#attributes' => [
           'id' => $island->getHtmlId($builder_id),
-          'class' => $classes,
+          'class' => $island_classes,
         ],
       ];
     }

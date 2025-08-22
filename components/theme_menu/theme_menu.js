@@ -10,6 +10,10 @@
    * This largely a copy of the Shoelace website theme switch.
    *
    * @param {HTMLElement} builder - The builder element.
+   *
+   * @listens shoelace:sl-show
+   * @listens shoelace:sl-hide
+   * @listens event:change
    */
   function handleThemeSwitch(builder) {
     function getTheme() {
@@ -75,12 +79,12 @@
   }
 
   /**
-   * Drupal behavior for display builder theme mode island.
+   * Drupal behavior for display builder theme mode.
    *
    * @type {Drupal~behavior}
    *
    * @prop {Drupal~behaviorAttach} attach
-   *   Attaches the behavior.
+   *   Attaches the behavior for display builder theme mode.
    */
   Drupal.behaviors.displayBuilderThemeMenu = {
     attach(context) {

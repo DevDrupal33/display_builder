@@ -8,6 +8,9 @@
    * Enable Display builder Toolbar switch on smaller width.
    *
    * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behavior for display builder Toolbar.
    */
   Drupal.behaviors.displayBuilderToolbar = {
     attach(context) {

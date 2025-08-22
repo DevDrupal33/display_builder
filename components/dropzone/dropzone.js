@@ -61,6 +61,9 @@
    * Enable Display builder Dropzone feature.
    *
    * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behaviors for Display builder dropzone.
    */
   Drupal.behaviors.displayBuilderDropzone = {
     attach(context) {

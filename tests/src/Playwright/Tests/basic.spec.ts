@@ -45,15 +45,15 @@ test('Create instance', {tag: ['@display_builder', '@display_builder_min']}, asy
 })
 
 test('Actions and cmd', {tag: ['@display_builder']}, async ({ page, drupal }) => {
-  const dbId = `test_${utils.createRandomString(6)}`
+  const dbName = `test_${utils.createRandomString(6)}`
 
   await drupal.loginAsAdmin()
 
   // Test 1: Create a Display builder
-  await cmd.createDisplayBuilderFromUi(page, dbId)
+  await cmd.createDisplayBuilderFromUi(page, dbName)
 
   // @todo seems needed because of failing SortableJs on empty builder
-  await cmd.refresh(page, dbId)
+  await cmd.refresh(page, dbName)
 
   // Test 2: Open libraries and drag elements and set some values
   await cmd.dragElementFromLibraryById(page, 'Components', 'test_simple', page.locator(`.db-island-builder > slot.db-dropzone`))
@@ -69,7 +69,7 @@ test('Actions and cmd', {tag: ['@display_builder']}, async ({ page, drupal }) =>
   await cmd.setElementValue(page,
     page.locator(`.db-island-builder [data-instance-title="Token"]`),
     'I am a test token in a slot',
-      [
+    [
       {
         action: 'fill',
         locator: page.locator('#edit-value'),
@@ -96,14 +96,14 @@ test('Actions and cmd', {tag: ['@display_builder']}, async ({ page, drupal }) =>
   await cmd.closeDialog(page, 'second')
 
   await page.getByRole('tab', { name: 'Preview' }).click()
-  await expect(page.locator(`#island-${dbId}-preview`)).toMatchAriaSnapshot('- text: "label: I am a component with a token I am a test token in a slot"')
+  await expect(page.locator(`#island-${dbName}-preview`)).toMatchAriaSnapshot('- text: "label: I am a component with a token I am a test token in a slot"')
 })
 
 test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal }) => {
 
   await drupal.loginAsAdmin()
   const dbName = `test_${utils.createRandomString(6)}`
-  const dbId = `#island-${dbName}-builder`
+  const dbDomId = `#island-${dbName}-builder`
 
   // Test 1: Create a Display builder
   await page.goto(dbConfig.dbAddUrl)
@@ -134,19 +134,19 @@ test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal })
 
   // Test 4: Move component to builder.
   await page.mouse.down()
-  await page.locator(`${dbId} slot`).hover()
+  await page.locator(`${dbDomId} slot`).hover()
   await page.mouse.up()
   await cmd.htmxReady(page)
   await expect(
-    page.locator(`${dbId} [data-test="testing"]`)
+    page.locator(`${dbDomId} [data-test="testing"]`)
   ).toBeVisible()
   await expect(
-    page.locator(`${dbId} [data-test="testing"]`)
+    page.locator(`${dbDomId} [data-test="testing"]`)
   ).toContainText('label: none, open: false, duration: 0')
 
   // Test 5: Instance form variant configuration
   await page
-    .locator(`${dbId} [data-test="testing"]`)
+    .locator(`${dbDomId} [data-test="testing"]`)
     .click()
   await cmd.htmxReady(page)
   await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible()
@@ -173,7 +173,7 @@ test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal })
   await cmd.htmxReady(page)
 
   await expect(
-    page.locator(`${dbId} [data-test="testing"]`)
+    page.locator(`${dbDomId} [data-test="testing"]`)
   ).toContainText('label: I am a test, open: true, duration: 22')
 
   // Test 5-2: Apply a style
@@ -202,7 +202,7 @@ test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal })
   await page.getByRole('dialog', { name: 'Settings' }).getByLabel('Close').click()
 
   // Move Token to slot 1
-    await expect(
+  await expect(
     page.getByRole('tab', { name: 'Blocks', exact: true })
   ).toBeVisible()
 

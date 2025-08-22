@@ -63,7 +63,8 @@ class ContextualMenu {
 
   /**
    * Initialize context menu event listeners.
-   * @listens contextmenu
+   *
+   * @listens event:contextmenu
    */
   initContextMenu() {
     this.island.addEventListener('contextmenu', (event) => {
@@ -262,7 +263,7 @@ class ContextualMenu {
   /**
    * Set up a global click handler to close the context menu.
    *
-   * @listens click
+   * @listens event:click
    */
   setupGlobalClickHandler() {
     document.addEventListener('click', (event) => {
@@ -548,6 +549,7 @@ Drupal.displayBuilder.ContextualMenu = ContextualMenu;
  *   The builder.
  * @param {boolean} debug
  *   Whether to enable debug messages.
+ *
  * @listens htmx:configRequest
  * @listens htmx:afterRequest
  */
