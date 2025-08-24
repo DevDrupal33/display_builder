@@ -27,7 +27,7 @@ const drupalSite = base.extend<DrupalSiteInstall>({
         process.env.DRUPAL_TEST_SKIP_INSTALL === 'true'
       ) {
         const withDrush = await hasDrush();
-        console.debug('[Info] Drupal is installed, skip installation for tests');
+        // console.log('[Info] Drupal is installed, skip installation for tests');
         await use({
           userAgent: '',
           sitePath: '',
@@ -38,7 +38,7 @@ const drupalSite = base.extend<DrupalSiteInstall>({
         return;
       }
 
-      console.debug('[Info] Install Drupal with test environment...')
+      // console.log('[Info] Install Drupal with test environment...')
       const setupFile = process.env.DRUPAL_TEST_SETUP_FILE ? `--setup-file "${process.env.DRUPAL_TEST_SETUP_FILE}"` : '';
       const installProfile = `--install-profile "${process.env.DRUPAL_TEST_SETUP_PROFILE || 'minimal'}"`;
       const langcodeOption = process.env.DRUPAL_TEST_SETUP_LANGCODE ? `--langcode "${process.env.DRUPAL_TEST_SETUP_LANGCODE}"` : '';

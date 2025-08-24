@@ -21,7 +21,7 @@ export const exec = async (command: string, cwd?: string): Promise<string> => {
     );
     return stdout;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw new Error(error);
   }
 };
@@ -38,7 +38,7 @@ export const execDrush = async (
     cmdDrush = `${process.env.DRUPAL_TEST_DRUSH_PREFIX} drush -y ${command}`;
   }
 
-  console.debug(`[Info] Drush command: ${cmdDrush}`);
+  // console.log(`[Info] Drush command: ${cmdDrush}`);
   try {
     const { stdout }: { stdout: string } = await execPromise(
       cmdDrush,
@@ -46,7 +46,7 @@ export const execDrush = async (
     );
     return stdout.toString().trim();
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw new Error(error);
   }
 };

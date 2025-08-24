@@ -105,6 +105,9 @@ class StateManager implements StateManagerInterface {
    */
   public function canSaveContextsRequirement(string $builder_id, ?array $contexts = NULL): bool {
     $contexts ??= $this->getContexts($builder_id);
+    if ($contexts === NULL) {
+      return FALSE;
+    }
 
     if (!\array_key_exists('context_requirements', $contexts)
       || !($contexts['context_requirements'] instanceof RequirementsContext)) {
@@ -117,8 +120,8 @@ class StateManager implements StateManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function hasSaveContextsRequirement(string $builder_id, string $key, ?array $contexts = NULL): bool {
-    $contexts ??= $this->getContexts($builder_id);
+  public function hasSaveContextsRequirement(string $builder_id, string $key, array $contexts = []): bool {
+    $contexts = empty($contexts) ? $this->getContexts($builder_id) : $contexts;
 
     if (!\array_key_exists('context_requirements', $contexts)
       || !($contexts['context_requirements'] instanceof RequirementsContext)
@@ -289,7 +292,7 @@ class StateManager implements StateManagerInterface {
     $root = $this->attachToSlot($builder_id, $root, $parent_id, $slot_id, $position, $data);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data, $this->getContexts($builder_id));
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data, $this->getContexts($builder_id) ?? []);
     $labelWithSummaryParent = $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id));
 
     $log = $this->t("%instance @source_id has been attached to %parent's @slot_id", [
@@ -433,9 +436,11 @@ class StateManager implements StateManagerInterface {
     $parent_id = $this->getParentId($builder_id, $root, $instance_id);
     $root = $this->doRemove($builder_id, $root, $instance_id);
 
+    $contexts = $this->getContexts($builder_id) ?? [];
+
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data, $this->getContexts($builder_id));
-    $labelWithSummaryParent = empty($parent_id) ? ['summary' => $this->t('root')] : $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id), $this->getContexts($builder_id));
+    $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data, $contexts);
+    $labelWithSummaryParent = empty($parent_id) ? ['summary' => $this->t('root')] : $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id), $contexts);
 
     $log = $this->t('%instance has been removed from %parent', [
       '%instance' => $labelWithSummaryInstance['summary'],
@@ -506,6 +511,10 @@ class StateManager implements StateManagerInterface {
   public function getUsers(string $builder_id): array {
     $users = [];
     $storage = $this->stateStorage->load($builder_id);
+    if ($storage === NULL) {
+      return [];
+    }
+
     $steps = \array_merge(
       $storage['past'],
       [$storage['present']],

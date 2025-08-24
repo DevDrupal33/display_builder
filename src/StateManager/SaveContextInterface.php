@@ -22,7 +22,7 @@ interface SaveContextInterface {
    * @return bool
    *   True if required, False otherwise.
    */
-  public function canSaveContextsRequirement(string $builder_id, ?array $contexts = NULL): bool;
+  public function canSaveContextsRequirement(string $builder_id, array $contexts = []): bool;
 
   /**
    * Check display has required context, meaning it can save value.
@@ -37,6 +37,6 @@ interface SaveContextInterface {
    * @return bool
    *   True if required, False otherwise.
    */
-  public function hasSaveContextsRequirement(string $builder_id, string $key, ?array $contexts = NULL): bool;
+  public function hasSaveContextsRequirement(string $builder_id, string $key, array $contexts = []): bool;
 
 }

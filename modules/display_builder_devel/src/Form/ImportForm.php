@@ -114,6 +114,11 @@ final class ImportForm extends FormBase {
     }
 
     $current = $this->stateManager->load($builder_id);
+    if (!$current) {
+      $this->messenger()->addError($this->t('The display builder instance %id does not exist.', ['%id' => $builder_id]));
+      return;
+    }
+
     $contexts = $this->stateManager->getContexts($builder_id);
     $this->stateManager->delete($builder_id);
 

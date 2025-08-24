@@ -49,9 +49,10 @@ export default defineConfig({
     },
     launchOptions: {
       // For --headed test, add some slow time.
-      // slowMo: 100,
+      slowMo: 100,
     },
-    // actionTimeout: 2_000,
+    // Quick fail on local tests.
+    actionTimeout: process.env.CI ? undefined : 2_000,
     /* For https://playwright.dev/docs/locators#locate-by-test-id */
     testIdAttribute: 'data-testid',
   },

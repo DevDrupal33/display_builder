@@ -63,18 +63,32 @@ export class Drupal {
   }
 
   async loginAsAdmin() {
+    // First see if we are already logged in.
+    const h1 = this.page.locator('h1');
+    await this.page.goto(`${this.drupalSite.url}/user`);
+    if ((await h1.count()) && (await h1.innerText()) === 'admin') {
+      return;
+    }
+    else if ((await h1.count()) && (await h1.innerText()) === 'Access denied') {
+      await this.logout();
+    }
+    else if ((await h1.count()) && (await h1.innerText()) === 'Reset your password') {
+      await this.logout();
+    }
+
     let logInUrl: string
+
     if (process.env.DRUPAL_TEST_SKIP_INSTALL && process.env.DRUPAL_TEST_SKIP_INSTALL === 'true') {
       if (!this.drupalSite.hasDrush) {
         throw new Error('Drush is not available for local tests! Please install.');
       }
-      console.debug('[Info] Login with Drush...')
+      // console.log('[Info] Login with Drush...')
       logInUrl = await this.drush(
         `user:login --uid=1`,
       );
     }
     else {
-      console.debug('[Info] Login with test-site.php...')
+      // console.log('[Info] Login with test-site.php...')
       const stdout = await exec(
         `php core/scripts/test-site.php user-login 1 --site-path ${this.drupalSite.sitePath}`,
       );
@@ -82,7 +96,7 @@ export class Drupal {
     }
 
     await this.page.goto(logInUrl);
-    await expect(this.page.locator('h1')).toHaveText('admin');
+    await expect(h1).toHaveText('admin');
   }
 
   async login(
@@ -110,15 +124,14 @@ export class Drupal {
   }
 
   async logout() {
-    const page = this.page;
-    await page.goto(`${this.drupalSite.url}/user/logout/confirm`);
-    await page.locator('[data-drupal-selector="edit-submit"]').click();
-    let cookies = await page.context().cookies();
+    await this.page.goto(`${this.drupalSite.url}/user/logout/confirm`);
+    await this.page.getByRole('button', { name: 'Log out' }).click();
+    let cookies = await this.page.context().cookies();
     cookies = cookies.filter(
       (cookie) =>
         cookie.name.startsWith('SESS') || cookie.name.startsWith('SSESS'),
     );
-    await expect(cookies).toHaveLength(0);
+    expect(cookies).toHaveLength(0);
   }
 
   async createRole({ name }: { name: string }) {

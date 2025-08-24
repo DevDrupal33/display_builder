@@ -69,6 +69,8 @@ abstract class ApiControllerBase extends ControllerBase {
     $builder_config_id = $this->stateManager->getEntityConfigId($builder_id);
     $display_builder = $this->entityTypeManager()->getStorage('display_builder')
       ->load($builder_config_id);
+    // dpm($builder_config_id);
+    // dpm($display_builder);
     \assert($display_builder instanceof DisplayBuilderInterface);
     $this->displayBuilder = $display_builder;
 

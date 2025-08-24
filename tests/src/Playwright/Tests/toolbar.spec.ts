@@ -14,7 +14,7 @@ const position = { position: { x: 5, y: 5 } }
 test.beforeEach('Setup', async ({ drupal, page }) => {
   dbName = `test_${utils.createRandomString(6)}`
 
-  await page.goto(dbConfig.logOutUrl)
+  // await page.goto(dbConfig.logOutUrl)
   await drupal.loginAsAdmin()
   await cmd.createDisplayBuilderFromUi(page, dbName)
   await cmd.dragElementFromLibraryById(page, 'Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))

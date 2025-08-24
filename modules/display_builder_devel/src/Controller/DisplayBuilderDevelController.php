@@ -46,7 +46,6 @@ class DisplayBuilderDevelController extends ControllerBase {
       '#header' => [
         'id' => ['data' => $this->t('Instance')],
         'type' => ['data' => $this->t('Type')],
-        'display_builder_config' => ['data' => $this->t('Config')],
         'updated' => ['data' => $this->t('Updated')],
         'log' => ['data' => $this->t('Last log')],
         'operations' => ['data' => $this->t('Operations')],
@@ -93,25 +92,20 @@ class DisplayBuilderDevelController extends ControllerBase {
    *   The display build.
    */
   public function view(string $builder_id): array {
-    // \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
-    // \Drupal::service('page_cache_kill_switch')->trigger();
-    $display_builder_id = $this->stateManager->getEntityConfigId($builder_id);
+    $profile_id = $this->stateManager->getEntityConfigId($builder_id);
 
     $storage = $this->entityTypeManager()->getStorage('display_builder');
-    /** @var \Drupal\display_builder\DisplayBuilderInterface $displayBuilderConfig */
-    $displayBuilderConfig = $storage->load($display_builder_id);
+    /** @var \Drupal\display_builder\DisplayBuilderInterface $profile */
+    $profile = $storage->load($profile_id);
 
-    if ($displayBuilderConfig) {
-      // @todo no contexts as it's a generic loader, but can fail if calling a
-      // display with context.
-      // $builder = $displayBuilderConfig->build($builder_id);
-      // $builder['#cache']['max-age'] = 0;
-      // return $builder;
-      return $displayBuilderConfig->build($builder_id);
+    if ($profile) {
+      $view_builder = $this->entityTypeManager()->getViewBuilder('display_builder');
+
+      return $view_builder->view($profile, $builder_id);
     }
 
     return [
-      '#plain_text' => $this->t('Missing @builder_id config.', ['@builder_id' => $display_builder_id]),
+      '#plain_text' => $this->t('Missing @builder_id config.', ['@builder_id' => $builder_id]),
     ];
   }
 
@@ -200,9 +194,7 @@ class DisplayBuilderDevelController extends ControllerBase {
 
     $row['type']['data'] = $type;
 
-    $row['display_builder_config']['data'] = $builder['entity_config_id'];
-
-    $present = $builder['present'];
+    $present = $builder['present'] ?? [];
 
     if (!$present) {
       $present = ['time' => NULL, 'log' => NULL];

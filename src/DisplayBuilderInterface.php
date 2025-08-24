@@ -12,21 +12,6 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
 interface DisplayBuilderInterface extends ConfigEntityInterface {
 
   /**
-   * Builds and returns the renderable array for this display builder.
-   *
-   * @param string $builder_id
-   *   The ID of the display builder instance.
-   * @param array $contexts
-   *   (Optional) An array of context to pass to the display builder.
-   *
-   * @return array
-   *   A renderable array representing the content of the display builder.
-   *
-   * @see \Drupal\display_builder\DisplayBuilderViewBuilder
-   */
-  public function build(string $builder_id, array $contexts = []): array;
-
-  /**
    * Get enabled islands for this config.
    *
    * @return array
@@ -78,5 +63,24 @@ interface DisplayBuilderInterface extends ConfigEntityInterface {
    *   List of roles.
    */
   public function getRoles(): array;
+
+  /**
+   * Return the library 'mode'.
+   *
+   * @todo To remove once we find a better way of switching between CDN and
+   * local.
+   *
+   * @return string
+   *   'cdn' or 'local'
+   */
+  public function getLibrary(): string;
+
+  /**
+   * Is debug mode activated?
+   *
+   * @return bool
+   *   Activated or not.
+   */
+  public function isDebugModeActivated(): bool;
 
 }

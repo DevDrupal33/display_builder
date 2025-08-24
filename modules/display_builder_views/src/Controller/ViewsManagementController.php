@@ -70,6 +70,9 @@ class ViewsManagementController extends ControllerBase {
     }
 
     $builder = $this->stateManager->load($builder_id);
+    if (!$builder) {
+      return [];
+    }
 
     $row = [];
 

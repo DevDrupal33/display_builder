@@ -84,9 +84,9 @@ final class EntityViewController extends ControllerBase {
     }
 
     // We build the rendered page.
-    $contexts = $this->stateManager->getContexts($builder_instance_id);
+    $view_builder = $this->entityTypeManager()->getViewBuilder('display_builder');
 
-    return $display_builder->build($builder_instance_id, $contexts);
+    return $view_builder->view($display_builder, $builder_instance_id);
   }
 
   /**

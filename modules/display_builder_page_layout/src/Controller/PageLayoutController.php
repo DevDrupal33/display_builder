@@ -58,9 +58,9 @@ class PageLayoutController extends ControllerBase {
       $page_layout->initInstanceIfMissing();
     }
 
-    $contexts = $this->stateManager->getContexts($instance_id) ?? [];
+    $view_builder = $this->entityTypeManager()->getViewBuilder('display_builder');
 
-    return $display_builder->build($instance_id, $contexts);
+    return $view_builder->view($display_builder, $instance_id);
   }
 
 }

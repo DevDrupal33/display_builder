@@ -64,7 +64,7 @@ export const getModuleDir = async (): Promise<string | null> => {
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    console.log('Unable to locate module directory, using default value.');
+    console.error('Unable to locate module directory, using default value.');
   }
 
   return `${composerRoot}/${modulePath}`;
