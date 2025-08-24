@@ -50,7 +50,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onActive(DisplayBuilderEvent $event): void {
-    $this->dispatch($event, __FUNCTION__, [$event->getData()]);
+    $this->dispatchToIslands($event, __FUNCTION__, [$event->getData()]);
   }
 
   /**
@@ -60,7 +60,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onAttachToRoot(DisplayBuilderEvent $event): void {
-    $this->dispatch($event, __FUNCTION__, [$event->getInstanceId()]);
+    $this->dispatchToIslands($event, __FUNCTION__, [$event->getInstanceId()]);
   }
 
   /**
@@ -70,7 +70,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onAttachToSlot(DisplayBuilderEvent $event): void {
-    $this->dispatch($event, __FUNCTION__, [$event->getInstanceId(), $event->getParentId()]);
+    $this->dispatchToIslands($event, __FUNCTION__, [$event->getInstanceId(), $event->getParentId()]);
   }
 
   /**
@@ -80,7 +80,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onDelete(DisplayBuilderEvent $event): void {
-    $this->dispatch($event, __FUNCTION__, [$event->getParentId()]);
+    $this->dispatchToIslands($event, __FUNCTION__, [$event->getParentId()]);
   }
 
   /**
@@ -90,7 +90,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onHistoryChange(DisplayBuilderEvent $event): void {
-    $this->dispatch($event, __FUNCTION__);
+    $this->dispatchToIslands($event, __FUNCTION__);
   }
 
   /**
@@ -100,7 +100,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onMove(DisplayBuilderEvent $event): void {
-    $this->dispatch($event, __FUNCTION__, [$event->getInstanceId()]);
+    $this->dispatchToIslands($event, __FUNCTION__, [$event->getInstanceId()]);
   }
 
   /**
@@ -110,7 +110,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onUpdate(DisplayBuilderEvent $event): void {
-    $this->dispatch($event, __FUNCTION__, [$event->getInstanceId(), $event->getCurrentIslandId()]);
+    $this->dispatchToIslands($event, __FUNCTION__, [$event->getInstanceId(), $event->getCurrentIslandId()]);
   }
 
   /**
@@ -120,7 +120,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onSave(DisplayBuilderEvent $event): void {
-    $this->dispatch($event, __FUNCTION__, [$event->getData()]);
+    $this->dispatchToIslands($event, __FUNCTION__, [$event->getData()]);
   }
 
   /**
@@ -130,7 +130,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onPresetSave(DisplayBuilderEvent $event): void {
-    $this->dispatch($event, __FUNCTION__);
+    $this->dispatchToIslands($event, __FUNCTION__);
   }
 
   /**
@@ -143,7 +143,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    * @param array $parameters
    *   (Optional) The parameters to the method.
    */
-  private function dispatch(DisplayBuilderEvent $event, string $method, array $parameters = []): void {
+  private function dispatchToIslands(DisplayBuilderEvent $event, string $method, array $parameters = []): void {
     \array_unshift($parameters, $event->getBuilderId());
 
     $configuration = $event->getIslandConfiguration();
@@ -163,7 +163,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
       $result = $island->{$method}(...$parameters);
 
       if ($result !== NULL) {
-        $event->appendResult($result);
+        $event->appendResult($island_id, $result);
       }
     }
   }

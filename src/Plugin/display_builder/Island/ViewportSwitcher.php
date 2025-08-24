@@ -212,7 +212,6 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
         'content' => $select,
       ],
     ];
-
   }
 
   /**

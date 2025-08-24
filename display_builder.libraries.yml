@@ -1,20 +1,36 @@
+htmx_sse_cdn:
+  js:
+    https://cdn.jsdelivr.net/npm/htmx-ext-sse@2.2.3/dist/sse.min.js:
+      type: external
+      minified: true
+
+htmx_sse_local:
+  js:
+    /libraries/htmx-ext-sse/node_modules/htmx-ext-sse/dist/sse.min.js:
+      minified: true
+
 shoelace_cdn:
   css:
     theme:
-      https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.min.css: { type: external, minified: true }
-      https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/dark.min.css: { type: external, minified: true }
-
+      https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.min.css:
+        type: external
+        minified: true
+      https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/dark.min.css:
+        type: external
+        minified: true
   js:
     # https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace.min.js:
     https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.min.js:
-      { type: external, minified: true, attributes: { type: "module" } }
+      type: external
+      minified: true
+      attributes:
+        type: module
 
 shoelace_local:
   css:
     theme:
       /libraries/shoelace/node_modules/@shoelace-style/shoelace/cdn/themes/light.css: {}
       /libraries/shoelace/node_modules/@shoelace-style/shoelace/cdn/themes/dark.css: {}
-
   js:
     /libraries/shoelace/node_modules/@shoelace-style/shoelace/cdn/shoelace.js:
       attributes:

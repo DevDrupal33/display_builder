@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ComponentPluginManager;
@@ -16,7 +15,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 /**
  * Returns preview responses for Display builder routes.
  */
-class ApiPreviewController extends ControllerBase implements ContainerInjectionInterface {
+class ApiPreviewController extends ControllerBase {
 
   use RenderableBuilderTrait;
 

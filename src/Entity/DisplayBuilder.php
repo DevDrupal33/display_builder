@@ -223,6 +223,10 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
         'contextual_islands' => $contextual_islands,
         'menu_islands' => $menu_islands,
       ],
+      '#attributes' => [
+        'hx-ext' => 'sse',
+        'sse-connect' => Url::fromRoute('display_builder.api_sse', ['builder_id' => $builder_id])->toString(),
+      ],
       '#attached' => [
         'drupalSettings' => [
           'dbDebug' => $this->debug,
@@ -232,9 +236,11 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
 
     if ($this->library === 'local') {
       $build['#attached']['library'][] = 'display_builder/shoelace_local';
+      $build['#attached']['library'][] = 'display_builder/htmx_sse_local';
     }
     else {
       $build['#attached']['library'][] = 'display_builder/shoelace_cdn';
+      $build['#attached']['library'][] = 'display_builder/htmx_sse_cdn';
     }
 
     return $build;
@@ -422,7 +428,10 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
         '#tag' => $tag,
         'children' => $island->build($builder_id, $data),
         '#attributes' => [
+          // `id` attribute is used by HTMX OOB swap.
           'id' => $island->getHtmlId($builder_id),
+          // `sse-swap` attribute is used by HTMX SSE swap.
+          'sse-swap' => $island->getHtmlId($builder_id),
           'class' => $island_classes,
         ],
       ];

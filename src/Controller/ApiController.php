@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Controller;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
-use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Form\FormAjaxException;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
@@ -15,8 +14,7 @@ use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Render\HtmlResponseAttachmentsProcessor;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder\DisplayBuilderInterface;
-use Drupal\display_builder\Event\DisplayBuilderEvent;
+use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\Plugin\display_builder\Island\InstanceFormPanel;
@@ -24,12 +22,13 @@ use Drupal\display_builder\RenderableBuilderTrait;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Returns responses for Display builder routes.
  */
-class ApiController extends ControllerBase implements ApiControllerInterface, ContainerInjectionInterface {
+class ApiController extends ApiControllerBase implements ApiControllerInterface {
 
   use RenderableBuilderTrait;
 
@@ -38,20 +37,18 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
    */
   private BareHtmlPageRenderer $bareHtmlPageRenderer;
 
-  /**
-   * The lazy loaded display builder.
-   */
-  private ?DisplayBuilderInterface $displayBuilder = NULL;
-
   public function __construct(
+    StateManagerInterface $stateManager,
+    EventDispatcherInterface $eventDispatcher,
+    MemoryCacheInterface $memoryCache,
+    RendererInterface $renderer,
+    TimeInterface $time,
+    #[Autowire(service: 'tempstore.shared')] SharedTempStoreFactory $sharedTempStoreFactory,
+    SessionInterface $session,
     private IslandPluginManagerInterface $islandPluginManager,
-    private StateManagerInterface $stateManager,
-    private EventDispatcherInterface $eventDispatcher,
-    #[Autowire(service: 'html_response.attachments_processor')]
-    private HtmlResponseAttachmentsProcessor $htmlResponseAttachmentsProcessor,
-    private RendererInterface $renderer,
-    private MemoryCacheInterface $memoryCache,
+    #[Autowire(service: 'html_response.attachments_processor')] private HtmlResponseAttachmentsProcessor $htmlResponseAttachmentsProcessor,
   ) {
+    parent::__construct($stateManager, $eventDispatcher, $memoryCache, $renderer, $time, $sharedTempStoreFactory, $session);
     $this->bareHtmlPageRenderer = new BareHtmlPageRenderer($this->renderer, $this->htmlResponseAttachmentsProcessor);
   }
 
@@ -453,9 +450,10 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     ?string $parent_id = NULL,
     ?string $current_island_id = NULL,
   ): HtmlResponse {
-    $result = $this->createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id, $current_island_id);
+    $event = $this->createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id, $current_island_id);
+    $this->saveSseData($event_id, $builder_id);
 
-    return $this->bareHtmlPageRenderer->renderBarePage($result, '', 'markup');
+    return $this->bareHtmlPageRenderer->renderBarePage($event->getResult(), '', 'markup');
   }
 
   /**
@@ -485,7 +483,10 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     ?string $parent_id = NULL,
     ?string $current_island_id = NULL,
   ): array {
-    return $this->createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id, $current_island_id);
+    $event = $this->createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id, $current_island_id);
+    $this->saveSseData($event_id, $builder_id);
+
+    return $event->getResult();
   }
 
   /**
@@ -523,27 +524,6 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
   }
 
   /**
-   * Returns the display builder by builder ID.
-   *
-   * @param string $builder_id
-   *   The builder ID.
-   *
-   * @return \Drupal\display_builder\DisplayBuilderInterface
-   *   The display builder instance.
-   */
-  protected function getDisplayBuilder(string $builder_id): DisplayBuilderInterface {
-    if ($this->displayBuilder !== NULL) {
-      return $this->displayBuilder;
-    }
-    $builder_config_id = $this->stateManager->getEntityConfigId($builder_id);
-    $display_builder = $this->entityTypeManager()->getStorage('display_builder')->load($builder_config_id);
-    \assert($display_builder instanceof DisplayBuilderInterface);
-    $this->displayBuilder = $display_builder;
-
-    return $this->displayBuilder;
-  }
-
-  /**
    * Render an error message in the display builder.
    *
    * @param string $builder_id
@@ -568,55 +548,6 @@ class ApiController extends ControllerBase implements ApiControllerInterface, Co
     $response->setContent($html);
 
     return $response;
-  }
-
-  /**
-   * Creates a display builder event with enabled islands only.
-   *
-   * Use a cache to avoid loading all the builder configuration.
-   *
-   * @param string $event_id
-   *   The event ID.
-   * @param string $builder_id
-   *   The builder ID.
-   * @param array|null $data
-   *   The data.
-   * @param string|null $instance_id
-   *   Optional instance ID.
-   * @param string|null $parent_id
-   *   Optional parent ID.
-   * @param string|null $current_island_id
-   *   Current island ID which trigger action.
-   *
-   * @return array
-   *   The event result.
-   */
-  private function createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id, $current_island_id): array {
-    $key = \sprintf('db_%s_island_enable', $builder_id);
-    $island_configuration_key = \sprintf('db_%s_island_configuration', $builder_id);
-    $island_enabled = $this->memoryCache->get($key);
-    $island_configuration = $this->memoryCache->get($island_configuration_key);
-
-    if ($island_configuration === FALSE) {
-      $island_configuration = $this->getDisplayBuilder($builder_id)->getIslandConfigurations();
-      $this->memoryCache->set($island_configuration_key, $island_configuration);
-    }
-    else {
-      $island_configuration = $island_configuration->data;
-    }
-
-    if ($island_enabled === FALSE) {
-      $island_enabled = $this->getDisplayBuilder($builder_id)->getIslandEnabled();
-      $this->memoryCache->set($key, $island_enabled);
-    }
-    else {
-      $island_enabled = $island_enabled->data;
-    }
-
-    $event = new DisplayBuilderEvent($builder_id, $island_enabled, $island_configuration, $data, $instance_id, $parent_id, $current_island_id);
-    $this->eventDispatcher->dispatch($event, $event_id);
-
-    return $event->getResult();
   }
 
   /**

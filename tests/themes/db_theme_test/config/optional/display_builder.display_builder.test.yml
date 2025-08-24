@@ -12,31 +12,34 @@ islands:
     weight: -10
   toggle_fullscreen:
     enable: true
-    weight: -9
+    weight: -8
   toggle_highlight:
     enable: true
-    weight: -8
-  active_users:
-    enable: false
-    weight: 0
-  history:
-    enable: true
     weight: -7
+  active_users:
+    image_field: user_picture
+    image_style: thumbnail
+    enable: true
+    weight: -5
+  history:
+    display_clear_button: true
+    enable: true
+    weight: -9
   keyboard_help:
     enable: true
-    weight: -6
+    weight: -4
   theme_mode:
     enable: false
-    weight: -4
+    weight: -3
   reset:
     enable: false
-    weight: -3
+    weight: -2
   operation:
     enable: false
-    weight: -2
+    weight: -1
   test_island_button:
     enable: false
-    weight: -1
+    weight: 0
   info:
     enable: true
     weight: -7
@@ -56,9 +59,23 @@ islands:
     enable: false
     weight: -5
   component_library:
+    providers:
+      db_theme_test: db_theme_test
+    status:
+      experimental: experimental
+    include_no_ui: true
+    show_grouped: true
+    show_variants: true
+    show_mosaic: true
     enable: true
     weight: -10
   block_library:
+    providers:
+      search: search
+      user: user
+      views: views
+      system: system
+      node: node
     enable: true
     weight: -9
   preset_library:
@@ -84,15 +101,15 @@ islands:
     weight: 0
   preview:
     enable: true
-    weight: -8
+    weight: -7
     region: main
   library:
     enable: true
     weight: -10
     region: sidebar
   logs:
-    enable: false
-    weight: -7
+    enable: true
+    weight: -8
     region: main
   builder:
     enable: true
@@ -127,5 +144,5 @@ islands:
       db_theme_test: db_theme_test
     format: default
     enable: true
-    weight: -5
+    weight: -6
 weight: 0

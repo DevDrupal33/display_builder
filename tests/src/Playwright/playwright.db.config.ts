@@ -5,6 +5,8 @@ export default {
   operatingMode: "native",
   drushCmd: "drush",
 
+  keyboardTimeout: 350, // Because keyboard.js has a 300 ms highlight of the clicked button.
+
   dbList: "admin/structure/display-builder/index",
   dbAddUrl: "admin/structure/display-builder/instance/add",
   dbViewUrl: "admin/structure/display-builder/instance/{db_id}",

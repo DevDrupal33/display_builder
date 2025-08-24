@@ -24,7 +24,7 @@ use Drupal\display_builder\IslandType;
   keyboard_shortcuts: [
     'u' => new TranslatableMarkup('Undo last change'),
     'r' => new TranslatableMarkup('Redo last change'),
-    'C' => new TranslatableMarkup('(shift c) Clear history'),
+    'C' => new TranslatableMarkup('(shift + c) Clear history (if enabled)'),
   ],
 )]
 class HistoryButtons extends IslandPluginBase implements PluginFormInterface {
@@ -83,7 +83,7 @@ class HistoryButtons extends IslandPluginBase implements PluginFormInterface {
 
     $configuration = $this->getConfiguration();
 
-    if ($configuration['display_clear_button'] === 1 && !empty($past) || !empty($future)) {
+    if ($configuration['display_clear_button'] && (!empty($past) || !empty($future))) {
       $clear = $this->buildButton($this->t('Clear'), '', 'C', (empty($past) && empty($future)));
       $clear['#props']['variant'] = 'warning';
       $clear['#attributes']['outline'] = TRUE;

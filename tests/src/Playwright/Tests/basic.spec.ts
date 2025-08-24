@@ -99,6 +99,7 @@ test('Actions and cmd', {tag: ['@display_builder']}, async ({ page, drupal }) =>
   await expect(page.locator(`#island-${dbName}-preview`)).toMatchAriaSnapshot('- text: "label: I am a component with a token I am a test token in a slot"')
 })
 
+// Legacy test with not much cmd usage.
 test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal }) => {
 
   await drupal.loginAsAdmin()

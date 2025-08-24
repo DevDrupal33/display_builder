@@ -277,3 +277,21 @@ export async function createDisplayBuilderFromUi(page: Page, dbName: string, fix
   await expect(page.getByRole('tab', { name: 'Builder' })).toBeVisible()
   await this.shoelaceReady(page)
 }
+
+/**
+ * Delete a Display Builder instance.
+ *
+ * @async
+ * @param {Page} page - Playwright Page object.
+ * @param {string} dbName - Name of the Display Builder instance.
+ * @returns {Promise<void>}
+ */
+export async function deleteDisplayBuilderFromUi(page: Page, dbName: string): Promise<void> {
+  await page.goto(dbConfig.dbList)
+  await expect(page.getByRole('link', { name: dbName })).toBeVisible()
+  await page.getByRole('row', { name: `${dbName}` }).getByRole('button').click()
+  await page.getByRole('link', { name: 'Delete', exact: true }).click()
+  await expect(page.getByRole('heading', { name: `Do you want to delete ${dbName}?` })).toBeVisible()
+  await page.getByRole('button', { name: 'Confirm' }).click()
+  await expect(page.getByRole('link', { name: dbName })).not.toBeVisible()
+}

@@ -201,7 +201,7 @@ cspell:
       - cache-$CI_JOB_NAME-$CI_DEFAULT_BRANCH
       - cache-$CI_JOB_NAME-default
     paths:
-      - ${CI_PROJECT_DIR}/$_WEB_ROOT/libraries/shoelace
+      - ${CI_PROJECT_DIR}/$_WEB_ROOT/libraries
       - ${CI_PROJECT_DIR}/node_modules
       - ${CI_PROJECT_DIR}/pw-browsers
   variables:
@@ -220,10 +220,15 @@ cspell:
     - export DRUPAL_TEST_DB_URL=$SIMPLETEST_DB
     - !reference [.show-environment-variables]
     - !reference [.show-context]
-    # Install local shoelace library for tests
-    - if [ ! -f ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/shoelace/node_modules/@shoelace-style/shoelace/cdn/shoelace.js ]; then
+    # Install local shoelace and htmx sse libraries for tests.
+    - if [ ! -f ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/shoelace/node_modules/@shoelace-style/shoelace/cdn/shoelace.js ]; then
         mkdir -p ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/shoelace;
         cd ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/shoelace && npm init -y && npm install @shoelace-style/shoelace;
+        cd ${CI_PROJECT_DIR};
+      fi
+      if [ ! -f ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/htmx-ext-sse/node_modules/htmx-ext-sse/dist/sse.min.js ]; then
+        mkdir -p ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/htmx-ext-sse;
+        cd ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/htmx-ext-sse && npm init -y && npm install htmx-ext-sse;
         cd ${CI_PROJECT_DIR};
       fi
     - mkdir -p ./web/sites/simpletest ./web/sites/default/files ./playwright-report ./test-results ./logs

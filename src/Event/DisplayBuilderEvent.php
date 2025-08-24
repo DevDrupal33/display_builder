@@ -49,11 +49,13 @@ final class DisplayBuilderEvent extends Event {
   /**
    * Append a result for this event.
    *
+   * @param string $islandId
+   *   The island ID.
    * @param array $result
    *   The result array to append.
    */
-  public function appendResult(array $result): void {
-    $this->result[] = $result;
+  public function appendResult(string $islandId, array $result): void {
+    $this->result[$islandId] = $result;
   }
 
   /**
@@ -69,7 +71,7 @@ final class DisplayBuilderEvent extends Event {
   /**
    * Gets the data associated with this event.
    *
-   * @return array
+   * @return array|null
    *   The event data.
    */
   public function getData(): ?array {

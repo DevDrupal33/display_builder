@@ -7,68 +7,115 @@ import * as cmd from '../utilities/commands'
 
 import dbConfig from '../playwright.db.config'
 
-test('Toolbar buttons', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
-  const dbName = `test_${utils.createRandomString(6)}`
+let dbName: string
+// Click position required to avoid icon to intercept the click.
+const position = { position: { x: 5, y: 5 } }
 
+test.beforeEach('Setup', async ({ drupal, page }) => {
+  dbName = `test_${utils.createRandomString(6)}`
+
+  await page.goto(dbConfig.logOutUrl)
   await drupal.loginAsAdmin()
-
   await cmd.createDisplayBuilderFromUi(page, dbName)
-
   await cmd.dragElementFromLibraryById(page, 'Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
-
-  await cmd.setElementValue(page,
-    page.locator(`.db-island-builder [data-instance-title="Token"]`),
-    'I am a token',
-    [
-      {
-        action: 'fill',
-        locator: page.locator('#edit-value'),
-      }
-    ]
-  )
-
+  await cmd.dragElementFromLibraryById(page, 'Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
   await cmd.closeDialog(page)
-  await cmd.closeDialog(page, 'second')
+});
 
-  // Test the keyboard button
+test.afterEach('Clean', async ({ drupal, page }) => {
+  await cmd.deleteDisplayBuilderFromUi(page, dbName)
+});
+
+test('Toolbar button history', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
+  // Test the undo/redo/clear buttons
+  const builderToken = page.locator(`.db-island-builder [data-instance-title="Token"]`)
+  await expect(builderToken).toHaveCount(2)
+  // Position required to avoid icon to intercept the click.
+  const undo = page.getByRole('button', { name: '2' })
+  await undo.click(position)
+  await expect(builderToken).toHaveCount(2)
+
+  const redo = page.locator('#button-1--2').getByRole('button', { name: '1' })
+  await redo.click(position)
+  await expect(builderToken).toHaveCount(2)
+
+  const clear = page.getByRole('button', { name: 'Clear' })
+  await clear.click(position)
+  await expect(builderToken).toHaveCount(2)
+  await expect(page.getByRole('button', { name: 'Undo' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Redo' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Clear' })).not.toBeVisible()
+
+  // @todo test is stuck on keyboard.
+  // await cmd.dragElementFromLibraryById(page, 'Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
+  // await cmd.closeDialog(page)
+  // await expect(builderToken).toHaveCount(3)
+  // await page.keyboard.press('u');
+  // await page.waitForTimeout(dbConfig.keyboardTimeout);
+  // await cmd.htmxReady(page);
+  // await expect(builderToken).toHaveCount(2)
+  // await page.keyboard.press('r');
+  // await page.waitForTimeout(dbConfig.keyboardTimeout);
+  // await cmd.htmxReady(page);
+  // await expect(builderToken).toHaveCount(3)
+  // await page.keyboard.press('Shift+C');
+  // await page.waitForTimeout(dbConfig.keyboardTimeout);
+  // await cmd.htmxReady(page);
+  // await expect(builderToken).toHaveCount(3)
+  // await expect(page.getByRole('button', { name: 'Undo' })).toBeVisible()
+  // await expect(page.getByRole('button', { name: 'Redo' })).toBeVisible()
+  // await expect(page.getByRole('button', { name: 'Clear' })).not.toBeVisible()
+})
+
+test('Toolbar button keyboard', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
   const keyboard = page.getByRole('button', { name: 'Keyboard help' })
   const keyboardHelp = page.getByText('Keyboard help')
-  // Position required to avoid icon to intercept the click.
-  await keyboard.click({position: { x: 5, y: 5 }})
-  await expect(keyboardHelp).toBeVisible()
-  await keyboard.click({position: { x: 5, y: 5 }})
-  await expect(keyboardHelp).not.toBeVisible()
-  await page.keyboard.press('h');
-  await expect(keyboardHelp).toBeVisible()
-  await page.keyboard.press('h');
-  await expect(keyboardHelp).not.toBeVisible()
 
-  // Test the fullscreen button
+  await keyboard.click(position)
+  await expect(keyboardHelp).toBeVisible()
+  await keyboard.click(position)
+  await expect(keyboardHelp).not.toBeVisible()
+  await page.keyboard.press('h');
+  await page.waitForTimeout(dbConfig.keyboardTimeout);
+  await expect(keyboardHelp).toBeVisible()
+  await page.keyboard.press('h');
+  await page.waitForTimeout(dbConfig.keyboardTimeout);
+  await expect(keyboardHelp).not.toBeVisible()
+})
+
+test('Toolbar button fullscreen', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
   const fullscreen = page.getByRole('button', { name: 'Display the builder as fullscreen.' })
   const fullscreenIsOn = page.locator('.display-builder--fullscreen')
-  // Position required to avoid icon to intercept the click.
-  await fullscreen.click({position: { x: 5, y: 5 }})
-  await expect(fullscreenIsOn).toBeVisible()
-  await fullscreen.click({position: { x: 5, y: 5 }})
-  await expect(fullscreenIsOn).not.toBeVisible()
-  await page.keyboard.press('Shift+M');
-  await expect(fullscreenIsOn).toBeVisible()
-  await page.keyboard.press('Shift+M');
-  await expect(fullscreenIsOn).not.toBeVisible()
 
-  // Test the highlight button
+  await fullscreen.click(position)
+  await expect(fullscreenIsOn).toBeVisible()
+  await fullscreen.click(position)
+  await expect(fullscreenIsOn).not.toBeVisible()
+  await page.keyboard.press('Shift+M');
+  await page.waitForTimeout(dbConfig.keyboardTimeout);
+  await expect(fullscreenIsOn).toBeVisible()
+  await page.keyboard.press('Shift+M');
+  await page.waitForTimeout(dbConfig.keyboardTimeout);
+  await expect(fullscreenIsOn).not.toBeVisible()
+})
+
+test('Toolbar button highlight', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
   const highlight = page.getByRole('button', { name: 'Highlight components, blocks and slots.' })
   const highlightIsOn = page.locator('.display-builder--highlight')
-  await highlight.click({position: { x: 5, y: 5 }})
-  await expect(highlightIsOn).toBeVisible()
-  await highlight.click({position: { x: 5, y: 5 }})
-  await expect(highlightIsOn).not.toBeVisible()
-  await page.keyboard.press('Shift+H');
-  await expect(highlightIsOn).toBeVisible()
-  await page.keyboard.press('Shift+H');
-  await expect(highlightIsOn).not.toBeVisible()
 
-  // Test the switch viewport button
+  await highlight.click(position)
+  await expect(highlightIsOn).toBeVisible()
+  await highlight.click(position)
+  await expect(highlightIsOn).not.toBeVisible()
+  await page.keyboard.press('Shift+H');
+  await page.waitForTimeout(dbConfig.keyboardTimeout);
+  await expect(highlightIsOn).toBeVisible()
+  await page.keyboard.press('Shift+H');
+  await page.waitForTimeout(dbConfig.keyboardTimeout);
+  await expect(highlightIsOn).not.toBeVisible()
+})
+
+test('Toolbar button switch viewport', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
   const switchViewport = page.locator(`#island-${dbName}-viewport`)
   const switchViewportList = page.locator('#listbox')
   

@@ -74,13 +74,16 @@ See: [Installing Modules](https://www.drupal.org/docs/extending-drupal/installin
 ## Libraries for local development
 
 Display Builder rely on [Shoelace component library](https://shoelace.style/getting-started/installation),
-by default the library is loaded with CDN, but you can use local copies instead
+and HTMX [sse extension](https://htmx.org/extensions/sse/).
 
-in Display builder profiles (/admin/structure/display-builder).
+Libraries are loaded by CDN, but you can use local copies instead with a setting
+in Display builder profiles.
 
 ### Local development installation
 
-Currently asset.packagist do not provide the last version of Shoelace, installation with package manager is recommended.
+Currently asset.packagist provide a version of Shoelace with Lit dependencies.
+
+Installation with package manager is recommended.
 
 From your installation libraries folder (`web/libraries` or `app/libraries`):
 
@@ -89,6 +92,14 @@ mkdir -p shoelace
 cd shoelace
 npm init -y
 npm install @shoelace-style/shoelace
+```
+
+```shell
+cd web/libraries
+mkdir -p htmx-ext-sse
+cd htmx-ext-sse
+npm init -y
+npm install htmx-ext-sse
 ```
 
 ## Troubleshooting

@@ -15,6 +15,7 @@ use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
+use Drupal\file\FileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -265,11 +266,13 @@ class ActiveUsers extends IslandPluginBase implements PluginFormInterface {
       }
 
       if (isset($configuration['image_field']) && $user->hasField($configuration['image_field'])) {
-        /** @var \Drupal\file\FileInterface $image */
         $image = $user->get($configuration['image_field'])->entity;
-        $image_style = $configuration['image_style'];
-        $style = $this->entityTypeManager->getStorage('image_style')->load($image_style);
-        $avatar['#props']['image'] = $style ? $style->buildUri($image->getFileUri()) : $image->getFileUri();
+
+        if ($image instanceof FileInterface) {
+          $image_style = $configuration['image_style'];
+          $style = $this->entityTypeManager->getStorage('image_style')->load($image_style);
+          $avatar['#props']['image'] = $style ? $style->buildUri($image->getFileUri()) : $image->getFileUri();
+        }
       }
       $avatars[] = $avatar;
     }

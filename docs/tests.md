@@ -14,6 +14,27 @@ npm install
 npx playwright install --with-deps
 ```
 
+**Fedora** is not yet supported by Playwright but can work, see this
+[issue](https://github.com/microsoft/playwright/issues/29559), a workaround is
+to install these packages:
+
+```shell
+sudo dnf install -y \
+    libicu \
+    libjpeg-turbo \
+    libwebp \
+    flite \
+    pcre \
+    libffi
+```
+
+An run install:
+
+```shell
+npm install
+npx playwright install
+```
+
 ## Local tests
 
 Tests are made to run in ci, they can run locally in 2 modes, with an integrated

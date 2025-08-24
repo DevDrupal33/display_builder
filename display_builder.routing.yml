@@ -176,3 +176,10 @@ display_builder.api_preset_preview:
     _permission: "administer display builders+access display builders api"
   options:
     _htmx_route: true
+
+display_builder.api_sse:
+  path: "/api/display-builder/{builder_id}/sse"
+  defaults:
+    _controller: '\Drupal\display_builder\Controller\ApiSseController::sse'
+  requirements:
+    _permission: "administer display builders+access display builders api"
