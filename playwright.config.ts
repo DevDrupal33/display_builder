@@ -51,8 +51,8 @@ export default defineConfig({
       // For --headed test, add some slow time.
       slowMo: 100,
     },
-    // Quick fail on local tests.
-    actionTimeout: process.env.CI ? undefined : 2_000,
+    // Quicker fail on local tests if skip install.
+    actionTimeout: process.env.CI ? undefined : process.env.DRUPAL_TEST_SKIP_INSTALL ? 2_000 : undefined,
     /* For https://playwright.dev/docs/locators#locate-by-test-id */
     testIdAttribute: 'data-testid',
   },

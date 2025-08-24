@@ -40,7 +40,15 @@ npx playwright install
 Tests are made to run in ci, they can run locally in 2 modes, with an integrated
 Drupal installation for tests or just on a local installed Drupal.
 
-For local tests, some modules **MUST** be enabled:
+For local tests, you must enable `extension_discovery_scan_tests` in your
+settings.php and disable js aggregation:
+
+```php
+$config['system.performance']['js']['preprocess'] = FALSE;
+$settings['extension_discovery_scan_tests'] = TRUE;
+```
+
+some modules **MUST** be enabled:
 
 - layout_builder
 - display_builder_test

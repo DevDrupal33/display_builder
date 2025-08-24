@@ -105,7 +105,7 @@ class Reporter {
     this.silly(step.title);
   }
 
-  onStepEnd() {}
+  onStepEnd() { }
 
   onTestEnd(test: TestCase, result: TestResult) {
     this.debug(
@@ -116,7 +116,7 @@ class Reporter {
     );
   }
 
-  onEnd(result: FullResult) {}
+  onEnd(result: FullResult) { }
 
   onStdOut(data: any) {
     this.silly(data);

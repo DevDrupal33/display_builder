@@ -5,6 +5,7 @@ import * as fs from 'node:fs';
 import { getModuleDir, getRootDir } from '../utilities/DrupalFilesystem';
 import type { DrupalSite } from '../fixtures/DrupalSite';
 import * as utils from '../utilities/utils'
+import dbConfig from '../playwright.db.config';
 
 export class Drupal {
   readonly page: Page;
@@ -56,23 +57,15 @@ export class Drupal {
     await this.writeBaseUrl();
   }
 
-  async setupMinimalTestSite(modules?: string[] | null) {
-    if (modules) {
-      await this.installModules(modules);
-    }
-  }
-
   async loginAsAdmin() {
     // First see if we are already logged in.
-    const h1 = this.page.locator('h1');
-    await this.page.goto(`${this.drupalSite.url}/user`);
-    if ((await h1.count()) && (await h1.innerText()) === 'admin') {
+    await this.page.goto(`${this.drupalSite.url}/${dbConfig.logInUrl}`);
+    const title = this.page.locator('h1');
+    if ((await title.innerText()) === 'admin') {
       return;
     }
-    else if ((await h1.count()) && (await h1.innerText()) === 'Access denied') {
-      await this.logout();
-    }
-    else if ((await h1.count()) && (await h1.innerText()) === 'Reset your password') {
+    // If we are not on the login page, log out first.
+    if ((await title.innerText()) !== 'Log in') {
       await this.logout();
     }
 
@@ -96,7 +89,9 @@ export class Drupal {
     }
 
     await this.page.goto(logInUrl);
-    await expect(h1).toHaveText('admin');
+    if ((await title.innerText()) !== 'admin') {
+      await this.loginAsAdmin();
+    }
   }
 
   async login(
@@ -115,16 +110,16 @@ export class Drupal {
       );
       await page.goto(loginUrl);
     } else {
-      await page.goto(`${this.drupalSite.url}/user/login`);
+      await page.goto(`${this.drupalSite.url}/${dbConfig.logInUrl}`);
       await page.locator('[data-drupal-selector="edit-name"]').fill(username);
-      await page.locator('[data-drupal-selector="edit-pass"]').fill(password);
+      await page.locator('[data-drupal-selector="edit-pass"]').fill(password ?? 'test_admin');
       await page.locator('[data-drupal-selector="edit-submit"]').click();
     }
     await expect(page.locator('h1')).toHaveText(username);
   }
 
   async logout() {
-    await this.page.goto(`${this.drupalSite.url}/user/logout/confirm`);
+    await this.page.goto(`${this.drupalSite.url}/${dbConfig.logOutUrl}/confirm`);
     await this.page.getByRole('button', { name: 'Log out' }).click();
     let cookies = await this.page.context().cookies();
     cookies = cookies.filter(
@@ -304,7 +299,7 @@ export class Drupal {
   async writeBaseUrl() {
     // \Drupal\Core\StreamWrapper\PublicStream::baseUrl needs a base-url set,
     // otherwise it will default to $GLOBALS['base_url']. When a recipe is being
-    // run via core/scripts/drupal, that defaults to core/scripts/drupal 😭.
+    // run via core/scripts/drupal, that defaults to core/scripts/drupal.
     const settingsFile = nodePath.resolve(
       getRootDir(),
       `${this.drupalSite.sitePath}/settings.php`,

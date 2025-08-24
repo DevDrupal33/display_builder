@@ -264,7 +264,7 @@ export async function refresh(page: Page, dbName: string): Promise<void> {
  * @param {string|null} fixture - (@todo) Name of the Display Builder fixture.
  * @returns {Promise<void>}
  */
-export async function createDisplayBuilderFromUi(page: Page, dbName: string, fixture: string|null = null): Promise<void> {
+export async function createDisplayBuilderFromUi(page: Page, dbName: string, fixture: string | null = null): Promise<void> {
   await page.goto(dbConfig.dbAddUrl)
   await page.getByRole('textbox', { name: 'Builder ID' }).fill(dbName)
   await page.locator('select[name="display_builder"]').selectOption('test')

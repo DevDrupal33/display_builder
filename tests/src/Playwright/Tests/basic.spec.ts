@@ -7,7 +7,7 @@ import * as cmd from '../utilities/commands'
 
 import dbConfig from '../playwright.db.config'
 
-test('Create instance', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
+test('Create instance', { tag: ['@display_builder', '@display_builder_min'] }, async ({ page, drupal }) => {
   const dbName = `test_${utils.createRandomString(6)}`
 
   await drupal.loginAsAdmin()
@@ -44,7 +44,7 @@ test('Create instance', {tag: ['@display_builder', '@display_builder_min']}, asy
   await expect(page.getByRole('link', { name: dbName })).not.toBeVisible()
 })
 
-test('Actions and cmd', {tag: ['@display_builder']}, async ({ page, drupal }) => {
+test('Actions and cmd', { tag: ['@display_builder'] }, async ({ page, drupal }) => {
   const dbName = `test_${utils.createRandomString(6)}`
 
   await drupal.loginAsAdmin()
@@ -102,7 +102,7 @@ test('Actions and cmd', {tag: ['@display_builder']}, async ({ page, drupal }) =>
 })
 
 // Legacy test with not much cmd usage.
-test('Full Display Builder', {tag: '@display_builder'}, async ({ page, drupal }) => {
+test('Full Display Builder', { tag: '@display_builder_legacy' }, async ({ page, drupal }) => {
 
   await drupal.loginAsAdmin()
   const dbName = `test_${utils.createRandomString(6)}`

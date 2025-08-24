@@ -21,7 +21,7 @@ export type DrupalSiteInstall = {
 
 const drupalSite = base.extend<DrupalSiteInstall>({
   drupalSite: [
-    async ({}, use, workerInfo) => {
+    async ({ }, use, workerInfo) => {
       if (
         process.env.DRUPAL_TEST_SKIP_INSTALL &&
         process.env.DRUPAL_TEST_SKIP_INSTALL === 'true'

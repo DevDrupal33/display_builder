@@ -7,7 +7,7 @@ import * as cmd from '../utilities/commands'
 
 import dbConfig from '../playwright.db.config'
 
-test('Preset', {tag: ['@display_builder', '@display_builder_preset', '@display_builder_min']}, async ({ page, drupal }) => {
+test('Preset', { tag: ['@display_builder', '@display_builder_preset', '@display_builder_min'] }, async ({ page, drupal }) => {
   const dbName = `test_${utils.createRandomString(6)}`
 
   await drupal.loginAsAdmin()
@@ -27,7 +27,7 @@ test('Preset', {tag: ['@display_builder', '@display_builder_preset', '@display_b
   await cmd.setElementValue(page,
     page.locator(`.db-island-builder [data-instance-title="Token"]`),
     'I am a test token in a slot',
-      [
+    [
       {
         action: 'fill',
         locator: page.locator('#edit-value'),
@@ -57,7 +57,7 @@ test('Preset', {tag: ['@display_builder', '@display_builder_preset', '@display_b
     await dialog.accept(`foo_${dbName}`);
   });
 
-  await page.locator(`#island-${dbName}-builder [data-test="testing"]`).click({button: 'right', position: { x: 30, y: 10 }})
+  await page.locator(`#island-${dbName}-builder [data-test="testing"]`).click({ button: 'right', position: { x: 30, y: 10 } })
   await page.getByRole('menuitemcheckbox', { name: 'Save as preset' }).locator('slot').nth(1).click()
 
   const preset = page.getByRole('button', { name: `foo_${dbName}` })

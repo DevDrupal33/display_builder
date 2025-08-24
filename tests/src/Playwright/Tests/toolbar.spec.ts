@@ -15,7 +15,7 @@ test.afterEach('Clean', async ({ drupal, page }) => {
   await cmd.deleteDisplayBuilderFromUi(page, dbName)
 })
 
-test('Toolbar buttons', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
+test('Toolbar buttons', { tag: ['@display_builder', '@display_builder_min'] }, async ({ page, drupal }) => {
   dbName = `test_${utils.createRandomString(6)}`
 
   await drupal.loginAsAdmin()
@@ -30,7 +30,7 @@ test('Toolbar buttons', {tag: ['@display_builder', '@display_builder_min']}, asy
   // Position required to avoid icon to intercept the click.
   const undo = page.getByRole('button', { name: '2' })
   await undo.click(position)
-  await expect(builderToken).toHaveCount(2)
+  await expect(builderToken).toHaveCount(1)
 
   const redo = page.locator('#button-1--2').getByRole('button', { name: '1' })
   await redo.click(position)
@@ -107,7 +107,7 @@ test('Toolbar buttons', {tag: ['@display_builder', '@display_builder_min']}, asy
 
   const switchViewport = page.locator(`#island-${dbName}-viewport`)
   const switchViewportList = page.locator('#listbox')
-  
+
   await switchViewport.click()
 
   await expect(

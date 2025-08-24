@@ -122,6 +122,8 @@ class StateManager implements StateManagerInterface {
    */
   public function hasSaveContextsRequirement(string $builder_id, string $key, array $contexts = []): bool {
     $contexts = empty($contexts) ? $this->getContexts($builder_id) : $contexts;
+    // Some strange edge cases where context is null.
+    $contexts ??= [];
 
     if (!\array_key_exists('context_requirements', $contexts)
       || !($contexts['context_requirements'] instanceof RequirementsContext)

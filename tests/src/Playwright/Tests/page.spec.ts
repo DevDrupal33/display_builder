@@ -6,10 +6,10 @@ import * as cmd from '../utilities/commands'
 import dbConfig from '../playwright.db.config'
 
 test.beforeEach('Setup', async ({ drupal }) => {
-  await drupal.setupMinimalTestSite(['display_builder_page_layout', 'display_builder_page_layout_test'])
+  await drupal.installModules(['display_builder_page_layout', 'display_builder_page_layout_test'])
 });
 
-test('Page Layout', {tag: ['@display_builder', '@display_builder_page_layout', '@display_builder_min']} , async ({ page, drupal }) => {
+test('Page Layout', { tag: ['@display_builder', '@display_builder_page_layout', '@display_builder_min'] }, async ({ page, drupal }) => {
   await drupal.loginAsAdmin()
 
   await page.goto(dbConfig.pageListUrl)

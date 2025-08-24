@@ -6,17 +6,13 @@ import * as cmd from '../utilities/commands'
 import dbConfig from '../playwright.db.config'
 
 test.beforeEach('Setup', async ({ drupal }) => {
-  await drupal.setupMinimalTestSite(['views', 'views_ui', 'display_builder_views', 'display_builder_views_test'])
+  await drupal.installModules(['views', 'views_ui', 'display_builder_views', 'display_builder_views_test'])
   // Allays show advanced panel and disable preview.
   await drupal.drush('config:set -y views.settings ui.show.advanced_column true');
   await drupal.drush('config:set -y views.settings ui.show.preview_information true');
 });
 
-test.afterEach('Clean', async ({ drupal, page }) => {
-  await cmd.deleteDisplayBuilderFromUi(page, dbConfig.viewsTestName)
-})
-
-test('Views Display Builder', {tag: ['@display_builder', '@display_builder_views', '@display_builder_min']} , async ({ page, drupal }) => {
+test('Views Display Builder', { tag: ['@display_builder', '@display_builder_views', '@display_builder_min'] }, async ({ page, drupal }) => {
   await drupal.loginAsAdmin()
 
   await page.goto(dbConfig.viewsEditUrl.replace('{view_id}', dbConfig.viewsTestName))
@@ -88,9 +84,9 @@ test('Views Display Builder', {tag: ['@display_builder', '@display_builder_views
 
   await cmd.dragElementFromLibraryById(page, 'Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
   await cmd.setElementValue(page,
-    page.locator(`.db-island-builder [data-instance-title="Token"]`),
+    page.locator(`.db-island-builder [data-instance-title="Token"]`).first(),
     'I am a test token in a views',
-      [
+    [
       {
         action: 'fill',
         locator: page.locator('#edit-value'),
