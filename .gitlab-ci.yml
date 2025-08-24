@@ -235,7 +235,7 @@ cspell:
         cd ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/shoelace && npm init -y && npm install @shoelace-style/shoelace;
         cd ${CI_PROJECT_DIR};
       fi
-      if [ ! -f ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/htmx-ext-sse/node_modules/htmx-ext-sse/dist/sse.min.js ]; then
+    - if [ ! -f ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/htmx-ext-sse/node_modules/htmx-ext-sse/dist/sse.min.js ]; then
         mkdir -p ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/htmx-ext-sse;
         cd ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/htmx-ext-sse && npm init -y && npm install htmx-ext-sse;
         cd ${CI_PROJECT_DIR};
