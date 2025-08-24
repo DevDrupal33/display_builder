@@ -1,6 +1,4 @@
--
-
-  source_id: component
+- source_id: component
   source:
     component:
       component_id: 'ui_suite_bootstrap:grid_row_1'
@@ -69,16 +67,13 @@
       slots:
         col_1_content:
           sources:
-            -
-
-              source_id: entity_field
+            - source_id: entity_field
               source:
                 derivable_context: 'field:node:article:field_image'
                 'field:node:article:field_image':
                   value:
                     sources:
-                      -
-                        source_id: 'field_formatter:node:article:field_image'
+                      - source_id: 'field_formatter:node:article:field_image'
                         source:
                           type: image
                           settings:
@@ -89,13 +84,10 @@
 
   _third_party_settings:
     ui_styles:
-      styles:
-        selected:
-          colors_background_color: bg-secondary-subtle
-          spacing_margin_bottom: mb-4
--
-
-  source_id: component
+      selected:
+        colors_background_color: bg-secondary-subtle
+        spacing_margin_bottom: mb-4
+- source_id: component
   source:
     component:
       component_id: 'ui_suite_bootstrap:grid_row_2'
@@ -182,16 +174,13 @@
       slots:
         col_2_content:
           sources:
-            -
-
-              source_id: entity_field
+            - source_id: entity_field
               source:
                 derivable_context: 'field:node:article:title'
                 'field:node:article:title':
                   value:
                     sources:
-                      -
-                        source_id: 'field_formatter:node:article:title'
+                      - source_id: 'field_formatter:node:article:title'
                         source:
                           type: string
                           settings:
@@ -199,19 +188,15 @@
 
               _third_party_settings:
                 ui_styles:
-                  styles:
-                    selected:
-                      typography: h2
-            -
-
-              source_id: entity_field
+                  selected:
+                    typography: h2
+            - source_id: entity_field
               source:
                 derivable_context: 'field:node:article:created'
                 'field:node:article:created':
                   value:
                     sources:
-                      -
-                        source_id: 'field_formatter:node:article:created'
+                      - source_id: 'field_formatter:node:article:created'
                         source:
                           type: timestamp
                           settings:
@@ -232,37 +217,30 @@
                     add_more_button: ''
               _third_party_settings:
                 ui_styles:
-                  styles:
-                    selected:
-                      colors_color: text-secondary
-                      text_font_italics: fst-italic
-                      spacing_margin_bottom: mb-2
-                      display_all: d-block
-            -
-
-              source_id: entity_field
+                  selected:
+                    colors_color: text-secondary
+                    text_font_italics: fst-italic
+                    spacing_margin_bottom: mb-2
+                    display_all: d-block
+            - source_id: entity_field
               source:
                 derivable_context: 'field:node:article:body'
                 'field:node:article:body':
                   value:
                     sources:
-                      -
-                        source_id: 'field_formatter:node:article:body'
+                      - source_id: 'field_formatter:node:article:body'
                         source:
                           type: text_default
 
         col_1_content:
           sources:
-            -
-
-              source_id: entity_field
+            - source_id: entity_field
               source:
                 derivable_context: 'field:node:article:uid'
                 'field:node:article:uid':
                   value:
                     sources:
-                      -
-                        source_id: 'field_formatter:node:article:uid'
+                      - source_id: 'field_formatter:node:article:uid'
                         source:
                           type: entity_reference_entity_view
                           settings:
@@ -270,20 +248,16 @@
 
               _third_party_settings:
                 ui_styles:
-                  styles:
-                    selected:
-                      text_text_alignment: text-center
-                      img_thumbnail: img-thumbnail
-            -
-
-              source_id: entity_field
+                  selected:
+                    text_text_alignment: text-center
+                    img_thumbnail: img-thumbnail
+            - source_id: entity_field
               source:
                 derivable_context: 'field:node:article:uid'
                 'field:node:article:uid':
                   value:
                     sources:
-                      -
-                        source_id: 'field_formatter:node:article:uid'
+                      - source_id: 'field_formatter:node:article:uid'
                         source:
                           type: entity_reference_label
                           settings:
@@ -291,26 +265,20 @@
 
               _third_party_settings:
                 ui_styles:
-                  styles:
-                    selected:
-                      colors_color: text-secondary
-                      text_font_italics: fst-italic
-                      text_text_alignment: text-center
+                  selected:
+                    colors_color: text-secondary
+                    text_font_italics: fst-italic
+                    text_text_alignment: text-center
   _third_party_settings:
-    ui_styles:
-      styles: {  }
--
-
-  source_id: component
+    ui_styles: {}
+- source_id: component
   source:
     component:
       component_id: 'ui_suite_bootstrap:accordion'
       slots:
         content:
           sources:
-            -
-
-              source_id: component
+            - source_id: component
               source:
                 component:
                   component_id: 'ui_suite_bootstrap:accordion_item'
@@ -339,31 +307,23 @@
                   slots:
                     title:
                       sources:
-                        -
-
-                          source_id: token
+                        - source_id: token
                           source:
                             value: Comments
-                        -
-
-                          source_id: entity_field
+                        - source_id: entity_field
                           source:
                             derivable_context: 'field:node:article:comment'
                             'field:node:article:comment':
                               value:
                                 sources:
-                                  -
-                                    source_id: 'field_property:node:comment:comment_count'
+                                  - source_id: 'field_property:node:comment:comment_count'
 
                           _third_party_settings:
                             ui_styles:
-                              styles:
-                                selected:
-                                  text_font_italics: fst-italic
-                                  spacing_margin_start: ms-2
+                              selected:
+                                text_font_italics: fst-italic
+                                spacing_margin_start: ms-2
                     content:
                       sources:
-                        -
-
-                                        pager_id: '0'
-                                        view_mode: default
+                        - pager_id: '0'
+                          view_mode: default

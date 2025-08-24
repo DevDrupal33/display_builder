@@ -37,11 +37,6 @@ class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface,
    * {@inheritdoc}
    */
   public function buildForm(array &$form, FormStateInterface $form_state): void {
-    // The data injected in buildInfo,
-    // is the one produced by form api.
-    // This is not the raw data for the form structure.
-    // There is this 'styles' key in the form values,
-    // which is specific to this form, not the ui_styles_styles form.
     // The data to be received here is in the form of:
     // ['styles' => ['selected' => [], 'extra' => '']].
     $form += [
@@ -49,7 +44,7 @@ class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface,
         '#type' => 'ui_styles_styles',
         '#title' => $this->t('Styles'),
         '#wrapper_type' => 'div',
-        '#default_value' => \array_merge(['selected' => [], 'extra' => ''], $this->data['styles'] ?? []),
+        '#default_value' => \array_merge(['selected' => [], 'extra' => ''], $this->data ?? []),
       ],
       '#tree' => TRUE,
     ];
@@ -59,6 +54,13 @@ class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface,
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state): void {
+    // The styles key in the values is added by BlockStylesForm.
+    // Inside the styles key, there are two keys: selected and extra.
+    // The structure here is the one produced by UI styles Form API element.
+    $values = $form_state->getValue('styles');
+    $form_state->setValue('selected', $values['selected'] ?? []);
+    $form_state->setValue('extra', $values['extra'] ?? '');
+    $form_state->unsetValue('styles');
     // Those two lines are necessary to prevent the form from being rebuilt.
     // if rebuilt, the form state values will have both the computed ones
     // and the raw ones (wrapper key and values).
@@ -70,11 +72,8 @@ class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface,
    * {@inheritdoc}
    */
   public function alterElement(array $element, array $data = []): array {
-    // The styles key in the data array is added by BlockStylesForm.
-    // Inside the styles key, there are two keys: selected and extra.
-    // The structure here is the one produced by UI styles Form API element.
-    $selected = $data['styles']['selected'] ?? [];
-    $extra = $data['styles']['extra'] ?? '';
+    $selected = $data['selected'] ?? [];
+    $extra = $data['extra'] ?? '';
 
     return \Drupal::service('plugin.manager.ui_styles')->addClasses($element, $selected, $extra);
   }

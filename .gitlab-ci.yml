@@ -36,6 +36,12 @@ variables:
       - "**/*.css"
     when: on_success
 
+.js-files-change-rule: &js-files-change-rule
+  - if: $_FOR_EVERY_MR_COMMIT == "true" || $_FOR_EVERY_MR_COMMIT == null
+    changes:
+      - "**/*.js"
+    when: on_success
+
 .module-config-files-change-rule: &module-config-files-change-rule
   - if: $_FOR_EVERY_MR_COMMIT == "true" || $_FOR_EVERY_MR_COMMIT == null
     changes:
@@ -212,6 +218,9 @@ cspell:
     PLAYWRIGHT_SKIP_TEARDOWN: true
     PLAYWRIGHT_DEBUG_LEVEL: info
     PLAYWRIGHT_BROWSERS_PATH: ${CI_PROJECT_DIR}/pw-browsers
+    # PLAYWRIGHT_TEST_PROJECT: firefox,chromium
+    PLAYWRIGHT_TEST_PROJECT: firefox
+    PLAYWRIGHT_TEST_TAG: display_builder
   before_script:
     - !reference [.check-composer-end-code]
     - !reference [.setup-webserver]
@@ -241,7 +250,7 @@ cspell:
     - echo -e "\e[0Ksection_end:`date +%s`:playwright_install\r\e[0K"
   script:
     # @todo for now running only minimum tests with firefox
-    - PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH} npx playwright test --project=firefox --grep @display_builder_min
+    - PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH} npx playwright test --project=${PLAYWRIGHT_TEST_PROJECT} --grep @${PLAYWRIGHT_TEST_TAG}
   after_script:
     - mkdir -p $CI_PROJECT_DIR/logs
     - cp -R /var/log/apache2 $CI_PROJECT_DIR/logs/apache2
@@ -260,4 +269,30 @@ cspell:
 
 playwright:
   extends: .playwright-base
+  rules:
+    # @todo opt in when stabilize
+    # - !reference [.opt-in-current-rule]
+    # - *skip-playwright-rule
+    # - *playwright-tests-exist-rule
+    - *manual-rule
   allow_failure: true
+
+playwright-min:
+  extends: .playwright-base
+  rules:
+    # @todo opt in when stabilize
+    # - !reference [.opt-in-current-rule]
+    # - *skip-playwright-rule
+    # - *playwright-tests-exist-rule
+    - *manual-rule
+  allow_failure: true
+  variables:
+    DRUPAL_TEST_BASE_URL: "${SIMPLETEST_BASE_URL}"
+    DRUPAL_TEST_SETUP_FILE: '${CI_PROJECT_DIR}/tests/src/TestSite/DisplayBuilderTestSetup.php'
+    DRUPAL_WEB_ROOT: $_WEB_ROOT
+    DRUPAL_TEST_WEBSERVER_USER: www-data
+    PLAYWRIGHT_SKIP_TEARDOWN: true
+    PLAYWRIGHT_DEBUG_LEVEL: info
+    PLAYWRIGHT_BROWSERS_PATH: ${CI_PROJECT_DIR}/pw-browsers
+    PLAYWRIGHT_TEST_PROJECT: firefox
+    PLAYWRIGHT_TEST_TAG: display_builder_min

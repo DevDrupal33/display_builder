@@ -1,4 +1,3 @@
-
 - source_id: component
   source:
     component:
@@ -24,85 +23,81 @@
       slots:
         content:
           sources:
-          - source_id: component
-            source:
-              component:
-                component_id: 'ui_suite_bootstrap:grid_row'
-                variant_id: null
-                props:
-                  container:
-                    source_id: select
-                    source:
-                      value: container
-                slots:
-                  content:
-                    sources:
-                    - source_id: component
+            - source_id: component
+              source:
+                component:
+                  component_id: 'ui_suite_bootstrap:grid_row'
+                  variant_id: null
+                  props:
+                    container:
+                      source_id: select
                       source:
-                        component:
-                          component_id: 'ui_suite_bootstrap:navbar'
-                          variant_id:
-                            source_id: select
-                            source:
-                              value: expand_lg
-                          slots:
-                            brand:
-                              sources:
-                              - source_id: block
+                        value: container
+                  slots:
+                    content:
+                      sources:
+                        - source_id: component
+                          source:
+                            component:
+                              component_id: 'ui_suite_bootstrap:navbar'
+                              variant_id:
+                                source_id: select
                                 source:
-                                  plugin_id: system_branding_block
-                                  system_branding_block:
-                                    id: system_branding_block
-                                    label: 'Site branding'
-                                    label_display: ''
-                                    provider: system
-                                    use_site_logo: true
-                                    use_site_name: false
-                                    use_site_slogan: false
-                                _third_party_settings:
-                                  ui_styles:
-                                    styles:
-                                      extra: navbar-brand
-                              - source_id: block
-                                source:
-                                  plugin_id: system_branding_block
-                                  system_branding_block:
-                                    id: system_branding_block
-                                    label: 'Site branding'
-                                    label_display: ''
-                                    provider: system
-                                    use_site_logo: false
-                                    use_site_name: true
-                                    use_site_slogan: false
-                                _third_party_settings:
-                                  ui_styles:
-                                    styles:
-                                      extra: navbar-brand
-                            navigation:
-                              sources: {}
-                            navigation_collapsible:
-                              sources:
-                              - source_id: block
-                                source:
-                                  plugin_id: 'system_menu_block:main'
-                                  'system_menu_block:main':
-                                    id: 'system_menu_block:main'
-                                    label: 'Main navigation'
-                                    label_display: '1'
-                                    provider: system
-                                    level: 1
-                                    depth: 1
-                                    expand_all_items: false
-            _third_party_settings:
-              ui_styles:
-                styles:
+                                  value: expand_lg
+                              slots:
+                                brand:
+                                  sources:
+                                    - source_id: block
+                                      source:
+                                        plugin_id: system_branding_block
+                                        system_branding_block:
+                                          id: system_branding_block
+                                          label: 'Site branding'
+                                          label_display: ''
+                                          provider: system
+                                          use_site_logo: true
+                                          use_site_name: false
+                                          use_site_slogan: false
+                                      _third_party_settings:
+                                        ui_styles:
+                                          extra: navbar-brand
+                                    - source_id: block
+                                      source:
+                                        plugin_id: system_branding_block
+                                        system_branding_block:
+                                          id: system_branding_block
+                                          label: 'Site branding'
+                                          label_display: ''
+                                          provider: system
+                                          use_site_logo: false
+                                          use_site_name: true
+                                          use_site_slogan: false
+                                      _third_party_settings:
+                                        ui_styles:
+                                          extra: navbar-brand
+                                navigation:
+                                  sources: {}
+                                navigation_collapsible:
+                                  sources:
+                                    - source_id: block
+                                      source:
+                                        plugin_id: 'system_menu_block:main'
+                                        'system_menu_block:main':
+                                          id: 'system_menu_block:main'
+                                          label: 'Main navigation'
+                                          label_display: '1'
+                                          provider: system
+                                          level: 1
+                                          depth: 1
+                                          expand_all_items: false
+              _third_party_settings:
+                ui_styles:
                   selected:
                     spacing_margin: m-3
   _third_party_settings:
     ui_styles:
-      styles:
-        selected:
-          colors_background_color: bg-secondary-subtle
+      selected:
+        colors_background_color: bg-secondary-subtle
 - source_id: component
   source:
     component:
@@ -120,17 +115,17 @@
       slots:
         content:
           sources:
-          - source_id: page_title
-            source: {}
-          - source_id: component
-            source:
-              component:
-                component_id: 'ui_suite_bootstrap:breadcrumb'
-                variant_id: null
-                props:
-                  items:
-                    source_id: breadcrumb
-                slots: {}
+            - source_id: page_title
+              source: {}
+            - source_id: component
+              source:
+                component:
+                  component_id: 'ui_suite_bootstrap:breadcrumb'
+                  variant_id: null
+                  props:
+                    items:
+                      source_id: breadcrumb
+                  slots: {}
 - source_id: component
   source:
     component:
@@ -138,42 +133,41 @@
       slots:
         col_1_content:
           sources:
-          - source_id: block
-            source:
-              plugin_id: search_form_block
-              search_form_block:
-                id: search_form_block
-                label: 'Search form'
-                label_display: '1'
-                provider: search
-                page_id: null
-          - source_id: block
-            source:
-              plugin_id: 'system_menu_block:account'
-              'system_menu_block:account':
-                id: 'system_menu_block:account'
-                label: 'User account menu'
-                label_display: '1'
-                provider: system
-                level: 1
-                depth: 1
-                expand_all_items: false
+            - source_id: block
+              source:
+                plugin_id: search_form_block
+                search_form_block:
+                  id: search_form_block
+                  label: 'Search form'
+                  label_display: '1'
+                  provider: search
+                  page_id: null
+            - source_id: block
+              source:
+                plugin_id: 'system_menu_block:account'
+                'system_menu_block:account':
+                  id: 'system_menu_block:account'
+                  label: 'User account menu'
+                  label_display: '1'
+                  provider: system
+                  level: 1
+                  depth: 1
+                  expand_all_items: false
         col_2_content:
           sources:
-          - source_id: local_tasks
-            source: {}
-            _third_party_settings:
-              ui_styles:
-                styles:
+            - source_id: local_tasks
+              source: {}
+              _third_party_settings:
+                ui_styles:
                   selected:
                     spacing_margin_bottom: mb-3
-          - source_id: wysiwyg
-            source:
-              value:
-                value: '<div class="alert alert-info" role="alert">Welcome to your new <b>Bootstrap</b> display builder layout!<br>Check the <b>Manage &gt; Structure &gt; Page layout</b> to edit this layout.</div>'
-                format: full_html
-          - source_id: main_page_content
-            source: {}
+            - source_id: wysiwyg
+              source:
+                value:
+                  value: '<div class="alert alert-info" role="alert">Welcome to your new <b>Bootstrap</b> display builder layout!<br>Check the <b>Manage &gt; Structure &gt; Page layout</b> to edit this layout.</div>'
+                  format: full_html
+            - source_id: main_page_content
+              source: {}
       props:
         container:
           source_id: select
@@ -183,20 +177,20 @@
           source_id: selects
           source:
             value:
-            - '12'
-            - '12'
+              - '12'
+              - '12'
         col_sm:
           source_id: selects
           source:
             value:
-            - '3'
-            - '9'
+              - '3'
+              - '9'
         col_md:
           source_id: selects
           source:
             value:
-            - '3'
-            - '9'
+              - '3'
+              - '9'
 - source_id: component
   source:
     component:
@@ -213,58 +207,55 @@
       slots:
         content:
           sources:
-          - source_id: component
-            source:
-              component:
-                component_id: 'ui_suite_bootstrap:grid_row'
-                variant_id: null
-                props:
-                  container:
-                    source_id: select
-                    source:
-                      value: container
-                  row_cols:
-                    source_id: select
-                    source:
-                      value: '1'
-                slots:
-                  content:
-                    sources:
-                    - source_id: component
+            - source_id: component
+              source:
+                component:
+                  component_id: 'ui_suite_bootstrap:grid_row'
+                  variant_id: null
+                  props:
+                    container:
+                      source_id: select
                       source:
-                        component:
-                          component_id: 'ui_suite_bootstrap:grid_row'
-                          slots:
-                            content:
-                              sources:
-                              
-                              - source_id: block
-                                source:
-                                  plugin_id: system_powered_by_block
-                    - source_id: component
+                        value: container
+                    row_cols:
+                      source_id: select
                       source:
-                        component:
-                          component_id: 'ui_suite_bootstrap:grid_row'
-                          slots:
-                            content:
-                              sources:
-                              - source_id: block
-                                source:
-                                  plugin_id: 'system_menu_block:footer'
-                                  'system_menu_block:footer':
-                                    id: 'system_menu_block:footer'
-                                    label: Footer
-                                    label_display: '1'
-                                    provider: system
-                                    level: 1
-                                    depth: 1
-                                    expand_all_items: false
-                                _third_party_settings:
-                                  ui_styles:
-                                    styles:
-                                      extra: list-inline
+                        value: '1'
+                  slots:
+                    content:
+                      sources:
+                        - source_id: component
+                          source:
+                            component:
+                              component_id: 'ui_suite_bootstrap:grid_row'
+                              slots:
+                                content:
+                                  sources:
+                                    - source_id: block
+                                      source:
+                                        plugin_id: system_powered_by_block
+                        - source_id: component
+                          source:
+                            component:
+                              component_id: 'ui_suite_bootstrap:grid_row'
+                              slots:
+                                content:
+                                  sources:
+                                    - source_id: block
+                                      source:
+                                        plugin_id: 'system_menu_block:footer'
+                                        'system_menu_block:footer':
+                                          id: 'system_menu_block:footer'
+                                          label: Footer
+                                          label_display: '1'
+                                          provider: system
+                                          level: 1
+                                          depth: 1
+                                          expand_all_items: false
+                                      _third_party_settings:
+                                        ui_styles:
+                                          extra: list-inline
   _third_party_settings:
     ui_styles:
-      styles:
-        selected:
-          colors_background_color: bg-secondary-subtle
+      selected:
+        colors_background_color: bg-secondary-subtle

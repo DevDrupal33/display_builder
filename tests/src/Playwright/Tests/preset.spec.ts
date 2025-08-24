@@ -68,4 +68,6 @@ test('Preset', {tag: ['@display_builder', '@display_builder_preset', '@display_b
 
   await page.getByRole('tab', { name: 'Preview' }).click()
   await expect(page.locator(`#island-${dbName}-preview`)).toMatchAriaSnapshot('- text: "label: I am a component with a token I am a test token in a slot label: I am a component with a token I am a test token in a slot"')
+
+  await cmd.deleteDisplayBuilderFromUi(page, dbName)
 })

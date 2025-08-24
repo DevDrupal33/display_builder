@@ -12,6 +12,10 @@ test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.drush('config:set -y views.settings ui.show.preview_information true');
 });
 
+test.afterEach('Clean', async ({ drupal, page }) => {
+  await cmd.deleteDisplayBuilderFromUi(page, dbConfig.viewsTestName)
+})
+
 test('Views Display Builder', {tag: ['@display_builder', '@display_builder_views', '@display_builder_min']} , async ({ page, drupal }) => {
   await drupal.loginAsAdmin()
 

@@ -1,6 +1,4 @@
--
-
-  source_id: component
+- source_id: component
   source:
     component:
       component_id: 'ui_suite_bootstrap:grid_row_2'
@@ -21,15 +19,13 @@
       slots:
         col_1_content:
           sources:
-            -
-              source_id: entity_field
+            - source_id: entity_field
               source:
                 derivable_context: 'field:node:article:field_image'
                 'field:node:article:field_image':
                   value:
                     sources:
-                      -
-                        source_id: 'field_formatter:node:article:field_image'
+                      - source_id: 'field_formatter:node:article:field_image'
                         source:
                           type: image
                           settings:
@@ -39,92 +35,78 @@
                               attribute: lazy
               _third_party_settings:
                 ui_styles:
-                  styles:
-                    selected:
-                      img_thumbnail: img-thumbnail
+                  selected:
+                    img_thumbnail: img-thumbnail
         col_2_content:
           sources:
-            -
-              source_id: component
+            - source_id: component
               source:
                 component:
                   component_id: 'ui_suite_bootstrap:blockquote'
                   slots:
                     content:
                       sources:
-                        -
-                          source_id: entity_field
+                        - source_id: entity_field
                           source:
                             derivable_context: 'field:node:article:title'
                             'field:node:article:title':
                               value:
                                 sources:
-                                  -
-                                    source_id: 'field_formatter:node:article:title'
+                                  - source_id: 'field_formatter:node:article:title'
                                     source:
                                       type: string
                                       settings:
                                         link_to_entity: '1'
                           _third_party_settings:
                             ui_styles:
-                              styles:
-                                selected:
-                                  colors_color: text-dark-emphasis
+                              selected:
+                                colors_color: text-dark-emphasis
                             ui_skins:
                               bs_link_color: '#656e7b'
                               bs_link_decoration: none
                     footer:
                       sources:
-                        -
-                          source_id: entity_field
+                        - source_id: entity_field
                           source:
                             derivable_context: 'field:node:article:created'
                             'field:node:article:created':
                               value:
                                 sources:
-                                  -
-                                    source_id: 'field_formatter:node:article:created'
+                                  - source_id: 'field_formatter:node:article:created'
                                     source:
                                       type: timestamp_ago
                                       settings:
                                         future_format: '@interval hence'
                                         past_format: '@interval ago'
                                         granularity: '2'
-                        -
-                          source_id: token
+                        - source_id: token
                           source:
                             value: by
                           _third_party_settings:
                             ui_styles:
-                              styles:
-                                selected:
-                                  spacing_margin_start: ms-2
-                                  display_all: d-inline-block
-                        -
-                          source_id: entity_field
+                              selected:
+                                spacing_margin_start: ms-2
+                                display_all: d-inline-block
+                        - source_id: entity_field
                           source:
                             derivable_context: 'field:node:article:uid'
                             'field:node:article:uid':
                               value:
                                 sources:
-                                  -
-                                    source_id: 'field_formatter:node:article:uid'
+                                  - source_id: 'field_formatter:node:article:uid'
                                     source:
                                       type: author
                           _third_party_settings:
                             ui_styles:
-                              styles:
-                                selected:
-                                  spacing_margin_start: ms-2
-            -
-              source_id: entity_field
+                              selected:
+                                spacing_margin_start: ms-2
+            - source_id: entity_field
               source:
                 derivable_context: 'field:node:article:body'
                 'field:node:article:body':
                   value:
                     sources:
-                      -
-                        source_id: 'field_formatter:node:article:body'
+                      - source_id: 'field_formatter:node:article:body'
                         source:
                           type: text_trimmed
                           settings:

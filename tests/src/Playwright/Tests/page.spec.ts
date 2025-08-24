@@ -19,4 +19,6 @@ test('Page Layout', {tag: ['@display_builder', '@display_builder_page_layout', '
 
   await cmd.toggleSidebarView(page)
   await cmd.dragElementFromLibraryById(page, 'Components', 'test_simple', page.locator(`.db-island-builder > slot.db-dropzone`))
+
+  await cmd.deleteDisplayBuilderFromUi(page, 'page_layout__test')
 })
