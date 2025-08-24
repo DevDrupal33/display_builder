@@ -21,6 +21,8 @@
       animation: 150,
       direction: 'vertical',
       swapThreshold: 0.65,
+      // Empty insert threshold to avoid flickering on first drag into a slot.
+      emptyInsertThreshold: 0,
       // fallbackOnBody: true,
       // fallbackTolerance: 50,
       group: {
