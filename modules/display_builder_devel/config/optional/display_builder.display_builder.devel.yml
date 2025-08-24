@@ -97,7 +97,7 @@ islands:
   menu_delete:
     enable: true
     weight: -8
-  active_users:
+  collaboration:
     enable: false
     weight: 0
   menu_debug:

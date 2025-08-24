@@ -93,7 +93,7 @@ display_builder.islands.block_library:
       type: weight
       label: Weight
 
-display_builder.islands.active_users:
+display_builder.islands.collaboration:
   type: mapping
   mapping:
     image_field:

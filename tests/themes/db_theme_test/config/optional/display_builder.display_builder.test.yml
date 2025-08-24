@@ -16,10 +16,10 @@ islands:
   toggle_highlight:
     enable: true
     weight: -7
-  active_users:
+  collaboration:
     image_field: user_picture
     image_style: thumbnail
-    enable: true
+    enable: false
     weight: -5
   history:
     display_clear_button: true

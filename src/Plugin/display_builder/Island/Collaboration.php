@@ -19,15 +19,15 @@ use Drupal\file\FileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * History buttons island plugin implementation.
+ * Real-time collaboration island plugin implementation.
  */
 #[Island(
-  id: 'active_users',
-  label: new TranslatableMarkup('Active users'),
-  description: new TranslatableMarkup('Users currently doing changes on the builder.'),
+  id: 'collaboration',
+  label: new TranslatableMarkup('Real-time collaboration'),
+  description: new TranslatableMarkup('Allow concurrent editing with multiple users.'),
   type: IslandType::Button,
 )]
-class ActiveUsers extends IslandPluginBase implements PluginFormInterface {
+class Collaboration extends IslandPluginBase implements PluginFormInterface {
 
   use IslandPluginConfigurationFormTrait;
 

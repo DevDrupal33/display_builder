@@ -11,22 +11,19 @@ let dbName: string
 // Click position required to avoid icon to intercept the click.
 const position = { position: { x: 5, y: 5 } }
 
-test.beforeEach('Setup', async ({ drupal, page }) => {
+test.afterEach('Clean', async ({ drupal, page }) => {
+  await cmd.deleteDisplayBuilderFromUi(page, dbName)
+})
+
+test('Toolbar buttons', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
   dbName = `test_${utils.createRandomString(6)}`
 
-  // await page.goto(dbConfig.logOutUrl)
   await drupal.loginAsAdmin()
   await cmd.createDisplayBuilderFromUi(page, dbName)
   await cmd.dragElementFromLibraryById(page, 'Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
   await cmd.dragElementFromLibraryById(page, 'Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
   await cmd.closeDialog(page)
-});
 
-test.afterEach('Clean', async ({ drupal, page }) => {
-  await cmd.deleteDisplayBuilderFromUi(page, dbName)
-});
-
-test('Toolbar button history', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
   // Test the undo/redo/clear buttons
   const builderToken = page.locator(`.db-island-builder [data-instance-title="Token"]`)
   await expect(builderToken).toHaveCount(2)
@@ -65,9 +62,7 @@ test('Toolbar button history', {tag: ['@display_builder', '@display_builder_min'
   // await expect(page.getByRole('button', { name: 'Undo' })).toBeVisible()
   // await expect(page.getByRole('button', { name: 'Redo' })).toBeVisible()
   // await expect(page.getByRole('button', { name: 'Clear' })).not.toBeVisible()
-})
 
-test('Toolbar button keyboard', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
   const keyboard = page.getByRole('button', { name: 'Keyboard help' })
   const keyboardHelp = page.getByText('Keyboard help')
 
@@ -81,9 +76,7 @@ test('Toolbar button keyboard', {tag: ['@display_builder', '@display_builder_min
   await page.keyboard.press('h');
   await page.waitForTimeout(dbConfig.keyboardTimeout);
   await expect(keyboardHelp).not.toBeVisible()
-})
 
-test('Toolbar button fullscreen', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
   const fullscreen = page.getByRole('button', { name: 'Display the builder as fullscreen.' })
   const fullscreenIsOn = page.locator('.display-builder--fullscreen')
 
@@ -97,9 +90,7 @@ test('Toolbar button fullscreen', {tag: ['@display_builder', '@display_builder_m
   await page.keyboard.press('Shift+M');
   await page.waitForTimeout(dbConfig.keyboardTimeout);
   await expect(fullscreenIsOn).not.toBeVisible()
-})
 
-test('Toolbar button highlight', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
   const highlight = page.getByRole('button', { name: 'Highlight components, blocks and slots.' })
   const highlightIsOn = page.locator('.display-builder--highlight')
 
@@ -113,9 +104,7 @@ test('Toolbar button highlight', {tag: ['@display_builder', '@display_builder_mi
   await page.keyboard.press('Shift+H');
   await page.waitForTimeout(dbConfig.keyboardTimeout);
   await expect(highlightIsOn).not.toBeVisible()
-})
 
-test('Toolbar button switch viewport', {tag: ['@display_builder', '@display_builder_min']}, async ({ page, drupal }) => {
   const switchViewport = page.locator(`#island-${dbName}-viewport`)
   const switchViewportList = page.locator('#listbox')
   

@@ -46,6 +46,7 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
 
     $stateManager = $this->stateManager();
     $contexts = $stateManager->getContexts($builder_id) ?? [];
+    $islands_enabled_sorted = $this->getIslandsEnableSorted($contexts);
 
     $build = [
       '#type' => 'component',
@@ -54,17 +55,21 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
         'builder_id' => $builder_id,
         'hash' => $stateManager->getCurrentHash($builder_id),
       ],
-      '#slots' => $this->buildSlots($builder_id, $contexts),
-      '#attributes' => [
-        'hx-ext' => 'sse',
-        'sse-connect' => Url::fromRoute('display_builder.api_sse', ['builder_id' => $builder_id])->toString(),
-      ],
+      '#slots' => $this->buildSlots($builder_id, $islands_enabled_sorted),
       '#attached' => [
         'drupalSettings' => [
           'dbDebug' => $entity->isDebugModeActivated(),
         ],
       ],
     ];
+
+    // Enable SSE if the active users button is enabled.
+    if (isset($islands_enabled_sorted['button']['collaboration'])) {
+      $build['#attributes'] = [
+        'hx-ext' => 'sse',
+        'sse-connect' => Url::fromRoute('display_builder.api_sse', ['builder_id' => $builder_id])->toString(),
+      ];
+    }
 
     if ($entity->getLibrary() === 'local') {
       $build['#attached']['library'][] = 'display_builder/shoelace_local';
@@ -83,17 +88,16 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
    *
    * @param string $builder_id
    *   The ID of the display builder instance.
-   * @param array $contexts
-   *   (Optional) An array of context to pass to the display builder.
+   * @param array $islands_enabled_sorted
+   *   An array of enabled islands.
    *
    * @return array
    *   An associative array with the value of each slot.
    */
-  private function buildSlots(string $builder_id, array $contexts = []): array {
+  private function buildSlots(string $builder_id, array $islands_enabled_sorted): array {
     $stateManager = $this->stateManager();
 
     $builder_data = $stateManager->getCurrentState($builder_id);
-    $islands_enabled_sorted = $this->getIslandsEnableSorted($contexts);
 
     $button_islands = $islands_enabled_sorted[IslandType::Button->value] ?? [];
     $library_islands = $islands_enabled_sorted[IslandType::Library->value] ?? [];
