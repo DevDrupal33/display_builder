@@ -60,7 +60,7 @@ islands:
     weight: -5
   component_library:
     providers:
-      db_theme_test: db_theme_test
+      display_builder_theme_test: display_builder_theme_test
     status:
       experimental: experimental
     include_no_ui: true
@@ -141,7 +141,7 @@ islands:
       bar: bar
   viewport:
     providers:
-      db_theme_test: db_theme_test
+      display_builder_theme_test: display_builder_theme_test
     format: default
     enable: true
     weight: -6

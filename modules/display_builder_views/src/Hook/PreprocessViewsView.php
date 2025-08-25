@@ -65,8 +65,9 @@ class PreprocessViewsView {
     }
 
     // Init the variable to render in views-view.html.twig.
-    $variables['display_builder'] = $fake_build['#slots']['content'] ?? [];
-    $variables['display_builder']['#cache'] = $fake_build['#cache'] ?? [];
+    // @see \Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender::preExecute()
+    $variables['content'] = $fake_build['#slots']['content'] ?? [];
+    $variables['content']['#cache'] = $fake_build['#cache'] ?? [];
   }
 
 }

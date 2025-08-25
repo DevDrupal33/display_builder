@@ -58,6 +58,7 @@ class LogsPanel extends IslandPluginBase {
    */
   public function build(string $builder_id, array $data, array $options = []): array {
     $load = $this->stateManager->load($builder_id);
+
     if (!$load) {
       return [];
     }
@@ -186,6 +187,7 @@ class LogsPanel extends IslandPluginBase {
       if ($saveHash && isset($step['hash']) && $step['hash'] === $saveHash) {
         $saveInPast = TRUE;
       }
+
       if ($step) {
         $rows_past[] = $this->buildRow(-\count($past) + $index, $step);
       }

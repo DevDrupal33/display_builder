@@ -11,6 +11,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextInterface;
 use Drupal\Core\Url;
+use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder\WithDisplayBuilderInterface;
 use Drupal\display_builder_devel\FixturesHelpers;
@@ -106,16 +107,19 @@ final class ImportForm extends FormBase {
     $builder_id = $form_state->getValue('builder_id');
 
     if ($import_type === 'fixture') {
-      $fixture_id = $form_state->getValue('fixture_id', 'blank');
-      $builder_data = FixturesHelpers::getAllFixturesData($fixture_id);
+      $fixture_id = $form_state->getValue('fixture_id', 'none:blank');
+      [$extension_name, $fixture_id] = \explode(':', $fixture_id);
+      $sources = DisplayBuilderHelpers::getFixtureDataFromExtension($extension_name, $fixture_id);
     }
     else {
-      $builder_data = Yaml::decode($form_state->getValue('data'));
+      $sources = Yaml::decode($form_state->getValue('data'));
     }
 
     $current = $this->stateManager->load($builder_id);
+
     if (!$current) {
       $this->messenger()->addError($this->t('The display builder instance %id does not exist.', ['%id' => $builder_id]));
+
       return;
     }
 
@@ -125,7 +129,7 @@ final class ImportForm extends FormBase {
     $this->stateManager->create(
       $builder_id,
       $current['entity_config_id'],
-      $builder_data,
+      $sources,
       $contexts,
     );
 

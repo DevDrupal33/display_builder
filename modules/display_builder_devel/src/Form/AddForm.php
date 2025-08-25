@@ -93,13 +93,12 @@ final class AddForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $display_builder_id = $form_state->getValue(ConfigFormBuilderInterface::PROFILE_PROPERTY);
-    $fixture_id = $form_state->getValue('fixture_id', 'blank');
+    $fixture_id = $form_state->getValue('fixture_id', 'none:blank');
     $builder_id = $form_state->getValue('builder_id');
 
-    $sources = DisplayBuilderHelpers::getFixtureData([
-      __DIR__ . '/../../fixtures/' . $fixture_id,
-      __DIR__ . '/../../../display_builder_page_layout/fixtures/' . $fixture_id,
-    ]);
+    [$extension_name, $fixture_id] = \explode(':', $fixture_id);
+
+    $sources = DisplayBuilderHelpers::getFixtureDataFromExtension($extension_name, $fixture_id);
 
     $display_builder = new MockEntity($builder_id, $display_builder_id, $sources);
     $display_builder->initInstanceIfMissing();

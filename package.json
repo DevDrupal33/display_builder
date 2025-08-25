@@ -8,6 +8,7 @@
   "scripts": {
     "test": "npx playwright test --project=firefox --fully-parallel --grep @display_builder",
     "test-min": "npx playwright test --project=firefox --fully-parallel --grep @display_builder_min",
+    "test-ui": "npx playwright test --project=firefox --ui",
     "test-debug": "npx playwright test --debug",
     "test-clean": "rm -rf playwright-report; rm -rf test-results;"
   },

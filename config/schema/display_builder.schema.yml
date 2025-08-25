@@ -1,6 +1,6 @@
 display_builder.display_builder.*:
   type: config_entity
-  label: Display builder
+  label: Display builder profile
   mapping:
     id:
       type: machine_name

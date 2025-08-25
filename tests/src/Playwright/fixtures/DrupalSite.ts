@@ -1,58 +1,85 @@
-import { mergeTests } from '@playwright/test';
-import { test as base } from '@playwright/test';
-import { Drupal } from '../objects/Drupal';
-import { exec } from '../utilities/DrupalExec';
-import { hasDrush } from '../utilities/DrupalFilesystem';
+import { test as base } from '@playwright/test'
+import { Drupal } from '../objects/Drupal'
+import { exec } from '../utilities/DrupalExec'
+import { hasDrush } from '../utilities/DrupalFilesystem'
 
 export type DrupalSite = {
-  dbPrefix: string;
-  userAgent: string;
-  sitePath: string;
-  url: string;
-  username: string;
-  password: string;
-  hasDrush: boolean;
-  teardown: Promise<string>;
-};
+  dbPrefix: string
+  userAgent: string
+  sitePath: string
+  url: string
+  username: string
+  password: string
+  hasDrush: boolean
+  teardown: Promise<string>
+}
 
 export type DrupalSiteInstall = {
-  drupalSite: DrupalSite;
-};
+  drupalSite: DrupalSite
+}
 
-const drupalSite = base.extend<DrupalSiteInstall>({
+/**
+ * Drupal site fixture to manage Drupal installation and teardown for tests.
+ * If the environment variable DRUPAL_TEST_SKIP_INSTALL is set to 'true',
+ * the installation step will be skipped, assuming Drupal is already installed.
+ * This is useful for debugging or when the test environment is already set up.
+ *
+ * The teardown function will remove the test site after all tests have run,
+ * unless the environment variable PLAYWRIGHT_SKIP_TEARDOWN is set to 'true'.
+ *
+ * The installation process uses environment variables to customize the setup:
+ * - DRUPAL_TEST_BASE_URL: The base URL for the Drupal site (required
+ *   for installation).
+ * - DRUPAL_TEST_DB_URL: The database connection string (required for
+ *   installation).
+ * - DRUPAL_TEST_SETUP_PROFILE: The installation profile to use
+ *   (defaults to 'minimal' if not set).
+ * - DRUPAL_TEST_SETUP_LANGCODE: The language code for the site  (optional).
+ * - DRUPAL_TEST_SETUP_FILE: A setup file to pre-configure the site
+ *   (optional).
+ * - DRUPAL_TEST_WEBSERVER_USER: If set, commands will be run as this user
+ *   using sudo (optional, useful for certain CI environments).
+ * - DRUPAL_TEST_DRUSH_PREFIX: A prefix to use for Drush commands
+ *   (optional).
+ * - PLAYWRIGHT_SKIP_TEARDOWN: If set to 'true', the teardown step will be
+ *   skipped (optional, useful for debugging).
+ * The fixture runs once per worker to optimize test execution time.
+ */
+export const drupalSite = base.extend<DrupalSiteInstall>({
   drupalSite: [
-    async ({ }, use, workerInfo) => {
-      if (
-        process.env.DRUPAL_TEST_SKIP_INSTALL &&
-        process.env.DRUPAL_TEST_SKIP_INSTALL === 'true'
-      ) {
-        const withDrush = await hasDrush();
-        // console.log('[Info] Drupal is installed, skip installation for tests');
+    async ({}, use, workerInfo) => {
+      if (process.env.DRUPAL_TEST_SKIP_INSTALL && process.env.DRUPAL_TEST_SKIP_INSTALL === 'true') {
+        const withDrush = await hasDrush()
+        console.log('[Info] Drupal is installed, skip installation for tests')
         await use({
           userAgent: '',
           sitePath: '',
           url: process.env.DRUPAL_TEST_BASE_URL ?? '',
           hasDrush: withDrush,
-          teardown: async () => { return Promise.resolve(''); },
-        });
-        return;
+          teardown: async () => {
+            return Promise.resolve('')
+          },
+        })
+        return
       }
 
-      // console.log('[Info] Install Drupal with test environment...')
-      const setupFile = process.env.DRUPAL_TEST_SETUP_FILE ? `--setup-file "${process.env.DRUPAL_TEST_SETUP_FILE}"` : '';
-      const installProfile = `--install-profile "${process.env.DRUPAL_TEST_SETUP_PROFILE || 'minimal'}"`;
-      const langcodeOption = process.env.DRUPAL_TEST_SETUP_LANGCODE ? `--langcode "${process.env.DRUPAL_TEST_SETUP_LANGCODE}"` : '';
+      console.log('[Info] Install Drupal with test environment...')
+      const setupFile = process.env.DRUPAL_TEST_SETUP_FILE ? `--setup-file "${process.env.DRUPAL_TEST_SETUP_FILE}"` : ''
+      const installProfile = `--install-profile "${process.env.DRUPAL_TEST_SETUP_PROFILE || 'minimal'}"`
+      const langcodeOption = process.env.DRUPAL_TEST_SETUP_LANGCODE
+        ? `--langcode "${process.env.DRUPAL_TEST_SETUP_LANGCODE}"`
+        : ''
       const dbOption =
         process.env.DRUPAL_TEST_DB_URL && process.env.DRUPAL_TEST_DB_URL.length > 0
           ? `--db-url "${process.env.DRUPAL_TEST_DB_URL}"`
-          : '';
+          : ''
       const stdout = await exec(
-        `php ./core/scripts/test-site.php install ${setupFile} ${installProfile} ${langcodeOption} --base-url ${process.env.DRUPAL_TEST_BASE_URL} ${dbOption} --json`,
-      );
+        `php ./core/scripts/test-site.php install ${setupFile} ${installProfile} ${langcodeOption} --base-url ${process.env.DRUPAL_TEST_BASE_URL} ${dbOption} --json`
+      )
 
-      const installData = JSON.parse(stdout.toString());
+      const installData = JSON.parse(stdout.toString())
 
-      const withDrush = await hasDrush();
+      const withDrush = await hasDrush()
 
       await use({
         dbPrefix: installData.db_prefix,
@@ -61,61 +88,51 @@ const drupalSite = base.extend<DrupalSiteInstall>({
         url: process.env.DRUPAL_TEST_BASE_URL ?? '',
         hasDrush: withDrush,
         teardown: async () => {
-          if (
-            process.env.PLAYWRIGHT_SKIP_TEARDOWN &&
-            process.env.PLAYWRIGHT_SKIP_TEARDOWN === 'true'
-          ) {
-            return Promise.resolve('');
+          if (process.env.PLAYWRIGHT_SKIP_TEARDOWN && process.env.PLAYWRIGHT_SKIP_TEARDOWN === 'true') {
+            return Promise.resolve('')
           }
           return await exec(
-            `php core/scripts/test-site.php tear-down --no-interaction --db-url ${process.env.DRUPAL_TEST_DB_URL}-${workerInfo.workerIndex} ${installData.db_prefix}`,
-          );
+            `php core/scripts/test-site.php tear-down --no-interaction --db-url ${process.env.DRUPAL_TEST_DB_URL}-${workerInfo.workerIndex} ${installData.db_prefix}`
+          )
         },
-      });
+      })
     },
     { scope: 'worker' },
   ],
-});
+})
 
 type DrupalObj = {
-  drupal: Drupal;
-};
+  drupal: Drupal
+}
 
-const drupal = base.extend<DrupalObj>({
+export const drupal = base.extend<DrupalObj>({
   drupal: [
     async ({ page, drupalSite }, use) => {
-      const drupal = new Drupal({ page, drupalSite });
-      await use(drupal);
+      const drupal = new Drupal({ page, drupalSite })
+      await use(drupal)
     },
     { auto: true },
   ],
-});
+})
 
 export const beforeAllTests = base.extend<{ forEachWorker: void }>({
   forEachWorker: [
     async ({ drupalSite }, use) => {
-      await use();
+      await use()
       // This code runs after all the tests in the worker process.
-      drupalSite.teardown();
+      drupalSite.teardown()
     },
     { scope: 'worker', auto: true },
   ], // automatically starts for every worker.
-});
+})
 
-const beforeEachTest = base.extend<{ forEachTest: void }>({
+export const beforeEachTest = base.extend<{ forEachTest: void }>({
   forEachTest: [
     async ({ drupal }, use) => {
       // This code runs before every test.
-      await drupal.setTestCookie();
-      await use();
+      await drupal.setTestCookie()
+      await use()
     },
     { auto: true },
   ], // automatically starts for every test.
-});
-
-export const test = mergeTests(
-  drupalSite,
-  drupal,
-  beforeAllTests,
-  beforeEachTest,
-);
+})

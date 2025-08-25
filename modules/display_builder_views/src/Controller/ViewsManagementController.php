@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Drupal\display_builder_views\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
 
@@ -18,6 +20,7 @@ class ViewsManagementController extends ControllerBase {
 
   public function __construct(
     private readonly StateManagerInterface $stateManager,
+    private readonly DateFormatterInterface $dateFormatter,
   ) {}
 
   /**
@@ -32,7 +35,7 @@ class ViewsManagementController extends ControllerBase {
       '#theme' => 'table',
       '#header' => [
         'id' => ['data' => $this->t('View')],
-        'display_builder_config' => ['data' => $this->t('Display builder')],
+        'profile_id' => ['data' => $this->t('Profile')],
         'updated' => ['data' => $this->t('Updated')],
         'log' => ['data' => $this->t('Last log')],
         'operations' => ['data' => $this->t('Operations')],
@@ -70,6 +73,7 @@ class ViewsManagementController extends ControllerBase {
     }
 
     $builder = $this->stateManager->load($builder_id);
+
     if (!$builder) {
       return [];
     }
@@ -81,8 +85,9 @@ class ViewsManagementController extends ControllerBase {
       '#title' => $view->label() . ' (' . $display_id . ')',
       '#url' => Url::fromRoute('entity.view.edit_display_form', ['view' => $view_id, 'display_id' => $display_id]),
     ];
-    $row['display_builder_config']['data'] = $builder['entity_config_id'];
-    $row['updated']['data'] = $builder['present']['time'] ?? 0;
+
+    $row['profile_id']['data'] = $view->getDisplay($display_id)['display_options']['display_extenders']['display_builder'][ConfigFormBuilderInterface::PROFILE_PROPERTY] ?? 'n/a';
+    $row['updated']['data'] = $builder['present']['time'] ? $this->formatTime((int) $builder['present']['time']) : '-';
 
     if (isset($builder['present']['log']) && $builder['present']['log'] instanceof TranslatableMarkup) {
       $row['log']['data'] = $this->formatLog($builder['present']['log']);
@@ -133,6 +138,25 @@ class ViewsManagementController extends ControllerBase {
         ]),
       ],
     ];
+  }
+
+  /**
+   * Print the date for humans.
+   *
+   * @param int $timestamp
+   *   The timestamp integer.
+   *
+   * @return string
+   *   The formatted date.
+   */
+  private function formatTime(int $timestamp): string {
+    $delta = \time() - $timestamp;
+
+    if ($delta < 86400) {
+      return $this->dateFormatter->format($timestamp, 'custom', 'G:i');
+    }
+
+    return $this->dateFormatter->format($timestamp, 'short');
   }
 
 }

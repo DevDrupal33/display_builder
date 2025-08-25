@@ -2,7 +2,7 @@
 {% set test_attributes = test_attributes.addClass(['test-attr']) %}
 {% set test_attributes = test_attributes.setAttribute('data-test', 'testing') %}
 
-<div{{ attributes.addClass('db_test_complex') }}>
+<div{{ attributes.addClass('test_complex') }}>
   <div{{ test_attributes }}>
     label: {{ label|default('none') }}, open: {{ open|default(false) ? 'true' : 'false' }}, duration: {{ duration|default(0) }}
     <div class="slot slot_1">

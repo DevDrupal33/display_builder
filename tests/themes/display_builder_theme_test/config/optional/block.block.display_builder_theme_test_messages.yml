@@ -4,9 +4,9 @@ dependencies:
   module:
     - system
   theme:
-    - db_theme_test
-id: db_theme_test_messages
-theme: db_theme_test
+    - display_builder_theme_test
+id: display_builder_theme_test_messages
+theme: display_builder_theme_test
 region: highlighted
 weight: 0
 provider: null

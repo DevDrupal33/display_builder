@@ -1,0 +1,34 @@
+-
+  source_id: component
+  source:
+    component:
+      component_id: 'display_builder_theme_test:test_simple'
+      variant_id: null
+      props:
+        label:
+          source_id: textfield
+          source:
+            value: 'This is a test'
+        tag:
+          source_id: textfield
+          source:
+            value: h5
+      slots:
+        slot_1:
+          sources:
+            -
+              source_id: token
+              source:
+                value: 'This is a token test'
+            -
+              source_id: wysiwyg
+              source:
+                value:
+                  value: '<p>This is a <b>Wysiwyg</b> test</p>'
+                  format: basic_html
+  _third_party_settings:
+    ui_styles:
+      selected:
+        test_style_1: test-style-1
+        test_style_2: h2
+      extra: ''

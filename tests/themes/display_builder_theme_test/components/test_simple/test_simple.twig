@@ -1,0 +1,7 @@
+<div{{ attributes.addClass('test_simple').setAttribute('data-test', 'test_simple') }}>
+  <{{ tag|default('h5') }}>label: {{ label|default('none') }}</{{ tag|default('h5') }}>
+  <div class="slot slot_test" data-test="test_simple_slot">
+    {{ slot_1 }}
+  </div>
+  <button class="test_change_color">Click me</button>
+</div>

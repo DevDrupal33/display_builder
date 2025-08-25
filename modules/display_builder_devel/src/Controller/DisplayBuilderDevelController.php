@@ -23,11 +23,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  */
 class DisplayBuilderDevelController extends ControllerBase {
 
-  /**
-   * Seconds in a day.
-   */
-  private const SECONDS_IN_A_DAY = 86400;
-
   public function __construct(
     private readonly StateManagerInterface $stateManager,
     private readonly DateFormatterInterface $dateFormatter,
@@ -245,7 +240,7 @@ class DisplayBuilderDevelController extends ControllerBase {
   private function formatTime(int $timestamp): string {
     $delta = \time() - $timestamp;
 
-    if ($delta < self::SECONDS_IN_A_DAY) {
+    if ($delta < 86400) {
       return $this->dateFormatter->format($timestamp, 'custom', 'G:i');
     }
 

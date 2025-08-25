@@ -59,7 +59,7 @@ Display Builder data is stored as content field provided by `ui_patterns_field` 
 - `source_id`: the source plugin ID
 - `source`: the source plugin config
 
-The entity view display config entity has additional `override_field` and `override_display_builder` properties for the field name storing the data and the related display builder profile:
+The entity view display config entity has additional `override_field` and `override_profile` properties for the field name storing the data and the related display builder profile:
 
 ```yaml
 id: node.article.default
@@ -73,9 +73,9 @@ third_party_settings:
     display_builder: default
     sources: [...]
     override_field: field_full_display
-    override_display_builder: default
+    override_profile: default
 ```
 
 Overview:
 
-![](images/overrides-internals.webp)
+![Overrides internals](images/overrides-internals.webp)

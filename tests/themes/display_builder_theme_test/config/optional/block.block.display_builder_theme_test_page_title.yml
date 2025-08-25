@@ -2,9 +2,9 @@ langcode: en
 status: true
 dependencies:
   theme:
-    - db_theme_test
-id: db_theme_test_page_title
-theme: db_theme_test
+    - display_builder_theme_test
+id: display_builder_theme_test_page_title
+theme: display_builder_theme_test
 region: header
 weight: -30
 provider: null

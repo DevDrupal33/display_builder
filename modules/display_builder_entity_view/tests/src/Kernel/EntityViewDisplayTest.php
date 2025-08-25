@@ -44,9 +44,9 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
 
     \Drupal::service('theme_installer')
       ->install([
-        'db_theme_test',
+        'display_builder_theme_test',
       ]);
-    $this->config('system.theme')->set('default', 'db_theme_test')->save();
+    $this->config('system.theme')->set('default', 'display_builder_theme_test')->save();
 
     $this->installConfig(['display_builder']);
   }
@@ -119,7 +119,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
 
     $changed = $display->onDependencyRemoval([
       'config' => [],
-      'theme' => ['db_theme_test'],
+      'theme' => ['display_builder_theme_test'],
       'module' => [],
     ]);
 

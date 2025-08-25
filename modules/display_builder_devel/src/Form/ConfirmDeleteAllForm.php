@@ -48,6 +48,7 @@ class ConfirmDeleteAllForm extends ConfirmFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $this->stateManager->deleteAll();
     $form_state->setRedirectUrl(new Url('display_builder_devel.collection'));
+    drupal_flush_all_caches();
   }
 
 }

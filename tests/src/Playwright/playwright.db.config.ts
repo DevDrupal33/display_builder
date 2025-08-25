@@ -2,44 +2,44 @@
  * Display Builder tests configuration.
  */
 export default {
-  operatingMode: "native",
-  drushCmd: "drush",
+  operatingMode: 'native',
+  drushCmd: 'drush',
 
   keyboardTimeout: 350, // Because keyboard.js has a 300 ms highlight of the clicked button.
 
-  dbList: "admin/structure/display-builder/index",
-  dbAddUrl: "admin/structure/display-builder/instance/add",
-  dbViewUrl: "admin/structure/display-builder/instance/{db_id}",
-  dbDeleteUrl: "admin/structure/display-builder/instance/{db_id}/delete",
-  dbDeleteAllUrl: "admin/structure/display-builder/instance/delete-all",
-  dbEditUrl: "admin/structure/display-builder/instance/{db_id}/edit",
+  dbList: 'admin/structure/display-builder/index',
+  dbAddUrl: 'admin/structure/display-builder/instance/add',
+  dbViewUrl: 'admin/structure/display-builder/instance/{db_id}',
+  dbDeleteUrl: 'admin/structure/display-builder/instance/{db_id}/delete',
+  dbDeleteAllUrl: 'admin/structure/display-builder/instance/delete-all',
+  dbEditUrl: 'admin/structure/display-builder/instance/{db_id}/edit',
 
-  viewsList: "admin/structure/views",
-  viewsAddUrl: "admin/structure/views/add",
-  viewsEditUrl: "admin/structure/views/view/{view_id}/edit",
-  viewsDbList: "admin/structure/views/display-builder",
-  viewsTestName: "test_db_view", // Must match the view ID in the test config.
+  viewsList: 'admin/structure/views',
+  viewsAddUrl: 'admin/structure/views/add',
+  viewsEditUrl: 'admin/structure/views/view/{view_id}/edit',
+  viewsDbList: 'admin/structure/views/display-builder',
+  viewsTestName: 'test_db_view', // Must match the view ID in the test config.
 
-  pageListUrl: "admin/structure/page-layout",
-  pageAddUrl: "admin/structure/page-layout/add",
-  pageTestName: "page_layout__test",
+  pageListUrl: 'admin/structure/page-layout',
+  pageAddUrl: 'admin/structure/page-layout/add',
+  pageTestName: 'page_layout__test',
 
-  logInUrl: "user/login",
-  logOutUrl: "user/logout",
+  logInUrl: 'user/login',
+  logOutUrl: 'user/logout',
 
-  authDir: ".auth",
+  authDir: '.auth',
 
   pantheon: {
     isTarget: false,
-    site: "aSite",
-    environment: "dev",
+    site: 'aSite',
+    environment: 'dev',
   },
 
   targetSite: {
     isTarget: false,
     root: null, // optional
-    remoteHost: "localhost",
+    remoteHost: 'localhost',
     remoteUser: null, // optional
-    sshOptions: "-p 2222", // optional
+    sshOptions: '-p 2222', // optional
   },
 }

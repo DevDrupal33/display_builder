@@ -1,8 +1,8 @@
-# Test sources with db_theme_test component
+# Test sources with display_builder_theme_test component
 - source_id: component
   source:
     component:
-      component_id: db_theme_test:db_test_simple
+      component_id: display_builder_theme_test:test_simple
       props:
         label:
           source_id: textfield

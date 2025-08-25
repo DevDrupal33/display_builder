@@ -1,25 +1,22 @@
-import { test as setup } from '@playwright/test';
-import { getRootDir } from './utilities/DrupalFilesystem';
-import { chmodSync, existsSync, mkdirSync } from 'node:fs';
+import { test as setup } from '@playwright/test'
+import { getRootDir } from './utilities/DrupalFilesystem'
+import { chmodSync, existsSync, mkdirSync } from 'node:fs'
 
 setup('Create sites/simpletest folder', async () => {
-  const rootDir = getRootDir();
-  const sitesDir = `${rootDir}/sites`;
-  const simpletestDir = `${sitesDir}/simpletest`;
+  const rootDir = getRootDir()
+  const sitesDir = `${rootDir}/sites`
+  const simpletestDir = `${sitesDir}/simpletest`
   if (!existsSync(simpletestDir)) {
     mkdirSync(simpletestDir, {
       mode: 0o777,
-    });
+    })
   }
 
-  chmodSync(`${sitesDir}/default`, 0o755);
-  const filesDir = `${sitesDir}/default/files`;
+  chmodSync(`${sitesDir}/default`, 0o755)
+  const filesDir = `${sitesDir}/default/files`
   if (!existsSync(filesDir)) {
     mkdirSync(filesDir, {
       mode: 0o777,
-    });
+    })
   }
-
-  
-
-});
+})

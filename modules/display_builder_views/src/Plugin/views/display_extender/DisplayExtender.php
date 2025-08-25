@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_views\Plugin\views\display_extender;
 
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Theme\Registry;
 use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
@@ -52,6 +54,16 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
   protected $entityTypeManager;
 
   /**
+   * The theme registry.
+   */
+  protected Registry $themeRegistry;
+
+  /**
+   * The list of modules.
+   */
+  protected ModuleExtensionList $modules;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): self {
@@ -59,6 +71,8 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
     $instance->stateManager = $container->get('display_builder.state_manager');
     $instance->configFormBuilder = $container->get('display_builder.config_form_builder');
     $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->themeRegistry = $container->get('theme.registry');
+    $instance->modules = $container->get('extension.list.module');
 
     return $instance;
   }
@@ -114,6 +128,23 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
       'desc' => $this->t('Use display builder as output for this view.'),
       'value' => $this->getDisplayBuilder()?->label() ?? $this->t('Disabled'),
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preExecute(): void {
+    if (!$this->getDisplayBuilder()) {
+      return;
+    }
+    // We alter the registry here instead of implementing
+    // hook_theme_registry_alter in order keep the alteration specific to each
+    // view.
+    $view = $this->view;
+    // Theme hook suggestion of the current view display.
+    $suggestion = \implode('__', ['views_view', $view->id(), $view->getDisplay()->getPluginId()]);
+    $entry = $this->buildThemeRegistryEntry();
+    $this->themeRegistry->getRuntime()->set($suggestion, $entry);
   }
 
   /**
@@ -227,6 +258,21 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
     $this->view->storage->save();
     // @todo Test if we still need to invalidate the cache manually here.
     $this->view->storage->invalidateCaches();
+  }
+
+  /**
+   * Build theme registry entry.
+   *
+   * @return array
+   *   A theme registry entry.
+   */
+  protected function buildThemeRegistryEntry(): array {
+    $theme_registry = $this->themeRegistry->get();
+    // Identical to views_view with a specific path.
+    $entry = $theme_registry['views_view'];
+    $entry['path'] = $this->modules->getPath('display_builder_views') . '/templates';
+
+    return $entry;
   }
 
   /**

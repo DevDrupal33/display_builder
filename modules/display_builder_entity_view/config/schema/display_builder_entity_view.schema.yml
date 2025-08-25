@@ -8,7 +8,7 @@ core.entity_view_display.*.*.*.third_party.display_builder:
       constraints:
         ConfigExists:
           prefix: 'display_builder.display_builder.'
-    override_display_builder:
+    override_profile:
       label: "Display Builder override profile"
       type: string
       constraints:

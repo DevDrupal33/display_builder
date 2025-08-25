@@ -1,0 +1,10 @@
+.test_simple {
+  margin: 10px;
+  padding: 10px;
+  .slot {
+    margin: 10px;
+    padding: 10px;
+    border: 2px solid rgb(106, 106, 192);
+    background-color: #b5e4a7;
+  }
+}

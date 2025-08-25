@@ -105,6 +105,7 @@ class StateManager implements StateManagerInterface {
    */
   public function canSaveContextsRequirement(string $builder_id, ?array $contexts = NULL): bool {
     $contexts ??= $this->getContexts($builder_id);
+
     if ($contexts === NULL) {
       return FALSE;
     }
@@ -513,6 +514,7 @@ class StateManager implements StateManagerInterface {
   public function getUsers(string $builder_id): array {
     $users = [];
     $storage = $this->stateStorage->load($builder_id);
+
     if ($storage === NULL) {
       return [];
     }

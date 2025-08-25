@@ -11,3 +11,9 @@ props:
     label:
       title: Label
       type: string
+    tag:
+      title: Tag
+      default: h5
+      description: HTML tag, only letters and dash allowed.
+      type: string
+      pattern: '^[a-zA-Z0-9-]+$'

@@ -19,17 +19,19 @@ class FixturesHelpers {
    * Default modules to look for fixtures.
    */
   private static array $moduleNames = [
+    'display_builder_ui',
     'display_builder_devel',
     'display_builder_entity_view',
     'display_builder_views',
     'display_builder_page_layout',
+    'display_builder_test',
   ];
 
   /**
    * Default modules to look for fixtures.
    */
   private static array $themeNames = [
-    'db_theme_test',
+    'display_builder_theme_test',
   ];
 
   /**
@@ -45,7 +47,7 @@ class FixturesHelpers {
     if (empty($moduleNames)) {
       $moduleNames = self::$moduleNames;
     }
-    $output = ['blank' => new TranslatableMarkup('Blank (Empty)')];
+    $output = ['none:blank' => new TranslatableMarkup('Blank (Empty)')];
 
     foreach ($moduleNames as $moduleName) {
       try {
@@ -109,13 +111,13 @@ class FixturesHelpers {
    *
    * @param array $paths
    *   The paths to look in.
-   * @param string|null $moduleName
-   *   (Optional) Module name prefix.
+   * @param string $extensionName
+   *   Module or theme name.
    *
    * @return array
    *   The list of fixtures available.
    */
-  private static function getFixturesOptions(array $paths, ?string $moduleName = NULL): array {
+  private static function getFixturesOptions(array $paths, ?string $extensionName = NULL): array {
     $output = [];
 
     foreach ($paths as $path) {
@@ -128,11 +130,9 @@ class FixturesHelpers {
 
       foreach ($finder as $file) {
         $name = $file->getFilenameWithoutExtension();
-        $output[$name] = u(\str_replace('_', ' ', $name))->title();
-
-        if ($moduleName) {
-          $output[$name] = \sprintf('[%s] %s', $moduleName, $output[$name]);
-        }
+        $title = u(\str_replace('_', ' ', $name))->title();
+        $key = \sprintf('%s:%s', $extensionName, $name);
+        $output[$key] = $title;
       }
     }
 

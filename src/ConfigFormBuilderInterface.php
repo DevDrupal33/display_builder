@@ -10,15 +10,19 @@ namespace Drupal\display_builder;
 interface ConfigFormBuilderInterface {
 
   // Storage property for the profile config entity ID.
+  // This will we used in some schema.yml, careful if you change it.
   public const PROFILE_PROPERTY = 'display_builder';
 
   // Storage property for the nestable list of UI Patterns 2 sources.
+  // This will we used in some schema.yml, careful if you change it.
   public const SOURCES_PROPERTY = 'sources';
 
   // Storage property for the overridden profile config entity ID.
-  public const OVERRIDE_PROFILE_PROPERTY = 'override_display_builder';
+  // This will we used in some schema.yml, careful if you change it.
+  public const OVERRIDE_PROFILE_PROPERTY = 'override_profile';
 
   // Storage property for of the override field.
+  // This will we used in some schema.yml, careful if you change it.
   public const OVERRIDE_FIELD_PROPERTY = 'override_field';
 
   /**

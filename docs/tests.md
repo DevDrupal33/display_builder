@@ -37,18 +37,19 @@ npx playwright install
 
 ## Local tests
 
-Tests are made to run in ci, they can run locally in 2 modes, with an integrated
-Drupal installation for tests or just on a local installed Drupal.
+Tests are made to run in **ci**, they can run locally with a running Drupal for
+local tests, with or without Drupal installed.
 
-For local tests, you must enable `extension_discovery_scan_tests` in your
-settings.php and disable js aggregation:
+For local tests with installed Drupal, you must enable
+`extension_discovery_scan_tests` in your **settings.php** and disable js
+aggregation:
 
 ```php
 $config['system.performance']['js']['preprocess'] = FALSE;
 $settings['extension_discovery_scan_tests'] = TRUE;
 ```
 
-some modules **MUST** be enabled:
+Modules that **MUST** be enabled:
 
 - layout_builder
 - display_builder_test
@@ -57,7 +58,8 @@ some modules **MUST** be enabled:
 - display_builder_entity_view
 - display_builder_page_layout
 
-And the theme **MUST** be `db_theme_test`, unless test is specific for a theme.
+Theme **MUST** be `display_builder_theme_test` by default, unless test is
+specific for a theme.
 
 Copy and adapt the `.env.dist` file as `.env` to set your environment.
 
@@ -66,16 +68,16 @@ Drupal to avoid the install step.
 
 _Note_: Webkit test can not be run in a non MacOS env.
 
-Commands to run the tests:
+Commands to run the minimum tests:
 
 ```shell
-npm run test
+npm run test-min
 ```
 
 Or test by tag:
 
 ```shell
-npx playwright test --project=firefox --grep "@display_builder_min"
+npx playwright test --project=firefox --grep "@display_builder_views"
 ```
 
 Or a specific test:

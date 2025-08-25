@@ -73,7 +73,7 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
     $row = [];
     /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $entity */
     $row['label'] = $entity->label();
-    $row['display_builder']['#plain_text'] = $entity->getDisplayBuilder()->label();
+    $row['display_builder']['#plain_text'] = $entity->getDisplayBuilder()?->label() ?? '';
     $row['conditions'] = [
       '#theme' => 'item_list',
       '#list_type' => 'ul',

@@ -35,9 +35,9 @@ class DisplayBuilderTestSetup implements TestSetupInterface {
     // Install DB test theme and set it as the default theme.
     $theme_installer = \Drupal::service('theme_installer');
     \assert($theme_installer instanceof ThemeInstallerInterface);
-    $theme_installer->install(['db_theme_test'], TRUE);
+    $theme_installer->install(['display_builder_theme_test'], TRUE);
     $system_theme_config = \Drupal::configFactory()->getEditable('system.theme');
-    $system_theme_config->set('default', 'db_theme_test')->save();
+    $system_theme_config->set('default', 'display_builder_theme_test')->save();
   }
 
 }

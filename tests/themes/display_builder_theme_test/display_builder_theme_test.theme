@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Functions to support theming in the DB test theme.
+ * Functions to support theming in the Display Builder test theme.
  *
  * phpcs:disable Squiz.Commenting.FunctionComment.MissingParamTag
  */
@@ -12,14 +12,14 @@ declare(strict_types=1);
 /**
  * Implements hook_preprocess_HOOK() for html.html.twig.
  */
-function db_theme_test_preprocess_html(array &$variables): void {}
+function display_builder_theme_test_preprocess_html(array &$variables): void {}
 
 /**
  * Implements hook_preprocess_HOOK() for page.html.twig.
  */
-function db_theme_test_preprocess_page(array &$variables): void {}
+function display_builder_theme_test_preprocess_page(array &$variables): void {}
 
 /**
  * Implements hook_preprocess_HOOK() for node.html.twig.
  */
-function db_theme_test_preprocess_node(array &$variables): void {}
+function display_builder_theme_test_preprocess_node(array &$variables): void {}
