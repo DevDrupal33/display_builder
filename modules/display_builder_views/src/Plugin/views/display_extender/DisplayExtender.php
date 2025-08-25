@@ -170,10 +170,24 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
   /**
    * {@inheritdoc}
    */
+  public static function checkInstanceId(string $instance_id): ?array {
+    // Examples: view__articles__default, view__people__grid.
+    if (!\str_starts_with($instance_id, 'view__')) {
+      return NULL;
+    }
+    [, $view, $display] = \explode('__', $instance_id);
+
+    return [
+      'view' => $view,
+      'display' => $display,
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function getUrlFromInstanceId(string $instance_id): Url {
-    $view = \explode('__', $instance_id)[1];
-    $display = \explode('__', $instance_id)[2];
-    $params = ['view' => $view, 'display' => $display];
+    $params = self::checkInstanceId($instance_id);
 
     return Url::fromRoute('display_builder_views.views.manage', $params);
   }

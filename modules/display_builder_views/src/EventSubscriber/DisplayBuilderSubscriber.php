@@ -48,7 +48,7 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     if (!$view) {
       return;
     }
-    $display_id = \explode('__', $builder_id)[2];
+    $display_id = DisplayExtender::checkInstanceId($builder_id)['display'];
     $view->getExecutable()->setDisplay($display_id);
     $extenders = $view->getExecutable()->getDisplay()->getExtenders();
 

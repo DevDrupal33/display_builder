@@ -68,6 +68,15 @@ class MockEntity implements WithDisplayBuilderInterface {
   /**
    * {@inheritdoc}
    */
+  public static function checkInstanceId(string $instance_id): ?array {
+    return [
+      'id' => $instance_id,
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getBuilderUrl(): Url {
     return Url::fromRoute('display_builder_devel.view', ['builder_id' => $this->getInstanceId()]);
   }

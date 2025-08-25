@@ -12,6 +12,10 @@ use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_devel\MockEntity;
+use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
+use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
+use Drupal\display_builder_page_layout\Entity\PageLayout;
+use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
@@ -31,7 +35,7 @@ final class EditForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state, ?string $builder_id = NULL, ?string $routeName = NULL, ?ParameterBag $routeParameters = NULL): array {
     // @todo have a way for saving.
-    if (\str_starts_with($builder_id, 'page_layout__') || \str_starts_with($builder_id, 'view__') || \str_starts_with($builder_id, 'entity_view__')) {
+    if (PageLayout::checkInstanceId($builder_id) || EntityViewDisplay::checkInstanceId($builder_id) || DisplayExtender::checkInstanceId($builder_id) || DisplayBuilderItemList::checkInstanceId($builder_id)) {
       return [
         '#markup' => $this->t('This configuration must be managed directly from the entity type.'),
       ];

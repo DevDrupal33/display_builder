@@ -63,6 +63,23 @@ final class DisplayBuilderItemList extends MapFieldItemList implements WithDispl
   /**
    * {@inheritdoc}
    */
+  public static function checkInstanceId(string $instance_id): ?array {
+    // Example: entity_view_override__node__1__field_teaser.
+    if (!\str_starts_with($instance_id, 'entity_view_override__')) {
+      return NULL;
+    }
+    [, $entity_type_id, $entity_id, $field_name] = \explode('__', $instance_id);
+
+    return [
+      'entity_type_id' => $entity_type_id,
+      'entity_id' => $entity_id,
+      'field_name' => $field_name,
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function getUrlFromInstanceId(string $instance_id): Url {
     // Example: entity_view_override__node__1__field_teaser.
     [, $entity_type_id, $entity_id, $field_name] = \explode('__', $instance_id);

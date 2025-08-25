@@ -11,6 +11,7 @@ use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder\WithDisplayBuilderInterface;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
+use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -42,21 +43,26 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     $builder_id = $event->getBuilderId();
     $contexts = $this->stateManager->getContexts($builder_id);
 
-    if (\str_starts_with($builder_id, 'entity_view_override__')) {
-      [, $entity_type_id, $entity_id, $field_name] = \explode('__', $builder_id);
+    // Entity view display overrides.
+    if ($params = DisplayBuilderItemList::checkInstanceId($builder_id)) {
       /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
-      $entity = $this->entityTypeManager->getStorage($entity_type_id)
-        ->load($entity_id);
-      /** @var \Drupal\display_builder\WithDisplayBuilderInterface $with_display_builder */
-      $with_display_builder = $entity->get($field_name);
-      $with_display_builder->saveSources();
+      $entity = $this->entityTypeManager->getStorage($params['entity_type_id'])
+        ->load($params['entity_id']);
+      /** @var \Drupal\display_builder\WithDisplayBuilderInterface $override */
+      $override = $entity->get($params['field_name']);
+
+      if ($override) {
+        $override->saveSources();
+      }
     }
-    elseif (\str_starts_with($builder_id, 'entity_view__')) {
+
+    // Entity view displays.
+    elseif (EntityViewDisplay::checkInstanceId($builder_id)) {
       if (!$this->stateManager->hasSaveContextsRequirement($builder_id, EntityViewDisplay::getContextRequirement(), $contexts)) {
         return;
       }
       // Entity view display parameters are also in route match.
-      /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $display */
+      /** @var \Drupal\display_builder\WithDisplayBuilderInterface|null $display */
       $display = $this->getEntityViewDisplayEntity($contexts['entity'], $contexts['view_mode']);
 
       if ($display) {

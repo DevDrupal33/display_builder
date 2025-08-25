@@ -23,6 +23,17 @@ interface WithDisplayBuilderInterface {
   public static function getContextRequirement(): string;
 
   /**
+   * Check if instance ID can be used with the interface implementation.
+   *
+   * @param string $instance_id
+   *   Instance ID, as managed by the StateManager.
+   *
+   * @return array
+   *   The parts we checked, extracted from the instance ID string.
+   */
+  public static function checkInstanceId(string $instance_id): ?array;
+
+  /**
    * Get display builder instance URL.
    *
    * @return \Drupal\Core\Url

@@ -41,10 +41,9 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
   public function onSave(DisplayBuilderEvent $event): void {
     $builder_id = $event->getBuilderId();
     $contexts = $event->getData();
-    // @see Drupal\display_builder_page_layout\Entity\PageLayout::getInstanceId()
-    $prefix = 'page_layout__';
+    $params = PageLayout::checkInstanceId($builder_id);
 
-    if (!\str_starts_with($builder_id, $prefix)) {
+    if (!$params) {
       return;
     }
 
@@ -54,7 +53,13 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     if (!$this->stateManager->hasSaveContextsRequirement($builder_id, PageLayout::getContextRequirement(), $contexts)) {
       return;
     }
-    $page_layout_id = \substr($builder_id, \strlen($prefix));
+    $page_layout_id = $params['page_layout'] ?? NULL;
+
+    if (!$page_layout_id) {
+      // This must never happen because PageLayout::checkInstanceId() always
+      // return a page_layout key.
+      return;
+    }
     /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $page_layout */
     $page_layout = $this->entityTypeManager->getStorage('page_layout')->load($page_layout_id);
     $page_layout->saveSources();

@@ -11,6 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
 
 /**
  * Confirmation form to confirm deletion of display builder instance.
@@ -72,8 +73,8 @@ class ConfirmViewsBuilderDeleteForm extends ConfirmFormBase {
    * Unset display builder.
    */
   protected function unsetDisplayBuilder(): void {
-    $view_id = \explode('__', $this->builderId)[1];
-    $display_id = \explode('__', $this->builderId)[2];
+    $view_id = DisplayExtender::checkInstanceId($this->builderId)['view'];
+    $display_id = DisplayExtender::checkInstanceId($this->builderId)['display'];
     $view = $this->entityTypeManager->getStorage('view')->load($view_id);
     // It is risky to alter a View like that. We need to be careful to not
     // break the storage integrity, but we didn't find a better way.

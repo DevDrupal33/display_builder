@@ -44,7 +44,7 @@ class ViewsManagementController extends ControllerBase {
     ];
 
     foreach (\array_keys($this->stateManager->loadAll()) as $builder_id) {
-      if (!\str_starts_with($builder_id, 'view__')) {
+      if (!DisplayExtender::checkInstanceId($builder_id)) {
         continue;
       }
       $build['display_builder_table']['#rows'][$builder_id] = $this->buildRow($builder_id);
@@ -64,8 +64,8 @@ class ViewsManagementController extends ControllerBase {
    *   A table row.
    */
   protected function buildRow(string $builder_id): array {
-    $view_id = \explode('__', $builder_id)[1];
-    $display_id = \explode('__', $builder_id)[2];
+    $view_id = DisplayExtender::checkInstanceId($builder_id)['view'];
+    $display_id = DisplayExtender::checkInstanceId($builder_id)['display'];
     $view = $this->entityTypeManager()->getStorage('view')->load($view_id);
 
     if (!$view) {

@@ -29,8 +29,9 @@ class LibrariesPanel extends IslandPluginBase {
    * {@inheritdoc}
    */
   public function build(string $builder_id, array $data, array $options = []): array {
-    // This will be filled by DisplayBuilder::build()
+    // This will be filled by DisplayBuilderViewBuilder::view()
     // @todo Move the logic here.
+    // @see https://www.drupal.org/project/display_builder/issues/3542866
     return [];
   }
 

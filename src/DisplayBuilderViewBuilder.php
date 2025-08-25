@@ -127,7 +127,8 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
     $view_main = $view_islands_data['view_main'];
 
     // Library content can be in main or sidebar.
-    // @todo Move the logic to LibrariesIsland::build().
+    // @todo Move the logic to LibrariesPanel::build().
+    // @see https://www.drupal.org/project/display_builder/issues/3542866
     if (isset($view_sidebar['library']) && !empty($library_islands)) {
       $view_sidebar['library']['content'] = $library_islands;
     }

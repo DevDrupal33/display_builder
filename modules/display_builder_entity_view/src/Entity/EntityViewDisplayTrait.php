@@ -117,10 +117,23 @@ trait EntityViewDisplayTrait {
   }
 
   /**
-   * Returns the URL for the display builder.
-   *
-   * @return \Drupal\Core\Url
-   *   The URL for the display builder.
+   * {@inheritdoc}
+   */
+  public static function checkInstanceId(string $instance_id): ?array {
+    if (!\str_starts_with($instance_id, 'entity_view__')) {
+      return NULL;
+    }
+    [, $entity, $bundle, $view_mode] = \explode('__', $instance_id);
+
+    return [
+      'entity' => $entity,
+      'bundle' => $bundle,
+      'view_mode' => $view_mode,
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function getBuilderUrl(): Url {
     $fieldable_entity_type = $this->entityTypeManager()->getDefinition($this->getTargetEntityTypeId());

@@ -132,6 +132,20 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   /**
    * {@inheritdoc}
    */
+  public static function checkInstanceId(string $instance_id): ?array {
+    if (!\str_starts_with($instance_id, 'page_layout__')) {
+      return NULL;
+    }
+    [, $page_layout] = \explode('__', $instance_id);
+
+    return [
+      'page_layout' => $page_layout,
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getBuilderUrl(): Url {
     return Url::fromRoute('entity.page_layout.display_builder', ['page_layout' => $this->id()]);
   }
@@ -140,8 +154,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
    * {@inheritdoc}
    */
   public static function getUrlFromInstanceId(string $instance_id): Url {
-    $page_layout = \explode('__', $instance_id)[1];
-    $params = ['page_layout' => $page_layout];
+    $params = self::checkInstanceId($instance_id);
 
     return Url::fromRoute('entity.page_layout.display_builder', $params);
   }
