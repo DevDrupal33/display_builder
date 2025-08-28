@@ -1,8 +1,8 @@
 {
-  "name": "display_builder",
+  "name": "drupal_playwright_test",
   "license": "ISC",
-  "description": "Tests e2e for Display builder. See tests/src/Playwright/tests",
-  "version": "1.0.0",
+  "description": "Tests e2e for Drupal. See tests/src/Playwright/tests",
+  "version": "0.0.1",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.54.1",
-    "@types/node": "^24.1.0",
+    "@types/node": "^24.3.0",
     "dotenv": "^17.2.0",
     "winston": "^3.17.0"
   },

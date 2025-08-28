@@ -2,8 +2,8 @@ import { exec as execNode } from 'node:child_process'
 import { promisify } from 'util'
 import { getRootDir, getVendorDir } from './DrupalFilesystem'
 import { DrupalSiteInstall } from '../fixtures/DrupalSite'
-
 import * as path from 'node:path'
+import * as utils from './utils'
 
 // Promisify exec for async/await usage.
 const execPromise = promisify(execNode)
@@ -62,7 +62,7 @@ export const execDrush = async (command: string, drupalSiteInstall: DrupalSiteIn
     cmdDrush = `${process.env.DRUPAL_TEST_DRUSH_PREFIX} drush -y ${command}`
   }
 
-  console.log(`[Info] Drush command: ${cmdDrush}`)
+  utils.debug(`Drush command: ${cmdDrush}`)
   try {
     const { stdout }: { stdout: string } = await execPromise(cmdDrush, { cwd: rootDir })
     return stdout.toString().trim()

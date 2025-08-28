@@ -1,10 +1,20 @@
 # Tests e2e
 
-E2e tests are done with [Playwright](https://playwright.dev/docs/intro#installing-playwright).
+End-to-end (E2E) tests in Drupal with [Playwright](https://playwright.dev/docs/intro).  
+Playwright enables reliable end-to-end testing for modern web apps.
 
 Tests are located in `tests/src/Playwright/Tests`.
 
-## Local installation
+## Requirements
+
+You must install `Drush` and `drupal/core-dev` in your project:
+
+```sh
+composer require drush/drush --dev
+composer require drupal/core-dev:^11.2 -W --dev
+```
+
+## Quick Start
 
 If your system match [requirements](https://playwright.dev/docs/intro#system-requirements),
 you can install Playwright run from this module folder:
@@ -14,11 +24,63 @@ npm install
 npx playwright install --with-deps
 ```
 
-**Fedora** is not yet supported by Playwright but can work, see this
-[issue](https://github.com/microsoft/playwright/issues/29559), a workaround is
-to install these packages:
+Copy `.env.dist` to `.env`. No need to change anything.
 
-```shell
+Uncomment `webServer` in [playwright.config.ts](./playwright.config.ts), then run:
+
+```sh
+npm run test
+```
+
+### Run Example Test Locally with Docker
+
+If you don't want or cannot install Playwright locally, you can run Playwright
+server in a Docker container.
+
+See [Playwright Docker documentation](https://playwright.dev/docs/docker#remote-connection)
+for more details.
+
+Pull and run Playwright server from this folder:
+
+```sh
+docker pull mcr.microsoft.com/playwright:v1.55.0-noble
+docker run --add-host=hostmachine:host-gateway -p 3000:3000 --rm --init -it --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.55.0-noble /bin/sh -c "npx -y playwright@1.55.0 run-server --port 3000 --host 0.0.0.0"
+```
+
+Launch a webserver on Drupal **root**, for example:
+
+```sh
+php -S 0.0.0.0:8000 -t web
+```
+
+Copy `.env.dist` to `.env`, adapt values for first case:
+
+```sh
+DRUPAL_TEST_BASE_URL='http://hostmachine:8000'
+```
+
+Run the test from this folder:
+
+```sh
+PW_TEST_CONNECT_WS_ENDPOINT=ws://127.0.0.1:3000/ npx playwright test --project=firefox
+```
+
+Adpapt the other variable for an installed Drupal with a database.
+
+### Run Tests Locally
+
+#### Local Installation
+
+If your system meets the [requirements](https://playwright.dev/docs/intro#system-requirements), you can install Playwright from this folder:
+
+```sh
+npm install
+npx playwright install --with-deps
+```
+
+**Fedora** is not officially supported by Playwright, but it can work. See this [issue](https://github.com/microsoft/playwright/issues/29559). As a workaround, install the following packages:
+
+```sh
 sudo dnf install -y \
     libicu \
     libjpeg-turbo \
@@ -28,21 +90,26 @@ sudo dnf install -y \
     libffi
 ```
 
-An run install:
+Then run the install without dependencies:
 
 ```shell
 npm install
 npx playwright install
 ```
 
-## Local tests
+Even if you see some error messages, tests should work on **Fedora**.
 
-Tests are made to run in **ci**, they can run locally with a running Drupal for
-local tests, with or without Drupal installed.
+#### Local Tests
 
-For local tests with installed Drupal, you must enable
-`extension_discovery_scan_tests` in your **settings.php** and disable js
-aggregation:
+Tests are designed to run in **GitLab CI**, but they can also run locally with a running Drupal instance, with or without Drupal installed.
+
+Without a local server, with Drupal and Drush installed, you can quickly launch the example test by running:
+
+```sh
+npm run test
+```
+
+For local tests with installed Drupal you must enable `extension_discovery_scan_tests` in your **settings.php** and disable js aggregation:
 
 ```php
 $config['system.performance']['js']['preprocess'] = FALSE;
@@ -63,39 +130,38 @@ specific for a theme.
 
 Copy and adapt the `.env.dist` file as `.env` to set your environment.
 
-There is different case to run tests with a full installation or on a running
-Drupal to avoid the install step.
+There are different cases for running tests with a full installation or on a running Drupal instance to avoid the install step.
 
-_Note_: Webkit test can not be run in a non MacOS env.
+_Note_: WebKit tests cannot be run in a non-MacOS environment.
 
-Commands to run the minimum tests:
+Commands to run the tests with Firefox only:
 
 ```shell
-npm run test-min
+npm run test
 ```
 
-Or test by tag:
+Or test by tag with Firefox only:
 
 ```shell
-npx playwright test --project=firefox --grep "@display_builder_views"
+npx playwright test --project=firefox --grep "@my_module"
 ```
 
 Or a specific test:
 
 ```shell
-npx playwright test --project=firefox -g 'Create instance'
+npx playwright test --project=firefox -g 'Example test'
 ```
 
-On local run, you can see what's happening with a running test:
+To see what's happening during a running test:
 
 ```shell
-npx playwright test --project=firefox -g 'Create instance' --headed
+npx playwright test --project=firefox -g 'Example test' --headed
 ```
 
-Or you can run the test step by step:
+Or run the test step by step:
 
 ```shell
-npx playwright test --project=firefox -g 'Create instance' --ui
+npx playwright test --project=firefox -g 'Example test' --ui
 ```
 
-More information on [Playwright running and debugging tests](https://playwright.dev/docs/running-tests).
+More information: [Playwright running and debugging tests](https://playwright.dev/docs/running-tests).

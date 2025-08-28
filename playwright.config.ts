@@ -36,7 +36,7 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     // Playwright require ending slash.
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-base-url
-    baseURL: `${process.env.DRUPAL_TEST_BASE_URL  }/`,
+    baseURL: `${process.env.DRUPAL_TEST_BASE_URL}/`,
     ignoreHTTPSErrors: true,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
@@ -48,7 +48,7 @@ export default defineConfig({
     },
     launchOptions: {
       // For --headed test, add some slow time.
-      slowMo: 100,
+      slowMo: 200,
     },
     // Quicker fail on local tests if skip install.
     actionTimeout: process.env.CI ? undefined : process.env.DRUPAL_TEST_SKIP_INSTALL ? 2_000 : undefined,
@@ -76,21 +76,26 @@ export default defineConfig({
       },
       dependencies: [ 'setup' ],
     },
-    {
-      name: 'webkit',
-      use: {
-        ...devices['Desktop Safari'],
-        deviceScaleFactor: 1,
-        viewport: { width: 1920, height: 1080 },
-      },
-      dependencies: [ 'setup' ],
-    },
+    // Enable on compatible env.
+    // {
+    //   name: 'webkit',
+    //   use: {
+    //     ...devices['Desktop Safari'],
+    //     deviceScaleFactor: 1,
+    //     viewport: { width: 1920, height: 1080 },
+    //   },
+    //   dependencies: [ 'setup' ],
+    // },
   ],
 
   /* Run your local dev server before starting the tests */
+  /* Comment for a local running server */
   // webServer: {
-  //   command: 'php -S localhost:8000 -t ../../..',
-  //   url: 'http://localhost:8000/web',
+  //   command: 'php -q -S localhost:8000 -t ../../../web',
+  //   url: 'http://localhost:8000',
+  //   // // Example with drush and site install.
+  //   // command: 'drush --quiet -y si minimal --db-url="sqlite://:memory:" && drush --quiet --no-browser rs :8000',
+  //   // url: 'http://localhost:8000',
   //   reuseExistingServer: !process.env.CI,
   // },
 })

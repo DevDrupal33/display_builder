@@ -4,7 +4,8 @@ import * as nodePath from 'node:path'
 import * as fs from 'node:fs'
 import { getModuleDir, getRootDir } from '../utilities/DrupalFilesystem'
 import type { DrupalSite, DrupalSiteInstall } from '../fixtures/DrupalSite'
-import dbConfig from '../playwright.db.config'
+import * as utils from '../utilities/utils'
+import config from '../playwright.config.loader'
 
 /**
  * The `Drupal` class provides a suite of utility methods for interacting with a Drupal site
@@ -81,7 +82,7 @@ export class Drupal {
 
   async loginAsAdmin(): Promise<void> {
     // First see if we are already logged in.
-    await this.page.goto(`${this.drupalSite.url}/${dbConfig.logInUrl}`)
+    await this.page.goto(`${this.drupalSite.url}/${config.logInUrl}`)
     const title = this.page.locator('h1')
     if ((await title.innerText()) === 'admin') {
       return
@@ -97,10 +98,10 @@ export class Drupal {
       if (!this.drupalSite.hasDrush) {
         throw new Error('Drush is not available for local tests! Please install.')
       }
-      console.log('[Info] Login with Drush...')
+      utils.debug('Login with Drush...')
       logInUrl = await this.drush(`user:login --uid=1`)
     } else {
-      console.log('[Info] Login with test-site.php...')
+      utils.debug('Login with test-site.php...')
       const stdout = await exec(`php core/scripts/test-site.php user-login 1 --site-path ${this.drupalSite.sitePath}`)
       logInUrl = `${this.drupalSite.url}${stdout.toString()}`
     }
@@ -125,7 +126,7 @@ export class Drupal {
       const loginUrl = await this.drush(`user:login --name=${username} --no-browser`)
       await page.goto(loginUrl)
     } else {
-      await page.goto(`${this.drupalSite.url}/${dbConfig.logInUrl}`)
+      await page.goto(`${this.drupalSite.url}/${config.logInUrl}`)
       await page.locator('[data-drupal-selector="edit-name"]').fill(username)
       await page.locator('[data-drupal-selector="edit-pass"]').fill(password ?? 'test_admin')
       await page.locator('[data-drupal-selector="edit-submit"]').click()
@@ -134,7 +135,7 @@ export class Drupal {
   }
 
   async logout(): Promise<void> {
-    await this.page.goto(`${this.drupalSite.url}/${dbConfig.logOutUrl}/confirm`)
+    await this.page.goto(`${this.drupalSite.url}/${config.logOutUrl}/confirm`)
     await this.page.getByRole('button', { name: 'Log out' }).click()
     let cookies = await this.page.context().cookies()
     cookies = cookies.filter(cookie => cookie.name.startsWith('SESS') || cookie.name.startsWith('SSESS'))

@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
 import { test } from '../fixtures/loader'
 
-import dbConfig from '../playwright.db.config'
+import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.installModules([ 'display_builder_page_layout', 'display_builder_page_layout_test' ])
@@ -13,7 +13,7 @@ test(
   async ({ page, drupal, displayBuilder }) => {
     await drupal.loginAsAdmin()
 
-    await page.goto(dbConfig.pageListUrl)
+    await page.goto(config.pageListUrl)
     await page.getByRole('link', { name: 'Build display' }).click()
 
     await displayBuilder.shoelaceReady()

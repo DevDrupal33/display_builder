@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
 import { test } from '../fixtures/loader'
 
-import dbConfig from '../playwright.db.config'
+import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.installModules([ 'views', 'views_ui', 'display_builder_views', 'display_builder_views_test' ])
@@ -16,7 +16,7 @@ test(
   async ({ page, drupal, displayBuilder }) => {
     await drupal.loginAsAdmin()
 
-    await page.goto(dbConfig.viewsEditUrl.replace('{view_id}', dbConfig.viewsTestName))
+    await page.goto(config.viewsEditUrl.replace('{view_id}', config.viewsTestName))
     await drupal.ajaxReady()
 
     // Test 1: Set the builder profile on a view.
@@ -38,12 +38,12 @@ test(
     await expect(page.getByRole('heading', { name: 'Display builder for Test Display builder Page' })).toBeVisible()
 
     // Ensure the good profile is set.
-    await page.goto(dbConfig.viewsDbList)
+    await page.goto(config.viewsDbList)
     await expect(page.getByRole('link', { name: 'Test Display builder' })).toBeVisible()
     await expect(page.getByRole('cell', { name: 'default' })).toBeVisible()
 
     // Test 2: change the display builder profile.
-    await page.goto(dbConfig.viewsEditUrl.replace('{view_id}', dbConfig.viewsTestName))
+    await page.goto(config.viewsEditUrl.replace('{view_id}', config.viewsTestName))
     await drupal.ajaxReady()
 
     await page.getByText('Display Builder: Default').getByRole('link', { name: 'Default' }).click()
@@ -57,7 +57,7 @@ test(
     await expect(page.getByText('The view Test Display builder has been saved.')).toBeVisible()
 
     // Ensure the good profile is set.
-    await page.goto(dbConfig.viewsDbList)
+    await page.goto(config.viewsDbList)
     await expect(page.getByRole('link', { name: 'Test Display builder' })).toBeVisible()
     await expect(page.getByRole('cell', { name: 'test', exact: true })).toBeVisible()
 
@@ -110,14 +110,14 @@ test(
     await displayBuilder.saveDisplayBuilder(page)
 
     // Test 4: Check the builder result from the view.
-    await page.goto(dbConfig.viewsEditUrl.replace('{view_id}', dbConfig.viewsTestName))
+    await page.goto(config.viewsEditUrl.replace('{view_id}', config.viewsTestName))
     await drupal.ajaxReady()
     await page.getByRole('link', { name: 'View Page' }).click()
     await expect(page.getByRole('heading', { name: 'Test page with Display builder' })).toBeVisible()
     await expect(page.getByText('I am a test token in a views')).toBeVisible()
 
     // Test 5: Delete the builder.
-    await page.goto(dbConfig.viewsEditUrl.replace('{view_id}', dbConfig.viewsTestName))
+    await page.goto(config.viewsEditUrl.replace('{view_id}', config.viewsTestName))
     await drupal.ajaxReady()
 
     await page.getByText('Display Builder: Test').getByRole('link', { name: 'Test' }).click()
@@ -129,9 +129,9 @@ test(
     await page.getByRole('button', { name: 'Save' }).click()
 
     // Ensure the profile is deleted and the view is working.
-    await page.goto(dbConfig.viewsDbList)
+    await page.goto(config.viewsDbList)
     await expect(page.getByRole('cell', { name: 'No Display builder enabled' })).toHaveCount(1)
-    await page.goto(dbConfig.viewsEditUrl.replace('{view_id}', dbConfig.viewsTestName))
+    await page.goto(config.viewsEditUrl.replace('{view_id}', config.viewsTestName))
     await drupal.ajaxReady()
     await page.getByRole('link', { name: 'View Page' }).click()
     await expect(page.getByRole('heading', { name: 'Test page with Display builder' })).toBeVisible()

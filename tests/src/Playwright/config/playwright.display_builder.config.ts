@@ -2,9 +2,6 @@
  * Display Builder tests configuration.
  */
 export default {
-  operatingMode: 'native',
-  drushCmd: 'drush',
-
   keyboardTimeout: 350, // Because keyboard.js has a 300 ms highlight of the clicked button.
 
   dbList: 'admin/structure/display-builder/index',
@@ -23,23 +20,5 @@ export default {
   pageListUrl: 'admin/structure/page-layout',
   pageAddUrl: 'admin/structure/page-layout/add',
   pageTestName: 'page_layout__test',
-
-  logInUrl: 'user/login',
-  logOutUrl: 'user/logout',
-
-  authDir: '.auth',
-
-  pantheon: {
-    isTarget: false,
-    site: 'aSite',
-    environment: 'dev',
-  },
-
-  targetSite: {
-    isTarget: false,
-    root: null, // optional
-    remoteHost: 'localhost',
-    remoteUser: null, // optional
-    sshOptions: '-p 2222', // optional
-  },
 }
+// 

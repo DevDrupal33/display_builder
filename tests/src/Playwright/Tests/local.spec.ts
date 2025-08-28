@@ -3,7 +3,7 @@ import { test } from '../fixtures/loader'
 
 import * as utils from '../utilities/utils'
 
-import dbConfig from '../playwright.db.config'
+import config from '../playwright.config.loader'
 
 // Local tests as the Display Builder must be created manually.
 // This is internal and used for creating and fixing tests, mostly position.
@@ -11,7 +11,7 @@ test('Drag and drop', { tag: [ '@display_builder_local' ] }, async ({ page, drup
   const dbName = `test_dnd`
 
   await drupal.loginAsAdmin()
-  await page.goto(dbConfig.dbViewUrl.replace('{db_id}', dbName))
+  await page.goto(config.dbViewUrl.replace('{db_id}', dbName))
 
   if ((await page.getByText(`Missing ${dbName} config.`).count()) === 1) {
     await displayBuilder.createDisplayBuilderFromUi(dbName)

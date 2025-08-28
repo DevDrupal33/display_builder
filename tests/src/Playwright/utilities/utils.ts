@@ -22,3 +22,28 @@ export function createRandomString(length: number = 3): string {
 
   return result
 }
+
+/**
+ * Log message to console if log level is set to verbose, debug or silly.
+ *
+ * @param {string} message
+ *   The message to log.
+ */
+export function debug(message: string): void {
+  const logMap = {
+    error: 0,
+    warn: 1,
+    info: 2,
+    http: 3,
+    verbose: 4,
+    debug: 5,
+    silly: 6
+  }
+  if ((process.env.PLAYWRIGHT_DEBUG_LEVEL || 'info') in logMap) {
+    const level = logMap[process.env.PLAYWRIGHT_DEBUG_LEVEL || 'info']
+    if (level >= 4) {
+      // eslint-disable-next-line no-console
+      console.debug(`debug: ${message}`)
+    }
+  }
+}

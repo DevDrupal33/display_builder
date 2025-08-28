@@ -3,7 +3,7 @@ import { test } from '../fixtures/loader'
 
 import * as utils from '../utilities/utils'
 
-import dbConfig from '../playwright.db.config'
+import config from '../playwright.config.loader'
 
 test(
   'Preset',

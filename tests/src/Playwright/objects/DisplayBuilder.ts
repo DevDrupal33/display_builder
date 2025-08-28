@@ -1,6 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test'
 
-import dbConfig from '../playwright.db.config'
+import config from '../playwright.config.loader'
 
 export class Displaybuilder {
   readonly page: Page
@@ -254,7 +254,7 @@ export class Displaybuilder {
    * @returns {Promise<void>}
    */
   async refresh(dbName: string): Promise<void> {
-    await this.page.goto(dbConfig.dbViewUrl.replace('{db_id}', dbName))
+    await this.page.goto(config.dbViewUrl.replace('{db_id}', dbName))
     await this.htmxReady()
   }
 
@@ -267,7 +267,7 @@ export class Displaybuilder {
    * @returns {Promise<void>}
    */
   async createDisplayBuilderFromUi(dbName: string, fixture: string | null = null): Promise<void> {
-    await this.page.goto(dbConfig.dbAddUrl)
+    await this.page.goto(config.dbAddUrl)
     await this.page.getByRole('textbox', { name: 'Builder ID' }).fill(dbName)
     await this.page.getByLabel('Profile').selectOption('test')
     if (fixture) {
@@ -287,7 +287,7 @@ export class Displaybuilder {
    * @returns {Promise<void>}
    */
   async deleteDisplayBuilderFromUi(dbName: string): Promise<void> {
-    await this.page.goto(dbConfig.dbList)
+    await this.page.goto(config.dbList)
     await expect(this.page.getByRole('link', { name: dbName })).toBeVisible()
     await this.page
       .getByRole('row', { name: `${dbName}` })
@@ -322,7 +322,7 @@ export class Displaybuilder {
    */
   async keyboardShortcut(key: string): Promise<void> {
     await this.page.keyboard.press(key)
-    await this.page.waitForTimeout(dbConfig.keyboardTimeout)
+    await this.page.waitForTimeout(config.keyboardTimeout)
     await this.htmxReady()
   }
 }

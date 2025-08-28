@@ -2,6 +2,7 @@ import { test as base } from '@playwright/test'
 import { Drupal } from '../objects/Drupal'
 import { exec } from '../utilities/DrupalExec'
 import { hasDrush } from '../utilities/DrupalFilesystem'
+import * as utils from '../utilities/utils'
 
 export type DrupalSite = {
   dbPrefix: string
@@ -50,7 +51,7 @@ export const drupalSite = base.extend<DrupalSiteInstall>({
     async ({}, use, workerInfo) => {
       if (process.env.DRUPAL_TEST_SKIP_INSTALL && process.env.DRUPAL_TEST_SKIP_INSTALL === 'true') {
         const withDrush = await hasDrush()
-        console.log('[Info] Drupal is installed, skip installation for tests')
+        utils.debug('Drupal is installed, skip installation for tests')
         await use({
           userAgent: '',
           sitePath: '',
@@ -63,7 +64,7 @@ export const drupalSite = base.extend<DrupalSiteInstall>({
         return
       }
 
-      console.log('[Info] Install Drupal with test environment...')
+      utils.debug('Install Drupal with test environment...')
       const setupFile = process.env.DRUPAL_TEST_SETUP_FILE ? `--setup-file "${process.env.DRUPAL_TEST_SETUP_FILE}"` : ''
       const installProfile = `--install-profile "${process.env.DRUPAL_TEST_SETUP_PROFILE || 'minimal'}"`
       const langcodeOption = process.env.DRUPAL_TEST_SETUP_LANGCODE
