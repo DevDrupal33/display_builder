@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\StateManager;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\SlotSourceProxy;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
@@ -17,8 +17,6 @@ use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
  * The business logic of the state management.
  */
 class StateManager implements StateManagerInterface {
-
-  use StringTranslationTrait;
 
   /**
    * Path index.
@@ -268,7 +266,7 @@ class StateManager implements StateManagerInterface {
     // Get friendly label to display in log instead of ids.
     $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data, $this->getContexts($builder_id) ?? []);
 
-    $log = $this->t('%instance @source_id has been attached to root', [
+    $log = new FormattableMarkup('%instance @source_id has been attached to root', [
       '%instance' => $labelWithSummaryInstance['summary'],
       '@source_id' => $source_id,
     ]);
@@ -298,7 +296,7 @@ class StateManager implements StateManagerInterface {
     $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data, $this->getContexts($builder_id) ?? []);
     $labelWithSummaryParent = $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id));
 
-    $log = $this->t("%instance @source_id has been attached to %parent's @slot_id", [
+    $log = new FormattableMarkup("%instance @source_id has been attached to %parent's @slot_id", [
       '%instance' => $labelWithSummaryInstance['summary'],
       '@source_id' => $source_id,
       '%parent' => $labelWithSummaryParent['summary'],
@@ -327,7 +325,7 @@ class StateManager implements StateManagerInterface {
     // Get friendly label to display in log instead of ids.
     $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data, $this->getContexts($builder_id));
 
-    $log = $this->t('%instance @thingy has been moved to root', [
+    $log = new FormattableMarkup('%instance @thingy has been moved to root', [
       '%instance' => $labelWithSummaryInstance['summary'],
       '@thingy' => $data['source_id'],
     ]);
@@ -369,7 +367,7 @@ class StateManager implements StateManagerInterface {
     $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data, $this->getContexts($builder_id));
     $labelWithSummaryParent = $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id));
 
-    $log = $this->t("%instance @thingy has been moved to %parent's @slot_id", [
+    $log = new FormattableMarkup("%instance @thingy has been moved to %parent's @slot_id", [
       '%instance' => $labelWithSummaryInstance['summary'],
       '@thingy' => $data['source_id'],
       '%parent' => $labelWithSummaryParent['summary'],
@@ -398,7 +396,7 @@ class StateManager implements StateManagerInterface {
     // Get friendly label to display in log instead of ids.
     $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($existing_data, $this->getContexts($builder_id));
 
-    $log = $this->t('%instance has been updated by @island_id', [
+    $log = new FormattableMarkup('%instance has been updated by @island_id', [
       '%instance' => $labelWithSummaryInstance['summary'],
       '@island_id' => $island_id,
     ]);
@@ -423,7 +421,7 @@ class StateManager implements StateManagerInterface {
     // Get friendly label to display in log instead of ids.
     $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($existing_data, $this->getContexts($builder_id));
 
-    $log = $this->t('%instance has been updated', [
+    $log = new FormattableMarkup('%instance has been updated', [
       '%instance' => $labelWithSummaryInstance['summary'],
     ]);
     $this->stateStorage->setNewPresent($builder_id, $root, $log);
@@ -443,9 +441,9 @@ class StateManager implements StateManagerInterface {
 
     // Get friendly label to display in log instead of ids.
     $labelWithSummaryInstance = $this->slotSourceProxy->getLabelWithSummary($data, $contexts);
-    $labelWithSummaryParent = empty($parent_id) ? ['summary' => $this->t('root')] : $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id), $contexts);
+    $labelWithSummaryParent = empty($parent_id) ? ['summary' => 'root'] : $this->slotSourceProxy->getLabelWithSummary($this->get($builder_id, $parent_id), $contexts);
 
-    $log = $this->t('%instance has been removed from %parent', [
+    $log = new FormattableMarkup('%instance has been removed from %parent', [
       '%instance' => $labelWithSummaryInstance['summary'],
       '%parent' => $labelWithSummaryParent['summary'],
     ]);

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\StateManager;
 
-use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Component\Render\FormattableMarkup;
 
 /**
  * History interface.
@@ -97,12 +97,12 @@ interface HistoryInterface {
    *   The display builder id.
    * @param array $state
    *   The state to set.
-   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $log_message
+   * @param string|\Drupal\Component\Render\FormattableMarkup $log_message
    *   (Optional) The log message.
    * @param bool $check_hash
    *   (Optional) Should check hash to avoid duplicates. Default to TRUE.
    */
-  public function setNewPresent(string $builder_id, array $state, string|TranslatableMarkup $log_message = '', bool $check_hash = TRUE): void;
+  public function setNewPresent(string $builder_id, array $state, string|FormattableMarkup $log_message = '', bool $check_hash = TRUE): void;
 
   /**
    * Undo handler.

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\StateManager;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Save displays in the State.
@@ -43,7 +43,7 @@ class StateStorage implements StorageInterface {
       'present' => [
         'data' => $builder_data,
         'hash' => self::getUniqId($builder_data),
-        'log' => $this->t('Initialization of the display builder.'),
+        'log' => 'Initialization of the display builder.',
         'time' => \time(),
         'user' => $this->user->id(),
       ],
@@ -160,7 +160,7 @@ class StateStorage implements StorageInterface {
   /**
    * {@inheritdoc}
    */
-  public function setNewPresent(string $builder_id, array $data, string|TranslatableMarkup $log_message = '', bool $check_hash = TRUE): void {
+  public function setNewPresent(string $builder_id, array $data, string|FormattableMarkup $log_message = '', bool $check_hash = TRUE): void {
     $builder_data = $this->load($builder_id);
     $hash = self::getUniqId($data);
 
