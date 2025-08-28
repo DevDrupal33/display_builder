@@ -167,6 +167,19 @@ interface ApiControllerInterface {
   public function restore(Request $request, string $builder_id): HtmlResponse;
 
   /**
+   * Revert entity override to default display.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   HTTP Request.
+   * @param string $builder_id
+   *   Builder ID.
+   *
+   * @return \Drupal\Core\Render\HtmlResponse
+   *   The HTML response.
+   */
+  public function revert(Request $request, string $builder_id): HtmlResponse;
+
+  /**
    * Move history to the last past state.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request

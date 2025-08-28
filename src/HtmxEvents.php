@@ -392,6 +392,28 @@ class HtmxEvents {
   }
 
   /**
+   * When the revert button is clicked.
+   *
+   * @param array $build
+   *   The render array.
+   * @param string $builder_id
+   *   The builder id.
+   *
+   * @return array
+   *   The render array.
+   */
+  public function onRevert(array $build, string $builder_id): array {
+    $url = new Url(
+      'display_builder.api_revert',
+      [
+        'builder_id' => $builder_id,
+      ]
+    );
+
+    return $this->setHtmxAttributes($build, $url, 'click consume', 'post');
+  }
+
+  /**
    * When the history clear button is clicked.
    *
    * @param array $build

@@ -133,6 +133,17 @@ display_builder.api_restore:
   options:
     _htmx_route: true
 
+display_builder.api_revert:
+  path: "/api/display-builder/{builder_id}/revert"
+  methods: [POST]
+  defaults:
+    _controller: '\Drupal\display_builder\Controller\ApiController::revert'
+  requirements:
+    _permission: "administer display builders+access display builders api"
+    _module_dependencies: "display_builder_entity_view"
+  options:
+    _htmx_route: true
+
 display_builder.api_clear:
   path: "/api/display-builder/{builder_id}/clear"
   methods: [POST]

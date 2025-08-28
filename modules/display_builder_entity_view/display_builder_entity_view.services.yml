@@ -19,9 +19,3 @@ services:
       - '@entity_type.manager'
     tags:
       - { name: event_subscriber }
-  display_builder_entity_view.field.display_builder_item_list:
-    class: Drupal\display_builder_entity_view\Field\DisplayBuilderItemList
-    arguments:
-      - '@plugin.manager.ui_patterns_source'
-      - '@display_builder.state_manager'
-      - '@entity_type.manager'

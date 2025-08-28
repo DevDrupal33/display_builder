@@ -28,7 +28,7 @@ class DisplayBuilderEntityViewHook {
    * @param array $info
    *   The field types to alter.
    */
-  #[Hook('field_info_alter', order: new OrderAfter(['layout_builder']))]
+  #[Hook('field_info_alter')]
   public function fieldInfoAlter(array &$info): void {
     $info['ui_patterns_source']['list_class'] = DisplayBuilderItemList::class;
   }

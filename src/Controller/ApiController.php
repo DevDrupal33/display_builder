@@ -6,9 +6,11 @@ namespace Drupal\display_builder\Controller;
 
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Form\FormAjaxException;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\Context\ContextInterface;
 use Drupal\Core\Render\BareHtmlPageRenderer;
 use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Render\HtmlResponseAttachmentsProcessor;
@@ -20,6 +22,7 @@ use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\Plugin\display_builder\Island\InstanceFormPanel;
 use Drupal\display_builder\RenderableBuilderTrait;
 use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -378,6 +381,53 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    */
   public function restore(Request $request, string $builder_id): HtmlResponse {
     $this->stateManager->restore($builder_id);
+
+    // @todo on history change is closest to a data change that we need here
+    // without any instance id. Perhaps we need a new event?
+    return $this->dispatchDisplayBuilderEvent(
+      DisplayBuilderEvents::ON_HISTORY_CHANGE,
+      $builder_id
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function revert(Request $request, string $builder_id): HtmlResponse {
+    $instanceInfos = DisplayBuilderItemList::checkInstanceId($builder_id);
+    if (isset($instanceInfos['entity_type_id'], $instanceInfos['entity_id'], $instanceInfos['field_name'])) {
+      // Do not use the entity from the state manager builder context because
+      // the fields are empty.
+      $entity = $this->entityTypeManager()->getStorage($instanceInfos['entity_type_id'])
+        ->load($instanceInfos['entity_id']);
+
+      if ($entity instanceof FieldableEntityInterface) {
+        // Remove the saved state as the field values will be deleted.
+        $this->stateManager->save($builder_id, [], 'Revert 1/2: clear overridden data and save');
+        $this->stateManager->setSave($builder_id, $this->stateManager->getCurrentState($builder_id));
+
+        // Clear field value.
+        $field = $entity->get($instanceInfos['field_name']);
+        $field->setValue(NULL);
+        $entity->save();
+
+        // Repopulate the state manager from the entity view display config.
+        $builder = $this->stateManager->load($builder_id);
+        if (isset($builder['contexts']['view_mode'])
+          && $builder['contexts']['view_mode'] instanceof ContextInterface
+        ) {
+          $viewMode = $builder['contexts']['view_mode']->getContextValue();
+          $display_id = "{$instanceInfos['entity_type_id']}.{$entity->bundle()}.{$viewMode}";
+
+          /** @var \Drupal\display_builder\WithDisplayBuilderInterface|null $display */
+          $display = $this->entityTypeManager()->getStorage('entity_view_display')
+            ->load($display_id);
+
+          $sources = $display->getSources();
+          $this->stateManager->save($builder_id, $sources, 'Revert 2/2: retrieve existing data from config');
+        }
+      }
+    }
 
     // @todo on history change is closest to a data change that we need here
     // without any instance id. Perhaps we need a new event?
