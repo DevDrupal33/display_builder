@@ -29,6 +29,8 @@ trait EntityViewDisplayTrait {
    *
    * @return $this
    *   The current instance.
+   *
+   * @see Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function calculateDependencies(): self {
     parent::calculateDependencies();
@@ -58,6 +60,8 @@ trait EntityViewDisplayTrait {
    *
    * @return bool
    *   The display builder is enabled if there is a Display Builder entity.
+   *
+   * @see Drupal\display_builder_entity_view\DisplayBuilderEnabledInterface
    */
   public function isDisplayBuilderEnabled(): bool {
     // Display Builder must not be enabled for the '_custom' view mode that is
@@ -77,6 +81,8 @@ trait EntityViewDisplayTrait {
    *
    * @return bool
    *   TRUE if the display can be overridden, FALSE otherwise.
+   *
+   * @see Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function onDependencyRemoval(array $dependencies): bool {
     $changed = parent::onDependencyRemoval($dependencies);
@@ -111,6 +117,8 @@ trait EntityViewDisplayTrait {
    *
    * @return string
    *   The context requirement string.
+   *
+   * @see Drupal\display_builder\WithDisplayBuilderInterface
    */
   public static function getContextRequirement(): string {
     return 'entity';
@@ -118,6 +126,8 @@ trait EntityViewDisplayTrait {
 
   /**
    * {@inheritdoc}
+   *
+   * @see Drupal\display_builder\WithDisplayBuilderInterface
    */
   public static function checkInstanceId(string $instance_id): ?array {
     if (!\str_starts_with($instance_id, 'entity_view__')) {
@@ -157,6 +167,8 @@ trait EntityViewDisplayTrait {
    *
    * @return \Drupal\Core\Url
    *   The url of the instance.
+   *
+   * @see Drupal\display_builder\WithDisplayBuilderInterface
    */
   public static function getUrlFromInstanceId(string $instance_id): Url {
     [, $entity, $bundle, $view_mode] = \explode('__', $instance_id);
@@ -176,6 +188,8 @@ trait EntityViewDisplayTrait {
    *
    * @return string|null
    *   The field name used to store overridden displays, or NULL if not set.
+   *
+   * @see Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
    */
   public function getDisplayBuilderOverrideField(): ?string {
     return $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY);
@@ -186,6 +200,8 @@ trait EntityViewDisplayTrait {
    *
    * @return \Drupal\display_builder\DisplayBuilderInterface|null
    *   The display builder override profile, or NULL if not set.
+   *
+   * @see Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
    */
   public function getDisplayBuilderOverrideProfile(): ?DisplayBuilderInterface {
     $display_builder_id = $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY);
@@ -202,6 +218,8 @@ trait EntityViewDisplayTrait {
    *
    * @return bool
    *   TRUE if the display can be overridden, FALSE otherwise.
+   *
+   * @see Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
    */
   public function isDisplayBuilderOverridable(): bool {
     return !empty($this->getDisplayBuilderOverrideField())
@@ -214,7 +232,7 @@ trait EntityViewDisplayTrait {
    * @return \Drupal\display_builder\DisplayBuilderInterface|null
    *   The display builder instance, or NULL if not set.
    *
-   * @see \Drupal\display_builder\WithDisplayBuilderInterface
+   * @see Drupal\display_builder\WithDisplayBuilderInterface
    */
   public function getDisplayBuilder(): ?DisplayBuilderInterface {
     $display_builder_id = $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY);
@@ -232,7 +250,7 @@ trait EntityViewDisplayTrait {
    * @return string|null
    *   The instance ID for the display builder, or NULL if the entity is new.
    *
-   * @see \Drupal\display_builder\StateManagerInterface::getInstanceId()
+   * @see Drupal\display_builder\WithDisplayBuilderInterface
    */
   public function getInstanceId(): ?string {
     // Usually an entity is new if no ID exists for it yet.
@@ -245,6 +263,8 @@ trait EntityViewDisplayTrait {
 
   /**
    * Initializes the display builder instance if it is missing.
+   *
+   * @see Drupal\display_builder\WithDisplayBuilderInterface
    */
   public function initInstanceIfMissing(): void {
     $instance_id = $this->getInstanceId();
@@ -273,6 +293,8 @@ trait EntityViewDisplayTrait {
    *
    * @return array
    *   The sources of the display builder.
+   *
+   * @see Drupal\display_builder\WithDisplayBuilderInterface
    */
   public function getSources(): array {
     return $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::SOURCES_PROPERTY, []);
@@ -280,6 +302,8 @@ trait EntityViewDisplayTrait {
 
   /**
    * Saves the sources of the display builder.
+   *
+   * @see Drupal\display_builder\WithDisplayBuilderInterface
    */
   public function saveSources(): void {
     $data = $this->stateManager->getCurrentState($this->getInstanceId());
@@ -294,6 +318,8 @@ trait EntityViewDisplayTrait {
    *   The entity storage.
    * @param bool $update
    *   Whether the entity is being updated.
+   *
+   * @see Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE): void {
     if ($this->getDisplayBuilder()) {
@@ -305,12 +331,83 @@ trait EntityViewDisplayTrait {
 
   /**
    * Deletes the display builder instance if it exists.
+   *
+   * @see Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function delete(): void {
     if ($this->getInstanceId()) {
       $this->stateManager->delete($this->getInstanceId());
     }
     parent::delete();
+  }
+
+  /**
+   * Builds a renderable array for the components of a set of entities.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface[] $entities
+   *   The entities being displayed.
+   *
+   * @return array
+   *   A renderable array for the entities, indexed by the same keys as the
+   *   $entities array parameter.
+   *
+   * @see Drupal\Core\Entity\Display\EntityViewDisplayInterface
+   */
+  public function buildMultiple(array $entities): array {
+    $build_list = parent::buildMultiple($entities);
+
+    // If no display builder enabled, stop here and return:
+    // - 'Manage Display' build if this trait is used in EntityViewDisplay
+    // - 'Layout Builder' build if used in LayoutBuilderEntityViewDisplay.
+    if (!$this->isDisplayBuilderEnabled()) {
+      // This is also preventing the availability of Display Builder overrides
+      // when Display Builder is not used for the entity view display.
+      // @todo Is it something we want to keep like that?
+      // @see https://www.drupal.org/project/display_builder/issues/3540048
+      return $build_list;
+    }
+
+    // We alter the registry here instead of implementing
+    // hook_theme_registry_alter in order keep the alteration specific to each
+    // display.
+    $entry = $this->buildThemeRegistryEntry();
+    // Theme hook suggestion of the current entity view display.
+    // Example: 'node__article__teaser'.
+    $suggestion = \implode('__', [$this->getTargetEntityTypeId(), $this->getTargetBundle(), $this->getMode()]);
+    $this->themeRegistry->getRuntime()->set($suggestion, $entry);
+
+    if ($this->getMode() === 'default') {
+      // Full page displays don't work without this 'hack'.
+      // @todo Do we need to check if full is not already set?
+      $suggestion = \implode('__', [$this->getTargetEntityTypeId(), $this->getTargetBundle(), 'full']);
+      $this->themeRegistry->getRuntime()->set($suggestion, $entry);
+    }
+
+    foreach ($entities as $id => $entity) {
+      $sources = [];
+
+      if ($this->isDisplayBuilderOverridable()) {
+        $display_builder_field = $this->getDisplayBuilderOverrideField();
+        $overridden_field = $entity->get($display_builder_field);
+        \assert($overridden_field instanceof WithDisplayBuilderInterface);
+        $sources = $overridden_field->getSources();
+      }
+
+      // If the overridden field is empty fallback to the entity view.
+      if (\count($sources) === 0) {
+        $sources = $this->getSources();
+      }
+
+      // We clear the display because we only want our renderable.
+      $build_list[$id] = [];
+      // But we add an empty layout builder renderable to avoid breaking
+      // stuff.
+      $build_list[$id]['_layout_builder'][0]['content'] = [];
+      // @see entity.html.twig
+      $build_list[$id]['content'] = $this->buildSources($entity, $sources);
+    }
+
+    return $build_list;
   }
 
   /**
@@ -364,52 +461,19 @@ trait EntityViewDisplayTrait {
   }
 
   /**
-   * Actual BuildMultiple.
-   *
-   * @param \Drupal\Core\Entity\FieldableEntityInterface[] $entities
-   *   The entities being displayed.
-   * @param array $build_list
-   *   Intermediary renderable array for the entities.
+   * Build the theme registry entry.
    *
    * @return array
-   *   A renderable array for the entities, indexed by the same keys as the
-   *   $entities array parameter.
+   *   A theme registry entry.
    */
-  private function displayBuilderBuildMultiple(array $entities, array $build_list): array {
-    // If no display builder enabled stop here.
-    if (!$this->isDisplayBuilderEnabled()) {
-      return $build_list;
-    }
+  private function buildThemeRegistryEntry(): array {
+    $theme_registry = $this->themeRegistry->get();
+    // Identical to the entity type entry with an unified template.
+    $entry = $theme_registry[$this->getTargetEntityTypeId()];
+    $entry['path'] = $this->modules->getPath('display_builder_entity_view') . '/templates';
+    $entry['template'] = 'entity';
 
-    foreach ($entities as $id => $entity) {
-      $sources = [];
-
-      if ($this->isDisplayBuilderOverridable()) {
-        $display_builder_field = $this->getDisplayBuilderOverrideField();
-        $overridden_field = $entity->get($display_builder_field);
-        \assert($overridden_field instanceof WithDisplayBuilderInterface);
-        $sources = $overridden_field->getSources();
-      }
-
-      // If the overridden field doesn't provide sources fallback to
-      // the entity view. Maybe we should handle this different.
-      if (\count($sources) === 0) {
-        $sources = $this->getSources();
-      }
-      $build_list[$id]['_display_builder'] = $this->buildSources($entity, $sources);
-
-      // Remove all fields with configurable display
-      // from the existing build.
-      foreach (\array_keys($build_list[$id]) as $name) {
-        $field_definition = $this->getFieldDefinition($name);
-
-        if ($field_definition && $field_definition->isDisplayConfigurable($this->displayContext)) {
-          unset($build_list[$id][$name]);
-        }
-      }
-    }
-
-    return $build_list;
+    return $entry;
   }
 
   /**

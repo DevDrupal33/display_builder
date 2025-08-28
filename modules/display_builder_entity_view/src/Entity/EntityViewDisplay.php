@@ -6,6 +6,8 @@ namespace Drupal\display_builder_entity_view\Entity;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay as CoreEntityViewDisplay;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleExtensionList;
+use Drupal\Core\Theme\Registry;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
@@ -13,6 +15,12 @@ use Drupal\ui_patterns\SourcePluginManager;
 
 /**
  * Provides an entity view display entity that has a display builder.
+ *
+ * When Layout Builder is not activated, extends the default entity view
+ * display ("Manage display").
+ *
+ * @see Drupal\display_builder_entity_view\Hook\DisplayBuilderEntityViewHook::entityTypeAlter()
+ * @see Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay
  */
 class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderEntityDisplayInterface, DisplayBuilderOverridableInterface {
 
@@ -39,6 +47,16 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
   protected SampleEntityGeneratorInterface $sampleEntityGenerator;
 
   /**
+   * The theme registry.
+   */
+  protected Registry $themeRegistry;
+
+  /**
+   * The list of modules.
+   */
+  protected ModuleExtensionList $modules;
+
+  /**
    * The entity field manager.
    *
    * @var \Drupal\Core\Entity\EntityFieldManagerInterface
@@ -63,19 +81,15 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
     $this->stateManager = \Drupal::service('display_builder.state_manager');
     $this->componentElementBuilder = \Drupal::service('ui_patterns.component_element_builder');
     $this->sampleEntityGenerator = \Drupal::service('ui_patterns.sample_entity_generator');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildMultiple(array $entities): array {
-    $build_list = parent::buildMultiple($entities);
-
-    return $this->displayBuilderBuildMultiple($entities, $build_list);
+    $this->themeRegistry = \Drupal::service('theme.registry');
+    $this->modules = \Drupal::service('extension.list.module');
   }
 
   /**
    * Gets entity_view_display information grouped by entity type.
+   *
+   * @todo To remove.
+   * https://www.drupal.org/project/display_builder/issues/3542273
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager service.

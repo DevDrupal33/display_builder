@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_entity_view\Entity;
 
+use Drupal\Core\Extension\ModuleExtensionList;
+use Drupal\Core\Theme\Registry;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay as CoreLayoutBuilderEntityViewDisplay;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
@@ -12,6 +14,11 @@ use Drupal\ui_patterns\SourcePluginManager;
 
 /**
  * Provides an entity view display entity that has a display builder.
+ *
+ * When Layout Builder is activated, extends Layout Builder.
+ *
+ * @see Drupal\display_builder_entity_view\Hook\DisplayBuilderEntityViewHook::entityTypeAlter()
+ * @see Drupal\display_builder_entity_view\Entity\EntityViewDisplay
  */
 class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay implements DisplayBuilderEntityDisplayInterface, DisplayBuilderOverridableInterface {
 
@@ -38,6 +45,16 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
   protected SampleEntityGeneratorInterface $sampleEntityGenerator;
 
   /**
+   * The theme registry.
+   */
+  protected Registry $themeRegistry;
+
+  /**
+   * The list of modules.
+   */
+  protected ModuleExtensionList $modules;
+
+  /**
    * The entity field manager.
    *
    * @var \Drupal\Core\Entity\EntityFieldManagerInterface
@@ -62,20 +79,8 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
     $this->stateManager = \Drupal::service('display_builder.state_manager');
     $this->componentElementBuilder = \Drupal::service('ui_patterns.component_element_builder');
     $this->sampleEntityGenerator = \Drupal::service('ui_patterns.sample_entity_generator');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildMultiple(array $entities): array {
-    $build_list = parent::buildMultiple($entities);
-
-    // If using Layout Builder stop here.
-    if ($this->isLayoutBuilderEnabled()) {
-      return $build_list;
-    }
-
-    return $this->displayBuilderBuildMultiple($entities, $build_list);
+    $this->themeRegistry = \Drupal::service('theme.registry');
+    $this->modules = \Drupal::service('extension.list.module');
   }
 
 }
