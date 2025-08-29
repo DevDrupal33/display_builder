@@ -21,7 +21,7 @@ class SlotSourceProxy {
    *
    * @param array $data
    *   The data to processed.
-   * @param array $contexts
+   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
    *   (Optional) The contexts for this builder_id.
    *
    * @return array{label: string, summary: string}

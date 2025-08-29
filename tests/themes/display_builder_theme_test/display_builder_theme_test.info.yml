@@ -23,6 +23,3 @@ regions:
 
 regions_hidden:
   - sidebar_first
-
-dependencies:
-  - display_builder_devel

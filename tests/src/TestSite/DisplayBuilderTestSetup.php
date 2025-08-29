@@ -25,7 +25,6 @@ class DisplayBuilderTestSetup implements TestSetupInterface {
     $modules = [
       'display_builder',
       'display_builder_ui',
-      'display_builder_devel',
       'display_builder_test',
       'ui_patterns',
       'ui_styles',

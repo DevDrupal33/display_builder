@@ -65,7 +65,7 @@ Run the test from this folder:
 PW_TEST_CONNECT_WS_ENDPOINT=ws://127.0.0.1:3000/ npx playwright test --project=firefox
 ```
 
-Adpapt the other variable for an installed Drupal with a database.
+Adapt the other variable for an installed Drupal with a database.
 
 ### Run Tests Locally
 
@@ -120,10 +120,10 @@ Modules that **MUST** be enabled:
 
 - layout_builder
 - display_builder_test
-- display_builder_devel
 - display_builder_ui
 - display_builder_entity_view
 - display_builder_page_layout
+- display_builder_dev_tools (external module, must be installed)
 
 Theme **MUST** be `display_builder_theme_test` by default, unless test is
 specific for a theme.

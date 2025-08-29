@@ -46,7 +46,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
     ];
 
     // Add admin information to link the profiles.
-    if ($this->moduleHandler->moduleExists('display_builder_ui') && $this->currentUser->hasPermission('administer display builders')) {
+    if ($this->moduleHandler->moduleExists('display_builder_ui') && $this->currentUser->hasPermission('administer display builder profile')) {
       $form[ConfigFormBuilderInterface::PROFILE_PROPERTY]['#description'] = [
         [
           '#markup' => $form[ConfigFormBuilderInterface::PROFILE_PROPERTY]['#description'] . '<br>',

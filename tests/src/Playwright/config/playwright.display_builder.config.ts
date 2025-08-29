@@ -4,7 +4,7 @@
 export default {
   keyboardTimeout: 350, // Because keyboard.js has a 300 ms highlight of the clicked button.
 
-  dbList: 'admin/structure/display-builder/index',
+  dbList: 'admin/structure/display-builder/instances',
   dbAddUrl: 'admin/structure/display-builder/instance/add',
   dbViewUrl: 'admin/structure/display-builder/instance/{db_id}',
   dbDeleteUrl: 'admin/structure/display-builder/instance/{db_id}/delete',

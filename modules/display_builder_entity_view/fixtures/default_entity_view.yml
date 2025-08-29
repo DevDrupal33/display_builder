@@ -1,0 +1,65 @@
+
+- source_id: entity_field
+  source:
+    derivable_context: 'field:node:article:title'
+    'field:node:article:title':
+      value:
+        sources:
+        
+        - source_id: 'field_formatter:node:article:title'
+          source:
+            type: string
+            settings:
+              link_to_entity: '1'
+
+- source_id: entity_field
+  source:
+    derivable_context: 'field:node:article:field_image'
+    'field:node:article:field_image':
+      value:
+        sources:
+        
+        - source_id: 'field_formatter:node:article:field_image'
+          source:
+            type: image
+            settings:
+              image_style: wide
+              image_link: ''
+              image_loading:
+                attribute: lazy
+
+- source_id: entity_field
+  source:
+    derivable_context: 'field:node:article:body'
+    'field:node:article:body':
+      value:
+        sources:
+        
+        - source_id: 'field_property:node:body:processed'
+
+- source_id: entity_field
+  source:
+    derivable_context: 'field:node:article:field_tags'
+    'field:node:article:field_tags':
+      value:
+        sources:
+        
+        - source_id: 'field_formatter:node:article:field_tags'
+          source:
+            type: entity_reference_label
+            settings:
+              link: '1'
+
+- source_id: entity_field
+  source:
+    derivable_context: 'field:node:article:comment'
+    'field:node:article:comment':
+      value:
+        sources:
+        
+        - source_id: 'field_formatter:node:article:comment'
+          source:
+            type: comment_default
+            settings:
+              pager_id: '0'
+              view_mode: default

@@ -395,6 +395,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    */
   public function revert(Request $request, string $builder_id): HtmlResponse {
     $instanceInfos = DisplayBuilderItemList::checkInstanceId($builder_id);
+
     if (isset($instanceInfos['entity_type_id'], $instanceInfos['entity_id'], $instanceInfos['field_name'])) {
       // Do not use the entity from the state manager builder context because
       // the fields are empty.
@@ -413,6 +414,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
         // Repopulate the state manager from the entity view display config.
         $builder = $this->stateManager->load($builder_id);
+
         if (isset($builder['contexts']['view_mode'])
           && $builder['contexts']['view_mode'] instanceof ContextInterface
         ) {

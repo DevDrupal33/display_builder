@@ -1,5 +1,0 @@
-entity.display_builder.instance.devel:
-  route_name: display_builder_devel.collection
-  title: Instances
-  base_route: entity.display_builder.collection
-  weight: 10

@@ -1,6 +1,6 @@
 name: Display Builder Test
 type: module
-description: Support module for Display Builder testing.
+description: 'Display Builder profile for testing.'
 package: Testing
 dependencies:
   - display_builder:display_builder

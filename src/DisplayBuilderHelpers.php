@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 use Drupal\Component\Serialization\Yaml;
+use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\Render\Markup;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Helpers related class for Display builder.
@@ -106,6 +109,40 @@ class DisplayBuilderHelpers {
     }
 
     return self::getFixtureData([$filepath], TRUE);
+  }
+
+  /**
+   * Format the log.
+   *
+   * @param \Drupal\Core\StringTranslation\TranslatableMarkup $log
+   *   The log to format.
+   *
+   * @return array
+   *   The formatted log.
+   */
+  public static function formatLog(TranslatableMarkup $log): array {
+    return ['#markup' => Markup::create($log->render())];
+  }
+
+  /**
+   * Print the date for humans.
+   *
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $dateFormatter
+   *   The date formatter service.
+   * @param int $timestamp
+   *   The timestamp integer.
+   *
+   * @return string
+   *   The formatted date.
+   */
+  public static function formatTime(DateFormatterInterface $dateFormatter, int $timestamp): string {
+    $delta = \time() - $timestamp;
+
+    if ($delta < 86400) {
+      return $dateFormatter->format($timestamp, 'custom', 'G:i');
+    }
+
+    return $dateFormatter->format($timestamp, 'short');
   }
 
 }

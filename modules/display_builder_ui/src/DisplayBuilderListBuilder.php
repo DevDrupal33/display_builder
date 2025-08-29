@@ -91,7 +91,7 @@ final class DisplayBuilderListBuilder extends DraggableListBuilder {
   public function render(): array {
     $build = parent::render();
     $build['notice'] = [
-      '#markup' => $this->t('A Display builder profile is a configuration of the builder itself.<br>Each Display builder configuration can be used to build a display with specific configuration and capabilities.'),
+      '#markup' => $this->t('A Display builder profile is a configuration of the builder itself.<br>Each Display builder profile can be used to build a display with specific settings and capabilities.'),
       '#weight' => -100,
     ];
 

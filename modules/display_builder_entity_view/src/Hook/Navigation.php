@@ -32,11 +32,13 @@ class Navigation {
       }
 
       $viewModeIds = $this->getEntityTypeViewModesIds($entityTypeId);
+
       if (!$viewModeIds) {
         continue;
       }
 
       $canonical = $entityType->getLinkTemplate('canonical');
+
       foreach ($viewModeIds as $viewModeId) {
         $entityType->setLinkTemplate("display_builder_override.{$viewModeId}", \sprintf('%s/display/%s', $canonical, $viewModeId));
       }
@@ -73,11 +75,12 @@ class Navigation {
   protected function getEntityTypeViewModesIds(string $entityTypeId): array {
     $viewModeIds = [];
     $viewModesList = $this->configFactory->listAll("core.entity_view_mode.{$entityTypeId}.");
+
     if ($viewModesList) {
       $viewModes = $this->configFactory->loadMultiple($viewModesList);
 
       foreach ($viewModes as $viewMode => $viewModeConfig) {
-        $viewModeIds[] = str_replace("core.entity_view_mode.{$entityTypeId}.", '', $viewMode);
+        $viewModeIds[] = \str_replace("core.entity_view_mode.{$entityTypeId}.", '', $viewMode);
       }
     }
 

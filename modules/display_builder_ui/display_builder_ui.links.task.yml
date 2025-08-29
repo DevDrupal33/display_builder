@@ -2,9 +2,16 @@ entity.display_builder.collection:
   route_name: entity.display_builder.collection
   title: 'Profiles'
   base_route: entity.display_builder.collection
+  weight: 1
 
 entity.display_builder.preset.collection:
   route_name: entity.pattern_preset.collection
   title: Presets
   base_route: entity.display_builder.collection
-  weight: 9
+  weight: 2
+
+display_builder_ui.collection:
+  route_name: display_builder_ui.collection
+  title: Instances
+  base_route: entity.display_builder.collection
+  weight: 3

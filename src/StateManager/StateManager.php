@@ -554,7 +554,7 @@ class StateManager implements StateManagerInterface {
   /**
    * Refresh contexts after loaded from storage.
    *
-   * @param array $contexts
+   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
    *   The contexts.
    *
    * @throws \Drupal\Component\Plugin\Exception\ContextException

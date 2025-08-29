@@ -1,5 +1,5 @@
 name: "Display Builder UI"
-description: "Create and manage display builders from the UI."
+description: "Create and manage Display Builder profile, pattern preset and view instances from the UI."
 type: module
 core_version_requirement: ^11.2
 package: "User interface"

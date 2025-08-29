@@ -1,10 +1,11 @@
+# Profile config entity routes
 entity.display_builder.collection:
   path: '/admin/structure/display-builder'
   defaults:
     _entity_list: 'display_builder'
-    _title: 'Display builders'
+    _title: 'Display Builder'
   requirements:
-    _permission: 'administer display builders'
+    _permission: 'administer display builder profile'
   options:
     _admin_route: true
 
@@ -12,9 +13,9 @@ entity.display_builder.add_form:
   path: '/admin/structure/display-builder/add'
   defaults:
     _entity_form: 'display_builder.add'
-    _title: 'Add display builder'
+    _title: 'Add a Display Builder profile'
   requirements:
-    _permission: 'administer display builders'
+    _permission: 'administer display builder profile'
   options:
     _admin_route: true
 
@@ -22,9 +23,9 @@ entity.display_builder.edit_form:
   path: '/admin/structure/display-builder/{display_builder}'
   defaults:
     _entity_form: 'display_builder.edit'
-    _title: 'Edit a display builder'
+    _title: 'Edit a Display Builder profile'
   requirements:
-    _permission: 'administer display builders'
+    _permission: 'administer display builder profile'
   options:
     _admin_route: true
 
@@ -32,12 +33,13 @@ entity.display_builder.delete_form:
   path: '/admin/structure/display-builder/{display_builder}/delete'
   defaults:
     _entity_form: 'display_builder.delete'
-    _title: 'Delete a display builder'
+    _title: 'Delete a Display Builder profile'
   requirements:
-    _permission: 'administer display builders'
+    _permission: 'administer display builder profile'
   options:
     _admin_route: true
 
+# Preset config entity routes
 entity.pattern_preset.collection:
   path: '/admin/structure/display-builder/preset'
   defaults:
@@ -45,6 +47,8 @@ entity.pattern_preset.collection:
     _title: 'Pattern presets'
   requirements:
     _permission: 'administer pattern preset'
+  options:
+    _admin_route: true
 
 entity.pattern_preset.add_form:
   path: '/admin/structure/display-builder/preset/add'
@@ -53,6 +57,8 @@ entity.pattern_preset.add_form:
     _title: 'Add a Pattern preset'
   requirements:
     _permission: 'administer pattern preset'
+  options:
+    _admin_route: true
 
 entity.pattern_preset.edit_form:
   path: '/admin/structure/display-builder/preset/{pattern_preset}'
@@ -61,6 +67,8 @@ entity.pattern_preset.edit_form:
     _title: 'Edit a Pattern preset'
   requirements:
     _permission: 'administer pattern preset'
+  options:
+    _admin_route: true
 
 entity.pattern_preset.delete_form:
   path: '/admin/structure/display-builder/preset/{pattern_preset}/delete'
@@ -69,3 +77,16 @@ entity.pattern_preset.delete_form:
     _title: 'Delete a Pattern preset'
   requirements:
     _permission: 'administer pattern preset'
+  options:
+    _admin_route: true
+
+# Instances route
+display_builder_ui.collection:
+  path: '/admin/structure/display-builder/instances'
+  defaults:
+    _controller: '\Drupal\display_builder_ui\Controller\DisplayBuilderUiController::instances'
+    _title: 'Display Builder instances'
+  requirements:
+    _permission: 'view display builder instance'
+  options:
+    _admin_route: true

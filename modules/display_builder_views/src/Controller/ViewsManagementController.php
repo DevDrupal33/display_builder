@@ -6,10 +6,9 @@ namespace Drupal\display_builder_views\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Datetime\DateFormatterInterface;
-use Drupal\Core\Render\Markup;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
 
@@ -87,10 +86,10 @@ class ViewsManagementController extends ControllerBase {
     ];
 
     $row['profile_id']['data'] = $view->getDisplay($display_id)['display_options']['display_extenders']['display_builder'][ConfigFormBuilderInterface::PROFILE_PROPERTY] ?? 'n/a';
-    $row['updated']['data'] = $builder['present']['time'] ? $this->formatTime((int) $builder['present']['time']) : '-';
+    $row['updated']['data'] = $builder['present']['time'] ? DisplayBuilderHelpers::formatTime($this->dateFormatter, (int) $builder['present']['time']) : '-';
 
-    if (isset($builder['present']['log']) && $builder['present']['log'] instanceof TranslatableMarkup) {
-      $row['log']['data'] = $this->formatLog($builder['present']['log']);
+    if (isset($builder['present']['log'])) {
+      $row['log']['data'] = $builder['present']['log'];
     }
     else {
       $row['log']['data'] = '-';
@@ -101,19 +100,6 @@ class ViewsManagementController extends ControllerBase {
     ];
 
     return ['data' => $row];
-  }
-
-  /**
-   * Format the log.
-   *
-   * @param \Drupal\Core\StringTranslation\TranslatableMarkup $log
-   *   The log to format.
-   *
-   * @return array
-   *   The formatted log.
-   */
-  private function formatLog(TranslatableMarkup $log): array {
-    return ['#markup' => Markup::create($log->render())];
   }
 
   /**
@@ -138,25 +124,6 @@ class ViewsManagementController extends ControllerBase {
         ]),
       ],
     ];
-  }
-
-  /**
-   * Print the date for humans.
-   *
-   * @param int $timestamp
-   *   The timestamp integer.
-   *
-   * @return string
-   *   The formatted date.
-   */
-  private function formatTime(int $timestamp): string {
-    $delta = \time() - $timestamp;
-
-    if ($delta < 86400) {
-      return $this->dateFormatter->format($timestamp, 'custom', 'G:i');
-    }
-
-    return $this->dateFormatter->format($timestamp, 'short');
   }
 
 }

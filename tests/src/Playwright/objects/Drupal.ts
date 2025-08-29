@@ -221,12 +221,13 @@ export class Drupal {
     }
 
     const permissions = [
+      'access display builder',
       'use display builder default',
       'use display builder test',
-      'manage devel display builders',
-      'access display builders api',
-      'administer display builders',
+      'administer display builder profile',
       'administer pattern preset',
+      'administer page layout',
+      'view display builder instance',
     ]
 
     await this.createRole({ name: role })

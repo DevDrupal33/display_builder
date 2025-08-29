@@ -115,6 +115,6 @@ We use `localStorage` that can change anytime, be sure to clear your local stora
 
 In case of a failing Display builder profile (config entity) or instance:
 
-- Enable module `display_builder_devel`
+- Install and enable module `display_builder_dev_tools`
 - Go to Structure > Display Builder > Devel
 - `Delete` from the _Operations_ dropdown

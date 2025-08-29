@@ -17,7 +17,7 @@ interface PatternPresetInterface extends ConfigEntityInterface {
    * This is not the same as WithDisplayBuilderInterface::getSources() because
    * the root level is a single nestable source plugin instead of a list.
    *
-   * @param array $contexts
+   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
    *   (Optional) Contexts for the sources.
    * @param bool $fillInstanceId
    *   (Optional) Set instance_id on all children. Default to TRUE.

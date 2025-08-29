@@ -161,23 +161,6 @@ class StateButtons extends IslandPluginBase {
   }
 
   /**
-   * Rebuilds the island with the given builder ID.
-   *
-   * @param string $builder_id
-   *   The ID of the builder.
-   *
-   * @return array
-   *   The rebuilt island.
-   */
-  private function rebuild(string $builder_id): array {
-    return $this->addOutOfBand(
-      $this->build($builder_id, []),
-      '#' . $this->getHtmlId($builder_id),
-      'innerHTML'
-    );
-  }
-
-  /**
    * Check if the display builder is on an entity override.
    *
    * @param string $builder_id
@@ -192,6 +175,7 @@ class StateButtons extends IslandPluginBase {
     }
 
     $instanceInfos = DisplayBuilderItemList::checkInstanceId($builder_id);
+
     if (!isset($instanceInfos['entity_type_id'], $instanceInfos['entity_id'], $instanceInfos['field_name'])) {
       return FALSE;
     }
@@ -200,15 +184,35 @@ class StateButtons extends IslandPluginBase {
     // the fields are empty.
     $entity = $this->entityTypeManager->getStorage($instanceInfos['entity_type_id'])
       ->load($instanceInfos['entity_id']);
+
     if (!($entity instanceof FieldableEntityInterface)) {
       return FALSE;
     }
 
     $overriddenField = $entity->get($instanceInfos['field_name']);
+
     if ($overriddenField->isEmpty()) {
       return FALSE;
     }
+
     return TRUE;
+  }
+
+  /**
+   * Rebuilds the island with the given builder ID.
+   *
+   * @param string $builder_id
+   *   The ID of the builder.
+   *
+   * @return array
+   *   The rebuilt island.
+   */
+  private function rebuild(string $builder_id): array {
+    return $this->addOutOfBand(
+      $this->build($builder_id, []),
+      '#' . $this->getHtmlId($builder_id),
+      'innerHTML'
+    );
   }
 
 }

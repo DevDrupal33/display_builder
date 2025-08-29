@@ -1,8 +1,11 @@
-administer display builders:
-  title: 'Administer display builder'
+administer display builder profile:
+  title: 'Administer profile'
+  description: 'View, edit and delete any Display Builder profile.'
 
 administer pattern preset:
   title: 'Administer pattern preset'
+  description: 'View, edit and delete any pattern preset.'
 
-access display builders api:
-  title: 'Access display builder API'
+view display builder instance:
+  title: 'View instance'
+  description: 'View any Display Builder instance.'

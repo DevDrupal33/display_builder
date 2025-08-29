@@ -8,6 +8,7 @@ use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -26,11 +27,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   icon: 'list-columns-reverse',
 )]
 class LogsPanel extends IslandPluginBase {
-
-  /**
-   * Seconds in a day.
-   */
-  private const SECONDS_IN_A_DAY = 86400;
 
   /**
    * The entity type manager.
@@ -89,7 +85,7 @@ class LogsPanel extends IslandPluginBase {
     $build[] = $table_logs;
 
     if ($saveHash && !$saveInFuture && !$saveInPresent && !$saveInPast) {
-      $time = $this->formatTime($load['save']['time']);
+      $time = DisplayBuilderHelpers::formatTime($this->dateFormatter, $load['save']['time']);
       $params = ['%hash' => $saveHash, '%time' => $time];
       $build[] = [
         '#type' => 'html_tag',
@@ -231,25 +227,6 @@ class LogsPanel extends IslandPluginBase {
   }
 
   /**
-   * Print the date for humans.
-   *
-   * @param int $timestamp
-   *   The timestamp integer.
-   *
-   * @return string
-   *   The formatted date.
-   */
-  protected function formatTime(int $timestamp): string {
-    $delta = \time() - $timestamp;
-
-    if ($delta < self::SECONDS_IN_A_DAY) {
-      return $this->dateFormatter->format($timestamp, 'custom', 'G:i');
-    }
-
-    return $this->dateFormatter->format($timestamp, 'short');
-  }
-
-  /**
    * Build a single row for the logs table.
    *
    * @param int $index
@@ -268,7 +245,7 @@ class LogsPanel extends IslandPluginBase {
       'data' => [
         (string) $index,
         '',
-        $step['time'] ? $this->formatTime($step['time']) : NULL,
+        $step['time'] ? DisplayBuilderHelpers::formatTime($this->dateFormatter, $step['time']) : NULL,
         $user ? $user->getDisplayName() : NULL,
         $step['log'] ?? '',
       ],

@@ -29,7 +29,6 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
   protected static $modules = [
     'display_builder',
     'display_builder_entity_view',
-    'display_builder_devel',
     'display_builder_test',
     'ui_patterns',
     'ui_patterns_field',

@@ -16,7 +16,7 @@ interface SaveContextInterface {
    *
    * @param string $builder_id
    *   The display builder id.
-   * @param array $contexts
+   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
    *   (Optional) contexts if already accessible.
    *
    * @return bool
@@ -31,7 +31,7 @@ interface SaveContextInterface {
    *   The display builder id.
    * @param string $key
    *   The context key to look for.
-   * @param array $contexts
+   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
    *   (Optional) contexts if already accessible.
    *
    * @return bool

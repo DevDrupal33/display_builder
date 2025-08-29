@@ -5,131 +5,128 @@ display_builder.api_root_attach:
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::attachToRoot'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
-    # _theme: none
 
 # Attach a component_id, a block_id, or an instance_id to a slot.
 display_builder.api_slot_attach:
-  path: "/api/display-builder/{builder_id}/instance/{instance_id}/{slot}"
+  path: '/api/display-builder/{builder_id}/instance/{instance_id}/{slot}'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::attachToSlot'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
-    # _theme: none
 
 display_builder.api_instance_get:
-  path: "/api/display-builder/{builder_id}/instance/{instance_id}"
+  path: '/api/display-builder/{builder_id}/instance/{instance_id}'
   methods: [GET]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::getInstance'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
-    _theme: none
 
 display_builder.api_instance_update:
-  path: "/api/display-builder/{builder_id}/instance/{instance_id}"
+  path: '/api/display-builder/{builder_id}/instance/{instance_id}'
   methods: [PUT, POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::updateInstance'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
 
 display_builder.api_instance_paste:
-  path: "/api/display-builder/{builder_id}/instance/{instance_id}/{parent_id}/{slot_id}/{slot_position}/paste"
+  path: '/api/display-builder/{builder_id}/instance/{instance_id}/{parent_id}/{slot_id}/{slot_position}/paste'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::pasteInstance'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
 
 display_builder.api_instance_duplicate:
-  path: "/api/display-builder/{builder_id}/instance/{instance_id}/{parent_id}/{slot_id}/{slot_position}/duplicate"
+  path: '/api/display-builder/{builder_id}/instance/{instance_id}/{parent_id}/{slot_id}/{slot_position}/duplicate'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::pasteInstance'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
 
 display_builder.api_instance_delete:
-  path: "/api/display-builder/{builder_id}/instance/{instance_id}"
+  path: '/api/display-builder/{builder_id}/instance/{instance_id}'
   methods: [DELETE]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::deleteInstance'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
 
 display_builder.api_instance_save_preset:
-  path: "/api/display-builder/{builder_id}/instance/{instance_id}/save_as_preset"
+  path: '/api/display-builder/{builder_id}/instance/{instance_id}/save_as_preset'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::saveInstanceAsPreset'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
 
 display_builder.api_third_party_settings_update:
-  path: "/api/display-builder/{builder_id}/instance/{instance_id}/settings/{island_id}"
+  path: '/api/display-builder/{builder_id}/instance/{instance_id}/settings/{island_id}'
   methods: [PUT]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::thirdPartySettingsUpdate'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
 
 display_builder.api_undo:
-  path: "/api/display-builder/{builder_id}/undo"
+  path: '/api/display-builder/{builder_id}/undo'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::undo'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
 
 display_builder.api_redo:
-  path: "/api/display-builder/{builder_id}/redo"
+  path: '/api/display-builder/{builder_id}/redo'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::redo'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
 
 display_builder.api_save:
-  path: "/api/display-builder/{builder_id}/save"
+  path: '/api/display-builder/{builder_id}/save'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::save'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
 
 display_builder.api_restore:
-  path: "/api/display-builder/{builder_id}/restore"
+  path: '/api/display-builder/{builder_id}/restore'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::restore'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
 
@@ -145,52 +142,52 @@ display_builder.api_revert:
     _htmx_route: true
 
 display_builder.api_clear:
-  path: "/api/display-builder/{builder_id}/clear"
+  path: '/api/display-builder/{builder_id}/clear'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::clear'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
 
 # Display Builder preview API.
 display_builder.api_component_preview:
-  path: "/api/display-builder/component/{component_id}/preview/{variant_id}"
+  path: '/api/display-builder/component/{component_id}/preview/{variant_id}'
   methods: [GET]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiPreviewController::getComponentPreview'
-    variant_id: "default"
+    variant_id: 'default'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
 
 display_builder.api_block_preview:
-  path: "/api/display-builder/block/{block_id}"
+  path: '/api/display-builder/block/{block_id}'
   methods: [GET]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiPreviewController::getBlockPreview'
-    variant_id: "default"
+    variant_id: 'default'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
 
 display_builder.api_preset_preview:
-  path: "/api/display-builder/preset/{preset_id}"
+  path: '/api/display-builder/preset/{preset_id}'
   methods: [GET]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiPreviewController::getPresetPreview'
-    variant_id: "default"
+    variant_id: 'default'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'
   options:
     _htmx_route: true
 
 display_builder.api_sse:
-  path: "/api/display-builder/{builder_id}/sse"
+  path: '/api/display-builder/{builder_id}/sse'
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiSseController::sse'
   requirements:
-    _permission: "administer display builders+access display builders api"
+    _permission: 'access display builder'

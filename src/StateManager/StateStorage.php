@@ -160,7 +160,7 @@ class StateStorage implements StorageInterface {
   /**
    * {@inheritdoc}
    */
-  public function setNewPresent(string $builder_id, array $data, string|FormattableMarkup $log_message = '', bool $check_hash = TRUE): void {
+  public function setNewPresent(string $builder_id, array $data, FormattableMarkup|string $log_message = '', bool $check_hash = TRUE): void {
     $builder_data = $this->load($builder_id);
     $hash = self::getUniqId($data);
 

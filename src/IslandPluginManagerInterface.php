@@ -14,8 +14,8 @@ interface IslandPluginManagerInterface extends PluginManagerInterface {
   /**
    * Get islands plugins by type.
    *
-   * @param array $contexts
-   *   (Optional) An array of contexts.
+   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
+   *   (Optional) An array of contexts, keyed by context name.
    * @param array $configuration
    *   (Optional) An array of configuration.
    * @param array $filter_by_island
@@ -42,8 +42,8 @@ interface IslandPluginManagerInterface extends PluginManagerInterface {
    *
    * @param array $definitions
    *   An array of plugin definitions.
-   * @param array $contexts
-   *   (Optional) An array of contexts.
+   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
+   *   (Optional) An array of contexts, keyed by context name.
    * @param array $configuration
    *   (Optional) An array of configuration.
    *

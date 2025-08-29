@@ -52,7 +52,7 @@ use Drupal\user\RoleInterface;
     'delete-form' => '/admin/structure/display-builder/{display_builder}/delete',
     'collection' => '/admin/structure/display-builder',
   ],
-  admin_permission: 'administer display builders',
+  admin_permission: 'administer display builder profile',
   constraints: [
     'ImmutableProperties' => [
       'id',

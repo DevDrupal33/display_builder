@@ -62,7 +62,7 @@ interface StateManagerInterface extends ContextAwareInterface, DataStateInterfac
    *   The display builder entity config id.
    * @param array|null $builder_data
    *   The populated data or current if null.
-   * @param array $contexts
+   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
    *   The contexts for this builder_id.
    *
    * @return array

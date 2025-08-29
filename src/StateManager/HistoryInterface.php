@@ -77,7 +77,7 @@ interface HistoryInterface {
    *   The display builder entity config id.
    * @param array $state
    *   The state to set.
-   * @param array $contexts
+   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
    *   The contexts for this builder_id.
    */
   public function init(string $builder_id, string $entity_config_id, array $state, array $contexts): void;
@@ -102,7 +102,7 @@ interface HistoryInterface {
    * @param bool $check_hash
    *   (Optional) Should check hash to avoid duplicates. Default to TRUE.
    */
-  public function setNewPresent(string $builder_id, array $state, string|FormattableMarkup $log_message = '', bool $check_hash = TRUE): void;
+  public function setNewPresent(string $builder_id, array $state, FormattableMarkup|string $log_message = '', bool $check_hash = TRUE): void;
 
   /**
    * Undo handler.

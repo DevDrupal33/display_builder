@@ -74,8 +74,8 @@ final class IslandPluginManager extends DefaultPluginManager implements IslandPl
    *
    * @param array $definitions
    *   An array of definitions.
-   * @param array $contexts
-   *   (Optional) An array of contexts.
+   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
+   *   (Optional) An array of contexts, keyed by context name.
    * @param array $configuration
    *   (Optional) An array of configuration.
    *
