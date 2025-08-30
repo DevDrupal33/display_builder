@@ -27,4 +27,8 @@
   .ui-icons-settings-wrapper {
     margin-top: 0.5rem;
   }
+
+  .form-item {
+    margin-block: 0.5rem;
+  }
 }

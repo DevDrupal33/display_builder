@@ -12,7 +12,9 @@
     padding: 0.5rem 1rem;
   }
   &::part(body) {
-    padding: 0 0.5rem 0 0.5rem;
+    padding-top: 0;
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
   }
   &::part(base) {
     position: fixed;
