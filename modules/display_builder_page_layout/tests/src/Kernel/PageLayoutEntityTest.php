@@ -6,8 +6,10 @@ namespace Drupal\Tests\display_builder_page_layout\Kernel;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormState;
+use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -15,6 +17,7 @@ use PHPUnit\Framework\Attributes\Group;
  *
  * @internal
  */
+#[CoversClass('\Drupal\display_builder_page_layout\Entity\PageLayout')]
 #[Group('display_builder')]
 final class PageLayoutEntityTest extends KernelTestBase {
 
@@ -25,6 +28,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
     'system',
     'user',
     'display_builder',
+    'display_builder_test',
     'display_builder_page_layout',
     'ui_patterns',
     'path_alias',
@@ -40,6 +44,15 @@ final class PageLayoutEntityTest extends KernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
+
+    \Drupal::service('theme_installer')
+      ->install([
+        'display_builder_theme_test',
+      ]);
+    $this->config('system.theme')->set('default', 'display_builder_theme_test')->save();
+
+    $this->installConfig(['display_builder']);
+
     $this->entityTypeManager = $this->container->get('entity_type.manager');
   }
 
@@ -53,11 +66,15 @@ final class PageLayoutEntityTest extends KernelTestBase {
       'id' => 'test_layout',
       'label' => 'Test Layout',
       'weight' => 1,
-      'display_builder' => '',
-      'sources' => [],
+      ConfigFormBuilderInterface::PROFILE_PROPERTY => 'test',
+      ConfigFormBuilderInterface::SOURCES_PROPERTY => [],
       'conditions' => [],
     ]);
-    $entity->save();
+    $entity->setStatus(TRUE)->save();
+    $entity->initInstanceIfMissing();
+
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($entity->getInstanceId());
+    self::assertNotNull($instance, 'PageLayout instance loaded.');
 
     // Load the entity.
     $loaded = PageLayout::load('test_layout');
@@ -67,9 +84,15 @@ final class PageLayoutEntityTest extends KernelTestBase {
     // Test getInstanceId().
     self::assertSame('page_layout__test_layout', $loaded->getInstanceId());
 
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($loaded->getInstanceId());
+    self::assertNotNull($instance);
+
     // Delete the entity.
     $entity->delete();
     self::assertNull(PageLayout::load('test_layout'), 'Entity deleted.');
+
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($loaded->getInstanceId());
+    self::assertNull($instance);
   }
 
   /**
@@ -80,11 +103,12 @@ final class PageLayoutEntityTest extends KernelTestBase {
       'id' => 'form_layout',
       'label' => 'Form Layout',
       'weight' => 0,
-      'display_builder' => '',
-      'sources' => [],
+      ConfigFormBuilderInterface::PROFILE_PROPERTY => 'test',
+      ConfigFormBuilderInterface::SOURCES_PROPERTY => [],
       'conditions' => [],
     ]);
-    $entity->save();
+    $entity->setStatus(TRUE)->save();
+    $entity->initInstanceIfMissing();
 
     // Get the form object.
     $form_object = $this->entityTypeManager
@@ -109,11 +133,12 @@ final class PageLayoutEntityTest extends KernelTestBase {
       'id' => 'edit_layout',
       'label' => 'Original Label',
       'weight' => 5,
-      'display_builder' => '',
-      'sources' => [],
+      ConfigFormBuilderInterface::PROFILE_PROPERTY => 'test',
+      ConfigFormBuilderInterface::SOURCES_PROPERTY => [],
       'conditions' => [],
     ]);
-    $entity->save();
+    $entity->setStatus(TRUE)->save();
+    $entity->initInstanceIfMissing();
 
     // Load and edit the entity.
     $loaded = PageLayout::load('edit_layout');

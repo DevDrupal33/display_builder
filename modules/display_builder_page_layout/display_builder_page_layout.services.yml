@@ -9,7 +9,6 @@ services:
   display_builder_page_layout.display_builder_subscriber:
     class: Drupal\display_builder_page_layout\EventSubscriber\DisplayBuilderSubscriber
     arguments:
-      - "@display_builder.state_manager"
       - "@plugin.cache_clearer"
       - "@entity_type.manager"
     tags:

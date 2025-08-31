@@ -1,6 +1,6 @@
 # Attach a component_id, a block_id, or an instance_id to the root.
 display_builder.api_root_attach:
-  path: "/api/display-builder/{builder_id}"
+  path: '/api/display-builder/{builder}'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::attachToRoot'
@@ -8,10 +8,13 @@ display_builder.api_root_attach:
     _permission: 'access display builder'
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 # Attach a component_id, a block_id, or an instance_id to a slot.
 display_builder.api_slot_attach:
-  path: '/api/display-builder/{builder_id}/instance/{instance_id}/{slot}'
+  path: '/api/display-builder/{builder}/instance/{instance_id}/{slot}'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::attachToSlot'
@@ -19,9 +22,12 @@ display_builder.api_slot_attach:
     _permission: 'access display builder'
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 display_builder.api_instance_get:
-  path: '/api/display-builder/{builder_id}/instance/{instance_id}'
+  path: '/api/display-builder/{builder}/instance/{instance_id}'
   methods: [GET]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::getInstance'
@@ -29,9 +35,12 @@ display_builder.api_instance_get:
     _permission: 'access display builder'
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 display_builder.api_instance_update:
-  path: '/api/display-builder/{builder_id}/instance/{instance_id}'
+  path: '/api/display-builder/{builder}/instance/{instance_id}'
   methods: [PUT, POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::updateInstance'
@@ -39,9 +48,12 @@ display_builder.api_instance_update:
     _permission: 'access display builder'
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 display_builder.api_instance_paste:
-  path: '/api/display-builder/{builder_id}/instance/{instance_id}/{parent_id}/{slot_id}/{slot_position}/paste'
+  path: '/api/display-builder/{builder}/instance/{instance_id}/{parent_id}/{slot_id}/{slot_position}/paste'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::pasteInstance'
@@ -49,9 +61,12 @@ display_builder.api_instance_paste:
     _permission: 'access display builder'
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 display_builder.api_instance_duplicate:
-  path: '/api/display-builder/{builder_id}/instance/{instance_id}/{parent_id}/{slot_id}/{slot_position}/duplicate'
+  path: '/api/display-builder/{builder}/instance/{instance_id}/{parent_id}/{slot_id}/{slot_position}/duplicate'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::pasteInstance'
@@ -59,9 +74,12 @@ display_builder.api_instance_duplicate:
     _permission: 'access display builder'
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 display_builder.api_instance_delete:
-  path: '/api/display-builder/{builder_id}/instance/{instance_id}'
+  path: '/api/display-builder/{builder}/instance/{instance_id}'
   methods: [DELETE]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::deleteInstance'
@@ -69,9 +87,12 @@ display_builder.api_instance_delete:
     _permission: 'access display builder'
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 display_builder.api_instance_save_preset:
-  path: '/api/display-builder/{builder_id}/instance/{instance_id}/save_as_preset'
+  path: '/api/display-builder/{builder}/instance/{instance_id}/save_as_preset'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::saveInstanceAsPreset'
@@ -79,9 +100,12 @@ display_builder.api_instance_save_preset:
     _permission: 'access display builder'
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 display_builder.api_third_party_settings_update:
-  path: '/api/display-builder/{builder_id}/instance/{instance_id}/settings/{island_id}'
+  path: '/api/display-builder/{builder}/instance/{instance_id}/settings/{island_id}'
   methods: [PUT]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::thirdPartySettingsUpdate'
@@ -89,9 +113,12 @@ display_builder.api_third_party_settings_update:
     _permission: 'access display builder'
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 display_builder.api_undo:
-  path: '/api/display-builder/{builder_id}/undo'
+  path: '/api/display-builder/{builder}/undo'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::undo'
@@ -99,9 +126,12 @@ display_builder.api_undo:
     _permission: 'access display builder'
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 display_builder.api_redo:
-  path: '/api/display-builder/{builder_id}/redo'
+  path: '/api/display-builder/{builder}/redo'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::redo'
@@ -109,9 +139,12 @@ display_builder.api_redo:
     _permission: 'access display builder'
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 display_builder.api_save:
-  path: '/api/display-builder/{builder_id}/save'
+  path: '/api/display-builder/{builder}/save'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::save'
@@ -119,9 +152,12 @@ display_builder.api_save:
     _permission: 'access display builder'
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 display_builder.api_restore:
-  path: '/api/display-builder/{builder_id}/restore'
+  path: '/api/display-builder/{builder}/restore'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::restore'
@@ -129,9 +165,12 @@ display_builder.api_restore:
     _permission: 'access display builder'
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 display_builder.api_revert:
-  path: "/api/display-builder/{builder_id}/revert"
+  path: '/api/display-builder/{builder}/revert'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::revert'
@@ -140,9 +179,12 @@ display_builder.api_revert:
     _module_dependencies: "display_builder_entity_view"
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 display_builder.api_clear:
-  path: '/api/display-builder/{builder_id}/clear'
+  path: '/api/display-builder/{builder}/clear'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::clear'
@@ -150,6 +192,9 @@ display_builder.api_clear:
     _permission: 'access display builder'
   options:
     _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'
 
 # Display Builder preview API.
 display_builder.api_component_preview:
@@ -186,8 +231,12 @@ display_builder.api_preset_preview:
     _htmx_route: true
 
 display_builder.api_sse:
-  path: '/api/display-builder/{builder_id}/sse'
+  path: '/api/display-builder/{builder}/sse'
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiSseController::sse'
   requirements:
     _permission: 'access display builder'
+  options:
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'

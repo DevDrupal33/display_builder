@@ -6,6 +6,7 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 
@@ -26,7 +27,7 @@ class KeyboardHelpButton extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function build(string $builder_id, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data, array $options = []): array {
     $items = [];
 
     foreach ($data as $key => $label) {

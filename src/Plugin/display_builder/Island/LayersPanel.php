@@ -6,6 +6,7 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -44,8 +45,8 @@ class LayersPanel extends BuilderPanel {
   /**
    * {@inheritdoc}
    */
-  public function build(string $builder_id, array $data, array $options = []): array {
-    $build = parent::build($builder_id, $data, $options);
+  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+    $build = parent::build($builder, $data, $options);
 
     if (empty($build['#slots']['content'] ?? [])) {
       // Load en empty component to have any assets with it.

@@ -5,16 +5,17 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\HtmxEvents;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandPluginFormTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -42,12 +43,12 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
     $plugin_definition,
     protected ComponentPluginManager $sdcManager,
     protected HtmxEvents $htmxEvents,
-    protected StateManagerInterface $stateManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
     protected EventSubscriberInterface $eventSubscriber,
     protected SourcePluginManager $sourceManager,
     protected PluginManagerInterface $propTypeManager,
   ) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $sdcManager, $htmxEvents, $stateManager, $eventSubscriber, $sourceManager);
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $sdcManager, $htmxEvents, $entityTypeManager, $eventSubscriber, $sourceManager);
   }
 
   /**
@@ -60,7 +61,7 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
       $plugin_definition,
       $container->get('plugin.manager.sdc'),
       $container->get('display_builder.htmx_events'),
-      $container->get('display_builder.state_manager'),
+      $container->get('entity_type.manager'),
       $container->get('display_builder.event_subscriber'),
       $container->get('plugin.manager.ui_patterns_source'),
       $container->get('plugin.manager.ui_patterns_prop_type'),
@@ -103,8 +104,8 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
   /**
    * {@inheritdoc}
    */
-  public function build(string $builder_id, array $data, array $options = []): array {
-    $build = parent::build($builder_id, $data, $options);
+  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+    $build = parent::build($builder, $data, $options);
 
     if (empty($build)) {
       return $build;
@@ -155,7 +156,11 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
    */
   public function onUpdate(string $builder_id, ?string $instance_id, ?string $current_island_id): array {
     // Reload the form itself on update.
-    $data = $this->stateManager->get($builder_id, $instance_id);
+    // @todo pass \Drupal\display_builder\InstanceInterface object in
+    // parameters instead of loading again.
+    /** @var \Drupal\display_builder\InstanceInterface $builder */
+    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+    $data = $builder->get($instance_id);
 
     return $this->reloadWithLocalData($builder_id, $data, $current_island_id);
   }

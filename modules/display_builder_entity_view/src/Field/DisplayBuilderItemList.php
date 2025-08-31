@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_entity_view\Field;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\MapFieldItemList;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuilderInterface;
-use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\WithDisplayBuilderInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
@@ -29,9 +30,14 @@ use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 final class DisplayBuilderItemList extends MapFieldItemList implements WithDisplayBuilderInterface {
 
   /**
-   * The state manager.
+   * The entity type manager.
    */
-  protected ?StateManagerInterface $stateManager = NULL;
+  protected ?EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * The loaded display builder instance.
+   */
+  protected ?InstanceInterface $instance;
 
   /**
    * {@inheritdoc}
@@ -146,7 +152,7 @@ final class DisplayBuilderItemList extends MapFieldItemList implements WithDispl
    * {@inheritdoc}
    */
   public function saveSources(): void {
-    $data = $this->stateManager()->getCurrentState($this->getInstanceId());
+    $data = $this->getInstance()->getCurrentState();
     $this->list = [];
 
     foreach ($data as $offset => $item) {
@@ -159,18 +165,22 @@ final class DisplayBuilderItemList extends MapFieldItemList implements WithDispl
    * {@inheritdoc}
    */
   public function initInstanceIfMissing(): void {
-    $instance_id = $this->getInstanceId();
-    // One instance in State API by entity view display entity.
-    $instance = $this->stateManager()->load($instance_id);
+    /** @var \Drupal\display_builder\InstanceStorage $storage */
+    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
 
-    if ($instance !== NULL) {
-      // The instance already exists in State Manager, so nothing to do.
-      return;
+    if (!$storage->load($this->getInstanceId())) {
+      // Init instance if missing in State Manager because new or deleted in the
+      // State API.
+      /** @var \Drupal\display_builder\InstanceInterface $instance */
+      $instance = $storage->createFromImplementation($this);
+      $instance->save();
     }
-    // Init instance if missing in State Manager because new or deleted in the
-    // State API.
-    $contexts = $this->initContexts();
-    // Get the sources stored in config.
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getInitialSources(): array {
     $sources = $this->getSources();
     $entity = $this->getEntity();
 
@@ -182,16 +192,14 @@ final class DisplayBuilderItemList extends MapFieldItemList implements WithDispl
         $sources = $display->getSources();
       }
     }
-    $this->stateManager()->create($instance_id, (string) $this->getDisplayBuilder()->id(), $sources, $contexts);
+
+    return $sources;
   }
 
   /**
-   * Initialize contexts for this item list.
-   *
-   * @return array<\Drupal\Core\Plugin\Context\ContextInterface>
-   *   The contexts.
+   * {@inheritdoc}
    */
-  protected function initContexts(): array {
+  public function getInitialContext(): array {
     $entity = $this->getEntity();
     $bundle = $entity->bundle();
     \assert(\is_string($this->getName()));
@@ -207,13 +215,13 @@ final class DisplayBuilderItemList extends MapFieldItemList implements WithDispl
   }
 
   /**
-   * Get the state manager.
+   * Get the entity type manager.
    *
-   * @return \Drupal\display_builder\StateManager\StateManagerInterface
-   *   The state manager.
+   * @return \Drupal\Core\Entity\EntityTypeManagerInterface
+   *   The entity type manager.
    */
-  protected function stateManager(): StateManagerInterface {
-    return $this->stateManager ??= \Drupal::service('display_builder.state_manager');
+  protected function entityTypeManager(): EntityTypeManagerInterface {
+    return $this->entityTypeManager ??= \Drupal::service('entity_type.manager');
   }
 
   /**
@@ -246,6 +254,22 @@ final class DisplayBuilderItemList extends MapFieldItemList implements WithDispl
     }
 
     return NULL;
+  }
+
+  /**
+   * Gets the Display Builder instance.
+   *
+   * @return \Drupal\display_builder\InstanceInterface|null
+   *   A display builder instance.
+   */
+  private function getInstance(): ?InstanceInterface {
+    if (!isset($this->instance)) {
+      /** @var \Drupal\display_builder\InstanceInterface|null $instance */
+      $instance = $this->entityTypeManager()->getStorage('display_builder_instance')->load($this->getInstanceId());
+      $this->instance = $instance;
+    }
+
+    return $this->instance;
   }
 
 }

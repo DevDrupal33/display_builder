@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityViewBuilder;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\Url;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 
 /**
  * View builder handler for display builder profiles.
@@ -18,9 +18,9 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
   use RenderableBuilderTrait;
 
   /**
-   * The display builder state manager.
+   * The entity type manager.
    */
-  private StateManagerInterface $stateManager;
+  private EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * The display builder island plugin manager.
@@ -44,8 +44,9 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
     $entity = $entity;
     $this->entity = $entity;
 
-    $stateManager = $this->stateManager();
-    $contexts = $stateManager->getContexts($builder_id) ?? [];
+    /** @var \Drupal\display_builder\InstanceInterface $builder */
+    $builder = $this->entityTypeManager()->getStorage('display_builder_instance')->load($builder_id);
+    $contexts = $builder->getContexts() ?? [];
     $islands_enabled_sorted = $this->getIslandsEnableSorted($contexts);
 
     $build = [
@@ -53,9 +54,9 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
       '#component' => 'display_builder:display_builder',
       '#props' => [
         'builder_id' => $builder_id,
-        'hash' => $stateManager->getCurrentHash($builder_id),
+        'hash' => $builder->getCurrentHash(),
       ],
-      '#slots' => $this->buildSlots($builder_id, $islands_enabled_sorted),
+      '#slots' => $this->buildSlots($builder, $islands_enabled_sorted),
       '#attached' => [
         'drupalSettings' => [
           'dbDebug' => $entity->isDebugModeActivated(),
@@ -67,7 +68,7 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
     if (isset($islands_enabled_sorted['button']['collaboration'])) {
       $build['#attributes'] = [
         'hx-ext' => 'sse',
-        'sse-connect' => Url::fromRoute('display_builder.api_sse', ['builder_id' => $builder_id])->toString(),
+        'sse-connect' => Url::fromRoute('display_builder.api_sse', ['builder' => $builder_id])->toString(),
       ];
     }
 
@@ -86,18 +87,16 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
   /**
    * Builds and returns the value of each slot.
    *
-   * @param string $builder_id
-   *   The ID of the display builder instance.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
    * @param array $islands_enabled_sorted
    *   An array of enabled islands.
    *
    * @return array
    *   An associative array with the value of each slot.
    */
-  private function buildSlots(string $builder_id, array $islands_enabled_sorted): array {
-    $stateManager = $this->stateManager();
-
-    $builder_data = $stateManager->getCurrentState($builder_id);
+  private function buildSlots(InstanceInterface $builder, array $islands_enabled_sorted): array {
+    $builder_data = $builder->getCurrentState();
 
     $button_islands = $islands_enabled_sorted[IslandType::Button->value] ?? [];
     $library_islands = $islands_enabled_sorted[IslandType::Library->value] ?? [];
@@ -108,21 +107,21 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
     $buttons = [];
 
     if (!empty($button_islands)) {
-      $buttons = $this->buildPanes($builder_id, $button_islands, $this->getKeyboardKeys(), [], 'span');
+      $buttons = $this->buildPanes($builder, $button_islands, $this->getKeyboardKeys(), [], 'span');
     }
 
     if (!empty($menu_islands)) {
-      $menu_islands = $this->buildMenuWrapper($builder_id, $menu_islands);
+      $menu_islands = $this->buildMenuWrapper($builder, $menu_islands);
     }
 
     if (!empty($library_islands)) {
       $library_islands = [
-        $this->buildBuilderTabs($builder_id, $library_islands, TRUE),
-        $this->buildPanes($builder_id, $library_islands, $builder_data),
+        $this->buildBuilderTabs($builder, $library_islands, TRUE),
+        $this->buildPanes($builder, $library_islands, $builder_data),
       ];
     }
 
-    $view_islands_data = $this->prepareViewIslands($builder_id, $view_islands, $builder_data);
+    $view_islands_data = $this->prepareViewIslands($builder, $view_islands);
     $view_sidebar = $view_islands_data['view_sidebar'];
     $view_main = $view_islands_data['view_main'];
 
@@ -137,7 +136,7 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
     }
 
     if (!empty($contextual_islands)) {
-      $contextual_islands = $this->buildContextualIslands($builder_id, $islands_enabled_sorted, $builder_data);
+      $contextual_islands = $this->buildContextualIslands($builder, $islands_enabled_sorted);
     }
 
     return [
@@ -154,17 +153,15 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
   /**
    * Prepares view islands data.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
    * @param array $islands
    *   The sorted, enabled View islands.
-   * @param array $builder_data
-   *   The builder data.
    *
    * @return array
    *   The prepared view islands data.
    */
-  private function prepareViewIslands(string $builder_id, array $islands, array $builder_data): array {
+  private function prepareViewIslands(InstanceInterface $builder, array $islands): array {
     $view_islands_sidebar = [];
     $view_islands_main = [];
     $view_sidebar_buttons = [];
@@ -188,16 +185,17 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
     }
 
     if (!empty($view_sidebar_buttons)) {
-      $view_sidebar_buttons = $this->buildStartButtons($builder_id, $view_sidebar_buttons);
+      $view_sidebar_buttons = $this->buildStartButtons($builder, $view_sidebar_buttons);
     }
 
     if (!empty($view_main_tabs)) {
-      $view_main_tabs = $this->buildBuilderTabs($builder_id, $view_main_tabs, FALSE, TRUE);
+      $view_main_tabs = $this->buildBuilderTabs($builder, $view_main_tabs, FALSE, TRUE);
     }
 
-    $view_sidebar = $this->buildPanes($builder_id, $view_islands_sidebar, $builder_data);
+    $builder_data = $builder->getCurrentState();
+    $view_sidebar = $this->buildPanes($builder, $view_islands_sidebar, $builder_data);
     // Default hidden.
-    $view_main = $this->buildPanes($builder_id, $view_islands_main, $builder_data, ['shoelace-tabs__tab--hidden']);
+    $view_main = $this->buildPanes($builder, $view_islands_main, $builder_data, ['shoelace-tabs__tab--hidden']);
 
     return [
       'view_sidebar_buttons' => $view_sidebar_buttons,
@@ -210,24 +208,22 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
   /**
    * Build contextual islands which are tabbed sub islands.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
    * @param array $islands_enabled_sorted
    *   The islands enabled sorted.
-   * @param array $builder_data
-   *   The builder data.
    *
    * @return array
    *   The contextual islands render array.
    */
-  private function buildContextualIslands(string $builder_id, array $islands_enabled_sorted, array $builder_data): array {
+  private function buildContextualIslands(InstanceInterface $builder, array $islands_enabled_sorted): array {
     $contextual_islands = $islands_enabled_sorted[IslandType::Contextual->value] ?? [];
 
     if (empty($contextual_islands)) {
       return [];
     }
 
-    $filter = $this->buildInput($builder_id, '', 'search', 'medium', 'off', $this->t('Filter by name'), TRUE, 'search');
+    $filter = $this->buildInput((string) $builder->id(), '', 'search', 'medium', 'off', $this->t('Filter by name'), TRUE, 'search');
     // @see assets/js/search.js
     $filter['#attributes']['class'] = ['db-search-contextual'];
 
@@ -236,20 +232,20 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
       '#tag' => 'div',
       // Used for custom styling in assets/css/form.css.
       '#attributes' => [
-        'id' => \sprintf('%s-contextual', $builder_id),
+        'id' => \sprintf('%s-contextual', $builder->id()),
         'class' => ['db-form'],
       ],
-      'tabs' => $this->buildBuilderTabs($builder_id, $contextual_islands),
+      'tabs' => $this->buildBuilderTabs($builder, $contextual_islands),
       'filter' => $filter,
-      'panes' => $this->buildPanes($builder_id, $contextual_islands, $builder_data),
+      'panes' => $this->buildPanes($builder, $contextual_islands, $builder->getCurrentState()),
     ];
   }
 
   /**
    * Builds panes.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
    * @param \Drupal\display_builder\IslandInterface[] $islands
    *   The islands to build tabs for.
    * @param array $data
@@ -262,7 +258,7 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
    * @return array
    *   The tabs render array.
    */
-  private function buildPanes(string $builder_id, array $islands, array $data = [], array $classes = [], string $tag = 'div'): array {
+  private function buildPanes(InstanceInterface $builder, array $islands, array $data = [], array $classes = [], string $tag = 'div'): array {
     $panes = [];
 
     foreach ($islands as $island_id => $island) {
@@ -275,12 +271,12 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
       $panes[$island_id] = [
         '#type' => 'html_tag',
         '#tag' => $tag,
-        'children' => $island->build($builder_id, $data),
+        'children' => $island->build($builder, $data),
         '#attributes' => [
           // `id` attribute is used by HTMX OOB swap.
-          'id' => $island->getHtmlId($builder_id),
+          'id' => $island->getHtmlId((string) $builder->id()),
           // `sse-swap` attribute is used by HTMX SSE swap.
-          'sse-swap' => $island->getHtmlId($builder_id),
+          'sse-swap' => $island->getHtmlId((string) $builder->id()),
           'class' => $island_classes,
         ],
       ];
@@ -292,15 +288,15 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
   /**
    * Build the buttons to hide/show the drawer.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
    * @param \Drupal\display_builder\IslandInterface[] $islands
    *   An array of island objects for which buttons will be created.
    *
    * @return array
    *   An array of render arrays for the drawer buttons.
    */
-  private function buildStartButtons(string $builder_id, array $islands): array {
+  private function buildStartButtons(InstanceInterface $builder, array $islands): array {
     $build = [];
 
     foreach ($islands as $island) {
@@ -310,7 +306,7 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
         '#type' => 'component',
         '#component' => 'display_builder:button',
         '#props' => [
-          'id' => \sprintf('start-btn-%s-%s', $builder_id, $island_id),
+          'id' => \sprintf('start-btn-%s-%s', $builder->id(), $island_id),
           'label' => (string) $island->label(),
           'icon' => $island->getIcon(),
           'attributes' => [
@@ -332,8 +328,8 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
   /**
    * Builds tabs.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
    * @param \Drupal\display_builder\IslandInterface[] $islands
    *   The islands to build tabs for.
    * @param bool $contextual
@@ -344,13 +340,13 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
    * @return array
    *   The tabs render array.
    */
-  private function buildBuilderTabs(string $builder_id, array $islands, bool $contextual = FALSE, bool $enableKeyboard = FALSE): array {
+  private function buildBuilderTabs(InstanceInterface $builder, array $islands, bool $contextual = FALSE, bool $enableKeyboard = FALSE): array {
     // Global id is based on last island.
     $id = '';
     $tabs = [];
 
     foreach ($islands as $island) {
-      $id = $island_id = $island->getHtmlId($builder_id);
+      $id = $island_id = $island->getHtmlId((string) $builder->id());
       $attributes = [];
 
       if ($enableKeyboard) {
@@ -374,19 +370,17 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
   /**
    * Builds menu with islands as entries.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
    * @param \Drupal\display_builder\IslandInterface[] $islands
    *   The islands to build tabs for.
-   * @param array $data
-   *   (Optional) The data to pass to the islands.
    *
    * @return array
    *   The islands render array.
    *
    * @see assets/js/contextual_menu.js
    */
-  private function buildMenuWrapper(string $builder_id, array $islands, array $data = []): array {
+  private function buildMenuWrapper(InstanceInterface $builder, array $islands): array {
     $build = [
       '#type' => 'component',
       '#component' => 'display_builder:contextual_menu',
@@ -397,14 +391,14 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
         'class' => ['db-background', 'db-menu'],
         // Require for JavaScript.
         // @see assets/js/contextual_menu.js
-        'data-db-id' => $builder_id,
+        'data-db-id' => (string) $builder->id(),
       ],
     ];
 
     $items = [];
 
     foreach ($islands as $island) {
-      $items = \array_merge($items, $island->build($builder_id, $data));
+      $items = \array_merge($items, $island->build($builder, $builder->getCurrentState()));
     }
     $build['#slots']['items'] = $items;
 
@@ -445,17 +439,17 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
   }
 
   /**
-   * Gets the display builder state manager.
+   * Gets the entity type manager.
    *
-   * @return \Drupal\display_builder\StateManager\StateManagerInterface
-   *   The state manager.
+   * @return \Drupal\Core\Entity\EntityTypeManagerInterface
+   *   The entity type manager.
    */
-  private function stateManager(): StateManagerInterface {
-    if (!isset($this->stateManager)) {
-      $this->stateManager = \Drupal::service('display_builder.state_manager');
+  private function entityTypeManager(): EntityTypeManagerInterface {
+    if (!isset($this->entityTypeManager)) {
+      $this->entityTypeManager = \Drupal::service('entity_type.manager');
     }
 
-    return $this->stateManager;
+    return $this->entityTypeManager;
   }
 
   /**

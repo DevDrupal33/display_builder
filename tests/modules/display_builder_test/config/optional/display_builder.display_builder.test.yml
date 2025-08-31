@@ -31,12 +31,6 @@ islands:
   theme_mode:
     enable: false
     weight: -3
-  reset:
-    enable: false
-    weight: -2
-  operation:
-    enable: false
-    weight: -1
   test_island_button:
     enable: false
     weight: 0
@@ -93,9 +87,6 @@ islands:
   menu_preset:
     enable: true
     weight: 0
-  menu_debug:
-    enable: false
-    weight: 0
   test_island_menu:
     enable: false
     weight: 0
@@ -122,14 +113,6 @@ islands:
   tree:
     enable: false
     weight: -5
-    region: main
-  index_debug:
-    enable: false
-    weight: -4
-    region: main
-  state_debug:
-    enable: false
-    weight: -3
     region: main
   test_island_view:
     enable: false

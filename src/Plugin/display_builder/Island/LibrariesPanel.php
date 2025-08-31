@@ -6,6 +6,7 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 
@@ -28,8 +29,7 @@ class LibrariesPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function build(string $builder_id, array $data, array $options = []): array {
-    // This will be filled by DisplayBuilderViewBuilder::view()
+  public function build(InstanceInterface $builder, array $data, array $options = []): array {
     // @todo Move the logic here.
     // @see https://www.drupal.org/project/display_builder/issues/3542866
     return [];

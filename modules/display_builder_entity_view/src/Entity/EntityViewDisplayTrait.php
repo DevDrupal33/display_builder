@@ -16,6 +16,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuilderInterface;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\WithDisplayBuilderInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 
@@ -40,7 +41,13 @@ trait EntityViewDisplayTrait {
       return $this;
     }
 
-    $contexts = $this->stateManager->getContexts($this->getInstanceId());
+    /** @var \Drupal\display_builder\InstanceInterface $instance */
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($this->getInstanceId());
+
+    if (!$instance) {
+      return $this;
+    }
+    $contexts = $instance->getContexts();
 
     if (!$contexts) {
       return $this;
@@ -89,8 +96,15 @@ trait EntityViewDisplayTrait {
 
     // Loop through all sources and determine if the removed dependencies are
     // used by their plugins.
-    $display_builder_id = $this->getDisplayBuilder() ? (string) $this->getDisplayBuilder()->id() : '';
-    $contexts = $this->stateManager->getContexts($display_builder_id) ?? [];
+    /** @var \Drupal\display_builder\InstanceInterface $instance */
+    $instance = $this->getInstance();
+
+    // @todo not working when content entity type is deleted.
+    if (!$instance) {
+      return TRUE;
+    }
+
+    $contexts = $instance->getContexts();
 
     foreach ($this->getSources() as $source_data) {
       /** @var \Drupal\ui_patterns\SourceInterface $source */
@@ -146,7 +160,7 @@ trait EntityViewDisplayTrait {
    * {@inheritdoc}
    */
   public function getBuilderUrl(): Url {
-    $fieldable_entity_type = $this->entityTypeManager()->getDefinition($this->getTargetEntityTypeId());
+    $fieldable_entity_type = $this->entityTypeManager->getDefinition($this->getTargetEntityTypeId());
     $bundle_parameter_key = $fieldable_entity_type->getBundleEntityType() ?: 'bundle';
     $parameters = [
       $bundle_parameter_key => $this->getTargetBundle(),
@@ -267,17 +281,22 @@ trait EntityViewDisplayTrait {
    * @see Drupal\display_builder\WithDisplayBuilderInterface
    */
   public function initInstanceIfMissing(): void {
-    $instance_id = $this->getInstanceId();
-    // One instance in State API by entity view display entity.
-    $instance = $this->stateManager->load($instance_id);
+    /** @var \Drupal\display_builder\InstanceStorage $storage */
+    $storage = $this->entityTypeManager->getStorage('display_builder_instance');
 
-    if ($instance !== NULL) {
-      // The instance already exists in State Manager, so nothing to do.
-      return;
+    if (!$storage->load($this->getInstanceId())) {
+      // Init instance if missing in State Manager because new or deleted in the
+      // State API.
+      /** @var \Drupal\display_builder\InstanceInterface $instance */
+      $instance = $storage->createFromImplementation($this);
+      $instance->save();
     }
-    // Init instance if missing in State Manager because new or deleted in the
-    // State API.
-    $contexts = $this->initContexts();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getInitialSources(): array {
     // Get the sources stored in config.
     $sources = $this->getSources();
 
@@ -285,7 +304,24 @@ trait EntityViewDisplayTrait {
       $sources = $this->convertManageDisplayData();
     }
 
-    $this->stateManager->create($instance_id, (string) $this->getDisplayBuilder()->id(), $sources, $contexts);
+    return $sources;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getInitialContext(): array {
+    $entity_type_id = $this->getTargetEntityTypeId();
+    $bundle = $this->getTargetBundle();
+    $view_mode = $this->getMode();
+    $sampleEntity = $this->sampleEntityGenerator->get($entity_type_id, $bundle);
+    $contexts = [
+      'entity' => EntityContext::fromEntity($sampleEntity),
+      'bundle' => new Context(ContextDefinition::create('string'), $bundle),
+      'view_mode' => new Context(ContextDefinition::create('string'), $view_mode),
+    ];
+
+    return RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
   }
 
   /**
@@ -306,7 +342,7 @@ trait EntityViewDisplayTrait {
    * @see Drupal\display_builder\WithDisplayBuilderInterface
    */
   public function saveSources(): void {
-    $data = $this->stateManager->getCurrentState($this->getInstanceId());
+    $data = $this->getInstance()->getCurrentState();
     $this->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::SOURCES_PROPERTY, $data);
     $this->save();
   }
@@ -335,8 +371,8 @@ trait EntityViewDisplayTrait {
    * @see Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function delete(): void {
-    if ($this->getInstanceId()) {
-      $this->stateManager->delete($this->getInstanceId());
+    if ($instance = $this->getInstance()) {
+      $instance->delete();
     }
     parent::delete();
   }
@@ -440,6 +476,22 @@ trait EntityViewDisplayTrait {
   }
 
   /**
+   * Gets the Display Builder instance.
+   *
+   * @return \Drupal\display_builder\InstanceInterface|null
+   *   A display builder instance.
+   */
+  protected function getInstance(): ?InstanceInterface {
+    if (!isset($this->instance)) {
+      /** @var \Drupal\display_builder\InstanceInterface|null $instance */
+      $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($this->getInstanceId());
+      $this->instance = $instance;
+    }
+
+    return $this->instance;
+  }
+
+  /**
    * Loads display builder by id.
    *
    * @param string $display_builder_id
@@ -452,7 +504,7 @@ trait EntityViewDisplayTrait {
     if (empty($display_builder_id)) {
       return NULL;
     }
-    $storage = $this->entityTypeManager()->getStorage('display_builder');
+    $storage = $this->entityTypeManager->getStorage('display_builder');
 
     /** @var \Drupal\display_builder\DisplayBuilderInterface $display_builder */
     $display_builder = $storage->load($display_builder_id);
@@ -537,26 +589,6 @@ trait EntityViewDisplayTrait {
         ],
       ],
     ];
-  }
-
-  /**
-   * Init contexts for entity view displays.
-   *
-   * @return array
-   *   List of contexts.
-   */
-  private function initContexts(): array {
-    $entity_type_id = $this->getTargetEntityTypeId();
-    $bundle = $this->getTargetBundle();
-    $view_mode = $this->getMode();
-    $sampleEntity = $this->sampleEntityGenerator->get($entity_type_id, $bundle);
-    $contexts = [
-      'entity' => EntityContext::fromEntity($sampleEntity),
-      'bundle' => new Context(ContextDefinition::create('string'), $bundle),
-      'view_mode' => new Context(ContextDefinition::create('string'), $view_mode),
-    ];
-
-    return RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
   }
 
   /**

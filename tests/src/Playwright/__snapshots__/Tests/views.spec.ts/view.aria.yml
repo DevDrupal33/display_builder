@@ -1,0 +1,11 @@
+- 'heading "label: none" [level=5]'
+- text: I am a test token in a slot in a View!
+- button "Click me"
+- button "[View] Header placeholder"
+- button "[View] Exposed placeholder"
+- button "[View] Attachment_before placeholder"
+- button "[View] Pager placeholder"
+- button "[View] Attachment_after placeholder"
+- button "[View] More placeholder"
+- button "[View] Footer placeholder"
+- button "[View] Feed_icons placeholder"

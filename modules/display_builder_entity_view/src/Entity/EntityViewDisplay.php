@@ -8,7 +8,7 @@ use Drupal\Core\Entity\Entity\EntityViewDisplay as CoreEntityViewDisplay;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Theme\Registry;
-use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\SourcePluginManager;
@@ -32,9 +32,9 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
   protected SourcePluginManager $sourcePluginManager;
 
   /**
-   * The state manager service.
+   * The entity type manager.
    */
-  protected StateManagerInterface $stateManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * The component element builder service.
@@ -64,7 +64,12 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
   protected $entityFieldManager;
 
   /**
-   * Constructs the EntityViewDisplayTrait.
+   * The loaded display builder instance.
+   */
+  protected ?InstanceInterface $instance;
+
+  /**
+   * Constructs the EntityViewDisplay.
    *
    * @param array $values
    *   The values to initialize the entity with.
@@ -78,7 +83,7 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
     $this->entityFieldManager = \Drupal::service('entity_field.manager');
     parent::__construct($values, $entity_type);
     $this->sourcePluginManager = \Drupal::service('plugin.manager.ui_patterns_source');
-    $this->stateManager = \Drupal::service('display_builder.state_manager');
+    $this->entityTypeManager = \Drupal::service('entity_type.manager');
     $this->componentElementBuilder = \Drupal::service('ui_patterns.component_element_builder');
     $this->sampleEntityGenerator = \Drupal::service('ui_patterns.sample_entity_generator');
     $this->themeRegistry = \Drupal::service('theme.registry');

@@ -55,7 +55,12 @@ export default defineConfig({
     /* For https://playwright.dev/docs/locators#locate-by-test-id */
     testIdAttribute: 'data-test',
   },
-
+  /* Configure snapshot folder */
+  expect: {
+    toMatchAriaSnapshot: {
+      pathTemplate: './tests/src/Playwright/__snapshots__/{testFilePath}/{arg}{ext}',
+    },
+  },
   /* Configure projects for major browsers */
   projects: [
     {
@@ -91,11 +96,8 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   /* Comment for a local running server */
   // webServer: {
-  //   command: 'php -q -S localhost:8000 -t ../../../web',
+  //   command: 'php -q -S localhost:8000 -t ../../../web &> /dev/null &',
   //   url: 'http://localhost:8000',
-  //   // // Example with drush and site install.
-  //   // command: 'drush --quiet -y si minimal --db-url="sqlite://:memory:" && drush --quiet --no-browser rs :8000',
-  //   // url: 'http://localhost:8000',
   //   reuseExistingServer: !process.env.CI,
   // },
 })

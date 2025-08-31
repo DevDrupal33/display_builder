@@ -579,6 +579,12 @@ class StateManager implements StateManagerInterface {
         else {
           $entity = $this->sampleEntityGenerator->get($entity->getEntityTypeId(), $entity->bundle());
         }
+
+        // Edge case when the parent entity is deleted but not the builder
+        // instance.
+        if (!$entity) {
+          return $contexts;
+        }
         $context = (\get_class($context))::fromEntity($entity);
       }
     }

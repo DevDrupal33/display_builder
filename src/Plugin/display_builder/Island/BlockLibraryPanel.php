@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Component\Render\MarkupInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
@@ -12,10 +13,10 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\HtmxEvents;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\ui_patterns\SourceWithChoicesInterface;
@@ -78,12 +79,12 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
     $plugin_definition,
     protected ComponentPluginManager $sdcManager,
     protected HtmxEvents $htmxEvents,
-    protected StateManagerInterface $stateManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
     protected EventSubscriberInterface $eventSubscriber,
     protected SourcePluginManager $sourceManager,
     protected ModuleExtensionList $modules,
   ) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $sdcManager, $htmxEvents, $stateManager, $eventSubscriber, $sourceManager);
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $sdcManager, $htmxEvents, $entityTypeManager, $eventSubscriber, $sourceManager);
   }
 
   /**
@@ -105,7 +106,7 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
       $plugin_definition,
       $container->get('plugin.manager.sdc'),
       $container->get('display_builder.htmx_events'),
-      $container->get('display_builder.state_manager'),
+      $container->get('entity_type.manager'),
       $container->get('display_builder.event_subscriber'),
       $container->get('plugin.manager.ui_patterns_source'),
       $container->get('extension.list.module'),
@@ -151,7 +152,8 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
   /**
    * {@inheritdoc}
    */
-  public function build(string $builder_id, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+    $builder_id = (string) $builder->id();
     $categories = $this->getGroupedChoices();
     $build = [];
 

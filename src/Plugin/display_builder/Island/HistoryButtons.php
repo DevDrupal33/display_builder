@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
@@ -73,9 +74,14 @@ class HistoryButtons extends IslandPluginBase implements PluginFormInterface {
   /**
    * {@inheritdoc}
    */
-  public function build(string $builder_id, array $data, array $options = []): array {
-    $future = $this->stateManager->getCountFuture($builder_id);
-    $past = $this->stateManager->getCountPast($builder_id);
+  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+    $builder_id = (string) $builder->id();
+    // @todo pass \Drupal\display_builder\InstanceInterface object in
+    // parameters instead of loading again.
+    /** @var \Drupal\display_builder\InstanceInterface $builder */
+    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+    $future = $builder->getCountFuture();
+    $past = $builder->getCountPast();
 
     $undo = $this->buildButton($past ? (string) $past : '', $this->t('Undo'), 'u', empty($past), 'arrow-counterclockwise');
     $redo = $this->buildButton($future ? (string) $future : '', $this->t('Redo'), 'r', empty($future), 'arrow-clockwise');
@@ -154,8 +160,13 @@ class HistoryButtons extends IslandPluginBase implements PluginFormInterface {
    *   The rebuilt island.
    */
   private function rebuild(string $builder_id): array {
+    // @todo pass \Drupal\display_builder\InstanceInterface object in
+    // parameters instead of loading again.
+    /** @var \Drupal\display_builder\InstanceInterface $builder */
+    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+
     return $this->addOutOfBand(
-      $this->build($builder_id, []),
+      $this->build($builder, []),
       '#' . $this->getHtmlId($builder_id),
       'innerHTML'
     );

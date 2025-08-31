@@ -10,7 +10,7 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
-use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\InstanceInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\EventStreamResponse;
 use Symfony\Component\HttpFoundation\ServerEvent;
@@ -33,7 +33,6 @@ class ApiSseController extends ApiControllerBase {
   public const int STALE = (self::REFRESH_WINDOW * 2) - 1;
 
   public function __construct(
-    StateManagerInterface $stateManager,
     EventDispatcherInterface $eventDispatcher,
     MemoryCacheInterface $memoryCache,
     RendererInterface $renderer,
@@ -42,7 +41,7 @@ class ApiSseController extends ApiControllerBase {
     SessionInterface $session,
     private StateInterface $state,
   ) {
-    parent::__construct($stateManager, $eventDispatcher, $memoryCache, $renderer, $time, $sharedTempStoreFactory, $session);
+    parent::__construct($eventDispatcher, $memoryCache, $renderer, $time, $sharedTempStoreFactory, $session);
   }
 
   /**
@@ -53,8 +52,8 @@ class ApiSseController extends ApiControllerBase {
    * ON_DELETE, ON_PRESET_SAVE, ON_SAVE and ON_HISTORY_CHANGE.
    * Skip ON_ACTIVE.
    *
-   * @param string $builder_id
-   *   The display builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
    *
    * @return \Symfony\Component\HttpFoundation\EventStreamResponse
    *   The event stream response.
@@ -62,8 +61,8 @@ class ApiSseController extends ApiControllerBase {
    * @see https://v1.htmx.org/extensions/server-sent-events/
    * @see https://symfony.com/blog/new-in-symfony-7-3-simpler-server-event-streaming
    */
-  public function sse(string $builder_id): EventStreamResponse {
-    return new EventStreamResponse(function () use ($builder_id) {
+  public function sse(InstanceInterface $builder): EventStreamResponse {
+    return new EventStreamResponse(function () use ($builder) {
       $sessionId = $this->session->getId();
       $collection = $this->sharedTempStoreFactory->get($this::SSE_COLLECTION);
 
@@ -75,7 +74,7 @@ class ApiSseController extends ApiControllerBase {
         // at least the HTTP response headers to be sent back to client without
         // waiting for a real event to occur.
         yield new ServerEvent('');
-        $latest = $collection->get("{$builder_id}_latest");
+        $latest = $collection->get("{$builder->id()}_latest");
 
         if (!$latest) {
           \sleep($this::REFRESH_WINDOW);
@@ -111,8 +110,8 @@ class ApiSseController extends ApiControllerBase {
         // updated.
         $event = $this->createEventWithEnabledIsland(
           DisplayBuilderEvents::ON_HISTORY_CHANGE,
-          $builder_id,
-          $this->stateManager->getCurrentState($builder_id),
+          $builder,
+          $builder->getCurrentState(),
           NULL,
           NULL,
           NULL,
@@ -129,7 +128,7 @@ class ApiSseController extends ApiControllerBase {
             continue;
           }
 
-          $sse_target = "island-{$builder_id}-{$island_id}";
+          $sse_target = "island-{$builder->id()}-{$island_id}";
           $data = $this->renderer->renderInIsolation($result['content']);
 
           // Need to send the data back as one line.

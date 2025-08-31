@@ -6,7 +6,6 @@ namespace Drupal\display_builder_views\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\views\ViewEntityInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -14,10 +13,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * Returns responses for Display Builder ui routes.
  */
 class ViewsController extends ControllerBase {
-
-  public function __construct(
-    private readonly StateManagerInterface $stateManager,
-  ) {}
 
   /**
    * Provides a generic title callback for a display used in pages.
@@ -77,7 +72,9 @@ class ViewsController extends ControllerBase {
 
     $instance_id = $extender->getInstanceId();
 
-    if (!$this->stateManager->load($instance_id)) {
+    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
+
+    if (!$storage->load($instance_id)) {
       // Display Builder instance was not created yet or deleted, create it on
       // the fly.
       $extender->initInstanceIfMissing();

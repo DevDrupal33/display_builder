@@ -14,7 +14,7 @@ use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\DisplayBuilderInterface;
-use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder_page_layout\AccessControlHandler;
 use Drupal\display_builder_page_layout\Form\PageLayoutForm;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
@@ -109,6 +109,11 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   protected $conditions = [];
 
   /**
+   * The loaded display builder instance.
+   */
+  protected ?InstanceInterface $instance;
+
+  /**
    * The conditions plugins for this page.
    */
   private ConditionPluginCollection $conditionPluginCollection;
@@ -163,13 +168,15 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
    * {@inheritdoc}
    */
   public function getDisplayBuilder(): ?DisplayBuilderInterface {
-    if (empty($this->display_builder)) {
+    $storage = $this->entityTypeManager()->getStorage('display_builder');
+    $profile_id = $this->get(ConfigFormBuilderInterface::PROFILE_PROPERTY);
+
+    if (!$profile_id) {
       return NULL;
     }
-    $storage = $this->entityTypeManager()->getStorage('display_builder');
 
     /** @var \Drupal\display_builder\DisplayBuilderInterface $builder */
-    $builder = $storage->load($this->display_builder);
+    $builder = $storage->load($profile_id);
 
     return $builder;
   }
@@ -191,30 +198,40 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
    * {@inheritdoc}
    */
   public function initInstanceIfMissing(): void {
-    $instance_id = $this->getInstanceId();
+    /** @var \Drupal\display_builder\InstanceStorage $storage */
+    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
 
-    if (!$instance_id) {
-      return;
+    if ($this->getInstanceId() && !$storage->load($this->getInstanceId())) {
+      // Init instance if missing in State Manager because new or deleted in the
+      // State API.
+      /** @var \Drupal\display_builder\InstanceInterface $instance */
+      $instance = $storage->createFromImplementation($this);
+      $instance->save();
     }
-    // One instance in State API by page layout entity.
-    $instance = $this->stateManager()->load($instance_id);
+  }
 
-    if ($instance !== NULL) {
-      // The instance already exists in State Manager, so nothing to do.
-      return;
+  /**
+   * {@inheritdoc}
+   */
+  public function getInitialSources(): array {
+    $sources = $this->getSources();
+
+    if (empty($sources)) {
+      // Fallback to a fixture mimicking the standard page layout.
+      $sources = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_page_layout', 'default_page_layout');
     }
-    // Init instance if missing in State Manager because the Page Layout is new
-    // or because the instance was deleted in the State API.
+
+    return $sources;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getInitialContext(): array {
     $contexts = [];
     $contexts = RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
-    // Get the sources stored in config.
-    $data = $this->getSources();
 
-    if (empty($data)) {
-      // Fallback to a fixture mimicking the standard page layout.
-      $data = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_page_layout', 'default_page_layout');
-    }
-    $this->stateManager()->create($instance_id, $this->display_builder, $data, $contexts);
+    return $contexts;
   }
 
   /**
@@ -228,7 +245,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
    * {@inheritdoc}
    */
   public function saveSources(): void {
-    $this->sources = $this->stateManager()->getCurrentState($this->getInstanceId());
+    $this->sources = $this->getInstance()->getCurrentState();
     $this->save();
   }
 
@@ -252,10 +269,11 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   public function calculateDependencies(): PageLayout {
     parent::calculateDependencies();
     $display_builder = $this->getDisplayBuilder();
+    $instance = $this->getInstance();
 
-    if ($display_builder) {
+    if ($display_builder && $instance) {
       $this->addDependency('config', $display_builder->getConfigDependencyName());
-      $contexts = $this->stateManager()->getContexts((string) $display_builder->id()) ?? [];
+      $contexts = $instance->getContexts() ?? [];
 
       foreach ($this->getSources() as $source_data) {
         /** @var \Drupal\ui_patterns\SourceInterface $source */
@@ -271,9 +289,11 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
    * {@inheritdoc}
    */
   public function delete(): void {
-    if ($this->getInstanceId()) {
-      $this->stateManager()->delete($this->getInstanceId());
+    if ($this->getInstance()) {
+      $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
+      $storage->delete([$this->getInstance()]);
     }
+
     parent::delete();
   }
 
@@ -286,13 +306,23 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   }
 
   /**
-   * Gets the Display Builder state manager.
+   * Gets the Display Builder instance.
    *
-   * @return \Drupal\display_builder\StateManager\StateManagerInterface
-   *   The state manager.
+   * @return \Drupal\display_builder\InstanceInterface|null
+   *   A display builder instance.
    */
-  private function stateManager(): StateManagerInterface {
-    return \Drupal::service('display_builder.state_manager');
+  private function getInstance(): ?InstanceInterface {
+    if (!$this->getInstanceId()) {
+      return NULL;
+    }
+
+    if (!isset($this->instance)) {
+      /** @var \Drupal\display_builder\InstanceInterface|null $instance */
+      $instance = $this->entityTypeManager()->getStorage('display_builder_instance')->load($this->getInstanceId());
+      $this->instance = $instance;
+    }
+
+    return $this->instance;
   }
 
   /**

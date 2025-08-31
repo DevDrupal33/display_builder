@@ -11,9 +11,9 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\HtmxEvents;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
 use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -43,13 +43,12 @@ class StateButtons extends IslandPluginBase {
     $plugin_definition,
     ComponentPluginManager $sdcManager,
     HtmxEvents $htmxEvents,
-    StateManagerInterface $stateManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
     EventSubscriberInterface $eventSubscriber,
     SourcePluginManager $sourceManager,
-    protected EntityTypeManagerInterface $entityTypeManager,
     protected ModuleHandlerInterface $moduleHandler,
   ) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $sdcManager, $htmxEvents, $stateManager, $eventSubscriber, $sourceManager);
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $sdcManager, $htmxEvents, $entityTypeManager, $eventSubscriber, $sourceManager);
   }
 
   /**
@@ -62,10 +61,9 @@ class StateButtons extends IslandPluginBase {
       $plugin_definition,
       $container->get('plugin.manager.sdc'),
       $container->get('display_builder.htmx_events'),
-      $container->get('display_builder.state_manager'),
+      $container->get('entity_type.manager'),
       $container->get('display_builder.event_subscriber'),
       $container->get('plugin.manager.ui_patterns_source'),
-      $container->get('entity_type.manager'),
       $container->get('module_handler'),
     );
   }
@@ -73,8 +71,10 @@ class StateButtons extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function build(string $builder_id, array $data, array $options = []): array {
-    if (!$this->stateManager->canSaveContextsRequirement($builder_id)) {
+  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+    $builder_id = (string) $builder->id();
+
+    if (!$builder->canSaveContextsRequirement()) {
       return [];
     }
 
@@ -86,8 +86,8 @@ class StateButtons extends IslandPluginBase {
       ],
     ];
 
-    $hasSave = $this->stateManager->hasSave($builder_id);
-    $saveIsCurrent = $hasSave ? $this->stateManager->saveIsCurrent($builder_id) : FALSE;
+    $hasSave = $builder->hasSave();
+    $saveIsCurrent = $hasSave ? $builder->saveIsCurrent() : FALSE;
 
     if (!$saveIsCurrent) {
       $save = $this->buildButton($this->t('Save'), $this->t('Save this display'), 'S', FALSE);
@@ -208,8 +208,13 @@ class StateButtons extends IslandPluginBase {
    *   The rebuilt island.
    */
   private function rebuild(string $builder_id): array {
+    // @todo pass \Drupal\display_builder\InstanceInterface object in
+    // parameters instead of loading again.
+    /** @var \Drupal\display_builder\InstanceInterface $builder */
+    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+
     return $this->addOutOfBand(
-      $this->build($builder_id, []),
+      $this->build($builder, []),
       '#' . $this->getHtmlId($builder_id),
       'innerHTML'
     );

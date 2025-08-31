@@ -2,3 +2,4 @@
 **/tests/playwright/**.config.js
 **/playwright-report/*
 **/test-results/*
+**/tests/src/Playwright/__snapshots__/*

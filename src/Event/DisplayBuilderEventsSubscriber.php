@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Event;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -18,12 +18,12 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *
    * @param \Drupal\display_builder\IslandPluginManagerInterface $islandManager
    *   The island plugin manager.
-   * @param \Drupal\display_builder\StateManager\StateManagerInterface $stateManager
-   *   The state manager service.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager service.
    */
   public function __construct(
     protected IslandPluginManagerInterface $islandManager,
-    protected StateManagerInterface $stateManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
   ) {}
 
   /**
@@ -147,7 +147,9 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
     \array_unshift($parameters, $event->getBuilderId());
 
     $configuration = $event->getIslandConfiguration();
-    $contexts = $this->stateManager->getContexts($event->getBuilderId());
+    /** @var \Drupal\display_builder\InstanceInterface $builder */
+    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($event->getBuilderId());
+    $contexts = $builder->getContexts();
     $islands = $this->islandManager->createInstances($this->islandManager->getDefinitions(), $contexts, $configuration);
 
     $island_enabled = $event->getIslandEnabled();

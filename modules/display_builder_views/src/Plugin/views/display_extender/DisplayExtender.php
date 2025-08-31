@@ -13,6 +13,7 @@ use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\DisplayBuilderInterface;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\WithDisplayBuilderInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\views\Attribute\ViewsDisplayExtender;
@@ -31,13 +32,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   no_ui: FALSE,
 )]
 class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBuilderInterface {
-
-  /**
-   * The display builder state manager.
-   *
-   * @var \Drupal\display_builder\StateManager\StateManagerInterface
-   */
-  protected $stateManager;
 
   /**
    * The config form builder for Display Builder.
@@ -64,11 +58,15 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
   protected ModuleExtensionList $modules;
 
   /**
+   * The loaded display builder instance.
+   */
+  protected ?InstanceInterface $instance;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): self {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->stateManager = $container->get('display_builder.state_manager');
     $instance->configFormBuilder = $container->get('display_builder.config_form_builder');
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->themeRegistry = $container->get('theme.registry');
@@ -111,7 +109,7 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
     // @todo Do we move that to the View's EntityInterface::delete() method?
     // @todo Also, when the changed are canceled from UI leaving the View
     // without Display Builder.
-    $this->stateManager->delete($this->getInstanceId() ?? '');
+    $this->entityTypeManager->getStorage('display_builder_instance')->delete([$this->getInstance()]);
   }
 
   /**
@@ -224,23 +222,22 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
    * {@inheritdoc}
    */
   public function initInstanceIfMissing(): void {
-    $instance_id = $this->getInstanceId();
-    // One instance in State API by page layout view display.
-    $instance = $this->stateManager->load($instance_id);
+    /** @var \Drupal\display_builder\InstanceStorage $storage */
+    $storage = $this->entityTypeManager->getStorage('display_builder_instance');
 
-    if ($instance !== NULL) {
-      // The instance already exists in State Manager, so nothing to do.
-      return;
+    if (!$storage->load($this->getInstanceId())) {
+      // Init instance if missing in State Manager because new or deleted in the
+      // State API.
+      /** @var \Drupal\display_builder\InstanceInterface $instance */
+      $instance = $storage->createFromImplementation($this);
+      $instance->save();
     }
-    // Init instance if missing in State Manager because the View display is new
-    // or because the instance was deleted in the State API.
-    $contexts = [];
-    // Mark for usage with views.
-    $contexts = RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
-    // Add view entity that we need in our sources or even UI Patterns Views
-    // sources.
-    $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($this->view->storage);
+  }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getInitialSources(): array {
     // Get the sources stored in config.
     $sources = $this->getSources();
 
@@ -248,7 +245,22 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
       // Fallback to a fixture mimicking the standard view layout.
       $sources = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_views', 'default_view');
     }
-    $this->stateManager->create($instance_id, (string) $this->getDisplayBuilder()->id(), $sources, $contexts);
+
+    return $sources;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getInitialContext(): array {
+    $contexts = [];
+    // Mark for usage with views.
+    $contexts = RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
+    // Add view entity that we need in our sources or even UI Patterns Views
+    // sources.
+    $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($this->view->storage);
+
+    return $contexts;
   }
 
   /**
@@ -262,7 +274,7 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
    * {@inheritdoc}
    */
   public function saveSources(): void {
-    $sources = $this->stateManager->getCurrentState($this->getInstanceId());
+    $sources = $this->getInstance()->getCurrentState();
     $displays = $this->view->storage->get('display');
     $display_id = $this->view->current_display;
     // It is risky to alter a View like that. We need to be careful to not
@@ -321,6 +333,22 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
     // phpcs:enable
 
     return TRUE;
+  }
+
+  /**
+   * Gets the Display Builder instance.
+   *
+   * @return \Drupal\display_builder\InstanceInterface|null
+   *   The state manager.
+   */
+  private function getInstance(): ?InstanceInterface {
+    if (!isset($this->instance)) {
+      /** @var \Drupal\display_builder\InstanceInterface|null $instance */
+      $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($this->getInstanceId());
+      $this->instance = $instance;
+    }
+
+    return $this->instance;
   }
 
 }

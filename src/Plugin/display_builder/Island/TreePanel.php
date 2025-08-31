@@ -6,6 +6,7 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -44,7 +45,9 @@ class TreePanel extends BuilderPanel {
   /**
    * {@inheritdoc}
    */
-  public function build(string $builder_id, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+    $builder_id = (string) $builder->id();
+
     return [
       '#type' => 'component',
       '#component' => 'display_builder:panel_tree',

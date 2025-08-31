@@ -18,10 +18,10 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\Plugin\display_builder\Island\InstanceFormPanel;
 use Drupal\display_builder\RenderableBuilderTrait;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,7 +41,6 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   private BareHtmlPageRenderer $bareHtmlPageRenderer;
 
   public function __construct(
-    StateManagerInterface $stateManager,
     EventDispatcherInterface $eventDispatcher,
     MemoryCacheInterface $memoryCache,
     RendererInterface $renderer,
@@ -51,24 +50,24 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     private IslandPluginManagerInterface $islandPluginManager,
     #[Autowire(service: 'html_response.attachments_processor')] private HtmlResponseAttachmentsProcessor $htmlResponseAttachmentsProcessor,
   ) {
-    parent::__construct($stateManager, $eventDispatcher, $memoryCache, $renderer, $time, $sharedTempStoreFactory, $session);
+    parent::__construct($eventDispatcher, $memoryCache, $renderer, $time, $sharedTempStoreFactory, $session);
     $this->bareHtmlPageRenderer = new BareHtmlPageRenderer($this->renderer, $this->htmlResponseAttachmentsProcessor);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function attachToRoot(Request $request, string $builder_id): HtmlResponse {
+  public function attachToRoot(Request $request, InstanceInterface $builder): HtmlResponse {
     $position = (int) $request->request->get('position', 0);
     $is_move = FALSE;
 
     if ($request->request->has('instance_id')) {
       $instance_id = (string) $request->request->get('instance_id');
 
-      if (!$this->stateManager->moveToRoot($builder_id, $instance_id, $position)) {
+      if (!$builder->moveToRoot($instance_id, $position)) {
         $message = $this->t('[attachToRoot] moveToRoot failed with invalid data');
 
-        return $this->responseMessageError($builder_id, $message, $request->request->all());
+        return $this->responseMessageError((string) $builder->id(), $message, $request->request->all());
       }
 
       $is_move = TRUE;
@@ -76,7 +75,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     elseif ($request->request->has('source_id')) {
       $source_id = (string) $request->request->get('source_id');
       $data = $request->request->has('source') ? \json_decode((string) $request->request->get('source'), TRUE) : [];
-      $instance_id = $this->stateManager->attachSourceToRoot($builder_id, $position, $source_id, $data);
+      $instance_id = $builder->attachSourceToRoot($position, $source_id, $data);
     }
     elseif ($request->request->has('preset_id')) {
       $preset_id = (string) $request->request->get('preset_id');
@@ -89,19 +88,19 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       if (!isset($data['source_id']) || !isset($data['source'])) {
         $message = $this->t('[attachToRoot] Missing preset source_id data');
 
-        return $this->responseMessageError($builder_id, $message, $data);
+        return $this->responseMessageError((string) $builder->id(), $message, $data);
       }
-      $instance_id = $this->stateManager->attachSourceToRoot($builder_id, $position, $data['source_id'], $data['source']);
+      $instance_id = $builder->attachSourceToRoot($position, $data['source_id'], $data['source']);
     }
     else {
       $message = '[attachToRoot] Missing content (source_id, instance_id or preset_id)';
 
-      return $this->responseMessageError($builder_id, $message, $request->request->all());
+      return $this->responseMessageError((string) $builder->id(), $message, $request->request->all());
     }
 
     return $this->dispatchDisplayBuilderEvent(
       $is_move ? DisplayBuilderEvents::ON_MOVE : DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
-      $builder_id,
+      $builder,
       NULL,
       $instance_id,
     );
@@ -110,7 +109,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function attachToSlot(Request $request, string $builder_id, string $instance_id, string $slot): HtmlResponse {
+  public function attachToSlot(Request $request, InstanceInterface $builder, string $instance_id, string $slot): HtmlResponse {
     $parent_id = $instance_id;
     $position = (int) $request->request->get('position', 0);
     $is_move = FALSE;
@@ -119,10 +118,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     if ($request->request->has('instance_id')) {
       $instance_id = (string) $request->request->get('instance_id');
 
-      if (!$this->stateManager->moveToSlot($builder_id, $instance_id, $parent_id, $slot, $position)) {
+      if (!$builder->moveToSlot($instance_id, $parent_id, $slot, $position)) {
         $message = $this->t('[attachToRoot] moveToRoot failed with invalid data');
 
-        return $this->responseMessageError($builder_id, $message, $request->request->all());
+        return $this->responseMessageError((string) $builder->id(), $message, $request->request->all());
       }
 
       $is_move = TRUE;
@@ -130,7 +129,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     elseif ($request->request->has('source_id')) {
       $source_id = (string) $request->request->get('source_id');
       $data = $request->request->has('source') ? \json_decode((string) $request->request->get('source'), TRUE) : [];
-      $instance_id = $this->stateManager->attachSourceToSlot($builder_id, $parent_id, $slot, $position, $source_id, $data);
+      $instance_id = $builder->attachSourceToSlot($parent_id, $slot, $position, $source_id, $data);
     }
     elseif ($request->request->has('preset_id')) {
       $preset_id = (string) $request->request->get('preset_id');
@@ -143,9 +142,9 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       if (!isset($data['source_id']) || !isset($data['source'])) {
         $message = $this->t('[attachToSlot] Missing preset source_id data');
 
-        return $this->responseMessageError($builder_id, $message, $data);
+        return $this->responseMessageError((string) $builder->id(), $message, $data);
       }
-      $instance_id = $this->stateManager->attachSourceToSlot($builder_id, $parent_id, $slot, $position, $data['source_id'], $data['source']);
+      $instance_id = $builder->attachSourceToSlot($parent_id, $slot, $position, $data['source_id'], $data['source']);
     }
     else {
       $message = $this->t('[attachToSlot] Missing content (component_id, block_id or instance_id)');
@@ -155,12 +154,12 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         'request' => $request->request->all(),
       ];
 
-      return $this->responseMessageError($builder_id, $message, $debug);
+      return $this->responseMessageError((string) $builder->id(), $message, $debug);
     }
 
     return $this->dispatchDisplayBuilderEvent(
       $is_move ? DisplayBuilderEvents::ON_MOVE : DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
-      $builder_id,
+      $builder,
       NULL,
       $instance_id,
       $parent_id,
@@ -170,13 +169,11 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function getInstance(Request $request, string $builder_id, string $instance_id): array {
-    $data = $this->stateManager->get($builder_id, $instance_id);
-
+  public function getInstance(Request $request, InstanceInterface $builder, string $instance_id): array {
     return $this->dispatchDisplayBuilderEventWithRenderApi(
       DisplayBuilderEvents::ON_ACTIVE,
-      $builder_id,
-      $data
+      $builder,
+      $builder->get($instance_id),
     );
   }
 
@@ -185,7 +182,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    *
    * @todo factorize with thirdPartySettingsUpdate.
    */
-  public function updateInstance(Request $request, string $builder_id, string $instance_id): array {
+  public function updateInstance(Request $request, InstanceInterface $builder, string $instance_id): array {
     $body = $request->getPayload()->all();
 
     if (!isset($body['form_id'])) {
@@ -194,7 +191,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     }
 
     // Load the instance to properly alter the form data into config data.
-    $instance = $this->stateManager->get($builder_id, $instance_id);
+    $instance = $builder->get($instance_id);
 
     if (isset($body['source']['form_build_id'])) {
       unset($body['source']['form_build_id'], $body['source']['form_token'], $body['source']['form_id']);
@@ -208,10 +205,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $form_state->addBuildInfo('args', [
       [
         'island_id' => 'instance_form',
-        'builder_id' => $builder_id,
+        'builder_id' => (string) $builder->id(),
         'instance' => $instance,
       ],
-      $this->stateManager->getContexts($builder_id),
+      $builder->getContexts(),
     ]);
     // The body received corresponds to raw form values.
     // We need to set them in the form state to properly
@@ -230,11 +227,11 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       $data['source']['component']['slots'] = $instance['source']['component']['slots'];
     }
 
-    $this->stateManager->setSource($builder_id, $instance_id, $instance['source_id'], $data['source']);
+    $builder->setSource($instance_id, $instance['source_id'], $data['source']);
 
     return $this->dispatchDisplayBuilderEventWithRenderApi(
       DisplayBuilderEvents::ON_UPDATE,
-      $builder_id,
+      $builder,
       NULL,
       $instance_id,
     );
@@ -243,18 +240,18 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function thirdPartySettingsUpdate(Request $request, string $builder_id, string $instance_id, string $island_id): HtmlResponse {
+  public function thirdPartySettingsUpdate(Request $request, InstanceInterface $builder, string $instance_id, string $island_id): HtmlResponse {
     $body = $request->getPayload()->all();
 
     if (!isset($body['form_id'])) {
       $message = $this->t('[thirdPartySettingsUpdate] Missing payload!');
 
-      return $this->responseMessageError($builder_id, $message, $body);
+      return $this->responseMessageError((string) $builder->id(), $message, $body);
     }
 
     $islandDefinition = $this->islandPluginManager->getDefinition($island_id);
     // Load the instance to properly alter the form data into config data.
-    $instance = $this->stateManager->get($builder_id, $instance_id);
+    $instance = $builder->get($instance_id);
     unset($body['form_build_id'], $body['form_token'], $body['form_id']);
 
     $form_state = new FormState();
@@ -262,7 +259,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $form_state->addBuildInfo('args', [
       [
         'island_id' => $island_id,
-        'builder_id' => $builder_id,
+        'builder_id' => (string) $builder->id(),
         'instance' => $instance,
       ],
       [],
@@ -275,11 +272,11 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $formClass = ($islandDefinition['class'])::getFormClass();
     $values = $this->validateIslandForm($formClass, $form_state);
     // We update the state with the new data.
-    $this->stateManager->setThirdPartySettings($builder_id, $instance_id, $island_id, $values);
+    $builder->setThirdPartySettings($instance_id, $island_id, $values);
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_UPDATE,
-      $builder_id,
+      $builder,
       NULL,
       $instance_id,
       NULL,
@@ -290,8 +287,8 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function pasteInstance(Request $request, string $builder_id, string $instance_id, string $parent_id, string $slot_id, string $slot_position): HtmlResponse {
-    $dataToCopy = $this->stateManager->get($builder_id, $instance_id);
+  public function pasteInstance(Request $request, InstanceInterface $builder, string $instance_id, string $parent_id, string $slot_id, string $slot_position): HtmlResponse {
+    $dataToCopy = $builder->get($instance_id);
 
     // Keep flag for move or attach to root.
     $is_paste_root = FALSE;
@@ -306,16 +303,16 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       // @todo for duplicate and not parent root seems not detected and copy is inside the slot.
       if ($parent_id === '__root__') {
         $is_paste_root = TRUE;
-        $this->stateManager->attachSourceToRoot($builder_id, 0, $source_id, $data, $dataToCopy['_third_party_settings'] ?? []);
+        $builder->attachSourceToRoot(0, $source_id, $data, $dataToCopy['_third_party_settings'] ?? []);
       }
       else {
-        $this->stateManager->attachSourceToSlot($builder_id, $parent_id, $slot_id, (int) $slot_position, $source_id, $data, $dataToCopy['_third_party_settings'] ?? []);
+        $builder->attachSourceToSlot($parent_id, $slot_id, (int) $slot_position, $source_id, $data, $dataToCopy['_third_party_settings'] ?? []);
       }
     }
 
     return $this->dispatchDisplayBuilderEvent(
       $is_paste_root ? DisplayBuilderEvents::ON_MOVE : DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
-      $builder_id,
+      $builder,
       NULL,
       $parent_id,
     );
@@ -324,14 +321,14 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function deleteInstance(Request $request, string $builder_id, string $instance_id): HtmlResponse {
-    $current = $this->stateManager->getCurrentState($builder_id);
-    $parent_id = $this->stateManager->getParentId($builder_id, $current, $instance_id);
-    $this->stateManager->remove($builder_id, $instance_id);
+  public function deleteInstance(Request $request, InstanceInterface $builder, string $instance_id): HtmlResponse {
+    $current = $builder->getCurrentState();
+    $parent_id = $builder->getParentId($current, $instance_id);
+    $builder->remove($instance_id);
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_DELETE,
-      $builder_id,
+      $builder,
       NULL,
       $instance_id,
       $parent_id
@@ -341,9 +338,9 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function saveInstanceAsPreset(Request $request, string $builder_id, string $instance_id): HtmlResponse {
+  public function saveInstanceAsPreset(Request $request, InstanceInterface $builder, string $instance_id): HtmlResponse {
     $label = (string) $this->t('New preset');
-    $data = $this->stateManager->get($builder_id, $instance_id);
+    $data = $builder->get($instance_id);
     self::cleanInstanceId($data);
 
     $preset_storage = $this->entityTypeManager()->getStorage('pattern_preset');
@@ -359,42 +356,42 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_PRESET_SAVE,
-      $builder_id,
+      $builder,
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function save(Request $request, string $builder_id): HtmlResponse {
-    $this->stateManager->setSave($builder_id, $this->stateManager->getCurrentState($builder_id));
+  public function save(Request $request, InstanceInterface $builder): HtmlResponse {
+    $builder->setSave($builder->getCurrentState());
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_SAVE,
-      $builder_id,
-      $this->stateManager->getContexts($builder_id)
+      $builder,
+      $builder->getContexts()
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function restore(Request $request, string $builder_id): HtmlResponse {
-    $this->stateManager->restore($builder_id);
+  public function restore(Request $request, InstanceInterface $builder): HtmlResponse {
+    $builder->restore();
 
     // @todo on history change is closest to a data change that we need here
     // without any instance id. Perhaps we need a new event?
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_HISTORY_CHANGE,
-      $builder_id
+      $builder,
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function revert(Request $request, string $builder_id): HtmlResponse {
-    $instanceInfos = DisplayBuilderItemList::checkInstanceId($builder_id);
+  public function revert(Request $request, InstanceInterface $builder): HtmlResponse {
+    $instanceInfos = DisplayBuilderItemList::checkInstanceId((string) $builder->id());
 
     if (isset($instanceInfos['entity_type_id'], $instanceInfos['entity_id'], $instanceInfos['field_name'])) {
       // Do not use the entity from the state manager builder context because
@@ -404,8 +401,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
       if ($entity instanceof FieldableEntityInterface) {
         // Remove the saved state as the field values will be deleted.
-        $this->stateManager->save($builder_id, [], 'Revert 1/2: clear overridden data and save');
-        $this->stateManager->setSave($builder_id, $this->stateManager->getCurrentState($builder_id));
+        $builder->setRuntimeData([]);
+        $builder->setLogMessage('Revert 1/2: clear overridden data and save');
+        $builder->save();
+        $builder->setSave($builder->getCurrentState());
 
         // Clear field value.
         $field = $entity->get($instanceInfos['field_name']);
@@ -413,12 +412,12 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         $entity->save();
 
         // Repopulate the state manager from the entity view display config.
-        $builder = $this->stateManager->load($builder_id);
+        $data = $builder->toArray();
 
-        if (isset($builder['contexts']['view_mode'])
-          && $builder['contexts']['view_mode'] instanceof ContextInterface
+        if (isset($data['contexts']['view_mode'])
+          && $data['contexts']['view_mode'] instanceof ContextInterface
         ) {
-          $viewMode = $builder['contexts']['view_mode']->getContextValue();
+          $viewMode = $data['contexts']['view_mode']->getContextValue();
           $display_id = "{$instanceInfos['entity_type_id']}.{$entity->bundle()}.{$viewMode}";
 
           /** @var \Drupal\display_builder\WithDisplayBuilderInterface|null $display */
@@ -426,7 +425,9 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
             ->load($display_id);
 
           $sources = $display->getSources();
-          $this->stateManager->save($builder_id, $sources, 'Revert 2/2: retrieve existing data from config');
+          $builder->setRuntimeData($sources);
+          $builder->setLogMessage('Revert 2/2: retrieve existing data from config');
+          $builder->save();
         }
       }
     }
@@ -435,43 +436,43 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     // without any instance id. Perhaps we need a new event?
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_HISTORY_CHANGE,
-      $builder_id
+      $builder,
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function undo(Request $request, string $builder_id): HtmlResponse {
-    $this->stateManager->undo($builder_id);
+  public function undo(Request $request, InstanceInterface $builder): HtmlResponse {
+    $builder->undo();
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_HISTORY_CHANGE,
-      $builder_id,
+      $builder,
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function redo(Request $request, string $builder_id): HtmlResponse {
-    $this->stateManager->redo($builder_id);
+  public function redo(Request $request, InstanceInterface $builder): HtmlResponse {
+    $builder->redo();
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_HISTORY_CHANGE,
-      $builder_id,
+      $builder,
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function clear(Request $request, string $builder_id): HtmlResponse {
-    $this->stateManager->clear($builder_id);
+  public function clear(Request $request, InstanceInterface $builder): HtmlResponse {
+    $builder->clear();
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_HISTORY_CHANGE,
-      $builder_id,
+      $builder,
     );
   }
 
@@ -480,8 +481,8 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    *
    * @param string $event_id
    *   The event ID.
-   * @param string $builder_id
-   *   The builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
    * @param array|null $data
    *   The data.
    * @param string|null $instance_id
@@ -496,14 +497,14 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    */
   protected function dispatchDisplayBuilderEvent(
     string $event_id,
-    string $builder_id,
+    InstanceInterface $builder,
     ?array $data = NULL,
     ?string $instance_id = NULL,
     ?string $parent_id = NULL,
     ?string $current_island_id = NULL,
   ): HtmlResponse {
-    $event = $this->createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id, $current_island_id);
-    $this->saveSseData($event_id, $builder_id);
+    $event = $this->createEventWithEnabledIsland($event_id, $builder, $data, $instance_id, $parent_id, $current_island_id);
+    $this->saveSseData($event_id, $builder);
 
     return $this->bareHtmlPageRenderer->renderBarePage($event->getResult(), '', 'markup');
   }
@@ -513,8 +514,8 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    *
    * @param string $event_id
    *   The event ID.
-   * @param string $builder_id
-   *   The builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
    * @param array|null $data
    *   The data.
    * @param string|null $instance_id
@@ -529,14 +530,14 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    */
   protected function dispatchDisplayBuilderEventWithRenderApi(
     string $event_id,
-    string $builder_id,
+    InstanceInterface $builder,
     ?array $data = NULL,
     ?string $instance_id = NULL,
     ?string $parent_id = NULL,
     ?string $current_island_id = NULL,
   ): array {
-    $event = $this->createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id, $current_island_id);
-    $this->saveSseData($event_id, $builder_id);
+    $event = $this->createEventWithEnabledIsland($event_id, $builder, $data, $instance_id, $parent_id, $current_island_id);
+    $this->saveSseData($event_id, $builder);
 
     return $event->getResult();
   }

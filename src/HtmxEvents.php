@@ -31,7 +31,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_instance_delete',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
         'instance_id' => $instance_id,
       ]
     );
@@ -58,7 +58,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_instance_save_preset',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
         'instance_id' => $instance_id,
       ]
     );
@@ -89,7 +89,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_instance_paste',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
         'instance_id' => $instance_id,
         'parent_id' => $parent_id,
         'slot_id' => $slot_id,
@@ -123,7 +123,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_instance_duplicate',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
         'instance_id' => $instance_id,
         'parent_id' => $parent_id,
         'slot_id' => $slot_id,
@@ -149,7 +149,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_root_attach',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
       ]
     );
 
@@ -175,7 +175,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_slot_attach',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
         'instance_id' => $instance_id,
         'slot' => $slot,
       ]
@@ -205,7 +205,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_instance_get',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
         'instance_id' => $instance_id,
       ]
     );
@@ -243,7 +243,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_instance_update',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
         'instance_id' => $instance_id,
       ]
     );
@@ -279,7 +279,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_instance_update',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
         'instance_id' => $instance_id,
       ]
     );
@@ -316,7 +316,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_third_party_settings_update',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
         'instance_id' => $instance_id,
         'island_id' => $island_id,
       ]
@@ -340,7 +340,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_undo',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
       ]
     );
 
@@ -362,7 +362,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_redo',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
       ]
     );
 
@@ -384,7 +384,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_restore',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
       ]
     );
 
@@ -406,7 +406,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_revert',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
       ]
     );
 
@@ -428,7 +428,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_clear',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
       ]
     );
 
@@ -450,7 +450,7 @@ class HtmxEvents {
     $url = new Url(
       'display_builder.api_save',
       [
-        'builder_id' => $builder_id,
+        'builder' => $builder_id,
       ]
     );
 

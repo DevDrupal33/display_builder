@@ -9,7 +9,6 @@ use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -20,7 +19,6 @@ class PreprocessViewsView {
 
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
-    protected StateManagerInterface $stateManager,
     #[Autowire('@ui_patterns.component_element_builder')]
     protected ComponentElementBuilder $componentElementBuilder,
   ) {}

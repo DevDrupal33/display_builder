@@ -39,6 +39,9 @@ export class Drupal {
     this.drupalSite = drupalSite
   }
 
+  /**
+   * Sets the cookie which determines which simpletest multisite to use.
+   */
   async setTestCookie(): Promise<void> {
     const context = this.page.context()
     const simpletestCookie = {
@@ -46,12 +49,28 @@ export class Drupal {
       value: encodeURIComponent(this.drupalSite.userAgent),
       url: this.drupalSite.url,
     }
-    const playwrightCookie = {
-      name: 'DB_PLAYWRIGHT',
-      value: 'true',
-      url: this.drupalSite.url,
-    }
-    await context.addCookies([ simpletestCookie, playwrightCookie ])
+    // const playwrightCookie = {
+    //   name: 'DB_PLAYWRIGHT',
+    //   value: 'true',
+    //   url: this.drupalSite.url,
+    // }
+    // await context.addCookies([ simpletestCookie, playwrightCookie ])
+    await context.addCookies([ simpletestCookie ])
+  }
+
+  /**
+   * Gets drupalSettings from the browser window object.
+   */
+  async getDrupalSettings() {
+    // Wait for the page to finish loading JavaScript
+    // cspell:ignore domcontentloaded
+    await this.page.waitForLoadState('domcontentloaded')
+    // Give a brief moment for any remaining JS to execute
+    await this.page.waitForTimeout(100)
+
+    return await this.page.evaluate(() => {
+      return window.drupalSettings || undefined
+    })
   }
 
   hasDrush(): boolean {
@@ -142,6 +161,22 @@ export class Drupal {
     expect(cookies).toHaveLength(0)
   }
 
+  async isLoggedIn(): Promise<boolean> {
+    const userId = await this.getUserId()
+    return userId > 0
+  }
+
+  /**
+   * Gets the uid of the currently logged in user.
+   */
+  async getUserId(): Promise<number> {
+    const drupalSettings = await this.getDrupalSettings()
+    if (drupalSettings && drupalSettings.user && drupalSettings.user.uid) {
+      return parseInt(drupalSettings.user.uid, 10)
+    }
+    return 0
+  }
+
   async createRole({ name }: { name: string }): Promise<void> {
     if (this.drupalSite.hasDrush) {
       await this.drush(`role:create ${name}`)
@@ -204,31 +239,24 @@ export class Drupal {
       await expect(page.locator('//*[@data-drupal-messages]')).toContainText(username)
       const href = await page.locator('//*[@data-drupal-messages]//a').getAttribute('href')
       const match = href?.match(/\/user\/(\d+)/)
-      const userId = parseInt(match[1])
-      if (isNaN(userId)) {
+      let userId: number | undefined
+      if (match && match[1]) {
+        userId = parseInt(match[1])
+      }
+      if (userId === undefined || isNaN(userId)) {
         throw new Error(`No user ID found for ${username}`)
       }
       return userId
     }
   }
 
-  async createAdminUserLogin(role: string = 'test'): Promise<void> {
+  async createAdminUserLogin(role: string = 'test', permissions: Array<string> = []): Promise<void> {
     const user = {
       username: 'test_admin',
       password: 'test_admin',
       email: 'test_admin@local.test',
       roles: [ role ],
     }
-
-    const permissions = [
-      'access display builder',
-      'use display builder default',
-      'use display builder test',
-      'administer display builder profile',
-      'administer pattern preset',
-      'administer page layout',
-      'view display builder instance',
-    ]
 
     await this.createRole({ name: role })
     await this.addPermissions({ role, permissions })
@@ -240,18 +268,27 @@ export class Drupal {
     if (this.drupalSite.hasDrush) {
       await this.drush(`pm:enable ${modules.join(' ')}`)
     } else {
-      const page = this.page
-      await page.goto(`${this.drupalSite.url}/admin/modules`)
+      await this.page.goto(config.modules);
       for (const module of modules) {
-        await page.locator(`[data-drupal-selector="edit-modules-${this.normalizeAttribute(module)}-enable"]`).check()
+        await this.page
+          .locator(`input[name="modules[${module}][enable]"]`)
+          .check();
       }
-      await page.locator('[data-drupal-selector="edit-submit"]').click()
+      await this.page.locator('[data-drupal-selector="edit-submit"]').click();
+      if (
+        await this.page
+          .locator('[data-drupal-selector="system-modules-confirm-form"]')
+          .count()
+      ) {
+        await this.page.locator('[data-drupal-selector="edit-submit"]').click();
+      }
       for (const module of modules) {
-        const checkbox = page.locator(`[data-drupal-selector="edit-modules-${this.normalizeAttribute(module)}-enable"]`)
-        expect(checkbox).toBeTruthy()
-        await expect(checkbox).toBeDisabled()
+        const checkbox = this.page.locator(
+          `input[name="modules[${module}][enable]"]`,
+        );
+        expect(checkbox).toBeTruthy();
+        await expect(checkbox).toBeDisabled();
       }
-      await expect(page.locator('//*[@data-drupal-messages]')).toContainText(`been installed`)
     }
   }
 
@@ -284,9 +321,64 @@ export class Drupal {
   }
 
   async expectMessage(text: string): Promise<void> {
+  
     // The status box needs a moment to appear.
-    const message = await this.page.waitForSelector('[aria-label="Status message"]')
+    const message = this.page.getByRole('contentinfo', { name: 'Status message' })
     expect(await message.textContent()).toContain(text)
+  }
+
+  async clearCache(): Promise<void> {
+    await this.page.goto(config.performance)
+    await this.page.locator('input[data-drupal-selector="edit-clear"]').click()
+    await expect(this.page.locator('//*[@data-drupal-messages]')).toContainText('Caches cleared')
+  }
+
+  async setPreprocessing({ css, javascript }: { css?: boolean; javascript?: boolean }): Promise<void> {
+    if (this.drupalSite.hasDrush) {
+        if (css === true) {
+          await this.drush(`config:set system.performance css.preprocess 1`)
+        }
+        else {
+          await this.drush(`config:set system.performance css.preprocess 0`)
+        }
+        if (javascript === true) {
+          await this.drush(`config:set system.performance js.preprocess 1`)
+        }
+        else {
+          await this.drush(`config:set system.performance js.preprocess 0`)
+        }
+    } else {
+      const cssCheckbox =
+        'form[data-drupal-selector="system-performance-settings"] [data-drupal-selector="edit-preprocess-css"]'
+      const jsCheckbox =
+        'form[data-drupal-selector="system-performance-settings"] [data-drupal-selector="edit-preprocess-js"]'
+      await this.page.goto('/admin/config/development/performance')
+      if (css !== undefined) {
+        await this.page.locator(cssCheckbox).setChecked(css)
+      }
+      if (javascript !== undefined) {
+        await this.page.locator(jsCheckbox).setChecked(javascript)
+      }
+      await this.page
+        .locator('form[data-drupal-selector="system-performance-settings"] [data-drupal-selector="edit-submit"]')
+        .click()
+
+      if (css !== undefined) {
+        if (css) {
+          await expect(this.page.locator(cssCheckbox)).toBeChecked()
+        } else {
+          await expect(this.page.locator(cssCheckbox)).not.toBeChecked()
+        }
+      }
+
+      if (javascript !== undefined) {
+        if (javascript) {
+          await expect(this.page.locator(jsCheckbox)).toBeChecked()
+        } else {
+          await expect(this.page.locator(jsCheckbox)).not.toBeChecked()
+        }
+      }
+    }
   }
 
   /**
@@ -376,7 +468,7 @@ export class Drupal {
     } else {
       path = nodePath.resolve(__dirname, `../../../../test-results/${fileName}`)
     }
-    await this.page.screenshot({ path: path, fullPage })
+    await this.page.screenshot({ path, fullPage })
   }
 
   normalizeAttribute(attribute: string): string {

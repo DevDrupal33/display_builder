@@ -89,6 +89,22 @@ interface WithDisplayBuilderInterface {
   public function initInstanceIfMissing(): void;
 
   /**
+   * Initialize sources for this implementation.
+   *
+   * @return array
+   *   The data.
+   */
+  public function getInitialSources(): array;
+
+  /**
+   * Initialize contexts for this implementation.
+   *
+   * @return array<\Drupal\Core\Plugin\Context\ContextInterface>
+   *   The contexts.
+   */
+  public function getInitialContext(): array;
+
+  /**
    * Get sources tree.
    *
    * @return array

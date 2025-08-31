@@ -73,7 +73,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     self::assertSame($display->getInstanceId(), 'entity_view__entity_test__entity_test__' . $view_mode);
     self::assertFalse($display->isDisplayBuilderEnabled());
 
-    $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY, 'default')->save();
+    $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY, 'test')->save();
 
     self::assertSame($expected, $display->isDisplayBuilderEnabled());
   }
@@ -112,7 +112,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
 
     $display = self::createTestDisplay();
 
-    $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY, 'default')->save();
+    $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY, 'test')->save();
     $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::SOURCES_PROPERTY, $sources)->save();
     $display->calculateDependencies();
 
@@ -179,10 +179,10 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $profile = $display->getDisplayBuilderOverrideProfile();
     self::assertNull($profile);
 
-    $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY, 'default')->save();
+    $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY, 'test')->save();
 
     $profile = $display->getDisplayBuilderOverrideProfile();
-    self::assertSame('default', $profile->id());
+    self::assertSame('test', $profile->id());
   }
 
   /**
@@ -194,10 +194,10 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $profile = $display->getDisplayBuilder();
     self::assertNull($profile);
 
-    $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY, 'default')->save();
+    $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY, 'test')->save();
 
     $profile = $display->getDisplayBuilder();
-    self::assertSame('default', $profile->id());
+    self::assertSame('test', $profile->id());
   }
 
   /**
@@ -212,7 +212,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
 
     self::assertFalse($display->isDisplayBuilderOverridable());
 
-    $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY, 'default')->save();
+    $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY, 'test')->save();
 
     self::assertTrue($display->isDisplayBuilderOverridable());
   }
@@ -237,16 +237,19 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
    * Test the ::saveSources method.
    */
   public function testSaveSources(): void {
-    $display = self::createTestDisplay();
+    $display = self::createTestDisplayWithProfile();
 
     $sources = $display->getSources();
     self::assertEmpty($sources);
 
     $expected = Yaml::decode(\file_get_contents(__DIR__ . '/../../fixtures/sources.yml'));
-    $instance_id = 'entity_view__entity_test__entity_test__default';
-    // @todo should use initInstanceIfMissing but there is a loop with
-    // getSources() call.
-    $display->stateManager->create($instance_id, 'default', $expected, []);
+
+    // Create the instance and fill sources.
+    $display->initInstanceIfMissing();
+
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($display->getInstanceId());
+    $instance->setRuntimeData($expected);
+    $instance->save();
 
     $display->saveSources();
     $sources = $display->getSources();
@@ -259,16 +262,13 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
    * Test the ::initInstanceIfMissing method.
    */
   public function testInitInstanceIfMissing(): void {
-    $display = self::createTestDisplay();
+    $display = self::createTestDisplayWithProfile();
 
-    $instance = $display->stateManager->load($display->getInstanceId());
-    self::assertNull($instance);
+    $display->initInstanceIfMissing();
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($display->getInstanceId());
 
-    // The initInstanceIfMissing will run on postSave.
-    $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY, 'default')->save();
-
-    $instance = $display->stateManager->load($display->getInstanceId());
     self::assertNotNull($instance);
+    self::assertSame('entity_view__entity_test__entity_test__default', $instance->id());
   }
 
   /**
@@ -291,6 +291,22 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
       'mode' => $view_mode,
     ]);
     $display->setStatus(TRUE)->save();
+
+    return $display;
+  }
+
+  /**
+   * Helper to create and save a test display with profile.
+   *
+   * @param string $profile_id
+   *   (Optional) The profile id. Default 'test'.
+   *
+   * @return \Drupal\display_builder_entity_view\Entity\EntityViewDisplay
+   *   The created display.
+   */
+  private static function createTestDisplayWithProfile(string $profile_id = 'test'): EntityViewDisplay {
+    $display = self::createTestDisplay();
+    $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY, $profile_id)->save();
 
     return $display;
   }

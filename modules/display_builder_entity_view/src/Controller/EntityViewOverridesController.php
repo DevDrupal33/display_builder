@@ -13,7 +13,6 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder\WithDisplayBuilderInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
@@ -28,10 +27,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  *   Controller classes are internal.
  */
 final class EntityViewOverridesController extends ControllerBase {
-
-  public function __construct(
-    protected StateManagerInterface $stateManager,
-  ) {}
 
   /**
    * Renders the Layout UI for override entities.
@@ -66,8 +61,9 @@ final class EntityViewOverridesController extends ControllerBase {
     }
 
     $builder_instance_id = $with_display_builder->getInstanceId();
+    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
 
-    if (!$this->stateManager->load($builder_instance_id)) {
+    if (!$storage->load($builder_instance_id)) {
       // Display Builder instance was not created yet or deleted, create it on
       // the fly.
       $with_display_builder->initInstanceIfMissing();

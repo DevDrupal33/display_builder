@@ -12,6 +12,7 @@ use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
@@ -135,8 +136,13 @@ class Collaboration extends IslandPluginBase implements PluginFormInterface {
   /**
    * {@inheritdoc}
    */
-  public function build(string $builder_id, array $data, array $options = []): array {
-    $users = $this->stateManager->getUsers($builder_id);
+  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+    $builder_id = (string) $builder->id();
+    // @todo pass \Drupal\display_builder\InstanceInterface object in
+    // parameters instead of loading again.
+    /** @var \Drupal\display_builder\InstanceInterface $builder */
+    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+    $users = $builder->getUsers();
     $current_user = $this->currentUser->id();
     $users = $this->removeInactiveUsers($users);
 
@@ -301,8 +307,13 @@ class Collaboration extends IslandPluginBase implements PluginFormInterface {
    *   The rebuilt island.
    */
   private function rebuild(string $builder_id): array {
+    // @todo pass \Drupal\display_builder\InstanceInterface object in
+    // parameters instead of loading again.
+    /** @var \Drupal\display_builder\InstanceInterface $builder */
+    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+
     return $this->addOutOfBand(
-      $this->build($builder_id, []),
+      $this->build($builder, []),
       '#' . $this->getHtmlId($builder_id),
       'innerHTML'
     );

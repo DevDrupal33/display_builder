@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_views\EventSubscriber;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -16,7 +16,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
   public function __construct(
-    private StateManagerInterface $stateManager,
+    private EntityTypeManagerInterface $entityTypeManager,
   ) {}
 
   /**
@@ -37,8 +37,10 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
   public function onSave(DisplayBuilderEvent $event): void {
     $builder_id = $event->getBuilderId();
     $contexts = $event->getData();
+    /** @var \Drupal\display_builder\InstanceInterface $instance */
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
 
-    if (!$this->stateManager->hasSaveContextsRequirement($builder_id, DisplayExtender::getContextRequirement(), $contexts)) {
+    if (!$instance->hasSaveContextsRequirement(DisplayExtender::getContextRequirement(), $contexts)) {
       return;
     }
 

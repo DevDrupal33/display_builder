@@ -6,7 +6,6 @@ namespace Drupal\display_builder_page_layout\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -14,10 +13,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * Returns responses for Display Builder ui routes.
  */
 class PageLayoutController extends ControllerBase {
-
-  public function __construct(
-    protected StateManagerInterface $stateManager,
-  ) {}
 
   /**
    * Returns a page title.
@@ -52,7 +47,9 @@ class PageLayoutController extends ControllerBase {
 
     $instance_id = $page_layout->getInstanceId();
 
-    if (!$this->stateManager->load($instance_id)) {
+    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
+
+    if (!$storage->load($instance_id)) {
       // Display Builder instance was not created yet or deleted, create it on
       // the fly.
       $page_layout->initInstanceIfMissing();

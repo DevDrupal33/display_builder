@@ -11,7 +11,7 @@ const configFiles = fs.readdirSync(configDir)
     file.endsWith('.config.ts')
   )
 
-let mergedConfig = {}
+let mergedConfig: { [key: string]: any } = {}
 
 // Merge all configs, starting with playwright.drupal.config.ts if present
 for (const file of configFiles) {

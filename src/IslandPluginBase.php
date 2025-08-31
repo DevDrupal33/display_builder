@@ -6,11 +6,11 @@ namespace Drupal\display_builder;
 
 use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Theme\ComponentPluginManager;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -53,7 +53,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
     $plugin_definition,
     protected ComponentPluginManager $sdcManager,
     protected HtmxEvents $htmxEvents,
-    protected StateManagerInterface $stateManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
     protected EventSubscriberInterface $eventSubscriber,
     protected SourcePluginManager $sourceManager,
   ) {
@@ -72,7 +72,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
       $plugin_definition,
       $container->get('plugin.manager.sdc'),
       $container->get('display_builder.htmx_events'),
-      $container->get('display_builder.state_manager'),
+      $container->get('entity_type.manager'),
       $container->get('display_builder.event_subscriber'),
       $container->get('plugin.manager.ui_patterns_source'),
     );
@@ -126,7 +126,8 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * {@inheritdoc}
    */
-  public function build(string $builder_id, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+    $builder_id = (string) $builder->id();
     $this->builderId = $builder_id;
     $this->instanceId = $data['_instance_id'] ?? NULL;
 
@@ -294,10 +295,14 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    *   Returns a render array with out-of-band commands.
    */
   protected function reloadWithGlobalData(string $builder_id): array {
-    $data = $this->stateManager->getCurrentState($builder_id);
+    // @todo pass \Drupal\display_builder\InstanceInterface object in
+    // parameters instead of loading again.
+    /** @var \Drupal\display_builder\InstanceInterface $builder */
+    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+    $data = $builder->getCurrentState();
 
     return $this->addOutOfBand(
-      $this->build($builder_id, $data),
+      $this->build($builder, $data),
       '#' . $this->getHtmlId($builder_id),
       'innerHTML'
     );
@@ -317,8 +322,13 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    *   Returns a render array with out-of-band commands.
    */
   protected function reloadWithLocalData(string $builder_id, array $data, ?string $current_island_id): array {
+    // @todo pass \Drupal\display_builder\InstanceInterface object in
+    // parameters instead of loading again.
+    /** @var \Drupal\display_builder\InstanceInterface $builder */
+    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+
     return $this->addOutOfBand(
-      $this->build($builder_id, $data, ['current_island_id' => $current_island_id]),
+      $this->build($builder, $data, ['current_island_id' => $current_island_id]),
       '#' . $this->getHtmlId($builder_id),
       'innerHTML'
     );
@@ -336,10 +346,14 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    *   Returns a render array with out-of-band commands.
    */
   protected function reloadWithInstanceData(string $builder_id, string $instance_id): array {
-    $data = $this->stateManager->get($builder_id, $instance_id);
+    // @todo pass \Drupal\display_builder\InstanceInterface object in
+    // parameters instead of loading again.
+    /** @var \Drupal\display_builder\InstanceInterface $builder */
+    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+    $data = $builder->get($instance_id);
 
     return $this->addOutOfBand(
-      $this->build($builder_id, $data),
+      $this->build($builder, $data),
       '#' . $this->getHtmlId($builder_id),
       'innerHTML'
     );
@@ -358,7 +372,11 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    */
   protected function replaceInstance(string $builder_id, string $instance_id): array {
     $parent_selector = '#' . $this->getHtmlId($builder_id) . ' [data-instance-id="' . $instance_id . '"]';
-    $data = $this->stateManager->get($builder_id, $instance_id);
+    // @todo pass \Drupal\display_builder\InstanceInterface object in
+    // parameters instead of loading again.
+    /** @var \Drupal\display_builder\InstanceInterface $builder */
+    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+    $data = $builder->get($instance_id);
 
     $build = [];
 

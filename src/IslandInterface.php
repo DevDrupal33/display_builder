@@ -17,17 +17,19 @@ interface IslandInterface extends ConfigurableInterface, ContainerFactoryPluginI
   /**
    * Build renderable from state data.
    *
-   * @param string $builder_id
-   *   Builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
    * @param array $data
-   *   The UI Patterns 2 form state data.
+   *   UI Patterns 2 sources data. It can be the full data state (so, the same
+   *   as $builder->getCurrentState()) or just some specific data of a single
+   *   source of a sub-tree of sources.
    * @param array $options
    *   (Optional) Additional data to alter the island rendering.
    *
    * @return array
    *   A renderable array.
    */
-  public function build(string $builder_id, array $data, array $options = []): array;
+  public function build(InstanceInterface $builder, array $data, array $options = []): array;
 
   /**
    * Returns the translated plugin label.

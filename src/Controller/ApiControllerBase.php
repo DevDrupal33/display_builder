@@ -12,7 +12,7 @@ use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\display_builder\DisplayBuilderInterface;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
-use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\InstanceInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -44,7 +44,6 @@ abstract class ApiControllerBase extends ControllerBase {
   protected ?DisplayBuilderInterface $displayBuilder = NULL;
 
   public function __construct(
-    protected StateManagerInterface $stateManager,
     protected EventDispatcherInterface $eventDispatcher,
     protected MemoryCacheInterface $memoryCache,
     protected RendererInterface $renderer,
@@ -54,38 +53,14 @@ abstract class ApiControllerBase extends ControllerBase {
   ) {}
 
   /**
-   * Returns the display builder by builder ID.
-   *
-   * @param string $builder_id
-   *   The builder ID.
-   *
-   * @return \Drupal\display_builder\DisplayBuilderInterface
-   *   The display builder instance.
-   */
-  protected function getDisplayBuilder(string $builder_id): DisplayBuilderInterface {
-    if ($this->displayBuilder !== NULL) {
-      return $this->displayBuilder;
-    }
-    $builder_config_id = $this->stateManager->getEntityConfigId($builder_id);
-    $display_builder = $this->entityTypeManager()->getStorage('display_builder')
-      ->load($builder_config_id);
-    // dpm($builder_config_id);
-    // dpm($display_builder);
-    \assert($display_builder instanceof DisplayBuilderInterface);
-    $this->displayBuilder = $display_builder;
-
-    return $this->displayBuilder;
-  }
-
-  /**
    * Creates a display builder event with enabled islands only.
    *
    * Use a cache to avoid loading all the builder configuration.
    *
    * @param string $event_id
    *   The event ID.
-   * @param string $builder_id
-   *   The builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
    * @param array|null $data
    *   The data.
    * @param string|null $instance_id
@@ -98,14 +73,15 @@ abstract class ApiControllerBase extends ControllerBase {
    * @return \Drupal\display_builder\Event\DisplayBuilderEvent
    *   The event.
    */
-  protected function createEventWithEnabledIsland($event_id, $builder_id, $data, $instance_id, $parent_id, $current_island_id): DisplayBuilderEvent {
+  protected function createEventWithEnabledIsland($event_id, InstanceInterface $builder, $data, $instance_id, $parent_id, $current_island_id): DisplayBuilderEvent {
+    $builder_id = (string) $builder->id();
     $key = \sprintf('db_%s_island_enable', $builder_id);
     $island_configuration_key = \sprintf('db_%s_island_configuration', $builder_id);
     $island_enabled = $this->memoryCache->get($key);
     $island_configuration = $this->memoryCache->get($island_configuration_key);
 
     if ($island_configuration === FALSE) {
-      $island_configuration = $this->getDisplayBuilder($builder_id)->getIslandConfigurations();
+      $island_configuration = $builder->getProfile()->getIslandConfigurations();
       $this->memoryCache->set($island_configuration_key, $island_configuration);
     }
     else {
@@ -113,7 +89,7 @@ abstract class ApiControllerBase extends ControllerBase {
     }
 
     if ($island_enabled === FALSE) {
-      $island_enabled = $this->getDisplayBuilder($builder_id)->getIslandEnabled();
+      $island_enabled = $builder->getProfile()->getIslandEnabled();
       $this->memoryCache->set($key, $island_enabled);
     }
     else {
@@ -131,10 +107,10 @@ abstract class ApiControllerBase extends ControllerBase {
    *
    * @param string $event_id
    *   The event ID.
-   * @param string $builder_id
-   *   The builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
    */
-  protected function saveSseData(string $event_id, string $builder_id): void {
+  protected function saveSseData(string $event_id, InstanceInterface $builder): void {
     if (!\in_array($event_id, $this::SSE_EVENTS, TRUE)) {
       return;
     }
@@ -146,10 +122,10 @@ abstract class ApiControllerBase extends ControllerBase {
       // builderId in the State Manager), not the specific node we are
       // manipulating in the sources data tree.
       // @see https://www.drupal.org/project/display_builder/issues/3538360
-      'instanceId' => $builder_id,
+      'instanceId' => (string) $builder->id(),
     ];
     $collection = $this->sharedTempStoreFactory->get($this::SSE_COLLECTION);
-    $collection->set(\sprintf('%s_latest', $builder_id), $state);
+    $collection->set(\sprintf('%s_latest', (string) $builder->id()), $state);
   }
 
 }

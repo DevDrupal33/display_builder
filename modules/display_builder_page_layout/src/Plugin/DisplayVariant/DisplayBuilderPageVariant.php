@@ -14,7 +14,6 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\Registry;
 use Drupal\display_builder\DisplayBuilderHelpers;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -44,11 +43,6 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
   protected array|MarkupInterface|string $title;
 
   /**
-   * The display builder state manager.
-   */
-  protected StateManagerInterface $stateManager;
-
-  /**
    * Component element builder.
    */
   protected ComponentElementBuilder $componentElementBuilder;
@@ -72,14 +66,12 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
     array $configuration,
     $plugin_id,
     $plugin_definition,
-    StateManagerInterface $state_manager,
     ComponentElementBuilder $component_element_builder,
     EntityTypeManagerInterface $entity_type_manager,
     Registry $theme_registry,
     ExtensionList $modules,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->stateManager = $state_manager;
     $this->componentElementBuilder = $component_element_builder;
     $this->entityTypeManager = $entity_type_manager;
     $this->themeRegistry = $theme_registry;
@@ -94,7 +86,6 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('display_builder.state_manager'),
       $container->get('ui_patterns.component_element_builder'),
       $container->get('entity_type.manager'),
       $container->get('theme.registry'),
@@ -140,7 +131,9 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
     $instance_id = $page_layout->getInstanceId();
     $this->replaceTitleAndContent($sources, $this->title, $this->mainContent);
 
-    $contexts = $this->stateManager->getContexts($instance_id) ?? [];
+    /** @var \Drupal\display_builder\InstanceInterface $instance */
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($instance_id);
+    $contexts = $instance->getContexts() ?? [];
     $data = [];
 
     foreach ($sources as $source) {

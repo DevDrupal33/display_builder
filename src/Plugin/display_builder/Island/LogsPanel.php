@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\DisplayBuilderHelpers;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -52,8 +53,8 @@ class LogsPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function build(string $builder_id, array $data, array $options = []): array {
-    $load = $this->stateManager->load($builder_id);
+  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+    $load = $builder->toArray();
 
     if (!$load) {
       return [];

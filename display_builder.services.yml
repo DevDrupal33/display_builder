@@ -19,7 +19,6 @@ services:
     arguments:
       - "@entity_type.manager"
       - "@current_user"
-      - "@display_builder.state_manager"
       - "@module_handler"
   Drupal\display_builder\ConfigFormBuilderInterface: "@display_builder.config_form_builder"
 
@@ -41,6 +40,6 @@ services:
 
   display_builder.event_subscriber:
     class: '\Drupal\display_builder\Event\DisplayBuilderEventsSubscriber'
-    arguments: ["@plugin.manager.db_island", "@display_builder.state_manager"]
+    arguments: ["@plugin.manager.db_island", "@entity_type.manager"]
     tags:
       - { name: "event_subscriber" }

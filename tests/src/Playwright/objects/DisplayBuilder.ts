@@ -172,10 +172,9 @@ export class Displaybuilder {
    * Saves the current state in the Display Builder from the UI
    *
    * @async
-   * @param {Page} page - The Playwright Page object representing the browser this.page.
    * @returns {Promise<void>}
    */
-  async saveDisplayBuilder(page: Page): Promise<void> {
+  async saveDisplayBuilder(): Promise<void> {
     await this.htmxReady()
     await this.page.getByRole('button', { name: 'Save' }).click()
     await this.htmxReady()
@@ -299,17 +298,58 @@ export class Displaybuilder {
     await expect(this.page.getByRole('link', { name: dbName })).not.toBeVisible()
   }
 
+  async dragSimpleComponentsWithToken(tokenTest: string = 'I am a test token in a slot!'): Promise<void> {
+    await this.toggleSidebarView()
+    await this.dragElementFromLibraryById(
+      'Components',
+      'test_simple',
+      this.page.locator(`.db-island-builder > slot.db-dropzone`)
+    )
+    const componentSimpleSlot = this.page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
+    await this.dragElementFromLibraryById('Blocks', 'token', componentSimpleSlot)
+    await this.setElementValue(
+      this.page.locator(`.db-island-builder [data-instance-title="Token"]`).first(),
+      tokenTest,
+      [
+        {
+          action: 'fill',
+          locator: this.page.locator('#edit-value'),
+        },
+      ]
+    )
+  }
+
+  /**
+   * Test the blocks tab to ensure context blocks are available in library.
+   *
+   * @async
+   * @param {Object} blocks - The list of expected blocks in library and in the builder.
+   * @param {boolean} builder - Check in the builder as well..
+   * @returns {Promise<void>}
+   */
+  async expectBlocksAvailable(blocks: Object, builder: boolean = true): Promise<void> {
+    await this.openLibrariesTab('Blocks')
+
+    // @todo handle hx-vals instead of simple button.
+    for (const [ source, label ] of Object.entries(blocks)) {
+      // await expect(this.page.locator(`.db-island-block_library [hx-vals*="${source}"]`)).toHaveCount(1)
+      await expect(this.page.locator('.db-island-block_library').getByRole('button', { name: label })).toHaveCount(1)
+      if (builder) {
+        await expect(this.page.locator(`.db-island-builder [data-instance-title="${label}"]`)).toHaveCount(1)
+      }
+    }
+  }
+
   /**
    * Test the preview tab with an Aria snapshot and go back to the builder.
    *
    * @async
-   * @param {string} dbName - Name of the Display Builder instance.
-   * @param {string}snapshot - The expected Aria snapshot string.
+   * @param {string} snapshotName - The expected Aria snapshot string.
    * @returns {Promise<void>}
    */
-  async expectPreviewAriaSnapshot(dbName: string, snapshot: string): Promise<void> {
+  async expectPreviewAriaSnapshot(snapshotName: string): Promise<void> {
     await this.page.getByRole('tab', { name: 'Preview' }).click()
-    await expect(this.page.locator(`#island-${dbName}-preview`)).toMatchAriaSnapshot(snapshot)
+    await expect(this.page.locator(`.db-island-preview`)).toMatchAriaSnapshot({ name: snapshotName })
     await this.page.getByRole('tab', { name: 'Builder' }).click()
   }
 

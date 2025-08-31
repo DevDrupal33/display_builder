@@ -6,6 +6,7 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 
@@ -23,8 +24,8 @@ class InfoPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function build(string $builder_id, array $data, array $options = []): array {
-    $build = parent::build($builder_id, $data, $options);
+  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+    $build = parent::build($builder, $data, $options);
 
     if (!$this->isApplicable()) {
       return $build;

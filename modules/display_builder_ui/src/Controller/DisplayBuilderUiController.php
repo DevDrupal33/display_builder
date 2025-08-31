@@ -10,7 +10,7 @@ use Drupal\Core\Pager\PagerManagerInterface;
 use Drupal\Core\Pager\PagerParametersInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\DisplayBuilderHelpers;
-use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder_dev_tools\MockEntity;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
@@ -44,7 +44,6 @@ class DisplayBuilderUiController extends ControllerBase {
   ];
 
   public function __construct(
-    private readonly StateManagerInterface $stateManager,
     private readonly DateFormatterInterface $dateFormatter,
     private readonly PagerManagerInterface $pagerManager,
     private readonly PagerParametersInterface $pagerParameters,
@@ -66,20 +65,21 @@ class DisplayBuilderUiController extends ControllerBase {
     $build['filter_form'] = $this->formBuilder()->getForm(DisplayBuilderUiFilterForm::class);
     $build['filter_form']['#attributes'] = ['class' => ['container-inline']];
 
-    $all_ids = \array_keys($this->stateManager->loadAll());
-    $filtered_ids = [];
+    $instances = $this->entityTypeManager()->getStorage('display_builder_instance')->loadMultiple();
+    $filtered = [];
 
-    foreach ($all_ids as $instance_id) {
-      $data = $this->stateManager->load($instance_id);
-      $type = $this->getBuilderType($instance_id);
+    foreach ($instances as $instance_id => $instance) {
+      /** @var \Drupal\display_builder\InstanceInterface $instance */
+      $instance = $instance;
+      $type = $this->getBuilderType($instance);
 
       if ($filter_type === '' || $type === $filter_type) {
-        $filtered_ids[] = $instance_id;
+        $filtered[$instance_id] = $instance;
       }
     }
 
     $limit = self::ITEMS_PER_PAGE;
-    $total = \count($filtered_ids);
+    $total = \count($filtered);
 
     // Get current page from pager parameters.
     $current_page = $this->pagerParameters->findPage();
@@ -88,7 +88,7 @@ class DisplayBuilderUiController extends ControllerBase {
     // Initialize the pager.
     $this->pagerManager->createPager($total, $limit);
 
-    $paged_ids = \array_slice($filtered_ids, $offset, $limit);
+    $paged = \array_slice($filtered, $offset, $limit);
 
     $build['notice'] = [
       '#markup' => $this->t('List of all Display builder instances.<br>An instance is a saved arrangement of components and styles for a specific display context (a view mode, a page layout or a view).<br>Instances are created directly from display pages like Entity view, Page layout or Views and should be managed directly from each display context.'),
@@ -110,9 +110,8 @@ class DisplayBuilderUiController extends ControllerBase {
       '#rows' => [],
     ];
 
-    foreach ($paged_ids as $instance_id) {
-      $data = $this->stateManager->load($instance_id);
-      $build['table']['#rows'][$instance_id] = $this->buildRow($instance_id, $data ?? []);
+    foreach ($paged as $instance_id => $instance) {
+      $build['table']['#rows'][$instance_id] = $this->buildRow($instance);
     }
 
     $build['pager'] = [
@@ -125,20 +124,20 @@ class DisplayBuilderUiController extends ControllerBase {
   /**
    * Builds a table row for a display builder.
    *
-   * @param string $instance_id
-   *   The builder id.
-   * @param array $builder
-   *   An builder to display.
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   Display builder instance.
    *
    * @return array
    *   A table row.
    */
-  protected function buildRow(string $instance_id, array $builder): array {
+  protected function buildRow(InstanceInterface $instance): array {
+    $instance_id = (string) $instance->id();
+    $data = $instance->toArray();
     $row = $links = [];
     $url = $type_attached = $current_class = NULL;
 
     foreach ($this->contextClasses as [$class, $label]) {
-      if (\class_exists($class) && $this->stateManager->hasSaveContextsRequirement($instance_id, $class::getContextRequirement())) {
+      if (\class_exists($class) && $instance->hasSaveContextsRequirement($class::getContextRequirement())) {
         $current_class = $class;
         $url = $class::getUrlFromInstanceId($instance_id);
         $type_attached = new TranslatableMarkup($label); // phpcs:ignore Drupal.Semantics.FunctionT.NotLiteralString
@@ -173,10 +172,10 @@ class DisplayBuilderUiController extends ControllerBase {
       ];
     }
 
-    $row['profile']['data'] = $this->stateManager->getEntityConfigId($instance_id);
+    $row['profile']['data'] = $instance->getProfile()->id();
     $row['display']['data'] = $type_attached;
 
-    $present = $builder['present'] ?? [];
+    $present = $data['present'] ?? [];
 
     if (!$present) {
       $present = ['time' => NULL, 'log' => NULL];
@@ -210,15 +209,15 @@ class DisplayBuilderUiController extends ControllerBase {
   /**
    * Helper to get builder type string for filtering.
    *
-   * @param string $instance_id
-   *   The instance id.
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   Display builder instance.
    *
    * @return string
    *   The type string.
    */
-  protected function getBuilderType(string $instance_id): string {
+  protected function getBuilderType(InstanceInterface $instance): string {
     foreach ($this->contextClasses as $type => [$class, $label]) {
-      if (\class_exists($class) && $this->stateManager->hasSaveContextsRequirement($instance_id, $class::getContextRequirement())) {
+      if (\class_exists($class) && $instance->hasSaveContextsRequirement($class::getContextRequirement())) {
         return $type;
       }
     }

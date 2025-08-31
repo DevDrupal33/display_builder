@@ -7,7 +7,6 @@ namespace Drupal\display_builder_entity_view\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder\WithDisplayBuilderInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -18,10 +17,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  *   Controller classes are internal.
  */
 final class EntityViewController extends ControllerBase {
-
-  public function __construct(
-    protected StateManagerInterface $stateManager,
-  ) {}
 
   /**
    * Provides a generic title callback for a display used in entities.
@@ -76,8 +71,9 @@ final class EntityViewController extends ControllerBase {
     }
 
     $builder_instance_id = $entity_display->getInstanceId();
+    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
 
-    if (!$this->stateManager->load($builder_instance_id)) {
+    if (!$storage->load($builder_instance_id)) {
       // Display Builder instance was not created yet or deleted, create it on
       // the fly.
       $entity_display->initInstanceIfMissing();

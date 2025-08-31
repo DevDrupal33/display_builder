@@ -59,7 +59,7 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
   public function buildHeader(): array {
     $header = [];
     $header['label'] = $this->t('Page layout');
-    $header['display_builder'] = $this->t('Display builder');
+    $header['profile_id'] = $this->t('Profile');
     $header['conditions'] = $this->t('Conditions');
     $header['status'] = $this->t('Status');
 
@@ -73,7 +73,7 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
     $row = [];
     /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $entity */
     $row['label'] = $entity->label();
-    $row['display_builder']['#plain_text'] = $entity->getDisplayBuilder()?->label() ?? '';
+    $row['profile_id']['#plain_text'] = $entity->getDisplayBuilder()?->label() ?? '?';
     $row['conditions'] = [
       '#theme' => 'item_list',
       '#list_type' => 'ul',
@@ -83,7 +83,10 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
     $status = $entity->status() && empty($entity->getSources()) ? '❌ ' . $this->t('Empty') : $status;
     $row['status']['#plain_text'] = $status;
 
-    return $row + parent::buildRow($entity);
+    $row = $row + parent::buildRow($entity);
+    $row['#attributes']['data-id'] = $entity->id();
+
+    return $row;
   }
 
   /**

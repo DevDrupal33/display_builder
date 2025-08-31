@@ -9,7 +9,6 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 
 /**
  * Config form builder.
@@ -21,7 +20,6 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
     protected AccountProxyInterface $currentUser,
-    protected StateManagerInterface $stateManager,
     protected readonly ModuleHandlerInterface $moduleHandler,
   ) {}
 

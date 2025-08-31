@@ -8,7 +8,6 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Context\ContextInterface;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder\WithDisplayBuilderInterface;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
@@ -20,7 +19,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
   public function __construct(
-    protected StateManagerInterface $stateManager,
     protected EntityTypeManagerInterface $entityTypeManager,
   ) {}
 
@@ -41,7 +39,9 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
    */
   public function onSave(DisplayBuilderEvent $event): void {
     $builder_id = $event->getBuilderId();
-    $contexts = $this->stateManager->getContexts($builder_id);
+    /** @var \Drupal\display_builder\InstanceInterface $instance */
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+    $contexts = $instance->getContexts();
 
     // Entity view display overrides.
     if ($params = DisplayBuilderItemList::checkInstanceId($builder_id)) {
@@ -58,7 +58,7 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
     // Entity view displays.
     elseif (EntityViewDisplay::checkInstanceId($builder_id)) {
-      if (!$this->stateManager->hasSaveContextsRequirement($builder_id, EntityViewDisplay::getContextRequirement(), $contexts)) {
+      if (!$instance->hasSaveContextsRequirement(EntityViewDisplay::getContextRequirement(), $contexts)) {
         return;
       }
       // Entity view display parameters are also in route match.

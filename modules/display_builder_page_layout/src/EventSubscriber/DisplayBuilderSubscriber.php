@@ -8,7 +8,6 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\CachedDiscoveryClearerInterface;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -18,7 +17,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
   public function __construct(
-    private StateManagerInterface $stateManager,
     private CachedDiscoveryClearerInterface $pluginCacheClearer,
     private EntityTypeManagerInterface $entityTypeManager,
   ) {}
@@ -50,7 +48,10 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     // Context requirements is set to allow SourcePlugin when editing. We need
     // a precedence when saving.
     // @todo perhaps we need a third context.
-    if (!$this->stateManager->hasSaveContextsRequirement($builder_id, PageLayout::getContextRequirement(), $contexts)) {
+    /** @var \Drupal\display_builder\InstanceInterface $instance */
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+
+    if (!$instance->hasSaveContextsRequirement(PageLayout::getContextRequirement(), $contexts)) {
       return;
     }
     $page_layout_id = $params['page_layout'] ?? NULL;
