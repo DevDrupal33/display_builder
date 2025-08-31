@@ -12,8 +12,6 @@ use Drupal\Core\Session\AccountInterface;
 /**
  * Defines the access control handler for the instance entity type.
  *
- * phpcs:disable Drupal.Arrays.Array.LongLineDeclaration
- *
  * @see https://www.drupal.org/project/coder/issues/3185082
  */
 final class InstanceAccessControlHandler extends EntityAccessControlHandler {
@@ -38,7 +36,8 @@ final class InstanceAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL): AccessResult {
-    return AccessResult::allowedIfHasPermissions($account, ['create display_builder_instance', 'administer display_builder_instance'], 'OR');
+    $premissions = ['create display_builder_instance', 'administer display_builder_instance'];
+    return AccessResult::allowedIfHasPermissions($account, $premissions, 'OR');
   }
 
 }
