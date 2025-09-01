@@ -6,6 +6,7 @@ namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\display_builder\Entity\DisplayBuilder;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\user\Entity\Role;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 
