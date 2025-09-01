@@ -36,8 +36,8 @@ final class InstanceAccessControlHandler extends EntityAccessControlHandler {
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL): AccessResult {
-    $premissions = ['create display_builder_instance', 'administer display_builder_instance'];
-    return AccessResult::allowedIfHasPermissions($account, $premissions, 'OR');
+    $permissions = ['create display_builder_instance', 'administer display_builder_instance'];
+    return AccessResult::allowedIfHasPermissions($account, $permissions, 'OR');
   }
 
 }

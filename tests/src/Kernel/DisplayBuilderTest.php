@@ -6,13 +6,16 @@ namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\display_builder\Entity\DisplayBuilder;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\user\Entity\Role;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Test the \Drupal\display_builder\Entity\DisplayBuilder.
+ * Test the DisplayBuilder class.
  *
  * @internal
  */
+#[CoversClass('\Drupal\display_builder\Entity\DisplayBuilder')]
 #[Group('display_builder')]
 final class DisplayBuilderTest extends KernelTestBase {
 
@@ -110,7 +113,7 @@ final class DisplayBuilderTest extends KernelTestBase {
   }
 
   /**
-   * Tests the island configuration functionality.
+   * Tests the ::getIslandConfigurations ::setIslandConfiguration ::getIslandEnabled method.
    */
   public function testIslandConfiguration(): void {
     $islandId = 'test_island_view';
@@ -192,4 +195,56 @@ final class DisplayBuilderTest extends KernelTestBase {
     self::assertArrayHasKey($islandId, $enabledIslands);
   }
 
+  /**
+   * Tests ::getRoles method.
+   */
+  public function testGetRoles(): void {
+    $displayBuilder = DisplayBuilder::create([
+      'id' => 'role_test',
+      'label' => 'Role Test',
+      'description' => 'Test Description',
+    ]);
+    $displayBuilder->save();
+
+    // Create a role with the permission.
+    $role = Role::create([
+      'id' => 'test_role',
+      'label' => 'Test Role',
+      'permissions' => ['use display builder role_test'],
+    ]);
+    $role->save();
+
+    $roles = $displayBuilder->getRoles();
+    self::assertContains('Test Role', $roles);
+  }
+
+  /**
+   * Test the ::toUrl method.
+   */
+  public function testToUrlEditPluginForm(): void {
+    $displayBuilder = DisplayBuilder::create([
+      'id' => 'url_test',
+      'label' => 'URL Test',
+      'description' => 'Test Description',
+    ]);
+    $displayBuilder->save();
+
+    $url = $displayBuilder->toUrl('edit-plugin-form', ['island_id' => 'foo']);
+    self::assertSame('/admin/structure/display-builder/url_test/edit/foo', $url->toString());
+  }
+
+  /**
+   * Test the ::getLibrary andd ::isDebugModeActivated method.
+   */
+  public function testGetLibraryAndDebug(): void {
+    $displayBuilder = DisplayBuilder::create([
+      'id' => 'lib_test',
+      'label' => 'Lib Test',
+      'description' => 'Test Description',
+      'library' => 'cdn',
+      'debug' => TRUE,
+    ]);
+    self::assertSame('cdn', $displayBuilder->getLibrary());
+    self::assertTrue($displayBuilder->isDebugModeActivated());
+  }
 }

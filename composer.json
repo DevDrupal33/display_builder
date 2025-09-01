@@ -5,8 +5,8 @@
     "type": "drupal-module",
     "require": {
         "php": ">=8.3",
-        "drupal/core": "^11.1",
-        "drupal/htmx": "^1.4",
+        "drupal/core": "^11.2",
+        "drupal/htmx": "~1.4.3",
         "drupal/ui_patterns": "^2.0.8"
     },
     "require-dev": {
