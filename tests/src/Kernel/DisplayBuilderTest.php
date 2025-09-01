@@ -114,7 +114,7 @@ final class DisplayBuilderTest extends KernelTestBase {
   }
 
   /**
-   * Tests islands managment.
+   * Tests islands management.
    */
   public function testIslandConfiguration(): void {
     $islandId = 'test_island_view';
