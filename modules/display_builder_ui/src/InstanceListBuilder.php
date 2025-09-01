@@ -32,7 +32,7 @@ final class InstanceListBuilder extends EntityListBuilder {
    * @todo to have from a hook_info in each module.
    */
   protected array $contextClasses = [
-    'views' => [DisplayExtender::class, 'Views'],
+    'view' => [DisplayExtender::class, 'Views'],
     'page_layout' => [PageLayout::class, 'Page layout'],
     'entity_view' => [EntityViewDisplay::class, 'Entity view'],
     'entity_view_override' => [DisplayBuilderItemList::class, 'Entity view override'],
@@ -71,12 +71,13 @@ final class InstanceListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function buildHeader(): array {
-    $header = [];
-    $header['id'] = $this->t('Instance');
-    $header['display'] = $this->t('Display');
-    $header['profile'] = $this->t('Profile');
-    $header['updated'] = $this->t('Updated');
-    $header['log'] = $this->t('Last log');
+    $header = [
+      'id' => $this->t('Instance'),
+      'context' => $this->t('Context'),
+      'profile' => $this->t('Profile'),
+      'updated' => $this->t('Updated'),
+      'log' => $this->t('Last log'),
+    ];
 
     return $header + parent::buildHeader();
   }
@@ -120,8 +121,8 @@ final class InstanceListBuilder extends EntityListBuilder {
       '#title' => $instance_id,
       '#url' => $url,
     ];
+    $row['context']['data'] = $type;
     $row['profile']['data'] = $instance->getProfile()->id();
-    $row['display']['data'] = $type;
 
     /** @var \Drupal\display_builder\HistoryStep $present */
     $present = $instance->getCurrent();
@@ -135,10 +136,26 @@ final class InstanceListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function getOperations(EntityInterface $entity) {
-    $links = parent::getOperations($entity);
+    $links = [];
+    $classContext = '';
+
+    foreach ($this->contextClasses as $type => [$class]) {
+      if (\str_starts_with($entity->id(), $type)) {
+        $classContext = $class;
+        $links['manage'] = [
+          'title' => $this->t('Build display'),
+          'weight' => -1,
+          'url' => $class::getUrlFromInstanceId($entity->id()),
+        ];
+
+        break;
+      }
+    }
+
+    $links = \array_merge($links, parent::getOperations($entity));
     $context = [
       'instance_id' => $entity->id(),
-      'class' => '',
+      'class' => $classContext,
     ];
     $this->moduleHandler()->alter('display_builder_ui_operations_links', $links, $context);
 
@@ -155,7 +172,7 @@ final class InstanceListBuilder extends EntityListBuilder {
    *   The type string.
    */
   protected function getBuilderType(InstanceInterface $instance): string {
-    foreach ($this->contextClasses as $type => [$class, $label]) {
+    foreach ($this->contextClasses as $type => [$class]) {
       if (\class_exists($class) && $instance->hasSaveContextsRequirement($class::getContextRequirement())) {
         return $type;
       }

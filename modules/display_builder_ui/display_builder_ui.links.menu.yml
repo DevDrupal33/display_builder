@@ -18,9 +18,9 @@ entity.pattern_preset.add_form:
   route_name: entity.pattern_preset.add_form
   weight: 3
 
-display_builder_ui.collection:
+entity.display_builder_instance.collection:
   title: Instances
   parent: entity.display_builder.collection
   description: 'Available display builder instances.'
-  route_name: display_builder_ui.collection
+  route_name: entity.display_builder_instance.collection
   weight: 4
