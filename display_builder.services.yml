@@ -22,22 +22,6 @@ services:
       - "@module_handler"
   Drupal\display_builder\ConfigFormBuilderInterface: "@display_builder.config_form_builder"
 
-  display_builder.state_manager:
-    class: Drupal\display_builder\StateManager\StateManager
-    arguments:
-      - "@display_builder.state_storage"
-      - "@entity_type.manager"
-      - "@ui_patterns.sample_entity_generator"
-      - "@display_builder.slot_sources_proxy"
-  Drupal\display_builder\StateManager\StateManagerInterface: "@display_builder.state_manager"
-
-  display_builder.state_storage:
-    class: Drupal\display_builder\StateManager\StateStorage
-    arguments:
-      - "@state"
-      - "@current_user"
-  Drupal\display_builder\StateManager\StateStorageInterface: "@display_builder.state_storage"
-
   display_builder.event_subscriber:
     class: '\Drupal\display_builder\Event\DisplayBuilderEventsSubscriber'
     arguments: ["@plugin.manager.db_island", "@entity_type.manager"]

@@ -7,18 +7,17 @@ namespace Drupal\display_builder_entity_view\Controller;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableMetadata;
-use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Drupal\display_builder\Controller\IntegrationControllerBase;
 use Drupal\display_builder\WithDisplayBuilderInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Defines a controller to get access the Display Builder admin UI.
@@ -26,7 +25,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * @internal
  *   Controller classes are internal.
  */
-final class EntityViewOverridesController extends ControllerBase {
+final class EntityViewOverridesController extends IntegrationControllerBase {
 
   /**
    * Renders the Layout UI for override entities.
@@ -55,25 +54,7 @@ final class EntityViewOverridesController extends ControllerBase {
     /** @var \Drupal\display_builder\WithDisplayBuilderInterface $with_display_builder */
     $with_display_builder = $entity->get($entity_display->getDisplayBuilderOverrideField());
 
-    if (!$with_display_builder) {
-      // Display Builder is not activated for this entity view display.
-      throw new NotFoundHttpException();
-    }
-
-    $builder_instance_id = $with_display_builder->getInstanceId();
-    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
-
-    if (!$storage->load($builder_instance_id)) {
-      // Display Builder instance was not created yet or deleted, create it on
-      // the fly.
-      $with_display_builder->initInstanceIfMissing();
-    }
-
-    // We build the rendered page.
-    $display_builder = $with_display_builder->getDisplayBuilder();
-    $view_builder = $this->entityTypeManager()->getViewBuilder('display_builder');
-
-    return $view_builder->view($display_builder, $builder_instance_id);
+    return $this->renderBuilder($with_display_builder);
   }
 
   /**

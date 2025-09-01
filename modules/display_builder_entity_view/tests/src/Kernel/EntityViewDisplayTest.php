@@ -248,7 +248,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $display->initInstanceIfMissing();
 
     $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($display->getInstanceId());
-    $instance->setRuntimeData($expected);
+    $instance->setNewPresent($expected);
     $instance->save();
 
     $display->saveSources();

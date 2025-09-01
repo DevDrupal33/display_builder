@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_entity_view\Controller;
 
-use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder\Controller\IntegrationControllerBase;
 use Drupal\display_builder\WithDisplayBuilderInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * @internal
  *   Controller classes are internal.
  */
-final class EntityViewController extends ControllerBase {
+final class EntityViewController extends IntegrationControllerBase {
 
   /**
    * Provides a generic title callback for a display used in entities.
@@ -63,26 +63,7 @@ final class EntityViewController extends ControllerBase {
       throw new NotFoundHttpException();
     }
 
-    $display_builder = $entity_display->getDisplayBuilder();
-
-    if (!$display_builder) {
-      // Display Builder is not activated for this entity view display.
-      throw new NotFoundHttpException();
-    }
-
-    $builder_instance_id = $entity_display->getInstanceId();
-    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
-
-    if (!$storage->load($builder_instance_id)) {
-      // Display Builder instance was not created yet or deleted, create it on
-      // the fly.
-      $entity_display->initInstanceIfMissing();
-    }
-
-    // We build the rendered page.
-    $view_builder = $this->entityTypeManager()->getViewBuilder('display_builder');
-
-    return $view_builder->view($display_builder, $builder_instance_id);
+    return $this->renderBuilder($entity_display);
   }
 
   /**

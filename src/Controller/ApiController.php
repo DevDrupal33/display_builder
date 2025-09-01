@@ -97,6 +97,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
       return $this->responseMessageError((string) $builder->id(), $message, $request->request->all());
     }
+    $builder->save();
 
     return $this->dispatchDisplayBuilderEvent(
       $is_move ? DisplayBuilderEvents::ON_MOVE : DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
@@ -156,6 +157,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
       return $this->responseMessageError((string) $builder->id(), $message, $debug);
     }
+    $builder->save();
 
     return $this->dispatchDisplayBuilderEvent(
       $is_move ? DisplayBuilderEvents::ON_MOVE : DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
@@ -228,6 +230,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     }
 
     $builder->setSource($instance_id, $instance['source_id'], $data['source']);
+    $builder->save();
 
     return $this->dispatchDisplayBuilderEventWithRenderApi(
       DisplayBuilderEvents::ON_UPDATE,
@@ -273,6 +276,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $values = $this->validateIslandForm($formClass, $form_state);
     // We update the state with the new data.
     $builder->setThirdPartySettings($instance_id, $island_id, $values);
+    $builder->save();
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_UPDATE,
@@ -309,6 +313,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         $builder->attachSourceToSlot($parent_id, $slot_id, (int) $slot_position, $source_id, $data, $dataToCopy['_third_party_settings'] ?? []);
       }
     }
+    $builder->save();
 
     return $this->dispatchDisplayBuilderEvent(
       $is_paste_root ? DisplayBuilderEvents::ON_MOVE : DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
@@ -325,6 +330,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $current = $builder->getCurrentState();
     $parent_id = $builder->getParentId($current, $instance_id);
     $builder->remove($instance_id);
+    $builder->save();
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_DELETE,
@@ -365,6 +371,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    */
   public function save(Request $request, InstanceInterface $builder): HtmlResponse {
     $builder->setSave($builder->getCurrentState());
+    $builder->save();
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_SAVE,
@@ -378,6 +385,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    */
   public function restore(Request $request, InstanceInterface $builder): HtmlResponse {
     $builder->restore();
+    $builder->save();
 
     // @todo on history change is closest to a data change that we need here
     // without any instance id. Perhaps we need a new event?
@@ -401,8 +409,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
       if ($entity instanceof FieldableEntityInterface) {
         // Remove the saved state as the field values will be deleted.
-        $builder->setRuntimeData([]);
-        $builder->setLogMessage('Revert 1/2: clear overridden data and save');
+        $builder->setNewPresent([], 'Revert 1/2: clear overridden data and save');
         $builder->save();
         $builder->setSave($builder->getCurrentState());
 
@@ -425,8 +432,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
             ->load($display_id);
 
           $sources = $display->getSources();
-          $builder->setRuntimeData($sources);
-          $builder->setLogMessage('Revert 2/2: retrieve existing data from config');
+          $builder->setNewPresent($sources, 'Revert 2/2: retrieve existing data from config');
           $builder->save();
         }
       }
@@ -445,6 +451,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    */
   public function undo(Request $request, InstanceInterface $builder): HtmlResponse {
     $builder->undo();
+    $builder->save();
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_HISTORY_CHANGE,
@@ -457,6 +464,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    */
   public function redo(Request $request, InstanceInterface $builder): HtmlResponse {
     $builder->redo();
+    $builder->save();
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_HISTORY_CHANGE,
@@ -469,6 +477,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    */
   public function clear(Request $request, InstanceInterface $builder): HtmlResponse {
     $builder->clear();
+    $builder->save();
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_HISTORY_CHANGE,

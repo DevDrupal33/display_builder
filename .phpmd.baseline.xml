@@ -2,8 +2,7 @@
 <phpmd-baseline>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/MainPageContentSource.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageTitleSource.php"/>
-  <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/modules/display_builder_ui/src/Controller/DisplayBuilderUiController.php" method="buildRow"/>
-  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="/builds/project/display_builder/modules/display_builder_ui/src/Controller/DisplayBuilderUiController.php"/>
+  <violation rule="PHPMD\Rule\UnusedLocalVariable" file="/builds/project/display_builder/modules/display_builder_ui/src/InstanceListBuilder.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Hook/UiPatternsHooks.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/IslandPluginBase.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/IslandPluginConfigurationFormTrait.php"/>

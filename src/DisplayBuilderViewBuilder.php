@@ -54,7 +54,7 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
       '#component' => 'display_builder:display_builder',
       '#props' => [
         'builder_id' => $builder_id,
-        'hash' => $builder->getCurrentHash(),
+        'hash' => (string) $builder->getCurrent()->hash,
       ],
       '#slots' => $this->buildSlots($builder, $islands_enabled_sorted),
       '#attached' => [

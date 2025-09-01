@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_page_layout\Controller;
 
-use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder\Controller\IntegrationControllerBase;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Returns responses for Display Builder ui routes.
  */
-class PageLayoutController extends ControllerBase {
+class PageLayoutController extends IntegrationControllerBase {
 
   /**
    * Returns a page title.
@@ -37,27 +36,7 @@ class PageLayoutController extends ControllerBase {
    *   The display builder renderable.
    */
   public function getBuilder(PageLayoutInterface $page_layout): array {
-    $display_builder = $page_layout->getDisplayBuilder();
-
-    if (!$display_builder) {
-      // Display Builder is not activated for this page layout. This is not
-      // supposed to happen because Display Builder is mandatory.
-      throw new NotFoundHttpException();
-    }
-
-    $instance_id = $page_layout->getInstanceId();
-
-    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
-
-    if (!$storage->load($instance_id)) {
-      // Display Builder instance was not created yet or deleted, create it on
-      // the fly.
-      $page_layout->initInstanceIfMissing();
-    }
-
-    $view_builder = $this->entityTypeManager()->getViewBuilder('display_builder');
-
-    return $view_builder->view($display_builder, $instance_id);
+    return $this->renderBuilder($page_layout);
   }
 
 }

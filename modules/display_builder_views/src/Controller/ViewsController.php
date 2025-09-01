@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_views\Controller;
 
-use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder\Controller\IntegrationControllerBase;
 use Drupal\views\ViewEntityInterface;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Returns responses for Display Builder ui routes.
  */
-class ViewsController extends ControllerBase {
+class ViewsController extends IntegrationControllerBase {
 
   /**
    * Provides a generic title callback for a display used in pages.
@@ -62,27 +61,7 @@ class ViewsController extends ControllerBase {
     /** @var \Drupal\display_builder\WithDisplayBuilderInterface $extender */
     $extender = $extenders['display_builder'];
 
-    /** @var \Drupal\display_builder\DisplayBuilderInterface $display_builder */
-    $display_builder = $extender->getDisplayBuilder();
-
-    if (!$display_builder) {
-      // Display Builder is not activated for this entity view display.
-      throw new NotFoundHttpException();
-    }
-
-    $instance_id = $extender->getInstanceId();
-
-    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
-
-    if (!$storage->load($instance_id)) {
-      // Display Builder instance was not created yet or deleted, create it on
-      // the fly.
-      $extender->initInstanceIfMissing();
-    }
-
-    $view_builder = $this->entityTypeManager()->getViewBuilder('display_builder');
-
-    return $view_builder->view($display_builder, $instance_id);
+    return $this->renderBuilder($extender);
   }
 
 }

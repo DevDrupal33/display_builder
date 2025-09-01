@@ -9,8 +9,8 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\State\StateInterface;
 use Drupal\display_builder\Entity\Instance;
-use Drupal\display_builder\StateManager\StateManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -18,16 +18,20 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class InstanceStorage extends EntityStorageBase implements EntityStorageInterface {
 
+  private const STORAGE_PREFIX = 'display_builder_';
+
+  private const STORAGE_INDEX = 'display_builder_index';
+
   /**
-   * State manager.
+   * State API.
    */
-  protected StateManagerInterface $stateManager;
+  protected StateInterface $state;
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(EntityTypeInterface $entity_type, MemoryCacheInterface $memory_cache, StateManagerInterface $state_manager) {
-    $this->stateManager = $state_manager;
+  public function __construct(EntityTypeInterface $entity_type, MemoryCacheInterface $memory_cache, StateInterface $state) {
+    $this->state = $state;
     parent::__construct($entity_type, $memory_cache);
   }
 
@@ -38,7 +42,7 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
     return new static(
       $entity_type,
       $container->get('entity.memory_cache'),
-      $container->get('display_builder.state_manager')
+      $container->get('state')
     );
   }
 
@@ -46,16 +50,24 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
    * {@inheritdoc}
    */
   public function createFromImplementation(WithDisplayBuilderInterface $implementation): EntityInterface {
+    $data = [
+      'id' => $implementation->getInstanceId(),
+      'profileId' => $implementation->getDisplayBuilder()->id(),
+      'contexts' => $implementation->getInitialContext(),
+    ];
+
+    $present = $implementation->getInitialSources();
     /** @var \Drupal\display_builder\InstanceInterface $instance */
-    $instance = $this->create(['id' => $implementation->getInstanceId()]);
-    $instance->setRuntimeProfileId((string) $implementation->getDisplayBuilder()->id());
-    $instance->setRuntimeData($implementation->getInitialSources());
+    $instance = $this->create($data);
+    $instance->setNewPresent($present, 'Initialization of the display builder.');
+
     // If we get the data directly from config or content, the data is
     // considered as already saved.
     // If we convert it from other tools, or import it from other places, the
     // user needs to save it themselves after retrieval.
-    $instance->setRuntimeSaved((bool) $implementation->getSources());
-    $instance->setRuntimeContexts($implementation->getInitialContext());
+    if ($implementation->getSources()) {
+      $instance->setSave($implementation->getSources());
+    }
 
     return $instance;
   }
@@ -68,14 +80,14 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
       return FALSE;
     }
 
-    return (bool) $this->stateManager->load((string) $id);
+    return (bool) $this->state->get(self::STORAGE_PREFIX . $id, NULL);
   }
 
   /**
    * {@inheritdoc}
    */
   protected function getQueryServiceName() {
-    return 'display_builder.instances';
+    return 'entity.query.null';
   }
 
   /**
@@ -85,14 +97,12 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
     $entities = [];
 
     if ($ids === NULL) {
-      $ids = \array_keys($this->stateManager->loadAll());
+      $ids = \array_keys($this->state->get(self::STORAGE_INDEX, []));
     }
 
     foreach ($ids as $id) {
-      if ($this->stateManager->load($id)) {
-        $entities[$id] = Instance::create([
-          'id' => $id,
-        ]);
+      if ($data = $this->state->get(self::STORAGE_PREFIX . $id, NULL)) {
+        $entities[$id] = Instance::create($data);
       }
     }
 
@@ -102,33 +112,18 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
   /**
    * {@inheritdoc}
    */
-  protected function doCreate(array $values): EntityInterface {
-    // We create only the object here. According to the Entity API, we don't
-    // save to storage during creation.
-    $builder_id = $values['id'] ?? $values['builder_id'] ?? '';
-
-    return parent::doCreate(['id' => $builder_id]);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   protected function doSave($id, EntityInterface $entity): bool|int {
     /** @var \Drupal\display_builder\InstanceInterface $entity */
 
-    $data = $entity->getRuntimeData();
+    $display_builder_list = $this->state->get(self::STORAGE_INDEX, []);
 
-    if ($this->stateManager->load((string) $id)) {
-      $this->stateManager->save((string) $entity->id(), $data, $entity->getLogMessage());
-
-      return TRUE;
+    if (!isset($display_builder_list[$entity->id()])) {
+      $display_builder_list[$entity->id()] = '';
     }
-    // First save.
-    $this->stateManager->create((string) $id, $entity->getRuntimeProfileId(), $data, $entity->getRuntimeContexts());
 
-    if ($entity->getRuntimeSaved()) {
-      $this->stateManager->setSave((string) $id, $data);
-    }
+    $this->state->set(self::STORAGE_INDEX, $display_builder_list);
+    $this->state->set(self::STORAGE_PREFIX . $entity->id(), $entity->toArray());
+    $this->state->set(self::STORAGE_PREFIX . $entity->id() . '_hash', $entity->getCurrent()->hash ?? '');
 
     return TRUE;
   }
@@ -138,7 +133,13 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
    */
   protected function doDelete($entities): void {
     foreach ($entities as $entity) {
-      $this->stateManager->delete((string) $entity->id());
+      $id = (string) $entity->id();
+      $display_builder_list = $this->state->get(self::STORAGE_INDEX, []);
+      unset($display_builder_list[$id]);
+
+      $this->state->set(self::STORAGE_INDEX, $display_builder_list);
+      $this->state->delete(self::STORAGE_PREFIX . $id);
+      $this->state->delete(self::STORAGE_PREFIX . $id . '_hash');
     }
   }
 

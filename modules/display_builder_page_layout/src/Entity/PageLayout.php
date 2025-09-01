@@ -201,10 +201,10 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
     /** @var \Drupal\display_builder\InstanceStorage $storage */
     $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
 
-    if ($this->getInstanceId() && !$storage->load($this->getInstanceId())) {
-      // Init instance if missing in State Manager because new or deleted in the
-      // State API.
-      /** @var \Drupal\display_builder\InstanceInterface $instance */
+    /** @var \Drupal\display_builder\InstanceInterface $instance */
+    $instance = $storage->load($this->getInstanceId());
+
+    if (!$instance) {
       $instance = $storage->createFromImplementation($this);
       $instance->save();
     }

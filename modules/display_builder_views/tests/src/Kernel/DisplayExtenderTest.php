@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder_views\Kernel;
 
 use Drupal\Core\Form\FormState;
+use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\views\Views;
 use Drupal\views\Entity\View;
-use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\views\Views;
 
 /**
  * Kernel test for the Views Display Extender.
@@ -18,6 +18,9 @@ use Drupal\display_builder\ConfigFormBuilderInterface;
  */
 final class DisplayExtenderTest extends KernelTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'system',
     'user',
@@ -29,7 +32,7 @@ final class DisplayExtenderTest extends KernelTestBase {
   ];
 
   /**
-   *
+   * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
@@ -41,7 +44,7 @@ final class DisplayExtenderTest extends KernelTestBase {
   }
 
   /**
-   *
+   * Test the display extender form.
    */
   public function testExtenderInstantiationAndOptionsForm(): void {
     // Create a minimal view entity.
@@ -84,29 +87,29 @@ final class DisplayExtenderTest extends KernelTestBase {
     $form_state = new FormState();
     $form_state->set('section', 'display_builder');
     $plugin->buildOptionsForm($form, $form_state);
-    $this->assertArrayHasKey(ConfigFormBuilderInterface::PROFILE_PROPERTY, $form);
+    self::assertArrayHasKey(ConfigFormBuilderInterface::PROFILE_PROPERTY, $form);
 
     // Test submitOptionsForm.
     $form_state->setValue(ConfigFormBuilderInterface::PROFILE_PROPERTY, 'default');
     $plugin->submitOptionsForm($form, $form_state);
-    $this->assertEquals('default', $plugin->options[ConfigFormBuilderInterface::PROFILE_PROPERTY]);
+    self::assertSame('default', $plugin->options[ConfigFormBuilderInterface::PROFILE_PROPERTY]);
 
     // Test optionsSummary.
     $categories = [];
     $options = [];
     $plugin->optionsSummary($categories, $options);
-    $this->assertArrayHasKey('display_builder', $options);
+    self::assertArrayHasKey('display_builder', $options);
 
     // Test getInstanceId.
     $instance_id = $plugin->getInstanceId();
-    $this->assertStringStartsWith('view__', $instance_id);
+    self::assertStringStartsWith('view__', $instance_id);
 
     // Test static checkInstanceId and getUrlFromInstanceId.
     $parsed = DisplayExtender::checkInstanceId('view__test_view__default');
-    $this->assertEquals(['view' => 'test_view', 'display' => 'default'], $parsed);
+    self::assertSame(['view' => 'test_view', 'display' => 'default'], $parsed);
 
     $url = DisplayExtender::getUrlFromInstanceId('view__test_view__default');
-    $this->assertStringContainsString('/admin/structure/views/view/test_view/display-builder/default', $url->toString());
+    self::assertStringContainsString('/admin/structure/views/view/test_view/display-builder/default', $url->toString());
   }
 
 }

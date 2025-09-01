@@ -4,14 +4,24 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Entity;
 
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Attribute\EntityType;
 use Drupal\Core\Entity\EntityBase;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Plugin\Context\EntityContext;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\DisplayBuilderInterface;
+use Drupal\display_builder\HistoryStep;
 use Drupal\display_builder\InstanceAccessControlHandler;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\InstanceStorage;
-use Drupal\display_builder\StateManager\StateManagerInterface;
+use Drupal\display_builder\SlotSourceProxy;
+use Drupal\display_builder_ui\InstanceListBuilder;
+use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
+use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 
 /**
  * Defines the display builder instance entity class.
@@ -28,6 +38,12 @@ use Drupal\display_builder\StateManager\StateManagerInterface;
   handlers: [
     'access' => InstanceAccessControlHandler::class,
     'storage' => InstanceStorage::class,
+    // Managed by display_builder_ui.
+    'list_builder' => InstanceListBuilder::class,
+  ],
+  links: [
+    // Managed by display_builder_ui.
+    'collection' => '/admin/structure/display-builder/instances',
   ],
   label_count: [
     'singular' => '@count instance',
@@ -36,55 +52,7 @@ use Drupal\display_builder\StateManager\StateManagerInterface;
 )]
 class Instance extends EntityBase implements InstanceInterface {
 
-  /**
-   * Profile ID injected next time the entity is saved.
-   *
-   * This is a temporary mechanism, useful when Instance is still a facade to
-   * StateManager.
-   *
-   * @see \Drupal\display_builder\InstanceStorage::doSave()
-   */
-  protected string $profileId = '';
-
-  /**
-   * Data injected next time the entity is saved.
-   *
-   * This is a temporary mechanism, useful when Instance is still a facade to
-   * StateManager.
-   *
-   * @see \Drupal\display_builder\InstanceStorage::doSave()
-   */
-  protected array $data = [];
-
-  /**
-   * Contexts injected next time the entity is saved.
-   *
-   * This is a temporary mechanism, useful when Instance is still a facade to
-   * StateManager.
-   *
-   * @see \Drupal\display_builder\InstanceStorage::doSave()
-   */
-  protected array $contexts = [];
-
-  /**
-   * Saved status injected next time the entity is saved.
-   *
-   * This is a temporary mechanism, useful when Instance is still a facade to
-   * StateManager.
-   *
-   * @see \Drupal\display_builder\InstanceStorage::doSave()
-   */
-  protected bool $saved = FALSE;
-
-  /**
-   * Log instance with be used next time the entity is saved.
-   *
-   * This is a temporary mechanism, useful when Instance is still a facade to
-   * StateManager.
-   *
-   * @see \Drupal\display_builder\InstanceStorage::doSave()
-   */
-  protected string $logMessage = '';
+  private const MAX_HISTORY = 10;
 
   /**
    * Entity ID.
@@ -92,25 +60,104 @@ class Instance extends EntityBase implements InstanceInterface {
   protected string $id;
 
   /**
-   * State manager.
+   * Display Builder profile ID.
    */
-  protected StateManagerInterface $stateManager;
+  protected string $profileId = '';
+
+  /**
+   * Past steps.
+   *
+   * @var \Drupal\display_builder\HistoryStep[]
+   */
+  protected array $past = [];
+
+  /**
+   * Present step.
+   */
+  protected ?HistoryStep $present = NULL;
+
+  /**
+   * Future steps.
+   *
+   * @var \Drupal\display_builder\HistoryStep[]
+   */
+  protected array $future = [];
+
+  /**
+   * Contexts.
+   *
+   * @var \Drupal\Core\Plugin\Context\ContextInterface[]
+   *   An array of contexts, keyed by context name.
+   */
+  protected array $contexts = [];
+
+  /**
+   * Saved step.
+   */
+  protected ?HistoryStep $save = NULL;
+
+  /**
+   * Path index.
+   *
+   * A mapping where each key is an slot source instance ID and each value is
+   * the path where this instance is located in the data state.
+   */
+  protected array $pathIndex = [];
+
+  /**
+   * Entity type manager.
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * Sample entity generator.
+   */
+  protected SampleEntityGeneratorInterface $sampleEntityGenerator;
+
+  /**
+   * Slot source proxy.
+   */
+  protected SlotSourceProxy $slotSourceProxy;
+
+  /**
+   * Current user.
+   */
+  protected AccountInterface $currentUser;
 
   /**
    * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\EntityInterface
    */
   public function toArray(): array {
-    return $this->stateManager()->load($this->id);
+    return [
+      'id' => $this->id,
+      'profileId' => $this->profileId,
+      'contexts' => $this->contexts,
+      'past' => $this->past,
+      'present' => $this->present,
+      'future' => $this->future,
+      'save' => $this->save,
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\EntityInterface
+   */
+  public function postCreate(EntityStorageInterface $storage): void {
+    if ($this->present) {
+      $this->present->data = $this->buildIndexFromSlot([], $this->getCurrentState());
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function getProfile(): ?DisplayBuilderInterface {
-    $profile_id = $this->stateManager()->getEntityConfigId($this->id);
-    $this->profileId = $profile_id;
     /** @var \Drupal\display_builder\DisplayBuilderInterface $profile */
-    $profile = $this->entityTypeManager()->getStorage('display_builder')->load($profile_id);
+    $profile = $this->entityTypeManager()->getStorage('display_builder')->load($this->profileId);
 
     return $profile;
   }
@@ -118,256 +165,732 @@ class Instance extends EntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function getRuntimeProfileId(): string {
-    return $this->profileId;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setRuntimeProfileId(string $profile_id): void {
+  public function setProfile(string $profile_id): void {
     $this->profileId = $profile_id;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getRuntimeData(): array {
-    return $this->data;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setRuntimeData(array $data): void {
-    $this->data = $data;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getRuntimeContexts(): array {
-    return $this->contexts;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setRuntimeContexts(array $contexts): void {
-    $this->contexts = $contexts;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getRuntimeSaved(): bool {
-    return $this->saved;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setRuntimeSaved(bool $saved): void {
-    $this->saved = $saved;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getLogMessage(): string {
-    return $this->logMessage;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setLogMessage(string $message): void {
-    $this->logMessage = $message;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCurrentHash(): string {
-    return $this->stateManager()->getCurrentHash($this->id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function moveToRoot(string $instance_id, int $position): bool {
-    return $this->stateManager()->moveToRoot($this->id, $instance_id, $position);
+    $root = $this->getCurrentState();
+    $path = $this->getPath($root, $instance_id);
+    $data = NestedArray::getValue($root, $path);
+
+    if (empty($data) || !isset($data['source_id'])) {
+      return FALSE;
+    }
+
+    $root = $this->doRemove($root, $instance_id);
+    $root = $this->attachToRoot($root, $position, $data);
+
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummaryInstance = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts());
+
+    $log = new FormattableMarkup('%instance @thingy has been moved to root', [
+      '%instance' => $labelWithSummaryInstance['summary'],
+      '@thingy' => $data['source_id'],
+    ]);
+    $this->setNewPresent($root, $log);
+
+    return TRUE;
   }
 
   /**
    * {@inheritdoc}
    */
   public function moveToSlot(string $instance_id, string $parent_id, string $slot_id, int $position): bool {
-    return $this->stateManager()->moveToSlot($this->id, $instance_id, $parent_id, $slot_id, $position);
+    $root = $this->getCurrentState();
+    $path = $this->getPath($root, $instance_id);
+    $data = NestedArray::getValue($root, $path);
+
+    if (empty($data) || !isset($data['source_id'])) {
+      return FALSE;
+    }
+
+    $parent_slot = \array_slice($path, \count($path) - 3, 1)[0];
+
+    if (($parent_id === $this->getParentId($root, $instance_id)) && ($slot_id === $parent_slot)) {
+      // Moving to the same slot is tricky, because we don't want to remove a
+      // sibling.
+      $slot_path = \array_slice($path, 0, \count($path) - 1);
+      $slot = NestedArray::getValue($root, $slot_path);
+      $slot = $this->changeInstancePositionInSlot($slot, $instance_id, $position);
+      NestedArray::setValue($root, $slot_path, $slot);
+    }
+    else {
+      // Moving to a different slot is easier, we can first delete the previous
+      // instance data, and attach it to the new position.
+      $root = $this->doRemove($root, $instance_id);
+      $root = $this->attachToSlot($root, $parent_id, $slot_id, $position, $data);
+    }
+
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummaryInstance = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts());
+    $labelWithSummaryParent = $this->slotSourceProxy()->getLabelWithSummary($this->get($parent_id));
+
+    $log = new FormattableMarkup("%instance @thingy has been moved to %parent's @slot_id", [
+      '%instance' => $labelWithSummaryInstance['summary'],
+      '@thingy' => $data['source_id'],
+      '%parent' => $labelWithSummaryParent['summary'],
+      '@slot_id' => $slot_id,
+    ]);
+
+    $this->setNewPresent($root, $log);
+
+    return TRUE;
   }
 
   /**
    * {@inheritdoc}
    */
   public function attachSourceToRoot(int $position, string $source_id, array $data, array $third_party_settings = []): string {
-    return $this->stateManager()->attachSourceToRoot($this->id, $position, $source_id, $data, $third_party_settings);
+    $data = [
+      '_instance_id' => \uniqid(),
+      'source_id' => $source_id,
+      'source' => $data,
+    ];
+
+    if ($third_party_settings) {
+      $data['_third_party_settings'] = $third_party_settings;
+    }
+
+    $root = $this->getCurrentState();
+    $root = $this->attachToRoot($root, $position, $data);
+
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummaryInstance = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts() ?? []);
+
+    $log = new FormattableMarkup('%instance @source_id has been attached to root', [
+      '%instance' => $labelWithSummaryInstance['summary'],
+      '@source_id' => $source_id,
+    ]);
+    $this->setNewPresent($root, $log, FALSE);
+
+    return $data['_instance_id'];
   }
 
   /**
    * {@inheritdoc}
    */
   public function attachSourceToSlot(string $parent_id, string $slot_id, int $position, string $source_id, array $data, array $third_party_settings = []): string {
-    return $this->stateManager()->attachSourceToSlot($this->id, $parent_id, $slot_id, $position, $source_id, $data, $third_party_settings);
+    $root = $this->getCurrentState();
+    $data = [
+      '_instance_id' => \uniqid(),
+      'source_id' => $source_id,
+      'source' => $data,
+    ];
+
+    if ($third_party_settings) {
+      $data['_third_party_settings'] = $third_party_settings;
+    }
+
+    $root = $this->attachToSlot($root, $parent_id, $slot_id, $position, $data);
+
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummaryInstance = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts() ?? []);
+    $labelWithSummaryParent = $this->slotSourceProxy()->getLabelWithSummary($this->get($parent_id));
+
+    $log = new FormattableMarkup("%instance @source_id has been attached to %parent's @slot_id", [
+      '%instance' => $labelWithSummaryInstance['summary'],
+      '@source_id' => $source_id,
+      '%parent' => $labelWithSummaryParent['summary'],
+      '@slot_id' => $slot_id,
+    ]);
+    $this->setNewPresent($root, $log);
+
+    return $data['_instance_id'];
   }
 
   /**
    * {@inheritdoc}
    */
   public function get(string $instance_id): array {
-    return $this->stateManager()->get($this->id, $instance_id);
-  }
+    $root = $this->getCurrentState();
+    $path = $this->getPath($root, $instance_id);
+    $value = NestedArray::getValue($root, $path);
 
-  /**
-   * {@inheritdoc}
-   */
-  public function getCurrentState(): array {
-    return $this->stateManager()->getCurrentState($this->id);
+    return $value ?? [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function getParentId(array $root, string $instance_id): string {
-    return $this->stateManager()->getParentId($this->id, $root, $instance_id);
+    $path = $this->getPath($root, $instance_id);
+    $length = \count(['source', 'component', 'slots', '{slot_id}', 'sources', '{position}']);
+    $parent_path = \array_slice($path, 0, \count($path) - $length);
+
+    return $this->getInstanceId($parent_path);
   }
 
   /**
    * {@inheritdoc}
    */
   public function setSource(string $instance_id, string $source_id, array $data): void {
-    $this->stateManager()->setSource($this->id, $instance_id, $source_id, $data);
+    $root = $this->getCurrentState();
+    $path = $this->getPath($root, $instance_id);
+    $existing_data = NestedArray::getValue($root, $path) ?? [];
+
+    if (!isset($existing_data['_instance_id']) || ($existing_data['_instance_id'] !== $instance_id)) {
+      throw new \Exception('Instance ID mismatch');
+    }
+    $existing_data['source_id'] = $source_id;
+    $existing_data['source'] = $data;
+    NestedArray::setValue($root, $path, $existing_data);
+
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummaryInstance = $this->slotSourceProxy()->getLabelWithSummary($existing_data, $this->getContexts());
+
+    $log = new FormattableMarkup('%instance has been updated', [
+      '%instance' => $labelWithSummaryInstance['summary'],
+    ]);
+    $this->setNewPresent($root, $log);
   }
 
   /**
    * {@inheritdoc}
    */
   public function setThirdPartySettings(string $instance_id, string $island_id, array $data): void {
-    $this->stateManager()->setThirdPartySettings($this->id, $instance_id, $island_id, $data);
+    $root = $this->getCurrentState();
+    $path = $this->getPath($root, $instance_id);
+    $existing_data = NestedArray::getValue($root, $path);
+
+    if (!isset($existing_data['_third_party_settings'])) {
+      $existing_data['_third_party_settings'] = [];
+    }
+    $existing_data['_third_party_settings'][$island_id] = $data;
+    NestedArray::setValue($root, $path, $existing_data);
+
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummaryInstance = $this->slotSourceProxy()->getLabelWithSummary($existing_data, $this->getContexts());
+
+    $log = new FormattableMarkup('%instance has been updated by @island_id', [
+      '%instance' => $labelWithSummaryInstance['summary'],
+      '@island_id' => $island_id,
+    ]);
+    $this->setNewPresent($root, $log);
   }
 
   /**
    * {@inheritdoc}
    */
   public function remove(string $instance_id): void {
-    $this->stateManager()->remove($this->id, $instance_id);
+    $root = $this->getCurrentState();
+    $path = $this->getPath($root, $instance_id);
+    $data = NestedArray::getValue($root, $path);
+    $parent_id = $this->getParentId($root, $instance_id);
+    $root = $this->doRemove($root, $instance_id);
+
+    $contexts = $this->getContexts() ?? [];
+
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummaryInstance = $this->slotSourceProxy()->getLabelWithSummary($data, $contexts);
+    $labelWithSummaryParent = empty($parent_id) ? ['summary' => 'root'] : $this->slotSourceProxy()->getLabelWithSummary($this->get($parent_id), $contexts);
+
+    $log = new FormattableMarkup('%instance has been removed from %parent', [
+      '%instance' => $labelWithSummaryInstance['summary'],
+      '%parent' => $labelWithSummaryParent['summary'],
+    ]);
+    $this->setNewPresent($root, $log, FALSE);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getContexts(): ?array {
-    return $this->stateManager()->getContexts($this->id);
+    return $this->refreshContexts($this->contexts);
   }
 
   /**
    * {@inheritdoc}
    */
   public function setSave(array $save_data): void {
-    $this->stateManager()->setSave($this->id, $save_data);
+    $hash = self::getUniqId($save_data);
+    $this->save = new HistoryStep($save_data, $hash, NULL, \time(), NULL);
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\display_builder\HistoryInterface
+   */
+  public function getCurrentState(): array {
+    return $this->getCurrent()->data ?? [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function restore(): void {
-    $this->stateManager()->restore($this->id);
+    $this->setNewPresent($this->save->data, 'Back to saved data.');
   }
 
   /**
    * {@inheritdoc}
+   *
+   * @see \Drupal\display_builder\HistoryInterface
    */
   public function undo(): void {
-    $this->stateManager()->undo($this->id);
+    $past = $this->past ?? [];
+
+    if (empty($past)) {
+      return;
+    }
+
+    $present = $this->present;
+    // Remove the last element from the past.
+    $last = \array_pop($past);
+    $this->past = $past;
+    // Set the present to the element we removed in the previous step.
+    $this->present = $last;
+    // Insert the old present state at the beginning of the future.
+    $this->future = \array_merge([$present], $this->future);
   }
 
   /**
    * {@inheritdoc}
+   *
+   * @see \Drupal\display_builder\HistoryInterface
    */
   public function redo(): void {
-    $this->stateManager()->redo($this->id);
+    $future = $this->future ?? [];
+
+    if (empty($future)) {
+      return;
+    }
+
+    // Remove the first element from the future.
+    $first = \array_shift($future);
+    // Insert the old present state at the end of the past.
+    $this->past = \array_merge($this->past, [$this->present]);
+    // Set the present to the element we removed in the previous step.
+    $this->present = $first;
+    $this->future = $future;
   }
 
   /**
    * {@inheritdoc}
+   *
+   * @see \Drupal\display_builder\HistoryInterface
    */
   public function clear(): void {
-    $this->stateManager()->clear($this->id);
+    $this->past = [];
+    $this->future = [];
   }
 
   /**
    * {@inheritdoc}
-   */
-  public function getPathIndex(array $root = []): array {
-    return $this->stateManager()->getPathIndex($this->id, $root);
-  }
-
-  /**
-   * {@inheritdoc}
+   *
+   * @see \Drupal\display_builder\HistoryInterface
    */
   public function getCountPast(): int {
-    return $this->stateManager()->getCountPast($this->id);
+    return \count($this->past);
   }
 
   /**
    * {@inheritdoc}
+   *
+   * @see \Drupal\display_builder\HistoryInterface
    */
   public function getCountFuture(): int {
-    return $this->stateManager()->getCountFuture($this->id);
+    return \count($this->future);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getUsers(): array {
-    return $this->stateManager()->getUsers($this->id);
+    $users = [];
+    $steps = \array_merge($this->past, [$this->present], $this->future);
+
+    foreach ($steps as $step) {
+      $user_id = $step->user ?? NULL;
+
+      if ($user_id && ($users[$user_id] ?? $step->time > 0)) {
+        $users[$user_id] = $step->time;
+      }
+    }
+
+    return $users;
   }
 
   /**
    * {@inheritdoc}
    */
   public function canSaveContextsRequirement(?array $contexts = NULL): bool {
-    return $this->stateManager()->canSaveContextsRequirement($this->id, $contexts);
+    $contexts ??= $this->getContexts();
+
+    if ($contexts === NULL) {
+      return FALSE;
+    }
+
+    if (!\array_key_exists('context_requirements', $contexts)
+      || !($contexts['context_requirements'] instanceof RequirementsContext)) {
+      return FALSE;
+    }
+
+    return TRUE;
   }
 
   /**
    * {@inheritdoc}
    */
   public function hasSaveContextsRequirement(string $key, array $contexts = []): bool {
-    return $this->stateManager()->hasSaveContextsRequirement($this->id, $key, $contexts);
+    $contexts = empty($contexts) ? $this->getContexts() : $contexts;
+    // Some strange edge cases where context is null.
+    $contexts ??= [];
+
+    if (!\array_key_exists('context_requirements', $contexts)
+      || !($contexts['context_requirements'] instanceof RequirementsContext)
+      || !$contexts['context_requirements']->hasValue($key)) {
+      return FALSE;
+    }
+
+    return TRUE;
   }
 
   /**
    * {@inheritdoc}
    */
   public function hasSave(): bool {
-    return $this->stateManager()->hasSave($this->id);
+    return !empty($this->save);
   }
 
   /**
    * {@inheritdoc}
    */
   public function saveIsCurrent(): bool {
-    return $this->stateManager()->saveIsCurrent($this->id);
+    return $this->present->hash === $this->save->hash;
   }
 
   /**
-   * Get the state manager.
-   *
-   * @return \Drupal\display_builder\StateManager\StateManagerInterface
-   *   The state manager.
+   * {@inheritdoc}
    */
-  protected function stateManager(): StateManagerInterface {
-    return $this->stateManager ??= \Drupal::service('display_builder.state_manager');
+  public function getPathIndex(array $root = []): array {
+    if (empty($root)) {
+      // When called from the outside, root is not already retrieved.
+      // When called from an other method, it is better to pass an already
+      // retrieved root, for performance.
+      $root = $this->getCurrentState();
+    }
+    // It may be slow to rebuild the index every time we request it. But it is
+    // very difficult to maintain an index synchronized with the state storage
+    // history.
+    $this->buildIndexFromSlot([], $root);
+
+    return $this->pathIndex ?? [];
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\display_builder\HistoryInterface
+   */
+  public function setNewPresent(array $data, FormattableMarkup|string $log_message = '', bool $check_hash = TRUE): void {
+    $hash = self::getUniqId($data);
+
+    // Check if this present is the same to avoid duplicates, for example move
+    // to the same place.
+    if ($check_hash && $hash === $this->present?->hash) {
+      return;
+    }
+
+    // 1. Insert the present at the end of the past.
+    $this->past[] = $this->present;
+
+    // Keep only the last x history.
+    if (\count($this->past) > self::MAX_HISTORY) {
+      \array_shift($this->past);
+    }
+
+    // 2. Set the present to the new state.
+    $this->present = new HistoryStep(
+      $data,
+      $hash,
+      $log_message,
+      \time(),
+      (int) $this->currentUser()->id(),
+    );
+
+    // 3. Clear the future.
+    $this->future = [];
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\display_builder\HistoryInterface
+   */
+  public function getCurrent(): ?HistoryStep {
+    return $this->present;
+  }
+
+  /**
+   * Build the index from a slot.
+   *
+   * @param array $path
+   *   The path to the slot.
+   * @param array $data
+   *   (Optional) The slot data.
+   *
+   * @return array
+   *   The slot data with the index updated.
+   */
+  private function buildIndexFromSlot(array $path, array $data = []): array {
+    foreach ($data as $index => $source) {
+      $source_path = \array_merge($path, [$index]);
+      $data[$index] = $this->buildIndexFromInstance($source_path, $source);
+    }
+
+    return $data;
+  }
+
+  /**
+   * Sample entity generator.
+   */
+  private function sampleEntityGenerator(): SampleEntityGeneratorInterface {
+    return $this->sampleEntityGenerator ??= \Drupal::service('ui_patterns.sample_entity_generator');
+  }
+
+  /**
+   * Slot source proxy.
+   */
+  private function slotSourceProxy(): SlotSourceProxy {
+    return $this->slotSourceProxy ??= \Drupal::service('display_builder.slot_sources_proxy');
+  }
+
+  /**
+   * Slot source proxy.
+   */
+  private function currentUser(): AccountInterface {
+    return $this->currentUser ??= \Drupal::service('current_user');
+  }
+
+  /**
+   * Refresh contexts after loaded from storage.
+   *
+   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
+   *   The contexts.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\ContextException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *
+   * @return array
+   *   The refreshed contexts or NULL if no context.
+   */
+  private function refreshContexts(array $contexts): array {
+    foreach ($contexts as &$context) {
+      if ($context instanceof EntityContext) {
+        // @todo We should use cache entries here
+        // with the corresponding cache contexts in it.
+        // This may avoid some unnecessary entity loads or generation.
+        $entity = $context->getContextValue();
+
+        // Check if sample entity.
+        if ($entity->id()) {
+          $entity = $this->entityTypeManager()->getStorage($entity->getEntityTypeId())->load($entity->id());
+        }
+        else {
+          $entity = $this->sampleEntityGenerator()->get($entity->getEntityTypeId(), $entity->bundle());
+        }
+
+        // Edge case when the parent entity is deleted but not the builder
+        // instance.
+        if (!$entity) {
+          return $contexts;
+        }
+        $context = (\get_class($context))::fromEntity($entity);
+      }
+    }
+
+    return $contexts;
+  }
+
+  /**
+   * Change the position of an instance in a slot.
+   *
+   * @param array $slot
+   *   The slot.
+   * @param string $instance_id
+   *   The instance id.
+   * @param int $to
+   *   The new position.
+   *
+   * @return array
+   *   The updated slot.
+   */
+  private function changeInstancePositionInSlot(array $slot, string $instance_id, int $to): array {
+    foreach ($slot as $position => $source) {
+      if ($source['_instance_id'] === $instance_id) {
+        $p1 = \array_splice($slot, $position, 1);
+        $p2 = \array_splice($slot, 0, $to);
+
+        return \array_merge($p2, $p1, $slot);
+      }
+    }
+
+    return $slot;
+  }
+
+  /**
+   * Get the instance ID from a path.
+   *
+   * @todo may be slow.
+   *
+   * @param array $path
+   *   The path to the slot.
+   */
+  private function getInstanceId(array $path): string {
+    $index = $this->getPathIndex();
+
+    foreach ($index as $instance_id => $instance_path) {
+      if ($path === $instance_path) {
+        return $instance_id;
+      }
+    }
+
+    return '';
+  }
+
+  /**
+   * Add path to index and add instance ID.
+   *
+   * @param array $path
+   *   The path to the slot.
+   * @param array $data
+   *   (Optional) The slot data.
+   *
+   * @return array
+   *   The slot data with the index updated.
+   */
+  private function buildIndexFromInstance(array $path, array $data = []): array {
+    // First job: Add missing _instance_id keys.
+    $instance_id = $data['_instance_id'] ?? \uniqid();
+    $data['_instance_id'] = $instance_id;
+    // Second job: Save the path to the index.
+    $this->pathIndex[$instance_id] = $path;
+
+    if (!isset($data['source_id'])) {
+      return $data;
+    }
+
+    // Let's continue the exploration.
+    if ($data['source_id'] !== 'component') {
+      return $data;
+    }
+
+    if (!isset($data['source']['component']['slots'])) {
+      return $data;
+    }
+
+    foreach ($data['source']['component']['slots'] as $slot_id => $slot) {
+      if (!isset($slot['sources'])) {
+        continue;
+      }
+      $slot_path = \array_merge($path, ['source', 'component', 'slots', $slot_id, 'sources']);
+      $slot['sources'] = $this->buildIndexFromSlot($slot_path, $slot['sources']);
+      $data['source']['component']['slots'][$slot_id] = $slot;
+    }
+
+    return $data;
+  }
+
+  /**
+   * Internal atomic change of the root state.
+   *
+   * @param array $root
+   *   The root state.
+   * @param int $position
+   *   The position where to insert the data.
+   * @param array $data
+   *   The data to insert.
+   *
+   * @return array
+   *   The updated root state
+   */
+  private function attachToRoot(array $root, int $position, array $data): array {
+    \array_splice($root, $position, 0, [$data]);
+
+    return $root;
+  }
+
+  /**
+   * Internal atomic change of the root state.
+   *
+   * @param array $root
+   *   The root state.
+   * @param string $parent_id
+   *   The ID of the parent instance.
+   * @param string $slot_id
+   *   The ID of the slot where to insert the data.
+   * @param int $position
+   *   The position where to insert the data.
+   * @param array $data
+   *   The data to insert.
+   *
+   * @return array
+   *   The updated root state
+   */
+  private function attachToSlot(array $root, string $parent_id, string $slot_id, int $position, array $data): array {
+    $parent_path = $this->getPath($root, $parent_id);
+    $slot_path = \array_merge($parent_path, ['source', 'component', 'slots', $slot_id, 'sources']);
+    $slot = NestedArray::getValue($root, $slot_path) ?? [];
+    \array_splice($slot, $position, 0, [$data]);
+    NestedArray::setValue($root, $slot_path, $slot);
+
+    return $root;
+  }
+
+  /**
+   * Internal atomic change of the root state.
+   *
+   * @param array $root
+   *   The root state.
+   * @param string $instance_id
+   *   The instance id.
+   *
+   * @return array
+   *   The updated root state
+   */
+  private function doRemove(array $root, string $instance_id): array {
+    $path = $this->getPath($root, $instance_id);
+    NestedArray::unsetValue($root, $path);
+    // To avoid non consecutive array keys, we rebuild the value list.
+    $slot_path = \array_slice($path, 0, \count($path) - 1);
+    $slot = NestedArray::getValue($root, $slot_path);
+    NestedArray::setValue($root, $slot_path, \array_values($slot));
+
+    return $root;
+  }
+
+  /**
+   * Get the path to an instance.
+   *
+   * @param array $root
+   *   The root state.
+   * @param string $instance_id
+   *   The instance id.
+   *
+   * @return array
+   *   The path, one array item by level.
+   */
+  private function getPath(array $root, string $instance_id): array {
+    return $this->getPathIndex($root)[$instance_id] ?? [];
+  }
+
+  /**
+   * Get a hash for this data as uniq id reference.
+   *
+   * @param array $data
+   *   The data to generate uniq id for.
+   *
+   * @return int
+   *   The uniq id value.
+   */
+  private static function getUniqId(array $data): int {
+    return \crc32((string) \serialize($data));
   }
 
 }

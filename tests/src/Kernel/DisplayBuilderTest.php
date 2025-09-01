@@ -12,7 +12,6 @@ use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Test the DisplayBuilder class.
- * Test the DisplayBuilder class.
  *
  * @internal
  */

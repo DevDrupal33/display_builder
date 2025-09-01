@@ -92,10 +92,10 @@ class ViewsManagementController extends ControllerBase {
       'data-profile-id' => \sprintf('profile_%s', $view_id),
       'data' => $view->getDisplay($display_id)['display_options']['display_extenders']['display_builder'][ConfigFormBuilderInterface::PROFILE_PROPERTY] ?? '?',
     ];
-    $row['updated']['data'] = $builder['present']['time'] ? DisplayBuilderHelpers::formatTime($this->dateFormatter, (int) $builder['present']['time']) : '-';
+    $row['updated']['data'] = $builder['present']->time ? DisplayBuilderHelpers::formatTime($this->dateFormatter, (int) $builder['present']->time) : '-';
 
-    if (isset($builder['present']['log'])) {
-      $row['log']['data'] = $builder['present']['log'];
+    if (isset($builder['present']->log)) {
+      $row['log']['data'] = $builder['present']->log;
     }
     else {
       $row['log']['data'] = '-';

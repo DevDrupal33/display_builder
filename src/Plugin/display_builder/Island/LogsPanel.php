@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\DisplayBuilderHelpers;
+use Drupal\display_builder\HistoryStep;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
@@ -60,9 +61,17 @@ class LogsPanel extends IslandPluginBase {
       return [];
     }
 
-    $saveHash = $load['save']['hash'] ?? NULL;
+    $saveHash = $load['save']->hash ?? NULL;
+    /** @var \Drupal\display_builder\HistoryStep $present */
     $present = $load['present'];
+
+    if (!$present) {
+      return [];
+    }
+
+    /** @var \Drupal\display_builder\HistoryStep[] $past */
     $past = $load['past'];
+    /** @var \Drupal\display_builder\HistoryStep[] $future */
     $future = $load['future'];
 
     $build = [];
@@ -78,7 +87,7 @@ class LogsPanel extends IslandPluginBase {
       '#rows' => [],
     ];
 
-    $saveInPresent = ($saveHash && $present['hash'] === $saveHash);
+    $saveInPresent = ($saveHash && $present->hash === $saveHash);
     $saveInPast = FALSE;
     $saveInFuture = FALSE;
 
@@ -86,7 +95,7 @@ class LogsPanel extends IslandPluginBase {
     $build[] = $table_logs;
 
     if ($saveHash && !$saveInFuture && !$saveInPresent && !$saveInPast) {
-      $time = DisplayBuilderHelpers::formatTime($this->dateFormatter, $load['save']['time']);
+      $time = DisplayBuilderHelpers::formatTime($this->dateFormatter, $load['save']->time);
       $params = ['%hash' => $saveHash, '%time' => $time];
       $build[] = [
         '#type' => 'html_tag',
@@ -150,13 +159,13 @@ class LogsPanel extends IslandPluginBase {
   /**
    * Build rows for the logs table.
    *
-   * @param array $past
+   * @param \Drupal\display_builder\HistoryStep[] $past
    *   Steps with time and log message.
-   * @param array $present
+   * @param \Drupal\display_builder\HistoryStep $present
    *   A step with time and log message.
-   * @param array $future
+   * @param \Drupal\display_builder\HistoryStep[] $future
    *   Steps with time and log message.
-   * @param string|null $saveHash
+   * @param int|null $saveHash
    *   Hash of the saved state.
    * @param bool $saveInPast
    *   Is the saved stated in the past?
@@ -168,20 +177,20 @@ class LogsPanel extends IslandPluginBase {
    * @return array
    *   A renderable array representing a table row.
    */
-  protected function buildRows(array $past, array $present, array $future, ?string $saveHash, bool &$saveInPast, bool &$saveInPresent, bool &$saveInFuture): array {
+  protected function buildRows(array $past, ?HistoryStep $present, array $future, ?int $saveHash, bool &$saveInPast, bool &$saveInPresent, bool &$saveInFuture): array {
     $rows_past = [];
     $rows_present = [];
     $rows_future = [];
 
     foreach ($future as $index => $step) {
-      if ($saveHash && $step['hash'] === $saveHash && !$saveInPresent) {
+      if ($saveHash && $step->hash === $saveHash && !$saveInPresent) {
         $saveInFuture = TRUE;
       }
       $rows_future[] = $this->buildRow($index + 1, $step);
     }
 
     foreach ($past as $index => $step) {
-      if ($saveHash && isset($step['hash']) && $step['hash'] === $saveHash) {
+      if ($saveHash && isset($step->hash) && $step->hash === $saveHash) {
         $saveInPast = TRUE;
       }
 
@@ -232,23 +241,23 @@ class LogsPanel extends IslandPluginBase {
    *
    * @param int $index
    *   The row index.
-   * @param array $step
+   * @param \Drupal\display_builder\HistoryStep $step
    *   The step data containing time and log message.
    *
    * @return array
    *   A renderable array representing a table row.
    */
-  private function buildRow(int $index, array $step): array {
-    $user = !empty($step['user']) ? $this->entityTypeManager->getStorage('user')->load($step['user']) : NULL;
+  private function buildRow(int $index, HistoryStep $step): array {
+    $user = !empty($step->user) ? $this->entityTypeManager->getStorage('user')->load($step->user) : NULL;
 
     return [
-      'hash' => $step['hash'] ?? '',
+      'hash' => $step->hash ?? '',
       'data' => [
         (string) $index,
         '',
-        $step['time'] ? DisplayBuilderHelpers::formatTime($this->dateFormatter, $step['time']) : NULL,
+        $step->time ? DisplayBuilderHelpers::formatTime($this->dateFormatter, $step->time) : NULL,
         $user ? $user->getDisplayName() : NULL,
-        $step['log'] ?? '',
+        $step->log ?? '',
       ],
       'style' => ($index === 0) ? 'font-weight: bold;' : '',
     ];

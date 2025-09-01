@@ -237,6 +237,10 @@ trait RenderableBuilderTrait {
     if (empty(\trim((string) $label))) {
       $id = \uniqid();
     }
+    elseif (\is_numeric($label)) {
+      // For example, undo/redo buttons.
+      $id = \uniqid();
+    }
     else {
       $id = Html::getUniqueId((string) $label);
     }
