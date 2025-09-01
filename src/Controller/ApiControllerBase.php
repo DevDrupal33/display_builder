@@ -116,6 +116,7 @@ abstract class ApiControllerBase extends ControllerBase {
     }
 
     $state = [
+      'username' => (string) $this->currentUser()->getDisplayName(),
       'sessionId' => $this->session->getId(),
       'timestamp' => $this->time->getRequestTime(),
       // instanceId here is the entry in the State API (so the equivalent of
