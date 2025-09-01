@@ -6,15 +6,16 @@ namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\display_builder\Entity\DisplayBuilder;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\user\Entity\Role;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Test the DisplayBuilder class.
+ * Test the DisplayBuilder class.
  *
  * @internal
  */
+#[CoversClass('\Drupal\display_builder\Entity\DisplayBuilder')]
 #[CoversClass('\Drupal\display_builder\Entity\DisplayBuilder')]
 #[Group('display_builder')]
 final class DisplayBuilderTest extends KernelTestBase {
@@ -113,7 +114,7 @@ final class DisplayBuilderTest extends KernelTestBase {
   }
 
   /**
-   * Tests the ::getIslandConfigurations ::setIslandConfiguration ::getIslandEnabled method.
+   * Tests islands managment.
    */
   public function testIslandConfiguration(): void {
     $islandId = 'test_island_view';
@@ -196,7 +197,7 @@ final class DisplayBuilderTest extends KernelTestBase {
   }
 
   /**
-   * Tests ::getRoles method.
+   * Test the getRoles() method.
    */
   public function testGetRoles(): void {
     $displayBuilder = DisplayBuilder::create([
@@ -219,7 +220,7 @@ final class DisplayBuilderTest extends KernelTestBase {
   }
 
   /**
-   * Test the ::toUrl method.
+   * Test the toUrl() method.
    */
   public function testToUrlEditPluginForm(): void {
     $displayBuilder = DisplayBuilder::create([
@@ -234,7 +235,7 @@ final class DisplayBuilderTest extends KernelTestBase {
   }
 
   /**
-   * Test the ::getLibrary andd ::isDebugModeActivated method.
+   * Test the library and debug mode.
    */
   public function testGetLibraryAndDebug(): void {
     $displayBuilder = DisplayBuilder::create([
@@ -247,4 +248,5 @@ final class DisplayBuilderTest extends KernelTestBase {
     self::assertSame('cdn', $displayBuilder->getLibrary());
     self::assertTrue($displayBuilder->isDebugModeActivated());
   }
+
 }

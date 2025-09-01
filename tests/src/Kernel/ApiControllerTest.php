@@ -7,6 +7,7 @@ namespace Drupal\Tests\display_builder\Kernel;
 use Drupal\Core\Render\HtmlResponse;
 use Drupal\display_builder\Controller\ApiController;
 use Drupal\display_builder\Entity\Instance;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -32,13 +33,19 @@ final class ApiControllerTest extends KernelTestBase {
     'display_builder_test',
   ];
 
+  /**
+   * The controller to test.
+   */
   protected ApiController $controller;
 
   /**
-   * @var \Drupal\display_builder\Entity\Instance
+   * The builder instance entity.
    */
-  protected $instance;
+  protected InstanceInterface $instance;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -58,6 +65,9 @@ final class ApiControllerTest extends KernelTestBase {
     $this->controller = $this->container->get('class_resolver')->getInstanceFromDefinition(ApiController::class);
   }
 
+  /**
+   * Test the attachToRoot() method.
+   */
   public function testAttachToRoot(): void {
     // 1. Test with missing content (should return error message).
     $request = Request::create('/api/display-builder/test_instance', 'POST', []);
@@ -74,26 +84,13 @@ final class ApiControllerTest extends KernelTestBase {
     self::assertInstanceOf(HtmlResponse::class, $response);
     self::assertStringContainsString('failed', $response->getContent());
 
-    // 3. Test with a valid instance_id.
-    // $this->builder->set('foo', ['bar']);
-    // $request = Request::create('/api/display-builder/test_instance', 'POST', [
-    //   'instance_id' => 'test_instance',
-    //   'position' => 0,
-    // ]);
-    // $response = $this->controller->attachToRoot($request, $this->instance);
-    // self::assertInstanceOf(HtmlResponse::class, $response);
-    // self::assertNotEmpty($response->getContent());
-
-    // 4. Optionally, test with source_id if your builder supports it.
-    // $request = Request::create('/api/display-builder/test_instance', 'POST', [
-    //   'source_id' => 'some_source',
-    //   'source' => json_encode(['foo' => 'bar']),
-    //   'position' => 0,
-    // ]);
-    // $response = $this->controller->attachToRoot($request, $this->instance);
-    // $this->assertInstanceOf(HtmlResponse::class, $response);
+    // @todo test with valid source_id, preset_id
+    self::markTestIncomplete();
   }
 
+  /**
+   * Test the attachToSlot() method.
+   */
   public function testAttachToSlot(): void {
     $request = Request::create('/api/display-builder/test_builder/instance/foo/slot1', 'POST', [
       'instance_id' => 'foo',
@@ -103,41 +100,95 @@ final class ApiControllerTest extends KernelTestBase {
     self::assertInstanceOf(HtmlResponse::class, $response);
   }
 
+  /**
+   * Test the getInstance() method.
+   */
   public function testGetInstance(): void {
-    $request = Request::create('/api/display-builder/test_builder/instance/foo', 'GET');
+    // phpcs:disable
+    // $request = Request::create('/api/display-builder/test_builder/instance/foo', 'GET');
 
     // We have to set profile to state manager for now.
-    $this->instance->setRuntimeProfileId('test');
-    $this->instance->save();
-
-    // dump($this->instance->getProfile());
-    // $this->instance->setRuntimeData(['foo' => 'bar']);
-    // $result = $this->controller->getInstance($request, $this->instance, 'foo');
-    // self::assertIsArray($result);
+    // $this->instance->setRuntimeProfileId('test');
+    // $this->instance->save();
+    // phpcs:enable
+    self::markTestIncomplete();
   }
 
-  // public function testDeleteInstance(): void {
-  //   $request = Request::create('/api/display-builder/test_builder/instance/foo', 'DELETE');
-  //   $response = $this->controller->deleteInstance($request, $this->instance, 'foo');
-  //   self::assertInstanceOf(HtmlResponse::class, $response);
-  // }
+  /**
+   * Test the updateInstance() method.
+   */
+  public function testUpdateInstance(): void {
+    self::markTestIncomplete();
+  }
 
-  // public function testUpdateInstance(): void {
-  //   $request = Request::create('/api/display-builder/test_builder/instance/foo', 'POST', [
-  //     'form_id' => 'test_form',
-  //     // Add other required form data here.
-  //   ]);
-  //   $result = $this->controller->updateInstance($request, $this->instance, 'foo');
-  //   self::assertIsArray($result);
-  // }
+  /**
+   * Test the thirdPartySettingsUpdate() method.
+   */
+  public function testThirdPartySettingsUpdate(): void {
+    self::markTestIncomplete();
+  }
 
-  // public function testThirdPartySettingsUpdate(): void {
-  //   $request = Request::create('/api/display-builder/test_builder/instance/foo/settings/bar', 'PUT', [
-  //     'form_id' => 'test_form',
-  //     // Add other required form data here.
-  //   ]);
-  //   $response = $this->controller->thirdPartySettingsUpdate($request, $this->instance, 'foo', 'bar');
-  //   self::assertInstanceOf(HtmlResponse::class, $response);
-  // }
+  /**
+   * Test the pasteInstance() method.
+   */
+  public function testPasteInstance(): void {
+    self::markTestIncomplete();
+  }
+
+  /**
+   * Test the deleteInstance() method.
+   */
+  public function testDeleteInstance(): void {
+    self::markTestIncomplete();
+  }
+
+  /**
+   * Test the saveInstanceAsPreset() method.
+   */
+  public function testSaveInstanceAsPreset(): void {
+    self::markTestIncomplete();
+  }
+
+  /**
+   * Test the save() method.
+   */
+  public function testSave(): void {
+    self::markTestIncomplete();
+  }
+
+  /**
+   * Test the restore() method.
+   */
+  public function testRestore(): void {
+    self::markTestIncomplete();
+  }
+
+  /**
+   * Test the revert() method.
+   */
+  public function testRevert(): void {
+    self::markTestIncomplete();
+  }
+
+  /**
+   * Test the undo() method.
+   */
+  public function testUndo(): void {
+    self::markTestIncomplete();
+  }
+
+  /**
+   * Test the redo() method.
+   */
+  public function testRedo(): void {
+    self::markTestIncomplete();
+  }
+
+  /**
+   * Test the clear() method.
+   */
+  public function testClear(): void {
+    self::markTestIncomplete();
+  }
 
 }
