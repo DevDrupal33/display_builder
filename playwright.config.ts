@@ -77,7 +77,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Firefox'],
         deviceScaleFactor: 1,
-        viewport: { width: 1920, height: 1080 },
+        viewport: { width: 2560, height: 1440 },
       },
       dependencies: [ 'setup' ],
     },

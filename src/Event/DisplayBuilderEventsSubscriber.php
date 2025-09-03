@@ -159,6 +159,15 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
         continue;
       }
 
+      // Skip the island triggering the HTMX event. Useful to avoid swapping
+      // the content of an island which is already in the expected state.
+      // For examples, if we move an instance in Builder, Layers or Tree
+      // panels, if we change the settings in InstanceForm.
+      // @see Drupal\display_builder\Controller\ApiControllerBase::islandId
+      if ($island_id === $event->getCurrentIslandId()) {
+        continue;
+      }
+
       if (!\method_exists($island, $method)) {
         continue;
       }

@@ -117,14 +117,14 @@ class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, 
    * {@inheritdoc}
    */
   public function onActive(string $builder_id, array $data): array {
-    return $this->reloadWithLocalData($builder_id, $data, NULL);
+    return $this->reloadWithLocalData($builder_id, $data);
   }
 
   /**
    * {@inheritdoc}
    */
   public function onDelete(string $builder_id, string $parent_id): array {
-    return $this->reloadWithLocalData($builder_id, [], NULL);
+    return $this->reloadWithLocalData($builder_id, []);
   }
 
   /**

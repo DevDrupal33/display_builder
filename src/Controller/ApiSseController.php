@@ -62,6 +62,8 @@ class ApiSseController extends ApiControllerBase {
    * @see https://symfony.com/blog/new-in-symfony-7-3-simpler-server-event-streaming
    */
   public function sse(InstanceInterface $builder): EventStreamResponse {
+    $this->builder = $builder;
+
     return new EventStreamResponse(function () use ($builder) {
       $sessionId = $this->session->getId();
       $collection = $this->sharedTempStoreFactory->get($this::SSE_COLLECTION);
@@ -110,9 +112,7 @@ class ApiSseController extends ApiControllerBase {
         // updated.
         $event = $this->createEventWithEnabledIsland(
           DisplayBuilderEvents::ON_HISTORY_CHANGE,
-          $builder,
           $builder->getCurrentState(),
-          NULL,
           NULL,
           NULL,
         );

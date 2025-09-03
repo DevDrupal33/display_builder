@@ -1,0 +1,3 @@
+- 'tooltip "label: Bar Foo Click me"':
+  - 'heading "label: Bar" [level=5]'
+  - button "Click me"

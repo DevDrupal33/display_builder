@@ -210,7 +210,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * {@inheritdoc}
    */
-  public function onUpdate(string $builder_id, string $instance_id, ?string $current_island_id): array {
+  public function onUpdate(string $builder_id, string $instance_id): array {
     return [];
   }
 
@@ -315,20 +315,18 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    *   The builder ID.
    * @param array $data
    *   The local data array to use for building the island.
-   * @param string|null $current_island_id
-   *   Optional current island ID which trigger action.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  protected function reloadWithLocalData(string $builder_id, array $data, ?string $current_island_id): array {
+  protected function reloadWithLocalData(string $builder_id, array $data): array {
     // @todo pass \Drupal\display_builder\InstanceInterface object in
     // parameters instead of loading again.
     /** @var \Drupal\display_builder\InstanceInterface $builder */
     $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
 
     return $this->addOutOfBand(
-      $this->build($builder, $data, ['current_island_id' => $current_island_id]),
+      $this->build($builder, $data, []),
       '#' . $this->getHtmlId($builder_id),
       'innerHTML'
     );

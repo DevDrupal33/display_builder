@@ -201,7 +201,7 @@ class Collaboration extends IslandPluginBase implements PluginFormInterface {
   /**
    * {@inheritdoc}
    */
-  public function onUpdate(string $builder_id, string $instance_id, ?string $current_island_id): array {
+  public function onUpdate(string $builder_id, string $instance_id): array {
     return $this->rebuild($builder_id);
   }
 

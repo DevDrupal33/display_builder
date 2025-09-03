@@ -81,9 +81,8 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
   public function buildForm(array &$form, FormStateInterface $form_state): void {
     try {
       $contexts = $form_state->getBuildInfo()['args'][1] ?? [];
-      $options = $form_state->getBuildInfo()['args'][2] ?? [];
 
-      $this->alterFormValues($form_state, $options);
+      $this->alterFormValues($form_state);
       $source = $this->sourceManager->getSource($this->data['_instance_id'], [], $this->data, $contexts);
       $form = $source ? $source->settingsForm([], $form_state) : [];
 
@@ -125,9 +124,9 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
       ],
     ];
 
-    $build = $this->htmxEvents->onInstanceFormChange($build, $this->builderId, $this->data['_instance_id']);
+    $build = $this->htmxEvents->onInstanceFormChange($build, $this->builderId, $this->getPluginId(), $this->data['_instance_id']);
 
-    return $this->htmxEvents->onInstanceUpdateButtonClick($build, $this->builderId, $this->data['_instance_id']);
+    return $this->htmxEvents->onInstanceUpdateButtonClick($build, $this->builderId, $this->getPluginId(), $this->data['_instance_id']);
   }
 
   /**
@@ -148,13 +147,13 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
    * {@inheritdoc}
    */
   public function onActive(string $builder_id, array $data): array {
-    return $this->reloadWithLocalData($builder_id, $data, NULL);
+    return $this->reloadWithLocalData($builder_id, $data);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onUpdate(string $builder_id, ?string $instance_id, ?string $current_island_id): array {
+  public function onUpdate(string $builder_id, string $instance_id): array {
     // Reload the form itself on update.
     // @todo pass \Drupal\display_builder\InstanceInterface object in
     // parameters instead of loading again.
@@ -162,14 +161,14 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
     $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
     $data = $builder->get($instance_id);
 
-    return $this->reloadWithLocalData($builder_id, $data, $current_island_id);
+    return $this->reloadWithLocalData($builder_id, $data);
   }
 
   /**
    * {@inheritdoc}
    */
   public function onDelete(string $builder_id, string $parent_id): array {
-    return $this->reloadWithLocalData($builder_id, [], NULL);
+    return $this->reloadWithLocalData($builder_id, []);
   }
 
   /**
@@ -184,10 +183,8 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
    *
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
-   * @param array $options
-   *   The data to inject in source plugin.
    */
-  protected function alterFormValues(FormStateInterface $form_state, array $options): void {
+  protected function alterFormValues(FormStateInterface $form_state): void {
     // When this is an Ajax CALL, we directly inject the data into the source
     // settings, but not during the rebuilt.
     $values = $form_state->getValues();
@@ -200,7 +197,7 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
 
     // When rebuilding the form, we need to inject the values into the source
     // settings.
-    if ($form_state->isRebuilding() && (!isset($options['current_island_id']) || $this->getPluginId() === $options['current_island_id'])) {
+    if ($form_state->isRebuilding()) {
       // Allow to get the posted values through ajax, and give them to the
       // source plugin through its settings (essential).
       if (isset($values['source'])) {
@@ -234,6 +231,35 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
     }
     $form['component']['#render_slots'] = FALSE;
     $form['component']['#component_id'] = $component_id;
+
+    $form = \array_merge(
+      ['info' => $this->getComponentMetadata($component_id)],
+      $form
+    );
+  }
+
+  /**
+   * Get component metadata.
+   *
+   * @param string $component_id
+   *   The component ID.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function getComponentMetadata(string $component_id): array {
+    $component = $this->sdcManager->find($component_id);
+    $build = [];
+
+    if ($description = $component->metadata->description) {
+      $build[] = [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $description,
+      ];
+    }
+
+    return $build;
   }
 
   /**

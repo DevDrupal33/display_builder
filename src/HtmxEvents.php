@@ -141,15 +141,18 @@ class HtmxEvents {
    *   The render array.
    * @param string $builder_id
    *   The builder id.
+   * @param string $island_id
+   *   The island initiating the event.
    *
    * @return array
    *   The render array.
    */
-  public function onRootDrop(array $build, string $builder_id): array {
+  public function onRootDrop(array $build, string $builder_id, string $island_id): array {
     $url = new Url(
       'display_builder.api_root_attach',
       [
         'builder' => $builder_id,
+        'from' => $island_id,
       ]
     );
 
@@ -163,6 +166,8 @@ class HtmxEvents {
    *   The render array.
    * @param string $builder_id
    *   The builder id.
+   * @param string $island_id
+   *   The island initiating the event.
    * @param string $instance_id
    *   The instance id.
    * @param string $slot
@@ -171,13 +176,14 @@ class HtmxEvents {
    * @return array
    *   The render array.
    */
-  public function onSlotDrop(array $build, string $builder_id, string $instance_id, string $slot): array {
+  public function onSlotDrop(array $build, string $builder_id, string $island_id, string $instance_id, string $slot): array {
     $url = new Url(
       'display_builder.api_slot_attach',
       [
         'builder' => $builder_id,
         'instance_id' => $instance_id,
         'slot' => $slot,
+        'from' => $island_id,
       ]
     );
 
@@ -233,18 +239,21 @@ class HtmxEvents {
    *   The render array.
    * @param string $builder_id
    *   The builder id.
+   * @param string $island_id
+   *   The island initiating the event.
    * @param string $instance_id
    *   The instance id.
    *
    * @return array
    *   The render array.
    */
-  public function onInstanceFormChange(array $build, string $builder_id, string $instance_id): array {
+  public function onInstanceFormChange(array $build, string $builder_id, string $island_id, string $instance_id): array {
     $url = new Url(
       'display_builder.api_instance_update',
       [
         'builder' => $builder_id,
         'instance_id' => $instance_id,
+        'from' => $island_id,
       ]
     );
 
@@ -266,13 +275,15 @@ class HtmxEvents {
    *   The render array.
    * @param string $builder_id
    *   The builder id.
+   * @param string $island_id
+   *   The island initiating the event.
    * @param string $instance_id
    *   The instance id.
    *
    * @return array
    *   The render array.
    */
-  public function onInstanceUpdateButtonClick(array $build, string $builder_id, string $instance_id): array {
+  public function onInstanceUpdateButtonClick(array $build, string $builder_id, string $island_id, string $instance_id): array {
     if (!isset($build['update']) || !isset($build['source']) || !isset($build['source']['#id'])) {
       return $build;
     }
@@ -281,6 +292,7 @@ class HtmxEvents {
       [
         'builder' => $builder_id,
         'instance_id' => $instance_id,
+        'from' => $island_id,
       ]
     );
 

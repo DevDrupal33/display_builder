@@ -18,15 +18,15 @@ islands:
     weight: -8
   builder:
     enable: true
-    weight: -8
+    weight: -7
     region: main
   layers:
     enable: true
-    weight: -7
+    weight: -6
     region: main
   preview:
     enable: true
-    weight: -6
+    weight: -5
     region: main
   library:
     enable: true
@@ -37,8 +37,8 @@ islands:
     weight: -9
     region: sidebar
   logs:
-    enable: false
-    weight: -5
+    enable: true
+    weight: -8
     region: sidebar
   history:
     display_clear_button: false
@@ -58,22 +58,19 @@ islands:
     weight: -6
   theme_mode:
     enable: false
-    weight: -5
+    weight: -3
   instance_form:
     enable: true
-    weight: 1
+    weight: -10
   ui_styles:
     enable: true
-    weight: 2
+    weight: -9
   ui_skins:
     enable: true
-    weight: 3
+    weight: -8
   visibility_conditions:
-    enable: false
-    weight: 4
-  info:
     enable: true
-    weight: 5
+    weight: -7
   menu:
     enable: true
     weight: -10
@@ -85,5 +82,8 @@ islands:
     weight: -8
   collaboration:
     enable: false
-    weight: -3
+    weight: -5
+  viewport:
+    enable: false
+    weight: -4
 weight: 0

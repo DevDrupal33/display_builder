@@ -20,20 +20,20 @@ islands:
     image_field: user_picture
     image_style: thumbnail
     enable: false
-    weight: -5
+    weight: -3
   history:
     display_clear_button: true
     enable: true
     weight: -9
   keyboard_help:
     enable: true
-    weight: -4
+    weight: -5
   theme_mode:
-    enable: false
-    weight: -3
+    enable: true
+    weight: -4
   test_island_button:
     enable: false
-    weight: 0
+    weight: -2
   info:
     enable: true
     weight: -7
@@ -44,10 +44,10 @@ islands:
     enable: true
     weight: -10
   ui_skins:
-    enable: false
+    enable: true
     weight: -8
   visibility_conditions:
-    enable: false
+    enable: true
     weight: -6
   test_island_contextual:
     enable: false
@@ -92,7 +92,7 @@ islands:
     weight: 0
   preview:
     enable: true
-    weight: -7
+    weight: -5
     region: main
   library:
     enable: true
@@ -100,23 +100,23 @@ islands:
     region: sidebar
   logs:
     enable: true
-    weight: -8
-    region: main
+    weight: -9
+    region: sidebar
   builder:
     enable: true
-    weight: -9
+    weight: -7
     region: main
   layers:
-    enable: false
+    enable: true
     weight: -6
     region: main
   tree:
-    enable: false
-    weight: -5
-    region: main
+    enable: true
+    weight: -8
+    region: sidebar
   test_island_view:
     enable: false
-    weight: -2
+    weight: -4
     region: main
     string_value: test
     bool_value: 0
@@ -128,4 +128,21 @@ islands:
     format: default
     enable: true
     weight: -6
+  operation:
+    enable: false
+    weight: 0
+  reset:
+    enable: false
+    weight: 0
+  menu_debug:
+    enable: false
+    weight: 0
+  index_debug:
+    enable: false
+    weight: -3
+    region: main
+  state_debug:
+    enable: false
+    weight: -2
+    region: main
 weight: 0

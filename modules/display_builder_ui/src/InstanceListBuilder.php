@@ -104,7 +104,7 @@ final class InstanceListBuilder extends EntityListBuilder {
     /** @var \Drupal\display_builder\InstanceInterface $instance */
     $instance_id = (string) $instance->id();
     $row = [];
-    $url = Url::fromRoute('display_builder_dev_tools.view', ['instance_id' => $instance_id]);
+    $url = Url::fromRoute('entity.display_builder.edit_form', ['display_builder' => $instance_id]);
     $type = $this->t('Other');
 
     foreach ($this->contextClasses as [$class, $label]) {
@@ -140,7 +140,7 @@ final class InstanceListBuilder extends EntityListBuilder {
     $classContext = '';
 
     foreach ($this->contextClasses as $type => [$class]) {
-      if (\str_starts_with($entity->id(), $type)) {
+      if (\str_starts_with((string) $entity->id(), $type)) {
         $classContext = $class;
         $links['manage'] = [
           'title' => $this->t('Build display'),

@@ -39,6 +39,24 @@ abstract class ApiControllerBase extends ControllerBase {
   ];
 
   /**
+   * The Display Builder instance triggering the action.
+   */
+  protected InstanceInterface $builder;
+
+  /**
+   * Plugin ID of the island triggering the HTMX event.
+   *
+   * If not NULL, the island will be skipped from the event dispatch. Useful to
+   * avoid swapping the content of an island which is already in the expected
+   * state. For examples, if we move an instance in Builder, Layers or Tree
+   * panels, if we change the settings in InstanceForm.
+   *
+   * @see \Drupal\display_builder\Event\DisplayBuilderEventsSubscriber::dispatchToIslands()
+   * @see \Drupal\display_builder\HtmxEvents
+   */
+  protected ?string $islandId = NULL;
+
+  /**
    * The lazy loaded display builder.
    */
   protected ?DisplayBuilderInterface $displayBuilder = NULL;
@@ -59,29 +77,25 @@ abstract class ApiControllerBase extends ControllerBase {
    *
    * @param string $event_id
    *   The event ID.
-   * @param \Drupal\display_builder\InstanceInterface $builder
-   *   Display builder instance.
    * @param array|null $data
    *   The data.
    * @param string|null $instance_id
    *   Optional instance ID.
    * @param string|null $parent_id
    *   Optional parent ID.
-   * @param string|null $current_island_id
-   *   Current island ID which trigger action.
    *
    * @return \Drupal\display_builder\Event\DisplayBuilderEvent
    *   The event.
    */
-  protected function createEventWithEnabledIsland($event_id, InstanceInterface $builder, $data, $instance_id, $parent_id, $current_island_id): DisplayBuilderEvent {
-    $builder_id = (string) $builder->id();
+  protected function createEventWithEnabledIsland($event_id, $data, $instance_id, $parent_id): DisplayBuilderEvent {
+    $builder_id = (string) $this->builder->id();
     $key = \sprintf('db_%s_island_enable', $builder_id);
     $island_configuration_key = \sprintf('db_%s_island_configuration', $builder_id);
     $island_enabled = $this->memoryCache->get($key);
     $island_configuration = $this->memoryCache->get($island_configuration_key);
 
     if ($island_configuration === FALSE) {
-      $island_configuration = $builder->getProfile()->getIslandConfigurations();
+      $island_configuration = $this->builder->getProfile()->getIslandConfigurations();
       $this->memoryCache->set($island_configuration_key, $island_configuration);
     }
     else {
@@ -89,14 +103,14 @@ abstract class ApiControllerBase extends ControllerBase {
     }
 
     if ($island_enabled === FALSE) {
-      $island_enabled = $builder->getProfile()->getIslandEnabled();
+      $island_enabled = $this->builder->getProfile()->getIslandEnabled();
       $this->memoryCache->set($key, $island_enabled);
     }
     else {
       $island_enabled = $island_enabled->data;
     }
 
-    $event = new DisplayBuilderEvent($builder_id, $island_enabled, $island_configuration, $data, $instance_id, $parent_id, $current_island_id);
+    $event = new DisplayBuilderEvent($builder_id, $island_enabled, $island_configuration, $data, $instance_id, $parent_id, $this->islandId);
     $this->eventDispatcher->dispatch($event, $event_id);
 
     return $event;
@@ -107,10 +121,8 @@ abstract class ApiControllerBase extends ControllerBase {
    *
    * @param string $event_id
    *   The event ID.
-   * @param \Drupal\display_builder\InstanceInterface $builder
-   *   Display builder instance.
    */
-  protected function saveSseData(string $event_id, InstanceInterface $builder): void {
+  protected function saveSseData(string $event_id): void {
     if (!\in_array($event_id, $this::SSE_EVENTS, TRUE)) {
       return;
     }
@@ -122,10 +134,10 @@ abstract class ApiControllerBase extends ControllerBase {
       // builderId in the State Manager), not the specific node we are
       // manipulating in the sources data tree.
       // @see https://www.drupal.org/project/display_builder/issues/3538360
-      'instanceId' => (string) $builder->id(),
+      'instanceId' => (string) $this->builder->id(),
     ];
     $collection = $this->sharedTempStoreFactory->get($this::SSE_COLLECTION);
-    $collection->set(\sprintf('%s_latest', (string) $builder->id()), $state);
+    $collection->set(\sprintf('%s_latest', (string) $this->builder->id()), $state);
   }
 
 }

@@ -1,2 +1,2 @@
-- 'heading "label: none" [level=5]'
+- 'heading "label: I am a test" [level=2]'
 - button "Click me"

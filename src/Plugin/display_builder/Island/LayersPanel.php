@@ -101,7 +101,7 @@ class LayersPanel extends BuilderPanel {
         $sources = $data['source']['component']['slots'][$slot_id]['sources'];
         $dropzone['#slots']['content'] = $this->digFromSlot($builder_id, $sources);
       }
-      $dropzone = $this->htmxEvents->onSlotDrop($dropzone, $builder_id, $instance_id, $slot_id);
+      $dropzone = $this->htmxEvents->onSlotDrop($dropzone, $builder_id, $this->getPluginID(), $instance_id, $slot_id);
       $slots[] = [
         [
           '#plain_text' => $definition['title'],

@@ -84,7 +84,7 @@ class BuilderPanel extends IslandPluginBase {
       ],
     ];
 
-    return $this->htmxEvents->onRootDrop($build, $builder_id);
+    return $this->htmxEvents->onRootDrop($build, $builder_id, $this->getPluginID());
   }
 
   /**
@@ -118,7 +118,7 @@ class BuilderPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function onUpdate(string $builder_id, string $instance_id, ?string $current_island_id): array {
+  public function onUpdate(string $builder_id, string $instance_id): array {
     return $this->replaceInstance($builder_id, $instance_id);
   }
 
@@ -389,7 +389,7 @@ class BuilderPanel extends IslandPluginBase {
       $dropzone['#slots']['content'] = $this->digFromSlot($builder_id, $sources);
     }
 
-    return $this->htmxEvents->onSlotDrop($dropzone, $builder_id, $instance_id, $slot_id);
+    return $this->htmxEvents->onSlotDrop($dropzone, $builder_id, $this->getPluginID(), $instance_id, $slot_id);
   }
 
 }

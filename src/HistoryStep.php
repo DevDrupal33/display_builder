@@ -28,13 +28,14 @@ class HistoryStep {
    */
   public function __construct(
     #[Assert\Type('list')]
+    // Writable because of Instance::postCreate().
     public array $data,
-    public int $hash,
-    public null|FormattableMarkup|string $log,
+    public readonly int $hash,
+    public readonly null|FormattableMarkup|string $log,
     #[Assert\Positive]
-    public int $time,
+    public readonly int $time,
     #[Assert\PositiveOrZero]
-    public ?int $user,
+    public readonly ?int $user,
   ) {}
 
 }
