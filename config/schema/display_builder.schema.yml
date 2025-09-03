@@ -22,12 +22,15 @@ display_builder.profile.*:
       type: sequence
       label: 'Islands'
       sequence:
-        type: display_builder.islands.[%key]
+        type: display_builder.island.[%key]
     weight:
       type: weight
       label: Weight
 
-display_builder.islands.*:
+display_builder.island.*:
+  type: display_builder.island
+
+display_builder.island:
   type: mapping
   label: 'Island configuration'
   mapping:
@@ -41,20 +44,14 @@ display_builder.islands.*:
       type: machine_name
       label: Region
 
-display_builder.islands.history:
-  type: mapping
+display_builder.island.history:
+  type: display_builder.island
   mapping:
     display_clear_button:
       type: boolean
-    enable:
-      type: boolean
-      label: Enabled
-    weight:
-      type: weight
-      label: Weight
 
-display_builder.islands.component_library:
-  type: mapping
+display_builder.island.component_library:
+  type: display_builder.island
   mapping:
     providers:
       type: sequence
@@ -72,43 +69,31 @@ display_builder.islands.component_library:
       type: boolean
     show_mosaic:
       type: boolean
-    enable:
-      type: boolean
-      label: Enabled
-    weight:
-      type: weight
-      label: Weight
 
-display_builder.islands.block_library:
-  type: mapping
+display_builder.island.block_library:
+  type: display_builder.island
   mapping:
     providers:
       type: sequence
       sequence:
         type: string
-    enable:
-      type: boolean
-      label: Enabled
-    weight:
-      type: weight
-      label: Weight
 
-display_builder.islands.collaboration:
-  type: mapping
+display_builder.island.collaboration:
+  type: display_builder.island
   mapping:
     image_field:
       type: machine_name
     image_style:
       type: machine_name
-    enable:
-      type: boolean
-      label: Enabled
-    weight:
-      type: weight
-      label: Weight
 
-display_builder.islands.viewport:
-  type: mapping
+display_builder.island.content_edit:
+  type: display_builder.island
+  mapping:
+    form_mode:
+      type: machine_name
+
+display_builder.island.viewport:
+  type: display_builder.island
   mapping:
     providers:
       type: sequence
@@ -117,12 +102,6 @@ display_builder.islands.viewport:
     format:
       type: string
       label: Format
-    enable:
-      type: boolean
-      label: Enabled
-    weight:
-      type: weight
-      label: Weight
 
 display_builder.pattern_preset.*:
   type: config_entity

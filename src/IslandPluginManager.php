@@ -79,7 +79,7 @@ final class IslandPluginManager extends DefaultPluginManager implements IslandPl
    * @param array $configuration
    *   (Optional) An array of configuration.
    *
-   * @return array
+   * @return \Drupal\display_builder\IslandInterface[]
    *   A list of fully configured plugin instances.
    */
   public function createInstances(array $definitions, array $contexts = [], array $configuration = []): array {

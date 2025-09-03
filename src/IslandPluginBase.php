@@ -173,6 +173,10 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
       return [];
     }
 
+    if (!$this->instanceId) {
+      return $element;
+    }
+
     $definition = $this->getPluginDefinition();
     $island_id = $definition instanceof PluginDefinitionInterface ? $definition->id() : ($definition['id'] ?? '');
 
