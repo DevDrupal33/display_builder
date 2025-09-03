@@ -2,17 +2,18 @@
 - text: I am a test token in a slot in a Page Layout!
 - button "Click me"
 - img "Home"
+- text: Drupal
 - heading "[Page] Title placeholder" [level=1]
 - list:
   - listitem:
     - link "My account":
-      - /url: /user
+      - /url: /web/user
 - navigation "Breadcrumb":
   - heading "Breadcrumb" [level=2]
   - list:
     - listitem:
       - link "Home":
-        - /url: /
+        - /url: /web/
 - heading "[Page] Content placeholder" [level=2]
 - text: Powered by
 - link "Drupal":
