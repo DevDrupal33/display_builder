@@ -7,11 +7,11 @@ export default {
 
   contentTypesList: 'admin/structure/types',
   contentTypesAdd: 'admin/structure/types/add',
-  contentTypesEdit: '/admin/structure/types/manage/{content_type}',
-  contentTypesFields: '/admin/structure/types/manage/{content_type}/fields',
-  contentTypesFormDisplay: '/admin/structure/types/manage/{content_type}/form-display',
-  contentTypesDisplay: '/admin/structure/types/manage/{content_type}/display',
-  contentTypesPermissions: '/admin/structure/types/manage/{content_type}/permissions',
+  contentTypesEdit: 'admin/structure/types/manage/{content_type}',
+  contentTypesFields: 'admin/structure/types/manage/{content_type}/fields',
+  contentTypesFormDisplay: 'admin/structure/types/manage/{content_type}/form-display',
+  contentTypesDisplay: 'admin/structure/types/manage/{content_type}/display',
+  contentTypesPermissions: 'admin/structure/types/manage/{content_type}/permissions',
 
   contentList: 'admin/content',
   contentAdd: 'node/add',

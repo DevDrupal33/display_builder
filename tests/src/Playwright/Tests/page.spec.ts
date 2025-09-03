@@ -24,6 +24,7 @@ test(
     await page.getByLabel('Label').fill(name)
     await page.getByLabel('Profile', { exact: true }).selectOption('test')
     // Fill some conditions.
+    await page.getByRole('tab', { name: 'Pages' }).click()
     await page.getByRole('textbox', { name: 'Pages' }).fill(`/test-${testName}`)
     await page.getByRole('button', { name: 'Save' }).click()
     await drupal.expectMessage('Created new page layout')
