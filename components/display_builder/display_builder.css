@@ -1,13 +1,7 @@
 :root {
   --db-background-color: white;
   --db-text-color: black;
-  --db-background-image: repeating-linear-gradient(
-    45deg,
-    oklch(100% 0 0),
-    oklch(100% 0 0) 13px,
-    var(--sl-color-neutral-100) 13px,
-    var(--sl-color-neutral-100) 14px
-  );
+  --db-background-image: repeating-linear-gradient(45deg, oklch(100% 0 0), oklch(100% 0 0) 13px, var(--sl-color-neutral-100) 13px, var(--sl-color-neutral-100) 14px);
   --db-background-size: 40px 40px;
   --db-toolbar-height: 75px;
   /* Drupal admin toolbar is 502 */

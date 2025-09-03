@@ -59,6 +59,7 @@ nav:
       - With source plugins: "source-plugins.md"
   - Contributing: "contributing.md"
   - Frequently asked questions: "faq.md"
+  - Tests: "tests.md"
 
 plugins:
   - search

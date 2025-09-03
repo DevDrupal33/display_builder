@@ -26,7 +26,7 @@ npx playwright install --with-deps
 
 Copy `.env.dist` to `.env`. No need to change anything.
 
-Uncomment `webServer` in [playwright.config.ts](./playwright.config.ts), then run:
+Uncomment `webServer` in `playwright.config.ts`, then run:
 
 ```sh
 npm run test

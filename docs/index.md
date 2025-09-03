@@ -15,7 +15,7 @@ Display Builder provides sub-modules for each Drupal Core's display building nee
 
 - [Entity view](entity-displays.md) and [entity view overrides](entity-displays-overrides.md) (`display_builder_entity_view`)
 - [Page layout](page-layout.md) (`display_builder_page_layout`)
-- [Views](with-views) (`display_builder_views`)
+- [Views](with-views.md) (`display_builder_views`)
 
 ## Maintainers
 

@@ -2,7 +2,7 @@
 
 ## Activate
 
-You need `display_builder_entity_view` module and `ui_patterns_field` sub-module form [UI Patterns 2](www.drupal.org/project/ui_patterns) project.
+You need `display_builder_entity_view` module and `ui_patterns_field` sub-module form [UI Patterns 2](https://www.drupal.org/project/ui_patterns) project.
 
 Contrary to Layout Builder, there is no "Allow each content item to have its layout customize" checkbox in the "Manage display" and no "magic" field added to the content bundle.
 

@@ -11,12 +11,8 @@
 /* @todo add instance form when possible, currently only apply to styles and
  skins because instance form do not have an easy to use markup */
 /* .display-builder .db-form:has(.shoelace-tabs [active][data-target$="instance_form"]) .db-search-contextual, */
-.display-builder
-  .db-form:has(.shoelace-tabs [active][data-target$="ui_styles"])
-  .db-search-contextual,
-.display-builder
-  .db-form:has(.shoelace-tabs [active][data-target$="ui_skins"])
-  .db-search-contextual {
+.display-builder .db-form:has(.shoelace-tabs [active][data-target$="ui_styles"]) .db-search-contextual,
+.display-builder .db-form:has(.shoelace-tabs [active][data-target$="ui_skins"]) .db-search-contextual {
   display: block;
 }
 .db-search-contextual {
@@ -30,22 +26,10 @@
   border: 1px solid var(--sl-color-success-600);
   background-color: var(--sl-color-success-200);
 }
-.db-form-search-found
-  .db-island-ui_styles
-  details
-  > fieldset:not(.db-element-search-in),
-.db-form-search-found
-  .db-island-ui_styles
-  details
-  > div:not(.db-element-search-in),
-.db-form-search-found
-  .db-island-ui_skins
-  details
-  > fieldset:not(.db-element-search-in),
-.db-form-search-found
-  .db-island-ui_skins
-  details
-  > div:not(.db-element-search-in) {
+.db-form-search-found .db-island-ui_styles details > fieldset:not(.db-element-search-in),
+.db-form-search-found .db-island-ui_styles details > div:not(.db-element-search-in),
+.db-form-search-found .db-island-ui_skins details > fieldset:not(.db-element-search-in),
+.db-form-search-found .db-island-ui_skins details > div:not(.db-element-search-in) {
   display: none;
 }
 .db-form-search-found .db-island-ui_styles .db-element-search-in,
