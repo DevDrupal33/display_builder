@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_entity_view\Entity;
 
-use Drupal\Component\Utility\SortArray;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
@@ -31,7 +30,7 @@ trait EntityViewDisplayTrait {
    * @return $this
    *   The current instance.
    *
-   * @see Drupal\Core\Entity\Display\EntityViewDisplayInterface
+   * @see \Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function calculateDependencies(): self {
     parent::calculateDependencies();
@@ -68,7 +67,7 @@ trait EntityViewDisplayTrait {
    * @return bool
    *   The display builder is enabled if there is a Display Builder entity.
    *
-   * @see Drupal\display_builder_entity_view\DisplayBuilderEnabledInterface
+   * @see \Drupal\display_builder_entity_view\DisplayBuilderEnabledInterface
    */
   public function isDisplayBuilderEnabled(): bool {
     // Display Builder must not be enabled for the '_custom' view mode that is
@@ -89,7 +88,7 @@ trait EntityViewDisplayTrait {
    * @return bool
    *   TRUE if the display can be overridden, FALSE otherwise.
    *
-   * @see Drupal\Core\Entity\Display\EntityViewDisplayInterface
+   * @see \Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function onDependencyRemoval(array $dependencies): bool {
     $changed = parent::onDependencyRemoval($dependencies);
@@ -132,7 +131,7 @@ trait EntityViewDisplayTrait {
    * @return string
    *   The context requirement string.
    *
-   * @see Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\WithDisplayBuilderInterface
    */
   public static function getContextRequirement(): string {
     return 'entity';
@@ -141,7 +140,7 @@ trait EntityViewDisplayTrait {
   /**
    * {@inheritdoc}
    *
-   * @see Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\WithDisplayBuilderInterface
    */
   public static function checkInstanceId(string $instance_id): ?array {
     if (!\str_starts_with($instance_id, 'entity_view__')) {
@@ -182,7 +181,7 @@ trait EntityViewDisplayTrait {
    * @return \Drupal\Core\Url
    *   The url of the instance.
    *
-   * @see Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\WithDisplayBuilderInterface
    */
   public static function getUrlFromInstanceId(string $instance_id): Url {
     [, $entity, $bundle, $view_mode] = \explode('__', $instance_id);
@@ -203,7 +202,7 @@ trait EntityViewDisplayTrait {
    * @return string|null
    *   The field name used to store overridden displays, or NULL if not set.
    *
-   * @see Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
+   * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
    */
   public function getDisplayBuilderOverrideField(): ?string {
     return $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY);
@@ -215,7 +214,7 @@ trait EntityViewDisplayTrait {
    * @return \Drupal\display_builder\DisplayBuilderInterface|null
    *   The display builder override profile, or NULL if not set.
    *
-   * @see Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
+   * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
    */
   public function getDisplayBuilderOverrideProfile(): ?DisplayBuilderInterface {
     $display_builder_id = $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY);
@@ -233,7 +232,7 @@ trait EntityViewDisplayTrait {
    * @return bool
    *   TRUE if the display can be overridden, FALSE otherwise.
    *
-   * @see Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
+   * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
    */
   public function isDisplayBuilderOverridable(): bool {
     return !empty($this->getDisplayBuilderOverrideField())
@@ -246,7 +245,7 @@ trait EntityViewDisplayTrait {
    * @return \Drupal\display_builder\DisplayBuilderInterface|null
    *   The display builder instance, or NULL if not set.
    *
-   * @see Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\WithDisplayBuilderInterface
    */
   public function getDisplayBuilder(): ?DisplayBuilderInterface {
     $display_builder_id = $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY);
@@ -264,7 +263,7 @@ trait EntityViewDisplayTrait {
    * @return string|null
    *   The instance ID for the display builder, or NULL if the entity is new.
    *
-   * @see Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\WithDisplayBuilderInterface
    */
   public function getInstanceId(): ?string {
     // Usually an entity is new if no ID exists for it yet.
@@ -278,7 +277,7 @@ trait EntityViewDisplayTrait {
   /**
    * Initializes the display builder instance if it is missing.
    *
-   * @see Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\WithDisplayBuilderInterface
    */
   public function initInstanceIfMissing(): void {
     /** @var \Drupal\display_builder\InstanceStorage $storage */
@@ -301,7 +300,10 @@ trait EntityViewDisplayTrait {
     $sources = $this->getSources();
 
     if (empty($sources)) {
-      $sources = $this->convertManageDisplayData();
+      // initialImport() has two implementations:
+      // - EntityViewDisplay::initialImport()
+      // - LayoutBuilderEntityViewDisplay::initialImport()
+      $sources = $this->initialImport();
     }
 
     return $sources;
@@ -330,7 +332,7 @@ trait EntityViewDisplayTrait {
    * @return array
    *   The sources of the display builder.
    *
-   * @see Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\WithDisplayBuilderInterface
    */
   public function getSources(): array {
     return $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::SOURCES_PROPERTY, []);
@@ -339,7 +341,7 @@ trait EntityViewDisplayTrait {
   /**
    * Saves the sources of the display builder.
    *
-   * @see Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\WithDisplayBuilderInterface
    */
   public function saveSources(): void {
     $data = $this->getInstance()->getCurrentState();
@@ -355,7 +357,7 @@ trait EntityViewDisplayTrait {
    * @param bool $update
    *   Whether the entity is being updated.
    *
-   * @see Drupal\Core\Entity\Display\EntityViewDisplayInterface
+   * @see \Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE): void {
     if ($this->getDisplayBuilder()) {
@@ -368,7 +370,7 @@ trait EntityViewDisplayTrait {
   /**
    * Deletes the display builder instance if it exists.
    *
-   * @see Drupal\Core\Entity\Display\EntityViewDisplayInterface
+   * @see \Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function delete(): void {
     if ($instance = $this->getInstance()) {
@@ -387,7 +389,7 @@ trait EntityViewDisplayTrait {
    *   A renderable array for the entities, indexed by the same keys as the
    *   $entities array parameter.
    *
-   * @see Drupal\Core\Entity\Display\EntityViewDisplayInterface
+   * @see \Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function buildMultiple(array $entities): array {
     $build_list = parent::buildMultiple($entities);
@@ -436,9 +438,6 @@ trait EntityViewDisplayTrait {
 
       // We clear the display because we only want our renderable.
       $build_list[$id] = [];
-      // But we add an empty layout builder renderable to avoid breaking
-      // stuff.
-      $build_list[$id]['_layout_builder'][0]['content'] = [];
       // @see entity.html.twig
       $build_list[$id]['content'] = $this->buildSources($entity, $sources);
     }
@@ -526,69 +525,6 @@ trait EntityViewDisplayTrait {
     $entry['template'] = 'entity';
 
     return $entry;
-  }
-
-  /**
-   * Convert "Manage display" formatters to sources.
-   *
-   * @return array
-   *   List of UI Patterns sources.
-   */
-  private function convertManageDisplayData(): array {
-    $definitions = $this->entityFieldManager->getFieldDefinitions($this->getTargetEntityTypeId(), $this->getTargetBundle());
-    $sources = [];
-    $fields = $this->content;
-    \uasort($fields, [SortArray::class, 'sortByWeightElement']);
-
-    foreach ($fields as $field_id => $field) {
-      if (!isset($field['type'])) {
-        // Probably an extra field. We don't support them.
-        continue;
-      }
-
-      if (!$definitions[$field_id]->isDisplayConfigurable('view')) {
-        // Hidden from Manage Display.
-        continue;
-      }
-      $sources[] = $this->convertSingleField($field_id, $field);
-    }
-
-    return $sources;
-  }
-
-  /**
-   * Convert field formatter plugin data to a source.
-   *
-   * @param string $field_id
-   *   Field ID.
-   * @param array $data
-   *   Field formatter data.
-   *
-   * @return array
-   *   A single UI Patterns source.
-   */
-  private function convertSingleField(string $field_id, array $data): array {
-    $derivable_context = \implode(':', [
-      $this->getTargetEntityTypeId(),
-      $this->getTargetBundle(),
-      $field_id,
-    ]);
-    $source = [
-      'source_id' => 'field_formatter:' . $derivable_context,
-      'source' => $data,
-    ];
-
-    return [
-      'source_id' => 'entity_field',
-      'source' => [
-        'derivable_context' => 'field:' . $derivable_context,
-        'field:' . $derivable_context => [
-          'value' => [
-            'sources' => [$source],
-          ],
-        ],
-      ],
-    ];
   }
 
   /**

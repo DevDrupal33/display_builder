@@ -48,6 +48,8 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
 
   private const HIDE_SOURCE = [
     'component',
+    // Used only for imports from Manage Display and Layout Builder.
+    'extra_field',
   ];
 
   /**

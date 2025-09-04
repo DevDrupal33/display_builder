@@ -23,9 +23,8 @@ Slot sources specific to the Entity Display context will show up in the "Block L
 
 ![](images/entity-display-sources.webp)
 
-> 🚧 2025-07-01: "[Entity] ➜ [Field]" will be flatten. [#3529260](https://www.drupal.org/project/display_builder/issues/3529260)
+Display Builder is saving every state in the memory, but is not auto-saving to the configuration.
 
-Display Builder is saving every state in the memory, but is not auto-saving to the configuration.  
 You can manually save the current state in the configuration or restore the state currently saved in the configuration:
 
 ![](images/state-buttons.webp)

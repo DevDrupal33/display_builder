@@ -234,4 +234,15 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
    */
   public function restore(): void;
 
+  /**
+   * Get a hash for this data as uniq id reference.
+   *
+   * @param array $data
+   *   The data to generate uniq id for.
+   *
+   * @return int
+   *   The uniq id value.
+   */
+  public static function getUniqId(array $data): int;
+
 }

@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\display_builder\Entity\Instance;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -28,10 +29,16 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
   protected StateInterface $state;
 
   /**
+   * Current user.
+   */
+  protected AccountInterface $currentUser;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(EntityTypeInterface $entity_type, MemoryCacheInterface $memory_cache, StateInterface $state) {
+  public function __construct(EntityTypeInterface $entity_type, MemoryCacheInterface $memory_cache, StateInterface $state, AccountInterface $current_user) {
     $this->state = $state;
+    $this->currentUser = $current_user;
     parent::__construct($entity_type, $memory_cache);
   }
 
@@ -42,7 +49,8 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
     return new static(
       $entity_type,
       $container->get('entity.memory_cache'),
-      $container->get('state')
+      $container->get('state'),
+      $container->get('current_user')
     );
   }
 
@@ -50,16 +58,23 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
    * {@inheritdoc}
    */
   public function createFromImplementation(WithDisplayBuilderInterface $implementation): EntityInterface {
+    $data = $implementation->getInitialSources();
+    $present = new HistoryStep(
+      $data,
+      Instance::getUniqId($data),
+      'Initialization of the display builder.',
+      \time(),
+      (int) $this->currentUser->id(),
+    );
     $data = [
       'id' => $implementation->getInstanceId(),
       'profileId' => $implementation->getDisplayBuilder()->id(),
       'contexts' => $implementation->getInitialContext(),
+      'present' => $present,
     ];
 
-    $present = $implementation->getInitialSources();
     /** @var \Drupal\display_builder\InstanceInterface $instance */
     $instance = $this->create($data);
-    $instance->setNewPresent($present, 'Initialization of the display builder.');
 
     // If we get the data directly from config or content, the data is
     // considered as already saved.

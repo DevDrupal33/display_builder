@@ -149,7 +149,7 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
    * {@inheritdoc}
    */
   public static function getContextRequirement(): string {
-    // @see Drupal\ui_patterns_views\Plugin\UiPatterns\Source\ViewRowsSource.
+    // @see \Drupal\ui_patterns_views\Plugin\UiPatterns\Source\ViewRowsSource.
     return 'views:style';
   }
 

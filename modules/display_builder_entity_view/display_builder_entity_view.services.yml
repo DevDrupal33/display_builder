@@ -18,3 +18,7 @@ services:
       - '@entity_type.manager'
     tags:
       - { name: event_subscriber }
+  display_builder_entity_view.builder_data_converter:
+    class: Drupal\display_builder_entity_view\BuilderDataConverter
+    arguments:
+      - '@entity_field.manager'

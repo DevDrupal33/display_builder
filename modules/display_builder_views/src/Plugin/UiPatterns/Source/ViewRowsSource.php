@@ -12,7 +12,7 @@ use Drupal\ui_patterns\Attribute\Source;
 /**
  * Plugin implementation of the source for views.
  *
- * @see Drupal\ui_patterns_views\Plugin\UiPatterns\Source\ViewRowsSource
+ * @see \Drupal\ui_patterns_views\Plugin\UiPatterns\Source\ViewRowsSource
  * @see display_builder_views.module
  */
 #[Source(

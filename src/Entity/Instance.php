@@ -627,6 +627,13 @@ class Instance extends EntityBase implements InstanceInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public static function getUniqId(array $data): int {
+    return \crc32((string) \serialize($data));
+  }
+
+  /**
    * Build the index from a slot.
    *
    * @param array $path
@@ -878,19 +885,6 @@ class Instance extends EntityBase implements InstanceInterface {
    */
   private function getPath(array $root, string $instance_id): array {
     return $this->getPathIndex($root)[$instance_id] ?? [];
-  }
-
-  /**
-   * Get a hash for this data as uniq id reference.
-   *
-   * @param array $data
-   *   The data to generate uniq id for.
-   *
-   * @return int
-   *   The uniq id value.
-   */
-  private static function getUniqId(array $data): int {
-    return \crc32((string) \serialize($data));
   }
 
 }

@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Theme\Registry;
 use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\SourcePluginManager;
@@ -19,8 +20,8 @@ use Drupal\ui_patterns\SourcePluginManager;
  * When Layout Builder is not activated, extends the default entity view
  * display ("Manage display").
  *
- * @see Drupal\display_builder_entity_view\Hook\DisplayBuilderEntityViewHook::entityTypeAlter()
- * @see Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay
+ * @see \Drupal\display_builder_entity_view\Hook\DisplayBuilderEntityViewHook::entityTypeAlter()
+ * @see \Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay
  */
 class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderEntityDisplayInterface, DisplayBuilderOverridableInterface {
 
@@ -57,11 +58,9 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
   protected ModuleExtensionList $modules;
 
   /**
-   * The entity field manager.
-   *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   * The data converter from Manage Display and Layout Builder.
    */
-  protected $entityFieldManager;
+  protected BuilderDataConverter $dataConverter;
 
   /**
    * The loaded display builder instance.
@@ -77,10 +76,6 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
    *   The entity type ID.
    */
   public function __construct(array $values, $entity_type) {
-    // Set $entityFieldManager before calling the parent constructor because the
-    // constructor will call init() which then calls setComponent() which needs
-    // $entityFieldManager.
-    $this->entityFieldManager = \Drupal::service('entity_field.manager');
     parent::__construct($values, $entity_type);
     $this->sourcePluginManager = \Drupal::service('plugin.manager.ui_patterns_source');
     $this->entityTypeManager = \Drupal::service('entity_type.manager');
@@ -88,6 +83,7 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
     $this->sampleEntityGenerator = \Drupal::service('ui_patterns.sample_entity_generator');
     $this->themeRegistry = \Drupal::service('theme.registry');
     $this->modules = \Drupal::service('extension.list.module');
+    $this->dataConverter = \Drupal::service('display_builder_entity_view.builder_data_converter');
   }
 
   /**
@@ -139,6 +135,19 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
     }
 
     return $tabs_info;
+  }
+
+  /**
+   * Initial import from existing data.
+   *
+   * @return array
+   *   List of UI Patterns sources.
+   *
+   * @see EntityViewDisplayTrait::initInstanceIfMissing()
+   * @see LayoutBuilderEntityViewDisplay::initialImport()
+   */
+  protected function initialImport(): array {
+    return $this->dataConverter->convertFromManageDisplay($this->getTargetEntityTypeId(), $this->getTargetBundle(), $this->content);
   }
 
 }

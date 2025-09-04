@@ -53,6 +53,8 @@ nav:
   - Features:
       - Available islands: "islands.md"
       - Pattern presets: "pattern-presets.md"
+      - Real-time collaboration: "realtime-collaboration.md"
+      - Migration from layout builder: "migration-from-layout-builder.md"
   - Configuring Display Builder: "configuration.md"
   - Extending Display Builder:
       - With island plugins: "island-plugins.md"
