@@ -10,6 +10,8 @@
       {% set item_attributes = item.value ? item_attributes.setAttribute('value', item.value) : item_attributes %}
       {% set item_attributes = item.type ? item_attributes.setAttribute('type', item.type) : item_attributes %}
       {% set item_attributes = item.disabled ? item_attributes.setAttribute('disabled', true) : item_attributes %}
+      {% set item_attributes = item.checked ? item_attributes.setAttribute('checked', true) : item_attributes %}
+      {% set item_attributes = item.class ? item_attributes.addClass(item.class) : item_attributes %}
 
       {% if item.url %}
         <a href="{{ item.url }}">

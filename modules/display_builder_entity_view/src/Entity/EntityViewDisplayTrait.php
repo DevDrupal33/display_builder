@@ -184,14 +184,26 @@ trait EntityViewDisplayTrait {
    * @see \Drupal\display_builder\WithDisplayBuilderInterface
    */
   public static function getUrlFromInstanceId(string $instance_id): Url {
-    [, $entity, $bundle, $view_mode] = \explode('__', $instance_id);
-    $fieldable_entity_type = \Drupal::service('entity_type.manager')->getDefinition($entity);
-    $bundle_parameter_key = $fieldable_entity_type->getBundleEntityType() ?: 'bundle';
-    $params = [
-      $bundle_parameter_key => $bundle,
-      'view_mode_name' => $view_mode,
-    ];
-    $route_name = \sprintf('display_builder_entity_view.%s', $entity);
+    $params = self::getUrlParamsFromInstanceId($instance_id);
+    $route_name = \sprintf('display_builder_entity_view.%s', $params['entity']);
+
+    return Url::fromRoute($route_name, $params);
+  }
+
+  /**
+   * Returns the URL for the display builder from an instance id.
+   *
+   * @param string $instance_id
+   *   The builder instance ID.
+   *
+   * @return \Drupal\Core\Url
+   *   The url of the instance.
+   *
+   * @see Drupal\display_builder\WithDisplayBuilderInterface
+   */
+  public static function getDisplayUrlFromInstanceId(string $instance_id): Url {
+    $params = self::getUrlParamsFromInstanceId($instance_id);
+    $route_name = \sprintf('entity.entity_view_display.%s.view_mode', $params['entity']);
 
     return Url::fromRoute($route_name, $params);
   }
@@ -559,6 +571,27 @@ trait EntityViewDisplayTrait {
     $cacheability->applyTo($build);
 
     return $build;
+  }
+
+  /**
+   * Returns the URL for the display builder from an instance id.
+   *
+   * @param string $instance_id
+   *   The builder instance ID.
+   *
+   * @return array
+   *   The url parameters for this instance id.
+   */
+  private static function getUrlParamsFromInstanceId(string $instance_id): array {
+    [, $entity, $bundle, $view_mode] = \explode('__', $instance_id);
+    $fieldable_entity_type = \Drupal::service('entity_type.manager')->getDefinition($entity);
+    $bundle_parameter_key = $fieldable_entity_type->getBundleEntityType() ?: 'bundle';
+
+    return [
+      $bundle_parameter_key => $bundle,
+      'view_mode_name' => $view_mode,
+      'entity' => $entity,
+    ];
   }
 
 }

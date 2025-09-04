@@ -34,7 +34,7 @@ class ToggleFullscreenButton extends IslandPluginBase {
       '#component' => 'display_builder:fullscreen_button',
       '#props' => [
         'icon' => 'fullscreen',
-        'title' => $this->t('Display the builder as fullscreen.'),
+        'tooltip' => $this->t('Toggle fullscreen'),
         'keyboard' => 'M',
       ],
     ];

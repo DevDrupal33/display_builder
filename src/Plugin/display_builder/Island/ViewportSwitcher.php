@@ -158,13 +158,22 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
    */
   public function build(InstanceInterface $builder, array $data, array $options = []): array {
     $configuration = $this->getConfiguration();
-    $options = [];
-    $data = [];
     $groups = \array_filter($configuration['providers']);
 
     if (empty($groups)) {
       return [];
     }
+
+    $options = $data = [];
+    $items = [
+      [
+        'title' => $this->t('Fluid'),
+        'class' => 'active',
+      ],
+      [
+        'divider' => TRUE,
+      ],
+    ];
 
     foreach ($groups as $group_id => $label) {
       $points = $this->breakpointManager->getBreakpointsByGroup($group_id);
@@ -176,7 +185,12 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
         if (!$width) {
           continue;
         }
-        $options[$label][$point_id] = $point->getLabel();
+        $point_label = $point->getLabel();
+        $options[$label][$point_id] = $point_label;
+        $items[] = [
+          'title' => $point_label,
+          'value' => $point_id,
+        ];
         $data[$point_id] = $width;
       }
     }
@@ -205,12 +219,34 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
     unset($select['#attributes']['style']);
     $select['#props']['icon'] = NULL;
 
+    $button = $this->buildButton('', $this->t('Switch viewport'), NULL, FALSE, 'display');
+    $button['#attributes']['class'] = ['switch-viewport-btn'];
+
     return [
       '#type' => 'component',
       '#component' => 'display_builder:dropdown',
       '#slots' => [
-        'button' => $this->buildButton('', $this->t('Switch viewport'), NULL, FALSE, 'window'),
-        'content' => $select,
+        'button' => $button,
+        'content' => [
+          '#type' => 'component',
+          '#component' => 'display_builder:menu',
+          '#slots' => [
+            'label' => $this->t('Switch viewport'),
+          ],
+          '#props' => [
+            'items' => $items,
+          ],
+          '#attributes' => [
+            'class' => ['viewport-menu', 'db-background'],
+            'data-points' => \json_encode($data),
+          ],
+        ],
+      ],
+      '#attributes' => [
+        'class' => ['switch-viewport'],
+      ],
+      '#attached' => [
+        'library' => ['display_builder/viewport_switcher'],
       ],
     ];
   }

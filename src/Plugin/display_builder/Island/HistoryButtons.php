@@ -83,8 +83,8 @@ class HistoryButtons extends IslandPluginBase implements PluginFormInterface {
     $future = $builder->getCountFuture();
     $past = $builder->getCountPast();
 
-    $undo = $this->buildButton($past ? (string) $past : '', $this->t('Undo'), 'u', empty($past), 'arrow-counterclockwise');
-    $redo = $this->buildButton($future ? (string) $future : '', $this->t('Redo'), 'r', empty($future), 'arrow-clockwise');
+    $undo = $this->buildButton($past ? (string) $past : '', '', 'u', empty($past), 'arrow-counterclockwise', $this->t('Undo (shortcut: u)'));
+    $redo = $this->buildButton($future ? (string) $future : '', '', 'r', empty($future), 'arrow-clockwise', $this->t('Redo (shortcut: r)'));
     $clear = [];
 
     $configuration = $this->getConfiguration();

@@ -55,10 +55,10 @@ islands:
     weight: -7
   keyboard_help:
     enable: true
-    weight: -6
+    weight: -5
   theme_mode:
     enable: false
-    weight: -3
+    weight: -2
   instance_form:
     enable: true
     weight: -10
@@ -82,8 +82,17 @@ islands:
     weight: -8
   collaboration:
     enable: false
-    weight: -5
+    weight: -4
   viewport:
     enable: false
-    weight: -4
+    weight: -3
+  parent_display:
+    enable: true
+    weight: -6
+  operation:
+    enable: false
+    weight: -1
+  reset:
+    enable: false
+    weight: 0
 weight: 0

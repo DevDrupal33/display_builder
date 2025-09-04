@@ -17,7 +17,7 @@ use Drupal\display_builder\IslandType;
   id: 'toggle_highlight',
   enabled_by_default: TRUE,
   label: new TranslatableMarkup('Toggle highlight'),
-  description: new TranslatableMarkup('Toggle the builder highlight zones.'),
+  description: new TranslatableMarkup('Toggle the builder highlight zones to ease drag and move around..'),
   type: IslandType::Button,
   keyboard_shortcuts: [
     'H' => new TranslatableMarkup('(shift + h) Toggle highlight'),
@@ -34,7 +34,7 @@ class ToggleHighlightButton extends IslandPluginBase {
       '#component' => 'display_builder:highlight_button',
       '#props' => [
         'icon' => 'border',
-        'title' => $this->t('Highlight components, blocks and slots.'),
+        'tooltip' => $this->t('Highlight components, blocks and slots to ease the manipulation. Shortcut: H.'),
         'keyboard' => 'H',
       ],
     ];

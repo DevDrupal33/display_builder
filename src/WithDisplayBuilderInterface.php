@@ -53,6 +53,17 @@ interface WithDisplayBuilderInterface {
   public static function getUrlFromInstanceId(string $instance_id): Url;
 
   /**
+   * Get the display url that use this instance.
+   *
+   * @param string $instance_id
+   *   Instance ID, as managed by the StateManager.
+   *
+   * @return \Drupal\Core\Url
+   *   A Drupal URL object.
+   */
+  public static function getDisplayUrlFromInstanceId(string $instance_id): Url;
+
+  /**
    * Get display builder profile config entity.
    *
    * If NULL, the Display Builder is not activated for this entity.

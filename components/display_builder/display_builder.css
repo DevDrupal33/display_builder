@@ -44,6 +44,12 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
     visibility: hidden;
   }
 
+  /* Lighter global focus. */
+  *:focus {
+    outline: 2px solid transparent !important;
+    box-shadow: none !important;
+  }
+
   /* Disable the builder until htmx is done. */
   /* @see assets/js/display_builder.js */
   &.db-htmx-before-request {
@@ -60,6 +66,21 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
     background-image: var(--db-background-image);
     background-size: var(--db-background-size);
     box-shadow: var(--sl-shadow-medium);
+  }
+
+  /* When on a viewport switch context. */
+  &.viewport-active {
+    .display-builder__main {
+      box-shadow:
+        rgb(0, 0, 0, 0.02) 0 1px 3px 0,
+        rgb(27, 31, 35, 0.15) 0 0 0 1px;
+    }
+    /* Viewport switch menu active state */
+    .switch-viewport {
+      .viewport-menu .active::part(label) {
+        font-weight: bold;
+      }
+    }
   }
 
   .display-builder__main {

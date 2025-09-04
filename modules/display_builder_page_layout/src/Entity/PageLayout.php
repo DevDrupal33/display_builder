@@ -167,6 +167,15 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   /**
    * {@inheritdoc}
    */
+  public static function getDisplayUrlFromInstanceId(string $instance_id): Url {
+    $params = self::checkInstanceId($instance_id);
+
+    return Url::fromRoute('entity.page_layout.edit_form', $params);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getDisplayBuilder(): ?DisplayBuilderInterface {
     $storage = $this->entityTypeManager()->getStorage('display_builder');
     $profile_id = $this->get(ConfigFormBuilderInterface::PROFILE_PROPERTY);

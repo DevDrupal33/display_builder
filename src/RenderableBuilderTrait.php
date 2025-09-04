@@ -220,7 +220,7 @@ trait RenderableBuilderTrait {
    *   (Optional) Is the button disabled? Default no.
    * @param string|null $icon
    *   (Optional) The icon name. Default none.
-   * @param string|null $tooltip
+   * @param string|TranslatableMarkup|null $tooltip
    *   (Optional) Enable the tooltip feature. Default no tooltip.
    *
    * @return array
@@ -232,7 +232,7 @@ trait RenderableBuilderTrait {
     ?string $keyboard = NULL,
     bool $disabled = FALSE,
     ?string $icon = NULL,
-    ?string $tooltip = NULL,
+    string|TranslatableMarkup|null $tooltip = NULL,
   ): array {
     if (empty(\trim((string) $label))) {
       $id = \uniqid();

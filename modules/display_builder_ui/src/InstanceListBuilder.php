@@ -34,8 +34,9 @@ final class InstanceListBuilder extends EntityListBuilder {
   protected array $contextClasses = [
     'view' => [DisplayExtender::class, 'Views'],
     'page_layout' => [PageLayout::class, 'Page layout'],
-    'entity_view' => [EntityViewDisplay::class, 'Entity view'],
+    // Order is important for loop on str start with.
     'entity_view_override' => [DisplayBuilderItemList::class, 'Entity view override'],
+    'entity_view' => [EntityViewDisplay::class, 'Entity view'],
   ];
 
   /**

@@ -20,6 +20,9 @@ props:
     icon:
       title: Icon name
       type: string
+    tooltip:
+      title: Tooltip content, can contain HTML
+      type: string
 libraryOverrides:
   dependencies:
     - core/drupal

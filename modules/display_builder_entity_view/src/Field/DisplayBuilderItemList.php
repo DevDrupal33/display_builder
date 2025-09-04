@@ -103,6 +103,13 @@ final class DisplayBuilderItemList extends MapFieldItemList implements WithDispl
   /**
    * {@inheritdoc}
    */
+  public static function getDisplayUrlFromInstanceId(string $instance_id): Url {
+    return Url::fromRoute('<front>');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getDisplayBuilder(): ?DisplayBuilderInterface {
     \assert(\is_string($this->getName()));
     $entity = $this->getEntity();

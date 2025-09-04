@@ -193,6 +193,15 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
   /**
    * {@inheritdoc}
    */
+  public static function getDisplayUrlFromInstanceId(string $instance_id): Url {
+    $params = self::checkInstanceId($instance_id);
+
+    return Url::fromRoute('entity.view.edit_form', $params);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getDisplayBuilder(): ?DisplayBuilderInterface {
     if (!isset($this->options[ConfigFormBuilderInterface::PROFILE_PROPERTY])) {
       return NULL;

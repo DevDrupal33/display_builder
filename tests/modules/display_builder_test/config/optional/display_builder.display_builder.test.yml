@@ -20,20 +20,20 @@ islands:
     image_field: user_picture
     image_style: thumbnail
     enable: false
-    weight: -3
+    weight: -2
   history:
     display_clear_button: true
     enable: true
     weight: -9
   keyboard_help:
     enable: true
-    weight: -5
-  theme_mode:
-    enable: true
     weight: -4
+  theme_mode:
+    enable: false
+    weight: -3
   test_island_button:
     enable: false
-    weight: -2
+    weight: -1
   info:
     enable: true
     weight: -7
@@ -133,7 +133,7 @@ islands:
     weight: 0
   reset:
     enable: false
-    weight: 0
+    weight: 1
   menu_debug:
     enable: false
     weight: 0
@@ -145,4 +145,7 @@ islands:
     enable: false
     weight: -2
     region: main
+  parent_display:
+    enable: true
+    weight: -5
 weight: 0

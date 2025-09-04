@@ -152,6 +152,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     self::assertSame([
       'bundle' => 'entity_test',
       'view_mode_name' => 'default',
+      'entity' => 'entity_test',
     ], $url->getRouteParameters());
   }
 
