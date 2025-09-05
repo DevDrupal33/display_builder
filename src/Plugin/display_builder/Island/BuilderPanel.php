@@ -261,7 +261,7 @@ class BuilderPanel extends IslandPluginBase {
    *   The renderable array for this slot source.
    */
   protected function renderSource(array $data, array $classes = []): array {
-    $build = $this->componentElementBuilder->buildSource([], 'content', [], $data, []) ?? [];
+    $build = $this->componentElementBuilder->buildSource([], 'content', [], $data, $this->configuration['contexts'] ?? []) ?? [];
     $build = $build['#slots']['content'][0] ?? [];
 
     // Fixes for token which is simple markup or html.
