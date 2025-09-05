@@ -8,6 +8,7 @@ use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\State\StateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\InstanceInterface;
@@ -117,6 +118,7 @@ class ApiSseController extends ApiControllerBase {
           NULL,
         );
 
+        $updated = FALSE;
         foreach ($event->getResult() as $island_id => $result) {
           // Do nothing if the island is not updated.
           if (empty($result)) {
@@ -128,6 +130,7 @@ class ApiSseController extends ApiControllerBase {
             continue;
           }
 
+          $updated = TRUE;
           $sse_target = "island-{$builder->id()}-{$island_id}";
           $data = $this->renderer->renderInIsolation($result['content']);
 
@@ -138,9 +141,55 @@ class ApiSseController extends ApiControllerBase {
           yield new ServerEvent($data, type: $sse_target);
         }
 
+        if ($updated) {
+          $message = $this->buildMessage($this->t('The user @username is currently editing this display, your version has been refreshed.', [
+            '@username' => $latest['username'],
+          ]));
+          $sse_target = "message-{$builder->id()}";
+
+          $data = $this->renderer->renderInIsolation($message);
+          // Need to send the data back as one line.
+          // @see https://www.reddit.com/r/htmx/comments/1mjhzl1/comment/n7bdf0s
+          $data = \str_replace(["\r\n", "\r", "\n"], ' ', (string) $data);
+          yield new ServerEvent($data, type: $sse_target);
+        }
+
         \sleep($this::REFRESH_WINDOW);
       }
     });
+  }
+
+  /**
+   * Build message.
+   *
+   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $message
+   *   The message to display.
+   *
+   * @return array
+   *   The message render array.
+   */
+  protected function buildMessage(string|TranslatableMarkup $message): array {
+    $build = [
+      '#type' => 'component',
+      '#component' => 'display_builder:alert',
+      '#slots' => [
+        'content' => $message,
+      ],
+      '#props' => [
+        'variant' => 'neutral',
+        'icon' => 'exclamation-octagon',
+        'open' => TRUE,
+        'closable' => TRUE,
+        'duration' => $this::REFRESH_WINDOW * 1000,
+      ],
+      '#attributes' => [
+        'class' => 'db-message',
+        // @todo to test if it adapts automatically between rtl and ltr.
+        'countdown' => 'undefined',
+      ],
+    ];
+
+    return $build;
   }
 
 }
