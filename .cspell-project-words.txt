@@ -43,3 +43,6 @@ libjpeg
 libwebp
 hostmachine
 pwuser
+
+sentity
+stest

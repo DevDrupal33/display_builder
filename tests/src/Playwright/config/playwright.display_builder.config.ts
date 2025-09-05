@@ -10,5 +10,11 @@ export default {
 
   pageListUrl: 'admin/structure/page-layout',
   pageAddUrl: 'admin/structure/page-layout/add',
-  pageTestName: 'page_layout__test',
+
+  // PageLayout::getPrefix()
+  pagePrefix: 'page_layout__',
+  // EntityViewDisplay::getPrefix()
+  entityPrefix: 'entity_view__',
+  // DisplayExtender::getPrefix()
+  viewsPrefix: 'views__',
 }

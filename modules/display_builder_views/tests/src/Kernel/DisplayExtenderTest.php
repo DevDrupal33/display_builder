@@ -102,13 +102,14 @@ final class DisplayExtenderTest extends KernelTestBase {
 
     // Test getInstanceId.
     $instance_id = $plugin->getInstanceId();
-    self::assertStringStartsWith('view__', $instance_id);
+    self::assertStringStartsWith(DisplayExtender::getPrefix(), $instance_id);
 
     // Test static checkInstanceId and getUrlFromInstanceId.
-    $parsed = DisplayExtender::checkInstanceId('view__test_view__default');
+    $id = \sprintf('%stest_view__default', DisplayExtender::getPrefix());
+    $parsed = DisplayExtender::checkInstanceId($id);
     self::assertSame(['view' => 'test_view', 'display' => 'default'], $parsed);
 
-    $url = DisplayExtender::getUrlFromInstanceId('view__test_view__default');
+    $url = DisplayExtender::getUrlFromInstanceId($id);
     self::assertStringContainsString('/admin/structure/views/view/test_view/display-builder/default', $url->toString());
   }
 

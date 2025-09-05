@@ -90,19 +90,19 @@ class StateButtons extends IslandPluginBase {
     $saveIsCurrent = $hasSave ? $builder->saveIsCurrent() : FALSE;
 
     if (!$saveIsCurrent) {
-      $save = $this->buildButton($this->t('Save'), $this->t('Save this display'), 'S', FALSE);
+      $save = $this->buildButton('', '', 'S', FALSE, 'floppy', $this->t('Save this display'));
       $save['#props']['variant'] = 'primary';
       $save['#attributes']['outline'] = TRUE;
       $buttonGroup['#slots']['buttons'][] = $this->htmxEvents->onSave($save, $builder_id);
 
-      $restore = $this->buildButton($this->t('Restore'), $this->t('Restore to last saved version'), 'R');
+      $restore = $this->buildButton('', '', 'R', FALSE, 'arrow-repeat', $this->t('Restore to last saved version'));
       $restore['#props']['variant'] = 'warning';
       $restore['#attributes']['outline'] = TRUE;
       $buttonGroup['#slots']['buttons'][] = $this->htmxEvents->onReset($restore, $builder_id);
     }
 
     if ($this->isOverridden($builder_id)) {
-      $revert = $this->buildButton($this->t('Revert'), $this->t('Revert to default display'));
+      $revert = $this->buildButton('', '', NULL, FALSE, 'box-arrow-in-down', $this->t('Revert to default display (not overridden)'));
       $revert['#props']['variant'] = 'danger';
       $revert['#attributes']['outline'] = TRUE;
       $buttonGroup['#slots']['buttons'][] = $this->htmxEvents->onRevert($revert, $builder_id);

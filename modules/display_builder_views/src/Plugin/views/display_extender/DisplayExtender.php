@@ -31,7 +31,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   help: new TranslatableMarkup('Use display builder as output for this view.'),
   no_ui: FALSE,
 )]
-class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBuilderInterface {
+final class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBuilderInterface {
 
   /**
    * The config form builder for Display Builder.
@@ -73,6 +73,13 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
     $instance->modules = $container->get('extension.list.module');
 
     return $instance;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getPrefix(): string {
+    return 'views__';
   }
 
   /**
@@ -169,8 +176,7 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
    * {@inheritdoc}
    */
   public static function checkInstanceId(string $instance_id): ?array {
-    // Examples: view__articles__default, view__people__grid.
-    if (!\str_starts_with($instance_id, 'view__')) {
+    if (!\str_starts_with($instance_id, DisplayExtender::getPrefix())) {
       return NULL;
     }
     [, $view, $display] = \explode('__', $instance_id);
@@ -187,6 +193,11 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
   public static function getUrlFromInstanceId(string $instance_id): Url {
     $params = self::checkInstanceId($instance_id);
 
+    if (!$params) {
+      // Fallback to the list of instances.
+      return Url::fromRoute('entity.display_builder_instance.collection');
+    }
+
     return Url::fromRoute('display_builder_views.views.manage', $params);
   }
 
@@ -195,6 +206,11 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
    */
   public static function getDisplayUrlFromInstanceId(string $instance_id): Url {
     $params = self::checkInstanceId($instance_id);
+
+    if (!$params) {
+      // Fallback to the list of instances.
+      return Url::fromRoute('entity.display_builder_instance.collection');
+    }
 
     return Url::fromRoute('entity.view.edit_form', $params);
   }
@@ -223,8 +239,11 @@ class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBu
    * {@inheritdoc}
    */
   public function getInstanceId(): ?string {
-    // Examples: view__articles__default, view__people__grid.
-    return 'view__' . $this->view->id() . '__' . $this->view->current_display;
+    if (!$this->view) {
+      return NULL;
+    }
+
+    return \sprintf('%s%s__%s', self::getPrefix(), $this->view->id(), $this->view->current_display);
   }
 
   /**

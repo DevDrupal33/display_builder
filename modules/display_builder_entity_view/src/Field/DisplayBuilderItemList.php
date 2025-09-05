@@ -42,6 +42,13 @@ final class DisplayBuilderItemList extends MapFieldItemList implements WithDispl
   /**
    * {@inheritdoc}
    */
+  public static function getPrefix(): string {
+    return 'entity_override__';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function getContextRequirement(): string {
     return 'content';
   }
@@ -70,8 +77,7 @@ final class DisplayBuilderItemList extends MapFieldItemList implements WithDispl
    * {@inheritdoc}
    */
   public static function checkInstanceId(string $instance_id): ?array {
-    // Example: entity_view_override__node__1__field_teaser.
-    if (!\str_starts_with($instance_id, 'entity_view_override__')) {
+    if (!\str_starts_with($instance_id, self::getPrefix())) {
       return NULL;
     }
     [, $entity_type_id, $entity_id, $field_name] = \explode('__', $instance_id);
@@ -87,7 +93,6 @@ final class DisplayBuilderItemList extends MapFieldItemList implements WithDispl
    * {@inheritdoc}
    */
   public static function getUrlFromInstanceId(string $instance_id): Url {
-    // Example: entity_view_override__node__1__field_teaser.
     [, $entity_type_id, $entity_id, $field_name] = \explode('__', $instance_id);
 
     $entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->load($entity_id);
@@ -97,7 +102,9 @@ final class DisplayBuilderItemList extends MapFieldItemList implements WithDispl
       'view_mode_name' => $display->getMode(),
     ];
 
-    return Url::fromRoute("entity.{$entity_type_id}.display_builder.{$display->getMode()}", $params);
+    $route_name = \sprintf('entity.%s.display_builder.%s', $entity_type_id, $display->getMode());
+
+    return Url::fromRoute($route_name, $params);
   }
 
   /**
@@ -135,7 +142,8 @@ final class DisplayBuilderItemList extends MapFieldItemList implements WithDispl
 
     $entity = $this->getEntity();
 
-    return \sprintf('entity_view_override__%s__%s__%s',
+    return \sprintf('%s%s__%s__%s',
+      self::getPrefix(),
       $entity->getEntityTypeId(),
       $entity->id(),
       $this->getName()

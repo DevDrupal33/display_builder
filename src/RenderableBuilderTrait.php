@@ -232,7 +232,7 @@ trait RenderableBuilderTrait {
     ?string $keyboard = NULL,
     bool $disabled = FALSE,
     ?string $icon = NULL,
-    string|TranslatableMarkup|null $tooltip = NULL,
+    null|string|TranslatableMarkup $tooltip = NULL,
   ): array {
     if (empty(\trim((string) $label))) {
       $id = \uniqid();

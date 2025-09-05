@@ -10,6 +10,7 @@ use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
+use Drupal\display_builder_page_layout\Entity\PageLayout;
 
 /**
  * Preview island plugin implementation.
@@ -39,7 +40,7 @@ class PreviewPanel extends IslandPluginBase {
 
     // Page layout display need preview. We don't have source for title and
     // content, so let replace it on the fly for preview.
-    if (\str_starts_with($builder_id, 'page_layout__')) {
+    if (\class_exists('PageLayout') && \str_starts_with($builder_id, PageLayout::getPrefix())) {
       $content_placeholder = '<div class="db-background db-preview-placeholder"><h2>[Page] Content placeholder</h2></div>';
       $title_placeholder = '<div class="db-background db-preview-placeholder"><h1 class="title">[Page] Title placeholder</h1></div>';
 

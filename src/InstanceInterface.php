@@ -12,15 +12,15 @@ use Drupal\Core\Entity\EntityInterface;
 interface InstanceInterface extends EntityInterface, HistoryInterface {
 
   /**
-   * Returns the display builder by builder ID.
+   * Returns the display builder profile.
    *
-   * @return \Drupal\display_builder\DisplayBuilderInterface
+   * @return \Drupal\display_builder\DisplayBuilderInterface|null
    *   The display builder profile.
    */
   public function getProfile(): ?DisplayBuilderInterface;
 
   /**
-   * Set the display builder profile.
+   * Set the display builder profile from id.
    *
    * @param string $profile_id
    *   Entity ID of the display builder profile.
@@ -181,8 +181,8 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
   /**
    * Check display has required context, meaning it can save value.
    *
-   * @param array $contexts
-   *   (Optional) contexts if already accessible.
+   * @param \Drupal\Core\Plugin\Context\ContextInterface[]|null $contexts
+   *   (Optional) contexts if already accessible, keyed by context name.
    *
    * @return bool
    *   True if required, False otherwise.
@@ -194,8 +194,8 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
    *
    * @param string $key
    *   The context key to look for.
-   * @param array $contexts
-   *   (Optional) contexts if already accessible.
+   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
+   *   (Optional) contexts if already accessible, keyed by context name.
    *
    * @return bool
    *   True if required, False otherwise.

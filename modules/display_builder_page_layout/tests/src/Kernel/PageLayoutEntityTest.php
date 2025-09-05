@@ -82,7 +82,8 @@ final class PageLayoutEntityTest extends KernelTestBase {
     self::assertSame('Test Layout', $loaded->label());
 
     // Test getInstanceId().
-    self::assertSame('page_layout__test_layout', $loaded->getInstanceId());
+    $id = \sprintf('%s%s', PageLayout::getPrefix(), 'test_layout');
+    self::assertSame($id, $loaded->getInstanceId());
 
     $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($loaded->getInstanceId());
     self::assertNotNull($instance);

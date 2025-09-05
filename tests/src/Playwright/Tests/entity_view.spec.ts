@@ -17,7 +17,7 @@ test(
   
     await test.step(`Admin login`, async () => {
       await drupal.loginAsAdmin()
-    });
+    })
   
     await test.step(`Create entity type and set display`, async () => {
       // Go to the content entity and create the display.
@@ -38,7 +38,7 @@ test(
       await page.getByLabel('Profile', { exact: true }).selectOption('Test')
       await page.getByRole('button', { name: 'Save' }).click()
       await drupal.expectMessage('Your settings have been saved.')
-    });
+    })
 
     await test.step(`Check the display`, async () => {
       await page.getByRole('link', { name: 'Build the display' }).click()
@@ -63,8 +63,7 @@ test(
         entity_link: '[Entity] Link',
       }
       await displayBuilder.expectBlocksAvailable(sources, false)
-
-    });
+    })
 
     await test.step(`Build the display`, async () => {
       // Basic common drag component and token.
@@ -122,7 +121,7 @@ test(
       await displayBuilder.saveDisplayBuilder()
 
       await displayBuilder.expectPreviewAriaSnapshot('entity.aria.yml')
-    });
+    })
 
     await test.step(`Disable the display`, async () => {
       // Disable the display builder.
@@ -132,8 +131,8 @@ test(
 
       // Check it is not deleted (should it be?)
       await page.goto(config.dbList)
-      await expect(page.getByRole('link', { name: `entity_view__node__${name}__default` })).toBeVisible()
-    });
+      await expect(page.getByRole('cell', { name: `${config.entityPrefix}node__${name}__default`, exact: true })).toBeVisible()
+    })
   
     await test.step(`Create override`, async () => {
       // Create a field ui patterns for sources, hide it and select a profile.
@@ -169,6 +168,6 @@ test(
       await displayBuilder.expectPreviewAriaSnapshot('entity-override.aria.yml')
       await page.getByRole('link', { name: 'View' }).click()
       await expect(page.locator('.block-system-main-block')).toMatchAriaSnapshot({ name: 'entity-override.aria.yml' })
-    });
+    })
   }
 )

@@ -9,14 +9,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuilderHelpers;
-use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
-use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
-use Drupal\display_builder_page_layout\Entity\PageLayout;
-use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -25,25 +18,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 final class InstanceListBuilder extends EntityListBuilder {
 
   /**
-   * Mapping of context classes to human-readable labels.
-   *
-   * @var array<string, array{class-string, string}>
-   *
-   * @todo to have from a hook_info in each module.
-   */
-  protected array $contextClasses = [
-    'view' => [DisplayExtender::class, 'Views'],
-    'page_layout' => [PageLayout::class, 'Page layout'],
-    // Order is important for loop on str start with.
-    'entity_view_override' => [DisplayBuilderItemList::class, 'Entity view override'],
-    'entity_view' => [EntityViewDisplay::class, 'Entity view'],
-  ];
-
-  /**
    * {@inheritdoc}
    */
   public function __construct(
-    EntityTypeInterface $entity_type,
+    protected EntityTypeInterface $entity_type,
     EntityStorageInterface $storage,
     private readonly DateFormatterInterface $dateFormatter,
   ) {
@@ -75,7 +53,6 @@ final class InstanceListBuilder extends EntityListBuilder {
     $header = [
       'id' => $this->t('Instance'),
       'context' => $this->t('Context'),
-      'profile' => $this->t('Profile'),
       'updated' => $this->t('Updated'),
       'log' => $this->t('Last log'),
     ];
@@ -87,8 +64,6 @@ final class InstanceListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function render(): array {
-    // Number of items to display per page.
-    $this->limit = 20;
     $build = parent::render();
     $build['notice'] = [
       '#markup' => $this->t('List of all Display builder instances.<br>An instance is a saved arrangement of components and styles for a specific display context (a view mode, a page layout or a view).<br>Instances are created directly from display pages like Entity view, Page layout or Views and should be managed directly from each display context.'),
@@ -105,25 +80,20 @@ final class InstanceListBuilder extends EntityListBuilder {
     /** @var \Drupal\display_builder\InstanceInterface $instance */
     $instance_id = (string) $instance->id();
     $row = [];
-    $url = Url::fromRoute('entity.display_builder.edit_form', ['display_builder' => $instance_id]);
-    $type = $this->t('Other');
 
-    foreach ($this->contextClasses as [$class, $label]) {
-      if (\class_exists($class) && $instance->hasSaveContextsRequirement($class::getContextRequirement())) {
-        $url = $class::getUrlFromInstanceId($instance_id);
-        $type = new TranslatableMarkup($label); // phpcs:ignore Drupal.Semantics.FunctionT.NotLiteralString
+    $type = '-';
+    $providers = $this->moduleHandler->invokeAll('display_builder_provider_info');
+
+    foreach ($providers as $provider) {
+      if (\str_starts_with($instance_id, $provider['prefix'])) {
+        $type = $provider['label'];
 
         break;
       }
     }
 
-    $row['id']['data'] = [
-      '#type' => 'link',
-      '#title' => $instance_id,
-      '#url' => $url,
-    ];
+    $row['id']['data'] = $instance_id;
     $row['context']['data'] = $type;
-    $row['profile']['data'] = $instance->getProfile()->id();
 
     /** @var \Drupal\display_builder\HistoryStep $present */
     $present = $instance->getCurrent();
@@ -131,55 +101,6 @@ final class InstanceListBuilder extends EntityListBuilder {
     $row['log']['data'] = $present->log ?? '-';
 
     return $row + parent::buildRow($instance);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getOperations(EntityInterface $entity) {
-    $links = [];
-    $classContext = '';
-
-    foreach ($this->contextClasses as $type => [$class]) {
-      if (\str_starts_with((string) $entity->id(), $type)) {
-        $classContext = $class;
-        $links['manage'] = [
-          'title' => $this->t('Build display'),
-          'weight' => -1,
-          'url' => $class::getUrlFromInstanceId($entity->id()),
-        ];
-
-        break;
-      }
-    }
-
-    $links = \array_merge($links, parent::getOperations($entity));
-    $context = [
-      'instance_id' => $entity->id(),
-      'class' => $classContext,
-    ];
-    $this->moduleHandler()->alter('display_builder_ui_operations_links', $links, $context);
-
-    return $links;
-  }
-
-  /**
-   * Helper to get builder type string for filtering.
-   *
-   * @param \Drupal\display_builder\InstanceInterface $instance
-   *   Display builder instance.
-   *
-   * @return string
-   *   The type string.
-   */
-  protected function getBuilderType(InstanceInterface $instance): string {
-    foreach ($this->contextClasses as $type => [$class]) {
-      if (\class_exists($class) && $instance->hasSaveContextsRequirement($class::getContextRequirement())) {
-        return $type;
-      }
-    }
-
-    return 'other';
   }
 
   /**

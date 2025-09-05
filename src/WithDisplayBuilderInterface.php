@@ -15,6 +15,14 @@ use Drupal\Core\Url;
 interface WithDisplayBuilderInterface {
 
   /**
+   * Get the instance prefix.
+   *
+   * @return string
+   *   The instance prefix.
+   */
+  public static function getPrefix(): string;
+
+  /**
    * Get the context requirement.
    *
    * @return string
@@ -85,7 +93,7 @@ interface WithDisplayBuilderInterface {
    * - any decimal digit (0 to 9), except for the first character
    * - an underscore (_)
    *
-   * @return ?string
+   * @return string|null
    *   Instance ID, as managed by the StateManager.
    */
   public function getInstanceId(): ?string;

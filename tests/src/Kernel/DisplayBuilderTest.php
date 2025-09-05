@@ -16,7 +16,6 @@ use PHPUnit\Framework\Attributes\Group;
  * @internal
  */
 #[CoversClass('\Drupal\display_builder\Entity\DisplayBuilder')]
-#[CoversClass('\Drupal\display_builder\Entity\DisplayBuilder')]
 #[Group('display_builder')]
 final class DisplayBuilderTest extends KernelTestBase {
 

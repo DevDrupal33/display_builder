@@ -1,0 +1,46 @@
+name: Toast
+slots:
+  content: "A toast that will disappear in 5s!"
+props:
+  closable: true
+  toast: true
+  toast_stack_position: 'bottom-right'
+  duration: 5000
+library_wrapper: >
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
+
+  {%
+    set icons = {
+      'default': 'info',
+      'primary': 'info-circle',
+      'success': 'check2-circle',
+      'neutral': 'gear',
+      'warning': 'exclamation-triangle',
+      'danger': 'exclamation-octagon',
+    }
+  %}
+  {% set id = "toast-" ~ random() %}
+  <div class="story-alert-toast-{{ variant }}">
+    {{ include('display_builder:button', {
+      'label': 'Open toast @variant'|t({'@variant': variant}),
+      'variant': variant,
+      'icon': icons[variant],
+      'attributes': {
+        'data-toast-target': id,
+      },
+    }, with_context = false) }}
+
+    {% set example_props = {'#props': _story['#props']|merge({
+      'id': id,
+      'icon': icons[variant],
+    })} %}
+    {% set example_story = _story %}
+    {{ example_story|merge(example_props) }}
+  </div>
+  <script>
+    const container{{ variant }} = document.querySelector('.story-alert-toast-{{ variant }}');
+    const button{{ variant }} = container{{ variant }}.querySelector(`sl-button`);
+    const alert{{ variant }} = container{{ variant }}.querySelector(`sl-alert`);
+    button{{ variant }}.addEventListener('click', () => alert{{ variant }}.toast());
+  </script>

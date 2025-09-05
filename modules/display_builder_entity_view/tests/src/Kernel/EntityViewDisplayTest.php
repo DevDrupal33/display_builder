@@ -70,7 +70,8 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $display = self::createTestDisplay($view_mode);
 
     self::assertSame($view_mode, $display->getMode());
-    self::assertSame($display->getInstanceId(), 'entity_view__entity_test__entity_test__' . $view_mode);
+    $id = \sprintf('%sentity_test__entity_test__%s', EntityViewDisplay::getPrefix(), $view_mode);
+    self::assertSame($id, $display->getInstanceId(), $view_mode);
     self::assertFalse($display->isDisplayBuilderEnabled());
 
     $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY, 'test')->save();
@@ -146,7 +147,8 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
   public function testGetUrlFromInstanceId(): void {
     $display = self::createTestDisplay();
 
-    $url = $display::getUrlFromInstanceId('entity_view__entity_test__entity_test__default');
+    $id = \sprintf('%sentity_test__entity_test__default', EntityViewDisplay::getPrefix());
+    $url = $display::getUrlFromInstanceId($id);
 
     self::assertSame('display_builder_entity_view.entity_test', $url->getRouteName());
     self::assertSame([
@@ -269,7 +271,8 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($display->getInstanceId());
 
     self::assertNotNull($instance);
-    self::assertSame('entity_view__entity_test__entity_test__default', $instance->id());
+    $id = \sprintf('%sentity_test__entity_test__default', EntityViewDisplay::getPrefix());
+    self::assertSame($id, $instance->id());
   }
 
   /**

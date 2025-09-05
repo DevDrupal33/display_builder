@@ -176,7 +176,7 @@ export class Displaybuilder {
    */
   async saveDisplayBuilder(): Promise<void> {
     await this.htmxReady()
-    await this.page.getByRole('button', { name: 'Save' }).click()
+    await this.page.locator('.db-toolbar__end [data-keyboard="S"]').click()
     await this.htmxReady()
   }
 
@@ -238,6 +238,7 @@ export class Displaybuilder {
           customElements.whenDefined('sl-dropdown'),
           customElements.whenDefined('sl-tab'),
           customElements.whenDefined('sl-tab-group'),
+          customElements.whenDefined('sl-tooltip'),
           customElements.whenDefined('sl-tree'),
           customElements.whenDefined('sl-tree-item'),
         ]).then(() => console.log('[OK] Shoelace is loaded!'));
@@ -345,11 +346,12 @@ export class Displaybuilder {
    *
    * @async
    * @param {string} snapshotName - The expected Aria snapshot string.
+   * @param {string} locatorClass - The locator parameter, default '.db-island-preview'.
    * @returns {Promise<void>}
    */
-  async expectPreviewAriaSnapshot(snapshotName: string): Promise<void> {
+  async expectPreviewAriaSnapshot(snapshotName: string, locatorClass: string = '.db-island-preview'): Promise<void> {
     await this.page.getByRole('tab', { name: 'Preview' }).click()
-    await expect(this.page.locator(`.db-island-preview`)).toMatchAriaSnapshot({ name: snapshotName })
+    await expect(this.page.locator(locatorClass)).toMatchAriaSnapshot({ name: snapshotName })
     await this.page.getByRole('tab', { name: 'Builder' }).click()
   }
 

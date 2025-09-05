@@ -45,3 +45,18 @@ props:
       title: Duration
       description: The length of time, in milliseconds, the alert will show before closing itself.
       type: integer
+    toast:
+      title: Toast
+      description: Move alert in a toast stack as a toast notification.
+      type: boolean
+      default: false
+    toast_stack_position:
+      title: Toast stack position
+      description: If a toast will define the stack location.
+      type: string
+      default: bottom-right
+      enum:
+        - top-right
+        - top-left
+        - bottom-left
+        - bottom-right

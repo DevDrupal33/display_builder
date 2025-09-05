@@ -10,9 +10,6 @@ use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
-use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
-use Drupal\display_builder_page_layout\Entity\PageLayout;
-use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
 
 /**
  * Help parent link island plugin implementation.
@@ -30,10 +27,6 @@ class ParentDisplayButton extends IslandPluginBase {
    * {@inheritdoc}
    */
   public function build(InstanceInterface $builder, array $data, array $options = []): array {
-    if (!$builder->canSaveContextsRequirement()) {
-      return [];
-    }
-
     $url = self::findParentDisplayFromId((string) $builder->id());
 
     if (!$url) {
@@ -44,7 +37,7 @@ class ParentDisplayButton extends IslandPluginBase {
       '#type' => 'component',
       '#component' => 'display_builder:button',
       '#props' => [
-        'icon' => 'box-arrow-up',
+        'icon' => 'box-arrow-up-right',
         'tooltip' => $this->t('Go to the parent display that manage this instance.'),
       ],
       '#attributes' => [
@@ -65,21 +58,16 @@ class ParentDisplayButton extends IslandPluginBase {
    *   The url of the instance.
    */
   private static function findParentDisplayFromId(string $instance_id): ?Url {
-    $id_values = \explode('__', $instance_id);
+    // phpcs:ignore-next-line Drupal.DeprecatedFunctions.GlobalFunction
+    $providers = \Drupal::moduleHandler()->invokeAll('display_builder_provider_info');
 
-    switch ($id_values[0]) {
-      case 'entity_view':
-        return EntityViewDisplay::getDisplayUrlFromInstanceId($instance_id);
-
-      case 'page_layout':
-        return PageLayout::getDisplayUrlFromInstanceId($instance_id);
-
-      case 'view':
-        return DisplayExtender::getDisplayUrlFromInstanceId($instance_id);
-
-      default:
-        return NULL;
+    foreach ($providers as $provider) {
+      if (\str_starts_with($instance_id, $provider['prefix'])) {
+        return $provider['class']::getDisplayUrlFromInstanceId($instance_id);
+      }
     }
+
+    return NULL;
   }
 
 }

@@ -123,6 +123,13 @@ trait EntityViewDisplayTrait {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public static function getPrefix(): string {
+    return 'entity_view__';
+  }
+
+  /**
    * Returns the context requirement for this entity view display.
    *
    * This is used to ensure that the entity context is available when building
@@ -143,7 +150,7 @@ trait EntityViewDisplayTrait {
    * @see \Drupal\display_builder\WithDisplayBuilderInterface
    */
   public static function checkInstanceId(string $instance_id): ?array {
-    if (!\str_starts_with($instance_id, 'entity_view__')) {
+    if (!\str_starts_with($instance_id, EntityViewDisplay::getPrefix())) {
       return NULL;
     }
     [, $entity, $bundle, $view_mode] = \explode('__', $instance_id);
@@ -283,7 +290,7 @@ trait EntityViewDisplayTrait {
       return NULL;
     }
 
-    return 'entity_view__' . \str_replace('.', '__', $this->id);
+    return \sprintf('%s%s', EntityViewDisplay::getPrefix(), \str_replace('.', '__', $this->id));
   }
 
   /**

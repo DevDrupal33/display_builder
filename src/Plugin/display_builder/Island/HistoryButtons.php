@@ -90,7 +90,7 @@ class HistoryButtons extends IslandPluginBase implements PluginFormInterface {
     $configuration = $this->getConfiguration();
 
     if ($configuration['display_clear_button'] && (!empty($past) || !empty($future))) {
-      $clear = $this->buildButton($this->t('Clear'), '', 'C', (empty($past) && empty($future)));
+      $clear = $this->buildButton('', '', 'C', (empty($past) && empty($future)), 'clock-history', $this->t('Clear history (shortcut: shift + C)'));
       $clear['#props']['variant'] = 'warning';
       $clear['#attributes']['outline'] = TRUE;
     }

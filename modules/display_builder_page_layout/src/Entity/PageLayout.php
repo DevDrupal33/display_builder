@@ -121,6 +121,13 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   /**
    * {@inheritdoc}
    */
+  public static function getPrefix(): string {
+    return 'page_layout__';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getPluginCollections(): array {
     return [
       'conditions' => $this->getConditions(),
@@ -138,7 +145,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
    * {@inheritdoc}
    */
   public static function checkInstanceId(string $instance_id): ?array {
-    if (!\str_starts_with($instance_id, 'page_layout__')) {
+    if (!\str_starts_with($instance_id, self::getPrefix())) {
       return NULL;
     }
     [, $page_layout] = \explode('__', $instance_id);
@@ -161,6 +168,11 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   public static function getUrlFromInstanceId(string $instance_id): Url {
     $params = self::checkInstanceId($instance_id);
 
+    if (!$params) {
+      // Fallback to the list of instances.
+      return Url::fromRoute('entity.display_builder_instance.collection');
+    }
+
     return Url::fromRoute('entity.page_layout.display_builder', $params);
   }
 
@@ -169,6 +181,11 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
    */
   public static function getDisplayUrlFromInstanceId(string $instance_id): Url {
     $params = self::checkInstanceId($instance_id);
+
+    if (!$params) {
+      // Fallback to the list of instances.
+      return Url::fromRoute('entity.display_builder_instance.collection');
+    }
 
     return Url::fromRoute('entity.page_layout.edit_form', $params);
   }
@@ -199,8 +216,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
       return NULL;
     }
 
-    // Examples: page_layout__default, page_layout__users.
-    return 'page_layout__' . $this->id();
+    return \sprintf('%s%s', self::getPrefix(), $this->id());
   }
 
   /**

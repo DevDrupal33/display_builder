@@ -16,54 +16,68 @@ test(
     const name = `test_${testName}`
     const pageLayoutListRow = page.locator(`tr[data-id="${name}"]`)
 
-    await drupal.loginAsAdmin()
+    await test.step(`Admin login`, async () => {
+      await drupal.loginAsAdmin()
+    })
 
     // Create the page layout.
-    await page.goto(config.pageListUrl)
-    await page.getByRole('link', { name: 'Add page layout' }).click()
-    await page.getByLabel('Label').fill(name)
-    await page.getByLabel('Profile', { exact: true }).selectOption('test')
-    // Fill some conditions.
-    await page.getByRole('link', { name: 'Pages' }).click()
-    await page.getByRole('textbox', { name: 'Pages' }).fill(`/test-${testName}`)
-    await page.getByRole('button', { name: 'Save' }).click()
-    await drupal.expectMessage('Created new page layout')
-    // Check conditions summary.
-    await expect(page.getByText(`On the following pages: /test-${testName}`)).toBeVisible()
+    await test.step(`Create page and set display`, async () => {
+      await page.goto(config.pageListUrl)
+      await page.getByRole('link', { name: 'Add page layout' }).click()
+      await page.getByLabel('Label').fill(name)
+      await page.getByLabel('Profile', { exact: true }).selectOption('test')
+      // Fill some conditions.
+      await page.getByRole('link', { name: 'Pages' }).click()
+      await page.getByRole('textbox', { name: 'Pages' }).fill(`/test-${testName}`)
+      await page.getByRole('button', { name: 'Save' }).click()
+      await drupal.expectMessage('Created new page layout')
+      // Check conditions summary.
+      await expect(page.getByText(`On the following pages: /test-${testName}`)).toBeVisible()
+    })
 
-    await pageLayoutListRow.getByRole('link', { name: 'Build display' }).click()
-    await displayBuilder.shoelaceReady()
+    await test.step(`Check the display`, async () => {
+      await pageLayoutListRow.getByRole('link', { name: 'Build display' }).click()
+      await displayBuilder.shoelaceReady()
 
-    // Enable highlight to ease drag.
-    await displayBuilder.keyboardShortcut('Shift+H')
+      // Enable highlight to ease drag.
+      await displayBuilder.keyboardShortcut('Shift+H')
 
-    // Test the proper blocks are available for Page context.
-    const sources = {
-      local_actions: '[Page] Local actions',
-      local_tasks: '[Page] Local tasks',
-      main_page_content: '[Page] Main content',
-      page_title: '[Page] Title',
-    }
-    await displayBuilder.expectBlocksAvailable(sources)
+      // Test the proper blocks are available for Page context.
+      const sources = {
+        local_actions: '[Page] Local actions',
+        local_tasks: '[Page] Local tasks',
+        main_page_content: '[Page] Main content',
+        page_title: '[Page] Title',
+      }
+      await displayBuilder.expectBlocksAvailable(sources)
+    })
 
-    // Basic common drag component and token.
-    await displayBuilder.dragSimpleComponentsWithToken('I am a test token in a slot in a Page Layout!')
+    await test.step(`Build the display`, async () => {
+      // Basic common drag component and token.
+      await displayBuilder.dragSimpleComponentsWithToken('I am a test token in a slot in a Page Layout!')
 
-    // Result is based on the default page fixture with previous actions.
-    // @see modules/display_builder_page_layout/fixtures/default_page_layout.yml
-    await displayBuilder.closeDialog('both')
-    await displayBuilder.saveDisplayBuilder()
+      // Result is based on the default page fixture with previous actions.
+      // @see modules/display_builder_page_layout/fixtures/default_page_layout.yml
+      await displayBuilder.closeDialog('both')
+      await displayBuilder.saveDisplayBuilder()
 
-    // await displayBuilder.expectPreviewAriaSnapshot('page.aria.yml')
-    // await page.goto(`/test-${testName}`)
-    // await expect(page.locator('.page-wrapper')).toMatchAriaSnapshot({ name: 'page-view.aria.yml' })
+      // Test only the component and token as the urls from blocks account change
+      // in ci.
+      await displayBuilder.expectPreviewAriaSnapshot('page.aria.yml', '.db-island-preview .test_simple ')
+    })
 
-    // Delete the full configuration.
-    await page.goto(config.pageListUrl)
-    await pageLayoutListRow.getByRole('button', { name: 'List additional actions' }).click()
-    await page.getByRole('link', { name: 'Delete Test' }).click()
-    // Instance is deleted.
-    await page.goto(config.dbList)
-    // @todo test the builder is deleted?
+    await test.step(`View the result page`, async () => {
+      await page.goto(`test-${testName}`)
+      await expect(page.locator('.page-wrapper .test_simple')).toMatchAriaSnapshot({ name: 'page-view.aria.yml' })
+    })
+
+    await test.step(`Delete the display`, async () => {
+      await page.goto(config.pageListUrl)
+      await pageLayoutListRow.getByRole('button', { name: 'List additional actions' }).click()
+      await page.getByRole('link', { name: 'Delete Test' }).click()
+      // Instance is deleted(?) not yet...
+      await page.goto(config.dbList)
+      await expect(page.getByRole('cell', { name: `${config.pagePrefix}${name}`, exact: true })).toBeVisible()
+    })
   }
 )

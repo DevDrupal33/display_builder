@@ -125,7 +125,7 @@ islands:
   viewport:
     providers:
       display_builder_theme_test: display_builder_theme_test
-    format: default
+    format: compact
     enable: true
     weight: -6
   operation:

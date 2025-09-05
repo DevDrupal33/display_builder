@@ -96,7 +96,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   /* Comment for a local running server */
   // webServer: {
-  //   command: 'php -q -S localhost:8000 -t ../../../web &> /dev/null &',
+  //   command: 'php -S localhost:8000 -t ../../../',
   //   url: 'http://localhost:8000',
   //   reuseExistingServer: !process.env.CI,
   // },
