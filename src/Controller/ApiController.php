@@ -625,8 +625,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   protected function validateIslandForm(string $formClass, FormStateInterface $form_state): array {
     /** @var \Drupal\Core\Form\FormBuilder $formBuilder */
     $formBuilder = $this->formBuilder();
+
     try {
       $triggering_element = $form_state->getTriggeringElement();
+
       if (!$triggering_element && !isset($form_state->getValues()['_triggering_element_name'])) {
         // We set a fake triggering element to avoid form API error.
         $form_state->setTriggeringElement(['#type' => 'submit', '#value' => (string) $this->t('Submit')]);

@@ -7,7 +7,7 @@
         "php": ">=8.3",
         "drupal/core": "^11.2",
         "drupal/htmx": "~1.4.3",
-        "drupal/ui_patterns": "^2.0.8"
+        "drupal/ui_patterns": "^2.0.9"
     },
     "require-dev": {
         "drupal/ui_icons": "^1.1",
