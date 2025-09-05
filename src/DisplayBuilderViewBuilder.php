@@ -68,7 +68,7 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
     if (isset($islands_enabled_sorted['button']['collaboration'])) {
       $build['#attributes'] = [
         'hx-ext' => 'sse',
-        'sse-connect' => Url::fromRoute('display_builder.api_sse', ['builder' => $builder_id])->toString(),
+        'sse-connect' => Url::fromRoute('display_builder.api_sse', ['builder_id' => $builder_id])->toString(),
       ];
     }
 

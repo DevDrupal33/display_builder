@@ -4,18 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Controller;
 
-use Drupal\Component\Datetime\TimeInterface;
-use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
-use Drupal\Core\Render\RendererInterface;
-use Drupal\Core\State\StateInterface;
-use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\InstanceInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\EventStreamResponse;
 use Symfony\Component\HttpFoundation\ServerEvent;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Returns responses for Display builder routes.
@@ -32,18 +24,6 @@ class ApiSseController extends ApiControllerBase {
    */
   public const int STALE = (self::REFRESH_WINDOW * 2) - 1;
 
-  public function __construct(
-    EventDispatcherInterface $eventDispatcher,
-    MemoryCacheInterface $memoryCache,
-    RendererInterface $renderer,
-    TimeInterface $time,
-    #[Autowire(service: 'tempstore.shared')] SharedTempStoreFactory $sharedTempStoreFactory,
-    SessionInterface $session,
-    private StateInterface $state,
-  ) {
-    parent::__construct($eventDispatcher, $memoryCache, $renderer, $time, $sharedTempStoreFactory, $session);
-  }
-
   /**
    * Stream server side events for real-time collaboration.
    *
@@ -52,8 +32,8 @@ class ApiSseController extends ApiControllerBase {
    * ON_DELETE, ON_PRESET_SAVE, ON_SAVE and ON_HISTORY_CHANGE.
    * Skip ON_ACTIVE.
    *
-   * @param \Drupal\display_builder\InstanceInterface $builder
-   *   Display builder instance.
+   * @param string $builder_id
+   *   The builder ID.
    *
    * @return \Symfony\Component\HttpFoundation\EventStreamResponse
    *   The event stream response.
@@ -61,10 +41,8 @@ class ApiSseController extends ApiControllerBase {
    * @see https://v1.htmx.org/extensions/server-sent-events/
    * @see https://symfony.com/blog/new-in-symfony-7-3-simpler-server-event-streaming
    */
-  public function sse(InstanceInterface $builder): EventStreamResponse {
-    $this->builder = $builder;
-
-    return new EventStreamResponse(function () use ($builder) {
+  public function sse(string $builder_id): EventStreamResponse {
+    return new EventStreamResponse(function () use ($builder_id) {
       $sessionId = $this->session->getId();
       $collection = $this->sharedTempStoreFactory->get($this::SSE_COLLECTION);
 
@@ -76,7 +54,7 @@ class ApiSseController extends ApiControllerBase {
         // at least the HTTP response headers to be sent back to client without
         // waiting for a real event to occur.
         yield new ServerEvent('');
-        $latest = $collection->get("{$builder->id()}_latest");
+        $latest = $collection->get("{$builder_id}_latest");
 
         if (!$latest) {
           \sleep($this::REFRESH_WINDOW);
@@ -103,9 +81,17 @@ class ApiSseController extends ApiControllerBase {
           continue;
         }
 
-        // Reset state static cache to ensure we load the builder's latest
+        // Reload the instance to ensure we get the builder's latest
         // state.
-        $this->state->resetCache();
+        $builder = $this->entityTypeManager()->getStorage('display_builder_instance')
+          ->load($builder_id);
+
+        if (!$builder instanceof InstanceInterface) {
+          \sleep($this::REFRESH_WINDOW);
+
+          continue;
+        }
+        $this->builder = $builder;
 
         // Recompute islands regarding the current user.
         // Use ON_HISTORY_CHANGE because it is the event where most islands are

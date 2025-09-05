@@ -347,6 +347,14 @@ class BuilderDataConverter {
   protected function convertUiPatternsBlock(BlockPluginInterface $block): array {
     $config = $block->getConfiguration();
 
+    // Sometimes, this value is null, so let's override it.
+    if (!isset($config['ui_patterns']['component_id'])) {
+      // See: \Drupal\ui_patterns_blocks\Plugin\Block\ComponentBlock.
+      $config['ui_patterns']['component_id'] = \str_replace('ui_patterns:', '', $config['id']);
+      // See: \Drupal\ui_patterns_blocks\Plugin\Block\EntityComponentBlock.
+      $config['ui_patterns']['component_id'] = \str_replace('ui_patterns_entity:', '', $config['id']);
+    }
+
     return [
       'source_id' => 'component',
       'source' => [
