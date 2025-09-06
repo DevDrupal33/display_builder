@@ -16,7 +16,7 @@ test(
   'Views',
   { tag: [ '@display_builder', '@display_builder_views', '@display_builder_min' ] },
   async ({ page, drupal, displayBuilder }) => {
-    const testName = utils.createRandomString(6).toLowerCase()
+    const testName = utils.createRandomString()
     const name = `test_${testName}`
 
     // We have a specific attribute in:
@@ -121,22 +121,21 @@ test(
       await page.locator(`[data-link-builder="${config.viewsPrefix}${name}__page_1"]`).click()
       await displayBuilder.shoelaceReady()
 
-      // Enable highlight to ease drag.
-      await displayBuilder.keyboardShortcut('Shift+H')
+      await displayBuilder.fullHighlight()
 
       // Test the proper blocks are available for Views context.
       // @todo check the proper views row.
       const sources = {
-        view_attachment_after: '[View] Attachment after',
-        view_attachment_before: '[View] Attachment before',
-        view_exposed: '[View] Exposed form',
-        view_feed_icons: '[View] Feed icons',
-        view_footer: '[View] Footer',
         view_header: '[View] Header',
-        view_more: '[View] More',
-        view_pager: '[View] Pager',
-        view_rows_tmp: '[View] Rows (Display Builder)',
+        view_exposed: '[View] Exposed',
+        view_attachment_before: '[View] Attachment_before',
+        view_rows_tmp: '[View] Rows',
         // 'view_rows': 'View rows',
+        view_pager: '[View] Pager',
+        view_attachment_after: '[View] Attachment_after',
+        view_more: '[View] More',
+        view_footer: '[View] Footer',
+        view_feed_icons: '[View] Feed_icons',
       }
       await displayBuilder.expectBlocksAvailable(sources)
     })

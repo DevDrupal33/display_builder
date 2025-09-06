@@ -37,6 +37,10 @@ class ToggleFullscreenButton extends IslandPluginBase {
         'tooltip' => $this->t('Toggle fullscreen'),
         'keyboard' => 'M',
       ],
+      // To ease e2e tests.
+      '#attributes' => [
+        'data-island-action' => 'fullscreen',
+      ],
     ];
   }
 

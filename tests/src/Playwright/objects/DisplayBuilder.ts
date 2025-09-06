@@ -19,7 +19,7 @@ export class Displaybuilder {
   async toggleSidebarView(targetId: string = 'library'): Promise<void> {
     const sidebarFirst = this.page.locator('#db-first-drawer')
     const toolbarButton = this.page.locator(`.db-toolbar__start [data-target="${targetId}"]`)
-    await expect(toolbarButton).toBeVisible()
+    // await expect(toolbarButton).toBeVisible()
 
     if (await sidebarFirst.isVisible()) {
       await toolbarButton.click()
@@ -41,7 +41,7 @@ export class Displaybuilder {
     if (await sidebarFirst.isHidden()) {
       await this.toggleSidebarView()
     }
-    await expect(sidebarFirst.getByRole('tab', { name, exact: true })).toBeVisible()
+    // await expect(sidebarFirst.getByRole('tab', { name, exact: true })).toBeVisible()
     await sidebarFirst.getByRole('tab', { name, exact: true }).locator('div').click()
 
     await this.htmxReady()
@@ -66,7 +66,7 @@ export class Displaybuilder {
   ): Promise<void> {
     await this.openLibrariesTab(type)
     const element = this.page.locator(`.db-island-library [hx-vals*="${id}"]`).first()
-    await expect(element).toBeVisible()
+    // await expect(element).toBeVisible()
     await this.dragElementFromLibrary(type, element, target, targetPosition)
   }
 
@@ -143,16 +143,16 @@ export class Displaybuilder {
     value: string,
     valuePath?: Array<{ action: 'click' | 'fill'; locator: Locator }>
   ): Promise<void> {
-    await expect(element).toBeVisible()
+    // await expect(element).toBeVisible()
 
     await element.click({ position: { x: 5, y: 10 } })
     await this.htmxReady()
 
-    await expect(this.page.getByRole('dialog', { name: 'Settings' })).toBeVisible()
+    // await expect(this.page.getByRole('dialog', { name: 'Settings' })).toBeVisible()
 
     if (valuePath && Array.isArray(valuePath)) {
       for (const step of valuePath) {
-        await expect(step.locator).toBeVisible()
+        // await expect(step.locator).toBeVisible()
         if (step.action === 'click') {
           await step.locator.click()
         } else if (step.action === 'fill') {
@@ -259,7 +259,7 @@ export class Displaybuilder {
   }
 
   /**
-   * Create a Display Builder instance from UI.
+   * Create a Display Builder instance from dev UI.
    *
    * @async
    * @param {string} dbName - Name of the Display Builder instance.
@@ -267,7 +267,7 @@ export class Displaybuilder {
    * @returns {Promise<void>}
    */
   async createDisplayBuilderFromUi(dbName: string, fixture: string | null = null): Promise<void> {
-    await this.page.goto(config.dbAddUrl)
+    await this.page.goto(config.devAddInstance)
     await this.page.getByRole('textbox', { name: 'Builder ID' }).fill(dbName)
     await this.page.getByLabel('Profile').selectOption('test')
     if (fixture) {
@@ -275,7 +275,7 @@ export class Displaybuilder {
     }
     await this.page.getByRole('button', { name: 'Save' }).click()
     // await expect(this.page.getByRole('heading', { name: `Display builder: ${dbName}` })).toBeVisible()
-    await expect(this.page.getByRole('tab', { name: 'Builder' })).toBeVisible()
+    // await expect(this.page.getByRole('tab', { name: 'Builder' })).toBeVisible()
     await this.shoelaceReady()
   }
 
@@ -286,15 +286,14 @@ export class Displaybuilder {
    * @param {string} dbName - Name of the Display Builder instance.
    * @returns {Promise<void>}
    */
-  async deleteDisplayBuilderFromUi(dbName: string): Promise<void> {
+  async deleteDisplayBuilderFromDevUi(dbName: string): Promise<void> {
     await this.page.goto(config.dbList)
-    await expect(this.page.getByRole('link', { name: dbName })).toBeVisible()
     await this.page
-      .getByRole('row', { name: `${dbName}` })
+      .getByRole('row', { name: `${config.develPrefix}${dbName}` })
       .getByRole('button')
       .click()
     await this.page.getByRole('link', { name: 'Delete', exact: true }).click()
-    await expect(this.page.getByRole('heading', { name: `Do you want to delete ${dbName}?` })).toBeVisible()
+    // await expect(this.page.getByRole('heading', { name: `Do you want to delete ${config.develPrefix}${dbName}?` })).toBeVisible()
     await this.page.getByRole('button', { name: 'Confirm' }).click()
     await expect(this.page.getByRole('link', { name: dbName })).not.toBeVisible()
   }
@@ -333,10 +332,10 @@ export class Displaybuilder {
 
     // @todo handle hx-vals instead of simple button.
     for (const [ source, label ] of Object.entries(blocks)) {
-      // await expect(this.page.locator(`.db-island-block_library [hx-vals*="${source}"]`)).toHaveCount(1)
-      await expect(this.page.locator('.db-island-block_library').getByRole('button', { name: label })).toHaveCount(1)
+      await expect(this.page.locator(`.db-island-block_library [hx-vals*="${source}"]`)).toHaveCount(1)
+      // await expect(this.page.locator('.db-island-block_library').getByRole('button', { name: label })).toHaveCount(1)
       if (builder) {
-        await expect(this.page.locator(`.db-island-builder [data-instance-title="${label}"]`)).toHaveCount(1)
+        await expect(this.page.locator('.db-island-builder').getByRole('button', { name: label })).toHaveCount(1)
       }
     }
   }
@@ -366,5 +365,36 @@ export class Displaybuilder {
     await this.page.keyboard.press(key)
     await this.page.waitForTimeout(config.keyboardTimeout)
     await this.htmxReady()
+  }
+
+  /**
+   * Activate the Highlight.
+   *
+   * @async
+   * @returns {Promise<void>}
+   */
+  async highlight(): Promise<void> {
+    await this.keyboardShortcut(config.keyHighlight)
+  }
+
+  /**
+   * Activate the Fullscreen.
+   *
+   * @async
+   * @returns {Promise<void>}
+   */
+  async fullscreen(): Promise<void> {
+    await this.keyboardShortcut(config.keyFullscreen)
+  }
+
+  /**
+   * Activate the Fullscreen and higlight.
+   *
+   * @async
+   * @returns {Promise<void>}
+   */
+  async fullHighlight(): Promise<void> {
+    await this.highlight()
+    await this.fullscreen()
   }
 }

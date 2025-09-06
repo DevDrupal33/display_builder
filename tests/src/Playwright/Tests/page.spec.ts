@@ -12,7 +12,7 @@ test(
   'Page Layout',
   { tag: [ '@display_builder', '@display_builder_page_layout', '@display_builder_min' ] },
   async ({ page, drupal, displayBuilder }) => {
-    const testName = utils.createRandomString(6).toLowerCase()
+    const testName = utils.createRandomString()
     const name = `test_${testName}`
     const pageLayoutListRow = page.locator(`tr[data-id="${name}"]`)
 
@@ -40,7 +40,7 @@ test(
       await displayBuilder.shoelaceReady()
 
       // Enable highlight to ease drag.
-      await displayBuilder.keyboardShortcut('Shift+H')
+      await displayBuilder.fullHighlight()
 
       // Test the proper blocks are available for Page context.
       const sources = {

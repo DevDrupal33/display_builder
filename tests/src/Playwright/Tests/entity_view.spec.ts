@@ -12,7 +12,7 @@ test(
   'Entity view',
   { tag: [ '@display_builder', '@display_builder_entity_view', '@display_builder_min' ] },
   async ({ page, drupal, displayBuilder }) => {
-    const testName = utils.createRandomString(6).toLowerCase()
+    const testName = utils.createRandomString()
     const name = `test_${testName}`
   
     await test.step(`Admin login`, async () => {
@@ -45,7 +45,7 @@ test(
       await displayBuilder.shoelaceReady()
 
       // Enable highlight to ease drag.
-      await displayBuilder.keyboardShortcut('Shift+H')
+      await displayBuilder.fullHighlight()
 
       // Check preview on hover
       await displayBuilder.openLibrariesTab('Components')

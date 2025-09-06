@@ -267,7 +267,7 @@ cspell:
       junit:
         - test-results/playwright.xml
 
-playwright:
+playwright-full:
   extends: .playwright-base
   rules:
     # @todo opt in when stabilize
@@ -277,13 +277,12 @@ playwright:
     - *manual-rule
   allow_failure: true
 
-playwright-min:
+playwright:
   extends: .playwright-base
   rules:
-    # @todo opt in when stabilize
-    # - !reference [.opt-in-current-rule]
-    # - *skip-playwright-rule
-    # - *playwright-tests-exist-rule
+    - !reference [.opt-in-current-rule]
+    - *skip-playwright-rule
+    - *playwright-tests-exist-rule
     - *manual-rule
   allow_failure: true
   variables:

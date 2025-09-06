@@ -7,13 +7,13 @@
  * Return a string of random characters of specified length.
  *
  * @param {number} length
- *   Length of string to return.
+ *   Length of string to return, default to 8.
  * @returns {string}
  *   The random string.
  */
-export function createRandomString(length: number = 3): string {
+export function createRandomString(length: number = 8): string {
   let result = ''
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
   const charactersLength = characters.length
 
   for (let i = 0; i < length; i += 1) {

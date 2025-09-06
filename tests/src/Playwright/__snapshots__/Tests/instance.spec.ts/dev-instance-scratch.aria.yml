@@ -1,0 +1,5 @@
+- 'heading "label: First component" [level=5]'
+- 'heading "label: Second component with a token" [level=5]'
+- text: I am a test token in a slot
+- button "Click me"
+- button "Click me"

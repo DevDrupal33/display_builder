@@ -93,11 +93,15 @@ class StateButtons extends IslandPluginBase {
       $save = $this->buildButton('', '', 'S', FALSE, 'floppy', $this->t('Save this display'));
       $save['#props']['variant'] = 'primary';
       $save['#attributes']['outline'] = TRUE;
+      // To ease e2e tests.
+      $save['#attributes']['data-island-action'] = 'save';
       $buttonGroup['#slots']['buttons'][] = $this->htmxEvents->onSave($save, $builder_id);
 
       $restore = $this->buildButton('', '', 'R', FALSE, 'arrow-repeat', $this->t('Restore to last saved version'));
       $restore['#props']['variant'] = 'warning';
       $restore['#attributes']['outline'] = TRUE;
+      // To ease e2e tests.
+      $restore['#attributes']['data-island-action'] = 'restore';
       $buttonGroup['#slots']['buttons'][] = $this->htmxEvents->onReset($restore, $builder_id);
     }
 
@@ -105,6 +109,8 @@ class StateButtons extends IslandPluginBase {
       $revert = $this->buildButton('', '', NULL, FALSE, 'box-arrow-in-down', $this->t('Revert to default display (not overridden)'));
       $revert['#props']['variant'] = 'danger';
       $revert['#attributes']['outline'] = TRUE;
+      // To ease e2e tests.
+      $revert['#attributes']['data-island-action'] = 'revert';
       $buttonGroup['#slots']['buttons'][] = $this->htmxEvents->onRevert($revert, $builder_id);
     }
 

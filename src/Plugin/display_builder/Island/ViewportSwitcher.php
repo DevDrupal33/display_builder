@@ -209,6 +209,7 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
       '#attributes' => [
         'style' => 'display: inline-block;',
         'data-points' => \json_encode($data),
+        'data-island-action' => 'viewport',
       ],
     ];
 
@@ -244,6 +245,7 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
       ],
       '#attributes' => [
         'class' => ['switch-viewport'],
+        'data-island-action' => 'viewport',
       ],
       '#attached' => [
         'library' => ['display_builder/viewport_switcher'],

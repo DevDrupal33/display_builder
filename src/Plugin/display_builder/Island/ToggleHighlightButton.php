@@ -37,6 +37,10 @@ class ToggleHighlightButton extends IslandPluginBase {
         'tooltip' => $this->t('Highlight components, blocks and slots to ease the manipulation. Shortcut: H.'),
         'keyboard' => 'H',
       ],
+      // To ease e2e tests.
+      '#attributes' => [
+        'data-island-action' => 'highlight',
+      ],
     ];
   }
 

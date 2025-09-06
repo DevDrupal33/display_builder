@@ -59,6 +59,10 @@ class KeyboardHelpButton extends IslandPluginBase {
           ],
         ],
       ],
+      // To ease e2e tests.
+      '#attributes' => [
+        'data-island-action' => 'help',
+      ],
     ];
   }
 
