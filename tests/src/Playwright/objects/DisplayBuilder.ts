@@ -388,7 +388,7 @@ export class Displaybuilder {
   }
 
   /**
-   * Activate the Fullscreen and higlight.
+   * Activate the Fullscreen and highlight.
    *
    * @async
    * @returns {Promise<void>}
