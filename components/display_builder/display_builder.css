@@ -1,11 +1,57 @@
 :root {
-  --db-background-color: white;
-  --db-text-color: black;
+  --db-background-color: var(--sl-color-neutral-1000);
+  --db-text-color: var(--sl-color-neutral-0);
   --db-background-image: repeating-linear-gradient(45deg, oklch(100% 0 0), oklch(100% 0 0) 13px, var(--sl-color-neutral-100) 13px, var(--sl-color-neutral-100) 14px);
   --db-background-size: 40px 40px;
   --db-toolbar-height: 75px;
-  /* Drupal admin toolbar is 502 */
   --db-z-index: 401;
+  --db-table-bg: var(--sl-color-neutral-50);
+  --db-table-border: var(--sl-color-neutral-200);
+  --db-table-header-bg: var(--sl-color-neutral-100);
+  --db-table-header-color: var(--sl-color-neutral-900);
+  --db-table-row-hover: var(--sl-color-neutral-200);
+  --sl-tooltip-arrow-size: 0;
+}
+
+/* Dark mode overrides using .sl-theme-dark class */
+.display-builder.sl-theme-dark {
+  /* --db-background-color: #181a1b; */
+  /* --db-text-color: #f8f9fa; */
+  --db-background-image: repeating-linear-gradient(45deg, oklch(20% 0 0), oklch(20% 0 0) 13px, var(--sl-color-neutral-50) 13px, var(--sl-color-neutral-50) 14px);
+  --db-table-bg: var(--sl-color-neutral-50);
+  --db-table-border: var(--sl-color-neutral-200);
+  --db-table-header-bg: var(--sl-color-neutral-100);
+  --db-table-header-color: var(--sl-color-neutral-900);
+  --db-table-row-hover: var(--sl-color-neutral-200);
+}
+
+/* Table styling uses variables, so it switches automatically */
+.db-island-logs table {
+  width: 100%;
+  color: var(--db-text-color);
+  border: 1px solid var(--db-table-border);
+  border-collapse: collapse;
+  background: var(--db-table-bg);
+}
+
+.db-island-logs th,
+.db-island-logs td {
+  padding: 0.5rem;
+  border: 1px solid var(--db-table-border);
+}
+
+.db-island-logs th {
+  color: var(--db-table-header-color);
+  background: var(--db-table-header-bg);
+  font-weight: bold;
+}
+
+.db-island-logs tr {
+  background: var(--db-table-bg);
+}
+
+.db-island-logs tr:hover {
+  background: var(--db-table-row-hover);
 }
 
 body:has(.display-builder) .dialog-off-canvas-main-canvas {
@@ -71,9 +117,7 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
   /* When on a viewport switch context. */
   &.viewport-active {
     .display-builder__main {
-      box-shadow:
-        rgb(0, 0, 0, 0.02) 0 1px 3px 0,
-        rgb(27, 31, 35, 0.15) 0 0 0 1px;
+      box-shadow: rgb(27, 31, 35, 0.15) 0 10px 25px 0;
     }
     /* Viewport switch menu active state */
     .switch-viewport {

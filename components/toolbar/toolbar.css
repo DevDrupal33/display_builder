@@ -5,6 +5,12 @@
   justify-content: space-between;
   height: var(--db-toolbar-height, 4rem);
   padding: 0.5rem;
+
+  sl-tooltip::part(body) {
+    color: var(--sl-color-neutral-700);
+    border: 1px solid var(--sl-color-neutral-200);
+    background-color: var(--sl-color-neutral-50);
+  }
 }
 
 .display-builder {

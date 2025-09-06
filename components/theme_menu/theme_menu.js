@@ -7,7 +7,8 @@
   /**
    * Initialize the display builder theme switch.
    *
-   * This largely a copy of the Shoelace website theme switch.
+   * This largely a copy of the Shoelace website theme switch. The switch is
+   * set for all display builders, not only the current.
    *
    * @param {HTMLElement} builder - The builder element.
    *
@@ -18,8 +19,10 @@
   function handleThemeSwitch(builder) {
     function getTheme() {
       return (
-        Drupal.displayBuilder.LocalStorageManager.get(builder.id, 'theme') ||
-        'auto'
+        Drupal.displayBuilder.LocalStorageManager.get(
+          'displayBuilder',
+          'theme',
+        ) || 'auto'
       );
     }
 
@@ -46,7 +49,11 @@
 
     function setTheme(newTheme) {
       theme = newTheme;
-      Drupal.displayBuilder.LocalStorageManager.set(builder.id, 'theme', theme);
+      Drupal.displayBuilder.LocalStorageManager.set(
+        'displayBuilder',
+        'theme',
+        theme,
+      );
 
       // Update the UI.
       updateSelection();

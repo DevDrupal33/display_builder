@@ -11,9 +11,11 @@
     .ui-icons-select {
       display: inline-block;
       margin-top: 0.5rem;
+
       .form-item--error-message {
         display: none;
       }
+
       > div {
         display: contents;
       }
@@ -30,5 +32,112 @@
 
   .form-item {
     margin-block: 0.5rem;
+  }
+
+  /* Reset and adapt fieldset, details and summary */
+
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    list-style: none;
+    font-size: var(--sl-button-font-size-medium);
+  }
+
+  summary::after {
+    width: 0;
+    height: 0;
+    content: "";
+    transition: 0.2s;
+    border-top: 8px solid var(--sl-color-neutral-500);
+    border-inline: 7px solid transparent;
+  }
+
+  details[open] > summary {
+    border-bottom: 0 none;
+  }
+
+  details[open] > summary::after {
+    transform: rotate(-180deg);
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  details {
+    margin-bottom: 0.5rem;
+    padding: 0;
+    border: 1px solid var(--sl-input-border-color);
+    border-radius: var(--sl-input-border-radius-medium);
+    box-shadow: var(--sl-shadow-small);
+  }
+
+  details summary {
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--sl-input-border-radius-medium);
+    background-color: var(--sl-color-neutral-100);
+  }
+
+  /* Have a smaller global size and color for description text */
+  details {
+    color: var(--sl-color-neutral-600);
+  }
+
+  details {
+    padding: 0 0 0 0.5rem;
+  }
+
+  details > * {
+    padding: 0;
+  }
+
+  form details > *:last-child {
+    margin-bottom: 0.5rem;
+  }
+
+  details > summary {
+    margin-left: -0.5rem;
+  }
+
+  details > div {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    padding: 0 0.1rem 0.1rem 0;
+  }
+
+  details summary,
+  details label,
+  details input {
+    color: var(--sl-color-neutral-800);
+  }
+
+  details summary {
+    padding: 0.5rem;
+    font-weight: normal;
+  }
+
+  details label {
+    display: inline-block;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    margin-left: 0.25rem;
+  }
+
+  details > .js-form-type-checkbox {
+    margin-top: 1rem;
+  }
+
+  details[open] {
+    padding: 0 0.5rem 0 0.5rem;
+  }
+
+  details[open] summary {
+    border-radius: 5px 5px 0 0;
+    background-color: var(--sl-color-primary-300);
+  }
+
+  .form-check .form-check-input {
+    margin-left: 0;
   }
 }
