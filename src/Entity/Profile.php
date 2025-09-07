@@ -9,11 +9,11 @@ use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
-use Drupal\display_builder\DisplayBuilderInterface;
-use Drupal\display_builder\DisplayBuilderViewBuilder;
-use Drupal\display_builder\Form\DisplayBuilderForm;
-use Drupal\display_builder\Form\DisplayBuilderIslandPluginForm;
-use Drupal\display_builder_ui\DisplayBuilderListBuilder;
+use Drupal\display_builder\Form\ProfileForm;
+use Drupal\display_builder\Form\ProfileIslandPluginForm;
+use Drupal\display_builder\ProfileInterface;
+use Drupal\display_builder\ProfileViewBuilder;
+use Drupal\display_builder_ui\ProfileListBuilder;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 
@@ -21,11 +21,11 @@ use Drupal\user\RoleInterface;
  * Defines the display builder entity type.
  */
 #[ConfigEntityType(
-  id: 'display_builder',
-  label: new TranslatableMarkup('Display builder'),
-  label_collection: new TranslatableMarkup('Display builders'),
-  label_singular: new TranslatableMarkup('display builder'),
-  label_plural: new TranslatableMarkup('display builders'),
+  id: 'display_builder_profile',
+  label: new TranslatableMarkup('Display builder profile'),
+  label_collection: new TranslatableMarkup('Display builder profiles'),
+  label_singular: new TranslatableMarkup('display builder profile'),
+  label_plural: new TranslatableMarkup('display builders profiles'),
   entity_keys: [
     'id' => 'id',
     'label' => 'label',
@@ -34,22 +34,22 @@ use Drupal\user\RoleInterface;
   ],
   handlers: [
     'route_provider' => [
-      'html' => 'Drupal\display_builder\Routing\DisplayBuilderRouteProvider',
+      'html' => 'Drupal\display_builder\Routing\ProfileRouteProvider',
     ],
-    'view_builder' => DisplayBuilderViewBuilder::class,
-    'list_builder' => DisplayBuilderListBuilder::class,
+    'view_builder' => ProfileViewBuilder::class,
+    'list_builder' => ProfileListBuilder::class,
     'form' => [
-      'add' => DisplayBuilderForm::class,
-      'edit' => DisplayBuilderForm::class,
+      'add' => ProfileForm::class,
+      'edit' => ProfileForm::class,
       'delete' => EntityDeleteForm::class,
-      'edit-plugin' => DisplayBuilderIslandPluginForm::class,
+      'edit-plugin' => ProfileIslandPluginForm::class,
     ],
   ],
   links: [
     'add-form' => '/admin/structure/display-builder/add',
-    'edit-form' => '/admin/structure/display-builder/{display_builder}',
-    'edit-plugin-form' => '/admin/structure/display-builder/{display_builder}/edit/{island_id}',
-    'delete-form' => '/admin/structure/display-builder/{display_builder}/delete',
+    'edit-form' => '/admin/structure/display-builder/{display_builder_profile}',
+    'edit-plugin-form' => '/admin/structure/display-builder/{display_builder_profile}/edit/{island_id}',
+    'delete-form' => '/admin/structure/display-builder/{display_builder_profile}/delete',
     'collection' => '/admin/structure/display-builder',
   ],
   admin_permission: 'administer display builder profile',
@@ -58,6 +58,8 @@ use Drupal\user\RoleInterface;
       'id',
     ],
   ],
+  // Example: display_builder.profile.default.yml.
+  config_prefix: 'profile',
   config_export: [
     'id',
     'label',
@@ -68,7 +70,7 @@ use Drupal\user\RoleInterface;
     'weight',
   ],
 )]
-final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInterface {
+final class Profile extends ConfigEntityBase implements ProfileInterface {
 
   /**
    * The display builder config ID.
@@ -127,7 +129,7 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
    * {@inheritdoc}
    */
   public function setIslandConfiguration(string $island_id, array $configuration = []): void {
-    // When $configuration is updated from DisplayBuilderIslandPluginForm,
+    // When $configuration is updated from ProfileIslandPluginForm,
     // 'weight', 'enable' and 'region' properties are missing but they must not
     // be reset.
     $configuration['weight'] = $configuration['weight'] ?? $this->islands[$island_id]['weight'] ?? 0;
@@ -188,8 +190,8 @@ final class DisplayBuilder extends ConfigEntityBase implements DisplayBuilderInt
       unset($options['island_id']);
 
       return Url::fromRoute(
-        'entity.display_builder.edit_plugin_form',
-        ['display_builder' => $this->id(), 'island_id' => $island_id],
+        'entity.display_builder_profile.edit_plugin_form',
+        ['display_builder_profile' => $this->id(), 'island_id' => $island_id],
         $options
       );
     }

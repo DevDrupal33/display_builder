@@ -88,7 +88,7 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
   /**
    * {@inheritdoc}
    */
-  public function getSources(array $contexts = [], bool $fillInstanceId = TRUE): array {
+  public function getSources(array $contexts = [], bool $fillNodeId = TRUE): array {
     $data = $this->get('sources') ?? [];
 
     if (isset($data[0]) && \count($data) === 1) {
@@ -99,8 +99,8 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
       return [];
     }
 
-    if ($fillInstanceId) {
-      self::fillInstanceId($data);
+    if ($fillNodeId) {
+      self::fillNodeId($data);
     }
 
     return $data;
@@ -140,19 +140,19 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
   }
 
   /**
-   * Recursively fill the _instance_id key.
+   * Recursively fill the _node_id key.
    *
    * @param array $array
    *   The array reference.
    */
-  private static function fillInstanceId(array &$array): void {
-    if (isset($array['source_id']) && !isset($array['_instance_id'])) {
-      $array['_instance_id'] = \uniqid();
+  private static function fillNodeId(array &$array): void {
+    if (isset($array['source_id']) && !isset($array['_node_id'])) {
+      $array['_node_id'] = \uniqid();
     }
 
     foreach ($array as &$value) {
       if (\is_array($value)) {
-        self::fillInstanceId($value);
+        self::fillNodeId($value);
       }
     }
   }

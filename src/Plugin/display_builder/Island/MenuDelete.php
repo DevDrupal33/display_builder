@@ -31,7 +31,7 @@ class MenuDelete extends IslandPluginBase {
     // @see assets/js/contextual_menu.js
     // Urls are generated with placeholders to be replaced in the js.
     $remove = $this->buildMenuItem($this->t('Remove'), 'remove');
-    $remove = $this->htmxEvents->onClickDelete($remove, $builder_id, '__instance_id__');
+    $remove = $this->htmxEvents->onClickDelete($remove, $builder_id, '__node_id__');
 
     return [
       $this->buildMenuDivider(),

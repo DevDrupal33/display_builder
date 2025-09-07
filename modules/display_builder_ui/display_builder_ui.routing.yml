@@ -1,32 +1,32 @@
 # Profile config entity routes
-entity.display_builder.collection:
+entity.display_builder_profile.collection:
   path: '/admin/structure/display-builder'
   defaults:
-    _entity_list: 'display_builder'
+    _entity_list: 'display_builder_profile'
     _title: 'Display Builder'
   requirements:
     _permission: 'administer display builder profile'
 
-entity.display_builder.add_form:
+entity.display_builder_profile.add_form:
   path: '/admin/structure/display-builder/add'
   defaults:
-    _entity_form: 'display_builder.add'
+    _entity_form: 'display_builder_profile.add'
     _title: 'Add a Display Builder profile'
   requirements:
     _permission: 'administer display builder profile'
 
-entity.display_builder.edit_form:
-  path: '/admin/structure/display-builder/{display_builder}'
+entity.display_builder_profile.edit_form:
+  path: '/admin/structure/display-builder/{display_builder_profile}'
   defaults:
-    _entity_form: 'display_builder.edit'
+    _entity_form: 'display_builder_profile.edit'
     _title: 'Edit a Display Builder profile'
   requirements:
     _permission: 'administer display builder profile'
 
-entity.display_builder.delete_form:
-  path: '/admin/structure/display-builder/{display_builder}/delete'
+entity.display_builder_profile.delete_form:
+  path: '/admin/structure/display-builder/{display_builder_profile}/delete'
   defaults:
-    _entity_form: 'display_builder.delete'
+    _entity_form: 'display_builder_profile.delete'
     _title: 'Delete a Display Builder profile'
   requirements:
     _permission: 'administer display builder profile'

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_entity_view\Entity;
 
-use Drupal\display_builder\DisplayBuilderInterface;
+use Drupal\display_builder\ProfileInterface;
 
 /**
  * Provides method to know if Display Builder is enabled.
@@ -30,9 +30,9 @@ interface DisplayBuilderOverridableInterface {
   /**
    * Get display builder config entity for overridden view mode.
    *
-   * @return ?DisplayBuilderInterface
+   * @return ?ProfileInterface
    *   The display builder config entity.
    */
-  public function getDisplayBuilderOverrideProfile(): ?DisplayBuilderInterface;
+  public function getDisplayBuilderOverrideProfile(): ?ProfileInterface;
 
 }

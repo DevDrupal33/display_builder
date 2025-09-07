@@ -64,7 +64,7 @@ class LayersPanel extends BuilderPanel {
    */
   protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): array {
     $component_id = $data['source']['component']['component_id'] ?? NULL;
-    $instance_id = $instance_id ?: $data['_instance_id'];
+    $instance_id = $instance_id ?: $data['_node_id'];
 
     if (!$instance_id && !$component_id) {
       return [];
@@ -93,7 +93,7 @@ class LayersPanel extends BuilderPanel {
           // @see assets/js/contextual_menu.js
           'data-slot-id' => $slot_id,
           'data-slot-title' => $definition['title'],
-          'data-instance-title' => $component['label'],
+          'data-node-title' => $component['label'],
         ],
       ];
 
@@ -126,7 +126,7 @@ class LayersPanel extends BuilderPanel {
       // Required for the context menu label.
       // @see assets/js/contextual_menu.js
       '#attributes' => [
-        'data-instance-title' => $name,
+        'data-node-title' => $name,
       ],
     ];
 
@@ -145,11 +145,11 @@ class LayersPanel extends BuilderPanel {
         'title' => $label['summary'],
       ],
     ];
-    $instance_id = $instance_id ?: $data['_instance_id'];
+    $instance_id = $instance_id ?: $data['_node_id'];
 
     // This label is used for contextual menu.
     // @see assets/js/contextual_menu.js
-    $build['#attributes']['data-instance-title'] = $label['summary'];
+    $build['#attributes']['data-node-title'] = $label['summary'];
     $build['#attributes']['data-slot-position'] = $index;
 
     return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['label'], $index);

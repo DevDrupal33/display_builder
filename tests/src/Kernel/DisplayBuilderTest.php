@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\display_builder\Kernel;
 
-use Drupal\display_builder\Entity\DisplayBuilder;
+use Drupal\display_builder\Entity\Profile;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\Role;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\Group;
  *
  * @internal
  */
-#[CoversClass('\Drupal\display_builder\Entity\DisplayBuilder')]
+#[CoversClass('\Drupal\display_builder\Entity\Profile')]
 #[Group('display_builder')]
 final class DisplayBuilderTest extends KernelTestBase {
 
@@ -37,7 +37,7 @@ final class DisplayBuilderTest extends KernelTestBase {
     parent::setUp();
     $this->installConfig(['system', 'display_builder', 'ui_patterns', 'display_builder_test']);
     $this->installEntitySchema('user');
-    $this->installEntitySchema('display_builder');
+    $this->installEntitySchema('display_builder_profile');
   }
 
   /**
@@ -48,7 +48,7 @@ final class DisplayBuilderTest extends KernelTestBase {
     $updated_island = ['enable' => FALSE, 'weight' => 3];
 
     // Create a new display builder entity.
-    $displayBuilder = DisplayBuilder::create([
+    $displayBuilder = Profile::create([
       'id' => 'test_builder',
       'label' => 'Test Builder',
       'description' => 'Test Description',
@@ -79,7 +79,7 @@ final class DisplayBuilderTest extends KernelTestBase {
     self::assertSame($enable_island, $config['test_island_menu']);
 
     // Test entity loading.
-    $loaded = DisplayBuilder::load('test_builder');
+    $loaded = Profile::load('test_builder');
     self::assertNotNull($loaded);
     self::assertSame($displayBuilder->id(), $loaded->id());
     self::assertSame($displayBuilder->label(), $loaded->label());
@@ -98,7 +98,7 @@ final class DisplayBuilderTest extends KernelTestBase {
     $displayBuilder->save();
 
     // Reload and verify changes.
-    $updated = DisplayBuilder::load('test_builder');
+    $updated = Profile::load('test_builder');
     self::assertSame('Updated Builder', $updated->label());
     self::assertSame('Updated Description', $updated->get('description'));
     self::assertSame('local', $updated->get('library'));
@@ -119,7 +119,7 @@ final class DisplayBuilderTest extends KernelTestBase {
     $islandId = 'test_island_view';
 
     // Create a display builder with island configuration.
-    $displayBuilder = DisplayBuilder::create([
+    $displayBuilder = Profile::create([
       'id' => 'test_islands',
       'label' => 'Test Islands',
       'description' => 'Test Description',
@@ -161,13 +161,13 @@ final class DisplayBuilderTest extends KernelTestBase {
     $displayBuilder->save();
 
     // Reload and verify island configuration changes.
-    $updated = DisplayBuilder::load('test_islands');
+    $updated = Profile::load('test_islands');
     $updatedConfig = $updated->getIslandConfiguration($islandId);
     self::assertFalse($updatedConfig['enable']);
     self::assertSame(10, $updatedConfig['weight']);
     self::assertSame('sidebar', $updatedConfig['region']);
     // Verify updated configuration including custom values.
-    $updated = DisplayBuilder::load('test_islands');
+    $updated = Profile::load('test_islands');
     $updatedConfig = $updated->getIslandConfiguration($islandId);
     self::assertFalse($updatedConfig['enable']);
     self::assertSame(10, $updatedConfig['weight']);
@@ -190,7 +190,7 @@ final class DisplayBuilderTest extends KernelTestBase {
     // Enable the island and test again.
     $displayBuilder->setIslandConfiguration($islandId, ['enable' => TRUE] + $newConfig);
     $displayBuilder->save();
-    $updated = DisplayBuilder::load('test_islands');
+    $updated = Profile::load('test_islands');
     $enabledIslands = $updated->getIslandEnabled();
     self::assertArrayHasKey($islandId, $enabledIslands);
   }
@@ -199,7 +199,7 @@ final class DisplayBuilderTest extends KernelTestBase {
    * Test the getRoles() method.
    */
   public function testGetRoles(): void {
-    $displayBuilder = DisplayBuilder::create([
+    $displayBuilder = Profile::create([
       'id' => 'role_test',
       'label' => 'Role Test',
       'description' => 'Test Description',
@@ -222,7 +222,7 @@ final class DisplayBuilderTest extends KernelTestBase {
    * Test the toUrl() method.
    */
   public function testToUrlEditPluginForm(): void {
-    $displayBuilder = DisplayBuilder::create([
+    $displayBuilder = Profile::create([
       'id' => 'url_test',
       'label' => 'URL Test',
       'description' => 'Test Description',
@@ -237,7 +237,7 @@ final class DisplayBuilderTest extends KernelTestBase {
    * Test the library and debug mode.
    */
   public function testGetLibraryAndDebug(): void {
-    $displayBuilder = DisplayBuilder::create([
+    $displayBuilder = Profile::create([
       'id' => 'lib_test',
       'label' => 'Lib Test',
       'description' => 'Test Description',

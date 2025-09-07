@@ -13,7 +13,7 @@ use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\Controller\IntegrationControllerBase;
-use Drupal\display_builder\WithDisplayBuilderInterface;
+use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Symfony\Component\HttpFoundation\Response;
@@ -51,7 +51,7 @@ final class EntityViewOverridesController extends IntegrationControllerBase {
     /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $entity_display */
     $entity_display = $this->getEntityViewDisplay($entity_type_id, $entity->bundle(), $view_mode);
     \assert($entity_display instanceof DisplayBuilderOverridableInterface);
-    /** @var \Drupal\display_builder\WithDisplayBuilderInterface $with_display_builder */
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $with_display_builder */
     $with_display_builder = $entity->get($entity_display->getDisplayBuilderOverrideField());
 
     return $this->renderBuilder($with_display_builder);
@@ -168,13 +168,13 @@ final class EntityViewOverridesController extends IntegrationControllerBase {
    * @param string $view_mode
    *   View mode of the display.
    *
-   * @return \Drupal\display_builder\WithDisplayBuilderInterface|null
+   * @return \Drupal\display_builder\DisplayBuildableInterface|null
    *   The corresponding entity view display.
    */
-  protected function getEntityViewDisplay(string $entity_type_id, string $bundle, string $view_mode): ?WithDisplayBuilderInterface {
+  protected function getEntityViewDisplay(string $entity_type_id, string $bundle, string $view_mode): ?DisplayBuildableInterface {
     $display_id = \sprintf('%s.%s.%s', $entity_type_id, $bundle, $view_mode);
 
-    /** @var \Drupal\display_builder\WithDisplayBuilderInterface|null $display */
+    /** @var \Drupal\display_builder\DisplayBuildableInterface|null $display */
     $display = $this->entityTypeManager()->getStorage('entity_view_display')
       ->load($display_id);
 

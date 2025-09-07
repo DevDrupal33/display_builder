@@ -95,7 +95,7 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
     // If the update is made from Layout Builder, convert the data and copy
     // to Display Builder's third party settings storage.
     if (isset($this->form_id) && $this->form_id === 'entity_view_display_layout_builder_form') {
-      if ($this->getDisplayBuilder()) {
+      if ($this->getProfile()) {
         $this->importFromLayoutBuilder();
       }
     }

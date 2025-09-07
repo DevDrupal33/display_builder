@@ -79,7 +79,7 @@ class BuilderPanel extends IslandPluginBase {
       '#attributes' => [
         // Required for JavaScript @see components/dropzone/dropzone.js.
         'data-db-id' => $builder_id,
-        'data-instance-title' => $this->t('Base container'),
+        'data-node-title' => $this->t('Base container'),
         'data-db-root' => TRUE,
       ],
     ];
@@ -138,7 +138,7 @@ class BuilderPanel extends IslandPluginBase {
    */
   protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
     $component_id = $data['source']['component']['component_id'] ?? NULL;
-    $instance_id = $instance_id ?: $data['_instance_id'];
+    $instance_id = $instance_id ?: $data['_node_id'];
 
     if (!$instance_id && !$component_id) {
       return NULL;
@@ -153,7 +153,7 @@ class BuilderPanel extends IslandPluginBase {
     $build = $this->renderSource($data);
     // Required for the context menu label.
     // @see assets/js/contextual_menu.js
-    $build['#attributes']['data-instance-title'] = $component['label'];
+    $build['#attributes']['data-node-title'] = $component['label'];
     $build['#attributes']['data-slot-position'] = $index;
 
     foreach ($component['slots'] ?? [] as $slot_id => $definition) {
@@ -196,13 +196,13 @@ class BuilderPanel extends IslandPluginBase {
    * {@inheritdoc}
    */
   protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
-    $instance_id = $instance_id ?: $data['_instance_id'];
+    $instance_id = $instance_id ?: $data['_node_id'];
 
     if (!$instance_id) {
       return NULL;
     }
 
-    $label = $data['source_id'] ?? $data['_instance_id'] ?? NULL;
+    $label = $data['source_id'] ?? $data['_node_id'] ?? NULL;
 
     $classes = ['db-block'];
 
@@ -241,7 +241,7 @@ class BuilderPanel extends IslandPluginBase {
 
     // This label is used for contextual menu.
     // @see assets/js/contextual_menu.js
-    $build['#attributes']['data-instance-title'] = $label['summary'] ?? $label;
+    $build['#attributes']['data-node-title'] = $label['summary'] ?? $label;
     $build['#attributes']['data-slot-position'] = $index;
 
     return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['label'] ?? $label, $index);
@@ -380,7 +380,7 @@ class BuilderPanel extends IslandPluginBase {
         // @see assets/js/contextual_menu.js
         'data-slot-id' => $slot_id,
         'data-slot-title' => \ucfirst($definition['title']),
-        'data-instance-id' => $instance_id,
+        'data-node-id' => $instance_id,
       ],
     ];
 

@@ -14,10 +14,10 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
   /**
    * Returns the display builder profile.
    *
-   * @return \Drupal\display_builder\DisplayBuilderInterface|null
+   * @return \Drupal\display_builder\ProfileInterface|null
    *   The display builder profile.
    */
-  public function getProfile(): ?DisplayBuilderInterface;
+  public function getProfile(): ?ProfileInterface;
 
   /**
    * Set the display builder profile from id.
@@ -30,15 +30,15 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
   /**
    * Move an instance to root.
    *
-   * @param string $instance_id
-   *   The instance id.
+   * @param string $node_id
+   *   The node ID of the source.
    * @param int $position
    *   The position.
    *
    * @return bool
    *   True if success, false otherwise.
    */
-  public function moveToRoot(string $instance_id, int $position): bool;
+  public function moveToRoot(string $node_id, int $position): bool;
 
   /**
    * Attach a new source instance to root.
@@ -53,12 +53,12 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
    *   (Optional) The source third party settings. Used for paste/duplicate.
    *
    * @return string
-   *   The instance ID of the new component.
+   *   The node ID of the source.
    */
-  public function attachSourceToRoot(int $position, string $source_id, array $data, array $third_party_settings = []): string;
+  public function attachToRoot(int $position, string $source_id, array $data, array $third_party_settings = []): string;
 
   /**
-   * Attach a new source instance to a slot.
+   * Attach a new source to a slot.
    *
    * @param string $parent_id
    *   The parent id.
@@ -74,15 +74,15 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
    *   (Optional) The source third party settings. Used for paste/duplicate.
    *
    * @return string
-   *   The instance ID of the new component.
+   *   The node ID of the source.
    */
-  public function attachSourceToSlot(string $parent_id, string $slot_id, int $position, string $source_id, array $data, array $third_party_settings = []): string;
+  public function attachToSlot(string $parent_id, string $slot_id, int $position, string $source_id, array $data, array $third_party_settings = []): string;
 
   /**
    * Move an instance to a slot.
    *
-   * @param string $instance_id
-   *   The instance id.
+   * @param string $node_id
+   *   The node ID of the source.
    * @param string $parent_id
    *   The parent id.
    * @param string $slot_id
@@ -93,63 +93,63 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
    * @return bool
    *   True if success, false otherwise.
    */
-  public function moveToSlot(string $instance_id, string $parent_id, string $slot_id, int $position): bool;
+  public function moveToSlot(string $node_id, string $parent_id, string $slot_id, int $position): bool;
 
   /**
    * Get instance data.
    *
-   * @param string $instance_id
-   *   The instance id.
+   * @param string $node_id
+   *   The node ID of the source.
    *
    * @return array
    *   The instance data.
    */
-  public function get(string $instance_id): array;
+  public function get(string $node_id): array;
 
   /**
    * Get the parent id of an instance.
    *
    * @param array $root
    *   The root data.
-   * @param string $instance_id
-   *   The instance id.
+   * @param string $node_id
+   *   The node ID of the source.
    *
    * @return string
    *   The parent id or empty.
    */
-  public function getParentId(array $root, string $instance_id): string;
+  public function getParentId(array $root, string $node_id): string;
 
   /**
    * Set the source for an instance.
    *
-   * @param string $instance_id
-   *   The instance id.
+   * @param string $node_id
+   *   The node ID of the source.
    * @param string $source_id
    *   The source id.
    * @param array $data
    *   The source data.
    */
-  public function setSource(string $instance_id, string $source_id, array $data): void;
+  public function setSource(string $node_id, string $source_id, array $data): void;
 
   /**
    * Set the third party settings for an instance.
    *
-   * @param string $instance_id
-   *   The instance id.
+   * @param string $node_id
+   *   The node ID of the source.
    * @param string $island_id
    *   The island id (relative to third party settings).
    * @param array $data
    *   The third party data for the island.
    */
-  public function setThirdPartySettings(string $instance_id, string $island_id, array $data): void;
+  public function setThirdPartySettings(string $node_id, string $island_id, array $data): void;
 
   /**
    * Remove an instance.
    *
-   * @param string $instance_id
-   *   The instance id.
+   * @param string $node_id
+   *   The node ID of the source.
    */
-  public function remove(string $instance_id): void;
+  public function remove(string $node_id): void;
 
   /**
    * Set the save value of a display builder.

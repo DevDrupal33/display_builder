@@ -38,7 +38,7 @@ final class DisplayExtenderTest extends KernelTestBase {
     parent::setUp();
     $this->installEntitySchema('user');
     $this->installEntitySchema('view');
-    $this->installEntitySchema('display_builder');
+    $this->installEntitySchema('display_builder_profile');
     $this->installEntitySchema('display_builder_instance');
     $this->installConfig(['system', 'views', 'display_builder', 'display_builder_views', 'ui_patterns']);
   }

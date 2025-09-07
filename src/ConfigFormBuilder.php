@@ -26,8 +26,8 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
   /**
    * {@inheritdoc}
    */
-  public function build(WithDisplayBuilderInterface $entity, bool $mandatory = TRUE): array {
-    $options = $this->getAllowedDisplayBuilders();
+  public function build(DisplayBuildableInterface $entity, bool $mandatory = TRUE): array {
+    $options = $this->getAllowedProfiles();
 
     if (empty($options)) {
       return [];
@@ -52,7 +52,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
         [
           '#type' => 'link',
           '#title' => $this->t('Add and configure display builder profiles'),
-          '#url' => Url::fromRoute('entity.display_builder.collection'),
+          '#url' => Url::fromRoute('entity.display_builder_profile.collection'),
           '#suffix' => '.',
         ],
       ];
@@ -61,7 +61,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
     // Add the builder link to edit.
     $instance_id = $entity->getInstanceId();
 
-    if ($instance_id && $entity->getDisplayBuilder()) {
+    if ($instance_id && $entity->getProfile()) {
       $form['link'] = [
         '#type' => 'html_tag',
         '#tag' => 'p',
@@ -79,8 +79,8 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
       ];
     }
 
-    if ($entity->getDisplayBuilder()?->id()) {
-      $form[ConfigFormBuilderInterface::PROFILE_PROPERTY]['#default_value'] = (string) $entity->getDisplayBuilder()->id();
+    if ($entity->getProfile()?->id()) {
+      $form[ConfigFormBuilderInterface::PROFILE_PROPERTY]['#default_value'] = (string) $entity->getProfile()->id();
     }
 
     return $form;
@@ -89,11 +89,11 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
   /**
    * {@inheritdoc}
    */
-  public function getAllowedDisplayBuilders(): array {
+  public function getAllowedProfiles(): array {
     $options = [];
-    $storage = $this->entityTypeManager->getStorage('display_builder');
+    $storage = $this->entityTypeManager->getStorage('display_builder_profile');
     $entity_ids = $storage->getQuery()->accessCheck(TRUE)->sort('weight', 'ASC')->execute();
-    /** @var \Drupal\display_builder\DisplayBuilderInterface[] $display_builders */
+    /** @var \Drupal\display_builder\ProfileInterface[] $display_builders */
     $display_builders = $storage->loadMultiple($entity_ids);
 
     foreach ($display_builders as $entity_id => $entity) {

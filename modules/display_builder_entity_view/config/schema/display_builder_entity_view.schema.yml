@@ -2,18 +2,18 @@ core.entity_view_display.*.*.*.third_party.display_builder:
   label: 'Display Builder settings'
   type: mapping
   mapping:
-    display_builder:
+    profile:
       label: "Display Builder profile"
       type: string
       constraints:
         ConfigExists:
-          prefix: 'display_builder.display_builder.'
+          prefix: 'display_builder.profile.'
     override_profile:
       label: "Display Builder override profile"
       type: string
       constraints:
         ConfigExists:
-          prefix: 'display_builder.display_builder.'
+          prefix: 'display_builder.profile.'
     # @todo add the field constraint, tricky because of current format:
     # field.storage.node.field_sources.yml where we have entity type.
     override_field:
@@ -38,6 +38,6 @@ core.entity_view_display.*.*.*.third_party.display_builder:
 #     source:
 #       type: ui_patterns_source.[%parent.source_id]
 #       label: 'Source configuration'
-#     _instance_id:
+#     _node_id:
 #       type: string
 #       label: 'Instance id'

@@ -30,7 +30,7 @@ class MenuPreset extends IslandPluginBase {
     // @see assets/js/contextual_menu.js
     // Urls are generated with placeholders to be replaced in the js.
     $save_preset = $this->buildMenuItem($this->t('Save as preset'), 'save_preset');
-    $save_preset = $this->htmxEvents->onClickSavePreset($save_preset, $builder_id, '__instance_id__', $this->t('Name of preset'));
+    $save_preset = $this->htmxEvents->onClickSavePreset($save_preset, $builder_id, '__node_id__', $this->t('Name of preset'));
 
     return [
       $this->buildMenuDivider(),

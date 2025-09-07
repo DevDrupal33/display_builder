@@ -70,9 +70,9 @@
       event.detail.parameters = JSON.parse(
         draggable.attributes['hx-vals'].value,
       );
-    } else if (draggable.dataset?.instanceId) {
+    } else if (draggable.dataset?.nodeId) {
       event.detail.parameters = {
-        instance_id: draggable.dataset.instanceId,
+        node_id: draggable.dataset.nodeId,
       };
     }
     event.detail.parameters.position = position;
@@ -107,10 +107,10 @@
 
       // Don't trigger api_instance_get request if already the active instance.
       // Instead open the contextual edit actions.
-      const activeInstanceId = builder.getAttribute('data-active-instance');
+      const activeNodeId = builder.getAttribute('data-active-instance');
       const currentPath = event.detail.requestConfig.path;
       if (
-        currentPath.endsWith(`/instance/${activeInstanceId}`) &&
+        currentPath.endsWith(`/node/${activeNodeId}`) &&
         event.detail.requestConfig.verb === 'get'
       ) {
         event.preventDefault();
@@ -125,12 +125,12 @@
     builder.addEventListener('htmx:afterRequest', (event) => {
       builder.classList.remove('db-htmx-before-request');
       const url = new URL(event.detail.xhr.responseURL);
-      const instances = builder.querySelectorAll('[data-instance-id]');
+      const instances = builder.querySelectorAll('[data-node-id]');
       Array.from(instances).forEach((instance) => {
         if (instance.attributes['hx-get']?.value === url.pathname) {
           builder.setAttribute(
             'data-active-instance',
-            instance.dataset.instanceId,
+            instance.dataset.nodeId,
           );
         }
       });

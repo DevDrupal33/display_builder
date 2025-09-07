@@ -50,8 +50,6 @@ The builder is a regular one with the same sources as Entity View Display plus s
 
 The "Save" button store the display in the content field. The "Restore" button load the display from the content field.
 
-> 🚧 2025-08-12: The revert button is still missing.
-
 ## Under the hood
 
 Display Builder data is stored as content field provided by `ui_patterns_field` module, where every field item has those properties:
@@ -70,7 +68,7 @@ content: {}
 hidden: {}
 third_party_settings:
   display_builder:
-    display_builder: default
+    profile: default
     sources: [...]
     override_field: field_full_display
     override_profile: default

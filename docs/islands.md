@@ -113,7 +113,3 @@ TODO
 ### Visibility
 
 TODO
-
-### Info
-
-TODO

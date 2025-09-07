@@ -308,7 +308,7 @@ export class Displaybuilder {
     const componentSimpleSlot = this.page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
     await this.dragElementFromLibraryById('Blocks', 'token', componentSimpleSlot)
     await this.setElementValue(
-      this.page.locator(`.db-island-builder [data-instance-title="Token"]`).first(),
+      this.page.locator(`.db-island-builder [data-node-title="Token"]`).first(),
       tokenTest,
       [
         {

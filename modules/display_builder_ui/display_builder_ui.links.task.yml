@@ -1,17 +1,17 @@
-entity.display_builder.collection:
-  route_name: entity.display_builder.collection
+entity.display_builder_profile.collection:
+  route_name: entity.display_builder_profile.collection
   title: 'Profiles'
-  base_route: entity.display_builder.collection
+  base_route: entity.display_builder_profile.collection
   weight: 1
 
 entity.display_builder.preset.collection:
   route_name: entity.pattern_preset.collection
   title: Presets
-  base_route: entity.display_builder.collection
+  base_route: entity.display_builder_profile.collection
   weight: 2
 
 entity.display_builder_instance.collection:
   route_name: entity.display_builder_instance.collection
   title: Instances
-  base_route: entity.display_builder.collection
+  base_route: entity.display_builder_profile.collection
   weight: 3

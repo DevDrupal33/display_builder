@@ -11,10 +11,10 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\Registry;
 use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
-use Drupal\display_builder\DisplayBuilderInterface;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\WithDisplayBuilderInterface;
+use Drupal\display_builder\ProfileInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\views\Attribute\ViewsDisplayExtender;
 use Drupal\views\Plugin\views\display_extender\DisplayExtenderPluginBase;
@@ -31,7 +31,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   help: new TranslatableMarkup('Use display builder as output for this view.'),
   no_ui: FALSE,
 )]
-final class DisplayExtender extends DisplayExtenderPluginBase implements WithDisplayBuilderInterface {
+final class DisplayExtender extends DisplayExtenderPluginBase implements DisplayBuildableInterface {
 
   /**
    * The config form builder for Display Builder.
@@ -131,7 +131,7 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements WithDis
       'category' => 'other',
       'title' => $this->t('Display Builder'),
       'desc' => $this->t('Use display builder as output for this view.'),
-      'value' => $this->getDisplayBuilder()?->label() ?? $this->t('Disabled'),
+      'value' => $this->getProfile()?->label() ?? $this->t('Disabled'),
     ];
   }
 
@@ -139,7 +139,7 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements WithDis
    * {@inheritdoc}
    */
   public function preExecute(): void {
-    if (!$this->getDisplayBuilder()) {
+    if (!$this->getProfile()) {
       return;
     }
     // We alter the registry here instead of implementing
@@ -218,7 +218,7 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements WithDis
   /**
    * {@inheritdoc}
    */
-  public function getDisplayBuilder(): ?DisplayBuilderInterface {
+  public function getProfile(): ?ProfileInterface {
     if (!isset($this->options[ConfigFormBuilderInterface::PROFILE_PROPERTY])) {
       return NULL;
     }
@@ -227,9 +227,9 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements WithDis
     if (empty($display_builder_id)) {
       return NULL;
     }
-    $storage = $this->entityTypeManager->getStorage('display_builder');
+    $storage = $this->entityTypeManager->getStorage('display_builder_profile');
 
-    /** @var \Drupal\display_builder\DisplayBuilderInterface $display_builder */
+    /** @var \Drupal\display_builder\ProfileInterface $display_builder */
     $display_builder = $storage->load($display_builder_id);
 
     return $display_builder;
@@ -367,7 +367,7 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements WithDis
    * Gets the Display Builder instance.
    *
    * @return \Drupal\display_builder\InstanceInterface|null
-   *   The state manager.
+   *   A display builder instance entity.
    */
   private function getInstance(): ?InstanceInterface {
     if (!isset($this->instance)) {

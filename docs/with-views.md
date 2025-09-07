@@ -51,7 +51,7 @@ View Title source is also available for string prop:
 
 Display Builder is a `display_extender` plugin with those properties:
 
-- `display_builder`: the Display builder profile (config entity) (profile) in use last time the config was saved
+- `profile`: the Display builder profile (config entity) in use last time the config was saved
 - `sources`: a UI Patterns 2 sources tree
 
 Example:
@@ -77,7 +77,7 @@ display:
       footer: {}
       display_extenders:
         display_builder:
-          display_builder: default
+          profile: default
           sources: [...]
 ```
 

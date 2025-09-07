@@ -83,7 +83,7 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
       $contexts = $form_state->getBuildInfo()['args'][1] ?? [];
 
       $this->alterFormValues($form_state);
-      $source = $this->sourceManager->getSource($this->data['_instance_id'], [], $this->data, $contexts);
+      $source = $this->sourceManager->getSource($this->data['_node_id'], [], $this->data, $contexts);
       $form = $source ? $source->settingsForm([], $form_state) : [];
 
       if ($this->isMultipleItemsSlotSource($this->data['source'])) {
@@ -124,9 +124,9 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
       ],
     ];
 
-    $build = $this->htmxEvents->onInstanceFormChange($build, $this->builderId, $this->getPluginId(), $this->data['_instance_id']);
+    $build = $this->htmxEvents->onInstanceFormChange($build, $this->builderId, $this->getPluginId(), $this->data['_node_id']);
 
-    return $this->htmxEvents->onInstanceUpdateButtonClick($build, $this->builderId, $this->getPluginId(), $this->data['_instance_id']);
+    return $this->htmxEvents->onInstanceUpdateButtonClick($build, $this->builderId, $this->getPluginId(), $this->data['_node_id']);
   }
 
   /**
@@ -175,7 +175,7 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
    * {@inheritdoc}
    */
   public function isApplicable(): bool {
-    return isset($this->data['source_id']) && isset($this->data['_instance_id']);
+    return isset($this->data['source_id']) && isset($this->data['_node_id']);
   }
 
   /**

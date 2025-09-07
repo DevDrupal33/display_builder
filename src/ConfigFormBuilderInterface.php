@@ -11,7 +11,7 @@ interface ConfigFormBuilderInterface {
 
   // Storage property for the profile config entity ID.
   // This will we used in some schema.yml, careful if you change it.
-  public const PROFILE_PROPERTY = 'display_builder';
+  public const PROFILE_PROPERTY = 'profile';
 
   // Storage property for the nestable list of UI Patterns 2 sources.
   // This will we used in some schema.yml, careful if you change it.
@@ -28,7 +28,7 @@ interface ConfigFormBuilderInterface {
   /**
    * Build form for integration with Display Builder.
    *
-   * @param \Drupal\display_builder\WithDisplayBuilderInterface $entity
+   * @param \Drupal\display_builder\DisplayBuildableInterface $entity
    *   An entity allowing the use of Display Builder.
    * @param bool $mandatory
    *   (Optional). Is it mandatory to use Display Builder? (for example, in
@@ -39,14 +39,14 @@ interface ConfigFormBuilderInterface {
    * @return array
    *   A form renderable array.
    */
-  public function build(WithDisplayBuilderInterface $entity, bool $mandatory = TRUE): array;
+  public function build(DisplayBuildableInterface $entity, bool $mandatory = TRUE): array;
 
   /**
-   * Get display builders allowed for the current user.
+   * Get profiles allowed for the current user.
    *
    * @return array
    *   The list of allowed profiles.
    */
-  public function getAllowedDisplayBuilders(): array;
+  public function getAllowedProfiles(): array;
 
 }

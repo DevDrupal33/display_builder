@@ -20,19 +20,19 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
-   * @param string $instance_id
-   *   The instance id.
+   *   The instance entity ID.
+   * @param string $node_id
+   *   The node id of the source.
    *
    * @return array
    *   The render array.
    */
-  public function onClickDelete(array $build, string $builder_id, string $instance_id): array {
+  public function onClickDelete(array $build, string $builder_id, string $node_id): array {
     $url = new Url(
-      'display_builder.api_instance_delete',
+      'display_builder.api_delete',
       [
         'builder' => $builder_id,
-        'instance_id' => $instance_id,
+        'node_id' => $node_id,
       ]
     );
 
@@ -45,21 +45,21 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
-   * @param string $instance_id
-   *   The instance id.
+   *   The instance entity ID.
+   * @param string $node_id
+   *   The node id of the source.
    * @param string|\Drupal\Component\Render\MarkupInterface $prompt
    *   The prompt before save.
    *
    * @return array
    *   The render array.
    */
-  public function onClickSavePreset(array $build, string $builder_id, string $instance_id, MarkupInterface|string $prompt): array {
+  public function onClickSavePreset(array $build, string $builder_id, string $node_id, MarkupInterface|string $prompt): array {
     $url = new Url(
-      'display_builder.api_instance_save_preset',
+      'display_builder.api_save_preset',
       [
         'builder' => $builder_id,
-        'instance_id' => $instance_id,
+        'node_id' => $node_id,
       ]
     );
 
@@ -72,9 +72,9 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
-   * @param string $instance_id
-   *   The instance id to copy.
+   *   The instance entity ID.
+   * @param string $node_id
+   *   The node id to copy.
    * @param string $parent_id
    *   The instance id target.
    * @param string $slot_id
@@ -85,12 +85,12 @@ class HtmxEvents {
    * @return array
    *   The render array.
    */
-  public function onClickPaste(array $build, string $builder_id, string $instance_id, string $parent_id, string $slot_id, string $slot_position): array {
+  public function onClickPaste(array $build, string $builder_id, string $node_id, string $parent_id, string $slot_id, string $slot_position): array {
     $url = new Url(
-      'display_builder.api_instance_paste',
+      'display_builder.api_paste',
       [
         'builder' => $builder_id,
-        'instance_id' => $instance_id,
+        'node_id' => $node_id,
         'parent_id' => $parent_id,
         'slot_id' => $slot_id,
         'slot_position' => $slot_position,
@@ -106,9 +106,9 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
-   * @param string $instance_id
-   *   The instance id to copy.
+   *   The instance entity ID.
+   * @param string $node_id
+   *   The node id to copy.
    * @param string $parent_id
    *   The instance id target.
    * @param string $slot_id
@@ -119,12 +119,12 @@ class HtmxEvents {
    * @return array
    *   The render array.
    */
-  public function onClickDuplicate(array $build, string $builder_id, string $instance_id, string $parent_id, string $slot_id, string $slot_position): array {
+  public function onClickDuplicate(array $build, string $builder_id, string $node_id, string $parent_id, string $slot_id, string $slot_position): array {
     $url = new Url(
-      'display_builder.api_instance_duplicate',
+      'display_builder.api_duplicate',
       [
         'builder' => $builder_id,
-        'instance_id' => $instance_id,
+        'node_id' => $node_id,
         'parent_id' => $parent_id,
         'slot_id' => $slot_id,
         'slot_position' => $slot_position,
@@ -140,7 +140,7 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
+   *   The instance entity ID.
    * @param string $island_id
    *   The island initiating the event.
    *
@@ -165,23 +165,23 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
+   *   The instance entity ID.
    * @param string $island_id
    *   The island initiating the event.
-   * @param string $instance_id
-   *   The instance id.
+   * @param string $node_id
+   *   The node id of the source.
    * @param string $slot
    *   The slot.
    *
    * @return array
    *   The render array.
    */
-  public function onSlotDrop(array $build, string $builder_id, string $island_id, string $instance_id, string $slot): array {
+  public function onSlotDrop(array $build, string $builder_id, string $island_id, string $node_id, string $slot): array {
     $url = new Url(
       'display_builder.api_slot_attach',
       [
         'builder' => $builder_id,
-        'instance_id' => $instance_id,
+        'node_id' => $node_id,
         'slot' => $slot,
         'from' => $island_id,
       ]
@@ -196,9 +196,9 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
-   * @param string $instance_id
-   *   The instance id.
+   *   The instance entity ID.
+   * @param string $node_id
+   *   The node id of the source.
    * @param string $title
    *   The instance title.
    * @param int $index
@@ -207,12 +207,12 @@ class HtmxEvents {
    * @return array
    *   The render array.
    */
-  public function onInstanceClick(array $build, string $builder_id, string $instance_id, string $title, int $index): array {
+  public function onInstanceClick(array $build, string $builder_id, string $node_id, string $title, int $index): array {
     $url = new Url(
-      'display_builder.api_instance_get',
+      'display_builder.api_get',
       [
         'builder' => $builder_id,
-        'instance_id' => $instance_id,
+        'node_id' => $node_id,
       ]
     );
 
@@ -221,9 +221,9 @@ class HtmxEvents {
 
     $attributes = [
       'tabindex' => '0',
-      'data-instance-id' => $instance_id,
+      'data-node-id' => $node_id,
       // Data used for contextual menu or drawer name.
-      'data-instance-title' => $label,
+      'data-node-title' => $label,
       'data-slot-position' => $index,
       'hx-on::after-swap' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this)', $builder_id),
       'hx-on:click' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this)', $builder_id),
@@ -238,21 +238,21 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
+   *   The instance entity ID.
    * @param string $island_id
    *   The island initiating the event.
-   * @param string $instance_id
-   *   The instance id.
+   * @param string $node_id
+   *   The node id of the source.
    *
    * @return array
    *   The render array.
    */
-  public function onInstanceFormChange(array $build, string $builder_id, string $island_id, string $instance_id): array {
+  public function onInstanceFormChange(array $build, string $builder_id, string $island_id, string $node_id): array {
     $url = new Url(
-      'display_builder.api_instance_update',
+      'display_builder.api_update',
       [
         'builder' => $builder_id,
-        'instance_id' => $instance_id,
+        'node_id' => $node_id,
         'from' => $island_id,
       ]
     );
@@ -274,24 +274,24 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
+   *   The instance entity ID.
    * @param string $island_id
    *   The island initiating the event.
-   * @param string $instance_id
-   *   The instance id.
+   * @param string $node_id
+   *   The node id of the source.
    *
    * @return array
    *   The render array.
    */
-  public function onInstanceUpdateButtonClick(array $build, string $builder_id, string $island_id, string $instance_id): array {
+  public function onInstanceUpdateButtonClick(array $build, string $builder_id, string $island_id, string $node_id): array {
     if (!isset($build['update']) || !isset($build['source']) || !isset($build['source']['#id'])) {
       return $build;
     }
     $url = new Url(
-      'display_builder.api_instance_update',
+      'display_builder.api_update',
       [
         'builder' => $builder_id,
-        'instance_id' => $instance_id,
+        'node_id' => $node_id,
         'from' => $island_id,
       ]
     );
@@ -315,21 +315,21 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
-   * @param string $instance_id
-   *   The instance id.
+   *   The instance entity ID.
+   * @param string $node_id
+   *   The node id of the source.
    * @param string $island_id
    *   The island id.
    *
    * @return array
    *   The render array.
    */
-  public function onThirdPartyFormChange(array $build, string $builder_id, string $instance_id, string $island_id): array {
+  public function onThirdPartyFormChange(array $build, string $builder_id, string $node_id, string $island_id): array {
     $url = new Url(
       'display_builder.api_third_party_settings_update',
       [
         'builder' => $builder_id,
-        'instance_id' => $instance_id,
+        'node_id' => $node_id,
         'island_id' => $island_id,
       ]
     );
@@ -343,7 +343,7 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
+   *   The instance entity ID.
    *
    * @return array
    *   The render array.
@@ -365,7 +365,7 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
+   *   The instance entity ID.
    *
    * @return array
    *   The render array.
@@ -387,7 +387,7 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
+   *   The instance entity ID.
    *
    * @return array
    *   The render array.
@@ -409,7 +409,7 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
+   *   The instance entity ID.
    *
    * @return array
    *   The render array.
@@ -431,7 +431,7 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
+   *   The instance entity ID.
    *
    * @return array
    *   The render array.
@@ -453,7 +453,7 @@ class HtmxEvents {
    * @param array $build
    *   The render array.
    * @param string $builder_id
-   *   The builder id.
+   *   The instance entity ID.
    *
    * @return array
    *   The render array.

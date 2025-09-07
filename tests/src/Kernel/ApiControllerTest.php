@@ -50,7 +50,7 @@ final class ApiControllerTest extends KernelTestBase {
     parent::setUp();
 
     $this->installEntitySchema('user');
-    $this->installEntitySchema('display_builder');
+    $this->installEntitySchema('display_builder_profile');
     $this->installEntitySchema('display_builder_instance');
     $this->installConfig(['system', 'display_builder', 'ui_patterns', 'display_builder_test']);
 
@@ -77,7 +77,7 @@ final class ApiControllerTest extends KernelTestBase {
 
     // 2. Test with a non-existing instance_id (should return error).
     $request = Request::create('/api/display-builder/test_instance', 'POST', [
-      'instance_id' => 'non_existing',
+      'node_id' => 'non_existing',
       'position' => 0,
     ]);
     $response = $this->controller->attachToRoot($request, $this->instance);
@@ -107,7 +107,7 @@ final class ApiControllerTest extends KernelTestBase {
     // phpcs:disable
     // $request = Request::create('/api/display-builder/test_builder/instance/foo', 'GET');
 
-    // We have to set profile to state manager for now.
+    // We have to set profile to Instance entity for now.
     // $this->instance->setRuntimeProfileId('test');
     // $this->instance->save();
     // phpcs:enable

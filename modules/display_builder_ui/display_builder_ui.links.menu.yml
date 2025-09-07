@@ -1,12 +1,12 @@
-entity.display_builder.collection:
+entity.display_builder_profile.collection:
   title: Display Builder
   parent: system.admin_structure
   description: 'Create and manage Display Builder profile, preset and instance.'
-  route_name: entity.display_builder.collection
+  route_name: entity.display_builder_profile.collection
 
 entity.pattern_preset.collection:
   title: Preset list
-  parent: entity.display_builder.collection
+  parent: entity.display_builder_profile.collection
   description: 'Available Pattern preset created.'
   route_name: entity.pattern_preset.collection
   weight: 2
@@ -20,7 +20,7 @@ entity.pattern_preset.add_form:
 
 entity.display_builder_instance.collection:
   title: Instances
-  parent: entity.display_builder.collection
+  parent: entity.display_builder_profile.collection
   description: 'Available display builder instances.'
   route_name: entity.display_builder_instance.collection
   weight: 4

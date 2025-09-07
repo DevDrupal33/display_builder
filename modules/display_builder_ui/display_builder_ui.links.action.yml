@@ -1,8 +1,8 @@
 display_builder.add_form:
-  route_name: 'entity.display_builder.add_form'
+  route_name: 'entity.display_builder_profile.add_form'
   title: 'Add profile'
   appears_on:
-    - entity.display_builder.collection
+    - entity.display_builder_profile.collection
 
 pattern_preset.add_form:
   route_name: 'entity.pattern_preset.add_form'

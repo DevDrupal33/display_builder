@@ -13,8 +13,8 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
-use Drupal\display_builder\DisplayBuilderInterface;
 use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder_page_layout\AccessControlHandler;
 use Drupal\display_builder_page_layout\Form\PageLayoutForm;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
@@ -193,15 +193,15 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   /**
    * {@inheritdoc}
    */
-  public function getDisplayBuilder(): ?DisplayBuilderInterface {
-    $storage = $this->entityTypeManager()->getStorage('display_builder');
+  public function getProfile(): ?ProfileInterface {
+    $storage = $this->entityTypeManager()->getStorage('display_builder_profile');
     $profile_id = $this->get(ConfigFormBuilderInterface::PROFILE_PROPERTY);
 
     if (!$profile_id) {
       return NULL;
     }
 
-    /** @var \Drupal\display_builder\DisplayBuilderInterface $builder */
+    /** @var \Drupal\display_builder\ProfileInterface $builder */
     $builder = $storage->load($profile_id);
 
     return $builder;
@@ -293,7 +293,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
    */
   public function calculateDependencies(): PageLayout {
     parent::calculateDependencies();
-    $display_builder = $this->getDisplayBuilder();
+    $display_builder = $this->getProfile();
     $instance = $this->getInstance();
 
     if ($display_builder && $instance) {

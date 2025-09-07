@@ -11,24 +11,24 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
-use Drupal\display_builder\DisplayBuilderInterface;
-use Drupal\display_builder\Entity\DisplayBuilder;
+use Drupal\display_builder\Entity\Profile;
 use Drupal\display_builder\IslandInterface;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandTypeViewDisplay;
+use Drupal\display_builder\ProfileInterface;
 use Drupal\user\RoleInterface;
 
 /**
  * Display builder form.
  */
-final class DisplayBuilderForm extends EntityForm {
+final class ProfileForm extends EntityForm {
 
   /**
    * {@inheritdoc}
    */
   public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
-    /** @var \Drupal\display_builder\DisplayBuilderInterface $entity */
+    /** @var \Drupal\display_builder\ProfileInterface $entity */
     $entity = $this->entity;
 
     $form['label'] = [
@@ -43,7 +43,7 @@ final class DisplayBuilderForm extends EntityForm {
       '#type' => 'machine_name',
       '#default_value' => $this->entity->id(),
       '#machine_name' => [
-        'exists' => [DisplayBuilder::class, 'load'],
+        'exists' => [Profile::class, 'load'],
       ],
       '#disabled' => !$entity->isNew(),
     ];
@@ -55,7 +55,7 @@ final class DisplayBuilderForm extends EntityForm {
     ];
 
     // Add user role access selection. Not available at creation because the
-    // permissions are not set yet by DisplayBuilderPermissions.
+    // permissions are not set yet by ProfilePermissions.
     if (!$entity->isNew()) {
       $roles = $this->entityTypeManager->getStorage('user_role')->loadMultiple();
       \ksort($roles);
@@ -130,11 +130,11 @@ final class DisplayBuilderForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state): DisplayBuilderInterface {
+  public function submitForm(array &$form, FormStateInterface $form_state): ProfileInterface {
     parent::submitForm($form, $form_state);
 
     // Save user permissions.
-    /** @var \Drupal\display_builder\DisplayBuilderInterface $entity */
+    /** @var \Drupal\display_builder\ProfileInterface $entity */
     $entity = $this->entity;
 
     if ($permission = $entity->getPermissionName()) {
@@ -168,10 +168,10 @@ final class DisplayBuilderForm extends EntityForm {
 
     // Stay on the form for new to allow islands configuration.
     if ($result === SAVED_NEW) {
-      $form_state->setRedirect('entity.display_builder.edit_form', ['display_builder' => $this->entity->id()]);
+      $form_state->setRedirect('entity.display_builder_profile.edit_form', ['display_builder' => $this->entity->id()]);
     }
     elseif ($result === SAVED_UPDATED) {
-      $form_state->setRedirect('entity.display_builder.collection');
+      $form_state->setRedirect('entity.display_builder_profile.collection');
     }
 
     return $result;

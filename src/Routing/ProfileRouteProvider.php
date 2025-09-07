@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Route;
 /**
  * Provides routes for display builder entities.
  */
-class DisplayBuilderRouteProvider extends AdminHtmlRouteProvider {
+class ProfileRouteProvider extends AdminHtmlRouteProvider {
 
   /**
    * {@inheritdoc}
@@ -50,7 +50,7 @@ class DisplayBuilderRouteProvider extends AdminHtmlRouteProvider {
       $route
         ->setDefaults([
           '_entity_form' => "{$entity_type_id}.{$operation}",
-          '_title_callback' => '\Drupal\display_builder\Form\DisplayBuilderIslandPluginForm::editFormTitle',
+          '_title_callback' => '\Drupal\display_builder\Form\ProfileIslandPluginForm::editFormTitle',
         ])
         ->setRequirement('_entity_access', "{$entity_type_id}.update")
         ->setOption('parameters', [

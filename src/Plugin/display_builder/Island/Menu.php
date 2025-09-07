@@ -30,10 +30,10 @@ class Menu extends IslandPluginBase {
     // @see assets/js/contextual_menu.js
     // Urls are generated with placeholders to be replaced in the js.
     $duplicate = $this->buildMenuItem($this->t('Duplicate'), 'duplicate');
-    $duplicate = $this->htmxEvents->onClickDuplicate($duplicate, $builder_id, '__instance_id__', '__parent_id__', '__slot_id__', '__slot_position__');
+    $duplicate = $this->htmxEvents->onClickDuplicate($duplicate, $builder_id, '__node_id__', '__parent_id__', '__slot_id__', '__slot_position__');
 
     $paste = $this->buildMenuItem($this->t('Paste'), 'paste');
-    $paste = $this->htmxEvents->onClickPaste($paste, $builder_id, '__instance_id__', '__parent_id__', '__slot_id__', '__slot_position__');
+    $paste = $this->htmxEvents->onClickPaste($paste, $builder_id, '__node_id__', '__parent_id__', '__slot_id__', '__slot_position__');
 
     return [
       $this->buildMenuItem($this->t('Copy'), 'copy'),

@@ -57,7 +57,7 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
   /**
    * {@inheritdoc}
    */
-  public function createFromImplementation(WithDisplayBuilderInterface $implementation): EntityInterface {
+  public function createFromImplementation(DisplayBuildableInterface $implementation): EntityInterface {
     $data = $implementation->getInitialSources();
     $present = new HistoryStep(
       $data,
@@ -68,7 +68,7 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
     );
     $data = [
       'id' => $implementation->getInstanceId(),
-      'profileId' => $implementation->getDisplayBuilder()->id(),
+      'profileId' => $implementation->getProfile()->id(),
       'contexts' => $implementation->getInitialContext(),
       'present' => $present,
     ];

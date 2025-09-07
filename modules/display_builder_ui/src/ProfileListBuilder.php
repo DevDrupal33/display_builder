@@ -9,14 +9,14 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder\DisplayBuilderInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
+use Drupal\display_builder\ProfileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a listing of display builders.
  */
-final class DisplayBuilderListBuilder extends DraggableListBuilder {
+final class ProfileListBuilder extends DraggableListBuilder {
 
   /**
    * Island plugin manager.
@@ -69,7 +69,7 @@ final class DisplayBuilderListBuilder extends DraggableListBuilder {
    */
   public function buildRow(EntityInterface $entity): array {
     $row = [];
-    /** @var \Drupal\display_builder\DisplayBuilderInterface $entity */
+    /** @var \Drupal\display_builder\ProfileInterface $entity */
     $row['label'] = $entity->label();
     // List enabled view panels instead of showing an empty description.
     $description = $entity->get('description') ?? $this->listViewPanels($entity);
@@ -101,13 +101,13 @@ final class DisplayBuilderListBuilder extends DraggableListBuilder {
   /**
    * List enabled view panels as a description fallback.
    *
-   * @param \Drupal\display_builder\DisplayBuilderInterface $entity
+   * @param \Drupal\display_builder\ProfileInterface $entity
    *   The entity.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup
    *   The description listing the panels.
    */
-  protected function listViewPanels(DisplayBuilderInterface $entity): TranslatableMarkup {
+  protected function listViewPanels(ProfileInterface $entity): TranslatableMarkup {
     $view_panels = $this->islandManager->getIslandsByTypes()['view'];
     $view_panels = \array_intersect_key($view_panels, $entity->getIslandEnabled());
     $view_panels = \array_map(static fn ($island) => $island->label(), $view_panels);

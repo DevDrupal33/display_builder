@@ -182,16 +182,16 @@ class ContextualMenu {
     pasteMenu ? (pasteMenu.disabled = !copyInstance?.id) : '';
     copyMenu ? (copyMenu.disabled = copyInstance?.id === instance.id) : '';
 
-    this.menu.setAttribute('data-instance-id', instance.id);
+    this.menu.setAttribute('data-node-id', instance.id);
 
     this.menu.querySelectorAll('.menu__item').forEach((item) => {
-      item.setAttribute('data-instance-title', this.formatName(instance.title));
-      item.setAttribute('data-instance-id', instance.id);
+      item.setAttribute('data-node-title', this.formatName(instance.title));
+      item.setAttribute('data-node-id', instance.id);
       item.setAttribute('data-slot-id', slotData?.id ?? '__root__');
       item.setAttribute('data-slot-position', slotData?.position ?? 0);
       item.setAttribute(
-        'data-slot-instance-id',
-        slotData?.instanceId ?? '__root__',
+        'data-slot-node-id',
+        slotData?.nodeId ?? '__root__',
       );
       if (copyInstance?.id) {
         item.setAttribute('data-copy-instance-id', copyInstance.id);
@@ -249,8 +249,8 @@ class ContextualMenu {
             this.builderId,
             'copy',
             {
-              id: item.dataset.instanceId,
-              title: item.dataset.instanceTitle ?? '',
+              id: item.dataset.nodeId,
+              title: item.dataset.nodeTitle ?? '',
             },
           );
         }
@@ -267,7 +267,7 @@ class ContextualMenu {
    */
   setupGlobalClickHandler() {
     document.addEventListener('click', (event) => {
-      if (!event.target.dataset.instanceId) {
+      if (!event.target.dataset.nodeId) {
         this.menu.style.display = 'none';
       }
     });
@@ -286,14 +286,14 @@ class ContextualMenu {
    */
   gePathLabel(target) {
     const name = [];
-    const currentInstance = target.closest('[data-instance-id]');
+    const currentInstance = target.closest('[data-node-id]');
     const parentId =
-      currentInstance.closest('[data-slot-title]')?.dataset?.instanceId;
+      currentInstance.closest('[data-slot-title]')?.dataset?.nodeId;
 
     if (parentId) {
       const parentInstanceName = currentInstance.closest(
-        `[data-instance-title][data-instance-id="${parentId}"]`,
-      )?.dataset?.instanceTitle;
+        `[data-node-title][data-node-id="${parentId}"]`,
+      )?.dataset?.nodeTitle;
       name.push(this.formatName(parentInstanceName));
     } else {
       name.push(Drupal.t('Base'));
@@ -305,7 +305,7 @@ class ContextualMenu {
       name.push(slotTitle);
     }
 
-    const instanceTitle = currentInstance.dataset?.instanceTitle;
+    const instanceTitle = currentInstance.dataset?.nodeTitle;
     if (instanceTitle) {
       name.push(this.formatName(instanceTitle));
     }
@@ -356,37 +356,37 @@ class ContextualMenu {
   getInstance(target) {
     let isChild = false;
     let title = '';
-    if (target?.dataset?.instanceId) {
-      if (!target.dataset.instanceTitle) {
-        title = target.closest('[data-instance-title]')?.dataset?.instanceTitle;
+    if (target?.dataset?.nodeId) {
+      if (!target.dataset.nodeTitle) {
+        title = target.closest('[data-node-title]')?.dataset?.nodeTitle;
         isChild = true;
       } else {
-        title = target.dataset.instanceTitle;
+        title = target.dataset.nodeTitle;
       }
 
       const parent = target.closest(
-        `[data-instance-id]:not([data-instance-id="${target.dataset.instanceId}"])`,
+        `[data-node-id]:not([data-node-id="${target.dataset.nodeId}"])`,
       );
 
       return {
-        id: target.dataset.instanceId,
+        id: target.dataset.nodeId,
         position: target?.dataset?.slotPosition ?? 1,
         title,
-        parentId: parent?.dataset?.instanceId ?? null,
-        parentTitle: parent?.dataset?.instanceTitle ?? null,
+        parentId: parent?.dataset?.nodeId ?? null,
+        parentTitle: parent?.dataset?.nodeTitle ?? null,
         isChild,
       };
     }
 
     const parent = target.closest(
-      `[data-instance-id]:not([data-instance-id="${target.dataset.instanceId}"])`,
+      `[data-node-id]:not([data-node-id="${target.dataset.nodeId}"])`,
     );
-    if (parent?.dataset?.instanceId) {
-      if (!parent.dataset.instanceTitle) {
-        title = parent.closest('[data-instance-title]')?.dataset?.instanceTitle;
+    if (parent?.dataset?.nodeId) {
+      if (!parent.dataset.nodeTitle) {
+        title = parent.closest('[data-node-title]')?.dataset?.nodeTitle;
         isChild = true;
       } else {
-        title = parent.dataset.instanceTitle;
+        title = parent.dataset.nodeTitle;
       }
 
       let position = null;
@@ -395,15 +395,15 @@ class ContextualMenu {
       }
 
       const grandParent = parent.closest(
-        `[data-instance-id]:not([data-instance-id="${parent.dataset.instanceId}"])`,
+        `[data-node-id]:not([data-node-id="${parent.dataset.nodeId}"])`,
       );
 
       return {
-        id: parent.dataset.instanceId,
+        id: parent.dataset.nodeId,
         position,
         title,
-        parentId: grandParent?.dataset?.instanceId ?? null,
-        parentTitle: grandParent?.dataset?.instanceTitle ?? null,
+        parentId: grandParent?.dataset?.nodeId ?? null,
+        parentTitle: grandParent?.dataset?.nodeTitle ?? null,
         isChild,
       };
     }
@@ -440,7 +440,7 @@ class ContextualMenu {
    * @return {string|null} [return.id] - The slot ID, or null if not found.
    * @return {string|null} [return.title] - The slot title, or null if not found.
    * @return {number} [return.position] - The slot position (1-based), or 0 if not found.
-   * @return {string|null} [return.instanceId] - The instance ID, or null if not found.
+   * @return {string|null} [return.nodeId] - The instance ID, or null if not found.
    * @return {string|null} [return.instanceTitle] - The instance title, or null if not found.
    */
   getSlotData(target, currentInstance) {
@@ -448,12 +448,12 @@ class ContextualMenu {
     if (target.dataset?.slotId) {
       const { slotId } = target.dataset;
       const slotTitle = target.dataset?.slotTitle ?? '';
-      const { instanceId } = target.dataset;
-      let instanceTitle = target.dataset?.instanceTitle;
+      const { nodeId } = target.dataset;
+      let instanceTitle = target.dataset?.nodeTitle;
       if (!instanceTitle) {
         instanceTitle = target.closest(
-          `[data-instance-title][data-instance-id="${target.dataset.instanceId}"]`,
-        )?.dataset?.instanceTitle;
+          `[data-node-title][data-node-id="${target.dataset.nodeId}"]`,
+        )?.dataset?.nodeTitle;
       }
       name.push(instanceTitle, slotTitle);
 
@@ -464,16 +464,16 @@ class ContextualMenu {
         position: target.dataset?.slotPosition
           ? parseInt(target.dataset.slotPosition, 10) + 1
           : 0,
-        instanceId,
+        nodeId,
         instanceTitle,
       };
     }
 
     const parent = target.closest(
-      `[data-slot-id]:not([data-instance-id="${target.dataset.instanceId}"])`,
+      `[data-slot-id]:not([data-node-id="${target.dataset.nodeId}"])`,
     );
     if (parent && parent?.dataset?.slotId) {
-      let instanceTitle = parent.dataset?.instanceTitle;
+      let instanceTitle = parent.dataset?.nodeTitle;
       let position = target.dataset?.slotPosition;
       if (!position) {
         position =
@@ -482,10 +482,10 @@ class ContextualMenu {
 
       if (!instanceTitle && position) {
         const parentInstance = target.closest(
-          `[data-instance-title]:not([data-instance-id="${target.dataset.instanceId}"])`,
+          `[data-node-title]:not([data-node-id="${target.dataset.nodeId}"])`,
         );
         instanceTitle = parentInstance
-          ? parentInstance?.dataset?.instanceTitle
+          ? parentInstance?.dataset?.nodeTitle
           : null;
       }
 
@@ -503,7 +503,7 @@ class ContextualMenu {
         id: parent.dataset.slotId,
         title: parent.dataset?.slotTitle ?? '',
         position: position ? parseInt(position, 10) + 1 : 0,
-        instanceId: parent.dataset.instanceId,
+        nodeId: parent.dataset.nodeId,
         instanceTitle,
       };
     }
@@ -524,7 +524,7 @@ class ContextualMenu {
         position: target.dataset?.slotPosition
           ? parseInt(target.dataset.slotPosition, 10) + 1
           : 0,
-        instanceId: currentInstance?.id,
+        nodeId: currentInstance?.id,
       };
     }
 
@@ -532,7 +532,7 @@ class ContextualMenu {
       id: null,
       title: null,
       position: 0,
-      instanceId: null,
+      nodeId: null,
       instanceTitle: null,
     };
   }
@@ -557,22 +557,22 @@ Drupal.displayBuilder.menuAlterHtmxEvents = (builder, debug) => {
   builder.addEventListener('htmx:configRequest', (event) => {
     if (!event.target.dataset?.contextualMenu) return;
 
-    let instanceId = event.target.dataset?.instanceId;
-    if (!instanceId) return;
+    let nodeId = event.target.dataset?.nodeId;
+    if (!nodeId) return;
 
     let parentId = '__none__';
     let slotId = '__none__';
     let slotPosition = 0;
 
     if (event.target?.value === 'paste') {
-      parentId = event.target.dataset.slotInstanceId;
-      instanceId = event.target.dataset.copyInstanceId;
+      parentId = event.target.dataset.slotNodeId;
+      nodeId = event.target.dataset.copyNodeId;
       slotId = event.target.dataset.slotId;
       slotPosition = event.target.dataset?.slotPosition ?? 0;
     }
 
     if (event.target?.value === 'duplicate') {
-      parentId = event.target.dataset.slotInstanceId;
+      parentId = event.target.dataset.slotNodeId;
       slotId = event.target.dataset?.slotId;
       if (
         event.target.dataset?.slotPosition &&
@@ -583,8 +583,8 @@ Drupal.displayBuilder.menuAlterHtmxEvents = (builder, debug) => {
     }
 
     event.detail.path = event.detail.path.replace(
-      '__instance_id__',
-      instanceId,
+      '__node_id__',
+      nodeId,
     );
     event.detail.path = event.detail.path.replace('__parent_id__', parentId);
     event.detail.path = event.detail.path.replace('__slot_id__', slotId);

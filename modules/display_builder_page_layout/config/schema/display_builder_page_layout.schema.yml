@@ -19,12 +19,12 @@ display_builder_page_layout.page_layout.*:
       sequence:
         type: condition.plugin.[id]
         label: 'Condition'
-    display_builder:
+    profile:
       label: "Display Builder profile"
       type: string
       constraints:
         ConfigExists:
-          prefix: 'display_builder.display_builder.'
+          prefix: 'display_builder.profile.'
     sources:
       label: "UI Patterns sources"
       type: sequence

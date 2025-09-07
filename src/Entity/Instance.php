@@ -13,11 +13,11 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder\DisplayBuilderInterface;
 use Drupal\display_builder\HistoryStep;
 use Drupal\display_builder\InstanceAccessControlHandler;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\InstanceStorage;
+use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder\SlotSourceProxy;
 use Drupal\display_builder_ui\InstanceListBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
@@ -99,8 +99,8 @@ class Instance extends EntityBase implements InstanceInterface {
   /**
    * Path index.
    *
-   * A mapping where each key is an slot source instance ID and each value is
-   * the path where this instance is located in the data state.
+   * A mapping where each key is an slot source node ID and each value is
+   * the path where this source is located in the data state.
    */
   protected array $pathIndex = [];
 
@@ -155,9 +155,9 @@ class Instance extends EntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function getProfile(): ?DisplayBuilderInterface {
-    /** @var \Drupal\display_builder\DisplayBuilderInterface $profile */
-    $profile = $this->entityTypeManager()->getStorage('display_builder')->load($this->profileId);
+  public function getProfile(): ?ProfileInterface {
+    /** @var \Drupal\display_builder\ProfileInterface $profile */
+    $profile = $this->entityTypeManager()->getStorage('display_builder_profile')->load($this->profileId);
 
     return $profile;
   }
@@ -172,23 +172,23 @@ class Instance extends EntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function moveToRoot(string $instance_id, int $position): bool {
+  public function moveToRoot(string $node_id, int $position): bool {
     $root = $this->getCurrentState();
-    $path = $this->getPath($root, $instance_id);
+    $path = $this->getPath($root, $node_id);
     $data = NestedArray::getValue($root, $path);
 
     if (empty($data) || !isset($data['source_id'])) {
       return FALSE;
     }
 
-    $root = $this->doRemove($root, $instance_id);
-    $root = $this->attachToRoot($root, $position, $data);
+    $root = $this->doRemove($root, $node_id);
+    $root = $this->doAttachToRoot($root, $position, $data);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts());
+    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts());
 
-    $log = new FormattableMarkup('%instance @thingy has been moved to root', [
-      '%instance' => $labelWithSummaryInstance['summary'],
+    $log = new FormattableMarkup('%node @thingy has been moved to root', [
+      '%node' => $labelWithSummary['summary'],
       '@thingy' => $data['source_id'],
     ]);
     $this->setNewPresent($root, $log);
@@ -199,9 +199,9 @@ class Instance extends EntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function moveToSlot(string $instance_id, string $parent_id, string $slot_id, int $position): bool {
+  public function moveToSlot(string $node_id, string $parent_id, string $slot_id, int $position): bool {
     $root = $this->getCurrentState();
-    $path = $this->getPath($root, $instance_id);
+    $path = $this->getPath($root, $node_id);
     $data = NestedArray::getValue($root, $path);
 
     if (empty($data) || !isset($data['source_id'])) {
@@ -210,27 +210,27 @@ class Instance extends EntityBase implements InstanceInterface {
 
     $parent_slot = \array_slice($path, \count($path) - 3, 1)[0];
 
-    if (($parent_id === $this->getParentId($root, $instance_id)) && ($slot_id === $parent_slot)) {
+    if (($parent_id === $this->getParentId($root, $node_id)) && ($slot_id === $parent_slot)) {
       // Moving to the same slot is tricky, because we don't want to remove a
       // sibling.
       $slot_path = \array_slice($path, 0, \count($path) - 1);
       $slot = NestedArray::getValue($root, $slot_path);
-      $slot = $this->changeInstancePositionInSlot($slot, $instance_id, $position);
+      $slot = $this->changeSourcePositionInSlot($slot, $node_id, $position);
       NestedArray::setValue($root, $slot_path, $slot);
     }
     else {
       // Moving to a different slot is easier, we can first delete the previous
-      // instance data, and attach it to the new position.
-      $root = $this->doRemove($root, $instance_id);
-      $root = $this->attachToSlot($root, $parent_id, $slot_id, $position, $data);
+      // node data, and attach it to the new position.
+      $root = $this->doRemove($root, $node_id);
+      $root = $this->doAttachToSlot($root, $parent_id, $slot_id, $position, $data);
     }
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts());
+    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts());
     $labelWithSummaryParent = $this->slotSourceProxy()->getLabelWithSummary($this->get($parent_id));
 
-    $log = new FormattableMarkup("%instance @thingy has been moved to %parent's @slot_id", [
-      '%instance' => $labelWithSummaryInstance['summary'],
+    $log = new FormattableMarkup("%node @thingy has been moved to %parent's @slot_id", [
+      '%node' => $labelWithSummary['summary'],
       '@thingy' => $data['source_id'],
       '%parent' => $labelWithSummaryParent['summary'],
       '@slot_id' => $slot_id,
@@ -244,9 +244,9 @@ class Instance extends EntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function attachSourceToRoot(int $position, string $source_id, array $data, array $third_party_settings = []): string {
+  public function attachToRoot(int $position, string $source_id, array $data, array $third_party_settings = []): string {
     $data = [
-      '_instance_id' => \uniqid(),
+      '_node_id' => \uniqid(),
       'source_id' => $source_id,
       'source' => $data,
     ];
@@ -256,27 +256,27 @@ class Instance extends EntityBase implements InstanceInterface {
     }
 
     $root = $this->getCurrentState();
-    $root = $this->attachToRoot($root, $position, $data);
+    $root = $this->doAttachToRoot($root, $position, $data);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts() ?? []);
+    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts() ?? []);
 
-    $log = new FormattableMarkup('%instance @source_id has been attached to root', [
-      '%instance' => $labelWithSummaryInstance['summary'],
+    $log = new FormattableMarkup('%node @source_id has been attached to root', [
+      '%node' => $labelWithSummary['summary'],
       '@source_id' => $source_id,
     ]);
     $this->setNewPresent($root, $log, FALSE);
 
-    return $data['_instance_id'];
+    return $data['_node_id'];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function attachSourceToSlot(string $parent_id, string $slot_id, int $position, string $source_id, array $data, array $third_party_settings = []): string {
+  public function attachToSlot(string $parent_id, string $slot_id, int $position, string $source_id, array $data, array $third_party_settings = []): string {
     $root = $this->getCurrentState();
     $data = [
-      '_instance_id' => \uniqid(),
+      '_node_id' => \uniqid(),
       'source_id' => $source_id,
       'source' => $data,
     ];
@@ -285,29 +285,29 @@ class Instance extends EntityBase implements InstanceInterface {
       $data['_third_party_settings'] = $third_party_settings;
     }
 
-    $root = $this->attachToSlot($root, $parent_id, $slot_id, $position, $data);
+    $root = $this->doAttachToSlot($root, $parent_id, $slot_id, $position, $data);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts() ?? []);
+    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts() ?? []);
     $labelWithSummaryParent = $this->slotSourceProxy()->getLabelWithSummary($this->get($parent_id));
 
-    $log = new FormattableMarkup("%instance @source_id has been attached to %parent's @slot_id", [
-      '%instance' => $labelWithSummaryInstance['summary'],
+    $log = new FormattableMarkup("%node @source_id has been attached to %parent's @slot_id", [
+      '%node' => $labelWithSummary['summary'],
       '@source_id' => $source_id,
       '%parent' => $labelWithSummaryParent['summary'],
       '@slot_id' => $slot_id,
     ]);
     $this->setNewPresent($root, $log);
 
-    return $data['_instance_id'];
+    return $data['_node_id'];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function get(string $instance_id): array {
+  public function get(string $node_id): array {
     $root = $this->getCurrentState();
-    $path = $this->getPath($root, $instance_id);
+    $path = $this->getPath($root, $node_id);
     $value = NestedArray::getValue($root, $path);
 
     return $value ?? [];
@@ -316,34 +316,34 @@ class Instance extends EntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function getParentId(array $root, string $instance_id): string {
-    $path = $this->getPath($root, $instance_id);
+  public function getParentId(array $root, string $node_id): string {
+    $path = $this->getPath($root, $node_id);
     $length = \count(['source', 'component', 'slots', '{slot_id}', 'sources', '{position}']);
     $parent_path = \array_slice($path, 0, \count($path) - $length);
 
-    return $this->getInstanceId($parent_path);
+    return $this->getNodeId($parent_path);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setSource(string $instance_id, string $source_id, array $data): void {
+  public function setSource(string $node_id, string $source_id, array $data): void {
     $root = $this->getCurrentState();
-    $path = $this->getPath($root, $instance_id);
+    $path = $this->getPath($root, $node_id);
     $existing_data = NestedArray::getValue($root, $path) ?? [];
 
-    if (!isset($existing_data['_instance_id']) || ($existing_data['_instance_id'] !== $instance_id)) {
-      throw new \Exception('Instance ID mismatch');
+    if (!isset($existing_data['_node_id']) || ($existing_data['_node_id'] !== $node_id)) {
+      throw new \Exception('Node ID mismatch');
     }
     $existing_data['source_id'] = $source_id;
     $existing_data['source'] = $data;
     NestedArray::setValue($root, $path, $existing_data);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy()->getLabelWithSummary($existing_data, $this->getContexts());
+    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($existing_data, $this->getContexts());
 
-    $log = new FormattableMarkup('%instance has been updated', [
-      '%instance' => $labelWithSummaryInstance['summary'],
+    $log = new FormattableMarkup('%source has been updated', [
+      '%source' => $labelWithSummary['summary'],
     ]);
     $this->setNewPresent($root, $log);
   }
@@ -351,9 +351,9 @@ class Instance extends EntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function setThirdPartySettings(string $instance_id, string $island_id, array $data): void {
+  public function setThirdPartySettings(string $node_id, string $island_id, array $data): void {
     $root = $this->getCurrentState();
-    $path = $this->getPath($root, $instance_id);
+    $path = $this->getPath($root, $node_id);
     $existing_data = NestedArray::getValue($root, $path);
 
     if (!isset($existing_data['_third_party_settings'])) {
@@ -363,10 +363,10 @@ class Instance extends EntityBase implements InstanceInterface {
     NestedArray::setValue($root, $path, $existing_data);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy()->getLabelWithSummary($existing_data, $this->getContexts());
+    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($existing_data, $this->getContexts());
 
-    $log = new FormattableMarkup('%instance has been updated by @island_id', [
-      '%instance' => $labelWithSummaryInstance['summary'],
+    $log = new FormattableMarkup('%source has been updated by @island_id', [
+      '%source' => $labelWithSummary['summary'],
       '@island_id' => $island_id,
     ]);
     $this->setNewPresent($root, $log);
@@ -375,21 +375,21 @@ class Instance extends EntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function remove(string $instance_id): void {
+  public function remove(string $node_id): void {
     $root = $this->getCurrentState();
-    $path = $this->getPath($root, $instance_id);
+    $path = $this->getPath($root, $node_id);
     $data = NestedArray::getValue($root, $path);
-    $parent_id = $this->getParentId($root, $instance_id);
-    $root = $this->doRemove($root, $instance_id);
+    $parent_id = $this->getParentId($root, $node_id);
+    $root = $this->doRemove($root, $node_id);
 
     $contexts = $this->getContexts() ?? [];
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummaryInstance = $this->slotSourceProxy()->getLabelWithSummary($data, $contexts);
+    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $contexts);
     $labelWithSummaryParent = empty($parent_id) ? ['summary' => 'root'] : $this->slotSourceProxy()->getLabelWithSummary($this->get($parent_id), $contexts);
 
-    $log = new FormattableMarkup('%instance has been removed from %parent', [
-      '%instance' => $labelWithSummaryInstance['summary'],
+    $log = new FormattableMarkup('%node has been removed from %parent', [
+      '%node' => $labelWithSummary['summary'],
       '%parent' => $labelWithSummaryParent['summary'],
     ]);
     $this->setNewPresent($root, $log, FALSE);
@@ -647,7 +647,7 @@ class Instance extends EntityBase implements InstanceInterface {
   private function buildIndexFromSlot(array $path, array $data = []): array {
     foreach ($data as $index => $source) {
       $source_path = \array_merge($path, [$index]);
-      $data[$index] = $this->buildIndexFromInstance($source_path, $source);
+      $data[$index] = $this->buildIndexFromSource($source_path, $source);
     }
 
     return $data;
@@ -716,21 +716,21 @@ class Instance extends EntityBase implements InstanceInterface {
   }
 
   /**
-   * Change the position of an instance in a slot.
+   * Change the position of an source in a slot.
    *
    * @param array $slot
    *   The slot.
-   * @param string $instance_id
-   *   The instance id.
+   * @param string $node_id
+   *   The node id of the source.
    * @param int $to
    *   The new position.
    *
    * @return array
    *   The updated slot.
    */
-  private function changeInstancePositionInSlot(array $slot, string $instance_id, int $to): array {
+  private function changeSourcePositionInSlot(array $slot, string $node_id, int $to): array {
     foreach ($slot as $position => $source) {
-      if ($source['_instance_id'] === $instance_id) {
+      if ($source['_node_id'] === $node_id) {
         $p1 = \array_splice($slot, $position, 1);
         $p2 = \array_splice($slot, 0, $to);
 
@@ -742,19 +742,19 @@ class Instance extends EntityBase implements InstanceInterface {
   }
 
   /**
-   * Get the instance ID from a path.
+   * Get the source nod ID from a path.
    *
    * @todo may be slow.
    *
    * @param array $path
    *   The path to the slot.
    */
-  private function getInstanceId(array $path): string {
+  private function getNodeId(array $path): string {
     $index = $this->getPathIndex();
 
-    foreach ($index as $instance_id => $instance_path) {
-      if ($path === $instance_path) {
-        return $instance_id;
+    foreach ($index as $node_id => $node_path) {
+      if ($path === $node_path) {
+        return $node_id;
       }
     }
 
@@ -762,7 +762,7 @@ class Instance extends EntityBase implements InstanceInterface {
   }
 
   /**
-   * Add path to index and add instance ID.
+   * Add path to index and add node ID to source.
    *
    * @param array $path
    *   The path to the slot.
@@ -772,12 +772,12 @@ class Instance extends EntityBase implements InstanceInterface {
    * @return array
    *   The slot data with the index updated.
    */
-  private function buildIndexFromInstance(array $path, array $data = []): array {
-    // First job: Add missing _instance_id keys.
-    $instance_id = $data['_instance_id'] ?? \uniqid();
-    $data['_instance_id'] = $instance_id;
+  private function buildIndexFromSource(array $path, array $data = []): array {
+    // First job: Add missing _node_id keys.
+    $node_id = $data['_node_id'] ?? \uniqid();
+    $data['_node_id'] = $node_id;
     // Second job: Save the path to the index.
-    $this->pathIndex[$instance_id] = $path;
+    $this->pathIndex[$node_id] = $path;
 
     if (!isset($data['source_id'])) {
       return $data;
@@ -817,7 +817,7 @@ class Instance extends EntityBase implements InstanceInterface {
    * @return array
    *   The updated root state
    */
-  private function attachToRoot(array $root, int $position, array $data): array {
+  private function doAttachToRoot(array $root, int $position, array $data): array {
     \array_splice($root, $position, 0, [$data]);
 
     return $root;
@@ -829,7 +829,7 @@ class Instance extends EntityBase implements InstanceInterface {
    * @param array $root
    *   The root state.
    * @param string $parent_id
-   *   The ID of the parent instance.
+   *   The ID of the parent node.
    * @param string $slot_id
    *   The ID of the slot where to insert the data.
    * @param int $position
@@ -840,7 +840,7 @@ class Instance extends EntityBase implements InstanceInterface {
    * @return array
    *   The updated root state
    */
-  private function attachToSlot(array $root, string $parent_id, string $slot_id, int $position, array $data): array {
+  private function doAttachToSlot(array $root, string $parent_id, string $slot_id, int $position, array $data): array {
     $parent_path = $this->getPath($root, $parent_id);
     $slot_path = \array_merge($parent_path, ['source', 'component', 'slots', $slot_id, 'sources']);
     $slot = NestedArray::getValue($root, $slot_path) ?? [];
@@ -855,14 +855,14 @@ class Instance extends EntityBase implements InstanceInterface {
    *
    * @param array $root
    *   The root state.
-   * @param string $instance_id
-   *   The instance id.
+   * @param string $node_id
+   *   The node id of the source.
    *
    * @return array
    *   The updated root state
    */
-  private function doRemove(array $root, string $instance_id): array {
-    $path = $this->getPath($root, $instance_id);
+  private function doRemove(array $root, string $node_id): array {
+    $path = $this->getPath($root, $node_id);
     NestedArray::unsetValue($root, $path);
     // To avoid non consecutive array keys, we rebuild the value list.
     $slot_path = \array_slice($path, 0, \count($path) - 1);
@@ -873,18 +873,18 @@ class Instance extends EntityBase implements InstanceInterface {
   }
 
   /**
-   * Get the path to an instance.
+   * Get the path to an source.
    *
    * @param array $root
    *   The root state.
-   * @param string $instance_id
-   *   The instance id.
+   * @param string $node_id
+   *   The node id of the source.
    *
    * @return array
    *   The path, one array item by level.
    */
-  private function getPath(array $root, string $instance_id): array {
-    return $this->getPathIndex($root)[$instance_id] ?? [];
+  private function getPath(array $root, string $node_id): array {
+    return $this->getPathIndex($root)[$node_id] ?? [];
   }
 
 }

@@ -62,7 +62,7 @@ class TreePanel extends BuilderPanel {
    */
   protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): array {
     $component_id = $data['source']['component']['component_id'] ?? NULL;
-    $instance_id = $instance_id ?: $data['_instance_id'];
+    $instance_id = $instance_id ?: $data['_node_id'];
 
     if (!$instance_id && !$component_id) {
       return [];
@@ -91,8 +91,8 @@ class TreePanel extends BuilderPanel {
         '#attributes' => [
           'data-slot-id' => $slot_id,
           'data-slot-title' => $definition['title'],
-          'data-instance-id' => $instance_id,
-          'data-instance-title' => $component['label'],
+          'data-node-id' => $instance_id,
+          'data-node-title' => $component['label'],
           'data-menu-type' => 'slot',
         ],
       ];
@@ -131,8 +131,8 @@ class TreePanel extends BuilderPanel {
       // Required for the context menu label.
       // @see assets/js/contextual_menu.js
       '#attributes' => [
-        'data-instance-id' => $instance_id,
-        'data-instance-title' => $name,
+        'data-node-id' => $instance_id,
+        'data-node-title' => $name,
         'data-slot-position' => $index,
         'data-menu-type' => 'component',
       ],
@@ -143,7 +143,7 @@ class TreePanel extends BuilderPanel {
    * {@inheritdoc}
    */
   protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): array {
-    $instance_id = $instance_id ?: $data['_instance_id'];
+    $instance_id = $instance_id ?: $data['_node_id'];
     $label = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
 
     return [
@@ -156,10 +156,10 @@ class TreePanel extends BuilderPanel {
         'title' => $label['summary'],
       ],
       '#attributes' => [
-        'data-instance-id' => $instance_id,
+        'data-node-id' => $instance_id,
         // This label is used for contextual menu.
         // @see assets/js/contextual_menu.js
-        'data-instance-title' => $label['label'],
+        'data-node-title' => $label['label'],
         'data-slot-position' => $index,
         'data-menu-type' => 'block',
       ],

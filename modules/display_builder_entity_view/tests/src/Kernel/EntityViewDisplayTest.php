@@ -194,12 +194,12 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
   public function testGetDisplayBuilder(): void {
     $display = self::createTestDisplay();
 
-    $profile = $display->getDisplayBuilder();
+    $profile = $display->getProfile();
     self::assertNull($profile);
 
     $display->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY, 'test')->save();
 
-    $profile = $display->getDisplayBuilder();
+    $profile = $display->getProfile();
     self::assertSame('test', $profile->id());
   }
 
@@ -256,7 +256,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
 
     $display->saveSources();
     $sources = $display->getSources();
-    self::removeInstanceId($sources);
+    self::removeNodeId($sources);
 
     self::assertSame($expected, $sources);
   }
@@ -316,17 +316,17 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
   }
 
   /**
-   * Recursively remove the _instance_id key.
+   * Recursively remove the _node_id key.
    *
    * @param array $array
    *   The array reference.
    */
-  private static function removeInstanceId(array &$array): void {
-    unset($array['_instance_id']);
+  private static function removeNodeId(array &$array): void {
+    unset($array['_node_id']);
 
     foreach ($array as $key => &$value) {
       if (\is_array($value)) {
-        self::removeInstanceId($value);
+        self::removeNodeId($value);
 
         if (isset($value['source_id'], $value['source']['value']) && empty($value['source']['value'])) {
           unset($array[$key]);

@@ -5,7 +5,7 @@
 
 ((Drupal, once) => {
   function highlightInstance(event, builder) {
-    const { instanceId } = event.detail.selection[0].dataset;
+    const { nodeId } = event.detail.selection[0].dataset;
     const { slotId } = event.detail.selection[0].dataset;
 
     builder.querySelectorAll('.db-tree-selected').forEach((elt) => {
@@ -14,10 +14,10 @@
 
     builder
       .querySelectorAll(
-        `.db-island-view:not(.db-island-tree) [data-instance-id="${instanceId}"]`,
+        `.db-island-view:not(.db-island-tree) [data-node-id="${nodeId}"]`,
       )
       .forEach((elt) => {
-        if (elt.dataset?.instanceTitle) {
+        if (elt.dataset?.nodeTitle) {
           elt.classList.add('db-tree-selected');
         } else if (elt.dataset?.slotId === slotId) {
           elt.classList.add('db-tree-selected');

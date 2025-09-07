@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 interface ApiControllerInterface {
 
   /**
-   * Attach a component_id, a block_id, or an instance_id, to the root.
+   * Attach a component_id, a block_id, or an existing source, to the root.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
@@ -27,78 +27,78 @@ interface ApiControllerInterface {
   public function attachToRoot(Request $request, InstanceInterface $builder): HtmlResponse;
 
   /**
-   * Attach a component_id, a block_id, or an instance_id, to a component slot.
+   * Attach a component_id, a block_id, or an source, to a component slot.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   Display builder instance.
-   * @param string $instance_id
-   *   Instance ID.
+   * @param string $node_id
+   *   Node ID of the parent.
    * @param string $slot
    *   Slot.
    *
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function attachToSlot(Request $request, InstanceInterface $builder, string $instance_id, string $slot): HtmlResponse;
+  public function attachToSlot(Request $request, InstanceInterface $builder, string $node_id, string $slot): HtmlResponse;
 
   /**
-   * Open instance_id's contextual islands.
+   * Open source's contextual islands.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   Display builder instance.
-   * @param string $instance_id
-   *   Instance ID.
+   * @param string $node_id
+   *   Node ID of the source.
    *
    * @return array
    *   The render array response.
    */
-  public function getInstance(Request $request, InstanceInterface $builder, string $instance_id): array;
+  public function get(Request $request, InstanceInterface $builder, string $node_id): array;
 
   /**
-   * Update instance_id.
+   * Update source.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   Display builder instance.
-   * @param string $instance_id
-   *   Instance ID.
+   * @param string $node_id
+   *   Node ID of the source.
    *
    * @return array
    *   The render array response.
    */
-  public function updateInstance(Request $request, InstanceInterface $builder, string $instance_id): array;
+  public function update(Request $request, InstanceInterface $builder, string $node_id): array;
 
   /**
-   * Update instance_id.
+   * Update source's 3rd party settings.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   Display builder instance.
-   * @param string $instance_id
-   *   Instance ID.
+   * @param string $node_id
+   *   Node ID of the source.
    * @param string $island_id
    *   Island ID.
    *
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function thirdPartySettingsUpdate(Request $request, InstanceInterface $builder, string $instance_id, string $island_id): HtmlResponse;
+  public function thirdPartySettingsUpdate(Request $request, InstanceInterface $builder, string $node_id, string $island_id): HtmlResponse;
 
   /**
-   * Paste an instance in a builder.
+   * Paste a source.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   Display builder instance.
-   * @param string $instance_id
-   *   Instance ID.
+   * @param string $node_id
+   *   Node ID of the source.
    * @param string $parent_id
    *   Parent ID.
    * @param string $slot_id
@@ -109,40 +109,40 @@ interface ApiControllerInterface {
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function pasteInstance(Request $request, InstanceInterface $builder, string $instance_id, string $parent_id, string $slot_id, string $slot_position): HtmlResponse;
+  public function paste(Request $request, InstanceInterface $builder, string $node_id, string $parent_id, string $slot_id, string $slot_position): HtmlResponse;
 
   /**
-   * Delete an instance in a builder.
+   * Delete a source.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   Display builder instance.
-   * @param string $instance_id
-   *   Instance ID to delete.
+   * @param string $node_id
+   *   Node ID of the source to delete.
    *
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function deleteInstance(Request $request, InstanceInterface $builder, string $instance_id): HtmlResponse;
+  public function delete(Request $request, InstanceInterface $builder, string $node_id): HtmlResponse;
 
   /**
-   * Save an instance as preset from a builder.
+   * Save a source as preset.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   Display builder instance.
-   * @param string $instance_id
-   *   Instance ID to save.
+   * @param string $node_id
+   *   Node ID of the source to save.
    *
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function saveInstanceAsPreset(Request $request, InstanceInterface $builder, string $instance_id): HtmlResponse;
+  public function saveAsPreset(Request $request, InstanceInterface $builder, string $node_id): HtmlResponse;
 
   /**
-   * Save builder.
+   * Save display builder instance.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.

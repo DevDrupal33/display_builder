@@ -186,8 +186,9 @@ class StateButtons extends IslandPluginBase {
       return FALSE;
     }
 
-    // Do not use the entity from the state manager builder context because
-    // the fields are empty.
+    // Do not get the profile entity ID from Instance context because the
+    // data stored there is not reliable yet.
+    // See: https://www.drupal.org/project/display_builder/issues/3544545
     $entity = $this->entityTypeManager->getStorage($instanceInfos['entity_type_id'])
       ->load($instanceInfos['entity_id']);
 

@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides dynamic permissions of the display_builder module.
  */
-class DisplayBuilderPermissions implements ContainerInjectionInterface {
+class ProfilePermissions implements ContainerInjectionInterface {
 
   use StringTranslationTrait;
 
@@ -24,7 +24,7 @@ class DisplayBuilderPermissions implements ContainerInjectionInterface {
   protected $entityTypeManager;
 
   /**
-   * Constructs a new DisplayBuilderPermissions instance.
+   * Constructs a new ProfilePermissions instance.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
@@ -36,7 +36,7 @@ class DisplayBuilderPermissions implements ContainerInjectionInterface {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container): DisplayBuilderPermissions {
+  public static function create(ContainerInterface $container): ProfilePermissions {
     return new static($container->get('entity_type.manager'));
   }
 
@@ -50,8 +50,8 @@ class DisplayBuilderPermissions implements ContainerInjectionInterface {
     $permissions = [];
     // Generate permissions for each display builder. Warn the administrator
     // that any of them are potentially unsafe.
-    /** @var \Drupal\display_builder\DisplayBuilderInterface[] $builders */
-    $builders = $this->entityTypeManager->getStorage('display_builder')->loadMultiple();
+    /** @var \Drupal\display_builder\ProfileInterface[] $builders */
+    $builders = $this->entityTypeManager->getStorage('display_builder_profile')->loadMultiple();
     \uasort($builders, 'Drupal\Core\Config\Entity\ConfigEntityBase::sort');
 
     foreach ($builders as $builder) {

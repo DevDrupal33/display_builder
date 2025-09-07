@@ -10,7 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\display_builder\Entity\DisplayBuilder;
+use Drupal\display_builder\Entity\Profile;
 use Drupal\display_builder\IslandInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -19,7 +19,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 /**
  * Display builder plugin form.
  */
-final class DisplayBuilderIslandPluginForm extends EntityForm {
+final class ProfileIslandPluginForm extends EntityForm {
 
   /**
    * The route parameter for the island plugin.
@@ -54,7 +54,7 @@ final class DisplayBuilderIslandPluginForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container): DisplayBuilderIslandPluginForm {
+  public static function create(ContainerInterface $container): ProfileIslandPluginForm {
     return new self(
       $container->get('plugin.manager.db_island')
     );
@@ -139,7 +139,7 @@ final class DisplayBuilderIslandPluginForm extends EntityForm {
    * {@inheritdoc}
    */
   protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state): void {
-    \assert($entity instanceof DisplayBuilder);
+    \assert($entity instanceof Profile);
     parent::copyFormValuesToEntity($entity, $form, $form_state);
     $island = $this->getIslandPlugin();
 
@@ -157,7 +157,7 @@ final class DisplayBuilderIslandPluginForm extends EntityForm {
     if ($this->island !== NULL) {
       return $this->island;
     }
-    /** @var \Drupal\display_builder\Entity\DisplayBuilder $entity */
+    /** @var \Drupal\display_builder\Entity\Profile $entity */
     $entity = $this->entity;
     $island_configuration = $entity->getIslandConfiguration($this->islandId);
     $island = $this->islandPluginManager->createInstance($this->islandId, $island_configuration);

@@ -9,7 +9,7 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
 /**
  * Provides an interface defining a display builder entity type.
  */
-interface DisplayBuilderInterface extends ConfigEntityInterface {
+interface ProfileInterface extends ConfigEntityInterface {
 
   /**
    * Get enabled islands for this config.

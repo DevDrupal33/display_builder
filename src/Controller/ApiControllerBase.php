@@ -9,10 +9,10 @@ use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
-use Drupal\display_builder\DisplayBuilderInterface;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\ProfileInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -59,7 +59,7 @@ abstract class ApiControllerBase extends ControllerBase {
   /**
    * The lazy loaded display builder.
    */
-  protected ?DisplayBuilderInterface $displayBuilder = NULL;
+  protected ?ProfileInterface $displayBuilder = NULL;
 
   public function __construct(
     protected EventDispatcherInterface $eventDispatcher,
@@ -79,15 +79,15 @@ abstract class ApiControllerBase extends ControllerBase {
    *   The event ID.
    * @param array|null $data
    *   The data.
-   * @param string|null $instance_id
-   *   Optional instance ID.
+   * @param string|null $node_id
+   *   Optional Instance entity ID.
    * @param string|null $parent_id
    *   Optional parent ID.
    *
    * @return \Drupal\display_builder\Event\DisplayBuilderEvent
    *   The event.
    */
-  protected function createEventWithEnabledIsland($event_id, $data, $instance_id, $parent_id): DisplayBuilderEvent {
+  protected function createEventWithEnabledIsland($event_id, $data, $node_id, $parent_id): DisplayBuilderEvent {
     $builder_id = (string) $this->builder->id();
     $key = \sprintf('db_%s_island_enable', $builder_id);
     $island_configuration_key = \sprintf('db_%s_island_configuration', $builder_id);
@@ -110,7 +110,7 @@ abstract class ApiControllerBase extends ControllerBase {
       $island_enabled = $island_enabled->data;
     }
 
-    $event = new DisplayBuilderEvent($builder_id, $island_enabled, $island_configuration, $data, $instance_id, $parent_id, $this->islandId);
+    $event = new DisplayBuilderEvent($builder_id, $island_enabled, $island_configuration, $data, $node_id, $parent_id, $this->islandId);
     $this->eventDispatcher->dispatch($event, $event_id);
 
     return $event;
@@ -130,10 +130,7 @@ abstract class ApiControllerBase extends ControllerBase {
     $state = [
       'sessionId' => $this->session->getId(),
       'timestamp' => $this->time->getRequestTime(),
-      // instanceId here is the entry in the State API (so the equivalent of
-      // builderId in the State Manager), not the specific node we are
-      // manipulating in the sources data tree.
-      // @see https://www.drupal.org/project/display_builder/issues/3538360
+      // instanceId here is the ID of a display_builder_instance entity.
       'instanceId' => (string) $this->builder->id(),
     ];
     $collection = $this->sharedTempStoreFactory->get($this::SSE_COLLECTION);

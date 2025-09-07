@@ -47,7 +47,7 @@ test('From fixture', { tag: [ '@display_builder_dev_tools' ] }, async ({ page, d
     const componentSimpleSlot = page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
     await displayBuilder.dragElementFromLibraryById('Blocks', 'token', componentSimpleSlot)
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-instance-title="Token"]`).first(),
+      page.locator(`.db-island-builder [data-node-title="Token"]`).first(),
       'I am a test token in a slot! ',
       [
         {
@@ -104,7 +104,7 @@ test('From scratch', { tag: [ '@display_builder_dev_tools' ] }, async ({ page, d
     await displayBuilder.dragElementFromLibraryById('Blocks', 'token', componentSimpleSlot.nth(1))
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-instance-title="Token"]`).first(),
+      page.locator(`.db-island-builder [data-node-title="Token"]`).first(),
       'I am a test token in a slot',
       [
         {
@@ -115,7 +115,7 @@ test('From scratch', { tag: [ '@display_builder_dev_tools' ] }, async ({ page, d
     )
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-instance-title="Test simple"]`).first(),
+      page.locator(`.db-island-builder [data-node-title="Test simple"]`).first(),
       'First component',
       [
         {
@@ -130,7 +130,7 @@ test('From scratch', { tag: [ '@display_builder_dev_tools' ] }, async ({ page, d
     )
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-instance-title="Test simple"]`).nth(1),
+      page.locator(`.db-island-builder [data-node-title="Test simple"]`).nth(1),
       'Second component with a token',
       [
         {

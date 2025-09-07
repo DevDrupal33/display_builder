@@ -46,8 +46,6 @@ View panels have an extra feature, they can be moved between 2 different regions
 - tabbed in the center of the toolbar
 - or as buttons in the start of the toolbar
 
-> 🚧 2025-07-01: "Edit" button for configurable islands is not implemented yet. See [#3529067](https://www.drupal.org/project/display_builder/issues/3529067)
-
 ## Access & permissions
 
 Each Display builder profile is associated to a permission:
@@ -57,5 +55,3 @@ Each Display builder profile is associated to a permission:
 This is conditioning the builders available in the selector for a specific user:
 
 ![Configuration selector](images/selector.webp)
-
-> 🚧 2025-07-01: Not implemented yet. See [#3529129](https://www.drupal.org/project/display_builder/issues/3529129)

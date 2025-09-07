@@ -172,7 +172,7 @@ trait EntityViewDisplayFormTrait {
       '#type' => 'select',
       '#title' => $this->t('Override profile'),
       '#description' => $this->t('The profile used for content overrides. It can be changed anytime.'),
-      '#options' => $this->configFormBuilder->getAllowedDisplayBuilders(),
+      '#options' => $this->configFormBuilder->getAllowedProfiles(),
       '#default_value' => $overridable->getDisplayBuilderOverrideProfile()?->id(),
       '#states' => [
         'invisible' => [

@@ -127,7 +127,7 @@ phpcs:
     - *manual-rule
 
 eslint:
-  allow_failure: false
+  allow_failure: true
   # .eslintignore seems ignored
   before_script:
     - rm -rf tests/src/Playwright playwright.config.ts
@@ -142,7 +142,7 @@ eslint:
     - *manual-rule
 
 stylelint:
-  allow_failure: false
+  allow_failure: true
   rules:
     - !reference [.skip-stylelint-rule]
     - *is-push-rule

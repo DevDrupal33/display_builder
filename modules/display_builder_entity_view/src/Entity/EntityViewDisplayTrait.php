@@ -14,9 +14,9 @@ use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
-use Drupal\display_builder\DisplayBuilderInterface;
+use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\WithDisplayBuilderInterface;
+use Drupal\display_builder\ProfileInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 
 /**
@@ -76,7 +76,7 @@ trait EntityViewDisplayTrait {
       return FALSE;
     }
 
-    return (bool) $this->getDisplayBuilder();
+    return (bool) $this->getProfile();
   }
 
   /**
@@ -138,7 +138,7 @@ trait EntityViewDisplayTrait {
    * @return string
    *   The context requirement string.
    *
-   * @see \Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\DisplayBuildableInterface
    */
   public static function getContextRequirement(): string {
     return 'entity';
@@ -147,7 +147,7 @@ trait EntityViewDisplayTrait {
   /**
    * {@inheritdoc}
    *
-   * @see \Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\DisplayBuildableInterface
    */
   public static function checkInstanceId(string $instance_id): ?array {
     if (!\str_starts_with($instance_id, EntityViewDisplay::getPrefix())) {
@@ -188,7 +188,7 @@ trait EntityViewDisplayTrait {
    * @return \Drupal\Core\Url
    *   The url of the instance.
    *
-   * @see \Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\DisplayBuildableInterface
    */
   public static function getUrlFromInstanceId(string $instance_id): Url {
     $params = self::getUrlParamsFromInstanceId($instance_id);
@@ -206,7 +206,7 @@ trait EntityViewDisplayTrait {
    * @return \Drupal\Core\Url
    *   The url of the instance.
    *
-   * @see Drupal\display_builder\WithDisplayBuilderInterface
+   * @see Drupal\display_builder\DisplayBuildableInterface
    */
   public static function getDisplayUrlFromInstanceId(string $instance_id): Url {
     $params = self::getUrlParamsFromInstanceId($instance_id);
@@ -230,12 +230,12 @@ trait EntityViewDisplayTrait {
   /**
    * Returns the display builder override profile.
    *
-   * @return \Drupal\display_builder\DisplayBuilderInterface|null
+   * @return \Drupal\display_builder\ProfileInterface|null
    *   The display builder override profile, or NULL if not set.
    *
    * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
    */
-  public function getDisplayBuilderOverrideProfile(): ?DisplayBuilderInterface {
+  public function getDisplayBuilderOverrideProfile(): ?ProfileInterface {
     $display_builder_id = $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY);
 
     if ($display_builder_id === NULL) {
@@ -261,12 +261,12 @@ trait EntityViewDisplayTrait {
   /**
    * Returns the display builder instance.
    *
-   * @return \Drupal\display_builder\DisplayBuilderInterface|null
+   * @return \Drupal\display_builder\ProfileInterface|null
    *   The display builder instance, or NULL if not set.
    *
-   * @see \Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\DisplayBuildableInterface
    */
-  public function getDisplayBuilder(): ?DisplayBuilderInterface {
+  public function getProfile(): ?ProfileInterface {
     $display_builder_id = $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY);
 
     if ($display_builder_id === NULL) {
@@ -282,7 +282,7 @@ trait EntityViewDisplayTrait {
    * @return string|null
    *   The instance ID for the display builder, or NULL if the entity is new.
    *
-   * @see \Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\DisplayBuildableInterface
    */
   public function getInstanceId(): ?string {
     // Usually an entity is new if no ID exists for it yet.
@@ -296,7 +296,7 @@ trait EntityViewDisplayTrait {
   /**
    * Initializes the display builder instance if it is missing.
    *
-   * @see \Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\DisplayBuildableInterface
    */
   public function initInstanceIfMissing(): void {
     /** @var \Drupal\display_builder\InstanceStorage $storage */
@@ -351,7 +351,7 @@ trait EntityViewDisplayTrait {
    * @return array
    *   The sources of the display builder.
    *
-   * @see \Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\DisplayBuildableInterface
    */
   public function getSources(): array {
     return $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::SOURCES_PROPERTY, []);
@@ -360,7 +360,7 @@ trait EntityViewDisplayTrait {
   /**
    * Saves the sources of the display builder.
    *
-   * @see \Drupal\display_builder\WithDisplayBuilderInterface
+   * @see \Drupal\display_builder\DisplayBuildableInterface
    */
   public function saveSources(): void {
     $data = $this->getInstance()->getCurrentState();
@@ -379,7 +379,7 @@ trait EntityViewDisplayTrait {
    * @see \Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE): void {
-    if ($this->getDisplayBuilder()) {
+    if ($this->getProfile()) {
       $this->initInstanceIfMissing();
     }
 
@@ -446,7 +446,7 @@ trait EntityViewDisplayTrait {
       if ($this->isDisplayBuilderOverridable()) {
         $display_builder_field = $this->getDisplayBuilderOverrideField();
         $overridden_field = $entity->get($display_builder_field);
-        \assert($overridden_field instanceof WithDisplayBuilderInterface);
+        \assert($overridden_field instanceof DisplayBuildableInterface);
         $sources = $overridden_field->getSources();
       }
 
@@ -515,16 +515,16 @@ trait EntityViewDisplayTrait {
    * @param string $display_builder_id
    *   The display builder ID.
    *
-   * @return \Drupal\display_builder\DisplayBuilderInterface|null
+   * @return \Drupal\display_builder\ProfileInterface|null
    *   The display builder, or NULL if not found.
    */
-  private function loadDisplayBuilder(string $display_builder_id): ?DisplayBuilderInterface {
+  private function loadDisplayBuilder(string $display_builder_id): ?ProfileInterface {
     if (empty($display_builder_id)) {
       return NULL;
     }
-    $storage = $this->entityTypeManager->getStorage('display_builder');
+    $storage = $this->entityTypeManager->getStorage('display_builder_profile');
 
-    /** @var \Drupal\display_builder\DisplayBuilderInterface $display_builder */
+    /** @var \Drupal\display_builder\ProfileInterface $display_builder */
     $display_builder = $storage->load($display_builder_id);
 
     return $display_builder;

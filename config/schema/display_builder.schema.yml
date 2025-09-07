@@ -1,4 +1,4 @@
-display_builder.display_builder.*:
+display_builder.profile.*:
   type: config_entity
   label: Display builder profile
   mapping:

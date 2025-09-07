@@ -68,7 +68,7 @@ If no Page layout matches, _Block Layout_ still manage the page.
 
 Each page is its own config entity
 
-- `display_builder`: the Display builder profile (config entity) in use last time the config was saved
+- `profile`: the Display builder profile (config entity) in use last time the config was saved
 - `sources`: a UI Patterns 2 sources tree
 
 Example:
@@ -77,7 +77,7 @@ Example:
 id: users
 label: Users
 weight: -9
-display_builder: default
+profile: default
 sources: [...]
 conditions:
   request_path:

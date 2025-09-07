@@ -41,7 +41,7 @@ However, only one of the tool will be used to render the content.
 
 Display Builder data is stored as a third party settings with those properties:
 
-- `display_builder`: the Display builder profile (config entity) in use last time the config was saved
+- `profile`: the Display builder profile (config entity) in use last time the config was saved
 - `sources`: a UI Patterns 2 sources tree
 
 Example:
@@ -55,7 +55,7 @@ content: {}
 hidden: {}
 third_party_settings:
   display_builder:
-    display_builder: default
+    profile: default
     sources: [...]
 ```
 

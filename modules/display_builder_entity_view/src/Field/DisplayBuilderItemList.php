@@ -10,9 +10,9 @@ use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Url;
-use Drupal\display_builder\DisplayBuilderInterface;
+use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\WithDisplayBuilderInterface;
+use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
@@ -27,7 +27,7 @@ use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
  *
  * phpcs:disable DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
  */
-final class DisplayBuilderItemList extends MapFieldItemList implements WithDisplayBuilderInterface {
+final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBuildableInterface {
 
   /**
    * The entity type manager.
@@ -117,7 +117,7 @@ final class DisplayBuilderItemList extends MapFieldItemList implements WithDispl
   /**
    * {@inheritdoc}
    */
-  public function getDisplayBuilder(): ?DisplayBuilderInterface {
+  public function getProfile(): ?ProfileInterface {
     \assert(\is_string($this->getName()));
     $entity = $this->getEntity();
 
@@ -203,7 +203,7 @@ final class DisplayBuilderItemList extends MapFieldItemList implements WithDispl
       \assert(\is_string($this->getName()));
       $display = self::getEntityViewDisplay($entity->getEntityTypeId(), $entity->bundle(), $this->getName());
 
-      if ($display->getDisplayBuilder() !== NULL) {
+      if ($display->getProfile() !== NULL) {
         $sources = $display->getSources();
       }
     }

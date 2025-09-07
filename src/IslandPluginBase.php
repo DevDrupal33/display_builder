@@ -129,7 +129,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   public function build(InstanceInterface $builder, array $data, array $options = []): array {
     $builder_id = (string) $builder->id();
     $this->builderId = $builder_id;
-    $this->instanceId = $data['_instance_id'] ?? NULL;
+    $this->instanceId = $data['_node_id'] ?? NULL;
 
     // First, get specific data for the plugin.
     if (isset($data['_third_party_settings'][$this->getPluginId()])) {
@@ -369,7 +369,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    *   Returns a render array with out-of-band commands.
    */
   protected function replaceInstance(string $builder_id, string $instance_id): array {
-    $parent_selector = '#' . $this->getHtmlId($builder_id) . ' [data-instance-id="' . $instance_id . '"]';
+    $parent_selector = '#' . $this->getHtmlId($builder_id) . ' [data-node-id="' . $instance_id . '"]';
     // @todo pass \Drupal\display_builder\InstanceInterface object in
     // parameters instead of loading again.
     /** @var \Drupal\display_builder\InstanceInterface $builder */

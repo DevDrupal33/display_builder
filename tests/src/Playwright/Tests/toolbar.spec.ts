@@ -61,7 +61,7 @@ test('Toolbar buttons and keyboard', { tag: [ '@display_builder_dev_tools' ] }, 
 
   await test.step(`Undo / Redo / Clear`, async () => {
     // Test the undo/redo/clear buttons
-    const builderToken = page.locator(`.db-island-builder [data-instance-title="Token"]`)
+    const builderToken = page.locator(`.db-island-builder [data-node-title="Token"]`)
     await expect(builderToken).toHaveCount(2)
 
     // Position required to avoid icon to intercept the click.

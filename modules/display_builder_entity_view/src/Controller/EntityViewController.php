@@ -7,7 +7,7 @@ namespace Drupal\display_builder_entity_view\Controller;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Controller\IntegrationControllerBase;
-use Drupal\display_builder\WithDisplayBuilderInterface;
+use Drupal\display_builder\DisplayBuildableInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -76,13 +76,13 @@ final class EntityViewController extends IntegrationControllerBase {
    * @param string $view_mode
    *   View mode of the display.
    *
-   * @return \Drupal\display_builder\WithDisplayBuilderInterface|null
+   * @return \Drupal\display_builder\DisplayBuildableInterface|null
    *   The corresponding entity view display.
    */
-  protected function getEntityViewDisplay(string $entity_type_id, string $bundle, string $view_mode): ?WithDisplayBuilderInterface {
+  protected function getEntityViewDisplay(string $entity_type_id, string $bundle, string $view_mode): ?DisplayBuildableInterface {
     $display_id = "{$entity_type_id}.{$bundle}.{$view_mode}";
 
-    /** @var \Drupal\display_builder\WithDisplayBuilderInterface|null $display */
+    /** @var \Drupal\display_builder\DisplayBuildableInterface|null $display */
     $display = $this->entityTypeManager()->getStorage('entity_view_display')
       ->load($display_id);
 

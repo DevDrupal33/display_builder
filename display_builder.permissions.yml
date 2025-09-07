@@ -1,5 +1,5 @@
 permission_callbacks:
-  - Drupal\display_builder\DisplayBuilderPermissions::permissions
+  - Drupal\display_builder\ProfilePermissions::permissions
 
 access display builder:
   title: 'Access and use Display Builder'

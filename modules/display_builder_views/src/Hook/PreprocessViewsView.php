@@ -42,7 +42,7 @@ class PreprocessViewsView {
     $sources = $extender->getSources();
 
     // We fallback on normal View if Display Builder is empty or disabled!
-    if (empty($sources) || !$extender->getDisplayBuilder()) {
+    if (empty($sources) || !$extender->getProfile()) {
       return;
     }
 

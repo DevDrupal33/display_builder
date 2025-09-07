@@ -13,7 +13,7 @@ use Drupal\Core\Url;
 /**
  * View builder handler for display builder profiles.
  */
-class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCallbackInterface {
+class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInterface {
 
   use RenderableBuilderTrait;
 
@@ -30,17 +30,17 @@ class DisplayBuilderViewBuilder extends EntityViewBuilder implements TrustedCall
   /**
    * The entity we are building the view for.
    */
-  private DisplayBuilderInterface $entity;
+  private ProfileInterface $entity;
 
   /**
    * {@inheritdoc}
    */
   public function view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL): array {
     // We have 'hacked' the interface by using $view_mode as a way of passing
-    // the instance ID from the state manager.
+    // the Instance entity ID.
     $builder_id = $view_mode;
 
-    /** @var \Drupal\display_builder\DisplayBuilderInterface $entity */
+    /** @var \Drupal\display_builder\ProfileInterface $entity */
     $entity = $entity;
     $this->entity = $entity;
 

@@ -1,4 +1,4 @@
-# Attach a component_id, a block_id, or an instance_id to the root.
+# Attach a component_id, a block_id, or an node_id to the root.
 display_builder.api_root_attach:
   path: '/api/display-builder/{builder}'
   methods: [POST]
@@ -12,9 +12,9 @@ display_builder.api_root_attach:
       builder:
         type: 'entity:display_builder_instance'
 
-# Attach a component_id, a block_id, or an instance_id to a slot.
+# Attach a component_id, a block_id, or an node_id to a slot.
 display_builder.api_slot_attach:
-  path: '/api/display-builder/{builder}/instance/{instance_id}/{slot}'
+  path: '/api/display-builder/{builder}/node/{node_id}/{slot}'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::attachToSlot'
@@ -26,11 +26,11 @@ display_builder.api_slot_attach:
       builder:
         type: 'entity:display_builder_instance'
 
-display_builder.api_instance_get:
-  path: '/api/display-builder/{builder}/instance/{instance_id}'
+display_builder.api_get:
+  path: '/api/display-builder/{builder}/node/{node_id}'
   methods: [GET]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiController::getInstance'
+    _controller: '\Drupal\display_builder\Controller\ApiController::get'
   requirements:
     _permission: 'access display builder'
   options:
@@ -39,11 +39,11 @@ display_builder.api_instance_get:
       builder:
         type: 'entity:display_builder_instance'
 
-display_builder.api_instance_update:
-  path: '/api/display-builder/{builder}/instance/{instance_id}'
+display_builder.api_update:
+  path: '/api/display-builder/{builder}/node/{node_id}'
   methods: [PUT, POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiController::updateInstance'
+    _controller: '\Drupal\display_builder\Controller\ApiController::update'
   requirements:
     _permission: 'access display builder'
   options:
@@ -52,11 +52,11 @@ display_builder.api_instance_update:
       builder:
         type: 'entity:display_builder_instance'
 
-display_builder.api_instance_paste:
-  path: '/api/display-builder/{builder}/instance/{instance_id}/{parent_id}/{slot_id}/{slot_position}/paste'
+display_builder.api_paste:
+  path: '/api/display-builder/{builder}/node/{node_id}/{parent_id}/{slot_id}/{slot_position}/paste'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiController::pasteInstance'
+    _controller: '\Drupal\display_builder\Controller\ApiController::paste'
   requirements:
     _permission: 'access display builder'
   options:
@@ -65,11 +65,11 @@ display_builder.api_instance_paste:
       builder:
         type: 'entity:display_builder_instance'
 
-display_builder.api_instance_duplicate:
-  path: '/api/display-builder/{builder}/instance/{instance_id}/{parent_id}/{slot_id}/{slot_position}/duplicate'
+display_builder.api_duplicate:
+  path: '/api/display-builder/{builder}/node/{node_id}/{parent_id}/{slot_id}/{slot_position}/duplicate'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiController::pasteInstance'
+    _controller: '\Drupal\display_builder\Controller\ApiController::paste'
   requirements:
     _permission: 'access display builder'
   options:
@@ -78,11 +78,11 @@ display_builder.api_instance_duplicate:
       builder:
         type: 'entity:display_builder_instance'
 
-display_builder.api_instance_delete:
-  path: '/api/display-builder/{builder}/instance/{instance_id}'
+display_builder.api_delete:
+  path: '/api/display-builder/{builder}/node/{node_id}'
   methods: [DELETE]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiController::deleteInstance'
+    _controller: '\Drupal\display_builder\Controller\ApiController::delete'
   requirements:
     _permission: 'access display builder'
   options:
@@ -91,11 +91,11 @@ display_builder.api_instance_delete:
       builder:
         type: 'entity:display_builder_instance'
 
-display_builder.api_instance_save_preset:
-  path: '/api/display-builder/{builder}/instance/{instance_id}/save_as_preset'
+display_builder.api_save_preset:
+  path: '/api/display-builder/{builder}/node/{node_id}/save_as_preset'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiController::saveInstanceAsPreset'
+    _controller: '\Drupal\display_builder\Controller\ApiController::saveAsPreset'
   requirements:
     _permission: 'access display builder'
   options:
@@ -105,7 +105,7 @@ display_builder.api_instance_save_preset:
         type: 'entity:display_builder_instance'
 
 display_builder.api_third_party_settings_update:
-  path: '/api/display-builder/{builder}/instance/{instance_id}/settings/{island_id}'
+  path: '/api/display-builder/{builder}/node/{node_id}/settings/{island_id}'
   methods: [PUT]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::thirdPartySettingsUpdate'

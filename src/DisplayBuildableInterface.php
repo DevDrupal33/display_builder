@@ -7,12 +7,9 @@ namespace Drupal\display_builder;
 use Drupal\Core\Url;
 
 /**
- * Interface for entities natively embedding a display builder.
- *
- * So, it fits for `page_layout` entities, but not for `view` and
- * `entity_view_display` where Display builder is a non-native addition.
+ * Interface for entities or plugins natively embedding a display builder.
  */
-interface WithDisplayBuilderInterface {
+interface DisplayBuildableInterface {
 
   /**
    * Get the instance prefix.
@@ -34,7 +31,7 @@ interface WithDisplayBuilderInterface {
    * Check if instance ID can be used with the interface implementation.
    *
    * @param string $instance_id
-   *   Instance ID, as managed by the StateManager.
+   *   Instance entity ID.
    *
    * @return array
    *   The parts we checked, extracted from the instance ID string.
@@ -53,7 +50,7 @@ interface WithDisplayBuilderInterface {
    * Get display builder instance URL from an instance ID.
    *
    * @param string $instance_id
-   *   Instance ID, as managed by the StateManager.
+   *   Instance entity ID.
    *
    * @return \Drupal\Core\Url
    *   A Drupal URL object.
@@ -64,7 +61,7 @@ interface WithDisplayBuilderInterface {
    * Get the display url that use this instance.
    *
    * @param string $instance_id
-   *   Instance ID, as managed by the StateManager.
+   *   Instance entity ID.
    *
    * @return \Drupal\Core\Url
    *   A Drupal URL object.
@@ -76,10 +73,10 @@ interface WithDisplayBuilderInterface {
    *
    * If NULL, the Display Builder is not activated for this entity.
    *
-   * @return ?DisplayBuilderInterface
+   * @return ?ProfileInterface
    *   The display builder profile config entity.
    */
-  public function getDisplayBuilder(): ?DisplayBuilderInterface;
+  public function getProfile(): ?ProfileInterface;
 
   /**
    * Get instance ID.
@@ -94,16 +91,16 @@ interface WithDisplayBuilderInterface {
    * - an underscore (_)
    *
    * @return string|null
-   *   Instance ID, as managed by the StateManager.
+   *   Instance entity ID.
    */
   public function getInstanceId(): ?string;
 
   /**
    * Init instance if missing.
    *
-   * Init an instance in the State Manager if:
-   * - ::getDisplayBuilder() is not null
-   * - the instance is not already present in the State Manager.
+   * Init an display_builder_instance entity if:
+   * - ::getProfile() is not null
+   * - the instance is not already existing in storage.
    */
   public function initInstanceIfMissing(): void;
 
@@ -132,10 +129,9 @@ interface WithDisplayBuilderInterface {
   public function getSources(): array;
 
   /**
-   * Save sources tree from the State Manager.
+   * Save sources tree retrieved from the Instance entity to config or content.
    *
-   * When Display Builder needs to save the current state to the config on a
-   * DisplayBuilderEvents::ON_SAVE event.
+   * Triggered by a DisplayBuilderEvents::ON_SAVE event.
    */
   public function saveSources(): void;
 

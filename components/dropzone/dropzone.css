@@ -76,7 +76,7 @@ handle it instead of shoelace */
 }
 
 /* Enough to make something with empty slot selectable */
-[data-instance-id][data-component-id]:has([data-slot-id]:empty) {
+[data-node-id][data-component-id]:has([data-slot-id]:empty) {
   min-width: var(--dropzone-placeholder-min-height);
   min-height: var(--dropzone-placeholder-min-height);
 }
@@ -99,17 +99,17 @@ handle it instead of shoelace */
 }
 
 /* On hover, highlight only possible selectable elements */
-.db-dropzone [data-instance-id]:hover,
-.db-dropzone [data-instance-id]:not([data-component-id]):hover,
-.db-placeholder[data-instance-id]:hover {
+.db-dropzone [data-node-id]:hover,
+.db-dropzone [data-node-id]:not([data-component-id]):hover,
+.db-placeholder[data-node-id]:hover {
   position: relative;
   cursor: hand !important;
   outline: var(--dropzone-slot-outline-width) var(--dropzone-color-hover) var(--dropzone-slot-outline-type) !important;
   outline-offset: var(--dropzone-slot-outline-offset-light) !important;
 }
-.display-builder--highlight .display-builder__main .db-dropzone [data-instance-id],
-.display-builder--highlight .display-builder__main .db-dropzone [data-instance-id]:not([data-component-id]),
-.display-builder--highlight .display-builder__main .db-placeholder[data-instance-id] {
+.display-builder--highlight .display-builder__main .db-dropzone [data-node-id],
+.display-builder--highlight .display-builder__main .db-dropzone [data-node-id]:not([data-component-id]),
+.display-builder--highlight .display-builder__main .db-placeholder[data-node-id] {
   position: relative;
   margin: 0.5rem;
   padding: 0.5rem;
@@ -117,25 +117,25 @@ handle it instead of shoelace */
   outline: var(--dropzone-slot-outline-width) var(--dropzone-color-strong) var(--dropzone-slot-outline-type);
   outline-offset: var(--dropzone-slot-outline-offset);
 }
-.display-builder--highlight .display-builder__main .db-dropzone [data-instance-id]::before,
-.display-builder--highlight .display-builder__main .db-dropzone [data-instance-id]:not([data-component-id])::before,
-.display-builder--highlight .display-builder__main .db-placeholder[data-instance-id]::before {
+.display-builder--highlight .display-builder__main .db-dropzone [data-node-id]::before,
+.display-builder--highlight .display-builder__main .db-dropzone [data-node-id]:not([data-component-id])::before,
+.display-builder--highlight .display-builder__main .db-placeholder[data-node-id]::before {
   position: absolute;
   z-index: var(--dropzone-z-index-label-element, 1);
   top: 0;
   left: 0;
   display: inline-block;
   padding: 0 3px;
-  content: attr(data-instance-title);
+  content: attr(data-node-title);
   text-align: left;
   color: var(--db-background-color);
   background-color: var(--dropzone-color-hover);
   font-size: 14px;
 }
 
-.db-dropzone [data-instance-id]:hover::before,
-.db-dropzone [data-instance-id]:not([data-component-id]):hover::before,
-.db-placeholder[data-instance-id]:hover::before {
+.db-dropzone [data-node-id]:hover::before,
+.db-dropzone [data-node-id]:not([data-component-id]):hover::before,
+.db-placeholder[data-node-id]:hover::before {
   position: absolute;
   z-index: var(--dropzone-z-index-label-element, 1);
   top: -16px;
@@ -145,27 +145,27 @@ handle it instead of shoelace */
   margin-top: 0;
   margin-left: 0;
   padding: 0 3px;
-  content: attr(data-instance-title);
+  content: attr(data-node-title);
   text-align: left;
   color: var(--db-background-color);
   background-color: var(--dropzone-color-hover);
   font-size: 0.9rem;
 }
-.display-builder--highlight .display-builder__main .db-dropzone [data-instance-id]::before,
-.display-builder--highlight .display-builder__main .db-dropzone [data-instance-id]:not([data-component-id])::before,
-.display-builder--highlight .display-builder__main .db-placeholder[data-instance-id]::before {
+.display-builder--highlight .display-builder__main .db-dropzone [data-node-id]::before,
+.display-builder--highlight .display-builder__main .db-dropzone [data-node-id]:not([data-component-id])::before,
+.display-builder--highlight .display-builder__main .db-placeholder[data-node-id]::before {
   background-color: var(--dropzone-color-strong);
 }
-.display-builder--highlight .display-builder__main .db-dropzone [data-instance-id]:hover::before,
-.display-builder--highlight .display-builder__main .db-dropzone [data-instance-id]:not([data-component-id]):hover::before,
-.display-builder--highlight .display-builder__main .db-placeholder[data-instance-id]:hover::before {
+.display-builder--highlight .display-builder__main .db-dropzone [data-node-id]:hover::before,
+.display-builder--highlight .display-builder__main .db-dropzone [data-node-id]:not([data-component-id]):hover::before,
+.display-builder--highlight .display-builder__main .db-placeholder[data-node-id]:hover::before {
   background-color: var(--dropzone-color-hover) !important;
 }
 
 /** On drag context, when something is selected **/
 
 /* Reset the slight highlight when nothing happen */
-.display-builder--onDrag .db-dropzone [data-component-id][data-instance-id]:not([data-slot-id]) {
+.display-builder--onDrag .db-dropzone [data-component-id][data-node-id]:not([data-slot-id]) {
   position: relative;
   outline: 0 none transparent;
   outline-offset: 0;
@@ -200,9 +200,9 @@ handle it instead of shoelace */
 }
 
 /* Reset the hover effect when on drag to focus on possible targets */
-.display-builder--onDrag .db-dropzone [data-instance-id]:hover,
-.display-builder--onDrag .db-dropzone [data-instance-id]:not([data-component-id]):hover,
-.display-builder--onDrag .db-placeholder[data-instance-id]:hover {
+.display-builder--onDrag .db-dropzone [data-node-id]:hover,
+.display-builder--onDrag .db-dropzone [data-node-id]:not([data-component-id]):hover,
+.display-builder--onDrag .db-placeholder[data-node-id]:hover {
   outline: 0 none transparent;
   outline-offset: 0;
 }
@@ -252,7 +252,7 @@ handle it instead of shoelace */
   right: -2px;
   display: inline-block;
   padding: 0 3px;
-  content: attr(data-instance-title);
+  content: attr(data-node-title);
   text-align: left;
   color: var(--db-background-color);
   background-color: var(--dropzone-color-target-light);
@@ -270,7 +270,7 @@ handle it instead of shoelace */
   left: -2px;
   display: inline-block;
   padding: 0 3px;
-  content: attr(data-instance-title);
+  content: attr(data-node-title);
   text-align: left;
   color: var(--db-background-color);
   background-color: var(--dropzone-color-strong);
@@ -298,31 +298,31 @@ handle it instead of shoelace */
 }
 
 /* Manual fix to give token more space to be able to grab */
-.display-builder [data-instance-id].db-block-token,
-.display-builder [data-instance-id].db-block-wysiwyg {
+.display-builder [data-node-id].db-block-token,
+.display-builder [data-node-id].db-block-wysiwyg {
   padding: 1px 0 0 1px;
 }
 
 /* Manual fix for some inline block */
 /* @todo find a better solution */
-.display-builder [data-instance-id].db-block-system-branding-block,
-.display-builder [data-instance-id].db-block-token,
-.display-builder [data-instance-id].db-block-icon-renderable,
-.display-builder [data-instance-id].db-placeholder-token,
-.display-builder [data-instance-id][class*="db-block-system-menu"] {
+.display-builder [data-node-id].db-block-system-branding-block,
+.display-builder [data-node-id].db-block-token,
+.display-builder [data-node-id].db-block-icon-renderable,
+.display-builder [data-node-id].db-placeholder-token,
+.display-builder [data-node-id][class*="db-block-system-menu"] {
   display: inline-block;
 }
 
-.display-builder [data-instance-id].db-block-wysiwyg {
+.display-builder [data-node-id].db-block-wysiwyg {
   display: inline;
 }
 
 /* If token or wysiwyg has a block tag, set to block */
-.display-builder [data-instance-id].db-block-wysiwyg:has(address, article, aside, blockquote, canvas, dd, div, dl, dt, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hr, li, main, nav, ol, p, pre, section, table, tfoot, ul, video),
-.display-builder [data-instance-id].db-block-token:has(address, article, aside, blockquote, canvas, dd, div, dl, dt, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hr, li, main, nav, ol, p, pre, section, table, tfoot, ul, video) {
+.display-builder [data-node-id].db-block-wysiwyg:has(address, article, aside, blockquote, canvas, dd, div, dl, dt, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hr, li, main, nav, ol, p, pre, section, table, tfoot, ul, video),
+.display-builder [data-node-id].db-block-token:has(address, article, aside, blockquote, canvas, dd, div, dl, dt, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hr, li, main, nav, ol, p, pre, section, table, tfoot, ul, video) {
   display: block;
 }
-/* .display-builder [data-instance-id].db-block-wysiwyg, */
-.display-builder [data-instance-id].db-block-system-breadcrumb-block {
+/* .display-builder [data-node-id].db-block-wysiwyg, */
+.display-builder [data-node-id].db-block-system-breadcrumb-block {
   display: block;
 }
