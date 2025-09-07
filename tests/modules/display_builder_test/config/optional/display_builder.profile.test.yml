@@ -92,7 +92,7 @@ islands:
     weight: 0
   preview:
     enable: true
-    weight: -5
+    weight: -4
     region: main
   library:
     enable: true
@@ -100,8 +100,8 @@ islands:
     region: sidebar
   logs:
     enable: true
-    weight: -9
-    region: sidebar
+    weight: -5
+    region: main
   builder:
     enable: true
     weight: -7

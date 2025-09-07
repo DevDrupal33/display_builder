@@ -12,6 +12,7 @@ export default {
   pageAddUrl: 'admin/structure/page-layout/add',
 
   devAddInstance: 'admin/structure/display-builder/instance/add',
+  devViewInstance: 'admin/structure/display-builder/instance/{instance_id}',
 
   // PageLayout::getPrefix()
   pagePrefix: 'page_layout__',

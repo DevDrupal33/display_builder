@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test'
+import { expect, Locator, Page } from '@playwright/test'
 import { test } from '../fixtures/loader'
 import * as utils from '../utilities/utils'
 import config from '../playwright.config.loader'
@@ -34,6 +34,8 @@ test.afterEach('Clean', async ({ displayBuilder }) => {
   await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
 })
 
+// Buttons in toolbar configuration is based on display_builder.profile.test.yml
+// Any change to the profile will be reflected here.
 test('Toolbar buttons and keyboard', { tag: [ '@display_builder_dev_tools' ] }, async ({ page, drupal, displayBuilder }) => {
   dbName = `test_${utils.createRandomString()}`
 
@@ -45,7 +47,20 @@ test('Toolbar buttons and keyboard', { tag: [ '@display_builder_dev_tools' ] }, 
     await displayBuilder.createDisplayBuilderFromUi(dbName)
   })
 
-  await test.step(`Minimal build in the instance`, async () => {
+  // Test highlight and fullscreen before any further tests to not conflict with
+  // highlight or fullscreen switch in the test to make it easier for position
+  // and error snapshot.
+  await test.step(`Highlight`, async () => {
+    const btn = page.locator('[data-island-action="highlight"]')
+    await testToggleFeature(page, btn, '.display-builder--highlight', key.highlight)
+  })
+
+  await test.step(`Fullscreen`, async () => {
+    const btn = page.locator('[data-island-action="fullscreen"]')
+    await testToggleFeature(page, btn, '.display-builder--fullscreen', key.fullscreen)
+  })
+
+  await test.step(`Minimal build instance`, async () => {
     await displayBuilder.dragElementFromLibraryById(
       'Blocks',
       'token',
@@ -81,68 +96,64 @@ test('Toolbar buttons and keyboard', { tag: [ '@display_builder_dev_tools' ] }, 
     await expect(clear).not.toBeVisible()
   })
 
-  // await test.step(`Keyboard Undo / Redo / Clear`, async () => {
+  await test.step(`Keyboard Undo / Redo / Clear`, async () => {
+    const builderToken = page.locator(`.db-island-builder [data-node-title="Token"]`)
     // @todo test is stuck on keyboard.
-    // await displayBuilder.dragElementFromLibraryById('Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
-    // await displayBuilder.closeDialog()
-    // await expect(builderToken).toHaveCount(3)
-    // await displayBuilder.keyboardShortcut(key.undo)
-    // await displayBuilder.htmxReady()
-    // await expect(builderToken).toHaveCount(2)
-    // await displayBuilder.keyboardShortcut(key.redo)
-    // await displayBuilder.htmxReady()
-    // await expect(builderToken).toHaveCount(3)
-    // await displayBuilder.keyboardShortcut(key.clear)
-    // await displayBuilder.htmxReady()
-    // await expect(builderToken).toHaveCount(3)
-    // await expect(page.getByRole('button', { name: 'Undo' })).toBeVisible()
-    // await expect(page.getByRole('button', { name: 'Redo' })).toBeVisible()
-    // await expect(page.getByRole('button', { name: 'Clear' })).not.toBeVisible()
-  // })
-
-  await test.step(`Help`, async () => {
-    const keyboard = page.locator('[data-island-action="help"]')
-    const keyboardHelp = page.getByText('Keyboard help')
-
-    await keyboard.click(position)
-    await expect(keyboardHelp).toBeVisible()
-    await keyboard.click(position)
-    await expect(keyboardHelp).not.toBeVisible()
-    await displayBuilder.keyboardShortcut(key.help)
-    await expect(keyboardHelp).toBeVisible()
-    await displayBuilder.keyboardShortcut(key.help)
-    await expect(keyboardHelp).not.toBeVisible()
+    await displayBuilder.dragElementFromLibraryById('Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
+    await displayBuilder.closeDialog()
+    await expect(builderToken).toHaveCount(3)
+    await displayBuilder.keyboardShortcut(key.undo)
+    await displayBuilder.htmxReady()
+    await expect(builderToken).toHaveCount(2)
+    await displayBuilder.keyboardShortcut(key.redo)
+    await displayBuilder.htmxReady()
+    await expect(builderToken).toHaveCount(3)
+    await displayBuilder.keyboardShortcut(key.clear)
+    await displayBuilder.htmxReady()
+    await expect(builderToken).toHaveCount(3)
+    await expect(page.locator('[data-island-action="undo"]')).toBeVisible()
+    await expect(page.locator('[data-island-action="redo"]')).toBeVisible()
+    await expect(page.locator('[data-island-action="clear"]')).not.toBeVisible()
   })
 
-  await test.step(`Fullscreen`, async () => {
-    const fullscreen = page.locator('[data-island-action="fullscreen"]')
-    const fullscreenIsOn = page.locator('.display-builder--fullscreen')
+  // This is helping next tests.
+  await test.step(`Set some values for next tests`, async () => {
+    await displayBuilder.setElementValue(
+      page.locator(`.db-island-builder [data-node-title="Token"]`).first(),
+      'I am first',
+      [
+        {
+          action: 'fill',
+          locator: page.locator('#edit-value'),
+        },
+      ]
+    )
+    await displayBuilder.setElementValue(
+      page.locator(`.db-island-builder [data-node-title="Token"]`).nth(1),
+      'I am second',
+      [
+        {
+          action: 'fill',
+          locator: page.locator('#edit-value'),
+        },
+      ]
+    )
+    await displayBuilder.setElementValue(
+      page.locator(`.db-island-builder [data-node-title="Token"]`).nth(2),
+      'I am third',
+      [
+        {
+          action: 'fill',
+          locator: page.locator('#edit-value'),
+        },
+      ]
+    )
 
-    await fullscreen.click(position)
-    await expect(fullscreenIsOn).toBeVisible()
-    await fullscreen.click(position)
-    await expect(fullscreenIsOn).not.toBeVisible()
-    await displayBuilder.keyboardShortcut(key.fullscreen)
-    await expect(fullscreenIsOn).toBeVisible()
-    await displayBuilder.keyboardShortcut(key.fullscreen)
-    await expect(fullscreenIsOn).not.toBeVisible()
+    await page.getByRole('button', { name: 'Close' }).click()
+    await displayBuilder.highlight()
   })
 
-  await test.step(`Highlight`, async () => {
-    const highlight = page.locator('[data-island-action="highlight"]')
-    const highlightIsOn = page.locator('.display-builder--highlight')
-
-    await highlight.click(position)
-    await expect(highlightIsOn).toBeVisible()
-    await highlight.click(position)
-    await expect(highlightIsOn).not.toBeVisible()
-    await displayBuilder.keyboardShortcut(key.highlight)
-    await expect(highlightIsOn).toBeVisible()
-    await displayBuilder.keyboardShortcut(key.highlight)
-    await expect(highlightIsOn).not.toBeVisible()
-  })
-
-  await test.step(`Switch viewport`, async () => {
+  await test.step(`Switch viewport (compact)`, async () => {
     const switchViewport = page.locator('[data-island-action="viewport"]')
     const switchViewportList = page.locator('#listbox')
 
@@ -157,4 +168,74 @@ test('Toolbar buttons and keyboard', { tag: [ '@display_builder_dev_tools' ] }, 
     await expect(switchViewportList).not.toBeVisible()
     await expect(page.locator('.display-builder__main')).toHaveAttribute('style', 'max-width: 100%;')
   })
+
+  await test.step(`Help`, async () => {
+    const btn = page.locator('[data-island-action="help"]')
+    await testToggleFeature(page, btn, 'text=Keyboard help', key.help)
+  })
+
+  await test.step(`Libraries`, async () => {
+    const btn = page.getByRole('button', { name: 'Libraries' })
+    await testToggleFeature(page, btn, '#db-first-drawer', key.libraries)
+  })
+
+  await test.step(`Tree`, async () => {
+    const btn = page.getByRole('button', { name: 'Tree' })
+    await testToggleFeature(page, btn, '.db-island-tree', key.tree)
+  })
+
+  await test.step(`Layers`, async () => {
+    const btn = page.getByRole('tab', { name: 'Layers' })
+    await testToggleTab(page, btn, '.db-island-layers', key.layers, 'layers')
+  })
+
+  await test.step(`Logs`, async () => {
+    const btn = page.getByRole('tab', { name: 'Logs' })
+    // @todo aria snapshot is hard with the table of logs, because of dates.
+    await testToggleTab(page, btn, '.db-island-logs', key.logs, null)
+  })
+
+  await test.step(`Preview`, async () => {
+    const btn = page.getByRole('tab', { name: 'Preview' })
+    await testToggleTab(page, btn, '.db-island-preview', key.preview, 'preview')
+  })
+
+  async function testToggleFeature(page: Page, button: Locator, isOnLocator: string, keyShortcut: string) {
+    const isOn = page.locator(isOnLocator)
+
+    await button.click(position)
+    await displayBuilder.shoelaceReady()
+    await expect(isOn).toBeVisible()
+    await button.click(position)
+    await displayBuilder.shoelaceReady()
+    await expect(isOn).not.toBeVisible()
+    await displayBuilder.keyboardShortcut(keyShortcut)
+    await displayBuilder.shoelaceReady()
+    await expect(isOn).toBeVisible()
+    await displayBuilder.keyboardShortcut(keyShortcut)
+    await displayBuilder.shoelaceReady()
+    await expect(isOn).not.toBeVisible()
+  }
+
+  async function testToggleTab(page: Page, button: Locator, isOnLocator: string, keyShortcut: string, name: string|null) {
+    const builder = page.getByRole('tab', { name: 'Builder' })
+    const isOn = page.locator(isOnLocator)
+
+    await button.click(position)
+    await displayBuilder.shoelaceReady()
+    await expect(isOn).toBeVisible()
+
+    if (name !== null) {
+      await expect(page.locator(isOnLocator)).toMatchAriaSnapshot({ name: `toolbar-${name}.aria.yml` })
+    }
+
+    await builder.click(position)
+    await displayBuilder.shoelaceReady()
+    await expect(isOn).not.toBeVisible()
+    await displayBuilder.keyboardShortcut(keyShortcut)
+    await expect(isOn).toBeVisible()
+    await displayBuilder.keyboardShortcut(key.builder)
+    await expect(isOn).not.toBeVisible()
+  }
 })
+

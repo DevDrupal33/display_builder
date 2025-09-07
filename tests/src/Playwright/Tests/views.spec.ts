@@ -9,7 +9,7 @@ test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.drush('config:set -y views.settings ui.show.advanced_column true')
   await drupal.drush('config:set -y views.settings ui.show.preview_information true')
 
-  await drupal.setPreprocessing({ css: false, javascript: false })
+  // await drupal.setPreprocessing({ css: true, javascript: true })
 })
 
 test(
@@ -86,6 +86,7 @@ test(
     })
 
     await test.step(`Set and switch profile`, async () => {
+      await drupal.ajaxReady()
       await page.getByText('Display Builder: Default').getByRole('link', { name: 'Default' }).click()
       await expect(page.getByRole('dialog')).toBeVisible()
       await page.getByRole('link', { name: 'build the display' }).click()

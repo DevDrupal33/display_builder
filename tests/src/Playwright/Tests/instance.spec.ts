@@ -5,7 +5,7 @@ import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.installModules([ 'display_builder_dev_tools' ])
-  await drupal.setPreprocessing({ css: false, javascript: false })
+  // await drupal.setPreprocessing({ css: true, javascript: true })
 })
 
 test('From fixture', { tag: [ '@display_builder_dev_tools' ] }, async ({ page, drupal, displayBuilder }) => {

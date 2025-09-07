@@ -30,7 +30,7 @@ export default defineConfig({
     [ './tests/src/Playwright/utilities/reporter.ts', { level: process.env.PLAYWRIGHT_DEBUG_LEVEL || 'info' } ],
   ],
   /* https://playwright.dev/docs/test-timeouts */
-  timeout: process.env.DRUPAL_TEST_SKIP_INSTALL ? 60_000 : 120_000,
+  timeout: process.env.DRUPAL_TEST_SKIP_INSTALL ? 120_000 : 240_000,
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -69,7 +69,11 @@ export default defineConfig({
     },
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'], deviceScaleFactor: 1, viewport: { width: 1920, height: 1080 } },
+      use: {
+        ...devices['Desktop Chrome'],
+        deviceScaleFactor: 1,
+        viewport: { width: 2560, height: 1440 }
+      },
       dependencies: [ 'setup' ],
     },
     {

@@ -1,6 +1,6 @@
 :root {
-  --db-background-color: var(--sl-color-neutral-1000);
-  --db-text-color: var(--sl-color-neutral-0);
+  --db-background-color: var(--sl-color-neutral-0);
+  --db-text-color: var(--sl-color-neutral-1000);
   --db-background-image: repeating-linear-gradient(45deg, oklch(100% 0 0), oklch(100% 0 0) 13px, var(--sl-color-neutral-100) 13px, var(--sl-color-neutral-100) 14px);
   --db-background-size: 40px 40px;
   --db-toolbar-height: 75px;
@@ -15,8 +15,8 @@
 
 /* Dark mode overrides using .sl-theme-dark class */
 .display-builder.sl-theme-dark {
-  /* --db-background-color: #181a1b; */
-  /* --db-text-color: #f8f9fa; */
+  --db-background-color: var(--sl-color-neutral-1000);
+  --db-text-color: var(--sl-color-neutral-0);
   --db-background-image: repeating-linear-gradient(45deg, oklch(20% 0 0), oklch(20% 0 0) 13px, var(--sl-color-neutral-50) 13px, var(--sl-color-neutral-50) 14px);
   --db-table-bg: var(--sl-color-neutral-50);
   --db-table-border: var(--sl-color-neutral-200);
@@ -68,7 +68,6 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
   overflow: auto;
   width: 100%;
   height: 100%;
-  /* @todo get the body background color? */
   background-color: var(--db-background-color);
 }
 

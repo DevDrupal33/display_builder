@@ -5,7 +5,6 @@ import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.installModules([ 'display_builder_entity_view' ])
-  await drupal.setPreprocessing({ css: false, javascript: false })
 })
 
 test(
