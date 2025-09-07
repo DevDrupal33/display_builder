@@ -8,12 +8,11 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\IslandPluginBase;
-use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandPluginFormTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
@@ -30,9 +29,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   type: IslandType::View,
   icon: 'pencil-square',
 )]
-class ContentEditPanel extends IslandPluginBase implements IslandWithFormInterface, PluginFormInterface {
+class ContentEditPanel extends IslandPluginBase implements IslandWithFormInterface {
 
-  use IslandPluginConfigurationFormTrait;
   use IslandPluginFormTrait;
 
   /**
@@ -86,87 +84,34 @@ class ContentEditPanel extends IslandPluginBase implements IslandWithFormInterfa
   /**
    * {@inheritdoc}
    */
-  public function defaultConfiguration(): array {
-    return [
-      'form_mode' => 'default',
-    ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
-    $configuration = $this->getConfiguration();
-    /** @var \Drupal\Core\Entity\Entity\EntityFormMode[] $formModes */
-    $formModes = $this->entityTypeManager->getStorage('entity_form_mode')
-      ->loadMultiple();
-    $options = [];
-
-    foreach ($formModes as $formMode) {
-      $options[$formMode->id()] = $formMode->label();
-    }
-
-    // @todo decline per entity type, per bundle.
-    // @todo or just load and loop on entity_form_display entities.
-    $form['form_mode'] = [
-      '#title' => $this->t('Form mode'),
-      '#type' => 'select',
-      '#default_value' => $configuration['form_mode'],
-      '#options' => $options,
-      '#empty_option' => $this->t('Default'),
-      '#empty_value' => 'default',
-    ];
-
-    return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function configurationSummary(): array {
-    $configuration = $this->getConfiguration();
-
-    // @todo get the form mode label.
-    return [
-      $this->t('Form mode: @form_mode', [
-        '@form_mode' => $configuration['form_mode'],
-      ]),
-    ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function buildForm(array &$form, FormStateInterface $form_state): void {
     $contexts = $form_state->getBuildInfo()['args'][1];
+    /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
     $entity = $contexts['entity']->getContextValue();
     // Problem of using entity.form_builder is that it adds process callbacks
     // expecting that the form class is an EntityForm class.
-    //    $form = NestedArray::mergeDeep($form, \Drupal::service('entity.form_builder')
-    //      ->getForm($entity, 'default'));.
-    $form['toto'] = [
+    $url = Url::fromRoute('display_builder.api_content_edit', ['builder' => $this->builderId]);
+    $form['content'] = [
       '#type' => 'inline_entity_form',
-      '#entity_type' => 'node',
-      '#bundle' => 'article',
-      // '#langcode' => $langcode,
+      '#entity_type' => $entity->getEntityTypeId(),
+      '#bundle' => $entity->bundle(),
       '#default_value' => $entity,
       '#op' => 'default',
       '#form_mode' => 'default',
-      '#save_entity' => TRUE,
-      // '#ief_row_delta' => $delta,
-      //      // Used by Field API and controller methods to find the relevant
-      //      // values in $form_state.
-      //      '#parents' => $parents,
-      //      // Labels could be overridden in field widget settings. We won't have
-      //      // access to those in static callbacks (#process, ...) so let's add
-      //      // them here.
-      //      '#ief_labels' => $this->getEntityTypeLabels(),
-      //      // Identifies the IEF widget to which the form belongs.
-      //      '#ief_id' => $this->getIefId(),
+      // @todo Move this to \Drupal\display_builder\HtmxEvents.
+      '#attributes' => [
+        'hx-put' => $url->toString(),
+        'hx-trigger' => 'change consume',
+        'hx-swap' => 'none',
+      ],
     ];
-    $form['submit'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Save'),
+    $form['entity_type'] = [
+      '#type' => 'hidden',
+      '#value' => $entity->getEntityTypeId(),
+    ];
+    $form['entity_id'] = [
+      '#type' => 'hidden',
+      '#value' => $entity->id(),
     ];
   }
 
@@ -182,10 +127,6 @@ class ContentEditPanel extends IslandPluginBase implements IslandWithFormInterfa
    * @see StateButtons::isOverridden()
    */
   protected function isOverride(string $builder_id): bool {
-    if (!$this->moduleHandler->moduleExists('display_builder_entity_view')) {
-      return FALSE;
-    }
-
     $instanceInfos = DisplayBuilderItemList::checkInstanceId($builder_id);
 
     if (!isset($instanceInfos['entity_type_id'], $instanceInfos['entity_id'], $instanceInfos['field_name'])) {

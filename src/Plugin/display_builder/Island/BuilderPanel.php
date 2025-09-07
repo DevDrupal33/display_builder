@@ -136,6 +136,13 @@ class BuilderPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
+  public function onContentUpdate(string $builder_id): array {
+    return $this->reloadWithGlobalData($builder_id);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
     $component_id = $data['source']['component']['component_id'] ?? NULL;
     $instance_id = $instance_id ?: $data['_node_id'];

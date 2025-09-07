@@ -249,6 +249,13 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * {@inheritdoc}
    */
+  public function onContentUpdate(string $builder_id): array {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getConfiguration(): array {
     return \array_merge($this->defaultConfiguration(), $this->configuration);
   }

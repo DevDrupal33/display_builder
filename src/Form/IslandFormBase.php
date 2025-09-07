@@ -75,30 +75,4 @@ final class IslandFormBase extends FormBase {
     return \Drupal::service('plugin.manager.db_island')->createInstance($args['island_id'], $args['instance']);
   }
 
-  // /**
-  //   * Process callback: assigns weights and hides extra fields.
-  //   *
-  //   * @see \Drupal\Core\Entity\EntityForm::form()
-  //   */
-  //  public function processForm($element, FormStateInterface $form_state, $form) {
-  //    // If the form is cached, process callbacks may not have a valid reference
-  //    // to the entity object, hence we must restore it.
-  //    $this->entity = $form_state->getFormObject()->getEntity();
-  //
-  //    return $element;
-  //  }
-  //
-  //  /**
-  //   * {@inheritdoc}
-  //   */
-  //  public function getEntity() {
-  //    return $this->entity;
-  //  }
-  //
-  //  /**
-  //   * {@inheritdoc}
-  //   */
-  //  public function save(array $form, FormStateInterface $form_state) {
-  //    return $this->entity->save();
-  //  }
 }

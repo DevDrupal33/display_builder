@@ -40,6 +40,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
       DisplayBuilderEvents::ON_UPDATE => 'onUpdate',
       DisplayBuilderEvents::ON_SAVE => 'onSave',
       DisplayBuilderEvents::ON_PRESET_SAVE => 'onPresetSave',
+      DisplayBuilderEvents::ON_CONTENT_UPDATE => 'onContentUpdate',
     ];
   }
 
@@ -130,6 +131,16 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onPresetSave(DisplayBuilderEvent $event): void {
+    $this->dispatchToIslands($event, __FUNCTION__);
+  }
+
+  /**
+   * Event handler for when a preset is saved.
+   *
+   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
+   *   The event object.
+   */
+  public function onContentUpdate(DisplayBuilderEvent $event): void {
     $this->dispatchToIslands($event, __FUNCTION__);
   }
 
