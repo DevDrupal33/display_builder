@@ -46,7 +46,6 @@ class ApiSseController extends ApiControllerBase {
 
     return new EventStreamResponse(function () use ($builder_id) {
       $sessionId = $this->session->getId();
-      $collection = $this->sharedTempStoreFactory->get($this::SSE_COLLECTION);
 
       // Infinite loop because we keep the HTTP transaction open until it is
       // closed by the client.
@@ -56,32 +55,7 @@ class ApiSseController extends ApiControllerBase {
         // at least the HTTP response headers to be sent back to client without
         // waiting for a real event to occur.
         yield new ServerEvent('');
-        $latest = $collection->get("{$builder_id}_latest");
-
-        if (!$latest) {
-          \sleep($this::REFRESH_WINDOW);
-
-          continue;
-        }
-
-        // The current session is the last one editing the builder. Do nothing.
-        // Use session ID to handle:
-        // - different users
-        // - the same user in different browsers
-        // Not handled: multiple tabs with the same user in the same browser.
-        if ($latest['sessionId'] === $sessionId) {
-          \sleep($this::REFRESH_WINDOW);
-
-          continue;
-        }
-
-        // If the last edit is older than STALE, do nothing
-        // as we consider that the builder has already been refreshed.
-        if ($latest['timestamp'] < $this->time->getCurrentTime() - $this::STALE) {
-          \sleep($this::REFRESH_WINDOW);
-
-          continue;
-        }
+        $start = \microtime(TRUE);
 
         // Reload the instance to ensure we get the builder's latest
         // state.
@@ -94,6 +68,27 @@ class ApiSseController extends ApiControllerBase {
           continue;
         }
         $this->builder = $builder;
+        $latest = $builder->getLatest();
+
+        // The current session is the last one editing the builder. Do nothing.
+        // Use session ID to handle:
+        // - different users
+        // - the same user in different browsers
+        // Not handled: multiple tabs with the same user in the same browser.
+        if ($latest->session === $sessionId) {
+          \sleep($this::REFRESH_WINDOW);
+
+          continue;
+        }
+
+        // If the last edit is older than STALE, do nothing
+        // as we consider that the builder has already been refreshed.
+        if ($latest->time < $this->time->getCurrentTime() - $this::STALE) {
+          \sleep($this::REFRESH_WINDOW);
+
+          continue;
+        }
+        yield new ServerEvent($latest->session);
 
         // Recompute islands regarding the current user.
         // Use ON_HISTORY_CHANGE because it is the event where most islands are
@@ -104,6 +99,9 @@ class ApiSseController extends ApiControllerBase {
           NULL,
           NULL,
         );
+        $end = \microtime(TRUE);
+
+        yield new ServerEvent((string) ($end - $start));
 
         foreach ($event->getResult() as $island_id => $result) {
           // Do nothing if the island is not updated.

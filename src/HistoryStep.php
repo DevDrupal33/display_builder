@@ -25,6 +25,8 @@ class HistoryStep {
    *   A timestamp.
    * @param ?int $user
    *   A Drupal user entity ID.
+   * @param ?string $session
+   *   A PHP session ID, used for SSE.
    */
   public function __construct(
     #[Assert\Type('list')]
@@ -36,6 +38,7 @@ class HistoryStep {
     public readonly int $time,
     #[Assert\PositiveOrZero]
     public readonly ?int $user,
+    public readonly ?string $session,
   ) {}
 
 }
