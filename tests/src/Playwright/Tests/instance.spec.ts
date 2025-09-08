@@ -4,11 +4,11 @@ import * as utils from '../utilities/utils'
 import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
-  await drupal.installModules([ 'display_builder_dev_tools' ])
+  await drupal.installModules(['display_builder_dev_tools'])
   // await drupal.setPreprocessing({ css: true, javascript: true })
 })
 
-test('From fixture', { tag: [ '@display_builder_dev_tools' ] }, async ({ page, drupal, displayBuilder }) => {
+test('From fixture', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
   const dbName = `test_${utils.createRandomString()}`
 
   await test.step(`Admin login`, async () => {
@@ -78,7 +78,7 @@ test('From fixture', { tag: [ '@display_builder_dev_tools' ] }, async ({ page, d
   })
 })
 
-test('From scratch', { tag: [ '@display_builder_dev_tools' ] }, async ({ page, drupal, displayBuilder }) => {
+test('From scratch', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
   const dbName = `test_${utils.createRandomString()}`
 
   await test.step(`Admin login`, async () => {

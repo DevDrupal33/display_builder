@@ -4,7 +4,7 @@ import * as utils from '../utilities/utils'
 import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
-  await drupal.installModules([ 'views', 'views_ui', 'display_builder_views', 'display_builder_views_test' ])
+  await drupal.installModules(['views', 'views_ui', 'display_builder_views', 'display_builder_views_test'])
   // Allays show advanced panel and disable preview.
   await drupal.drush('config:set -y views.settings ui.show.advanced_column true')
   await drupal.drush('config:set -y views.settings ui.show.preview_information true')
@@ -14,7 +14,7 @@ test.beforeEach('Setup', async ({ drupal }) => {
 
 test(
   'Views',
-  { tag: [ '@display_builder', '@display_builder_views', '@display_builder_min' ] },
+  { tag: ['@display_builder', '@display_builder_views', '@display_builder_min'] },
   async ({ page, drupal, displayBuilder }) => {
     const testName = utils.createRandomString()
     const name = `test_${testName}`
@@ -160,7 +160,7 @@ test(
       await expect(page.getByRole('heading', { name: `Test ${testName}` })).toBeVisible()
       await expect(page.locator('.views-element-container')).toMatchAriaSnapshot({ name: 'view-view.aria.yml' })
     })
-  
+
     await test.step(`Delete the display`, async () => {
       await page.goto(config.viewsEditUrl.replace('{view_id}', name))
       await drupal.ajaxReady()

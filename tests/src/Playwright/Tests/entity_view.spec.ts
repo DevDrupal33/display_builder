@@ -4,20 +4,20 @@ import * as utils from '../utilities/utils'
 import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
-  await drupal.installModules([ 'display_builder_entity_view' ])
+  await drupal.installModules(['display_builder_entity_view'])
 })
 
 test(
   'Entity view',
-  { tag: [ '@display_builder', '@display_builder_entity_view', '@display_builder_min' ] },
+  { tag: ['@display_builder', '@display_builder_entity_view', '@display_builder_min'] },
   async ({ page, drupal, displayBuilder }) => {
     const testName = utils.createRandomString()
     const name = `test_${testName}`
-  
+
     await test.step(`Admin login`, async () => {
       await drupal.loginAsAdmin()
     })
-  
+
     await test.step(`Create entity type and set display`, async () => {
       // Go to the content entity and create the display.
       await page.goto(config.contentTypesAdd)
@@ -132,7 +132,7 @@ test(
       await page.goto(config.dbList)
       await expect(page.getByRole('cell', { name: `${config.entityPrefix}node__${name}__default`, exact: true })).toBeVisible()
     })
-  
+
     await test.step(`Create override`, async () => {
       // Create a field ui patterns for sources, hide it and select a profile.
       await drupal.drush(

@@ -26,7 +26,7 @@ const key = {
 }
 
 test.beforeEach('Setup', async ({ drupal }) => {
-  await drupal.installModules([ 'display_builder_dev_tools' ])
+  await drupal.installModules(['display_builder_dev_tools'])
   await drupal.setPreprocessing({ css: false, javascript: false })
 })
 
@@ -36,7 +36,7 @@ test.afterEach('Clean', async ({ displayBuilder }) => {
 
 // Buttons in toolbar configuration is based on display_builder.profile.test.yml
 // Any change to the profile will be reflected here.
-test('Toolbar buttons and keyboard', { tag: [ '@display_builder_dev_tools' ] }, async ({ page, drupal, displayBuilder }) => {
+test('Toolbar buttons and keyboard', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
   dbName = `test_${utils.createRandomString()}`
 
   await test.step(`Admin login`, async () => {
@@ -217,7 +217,7 @@ test('Toolbar buttons and keyboard', { tag: [ '@display_builder_dev_tools' ] }, 
     await expect(isOn).not.toBeVisible()
   }
 
-  async function testToggleTab(page: Page, button: Locator, isOnLocator: string, keyShortcut: string, name: string|null) {
+  async function testToggleTab(page: Page, button: Locator, isOnLocator: string, keyShortcut: string, name: string | null) {
     const builder = page.getByRole('tab', { name: 'Builder' })
     const isOn = page.locator(isOnLocator)
 
