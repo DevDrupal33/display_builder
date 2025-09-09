@@ -1,6 +1,6 @@
 name: With preview
 slots:
-  title: "Lorem ipsum"
+  title: 'Lorem ipsum'
 props:
   thumbnail: https://img.daisyui.com/images/components/calendar.webp
 library_wrapper: >

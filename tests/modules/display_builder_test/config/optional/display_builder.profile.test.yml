@@ -1,6 +1,6 @@
 langcode: en
 status: true
-dependencies: {  }
+dependencies: {}
 id: test
 label: Test
 description: 'Testing Display builder config.'

@@ -1,16 +1,16 @@
 name: Preview
 slots:
-  slot_1: "Foo"
-  sub_slot_1_1: "Bar"
-  sub_slot_1_2: "Baz"
-  sub_slot_1_3: "Foo"
-  slot_2: "Foo"
-  sub_slot_2_1: "Bar"
-  sub_slot_2_2: "Baz"
-  sub_slot_2_3: "Foo"
+  slot_1: 'Foo'
+  sub_slot_1_1: 'Bar'
+  sub_slot_1_2: 'Baz'
+  sub_slot_1_3: 'Foo'
+  slot_2: 'Foo'
+  sub_slot_2_1: 'Bar'
+  sub_slot_2_2: 'Baz'
+  sub_slot_2_3: 'Foo'
 props:
   test_attributes:
     class: testing-start
-  label: "Bar"
+  label: 'Bar'
   open: true
   duration: 123

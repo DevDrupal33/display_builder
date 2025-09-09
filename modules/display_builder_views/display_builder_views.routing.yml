@@ -1,5 +1,5 @@
 display_builder_views.views.manage:
-  path: "/admin/structure/views/view/{view}/display-builder/{display}"
+  path: '/admin/structure/views/view/{view}/display-builder/{display}'
   defaults:
     _title_callback: '\Drupal\display_builder_views\Controller\ViewsController::title'
     _controller: '\Drupal\display_builder_views\Controller\ViewsController::getBuilder'
@@ -11,25 +11,25 @@ display_builder_views.views.manage:
     _display_builder_route: true
     parameters:
       view:
-        type: "entity:view"
+        type: 'entity:view'
         # To trigger Drupal\views_ui\ParamConverter\ViewUIConverter.
         # The value for {view} will be converted to a view entity loaded from
         # the views temp store.
         tempstore: true
-        converter: "drupal.proxy_original_service.paramconverter.views_ui"
+        converter: 'drupal.proxy_original_service.paramconverter.views_ui'
 
 display_builder_views.views.collection:
-  path: "/admin/structure/views/display-builder"
+  path: '/admin/structure/views/display-builder'
   defaults:
-    _title: " Display builders in Views"
+    _title: ' Display builders in Views'
     _controller: '\Drupal\display_builder_views\Controller\ViewsManagementController::pageViewsIndex'
   requirements:
-    _permission: "administer views"
+    _permission: 'administer views'
 
 display_builder_views.views.delete:
-  path: "/admin/structure/views/display-builder/{builder_id}/delete"
+  path: '/admin/structure/views/display-builder/{builder_id}/delete'
   defaults:
     _form: '\Drupal\display_builder_views\Form\ConfirmViewsBuilderDeleteForm'
-    _title: "Confirm deletion"
+    _title: 'Confirm deletion'
   requirements:
-    _permission: "administer views"
+    _permission: 'administer views'

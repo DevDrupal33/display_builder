@@ -3,13 +3,13 @@ core.entity_view_display.*.*.*.third_party.display_builder:
   type: mapping
   mapping:
     profile:
-      label: "Display Builder profile"
+      label: 'Display Builder profile'
       type: string
       constraints:
         ConfigExists:
           prefix: 'display_builder.profile.'
     override_profile:
-      label: "Display Builder override profile"
+      label: 'Display Builder override profile'
       type: string
       constraints:
         ConfigExists:
@@ -17,16 +17,15 @@ core.entity_view_display.*.*.*.third_party.display_builder:
     # @todo add the field constraint, tricky because of current format:
     # field.storage.node.field_sources.yml where we have entity type.
     override_field:
-      label: "Display Builder field"
+      label: 'Display Builder field'
       type: string
     sources:
-      label: "UI Patterns sources"
+      label: 'UI Patterns sources'
       type: sequence
       sequence:
         type: ignore
   constraints:
     FullyValidatable: ~
-
 # @todo find the proper schema, problem is the sources can go very deep.
 # display_builder_sources:
 #   type: mapping

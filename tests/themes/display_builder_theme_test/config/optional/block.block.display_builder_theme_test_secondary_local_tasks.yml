@@ -16,4 +16,4 @@ settings:
   provider: core
   primary: false
   secondary: true
-visibility: {  }
+visibility: {}

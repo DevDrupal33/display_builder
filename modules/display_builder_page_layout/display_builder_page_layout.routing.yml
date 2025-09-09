@@ -1,34 +1,34 @@
 entity.page_layout.collection:
-  path: "/admin/structure/page-layout"
+  path: '/admin/structure/page-layout'
   defaults:
-    _entity_list: "page_layout"
-    _title: "Page layouts"
+    _entity_list: 'page_layout'
+    _title: 'Page layouts'
   requirements:
-    _permission: "administer page_layout"
+    _permission: 'administer page_layout'
 
 entity.page_layout.add_form:
-  path: "/admin/structure/page-layout/add"
+  path: '/admin/structure/page-layout/add'
   defaults:
-    _entity_form: "page_layout.add"
-    _title: "Add a page layout"
+    _entity_form: 'page_layout.add'
+    _title: 'Add a page layout'
   requirements:
-    _permission: "administer page_layout"
+    _permission: 'administer page_layout'
 
 entity.page_layout.edit_form:
-  path: "/admin/structure/page-layout/{page_layout}"
+  path: '/admin/structure/page-layout/{page_layout}'
   defaults:
-    _entity_form: "page_layout.edit"
-    _title: "Edit a page layout"
+    _entity_form: 'page_layout.edit'
+    _title: 'Edit a page layout'
   requirements:
-    _permission: "administer page_layout"
+    _permission: 'administer page_layout'
 
 entity.page_layout.display_builder:
-  path: "/admin/structure/page-layout/{page_layout}/builder"
+  path: '/admin/structure/page-layout/{page_layout}/builder'
   defaults:
     _controller: '\Drupal\display_builder_page_layout\Controller\PageLayoutController::getBuilder'
     _title_callback: '\Drupal\display_builder_page_layout\Controller\PageLayoutController::getTitle'
   requirements:
-    _permission: "administer page_layout"
+    _permission: 'administer page_layout'
   options:
     parameters:
       page_layout:
@@ -37,9 +37,9 @@ entity.page_layout.display_builder:
     _display_builder_route: true
 
 entity.page_layout.delete_form:
-  path: "/admin/structure/page-layout/{page_layout}/delete"
+  path: '/admin/structure/page-layout/{page_layout}/delete'
   defaults:
-    _entity_form: "page_layout.delete"
-    _title: "Delete a page layout"
+    _entity_form: 'page_layout.delete'
+    _title: 'Delete a page layout'
   requirements:
-    _permission: "administer page_layout"
+    _permission: 'administer page_layout'

@@ -175,8 +175,8 @@ display_builder.api_revert:
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::revert'
   requirements:
-    _permission: "administer display builders+access display builders api"
-    _module_dependencies: "display_builder_entity_view"
+    _permission: 'administer display builders+access display builders api'
+    _module_dependencies: 'display_builder_entity_view'
   options:
     _htmx_route: true
     parameters:

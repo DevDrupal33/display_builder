@@ -1,6 +1,6 @@
 name: Default
 slots:
-  content: "Lorem ipsum"
+  content: 'Lorem ipsum'
   image:
     type: html_tag
     tag: img

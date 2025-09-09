@@ -2,13 +2,13 @@ views.display_extender.display_builder:
   type: views_display_extender
   mapping:
     profile:
-      label: "Display Builder profile"
+      label: 'Display Builder profile'
       type: string
       constraints:
         ConfigExists:
           prefix: 'display_builder.profile.'
     sources:
-      label: "UI Patterns sources"
+      label: 'UI Patterns sources'
       sequence:
         type: ui_patterns_source.[source_id]
   constraints:

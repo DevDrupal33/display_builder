@@ -1,6 +1,6 @@
 name: Button
 slots:
-  content: "Lorem ipsum"
+  content: 'Lorem ipsum'
 props:
   variant: button
 library_wrapper: >

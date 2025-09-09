@@ -2,10 +2,10 @@ name: Default
 slots:
   buttons:
     - type: component
-      component: "display_builder:button"
+      component: 'display_builder:button'
       story: default
     - type: component
-      component: "display_builder:button"
+      component: 'display_builder:button'
       story: default
 library_wrapper: >
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />

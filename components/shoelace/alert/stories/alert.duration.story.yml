@@ -1,6 +1,6 @@
 name: Duration
 slots:
-  content: "I will disappear in 20s..."
+  content: 'I will disappear in 20s...'
 props:
   open: true
   duration: 20000

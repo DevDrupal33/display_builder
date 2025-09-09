@@ -128,10 +128,7 @@
       const instances = builder.querySelectorAll('[data-node-id]');
       Array.from(instances).forEach((instance) => {
         if (instance.attributes['hx-get']?.value === url.pathname) {
-          builder.setAttribute(
-            'data-active-instance',
-            instance.dataset.nodeId,
-          );
+          builder.setAttribute('data-active-instance', instance.dataset.nodeId);
         }
       });
     });

@@ -2,6 +2,6 @@ services:
   display_builder_views.display_builder_subscriber:
     class: Drupal\display_builder_views\EventSubscriber\DisplayBuilderSubscriber
     arguments:
-      - "@entity_type.manager"
+      - '@entity_type.manager'
     tags:
-      - { name: "event_subscriber" }
+      - { name: 'event_subscriber' }

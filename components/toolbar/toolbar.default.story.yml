@@ -2,15 +2,15 @@ name: Default
 slots:
   start:
     type: component
-    component: "display_builder:button_group"
+    component: 'display_builder:button_group'
     story: default
   middle:
     type: component
-    component: "display_builder:tabs"
+    component: 'display_builder:tabs'
     story: default
   end:
     type: component
-    component: "display_builder:button_group"
+    component: 'display_builder:button_group'
     story: default
 library_wrapper: >
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />

@@ -2,11 +2,11 @@ name: Default
 slots:
   button:
     type: component
-    component: "display_builder:button"
+    component: 'display_builder:button'
     props:
       label: Trigger
   content:
     type: component
-    component: "display_builder:card"
+    component: 'display_builder:card'
     slots:
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quid censes in Latino fore? Bork Immo videri fortasse. Duo Reges: constructio interrete. Sic enim censent, oportunitatis esse beate vivere."
+      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quid censes in Latino fore? Bork Immo videri fortasse. Duo Reges: constructio interrete. Sic enim censent, oportunitatis esse beate vivere.'

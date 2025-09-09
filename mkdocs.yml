@@ -11,20 +11,20 @@ theme:
   language: en
   palette:
     # Palette toggle for automatic mode
-    - media: "(prefers-color-scheme)"
+    - media: '(prefers-color-scheme)'
       primary: blue
       toggle:
         icon: material/brightness-auto
         name: Switch to light mode
     # Palette toggle for light mode
-    - media: "(prefers-color-scheme: light)"
+    - media: '(prefers-color-scheme: light)'
       primary: blue
       scheme: default
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     # Palette toggle for dark mode
-    - media: "(prefers-color-scheme: dark)"
+    - media: '(prefers-color-scheme: dark)'
       primary: blue
       scheme: slate
       toggle:
@@ -43,25 +43,25 @@ extra:
       link: https://developpeur-drupal.com/en
 
 nav:
-  - Introduction: "index.md"
-  - Installation: "install.md"
+  - Introduction: 'index.md'
+  - Installation: 'install.md'
   - Using Display Builder:
-      - For entity displays: "entity-displays.md"
-      - For entity displays overrides: "entity-displays-overrides.md"
-      - For page layout: "page-layout.md"
-      - With Views: "with-views.md"
+      - For entity displays: 'entity-displays.md'
+      - For entity displays overrides: 'entity-displays-overrides.md'
+      - For page layout: 'page-layout.md'
+      - With Views: 'with-views.md'
   - Features:
-      - Available islands: "islands.md"
-      - Pattern presets: "pattern-presets.md"
-      - Real-time collaboration: "realtime-collaboration.md"
-      - Migration from layout builder: "migration-from-layout-builder.md"
-  - Configuring Display Builder: "configuration.md"
+      - Available islands: 'islands.md'
+      - Pattern presets: 'pattern-presets.md'
+      - Real-time collaboration: 'realtime-collaboration.md'
+      - Migration from layout builder: 'migration-from-layout-builder.md'
+  - Configuring Display Builder: 'configuration.md'
   - Extending Display Builder:
-      - With island plugins: "island-plugins.md"
-      - With source plugins: "source-plugins.md"
-  - Contributing: "contributing.md"
-  - Frequently asked questions: "faq.md"
-  - Tests: "tests.md"
+      - With island plugins: 'island-plugins.md'
+      - With source plugins: 'source-plugins.md'
+  - Contributing: 'contributing.md'
+  - Frequently asked questions: 'faq.md'
+  - Tests: 'tests.md'
 
 plugins:
   - search

@@ -1,8 +1,8 @@
-name: "Display Builder core"
+name: 'Display Builder core'
 type: module
-description: "An advanced Display Builder for Drupal, require to have a sub module enable to build Entity view, Page or Views."
+description: 'An advanced Display Builder for Drupal, require to have a sub module enable to build Entity view, Page or Views.'
 core_version_requirement: ^11.2
-package: "User interface"
+package: 'User interface'
 dependencies:
   - drupal:breakpoint
   - ui_patterns:ui_patterns_library

@@ -6,24 +6,24 @@ services:
   plugin.manager.db_island:
     class: Drupal\display_builder\IslandPluginManager
     parent: default_plugin_manager
-  Drupal\display_builder\IslandPluginManagerInterface: "@plugin.manager.db_island"
+  Drupal\display_builder\IslandPluginManagerInterface: '@plugin.manager.db_island'
 
   display_builder.slot_sources_proxy:
     class: Drupal\display_builder\SlotSourceProxy
     arguments:
-      - "@plugin.manager.ui_patterns_source"
-      - "@entity.memory_cache"
+      - '@plugin.manager.ui_patterns_source'
+      - '@entity.memory_cache'
 
   display_builder.config_form_builder:
     class: Drupal\display_builder\ConfigFormBuilder
     arguments:
-      - "@entity_type.manager"
-      - "@current_user"
-      - "@module_handler"
-  Drupal\display_builder\ConfigFormBuilderInterface: "@display_builder.config_form_builder"
+      - '@entity_type.manager'
+      - '@current_user'
+      - '@module_handler'
+  Drupal\display_builder\ConfigFormBuilderInterface: '@display_builder.config_form_builder'
 
   display_builder.event_subscriber:
     class: '\Drupal\display_builder\Event\DisplayBuilderEventsSubscriber'
-    arguments: ["@plugin.manager.db_island", "@entity_type.manager"]
+    arguments: ['@plugin.manager.db_island', '@entity_type.manager']
     tags:
-      - { name: "event_subscriber" }
+      - { name: 'event_subscriber' }

@@ -1,5 +1,5 @@
 entity.page_layout.overview:
   title: Page layouts
   parent: system.admin_structure
-  description: "Manage page layouts with Display Builder."
+  description: 'Manage page layouts with Display Builder.'
   route_name: entity.page_layout.collection

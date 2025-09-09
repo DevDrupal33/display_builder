@@ -1,6 +1,6 @@
 name: Toast
 slots:
-  content: "A toast that will disappear in 5s!"
+  content: 'A toast that will disappear in 5s!'
 props:
   closable: true
   toast: true

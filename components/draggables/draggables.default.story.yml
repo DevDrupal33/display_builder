@@ -2,19 +2,19 @@ name: Example
 slots:
   content:
     - type: component
-      component: "display_builder:placeholder"
+      component: 'display_builder:placeholder'
       story: button
     - type: component
-      component: "display_builder:placeholder"
+      component: 'display_builder:placeholder'
       story: button
     - type: component
-      component: "display_builder:placeholder"
+      component: 'display_builder:placeholder'
       story: button
     - type: component
-      component: "display_builder:placeholder"
+      component: 'display_builder:placeholder'
       story: button
     - type: component
-      component: "display_builder:placeholder"
+      component: 'display_builder:placeholder'
       story: button
 props:
   title: Lorem ipsum

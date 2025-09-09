@@ -1,7 +1,7 @@
 name: Test simple
-description: "Used for testing Display Builder."
+description: 'Used for testing Display Builder.'
 links:
-  - "https://www.drupal.org/project/display_builder"
+  - 'https://www.drupal.org/project/display_builder'
 slots:
   slot_1:
     title: Slot 1

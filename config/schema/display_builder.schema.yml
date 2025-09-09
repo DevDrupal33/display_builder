@@ -14,13 +14,13 @@ display_builder.profile.*:
       type: text
     library:
       type: string
-      label: "Library type"
+      label: 'Library type'
     debug:
       type: boolean
-      label: "Debug mode"
+      label: 'Debug mode'
     islands:
       type: sequence
-      label: "Islands"
+      label: 'Islands'
       sequence:
         type: display_builder.islands.[%key]
     weight:
@@ -29,7 +29,7 @@ display_builder.profile.*:
 
 display_builder.islands.*:
   type: mapping
-  label: "Island configuration"
+  label: 'Island configuration'
   mapping:
     enable:
       type: boolean
@@ -141,7 +141,7 @@ display_builder.pattern_preset.*:
     group:
       type: string
     sources:
-      label: "UI Patterns sources"
+      label: 'UI Patterns sources'
       # See Drupal\display_builder\Hook\UiPatternsHooks::schemaInfoAlter().
       type: ui_patterns_slot_source
 
