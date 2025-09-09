@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+/**
+ * @codeCoverageIgnore
+ */
+
 use drupol\PhpCsFixerConfigsDrupal\Config\Drupal8;
 
 $finder = PhpCsFixer\Finder::create()

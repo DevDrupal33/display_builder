@@ -18,7 +18,7 @@ use PHPUnit\Framework\Attributes\Group;
  *
  * @internal
  */
-#[CoversClass('\Drupal\display_builder_entity_view\Entity\EntityViewDisplay')]
+#[CoversClass(EntityViewDisplay::class)]
 #[CoversClass('\Drupal\display_builder_entity_view\Entity\EntityViewDisplayTrait')]
 #[Group('display_builder')]
 final class EntityViewDisplayTest extends EntityKernelTestBase {

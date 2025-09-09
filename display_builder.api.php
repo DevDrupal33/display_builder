@@ -3,6 +3,8 @@
 /**
  * @file
  * Describes hooks provided by the Display Builder module.
+ *
+ * @codeCoverageIgnore
  */
 
 declare(strict_types=1);

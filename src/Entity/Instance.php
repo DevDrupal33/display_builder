@@ -60,6 +60,11 @@ class Instance extends EntityBase implements InstanceInterface {
   protected string $id;
 
   /**
+   * Entity label.
+   */
+  protected string $label;
+
+  /**
    * Display Builder profile ID.
    */
   protected string $profileId = '';
