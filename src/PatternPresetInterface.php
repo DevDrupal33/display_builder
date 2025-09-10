@@ -27,4 +27,14 @@ interface PatternPresetInterface extends ConfigEntityInterface {
    */
   public function getSources(array $contexts = [], bool $fillNodeId = TRUE): array;
 
+  /**
+   * Get summary.
+   *
+   * The summary of a preset is the summary of its root source.
+   *
+   * @return string
+   *   The summary
+   */
+  public function getSummary(): string;
+
 }

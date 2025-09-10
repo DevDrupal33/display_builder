@@ -507,6 +507,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       return $this->responseMessageError((string) $builder->id(), $message, $data);
     }
     $node_id = $builder->attachToRoot($position, $data['source_id'], $data['source']);
+
+    foreach ($data['_third_party_settings'] ?? [] as $provider => $settings) {
+      $builder->setThirdPartySettings($node_id, $provider, $settings ?? []);
+    }
     $this->builder = $builder;
 
     return $this->dispatchDisplayBuilderEvent(
@@ -548,6 +552,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       return $this->responseMessageError((string) $builder->id(), $message, $data);
     }
     $node_id = $builder->attachToSlot($parent_id, $slot, $position, $data['source_id'], $data['source']);
+
+    foreach ($data['_third_party_settings'] ?? [] as $provider => $settings) {
+      $builder->setThirdPartySettings($node_id, $provider, $settings ?? []);
+    }
 
     $this->builder = $builder;
 

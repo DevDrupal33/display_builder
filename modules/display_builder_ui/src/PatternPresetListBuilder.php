@@ -28,10 +28,10 @@ final class PatternPresetListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity): array {
+    /** @var \Drupal\display_builder\PatternPresetInterface $entity */
     $row = [];
-    /** @var \Drupal\display_builder\ProfileInterface $entity */
     $row['label'] = $entity->label();
-    $row['description'] = $entity->get('description');
+    $row['description'] = $entity->get('description') ?: $entity->getSummary();
     $row['themes'] = \implode(', ', $entity->getDependencies()['theme'] ?? []);
 
     return $row + parent::buildRow($entity);

@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Form\PatternPresetForm;
 use Drupal\display_builder\PatternPresetInterface;
+use Drupal\display_builder\SlotSourceProxy;
 use Drupal\display_builder_ui\PatternPresetListBuilder;
 use Drupal\ui_patterns\SourcePluginManager;
 
@@ -86,7 +87,27 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
   protected array $sources;
 
   /**
+   * Slot source proxy.
+   */
+  protected SlotSourceProxy $slotSourceProxy;
+
+  /**
    * {@inheritdoc}
+   *
+   * @see \Drupal\display_builder\PatternPresetInterface
+   */
+  public function getSummary(): string {
+    $contexts = [];
+    $data = $this->getSources($contexts, FALSE);
+    $data = $this->slotSourceProxy()->getLabelWithSummary($data);
+
+    return $data['summary'] ?: $data['label'];
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\display_builder\PatternPresetInterface
    */
   public function getSources(array $contexts = [], bool $fillNodeId = TRUE): array {
     $data = $this->get('sources') ?? [];
@@ -108,6 +129,8 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
 
   /**
    * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Config\Entity\ConfigEntityInterface
    */
   public function calculateDependencies() {
     parent::calculateDependencies();
@@ -155,6 +178,13 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
         self::fillNodeId($value);
       }
     }
+  }
+
+  /**
+   * Slot source proxy.
+   */
+  private function slotSourceProxy(): SlotSourceProxy {
+    return $this->slotSourceProxy ??= \Drupal::service('display_builder.slot_sources_proxy');
   }
 
 }
