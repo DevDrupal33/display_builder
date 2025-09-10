@@ -61,7 +61,6 @@ class LogsPanel extends IslandPluginBase {
       return [];
     }
 
-    $saveHash = $load['save']->hash ?? NULL;
     /** @var \Drupal\display_builder\HistoryStep $present */
     $present = $load['present'];
 
@@ -69,13 +68,9 @@ class LogsPanel extends IslandPluginBase {
       return [];
     }
 
-    /** @var \Drupal\display_builder\HistoryStep[] $past */
-    $past = $load['past'];
-    /** @var \Drupal\display_builder\HistoryStep[] $future */
-    $future = $load['future'];
-
-    $build = [];
-    $table_logs = [
+    $save = $load['save'] ?? NULL;
+    $rows = $this->buildRows($load['past'], $present, $load['future'], $save);
+    $table = [
       '#theme' => 'table',
       '#header' => [
         ['data' => $this->t('Step')],
@@ -84,27 +79,13 @@ class LogsPanel extends IslandPluginBase {
         ['data' => $this->t('User')],
         ['data' => $this->t('Message')],
       ],
-      '#rows' => [],
+      '#rows' => $rows,
     ];
 
-    $saveInPresent = ($saveHash && $present->hash === $saveHash);
-    $saveInPast = FALSE;
-    $saveInFuture = FALSE;
-
-    $table_logs['#rows'] = $this->buildRows($past, $present, $future, $saveHash, $saveInPast, $saveInPresent, $saveInFuture);
-    $build[] = $table_logs;
-
-    if ($saveHash && !$saveInFuture && !$saveInPresent && !$saveInPast) {
-      $time = DisplayBuilderHelpers::formatTime($this->dateFormatter, $load['save']->time);
-      $params = ['%hash' => $saveHash, '%time' => $time];
-      $build[] = [
-        '#type' => 'html_tag',
-        '#tag' => 'p',
-        '#value' => $this->t('Saved version not in history: %hash at %time', $params),
-      ];
-    }
-
-    return $build;
+    return [
+      $table,
+      $save ? $this->printSaveAlert(\array_merge($load['past'], [$present], $load['future']), $save) : [],
+    ];
   }
 
   /**
@@ -165,75 +146,27 @@ class LogsPanel extends IslandPluginBase {
    *   A step with time and log message.
    * @param \Drupal\display_builder\HistoryStep[] $future
    *   Steps with time and log message.
-   * @param int|null $saveHash
-   *   Hash of the saved state.
-   * @param bool $saveInPast
-   *   Is the saved stated in the past?
-   * @param bool $saveInPresent
-   *   Is the saved stated in the present?
-   * @param bool $saveInFuture
-   *   Is the saved stated in the future?
+   * @param \Drupal\display_builder\HistoryStep $save
+   *   Saved state.
    *
    * @return array
    *   A renderable array representing a table row.
    */
-  protected function buildRows(array $past, ?HistoryStep $present, array $future, ?int $saveHash, bool &$saveInPast, bool &$saveInPresent, bool &$saveInFuture): array {
-    $rows_past = [];
-    $rows_present = [];
-    $rows_future = [];
+  protected function buildRows(array $past, ?HistoryStep $present, array $future, ?HistoryStep $save): array {
+    $rows = [];
 
-    foreach ($future as $index => $step) {
-      if ($saveHash && $step->hash === $saveHash && !$saveInPresent) {
-        $saveInFuture = TRUE;
-      }
-      $rows_future[] = $this->buildRow($index + 1, $step);
-    }
-
-    foreach ($past as $index => $step) {
-      if ($saveHash && isset($step->hash) && $step->hash === $saveHash) {
-        $saveInPast = TRUE;
-      }
-
-      if ($step) {
-        $rows_past[] = $this->buildRow(-\count($past) + $index, $step);
-      }
+    foreach (\array_filter($past) as $index => $step) {
+      $rows[] = $this->buildRow(-\count($past) + $index, $step, $save);
     }
 
     // Present data.
-    $rows_present[] = $this->buildRow(0, $present);
+    $rows[] = $this->buildRow(0, $present, $save);
 
-    // Process the saved mark.
-    $savedRow = NULL;
-
-    if ($saveHash) {
-      if ($saveInPresent) {
-        $savedRow = &$rows_present[0];
-      }
-      elseif ($saveInFuture) {
-        foreach ($rows_future as &$row) {
-          if ($row['hash'] === $saveHash) {
-            $savedRow = &$row;
-
-            // Get closest to present future.
-            break;
-          }
-        }
-      }
-      elseif ($saveInPast) {
-        foreach ($rows_past as &$row) {
-          if ($row['hash'] === $saveHash) {
-            $savedRow = &$row;
-            // Do not break to get closest to present.
-          }
-        }
-      }
-
-      if ($savedRow !== NULL) {
-        $savedRow['data'][1] = '✅';
-      }
+    foreach (\array_filter($future) as $index => $step) {
+      $rows[] = $this->buildRow($index + 1, $step, $save);
     }
 
-    return \array_merge($rows_past, $rows_present, $rows_future);
+    return $rows;
   }
 
   /**
@@ -243,23 +176,61 @@ class LogsPanel extends IslandPluginBase {
    *   The row index.
    * @param \Drupal\display_builder\HistoryStep $step
    *   The step data containing time and log message.
+   * @param \Drupal\display_builder\HistoryStep $save
+   *   Saved state.
    *
    * @return array
    *   A renderable array representing a table row.
    */
-  private function buildRow(int $index, HistoryStep $step): array {
+  private function buildRow(int $index, HistoryStep $step, ?HistoryStep $save): array {
     $user = !empty($step->user) ? $this->entityTypeManager->getStorage('user')->load($step->user) : NULL;
 
     return [
-      'hash' => $step->hash ?? '',
+      'hash' => $step->hash,
       'data' => [
         (string) $index,
-        '',
+        ($save && $step->hash === $save->hash) ? '✅' : '',
         $step->time ? DisplayBuilderHelpers::formatTime($this->dateFormatter, $step->time) : NULL,
         $user ? $user->getDisplayName() : NULL,
         $step->log ?? '',
       ],
       'style' => ($index === 0) ? 'font-weight: bold;' : '',
+    ];
+  }
+
+  /**
+   * Print an alert if the saved step is not in the history.
+   *
+   * @param \Drupal\display_builder\HistoryStep[] $steps
+   *   All steps: past, present and future.
+   * @param \Drupal\display_builder\HistoryStep $save
+   *   Saved state.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  private function printSaveAlert(array $steps, HistoryStep $save): array {
+    $save_found = FALSE;
+
+    foreach ($steps as $step) {
+      if ($step->hash === $save->hash) {
+        $save_found = TRUE;
+
+        break;
+      }
+    }
+
+    if ($save_found) {
+      return [];
+    }
+    $params = [
+      '%time' => DisplayBuilderHelpers::formatTime($this->dateFormatter, $save->time),
+    ];
+
+    return [
+      '#type' => 'html_tag',
+      '#tag' => 'p',
+      '#value' => $this->t('Saved at %time but not visible in logs', $params),
     ];
   }
 
