@@ -103,4 +103,11 @@ class PreviewPanel extends IslandPluginBase {
     return $this->reloadWithGlobalData($builder_id);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function onContentUpdate(string $builder_id): array {
+    return $this->reloadWithGlobalData($builder_id);
+  }
+
 }

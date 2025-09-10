@@ -1,0 +1,12 @@
+display_builder.api_content_edit:
+  path: '/api/display-builder/{builder}/content'
+  methods: [PUT]
+  defaults:
+    _controller: '\Drupal\display_builder_entity_view\Controller\ContentEditController::updateContent'
+  requirements:
+    _permission: 'access display builder'
+  options:
+    _htmx_route: true
+    parameters:
+      builder:
+        type: 'entity:display_builder_instance'

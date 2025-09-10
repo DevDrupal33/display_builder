@@ -181,6 +181,8 @@ trait EntityViewDisplayFormTrait {
       ],
     ];
 
+    $form['form_mode'] = $this->buildFormModesForm();
+
     return $form;
   }
 
@@ -312,6 +314,36 @@ trait EntityViewDisplayFormTrait {
     }
 
     parent::copyFormValuesToEntity($entity, $form, $form_state);
+  }
+
+  /**
+   * Build form modes form.
+   */
+  protected function buildFormModesForm(): array {
+    // $configuration = $this->getConfiguration();
+    /** @var \Drupal\Core\Entity\Entity\EntityFormMode[] $formModes */
+    $formModes = $this->entityTypeManager->getStorage('entity_form_mode')
+      ->loadMultiple();
+    $options = [];
+
+    foreach ($formModes as $formMode) {
+      $options[$formMode->id()] = $formMode->label();
+    }
+
+    return [
+      '#title' => $this->t('Form mode'),
+      '#type' => 'select',
+      '#default_value' => '',
+      '#description' => 'Form for the content edit panel, if avaialble.',
+      '#options' => $options,
+      '#empty_option' => $this->t('Default'),
+      '#empty_value' => 'default',
+      '#states' => [
+        'invisible' => [
+          ':input[name="' . ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY . '"]' => ['filled' => FALSE],
+        ],
+      ],
+    ];
   }
 
 }

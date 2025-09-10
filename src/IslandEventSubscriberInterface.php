@@ -122,4 +122,17 @@ interface IslandEventSubscriberInterface {
    */
   public function onPresetSave(string $builder_id): array;
 
+  /**
+   * Event triggered when the related content has been updated.
+   *
+   * Used for entity view overrides.
+   *
+   * @param string $builder_id
+   *   The builder ID.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  public function onContentUpdate(string $builder_id): array;
+
 }

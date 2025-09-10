@@ -173,6 +173,10 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
       return [];
     }
 
+    if (!$this->instanceId) {
+      return $element;
+    }
+
     $definition = $this->getPluginDefinition();
     $island_id = $definition instanceof PluginDefinitionInterface ? $definition->id() : ($definition['id'] ?? '');
 
@@ -239,6 +243,13 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    * {@inheritdoc}
    */
   public function onPresetSave(string $builder_id): array {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onContentUpdate(string $builder_id): array {
     return [];
   }
 
