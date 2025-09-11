@@ -1,0 +1,14 @@
+services:
+  display_builder_entity_form.routes:
+    class: Drupal\display_builder_entity_form\Routing\DisplayBuilderRoutes
+    arguments:
+      - '@entity_type.manager'
+      - '@module_handler'
+    tags:
+      - { name: event_subscriber }
+  display_builder_entity_form.display_builder_subscriber:
+    class: Drupal\display_builder_entity_form\EventSubscriber\DisplayBuilderSubscriber
+    arguments:
+      - '@entity_type.manager'
+    tags:
+      - { name: event_subscriber }
