@@ -1,0 +1,17 @@
+core.entity_form_display.*.*.*.third_party.display_builder:
+  label: 'Display Builder settings'
+  type: mapping
+  mapping:
+    profile:
+      label: 'Display Builder profile'
+      type: string
+      constraints:
+        ConfigExists:
+          prefix: 'display_builder.profile.'
+    sources:
+      label: 'UI Patterns sources'
+      type: sequence
+      sequence:
+        type: ignore
+  constraints:
+    FullyValidatable: ~
