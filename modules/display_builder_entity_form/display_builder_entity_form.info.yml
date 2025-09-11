@@ -1,8 +1,0 @@
-name: 'Display Builder for entity form'
-description: 'Provide integration of Display Builder to entity form.'
-type: module
-core_version_requirement: ^11.2
-package: 'User interface'
-dependencies:
-  - drupal:field_ui
-  - display_builder:display_builder

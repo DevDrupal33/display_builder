@@ -48,7 +48,6 @@ nav:
   - Using Display Builder:
       - For entity displays: 'entity-displays.md'
       - For entity displays overrides: 'entity-displays-overrides.md'
-      - For entity forms: 'entity-forms.md'
       - For page layout: 'page-layout.md'
       - With Views: 'with-views.md'
   - Features:
