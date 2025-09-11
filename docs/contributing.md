@@ -10,7 +10,7 @@ Display Builder is in active development, codebase can change heavily, be prepar
 
 ### Issue
 
-- When fork an issue, use a short branch name with proper wording (no article, no concatenated words, ie: no 300000-mytitleislongandthisbran )
+- When fork an issue, use a short branch name with proper wording (no article, no concatenated words)
 - When a PR is created it MUST be set DRAFT immediately until the issue is in `Need review`
 
 ### Pull requests
@@ -111,7 +111,7 @@ Javascript and Yaml, from Drupal root:
 cd web/core && yarn install # Install first time
 cd ../..
 cp web/core/.prettierrc.json web/modules/custom/display_builder/.prettierrc.json
-web/core/node_modules/.bin/eslintt --fix --config=web/core/.eslintrc.json \
+web/core/node_modules/.bin/eslint --fix --config=web/core/.eslintrc.json \
   --ignore-path web/modules/custom/display_builder/.eslintignore \
   --no-error-on-unmatched-pattern --ext .js,.yml \
   --resolve-plugins-relative-to ./web/core/node_modules web/modules/custom/display_builder
