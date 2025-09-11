@@ -8,20 +8,35 @@ First step is to join our slack [#display_builder](https://drupal.slack.com/arch
 
 Display Builder is in active development, codebase can change heavily, be prepared for rebasing while helping us.
 
+### Issue
+
+- When fork an issue, use a short branch name with proper wording (no article, no concatenated words, ie: no 300000-mytitleislongandthisbran )
+- When a PR is created it MUST be set DRAFT immediately until the issue is in `Need review`
+
 ### Pull requests
 
 We accept only pull requests (PR), no patches, with the following expectations:
 
 - Maintain the existing code style, CI pass is mandatory. ⚠️ Please ensure your PR is all green on CI before asking for review, see Code style below for local setup
 - Are focused on a single change (i.e. avoid large refactoring or style adjustments in untouched code if not the primary goal of the pull request) from a single Drupal issue
+- Contributor is responsible for rebase and MUST do it before review, exception on Draft that require review
 - Have tests if possible
 - Don't decrease the current code coverage
 
-Commit message structure **must** have the issue ID and **can** have the contribution credit:
+#### Commit
 
-- ✅ Issue #3529070 by pdureau, mogtofu33: Use PluginSettingsInterface::settingsSummary()
-- ✅ Issue #3529070: Use PluginSettingsInterface::settingsSummary()
-- ❌ Use PluginSettingsInterface::settingsSummary()
+- Use new Drupal contribution record system:
+
+> [#ISSUE_ID] SCOPE: DESCRIPTION
+>
+> By: CREDIT 1  
+> By: CREDIT 2  
+> ...
+
+#### Review
+
+- All comments on code SHOULD be done as much as possible with the Gitlab comment system to allow `resolve`
+- All remarks MUST be `resolved` before merging
 
 #### Naming rules
 
@@ -90,18 +105,17 @@ vendor/bin/twig-cs-fixer lint --fix web/modules/custom/display_builder
 vendor/bin/twigcs web/modules/custom/display_builder
 ```
 
-Javascript, from Drupal root:
+Javascript and Yaml, from Drupal root:
 
 ```shell
 cd web/core && yarn install # Install first time
-
-web/core/node_modules/.bin/eslint --fix --config=web/core/.eslintrc.json \
+cd ../..
+cp web/core/.prettierrc.json web/modules/custom/display_builder/.prettierrc.json
+web/core/node_modules/.bin/eslintt --fix --config=web/core/.eslintrc.json \
   --ignore-path web/modules/custom/display_builder/.eslintignore \
-  --no-error-on-unmatched-pattern --ext .js \
+  --no-error-on-unmatched-pattern --ext .js,.yml \
   --resolve-plugins-relative-to ./web/core/node_modules web/modules/custom/display_builder
-web/core/node_modules/.bin/prettier --config=web/core/.prettierrc.json \
-  --ignore-path web/modules/custom/display_builder/.eslintignore \
-  --log-level warn --write web/modules/custom/display_builder/**/*.js
+rm -f web/modules/custom/display_builder/.prettierrc.json
 ```
 
 Stylesheet, from Drupal root:
