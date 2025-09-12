@@ -220,7 +220,7 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
     unset($select['#attributes']['style']);
     $select['#props']['icon'] = NULL;
 
-    $button = $this->buildButton('', $this->t('Switch viewport'), NULL, FALSE, 'display');
+    $button = $this->buildButton('', NULL, 'display', $this->t('Switch viewport of this display'));
     $button['#attributes']['class'] = ['switch-viewport-btn'];
 
     return [
@@ -231,9 +231,6 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
         'content' => [
           '#type' => 'component',
           '#component' => 'display_builder:menu',
-          '#slots' => [
-            'label' => $this->t('Switch viewport'),
-          ],
           '#props' => [
             'items' => $items,
           ],
@@ -242,6 +239,9 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
             'data-points' => \json_encode($data),
           ],
         ],
+      ],
+      '#props' => [
+        'tooltip' => $this->t('Switch viewport'),
       ],
       '#attributes' => [
         'class' => ['switch-viewport'],

@@ -18,9 +18,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Tree'),
   description: new TranslatableMarkup('Manageable hierarchical tree view of elements.'),
   type: IslandType::View,
-  keyboard_shortcuts: [
-    't' => new TranslatableMarkup('Show tree view'),
-  ],
   icon: 'bar-chart-steps',
 )]
 class TreePanel extends BuilderPanel {
@@ -40,6 +37,15 @@ class TreePanel extends BuilderPanel {
     $instance->slotSourceProxy = $container->get('display_builder.slot_sources_proxy');
 
     return $instance;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function keyboardShortcuts(): array {
+    return [
+      't' => t('Show the tree'),
+    ];
   }
 
   /**

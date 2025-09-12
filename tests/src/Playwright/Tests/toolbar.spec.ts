@@ -14,7 +14,6 @@ const key = {
   preview: 'p',
   layers: 'y',
   tree: 't',
-  help: 'h',
   fullscreen: config.keyFullscreen,
   highlight: config.keyHighlight,
   undo: 'u',
@@ -36,7 +35,7 @@ test.afterEach('Clean', async ({ displayBuilder }) => {
 
 // Buttons in toolbar configuration is based on display_builder.profile.test.yml
 // Any change to the profile will be reflected here.
-test('Toolbar buttons and keyboard', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
+test('Toolbar buttons', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
   dbName = `test_${utils.createRandomString()}`
 
   await test.step(`Admin login`, async () => {
@@ -52,12 +51,12 @@ test('Toolbar buttons and keyboard', { tag: ['@display_builder_dev_tools'] }, as
   // and error snapshot.
   await test.step(`Highlight`, async () => {
     const btn = page.locator('[data-island-action="highlight"]')
-    await testToggleFeature(page, btn, '.display-builder--highlight', key.highlight)
+    await testToggleFeature(page, btn, '.display-builder--highlight')
   })
 
   await test.step(`Fullscreen`, async () => {
     const btn = page.locator('[data-island-action="fullscreen"]')
-    await testToggleFeature(page, btn, '.display-builder--fullscreen', key.fullscreen)
+    await testToggleFeature(page, btn, '.display-builder--fullscreen')
   })
 
   await test.step(`Minimal build instance`, async () => {
@@ -96,26 +95,6 @@ test('Toolbar buttons and keyboard', { tag: ['@display_builder_dev_tools'] }, as
     await expect(clear).not.toBeVisible()
   })
 
-  await test.step(`Keyboard Undo / Redo / Clear`, async () => {
-    const builderToken = page.locator(`.db-island-builder [data-node-title="Token"]`)
-    // @todo test is stuck on keyboard.
-    await displayBuilder.dragElementFromLibraryById('Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
-    await displayBuilder.closeDialog()
-    await expect(builderToken).toHaveCount(3)
-    await displayBuilder.keyboardShortcut(key.undo)
-    await displayBuilder.htmxReady()
-    await expect(builderToken).toHaveCount(2)
-    await displayBuilder.keyboardShortcut(key.redo)
-    await displayBuilder.htmxReady()
-    await expect(builderToken).toHaveCount(3)
-    await displayBuilder.keyboardShortcut(key.clear)
-    await displayBuilder.htmxReady()
-    await expect(builderToken).toHaveCount(3)
-    await expect(page.locator('[data-island-action="undo"]')).toBeVisible()
-    await expect(page.locator('[data-island-action="redo"]')).toBeVisible()
-    await expect(page.locator('[data-island-action="clear"]')).not.toBeVisible()
-  })
-
   // This is helping next tests.
   await test.step(`Set some values for next tests`, async () => {
     await displayBuilder.setElementValue(
@@ -131,16 +110,6 @@ test('Toolbar buttons and keyboard', { tag: ['@display_builder_dev_tools'] }, as
     await displayBuilder.setElementValue(
       page.locator(`.db-island-builder [data-node-title="Token"]`).nth(1),
       'I am second',
-      [
-        {
-          action: 'fill',
-          locator: page.locator('#edit-value'),
-        },
-      ]
-    )
-    await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title="Token"]`).nth(2),
-      'I am third',
       [
         {
           action: 'fill',
@@ -169,38 +138,37 @@ test('Toolbar buttons and keyboard', { tag: ['@display_builder_dev_tools'] }, as
     await expect(page.locator('.display-builder__main')).toHaveAttribute('style', 'max-width: 100%;')
   })
 
-  await test.step(`Help`, async () => {
-    const btn = page.locator('[data-island-action="help"]')
-    await testToggleFeature(page, btn, 'text=Keyboard help', key.help)
-  })
+  // @todo help hover test
+  // await test.step(`Help`, async () => {
+  // })
 
   await test.step(`Libraries`, async () => {
     const btn = page.getByRole('button', { name: 'Libraries' })
-    await testToggleFeature(page, btn, '#db-first-drawer', key.libraries)
+    await testToggleFeature(page, btn, '#db-first-drawer')
   })
 
   await test.step(`Tree`, async () => {
     const btn = page.getByRole('button', { name: 'Tree' })
-    await testToggleFeature(page, btn, '.db-island-tree', key.tree)
+    await testToggleFeature(page, btn, '.db-island-tree')
   })
 
   await test.step(`Layers`, async () => {
     const btn = page.getByRole('tab', { name: 'Layers' })
-    await testToggleTab(page, btn, '.db-island-layers', key.layers, 'layers')
+    await testToggleTab(page, btn, '.db-island-layers', 'layers')
   })
 
   await test.step(`Logs`, async () => {
     const btn = page.getByRole('tab', { name: 'Logs' })
     // @todo aria snapshot is hard with the table of logs, because of dates.
-    await testToggleTab(page, btn, '.db-island-logs', key.logs, null)
+    await testToggleTab(page, btn, '.db-island-logs', null)
   })
 
   await test.step(`Preview`, async () => {
     const btn = page.getByRole('tab', { name: 'Preview' })
-    await testToggleTab(page, btn, '.db-island-preview', key.preview, 'preview')
+    await testToggleTab(page, btn, '.db-island-preview', 'preview')
   })
 
-  async function testToggleFeature(page: Page, button: Locator, isOnLocator: string, keyShortcut: string) {
+  async function testToggleFeature(page: Page, button: Locator, isOnLocator: string) {
     const isOn = page.locator(isOnLocator)
 
     await button.click(position)
@@ -209,15 +177,9 @@ test('Toolbar buttons and keyboard', { tag: ['@display_builder_dev_tools'] }, as
     await button.click(position)
     await displayBuilder.shoelaceReady()
     await expect(isOn).not.toBeVisible()
-    await displayBuilder.keyboardShortcut(keyShortcut)
-    await displayBuilder.shoelaceReady()
-    await expect(isOn).toBeVisible()
-    await displayBuilder.keyboardShortcut(keyShortcut)
-    await displayBuilder.shoelaceReady()
-    await expect(isOn).not.toBeVisible()
   }
 
-  async function testToggleTab(page: Page, button: Locator, isOnLocator: string, keyShortcut: string, name: string | null) {
+  async function testToggleTab(page: Page, button: Locator, isOnLocator: string, name: string | null) {
     const builder = page.getByRole('tab', { name: 'Builder' })
     const isOn = page.locator(isOnLocator)
 
@@ -232,8 +194,139 @@ test('Toolbar buttons and keyboard', { tag: ['@display_builder_dev_tools'] }, as
     await builder.click(position)
     await displayBuilder.shoelaceReady()
     await expect(isOn).not.toBeVisible()
+  }
+})
+
+test('Toolbar keyboard', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
+  dbName = `test_${utils.createRandomString()}`
+
+  await test.step(`Admin login`, async () => {
+    await drupal.loginAsAdmin()
+  })
+
+  await test.step(`Create dev instance`, async () => {
+    await displayBuilder.createDisplayBuilderFromUi(dbName)
+  })
+
+  // // Test highlight and fullscreen before any further tests to not conflict with
+  // // highlight or fullscreen switch in the test to make it easier for position
+  // // and error snapshot.
+  // await test.step(`Highlight`, async () => {
+  //   await testToggleFeature(page, '.display-builder--highlight', key.highlight)
+  // })
+
+  // await test.step(`Fullscreen`, async () => {
+  //   await testToggleFeature(page, '.display-builder--fullscreen', key.fullscreen)
+  // })
+
+  await test.step(`Minimal build instance`, async () => {
+    await displayBuilder.dragElementFromLibraryById(
+      'Blocks',
+      'token',
+      page.locator(`.db-island-builder > slot.db-dropzone`)
+    )
+    await displayBuilder.dragElementFromLibraryById(
+      'Blocks',
+      'token',
+      page.locator(`.db-island-builder > slot.db-dropzone`)
+    )
+    await displayBuilder.closeDialog()
+  })
+
+  await test.step(`Keyboard Undo / Redo / Clear`, async () => {
+    const builderToken = page.locator(`.db-island-builder [data-node-title="Token"]`)
+
+    await displayBuilder.dragElementFromLibraryById('Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
+    await displayBuilder.closeDialog()
+    await expect(builderToken).toHaveCount(3)
+    await displayBuilder.keyboardShortcut(key.undo)
+    await displayBuilder.htmxReady()
+    await displayBuilder.shoelaceReady()
+    await expect(builderToken).toHaveCount(2)
+    await displayBuilder.keyboardShortcut(key.redo)
+    await displayBuilder.htmxReady()
+    await displayBuilder.shoelaceReady()
+    await expect(builderToken).toHaveCount(3)
+    await displayBuilder.keyboardShortcut(key.clear)
+    await displayBuilder.htmxReady()
+    await displayBuilder.shoelaceReady()
+    await expect(builderToken).toHaveCount(3)
+    await expect(page.locator('[data-island-action="undo"]')).toBeVisible()
+    await expect(page.locator('[data-island-action="redo"]')).toBeVisible()
+    await expect(page.locator('[data-island-action="clear"]')).not.toBeVisible()
+  })
+
+  // This is helping next tests.
+  await test.step(`Set some values for next tests`, async () => {
+    await displayBuilder.setElementValue(
+      page.locator(`.db-island-builder [data-node-title="Token"]`).first(),
+      'I am first',
+      [
+        {
+          action: 'fill',
+          locator: page.locator('#edit-value'),
+        },
+      ]
+    )
+    await displayBuilder.setElementValue(
+      page.locator(`.db-island-builder [data-node-title="Token"]`).nth(1),
+      'I am second',
+      [
+        {
+          action: 'fill',
+          locator: page.locator('#edit-value'),
+        },
+      ]
+    )
+
+    await page.getByRole('button', { name: 'Close' }).click()
+    await displayBuilder.highlight()
+  })
+
+  await test.step(`Libraries`, async () => {
+    await testToggleFeature(page, '#db-first-drawer', key.libraries)
+  })
+
+  await test.step(`Tree`, async () => {
+    await testToggleFeature(page, '.db-island-tree', key.tree)
+  })
+
+  await test.step(`Layers`, async () => {
+    await testToggleTab(page, '.db-island-layers', key.layers, 'layers')
+  })
+
+  await test.step(`Logs`, async () => {
+    // @todo aria snapshot is hard with the table of logs, because of dates.
+    await testToggleTab(page, '.db-island-logs', key.logs, null)
+  })
+
+  await test.step(`Preview`, async () => {
+    await testToggleTab(page, '.db-island-preview', key.preview, 'preview')
+  })
+
+  async function testToggleFeature(page: Page, isOnLocator: string, keyShortcut: string) {
+    const isOn = page.locator(isOnLocator)
+
+    await displayBuilder.keyboardShortcut(keyShortcut)
+    await displayBuilder.shoelaceReady()
+    await expect(isOn).toBeVisible()
+    await displayBuilder.keyboardShortcut(keyShortcut)
+    await displayBuilder.shoelaceReady()
+    await expect(isOn).not.toBeVisible()
+  }
+
+  async function testToggleTab(page: Page, isOnLocator: string, keyShortcut: string, name: string | null) {
+    // const builder = page.getByRole('tab', { name: 'Builder' })
+    const isOn = page.locator(isOnLocator)
+
     await displayBuilder.keyboardShortcut(keyShortcut)
     await expect(isOn).toBeVisible()
+
+    if (name !== null) {
+      await expect(page.locator(isOnLocator)).toMatchAriaSnapshot({ name: `keyboard-${name}.aria.yml` })
+    }
+
+    // await builder.click(position)
     await displayBuilder.keyboardShortcut(key.builder)
     await expect(isOn).not.toBeVisible()
   }

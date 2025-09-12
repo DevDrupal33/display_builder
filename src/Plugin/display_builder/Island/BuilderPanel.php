@@ -23,9 +23,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   description: new TranslatableMarkup('The Display Builder main island, allow to build the display.'),
   type: IslandType::View,
   icon: 'tools',
-  keyboard_shortcuts: [
-    'b' => new TranslatableMarkup('Show builder view'),
-  ],
 )]
 class BuilderPanel extends IslandPluginBase {
 
@@ -60,6 +57,15 @@ class BuilderPanel extends IslandPluginBase {
     $instance->componentElementBuilder = $container->get('ui_patterns.component_element_builder');
 
     return $instance;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function keyboardShortcuts(): array {
+    return [
+      'b' => t('Show the builder'),
+    ];
   }
 
   /**

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
-use Drupal\Component\Utility\Html;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 
@@ -212,60 +211,43 @@ trait RenderableBuilderTrait {
    *
    * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $label
    *   The button label.
-   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $title
-   *   (Optional) The button title attributes.
-   * @param string|null $keyboard
-   *   (Optional) Has a keyboard shortcut. @see component button.js file.
-   * @param bool $disabled
-   *   (Optional) Is the button disabled? Default no.
+   * @param string $action
+   *   (Optional) The action value attribute. Used mainly for e2e tests.
    * @param string|null $icon
    *   (Optional) The icon name. Default none.
    * @param string|TranslatableMarkup|null $tooltip
    *   (Optional) Enable the tooltip feature. Default no tooltip.
+   * @param array|null $keyboard
+   *   (Optional) Keyboard shortcut as associative array key => description.
    *
    * @return array
    *   The button render array.
    */
   protected function buildButton(
     string|TranslatableMarkup $label,
-    string|TranslatableMarkup $title = '',
-    ?string $keyboard = NULL,
-    bool $disabled = FALSE,
+    ?string $action,
     ?string $icon = NULL,
     null|string|TranslatableMarkup $tooltip = NULL,
+    ?array $keyboard = NULL,
   ): array {
-    if (empty(\trim((string) $label))) {
-      $id = \uniqid();
-    }
-    elseif (\is_numeric($label)) {
-      // For example, undo/redo buttons.
-      $id = \uniqid();
-    }
-    else {
-      $id = Html::getUniqueId((string) $label);
-    }
-
     $button = [
       '#type' => 'component',
       '#component' => 'display_builder:button',
       '#props' => [
-        'id' => $id,
         'label' => $label,
         'icon' => $icon,
         'tooltip' => $tooltip,
       ],
     ];
 
-    if ($title) {
-      $button['#attributes']['title'] = $title;
-    }
-
     if ($keyboard) {
-      $button['#attributes']['data-keyboard'] = $keyboard;
+      $button['#attributes']['data-keyboard-key'] = \key($keyboard);
+      $button['#attributes']['data-keyboard-help'] = \reset($keyboard) ?? '';
     }
 
-    if ($disabled) {
-      $button['#attributes']['disabled'] = 'disabled';
+    // Used to ease e2e tests.
+    if ($action) {
+      $button['#attributes']['data-island-action'] = $action;
     }
 
     return $button;

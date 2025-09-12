@@ -1,3 +1,4 @@
+/* eslint max-nested-callbacks: 0 */
 /**
  * @file
  * Specific behaviors for keyboard mapping.
@@ -6,7 +7,7 @@
  * pressed, the element is clicked.
  */
 
-((Drupal) => {
+((Drupal, once) => {
   /**
    * Drupal behavior for keyboard mapping.
    *
@@ -19,55 +20,79 @@
    */
   Drupal.behaviors.displayBuilderKeyboard = {
     attach(context) {
-      // Aggregate the keyboard values and create a mapping. Because the htmx
-      // refresh we collect again on each refresh.
-      const keyboardKeys = context.querySelectorAll('[data-keyboard]');
-      if (!keyboardKeys) return;
+      once('dbKeyboardGlobal', '.display-builder', context).forEach(
+        (builder) => {
+          const keyboardKeys = builder.querySelectorAll('[data-keyboard-key]');
+          if (!keyboardKeys) return;
 
-      // Collect the keyboard mapping to associate with elements.
-      const keyboardMapping = {};
-      keyboardKeys.forEach((keyElement) => {
-        keyboardMapping[keyElement.dataset.keyboard] = keyElement.id;
-      });
+          const keyboardMapping = {};
+          const keyboardHelp = {};
+          keyboardKeys.forEach((elt) => {
+            if (!elt.dataset?.keyboardKey) {
+              return;
+            }
+            keyboardMapping[elt.dataset.keyboardKey] = elt.dataset.keyboardKey;
+            keyboardHelp[elt.dataset.keyboardKey] =
+              `<code>${elt.dataset.keyboardKey}</code> ${elt.dataset?.keyboardHelp ?? ''}`;
+          });
 
-      if (Object.keys(keyboardMapping).length === 0) {
-        return;
-      }
+          builder.addEventListener('sl-show', (event) => {
+            if (!event.target.querySelector('[data-island-action="help"]'))
+              return;
 
-      document.addEventListener('keydown', (event) => {
-        if (!keyboardMapping[event.key]) {
-          return;
-        }
+            const helpKeyboard = event.target.querySelector('sl-tooltip > div');
+            // Build the list from keyboardHelp values.
+            helpKeyboard.innerHTML = `<ul class="db-keyboard-help">${Object.values(
+              keyboardHelp,
+            )
+              .map((item) => `<li>${item}</li>`)
+              .join('')}</ul>`;
+          });
 
-        // Avoid action when on a textfield, textarea or CKEditor content.
-        if (
-          // @todo: find a more generic way.
-          event.target.tagName === 'SL-INPUT' ||
-          event.target.tagName === 'SL-TEXTAREA' ||
-          event.target.tagName === 'INPUT' ||
-          event.target.tagName === 'TEXTAREA' ||
-          event.target.classList.contains('ck-content')
-        ) {
-          return;
-        }
+          document.addEventListener('keydown', (event) => {
+            if (!keyboardMapping[event.key]) {
+              return;
+            }
 
-        const element = document.getElementById(keyboardMapping[event.key]);
-        if (!element) {
-          return;
-        }
-        // Avoid multiple click.
-        if (element.classList.contains('db-keyboard-mapping-clicked')) {
-          return;
-        }
-        element.click();
-        // Visually give a sign of clicked button.
-        element.focus();
-        element.classList.add('db-keyboard-mapping-clicked');
-        setTimeout(() => {
-          element.blur();
-          element.classList.remove('db-keyboard-mapping-clicked');
-        }, 300);
-      });
+            // Avoid action when on a textfield, textarea or CKEditor content.
+            if (
+              // @todo: find a more generic way.
+              event.target.tagName === 'SL-INPUT' ||
+              event.target.tagName === 'SL-TEXTAREA' ||
+              event.target.tagName === 'INPUT' ||
+              event.target.tagName === 'TEXTAREA' ||
+              event.target.classList.contains('ck-content')
+            ) {
+              return;
+            }
+
+            // Because buttons can be refreshed by HTMX we need to get the elt.
+            const element = document.querySelector(
+              `[data-keyboard-key="${event.key}"]`,
+            );
+            if (!element) return;
+
+            // For some cases, the button is hidden instead of removed from dom.
+            // Like state clear button.
+            if (
+              element.classList.contains('db-keyboard-mapping-clicked') ||
+              element.classList.contains('hidden')
+            ) {
+              return;
+            }
+
+            element.click();
+
+            // Visually give a sign of clicked button.
+            element.focus();
+            element.classList.add('db-keyboard-mapping-clicked');
+            setTimeout(() => {
+              element.blur();
+              element.classList.remove('db-keyboard-mapping-clicked');
+            }, 300);
+          });
+        },
+      );
     },
   };
-})(Drupal);
+})(Drupal, once);

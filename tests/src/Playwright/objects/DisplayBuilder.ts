@@ -176,7 +176,7 @@ export class Displaybuilder {
    */
   async saveDisplayBuilder(): Promise<void> {
     await this.htmxReady()
-    await this.page.locator('.db-toolbar__end [data-keyboard="S"]').click()
+    await this.page.locator('.db-toolbar__end [data-keyboard-key="S"]').click()
     await this.htmxReady()
   }
 

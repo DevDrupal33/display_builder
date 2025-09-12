@@ -22,11 +22,6 @@ use Drupal\display_builder\IslandType;
   label: new TranslatableMarkup('History'),
   description: new TranslatableMarkup('Undo and Redo buttons.'),
   type: IslandType::Button,
-  keyboard_shortcuts: [
-    'u' => new TranslatableMarkup('Undo last change'),
-    'r' => new TranslatableMarkup('Redo last change'),
-    'C' => new TranslatableMarkup('(shift + c) Clear history (if enabled)'),
-  ],
 )]
 class HistoryButtons extends IslandPluginBase implements PluginFormInterface {
 
@@ -76,27 +71,29 @@ class HistoryButtons extends IslandPluginBase implements PluginFormInterface {
    */
   public function build(InstanceInterface $builder, array $data, array $options = []): array {
     $builder_id = (string) $builder->id();
-    // @todo pass \Drupal\display_builder\InstanceInterface object in
-    // parameters instead of loading again.
-    /** @var \Drupal\display_builder\InstanceInterface $builder */
-    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
     $future = $builder->getCountFuture();
     $past = $builder->getCountPast();
 
-    $undo = $this->buildButton($past ? (string) $past : '', '', 'u', empty($past), 'arrow-counterclockwise', $this->t('Undo (shortcut: u)'));
-    $redo = $this->buildButton($future ? (string) $future : '', '', 'r', empty($future), 'arrow-clockwise', $this->t('Redo (shortcut: r)'));
-    // To ease e2e tests.
-    $undo['#attributes']['data-island-action'] = 'undo';
-    $redo['#attributes']['data-island-action'] = 'redo';
-    $clear = [];
+    $undo = $this->buildButton($past ? (string) $past : '', 'undo', 'arrow-counterclockwise', $this->t('Undo (shortcut: u)'), ['u' => $this->t('Undo last change')]);
 
+    if (empty($past)) {
+      $undo['#attributes']['disabled'] = 'disabled';
+    }
+    $redo = $this->buildButton($future ? (string) $future : '', 'redo', 'arrow-clockwise', $this->t('Redo (shortcut: r)'), ['r' => $this->t('Redo last undone change')]);
+
+    if (empty($future)) {
+      $redo['#attributes']['disabled'] = 'disabled';
+    }
+
+    $clear = $this->buildButton('', 'clear', 'clock-history', $this->t('Clear history (shortcut: C)'), ['C' => $this->t('Clear all changes history')]);
+    $clear['#props']['variant'] = 'warning';
+    $clear['#attributes']['outline'] = TRUE;
+
+    // Just hide the button to keep it in the dom, if not keyboard shortcut will
+    // fail.
     $configuration = $this->getConfiguration();
-
-    if ($configuration['display_clear_button'] && (!empty($past) || !empty($future))) {
-      $clear = $this->buildButton('', '', 'C', (empty($past) && empty($future)), 'clock-history', $this->t('Clear history (shortcut: shift + C)'));
-      $clear['#props']['variant'] = 'warning';
-      $clear['#attributes']['outline'] = TRUE;
-      $clear['#attributes']['data-island-action'] = 'clear';
+    if (!$configuration['display_clear_button'] || (empty($past) && empty($future))) {
+      $clear['#attributes']['class'] = ['hidden'];
     }
 
     return [

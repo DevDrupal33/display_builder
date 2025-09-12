@@ -89,6 +89,13 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * {@inheritdoc}
    */
+  public static function keyboardShortcuts(): array {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getTypeId(): string {
     return $this->pluginDefinition['type']->value;
   }
@@ -98,13 +105,6 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    */
   public function getHtmlId(string $builder_id): string {
     return \implode('-', ['island', $builder_id, $this->pluginDefinition['id']]);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getKeyboardShortcuts(): array {
-    return $this->pluginDefinition['keyboard_shortcuts'] ?? [];
   }
 
   /**

@@ -53,6 +53,28 @@ display_builder.islands.history:
       type: weight
       label: Weight
 
+display_builder.islands.controls:
+  type: mapping
+  mapping:
+    toggle_highlight:
+      type: boolean
+      label: Toggle highlight
+    toggle_fullscreen:
+      type: boolean
+      label: Toggle fullscreen
+    keyboard_help:
+      type: boolean
+      label: Keyboard help
+    theme_mode:
+      type: boolean
+      label: Theme mode selector
+    enable:
+      type: boolean
+      label: Enabled
+    weight:
+      type: weight
+      label: Weight
+
 display_builder.islands.component_library:
   type: mapping
   mapping:

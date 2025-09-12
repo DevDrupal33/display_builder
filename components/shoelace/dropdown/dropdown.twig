@@ -1,4 +1,10 @@
 <sl-dropdown {{ attributes.setAttribute('placement', placement|default('bottom-start')) }}>
-  {{ button|set_attribute('slot', 'trigger')|set_attribute('caret', 'caret') }}
+  {% if tooltip %}
+    <sl-tooltip slot="trigger" content="{{ tooltip }}" style="display: inline-block;">
+      {{ button|set_attribute('caret', 'caret') }}
+    </sl-tooltip>
+  {% else %}
+    {{ button|set_attribute('slot', 'trigger')|set_attribute('caret', 'caret') }}
+  {% endif %}
   {{ content }}
 </sl-dropdown>

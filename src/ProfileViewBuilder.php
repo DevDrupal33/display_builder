@@ -107,7 +107,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     $buttons = [];
 
     if (!empty($button_islands)) {
-      $buttons = $this->buildPanes($builder, $button_islands, $this->getKeyboardKeys(), [], 'span');
+      $buttons = $this->buildPanes($builder, $button_islands, [], [], 'span');
     }
 
     if (!empty($menu_islands)) {
@@ -189,7 +189,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     }
 
     if (!empty($view_main_tabs)) {
-      $view_main_tabs = $this->buildBuilderTabs($builder, $view_main_tabs, FALSE, TRUE);
+      $view_main_tabs = $this->buildBuilderTabs($builder, $view_main_tabs, FALSE);
     }
 
     $builder_data = $builder->getCurrentState();
@@ -316,9 +316,9 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         ],
       ];
 
-      // Keep only first keyboard key.
-      if ($keyboard = $island->getKeyboardShortcuts()) {
-        $build[$island_id]['#attributes']['data-keyboard'] = \key($keyboard);
+      if ($keyboard = $island::keyboardShortcuts()) {
+        $build[$island_id]['#attributes']['data-keyboard-key'] = \key($keyboard);
+        $build[$island_id]['#attributes']['data-keyboard-help'] = \reset($keyboard);
       }
     }
 
@@ -334,27 +334,23 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    *   The islands to build tabs for.
    * @param bool $contextual
    *   (Optional) Whether the tabs are contextual.
-   * @param bool $enableKeyboard
-   *   (Optional) Add the keyboard data value.
    *
    * @return array
    *   The tabs render array.
    */
-  private function buildBuilderTabs(InstanceInterface $builder, array $islands, bool $contextual = FALSE, bool $enableKeyboard = FALSE): array {
+  private function buildBuilderTabs(InstanceInterface $builder, array $islands, bool $contextual = FALSE): array {
     // Global id is based on last island.
     $id = '';
     $tabs = [];
 
     foreach ($islands as $island) {
       $id = $island_id = $island->getHtmlId((string) $builder->id());
+
       $attributes = [];
 
-      if ($enableKeyboard) {
-        $key = \array_keys($island->getKeyboardShortcuts());
-
-        if (!empty($key)) {
-          $attributes = ['data-keyboard' => $key[0]];
-        }
+      if ($keyboard = $island::keyboardShortcuts()) {
+        $attributes['data-keyboard-key'] = \key($keyboard);
+        $attributes['data-keyboard-help'] = \reset($keyboard);
       }
       $tabs[] = [
         'title' => $island->label(),
@@ -403,20 +399,6 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     $build['#slots']['items'] = $items;
 
     return $build;
-  }
-
-  /**
-   * Get keyboard keys defined in islands.
-   *
-   * @return array
-   *   The keyboard array list as key => description.
-   */
-  private function getKeyboardKeys(): array {
-    $island_enable = \array_keys($this->entity->getIslandEnabled());
-    $output = $this->islandPluginManager()->getIslandsKeyboard(\array_flip($island_enable));
-    \ksort($output, \SORT_NATURAL | \SORT_FLAG_CASE);
-
-    return $output;
   }
 
   /**

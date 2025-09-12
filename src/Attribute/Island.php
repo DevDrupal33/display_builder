@@ -32,8 +32,6 @@ final class Island extends AttributeBase {
    *   (Optional) The deriver class.
    * @param \Drupal\display_builder\IslandType|null $type
    *   (Optional) The island type from enumeration.
-   * @param array<string, TranslatableMarkup>|null $keyboard_shortcuts
-   *   (Optional) List of keyboard shortcuts as keypress => description.
    * @param string|null $icon
    *   (Optional) Icon for this island.
    */
@@ -44,7 +42,6 @@ final class Island extends AttributeBase {
     public readonly ?TranslatableMarkup $description = NULL,
     public readonly ?string $deriver = NULL,
     public readonly ?IslandType $type = NULL,
-    public readonly ?array $keyboard_shortcuts = NULL,
     public readonly ?string $icon = NULL,
   ) {}
 

@@ -15,6 +15,14 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 interface IslandInterface extends ConfigurableInterface, ContainerFactoryPluginInterface, IslandEventSubscriberInterface, PluginInspectionInterface {
 
   /**
+   * Define keyboard shortcuts.
+   *
+   * @return array
+   *   An associative array of key => description.
+   */
+  public static function keyboardShortcuts(): array;
+
+  /**
    * Build renderable from state data.
    *
    * @param \Drupal\display_builder\InstanceInterface $builder
@@ -59,14 +67,6 @@ interface IslandInterface extends ConfigurableInterface, ContainerFactoryPluginI
    *   The HTML ID attribute value.
    */
   public function getHtmlId(string $builder_id): string;
-
-  /**
-   * Returns the keyboard shortcuts if any.
-   *
-   * @return array
-   *   The shortcut list as key => description.
-   */
-  public function getKeyboardShortcuts(): array;
 
   /**
    * Returns the icon if any.

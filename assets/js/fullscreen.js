@@ -108,4 +108,4 @@
       );
     },
   };
-})(Drupal, once, Drupal);
+})(Drupal, once);

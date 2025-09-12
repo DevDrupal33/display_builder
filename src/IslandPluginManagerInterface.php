@@ -27,17 +27,6 @@ interface IslandPluginManagerInterface extends PluginManagerInterface {
   public function getIslandsByTypes(array $contexts = [], array $configuration = [], array $filter_by_island = []): array;
 
   /**
-   * Get the islands keyboard keys.
-   *
-   * @param array $filter_by_island
-   *   (Optional) Filter list by island ids.
-   *
-   * @return array<string, \Drupal\Core\StringTranslation\TranslatableMarkup>
-   *   A list of keys.
-   */
-  public function getIslandsKeyboard(array $filter_by_island = []): array;
-
-  /**
    * Create an island instance for each definition.
    *
    * @param array $definitions

@@ -163,7 +163,10 @@ class ContentEntitySource extends SourcePluginBase {
 
     $storage = $this->entityTypeManager->getStorage($entity_type);
 
-    return $storage->load($entity_id);
+    /** @var \Drupal\Core\Entity\ContentEntityInterface|null $entity */
+    $entity = $storage->load((int) $entity_id);
+
+    return $entity;
   }
 
 }

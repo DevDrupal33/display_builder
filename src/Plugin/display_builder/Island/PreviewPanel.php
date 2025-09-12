@@ -21,12 +21,18 @@ use Drupal\display_builder_page_layout\Entity\PageLayout;
   label: new TranslatableMarkup('Preview'),
   description: new TranslatableMarkup('Show a real time preview of the display.'),
   type: IslandType::View,
-  keyboard_shortcuts: [
-    'p' => new TranslatableMarkup('Show preview'),
-  ],
   icon: 'binoculars',
 )]
 class PreviewPanel extends IslandPluginBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function keyboardShortcuts(): array {
+    return [
+      'p' => t('Show the preview'),
+    ];
+  }
 
   /**
    * {@inheritdoc}

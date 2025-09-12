@@ -25,18 +25,6 @@ parameters:
 			path: modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php
 
 		-
-			message: '#^Method Drupal\\display_builder_entity_view\\Plugin\\UiPatterns\\Source\\ContentEntitySource\:\:getEntity\(\) should return Drupal\\Core\\Entity\\ContentEntityInterface\|null but returns Drupal\\Core\\Entity\\EntityInterface\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ContentEntitySource.php
-
-		-
-			message: '#^Parameter \#1 \$id of method Drupal\\Core\\Entity\\EntityStorageInterface\:\:load\(\) expects int\|string, float\|int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ContentEntitySource.php
-
-		-
 			message: '#^Cannot access offset ''icon'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -44,12 +32,6 @@ parameters:
 
 		-
 			message: '#^Cannot access offset ''id'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/IslandPluginBase.php
-
-		-
-			message: '#^Cannot access offset ''keyboard_shortcuts'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/IslandPluginBase.php

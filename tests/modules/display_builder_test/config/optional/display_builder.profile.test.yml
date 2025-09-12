@@ -10,12 +10,13 @@ islands:
   state:
     enable: true
     weight: -10
-  toggle_fullscreen:
+  controls:
+    toggle_highlight: true
+    toggle_fullscreen: true
+    keyboard_help: true
+    theme_mode: true
     enable: true
     weight: -8
-  toggle_highlight:
-    enable: true
-    weight: -7
   collaboration:
     image_field: user_picture
     image_style: thumbnail
@@ -25,18 +26,9 @@ islands:
     display_clear_button: true
     enable: true
     weight: -9
-  keyboard_help:
-    enable: true
-    weight: -4
-  theme_mode:
-    enable: false
-    weight: -3
   test_island_button:
     enable: false
     weight: -1
-  info:
-    enable: true
-    weight: -7
   ui_styles:
     enable: true
     weight: -9
@@ -128,23 +120,6 @@ islands:
     format: compact
     enable: true
     weight: -6
-  operation:
-    enable: false
-    weight: 0
-  reset:
-    enable: false
-    weight: 1
-  menu_debug:
-    enable: false
-    weight: 0
-  index_debug:
-    enable: false
-    weight: -3
-    region: main
-  state_debug:
-    enable: false
-    weight: -2
-    region: main
   parent_display:
     enable: true
     weight: -5

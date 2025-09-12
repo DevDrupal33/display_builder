@@ -23,9 +23,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Logs'),
   description: new TranslatableMarkup('Logs based on changes history.'),
   type: IslandType::View,
-  keyboard_shortcuts: [
-    'o' => new TranslatableMarkup('Show logs view'),
-  ],
   icon: 'list-columns-reverse',
 )]
 class LogsPanel extends IslandPluginBase {
@@ -49,6 +46,15 @@ class LogsPanel extends IslandPluginBase {
     $instance->dateFormatter = $container->get('date.formatter');
 
     return $instance;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function keyboardShortcuts(): array {
+    return [
+      'o' => t('Show the logs'),
+    ];
   }
 
   /**

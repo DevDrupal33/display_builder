@@ -2,7 +2,7 @@
  * Display Builder tests configuration.
  */
 export default {
-  keyboardTimeout: 350, // Because keyboard.js has a 300 ms highlight of the clicked button.
+  keyboardTimeout: 400, // Because keyboard.js has a 300 ms highlight of the clicked button.
 
   dbList: 'admin/structure/display-builder/instances',
 
@@ -23,6 +23,6 @@ export default {
   // MockEntity::getPrefix()
   develPrefix: 'devel__',
 
-  keyFullscreen: 'Shift+M',
+  keyFullscreen: 'Shift+F',
   keyHighlight: 'Shift+H',
 }

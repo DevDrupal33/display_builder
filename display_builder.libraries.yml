@@ -98,3 +98,11 @@ form:
 viewport_switcher:
   js:
     ./assets/js/viewport_switcher.js: {}
+
+highlight:
+  js:
+    ./assets/js/highlight.js: {}
+
+fullscreen:
+  js:
+    ./assets/js/fullscreen.js: {}

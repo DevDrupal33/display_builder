@@ -43,33 +43,6 @@ final class IslandPluginManager extends DefaultPluginManager implements IslandPl
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function getIslandsKeyboard(array $filter_by_island = []): array {
-    $definitions = $this->getDefinitions();
-
-    $grouped_definitions = [];
-
-    foreach ($definitions as $definition) {
-      if (isset($filter_by_island[$definition['id']])) {
-        $grouped_definitions[$definition['type']->value][] = $definition;
-      }
-    }
-
-    $all_shortcuts = [];
-
-    foreach ($grouped_definitions as $definitions) {
-      foreach ($definitions as $definition) {
-        if (isset($definition['keyboard_shortcuts'])) {
-          $all_shortcuts[] = $definition['keyboard_shortcuts'];
-        }
-      }
-    }
-
-    return \array_merge(...$all_shortcuts);
-  }
-
-  /**
    * Create a plugin instances for each definition.
    *
    * @param array $definitions

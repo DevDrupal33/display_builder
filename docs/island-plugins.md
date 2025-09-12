@@ -37,7 +37,6 @@ HTMX behavior will change according to `IslandInterface::build()` return value:
 - `label`: The human-readable name of the plugin.
 - `description`: A brief description of the plugin.
 - `type` : The island type from enumeration.
-- `keyboard_shortcuts`: List of keyboard shortcuts as keypress => description.
 - `icon`: Icon for this island. Used for View panels.
 
 Example:
@@ -59,3 +58,14 @@ use Drupal\display_builder\IslandType;
 class BlockLibraryPanel extends IslandPluginBase {
 }
 ```
+
+### Keyboard support
+
+We provide a small utility to map buttons to keyboard shortcuts to ease actions in the Display Builder.
+
+If your Island provide a button you should use our method `\Drupal\display_builder\RenderableBuilderTrait::buildButton()` to generate your button.
+This method allow a keyboard mapping as parameter. Check the class for more info.
+
+If your island is of type `Island:View`, implement the `keyboardShortcuts()` method.
+
+_Note_: There is no control on duplicate, please ensure your shortcut is not already used.

@@ -18,9 +18,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Layers'),
   description: new TranslatableMarkup('Manageable hierarchical layer view of elements.'),
   type: IslandType::View,
-  keyboard_shortcuts: [
-    'y' => new TranslatableMarkup('Show layers view'),
-  ],
   icon: 'layers',
 )]
 class LayersPanel extends BuilderPanel {
@@ -40,6 +37,15 @@ class LayersPanel extends BuilderPanel {
     $instance->slotSourceProxy = $container->get('display_builder.slot_sources_proxy');
 
     return $instance;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function keyboardShortcuts(): array {
+    return [
+      'y' => t('Show the layer'),
+    ];
   }
 
   /**

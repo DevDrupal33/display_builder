@@ -47,18 +47,13 @@ islands:
   state:
     enable: true
     weight: -10
-  toggle_highlight:
+  controls:
     enable: true
     weight: -8
-  toggle_fullscreen:
-    enable: true
-    weight: -7
-  keyboard_help:
-    enable: true
-    weight: -5
-  theme_mode:
-    enable: false
-    weight: -2
+    toggle_highlight: true
+    toggle_fullscreen: true
+    keyboard_help: true
+    theme_mode: false
   instance_form:
     enable: true
     weight: -10

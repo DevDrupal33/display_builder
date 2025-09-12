@@ -151,3 +151,97 @@ test('From scratch', { tag: ['@display_builder_dev_tools'] }, async ({ page, dru
     await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
   })
 })
+
+test('Contextual', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
+  const dbName = `test_${utils.createRandomString()}`
+
+  await test.step(`Admin login`, async () => {
+    await drupal.loginAsAdmin()
+  })
+
+  await test.step(`Create dev instance`, async () => {
+    await displayBuilder.createDisplayBuilderFromUi(dbName)
+  })
+
+  await test.step(`Build instance`, async () => {
+    await displayBuilder.fullHighlight()
+
+    const componentSimpleSlot = page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
+
+    // Drag element and set some values
+    await displayBuilder.dragElementFromLibraryById(
+      'Components',
+      'test_simple',
+      page.locator(`.db-island-builder > slot.db-dropzone`)
+    )
+    await displayBuilder.dragElementFromLibraryById('Components', 'test_simple', componentSimpleSlot)
+    await displayBuilder.dragElementFromLibraryById('Blocks', 'token', componentSimpleSlot.nth(1))
+
+    await displayBuilder.setElementValue(
+      page.locator(`.db-island-builder [data-node-title="Test simple"]`).first(),
+      'I am component',
+      [
+        {
+          action: 'click',
+          locator: page.getByRole('button', { name: 'Label' }),
+        },
+        {
+          action: 'fill',
+          locator: page.locator('input[name="component[props][label][source][value]"]'),
+        },
+      ]
+    )
+
+    await displayBuilder.setElementValue(
+      page.locator(`.db-island-builder [data-node-title="Test simple"]`).nth(1),
+      'I am component inside component with a token',
+      [
+        {
+          action: 'click',
+          locator: page.getByRole('button', { name: 'Label' }),
+        },
+        {
+          action: 'fill',
+          locator: page.locator('input[name="component[props][label][source][value]"]'),
+        },
+      ]
+    )
+
+    await displayBuilder.setElementValue(
+      page.locator(`.db-island-builder [data-node-title="Token"]`).first(),
+      'I am a test token in a slot',
+      [
+        {
+          action: 'fill',
+          locator: page.locator('#edit-value'),
+        },
+      ]
+    )
+
+    await displayBuilder.closeDialog('both')
+
+    await expect(page.locator('.db-island-builder')).toMatchAriaSnapshot({ name: 'contextual.aria.yml' })
+
+    await page
+      .getByRole('heading', { name: 'label: I am component inside component with a token' })
+      .click({ button: 'right', position: { x: 40, y: 10 } })
+
+    await page.getByRole('menuitemcheckbox', { name: 'Duplicate Test simple' }).locator('slot').nth(1).click()
+    await displayBuilder.shoelaceReady()
+
+    await expect(page.locator('.db-island-builder')).toMatchAriaSnapshot({ name: 'contextual-duplicate.aria.yml' })
+
+    await page
+      .getByRole('heading', { name: 'label: I am component inside component with a token' }).nth(1)
+      .click({ button: 'right', position: { x: 40, y: 10 } })
+  
+    await page.getByRole('menuitemcheckbox', { name: 'Remove' }).locator('slot').nth(1).click()
+    await displayBuilder.shoelaceReady()
+
+    await expect(page.locator('.db-island-builder')).toMatchAriaSnapshot({ name: 'contextual-remove.aria.yml' })
+
+    await test.step(`Delete`, async () => {
+      await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
+    })
+  })
+})

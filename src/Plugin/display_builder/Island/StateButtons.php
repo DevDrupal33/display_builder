@@ -28,9 +28,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
   label: new TranslatableMarkup('State'),
   description: new TranslatableMarkup('Buttons to publish and reset the display.'),
   type: IslandType::Button,
-  keyboard_shortcuts: [
-    'S' => new TranslatableMarkup('(shift+s) Save this display builder'),
-  ],
 )]
 class StateButtons extends IslandPluginBase {
 
@@ -90,27 +87,21 @@ class StateButtons extends IslandPluginBase {
     $saveIsCurrent = $hasSave ? $builder->saveIsCurrent() : FALSE;
 
     if (!$saveIsCurrent) {
-      $save = $this->buildButton('', '', 'S', FALSE, 'floppy', $this->t('Save this display'));
+      $save = $this->buildButton('', 'save', 'floppy', $this->t('Save this display in current state, this will publish your display. (shortcut: S)'), ['S' => $this->t('Save this display (shift+S)')]);
       $save['#props']['variant'] = 'primary';
       $save['#attributes']['outline'] = TRUE;
-      // To ease e2e tests.
-      $save['#attributes']['data-island-action'] = 'save';
       $buttonGroup['#slots']['buttons'][] = $this->htmxEvents->onSave($save, $builder_id);
 
-      $restore = $this->buildButton('', '', 'R', FALSE, 'arrow-repeat', $this->t('Restore to last saved version'));
+      $restore = $this->buildButton('', 'restore', 'arrow-repeat', $this->t('Restore to last saved version'));
       $restore['#props']['variant'] = 'warning';
       $restore['#attributes']['outline'] = TRUE;
-      // To ease e2e tests.
-      $restore['#attributes']['data-island-action'] = 'restore';
       $buttonGroup['#slots']['buttons'][] = $this->htmxEvents->onReset($restore, $builder_id);
     }
 
     if ($this->isOverridden($builder_id)) {
-      $revert = $this->buildButton('', '', NULL, FALSE, 'box-arrow-in-down', $this->t('Revert to default display (not overridden)'));
+      $save = $this->buildButton('', 'revert', 'box-arrow-in-down', $this->t('Revert to default display (not overridden)'));
       $revert['#props']['variant'] = 'danger';
       $revert['#attributes']['outline'] = TRUE;
-      // To ease e2e tests.
-      $revert['#attributes']['data-island-action'] = 'revert';
       $buttonGroup['#slots']['buttons'][] = $this->htmxEvents->onRevert($revert, $builder_id);
     }
 
