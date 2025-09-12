@@ -104,7 +104,7 @@ final class DisplayBuilderEvent extends Event {
    * @return array
    *   The enabled islands.
    */
-  public function getIslandEnabled(): array {
+  public function getEnabledIslands(): array {
     return $this->island_enabled;
   }
 

@@ -84,7 +84,7 @@ class ApiSseController extends ApiControllerBase {
         // Reload the instance to ensure we get the builder's latest
         // state.
         $builder = $this->entityTypeManager()->getStorage('display_builder_instance')
-          ->load($builder_id);
+          ->loadUnchanged($builder_id);
 
         if (!$builder instanceof InstanceInterface) {
           \sleep($this::REFRESH_WINDOW);

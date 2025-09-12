@@ -184,14 +184,14 @@ final class DisplayBuilderTest extends KernelTestBase {
     self::assertSame($updatedConfig, $allConfigs[$islandId]);
 
     // Test getting enabled islands.
-    $enabledIslands = $updated->getIslandEnabled();
+    $enabledIslands = $updated->getEnabledIslands();
     self::assertEmpty($enabledIslands);
 
     // Enable the island and test again.
     $displayBuilder->setIslandConfiguration($islandId, ['enable' => TRUE] + $newConfig);
     $displayBuilder->save();
     $updated = Profile::load('test_islands');
-    $enabledIslands = $updated->getIslandEnabled();
+    $enabledIslands = $updated->getEnabledIslands();
     self::assertArrayHasKey($islandId, $enabledIslands);
   }
 

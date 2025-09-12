@@ -90,6 +90,15 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
   /**
    * {@inheritdoc}
    */
+  public function loadUnchanged($id) {
+    $this->state->resetCache();
+
+    return parent::loadUnchanged($id);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function has($id, EntityInterface $entity) {
     if ($entity->isNew()) {
       return FALSE;

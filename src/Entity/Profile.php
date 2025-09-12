@@ -146,7 +146,7 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
   /**
    * {@inheritdoc}
    */
-  public function getIslandEnabled(): array {
+  public function getEnabledIslands(): array {
     $island_enabled = [];
 
     foreach ($this->islands as $island_id => $configuration) {

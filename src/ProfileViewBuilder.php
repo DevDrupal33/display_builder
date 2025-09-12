@@ -415,7 +415,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
   private function getIslandsEnableSorted(array $contexts): array {
     // Set island by weight.
     // @todo just key by weight and default weight in Island?
-    $islands_enable_by_weight = $this->entity->getIslandEnabled();
+    $islands_enable_by_weight = $this->entity->getEnabledIslands();
 
     return $this->islandPluginManager()->getIslandsByTypes($contexts, $this->entity->getIslandConfigurations(), $islands_enable_by_weight);
   }

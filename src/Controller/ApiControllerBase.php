@@ -103,7 +103,7 @@ abstract class ApiControllerBase extends ControllerBase {
     }
 
     if ($island_enabled === FALSE) {
-      $island_enabled = $this->builder->getProfile()->getIslandEnabled();
+      $island_enabled = $this->builder->getProfile()->getEnabledIslands();
       $this->memoryCache->set($key, $island_enabled);
     }
     else {

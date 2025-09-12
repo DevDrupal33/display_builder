@@ -109,7 +109,7 @@ final class ProfileListBuilder extends DraggableListBuilder {
    */
   protected function listViewPanels(ProfileInterface $entity): TranslatableMarkup {
     $view_panels = $this->islandManager->getIslandsByTypes()['view'];
-    $view_panels = \array_intersect_key($view_panels, $entity->getIslandEnabled());
+    $view_panels = \array_intersect_key($view_panels, $entity->getEnabledIslands());
     $view_panels = \array_map(static fn ($island) => $island->label(), $view_panels);
 
     return $this->t('With: @panels', ['@panels' => \implode(', ', $view_panels)]);

@@ -17,7 +17,7 @@ interface ProfileInterface extends ConfigEntityInterface {
    * @return array
    *   The islands as island ID => weight.
    */
-  public function getIslandEnabled(): array;
+  public function getEnabledIslands(): array;
 
   /**
    * Get configuration of all islands.
