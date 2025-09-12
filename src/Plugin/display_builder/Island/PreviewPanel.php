@@ -11,6 +11,8 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
+use Drupal\ui_patterns\Element\ComponentElementBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Preview island plugin implementation.
@@ -24,6 +26,21 @@ use Drupal\display_builder_page_layout\Entity\PageLayout;
   icon: 'binoculars',
 )]
 class PreviewPanel extends IslandPluginBase {
+
+  /**
+   * The component element builder.
+   */
+  protected ComponentElementBuilder $componentElementBuilder;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->componentElementBuilder = $container->get('ui_patterns.component_element_builder');
+
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -55,12 +72,10 @@ class PreviewPanel extends IslandPluginBase {
       DisplayBuilderHelpers::findArrayReplaceSource($data, ['source_id' => 'main_page_content'], ['#markup' => $content_placeholder]);
     }
 
-    /** @var \Drupal\ui_patterns\Element\ComponentElementBuilder $builder */
-    $builder = \Drupal::service('ui_patterns.component_element_builder');
     $returned = [];
 
     foreach ($data as $slot) {
-      $build = $builder->buildSource([], 'content', [], $slot, $this->configuration['contexts'] ?? []);
+      $build = $this->componentElementBuilder->buildSource([], 'content', [], $slot, $this->configuration['contexts'] ?? []);
       $returned[] = $build['#slots']['content'][0] ?? [];
     }
 

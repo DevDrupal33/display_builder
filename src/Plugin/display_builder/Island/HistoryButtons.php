@@ -92,6 +92,7 @@ class HistoryButtons extends IslandPluginBase implements PluginFormInterface {
     // Just hide the button to keep it in the dom, if not keyboard shortcut will
     // fail.
     $configuration = $this->getConfiguration();
+
     if (!$configuration['display_clear_button'] || (empty($past) && empty($future))) {
       $clear['#attributes']['class'] = ['hidden'];
     }

@@ -263,6 +263,8 @@ trait RenderableBuilderTrait {
    *
    * @return array
    *   The icon button render array.
+   *
+   * @todo never used, replace existing buildButton() where relevant
    */
   protected function buildIconButton(string|TranslatableMarkup $label, ?string $icon = NULL): array {
     return [

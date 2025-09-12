@@ -4,21 +4,16 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
-use Drupal\Component\Plugin\PluginManagerInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\display_builder\Attribute\Island;
-use Drupal\display_builder\HtmxEvents;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandPluginFormTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
-use Drupal\ui_patterns\SourcePluginManager;
+use Drupal\ui_patterns\PropTypePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Instance form island plugin implementation.
@@ -35,37 +30,18 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
   use IslandPluginFormTrait;
 
   /**
-   * {@inheritdoc}
+   * The prop type plugin manager.
    */
-  public function __construct(
-    array $configuration,
-    $plugin_id,
-    $plugin_definition,
-    protected ComponentPluginManager $sdcManager,
-    protected HtmxEvents $htmxEvents,
-    protected EntityTypeManagerInterface $entityTypeManager,
-    protected EventSubscriberInterface $eventSubscriber,
-    protected SourcePluginManager $sourceManager,
-    protected PluginManagerInterface $propTypeManager,
-  ) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $sdcManager, $htmxEvents, $entityTypeManager, $eventSubscriber, $sourceManager);
-  }
+  protected PropTypePluginManager $propTypeManager;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('plugin.manager.sdc'),
-      $container->get('display_builder.htmx_events'),
-      $container->get('entity_type.manager'),
-      $container->get('display_builder.event_subscriber'),
-      $container->get('plugin.manager.ui_patterns_source'),
-      $container->get('plugin.manager.ui_patterns_prop_type'),
-    );
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->propTypeManager = $container->get('plugin.manager.ui_patterns_prop_type');
+
+    return $instance;
   }
 
   /**
@@ -276,7 +252,7 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
    * @return bool
    *   Is multiple or not.
    */
-  protected function isMultipleItemsSlotSource(array $data): bool {
+  private function isMultipleItemsSlotSource(array $data): bool {
     if (!isset($data['plugin_id']) || !\is_string($data['plugin_id'])) {
       return FALSE;
     }
@@ -307,7 +283,7 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
    * @return array
    *   The modified form array.
    */
-  protected function removeItemSelector(array $form): array {
+  private function removeItemSelector(array $form): array {
     $form['plugin_id']['#type'] = 'hidden';
     unset($form['plugin_id']['#options']);
 

@@ -8,9 +8,19 @@ library: cdn
 debug: false
 islands:
   component_library:
+    exclude: {}
+    status:
+      experimental: experimental
+      deprecated: '0'
+      obsolete: '0'
+    include_no_ui: false
+    show_grouped: true
+    show_variants: true
+    show_mosaic: true
     enable: true
     weight: -10
   block_library:
+    exclude: {}
     enable: true
     weight: -9
   preset_library:
@@ -79,6 +89,7 @@ islands:
     enable: false
     weight: -4
   viewport:
+    exclude: {}
     enable: false
     weight: -3
   parent_display:

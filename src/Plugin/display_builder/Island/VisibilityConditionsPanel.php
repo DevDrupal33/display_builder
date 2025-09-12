@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
+use Drupal\Core\Executable\ExecutableManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
@@ -12,6 +13,7 @@ use Drupal\display_builder\IslandPluginFormTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
 use Drupal\display_builder\RenderableAltererInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Skins island plugin implementation.
@@ -27,14 +29,29 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
   use IslandPluginFormTrait;
 
   /**
+   * The condition manager.
+   */
+  protected ExecutableManagerInterface $conditionManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->conditionManager = $container->get('plugin.manager.condition');
+
+    return $instance;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildForm(array &$form, FormStateInterface $form_state): void {
     $form['#tree'] = TRUE;
-    $manager = \Drupal::service('plugin.manager.condition');
+
     $data = $form_state->getBuildInfo()['args'][0];
     $instance = $data['instance'] ?? [];
-    $conditions = $manager->getDefinitions();
+    $conditions = $this->conditionManager->getDefinitions();
     unset($conditions['response_status']);
 
     foreach ($conditions as $condition_id => $definition) {
@@ -42,7 +59,7 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
         continue;
       }
       /** @var \Drupal\Core\Condition\ConditionInterface $condition */
-      $condition = $manager->createInstance($condition_id, $instance[$condition_id] ?? []);
+      $condition = $this->conditionManager->createInstance($condition_id, $instance[$condition_id] ?? []);
       $form_state->set(['conditions', $condition_id], $condition);
       $condition_form = $condition->buildConfigurationForm([], $form_state);
       $condition_form['#type'] = 'details';
@@ -66,14 +83,11 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
    * {@inheritdoc}
    */
   public function alterElement(array $element, array $data = []): array {
-    /** @var \Drupal\Core\Condition\ConditionManager $manager */
-    $manager = \Drupal::service('plugin.manager.condition');
-
     foreach (\array_keys($data) as $condition_id) {
       /** @var \Drupal\Core\Condition\ConditionInterface $condition */
-      $condition = $manager->createInstance($condition_id, $data[$condition_id] ?? []);
+      $condition = $this->conditionManager->createInstance($condition_id, $data[$condition_id] ?? []);
 
-      if (!$manager->execute($condition)) {
+      if (!$this->conditionManager->execute($condition)) {
         return [];
       }
     }

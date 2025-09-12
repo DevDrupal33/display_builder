@@ -8,6 +8,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandType;
+use Drupal\display_builder\SlotSourceProxy;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -24,10 +25,8 @@ class LayersPanel extends BuilderPanel {
 
   /**
    * Proxy for slot source operations.
-   *
-   * @var \Drupal\display_builder\SlotSourceProxy
    */
-  protected $slotSourceProxy;
+  protected SlotSourceProxy $slotSourceProxy;
 
   /**
    * {@inheritdoc}

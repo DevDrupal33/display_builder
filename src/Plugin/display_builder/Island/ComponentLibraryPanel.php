@@ -4,25 +4,19 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ThemeExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
-use Drupal\display_builder\HtmxEvents;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
-use Drupal\display_builder\PluginProvidersTrait;
-use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Component library island plugin implementation.
@@ -37,7 +31,23 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterface {
 
   use IslandPluginConfigurationFormTrait;
-  use PluginProvidersTrait;
+
+  private const HIDE_PROVIDER = ['display_builder', 'sdc_devel'];
+
+  /**
+   * The module list extension service.
+   */
+  protected ThemeManagerInterface $themeManager;
+
+  /**
+   * The module list extension service.
+   */
+  protected ThemeExtensionList $themeList;
+
+  /**
+   * The module list extension service.
+   */
+  protected ModuleExtensionList $moduleList;
 
   /**
    * The definitions filtered for current theme.
@@ -58,39 +68,13 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
   /**
    * {@inheritdoc}
    */
-  public function __construct(
-    array $configuration,
-    $plugin_id,
-    $plugin_definition,
-    protected ComponentPluginManager $sdcManager,
-    protected HtmxEvents $htmxEvents,
-    protected EntityTypeManagerInterface $entityTypeManager,
-    protected EventSubscriberInterface $eventSubscriber,
-    protected SourcePluginManager $sourceManager,
-    protected ThemeManagerInterface $themeManager,
-    protected ModuleExtensionList $modules,
-    protected ThemeExtensionList $themes,
-  ) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $sdcManager, $htmxEvents, $entityTypeManager, $eventSubscriber, $sourceManager);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('plugin.manager.sdc'),
-      $container->get('display_builder.htmx_events'),
-      $container->get('entity_type.manager'),
-      $container->get('display_builder.event_subscriber'),
-      $container->get('plugin.manager.ui_patterns_source'),
-      $container->get('theme.manager'),
-      $container->get('extension.list.module'),
-      $container->get('extension.list.theme'),
-    );
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->themeManager = $container->get('theme.manager');
+    $instance->themeList = $container->get('extension.list.theme');
+    $instance->moduleList = $container->get('extension.list.module');
+
+    return $instance;
   }
 
   /**
@@ -104,10 +88,8 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
    * {@inheritdoc}
    */
   public function defaultConfiguration(): array {
-    $components = $this->sdcManager->getDefinitions();
-
     return [
-      'providers' => $this->getDefaultProviders($components),
+      'exclude' => [],
       'status' => [
         'experimental',
       ],
@@ -125,11 +107,11 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
     $configuration = $this->getConfiguration();
     $components = $this->sdcManager->getDefinitions();
 
-    $form['providers'] = [
+    $form['exclude'] = [
       '#type' => 'checkboxes',
-      '#title' => $this->t('Allowed providers'),
+      '#title' => $this->t('Exclude providers'),
       '#options' => $this->getProvidersOptions($components, $this->t('component'), $this->t('components')),
-      '#default_value' => $configuration['providers'],
+      '#default_value' => $configuration['exclude'],
     ];
 
     // @see https://git.drupalcode.org/project/drupal/-/blob/11.x/core/assets/schemas/v1/metadata.schema.json#L217
@@ -184,11 +166,6 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state): void {
     $values = $form_state->getValues();
 
-    // At least one provider must be enabled.
-    if (empty(\array_filter($values['providers']))) {
-      $form_state->setError($form['providers'], $this->t('At least one provider must be selected!'));
-    }
-
     // At least one display must be enabled.
     $show_grouped = (bool) $values['show_grouped'];
     $show_variants = (bool) $values['show_variants'];
@@ -209,12 +186,14 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
 
     $summary = [];
 
-    $summary[] = $this->t('Allowed providers: @providers', [
-      '@providers' => ($providers = \array_filter($configuration['providers'] ?? [])) ? \implode(', ', $providers) : $this->t('None'),
+    $summary[] = $this->t('Excluded providers: @exclude', [
+      '@exclude' => ($exclude = \array_filter($configuration['exclude'] ?? [])) ? \implode(', ', $exclude) : $this->t('None'),
     ]);
+
     $summary[] = $this->t('Allowed status: @status', [
       '@status' => \implode(', ', \array_filter(\array_unique(\array_merge(['stable', 'undefined'], $configuration['status'] ?? []))) ?: [$this->t('stable, undefined')]),
     ]);
+
     $summary[] = $configuration['include_no_ui'] ? $this->t('Include no UI components') : $this->t('Exclude no UI components');
 
     $list = [];
@@ -292,6 +271,38 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
         'content' => $content,
       ],
     ];
+  }
+
+  /**
+   * Get all providers.
+   *
+   * @param array $definitions
+   *   Plugin definitions.
+   *
+   * @return array
+   *   Drupal extension definitions, keyed by extension ID
+   */
+  protected function getProviders(array $definitions): array {
+    $themes = $this->themeList->getAllInstalledInfo();
+    $modules = $this->moduleList->getAllInstalledInfo();
+    $providers = [];
+
+    foreach ($definitions as $definition) {
+      $provider_id = $definition['provider'];
+
+      if (\in_array($provider_id, self::HIDE_PROVIDER, TRUE)) {
+        continue;
+      }
+      $provider = $themes[$provider_id] ?? $modules[$provider_id] ?? NULL;
+
+      if (!$provider) {
+        continue;
+      }
+      $provider['count'] = isset($providers[$provider_id]) ? ($providers[$provider_id]['count']) + 1 : 1;
+      $providers[$provider_id] = $provider;
+    }
+
+    return $providers;
   }
 
   /**
@@ -446,6 +457,14 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
     $filtered_definitions = $grouped_definitions = [];
 
     foreach ($definitions as $id => $definition) {
+      if (isset($definition['provider']) && \in_array($definition['provider'], self::HIDE_PROVIDER, TRUE)) {
+        continue;
+      }
+
+      if (isset($definition['provider']) && \in_array($definition['provider'], $configuration['exclude'], TRUE)) {
+        continue;
+      }
+
       // Excluded no ui components unless forced.
       if (isset($definition['noUi']) && $definition['noUi'] === TRUE) {
         if ((bool) $configuration['include_no_ui'] !== TRUE) {
@@ -462,9 +481,6 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
       }
       $allowed_status = \array_merge($configuration['status'], ['stable']);
 
-      if (isset($definition['provider']) && !\in_array($definition['provider'], $configuration['providers'], TRUE)) {
-        continue;
-      }
       $filtered_definitions[$id] = $definition;
       $grouped_definitions[(string) $definition['category']][$id] = $definition;
     }
@@ -481,6 +497,37 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
       'grouped' => $grouped_definitions,
       'filtered' => $filtered_definitions,
     ];
+  }
+
+  /**
+   * Get providers options for select input.
+   *
+   * @param array $definitions
+   *   Plugin definitions.
+   * @param string|TranslatableMarkup $singular
+   *   Singular label of the plugins.
+   * @param string|TranslatableMarkup $plural
+   *   Plural label of the plugins.
+   *
+   * @return array
+   *   An associative array with extension ID as key and extension description
+   *   as value.
+   */
+  private function getProvidersOptions(array $definitions, string|TranslatableMarkup $singular = 'definition', string|TranslatableMarkup $plural = 'definitions'): array {
+    $options = [];
+
+    foreach ($this->getProviders($definitions) as $provider_id => $provider) {
+      $params = [
+        '@name' => $provider['name'],
+        '@type' => $provider['type'],
+        '@count' => $provider['count'],
+        '@singular' => $singular,
+        '@plural' => $plural,
+      ];
+      $options[$provider_id] = $this->formatPlural($provider['count'], '@name (@type, @count @singular)', '@name (@type, @count @plural)', $params);
+    }
+
+    return $options;
   }
 
 }

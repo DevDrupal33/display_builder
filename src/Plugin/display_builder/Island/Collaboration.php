@@ -6,7 +6,6 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -43,11 +42,6 @@ class Collaboration extends IslandPluginBase implements PluginFormInterface {
   protected AccountInterface $currentUser;
 
   /**
-   * The entity type manager.
-   */
-  protected EntityTypeManagerInterface $entityTypeManager;
-
-  /**
    * The date formatter.
    */
   protected DateFormatterInterface $dateFormatter;
@@ -63,7 +57,6 @@ class Collaboration extends IslandPluginBase implements PluginFormInterface {
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->currentUser = $container->get('current_user');
-    $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->dateFormatter = $container->get('date.formatter');
     $instance->entityFieldManager = $container->get('entity_field.manager');
 

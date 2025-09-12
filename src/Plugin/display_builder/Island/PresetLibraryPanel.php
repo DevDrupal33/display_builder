@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
@@ -25,10 +26,8 @@ class PresetLibraryPanel extends IslandPluginBase {
 
   /**
    * The Pattern preset storage.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $presetConfigStorage;
+  protected EntityStorageInterface $presetConfigStorage;
 
   /**
    * {@inheritdoc}

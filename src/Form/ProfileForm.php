@@ -6,6 +6,7 @@ namespace Drupal\display_builder\Form;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
@@ -22,6 +23,8 @@ use Drupal\user\RoleInterface;
  * Display builder form.
  */
 final class ProfileForm extends EntityForm {
+
+  use AutowireTrait;
 
   /**
    * {@inheritdoc}
@@ -166,9 +169,10 @@ final class ProfileForm extends EntityForm {
       }
     );
 
-    // Stay on the form for new to allow islands configuration.
+    // Set the initial default configuration and stay on the form to allow
+    // islands configuration.
     if ($result === SAVED_NEW) {
-      $form_state->setRedirect('entity.display_builder_profile.edit_form', ['display_builder' => $this->entity->id()]);
+      $form_state->setRedirect('entity.display_builder_profile.edit_form', ['display_builder_profile' => $this->entity->id()]);
     }
     elseif ($result === SAVED_UPDATED) {
       $form_state->setRedirect('entity.display_builder_profile.collection');

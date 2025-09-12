@@ -12,10 +12,14 @@ use Drupal\display_builder\IslandPluginFormTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
 use Drupal\display_builder\RenderableAltererInterface;
+use Drupal\ui_skins\CssVariable\CssVariablePluginManagerInterface;
 use Drupal\ui_skins\UiSkinsUtility;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Skins island plugin implementation.
+ *
+ * @todo must move to UI Styles module.
  */
 #[Island(
   id: 'ui_skins',
@@ -26,6 +30,21 @@ use Drupal\ui_skins\UiSkinsUtility;
 class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {
 
   use IslandPluginFormTrait;
+
+  /**
+   * The UI Skins CSS variables manager.
+   */
+  protected CssVariablePluginManagerInterface $cssVariablePluginManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->cssVariablePluginManager = $container->get('plugin.manager.ui_skins.css_variable');
+
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -40,7 +59,7 @@ class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, 
   public function buildForm(array &$form, FormStateInterface $form_state): void {
     $data = $form_state->getBuildInfo()['args'][0];
     $instance = $data['instance'] ?? [];
-    $grouped_plugin_definitions = \Drupal::service('plugin.manager.ui_skins.css_variable')->getGroupedDefinitions();
+    $grouped_plugin_definitions = $this->cssVariablePluginManager->getGroupedDefinitions();
 
     if (empty($grouped_plugin_definitions)) {
       return;
@@ -149,7 +168,7 @@ class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, 
 
     foreach ($variables as $variable => $value) {
       /** @var \Drupal\ui_skins\Definition\CssVariableDefinition $plugin_definition */
-      $plugin_definition = \Drupal::service('plugin.manager.ui_skins.css_variable')->getDefinition($variable, FALSE);
+      $plugin_definition = $this->cssVariablePluginManager->getDefinition($variable, FALSE);
 
       if (!$plugin_definition) {
         continue;

@@ -12,9 +12,13 @@ use Drupal\display_builder\IslandPluginFormTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
 use Drupal\display_builder\RenderableAltererInterface;
+use Drupal\ui_styles\StylePluginManagerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Styles island plugin implementation.
+ *
+ * @todo must move to UI Styles module.
  */
 #[Island(
   id: 'ui_styles',
@@ -25,6 +29,21 @@ use Drupal\display_builder\RenderableAltererInterface;
 class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {
 
   use IslandPluginFormTrait;
+
+  /**
+   * The UI Styles styles manager.
+   */
+  protected StylePluginManagerInterface $stylesManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->stylesManager = $container->get('plugin.manager.ui_styles');
+
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -75,7 +94,7 @@ class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface,
     $selected = $data['selected'] ?? [];
     $extra = $data['extra'] ?? '';
 
-    return \Drupal::service('plugin.manager.ui_styles')->addClasses($element, $selected, $extra);
+    return $this->stylesManager->addClasses($element, $selected, $extra);
   }
 
   /**

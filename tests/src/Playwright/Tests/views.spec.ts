@@ -39,6 +39,7 @@ test(
 
       // Set areas to check the result.
       await page.getByRole('link', { name: 'Add header' }).click()
+      await drupal.ajaxReady()
       await page.getByRole('checkbox', { name: 'Update Text area' }).check()
       await page.getByRole('button', { name: 'Add and configure header' }).click()
       await page.getByRole('textbox', { name: 'Content' }).fill('This is a header views area')
@@ -46,6 +47,7 @@ test(
       await drupal.ajaxReady()
 
       await page.getByRole('link', { name: 'Add footer' }).click()
+      await drupal.ajaxReady()
       await page.getByRole('row', { name: 'Update Text area Text area' }).locator('div').click()
       await page.getByRole('checkbox', { name: 'Update Text area' }).check()
       await page.getByRole('button', { name: 'Add and configure footer' }).click()
@@ -54,6 +56,7 @@ test(
       await drupal.ajaxReady()
 
       await page.getByRole('link', { name: 'Add no results behavior' }).click()
+      await drupal.ajaxReady()
       await page.getByRole('checkbox', { name: 'Update Text area' }).check()
       await page.getByRole('button', { name: 'Add and configure no results' }).click()
       await page.getByRole('textbox', { name: 'Content' }).fill('This is the no results views area')
@@ -61,11 +64,13 @@ test(
       await drupal.ajaxReady()
 
       await page.getByRole('link', { name: 'Content: Published (= Yes)' }).click()
+      await drupal.ajaxReady()
       await page.getByRole('checkbox', { name: 'Expose this filter to visitors' }).check()
       await applyDialog.click()
       await drupal.ajaxReady()
 
       await page.getByRole('link', { name: 'Content: Authored on (desc)' }).click()
+      await drupal.ajaxReady()
       await page.getByRole('checkbox', { name: 'Expose this sort to visitors' }).check()
       await applyDialog.click()
       await drupal.ajaxReady()

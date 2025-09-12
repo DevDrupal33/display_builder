@@ -78,7 +78,7 @@ display_builder.islands.controls:
 display_builder.islands.component_library:
   type: mapping
   mapping:
-    providers:
+    exclude:
       type: sequence
       sequence:
         type: string
@@ -104,7 +104,7 @@ display_builder.islands.component_library:
 display_builder.islands.block_library:
   type: mapping
   mapping:
-    providers:
+    exclude:
       type: sequence
       sequence:
         type: string
@@ -132,7 +132,7 @@ display_builder.islands.collaboration:
 display_builder.islands.viewport:
   type: mapping
   mapping:
-    providers:
+    exclude:
       type: sequence
       sequence:
         type: string

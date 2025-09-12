@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
+use Drupal\display_builder\SlotSourceProxy;
+use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_styles\Render\Element;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -27,25 +30,19 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class BuilderPanel extends IslandPluginBase {
 
   /**
-   * The renderer.
-   *
-   * @var \Drupal\Core\Render\RendererInterface
+   * The renderer service.
    */
-  protected $renderer;
+  protected RendererInterface $renderer;
 
   /**
    * Proxy for slot source operations.
-   *
-   * @var \Drupal\display_builder\SlotSourceProxy
    */
-  protected $slotSourceProxy;
+  protected SlotSourceProxy $slotSourceProxy;
 
   /**
    * The component element builder.
-   *
-   * @var \Drupal\ui_patterns\Element\ComponentElementBuilder
    */
-  protected $componentElementBuilder;
+  protected ComponentElementBuilder $componentElementBuilder;
 
   /**
    * {@inheritdoc}

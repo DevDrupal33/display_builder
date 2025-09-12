@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Core\Datetime\DateFormatterInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\DisplayBuilderHelpers;
@@ -28,11 +27,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class LogsPanel extends IslandPluginBase {
 
   /**
-   * The entity type manager.
-   */
-  protected EntityTypeManagerInterface $entityTypeManager;
-
-  /**
    * The date formatter.
    */
   protected DateFormatterInterface $dateFormatter;
@@ -42,7 +36,6 @@ class LogsPanel extends IslandPluginBase {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->dateFormatter = $container->get('date.formatter');
 
     return $instance;

@@ -5,24 +5,17 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\breakpoint\BreakpointManager;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ThemeExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Theme\ComponentPluginManager;
-use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\display_builder\Attribute\Island;
-use Drupal\display_builder\HtmxEvents;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
-use Drupal\display_builder\PluginProvidersTrait;
-use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Island plugin implementation.
@@ -36,55 +29,34 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
 
   use IslandPluginConfigurationFormTrait;
-  use PluginProvidersTrait;
+
+  private const HIDE_PROVIDER = ['toolbar'];
 
   /**
-   * Breakpoint plugin definitions.
-   *
-   * @var array
-   *   The definitions.
+   * The module list extension service.
    */
-  private array $definitions = [];
+  protected ThemeExtensionList $themeList;
 
   /**
-   * {@inheritdoc}
+   * The module list extension service.
    */
-  public function __construct(
-    array $configuration,
-    $plugin_id,
-    $plugin_definition,
-    protected ComponentPluginManager $sdcManager,
-    protected HtmxEvents $htmxEvents,
-    protected EntityTypeManagerInterface $entityTypeManager,
-    protected EventSubscriberInterface $eventSubscriber,
-    protected SourcePluginManager $sourceManager,
-    protected ThemeManagerInterface $themeManager,
-    protected ModuleExtensionList $modules,
-    protected ThemeExtensionList $themes,
-    protected BreakpointManager $breakpointManager,
-  ) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $sdcManager, $htmxEvents, $entityTypeManager, $eventSubscriber, $sourceManager);
-    $this->definitions = $this->initDefinitions();
-  }
+  protected ModuleExtensionList $moduleList;
+
+  /**
+   * The breakpoint manager.
+   */
+  protected BreakpointManager $breakpointManager;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('plugin.manager.sdc'),
-      $container->get('display_builder.htmx_events'),
-      $container->get('entity_type.manager'),
-      $container->get('display_builder.event_subscriber'),
-      $container->get('plugin.manager.ui_patterns_source'),
-      $container->get('theme.manager'),
-      $container->get('extension.list.module'),
-      $container->get('extension.list.theme'),
-      $container->get('breakpoint.manager'),
-    );
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->themeList = $container->get('extension.list.theme');
+    $instance->moduleList = $container->get('extension.list.module');
+    $instance->breakpointManager = $container->get('breakpoint.manager');
+
+    return $instance;
   }
 
   /**
@@ -92,7 +64,7 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
    */
   public function defaultConfiguration(): array {
     return [
-      'providers' => $this->getDefaultProviders($this->definitions),
+      'exclude' => [],
       'format' => 'default',
     ];
   }
@@ -114,19 +86,12 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
       '#default_value' => $configuration['format'],
     ];
 
-    $form['providers'] = [
+    $form['exclude'] = [
       '#type' => 'checkboxes',
-      '#title' => $this->t('Allowed providers'),
-      '#options' => $this->getProvidersOptions($this->definitions, $this->t('breakpoint'), $this->t('breakpoints')),
-      '#default_value' => $configuration['providers'],
+      '#title' => $this->t('Exclude providers'),
+      '#options' => $this->getProvidersOptions($this->t('breakpoint'), $this->t('breakpoints')),
+      '#default_value' => $configuration['exclude'],
     ];
-
-    $skipped_providers = \array_diff_key($this->breakpointManager->getGroups(), $this->getProviders($this->definitions));
-
-    if (!empty($skipped_providers)) {
-      $params = ['@providers' => \implode(', ', $skipped_providers)];
-      $form['providers']['#description'] = $this->t('Skipped breakpoints providers: @providers', $params);
-    }
 
     return $form;
   }
@@ -138,12 +103,10 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
     $configuration = $this->getConfiguration();
     $summary = [];
 
-    $providers = \array_filter($configuration['providers'] ?? []);
+    $exclude = \array_filter($configuration['exclude'] ?? []);
 
-    $summary[] = empty($providers) ? $this->t('This island will be hidden.') : '';
-
-    $summary[] = $this->t('Allowed providers: @providers', [
-      '@providers' => ($providers = \array_filter($configuration['providers'] ?? [])) ? \implode(', ', $providers) : $this->t('None'),
+    $summary[] = $this->t('Excluded providers: @exclude', [
+      '@exclude' => ($exclude = \array_filter($configuration['exclude'] ?? [])) ? \implode(', ', $exclude) : $this->t('None'),
     ]);
 
     $summary[] = $this->t('Format: @format', [
@@ -158,10 +121,15 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
    */
   public function build(InstanceInterface $builder, array $data, array $options = []): array {
     $configuration = $this->getConfiguration();
-    $groups = \array_filter($configuration['providers']);
+    $definitions = $this->getDefinitions();
 
-    if (empty($groups)) {
-      return [];
+    $groups = [];
+
+    foreach ($definitions as $definition) {
+      if (!isset($definition['group'])) {
+        continue;
+      }
+      $groups[$definition['group']] = $definition['group'];
     }
 
     $options = $data = [];
@@ -254,15 +222,19 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
   }
 
   /**
-   * Init the definitions list which is used by a few methods.
+   * Get the definitions list which is used by a few methods.
    *
    * @return array
    *   Breakpoints plugin definitions as associative arrays.
    */
-  public function initDefinitions(): array {
+  public function getDefinitions(): array {
     $definitions = $this->breakpointManager->getDefinitions();
 
     foreach ($definitions as $definition_id => $definition) {
+      if (isset($definition['provider']) && \in_array($definition['provider'], self::HIDE_PROVIDER, TRUE)) {
+        unset($definitions[$definition_id]);
+      }
+
       // Exclude definitions with not supported media queries.
       if (!$this->getMaxWidthValueFromMediaQuery($definition['mediaQuery'])) {
         unset($definitions[$definition_id]);
@@ -304,6 +276,63 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
     // Does not support min-width, percentage units, or complex/combined media
     // queries.
     return NULL;
+  }
+
+  /**
+   * Get providers options for select input.
+   *
+   * @param string|TranslatableMarkup $singular
+   *   Singular label of the plugins.
+   * @param string|TranslatableMarkup $plural
+   *   Plural label of the plugins.
+   *
+   * @return array
+   *   An associative array with extension ID as key and extension description
+   *   as value.
+   */
+  protected function getProvidersOptions(string|TranslatableMarkup $singular = 'definition', string|TranslatableMarkup $plural = 'definitions'): array {
+    $options = [];
+
+    foreach ($this->getProviders($this->getDefinitions()) as $provider_id => $provider) {
+      $params = [
+        '@name' => $provider['name'],
+        '@type' => $provider['type'],
+        '@count' => $provider['count'],
+        '@singular' => $singular,
+        '@plural' => $plural,
+      ];
+      $options[$provider_id] = $this->formatPlural($provider['count'], '@name (@type, @count @singular)', '@name (@type, @count @plural)', $params);
+    }
+
+    return $options;
+  }
+
+  /**
+   * Get all providers.
+   *
+   * @param array $definitions
+   *   Plugin definitions.
+   *
+   * @return array
+   *   Drupal extension definitions, keyed by extension ID
+   */
+  protected function getProviders(array $definitions): array {
+    $themes = $this->themeList->getAllInstalledInfo();
+    $modules = $this->moduleList->getAllInstalledInfo();
+    $providers = [];
+
+    foreach ($definitions as $definition) {
+      $provider_id = $definition['provider'];
+      $provider = $themes[$provider_id] ?? $modules[$provider_id] ?? NULL;
+
+      if (!$provider) {
+        continue;
+      }
+      $provider['count'] = isset($providers[$provider_id]) ? ($providers[$provider_id]['count']) + 1 : 1;
+      $providers[$provider_id] = $provider;
+    }
+
+    return $providers;
   }
 
 }

@@ -5,23 +5,18 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Component\Render\MarkupInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\display_builder\Attribute\Island;
-use Drupal\display_builder\HtmxEvents;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\ui_patterns\SourcePluginBase;
-use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\ui_patterns\SourceWithChoicesInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Block library island plugin implementation.
@@ -52,15 +47,7 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
     'extra_field',
   ];
 
-  /**
-   * Component provider to exclude by default.
-   *
-   * @var array
-   *   The providers to exclude.
-   */
-  private const PROVIDER_EXCLUDE = [
-    'ui_patterns_blocks',
-  ];
+  private const HIDE_PROVIDER = ['ui_patterns_blocks'];
 
   /**
    * The sources.
@@ -73,20 +60,18 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
   protected ?array $choices = NULL;
 
   /**
+   * The module list extension service.
+   */
+  protected ModuleExtensionList $moduleList;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(
-    array $configuration,
-    $plugin_id,
-    $plugin_definition,
-    protected ComponentPluginManager $sdcManager,
-    protected HtmxEvents $htmxEvents,
-    protected EntityTypeManagerInterface $entityTypeManager,
-    protected EventSubscriberInterface $eventSubscriber,
-    protected SourcePluginManager $sourceManager,
-    protected ModuleExtensionList $modules,
-  ) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $sdcManager, $htmxEvents, $entityTypeManager, $eventSubscriber, $sourceManager);
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->moduleList = $container->get('extension.list.module');
+
+    return $instance;
   }
 
   /**
@@ -94,25 +79,12 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
    */
   public function defaultConfiguration(): array {
     return [
-      'providers' => $this->getDefaultProviders(),
+      'exclude' => [
+        'devel',
+        'htmx',
+        'shortcut',
+      ],
     ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('plugin.manager.sdc'),
-      $container->get('display_builder.htmx_events'),
-      $container->get('entity_type.manager'),
-      $container->get('display_builder.event_subscriber'),
-      $container->get('plugin.manager.ui_patterns_source'),
-      $container->get('extension.list.module'),
-    );
   }
 
   /**
@@ -121,11 +93,11 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
   public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
     $configuration = $this->getConfiguration();
 
-    $form['providers'] = [
+    $form['exclude'] = [
       '#type' => 'checkboxes',
-      '#title' => $this->t('Allowed modules'),
+      '#title' => $this->t('Exclude modules'),
       '#options' => $this->getProvidersOptions(),
-      '#default_value' => $configuration['providers'],
+      '#default_value' => $configuration['exclude'],
     ];
 
     return $form;
@@ -138,17 +110,10 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
     $configuration = $this->getConfiguration();
 
     return [
-      $this->t('Allowed modules: @providers', [
-        '@providers' => \implode(', ', \array_filter($configuration['providers'] ?? []) ?: [$this->t('None')]),
+      $this->t('Excluded modules: @exclude', [
+        '@exclude' => \implode(', ', \array_filter($configuration['exclude'] ?? []) ?: [$this->t('None')]),
       ]),
     ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function label(): string {
-    return 'Blocks';
   }
 
   /**
@@ -186,6 +151,13 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function label(): string {
+    return 'Blocks';
+  }
+
+  /**
    * Get the group label for a choice.
    *
    * @param array $choice
@@ -193,10 +165,10 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
    * @param array $source_definition
    *   The source definition to use for the group.
    *
-   * @return string|null
+   * @return string
    *   The group label for the choice.
    */
-  public function getChoiceGroup(array &$choice, array &$source_definition): ?string {
+  private static function getChoiceGroupLabel(array &$choice, array &$source_definition): string {
     $group = $source_definition['label'] ?? '';
 
     switch ($source_definition['id']) {
@@ -210,18 +182,18 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
           $group = $choice['group'];
         }
         else {
-          $group = $this->t('Others');
+          $group = new TranslatableMarkup('Others');
         }
 
         break;
 
       case 'entity_reference':
-        $group = $this->t('Referenced entities');
+        $group = new TranslatableMarkup('Referenced entities');
 
         break;
 
       case 'entity_field':
-        $group = $this->t('Fields');
+        $group = new TranslatableMarkup('Fields');
 
         break;
 
@@ -238,7 +210,7 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
    * @return array
    *   An array of grouped choices.
    */
-  protected function getGroupedChoices(): array {
+  private function getGroupedChoices(): array {
     $choices = $this->getChoices();
     $categories = [];
 
@@ -258,7 +230,7 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
       }
       $categories[$category]['choices'][] = $choice;
     }
-    $this->sortGroupedChoices($categories);
+    self::sortGroupedChoices($categories);
 
     return $categories;
   }
@@ -272,7 +244,7 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
    * @param array $categories
    *   The categories to sort, passed by reference.
    */
-  protected function sortGroupedChoices(array &$categories): void {
+  private static function sortGroupedChoices(array &$categories): void {
     // Sort categories : empty first, views at the end.
     \usort($categories, static function ($a, $b) {
       if (empty($a['label'])) {
@@ -305,7 +277,7 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
    * @return array<string, array>
    *   An array of sources.
    */
-  protected function getSources(): array {
+  private function getSources(): array {
     if ($this->sources === NULL) {
       $definitions = $this->sourceManager->getDefinitionsForPropType('slot', $this->configuration['contexts'] ?? []);
       $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager->getSlotPropType()]];
@@ -338,21 +310,17 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
    *   The choice to validate.
    * @param array $source_definition
    *   The source definition.
-   * @param array|bool $allowed_providers
-   *   The allowed providers, or TRUE to allow all.
+   * @param array $excluded_providers
+   *   The excluded providers.
    *
    * @return bool
    *   Whether the choice is valid or not.
    */
-  protected function isChoiceValid(array &$choice, array &$source_definition, $allowed_providers): bool {
+  private function isChoiceValid(array &$choice, array &$source_definition, array $excluded_providers = []): bool {
     $provider = $choice['provider'] ?? '';
 
     if ($provider) {
-      if (!$allowed_providers) {
-        return FALSE;
-      }
-
-      if (\is_array($allowed_providers) && (\in_array($provider, self::PROVIDER_EXCLUDE, TRUE) || !\in_array($provider, $allowed_providers, TRUE))) {
+      if (\in_array($provider, self::HIDE_PROVIDER, TRUE) && \in_array($provider, $excluded_providers, TRUE)) {
         return FALSE;
       }
     }
@@ -374,44 +342,47 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
    * @return array
    *   An array of choices.
    */
-  protected function getChoices(): array {
-    if ($this->choices === NULL) {
-      $this->choices = [];
-      $configuration = $this->getConfiguration();
-      $allowed_providers = $configuration['providers'] ?? TRUE;
-      $sources = $this->getSources();
+  private function getChoices(): array {
+    if ($this->choices !== NULL) {
+      return $this->choices;
+    }
 
-      foreach ($sources as $source_id => $source_data) {
-        $definition = $source_data['definition'];
-        $source = $source_data['source'];
+    $this->choices = [];
 
-        if (!isset($source_data['choices'])) {
-          $this->choices[] = [
-            'label' => $definition['label'] ?? $source_id,
-            'data' => ['source_id' => $source_id],
-            'keywords' => \sprintf('%s %s %s', $definition['id'], $definition['label'] ?? $source_id, $definition['description'] ?? ''),
-          ];
+    $configuration = $this->getConfiguration();
+    $excluded_providers = $configuration['exclude'] ?? [];
+    $sources = $this->getSources();
 
+    foreach ($sources as $source_id => $source_data) {
+      $definition = $source_data['definition'];
+      $source = $source_data['source'];
+
+      if (!isset($source_data['choices'])) {
+        $this->choices[] = [
+          'label' => $definition['label'] ?? $source_id,
+          'data' => ['source_id' => $source_id],
+          'keywords' => \sprintf('%s %s %s', $definition['id'], $definition['label'] ?? $source_id, $definition['description'] ?? ''),
+        ];
+
+        continue;
+      }
+      $choices = $source_data['choices'];
+
+      foreach ($choices as $choice_id => $choice) {
+        if (!$this->isChoiceValid($choice, $definition, $excluded_providers)) {
           continue;
         }
-        $choices = $source_data['choices'];
-
-        foreach ($choices as $choice_id => $choice) {
-          if (!$this->isChoiceValid($choice, $definition, $allowed_providers)) {
-            continue;
-          }
-          $choice_label = $choice['label'] ?? $choice_id;
-          $group = $this->getChoiceGroup($choice, $definition);
-          $this->choices[] = [
-            'group' => $group,
-            'label' => $choice_label,
-            'data' => [
-              'source_id' => $source_id,
-              'source' => $source->getChoiceSettings($choice_id),
-            ],
-            'keywords' => \sprintf('%s %s %s %s', $definition['id'], $choice_label, $definition['description'] ?? '', $choice_id),
-          ];
-        }
+        $choice_label = $choice['label'] ?? $choice_id;
+        $group_label = self::getChoiceGroupLabel($choice, $definition);
+        $this->choices[] = [
+          'group' => $group_label,
+          'label' => $choice_label,
+          'data' => [
+            'source_id' => $source_id,
+            'source' => $source->getChoiceSettings($choice_id),
+          ],
+          'keywords' => \sprintf('%s %s %s %s', $definition['id'], $choice_label, $definition['description'] ?? '', $choice_id),
+        ];
       }
     }
 
@@ -425,7 +396,7 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
    *   An associative array with module ID as key and module description as
    *   value.
    */
-  protected function getProvidersOptions(): array {
+  private function getProvidersOptions(): array {
     $options = [];
 
     foreach ($this->getProviders() as $provider_id => $provider) {
@@ -445,10 +416,10 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
    * @return array
    *   Drupal modules definitions, keyed by extension ID
    */
-  protected function getProviders(): array {
+  private function getProviders(): array {
     $sources = $this->getSources();
     $providers = [];
-    $modules = $this->modules->getAllInstalledInfo();
+    $modules = $this->moduleList->getAllInstalledInfo();
 
     foreach ($sources as $source_data) {
       if (!isset($source_data['choices'])) {
@@ -459,7 +430,7 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
       foreach ($choices as $choice) {
         $provider = $choice['provider'] ?? '';
 
-        if (!$provider || \in_array($provider, self::PROVIDER_EXCLUDE, TRUE)) {
+        if (!$provider || \in_array($provider, self::HIDE_PROVIDER, TRUE)) {
           continue;
         }
 
@@ -474,26 +445,6 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
         }
         ++$providers[$provider]['count'];
       }
-    }
-
-    return $providers;
-  }
-
-  /**
-   * Get default providers.
-   *
-   * @return array
-   *   A list of Drupal modules IDs.
-   */
-  protected function getDefaultProviders(): array {
-    $providers = [];
-
-    foreach (\array_keys($this->getProviders()) as $provider_id) {
-      // If the provider is part of the excluded list, skip it.
-      if (\in_array($provider_id, self::PROVIDER_EXCLUDE, TRUE)) {
-        continue;
-      }
-      $providers[] = $provider_id;
     }
 
     return $providers;
