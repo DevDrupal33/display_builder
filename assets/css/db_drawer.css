@@ -35,7 +35,7 @@ body:has(> .admin-toolbar) .display-builder .shoelace-drawer {
 .display-builder.display-builder--fullscreen .shoelace-drawer {
   &::part(base) {
     /* Ignore the top toolbar, only check the Display Builder toolbar. */
-    margin-top: var(--db-toolbar-height, 0);
+    margin-top: 92px;
   }
 }
 .toolbar-loading .display-builder.display-builder--fullscreen {
