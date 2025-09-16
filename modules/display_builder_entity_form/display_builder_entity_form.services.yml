@@ -12,3 +12,9 @@ services:
       - '@entity_type.manager'
     tags:
       - { name: event_subscriber }
+  display_builder_entity_form.admin_path.route_subscriber:
+    class: Drupal\display_builder_entity_form\EventSubscriber\EntityAdminRouteSubscriber
+    arguments:
+      - '@entity_type.manager'
+    tags:
+      - { name: event_subscriber }
