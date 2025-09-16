@@ -9,6 +9,7 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\IslandBuilderInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\SlotSourceProxy;
@@ -27,7 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   type: IslandType::View,
   icon: 'tools',
 )]
-class BuilderPanel extends IslandPluginBase {
+class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
 
   /**
    * The renderer service.
@@ -68,7 +69,7 @@ class BuilderPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $builder_id = (string) $builder->id();
     $build = [
       '#type' => 'component',
@@ -139,7 +140,7 @@ class BuilderPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
+  public function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
     $component_id = $data['source']['component']['component_id'] ?? NULL;
     $instance_id = $instance_id ?: $data['_node_id'];
 
@@ -179,26 +180,9 @@ class BuilderPanel extends IslandPluginBase {
   }
 
   /**
-   * Does the component use the attributes variable in template?
-   *
-   * @param array $renderable
-   *   Component renderable.
-   *
-   * @return bool
-   *   Use it or not.
-   */
-  protected function useAttributesVariable(array $renderable): bool {
-    $random = \uniqid();
-    $renderable['#attributes'][$random] = $random;
-    $html = $this->renderer->renderInIsolation($renderable);
-
-    return \str_contains((string) $html, $random);
-  }
-
-  /**
    * {@inheritdoc}
    */
-  protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
+  public function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
     $instance_id = $instance_id ?: $data['_node_id'];
 
     if (!$instance_id) {
@@ -248,6 +232,58 @@ class BuilderPanel extends IslandPluginBase {
     $build['#attributes']['data-slot-position'] = $index;
 
     return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['label'] ?? $label, $index);
+  }
+
+  /**
+   * Helper method to replace a specific instance in the DOM.
+   *
+   * @param string $builder_id
+   *   The builder ID.
+   * @param string $instance_id
+   *   The instance ID.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  protected function replaceInstance(string $builder_id, string $instance_id): array {
+    $parent_selector = '#' . $this->getHtmlId($builder_id) . ' [data-node-id="' . $instance_id . '"]';
+    // @todo pass \Drupal\display_builder\InstanceInterface object in
+    // parameters instead of loading again.
+    /** @var \Drupal\display_builder\InstanceInterface $builder */
+    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+    $data = $builder->get($instance_id);
+
+    $build = [];
+
+    if (isset($data['source_id']) && $data['source_id'] === 'component') {
+      $build = $this->buildSingleComponent($builder_id, $instance_id, $data);
+    }
+    else {
+      $build = $this->buildSingleBlock($builder_id, $instance_id, $data);
+    }
+
+    return $this->makeOutOfBand(
+      $build,
+      $parent_selector,
+      'outerHTML'
+    );
+  }
+
+  /**
+   * Does the component use the attributes variable in template?
+   *
+   * @param array $renderable
+   *   Component renderable.
+   *
+   * @return bool
+   *   Use it or not.
+   */
+  protected function useAttributesVariable(array $renderable): bool {
+    $random = \uniqid();
+    $renderable['#attributes'][$random] = $random;
+    $html = $this->renderer->renderInIsolation($renderable);
+
+    return \str_contains((string) $html, $random);
   }
 
   /**

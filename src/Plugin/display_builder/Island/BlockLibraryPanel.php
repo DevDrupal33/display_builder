@@ -7,14 +7,15 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\IslandConfigurationFormInterface;
+use Drupal\display_builder\IslandConfigurationFormTrait;
 use Drupal\display_builder\IslandPluginBase;
-use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\ui_patterns\SourcePluginBase;
+use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\ui_patterns\SourceWithChoicesInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -28,9 +29,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   description: new TranslatableMarkup('List of available Drupal blocks to use.'),
   type: IslandType::Library,
 )]
-class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface {
+class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationFormInterface {
 
-  use IslandPluginConfigurationFormTrait;
+  use IslandConfigurationFormTrait;
 
   private const HIDE_BLOCK = [
     'help_block',
@@ -65,11 +66,17 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
   protected ModuleExtensionList $moduleList;
 
   /**
+   * The UI Patterns source plugin manager.
+   */
+  protected SourcePluginManager $sourceManager;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->moduleList = $container->get('extension.list.module');
+    $instance->sourceManager = $container->get('plugin.manager.ui_patterns_source');
 
     return $instance;
   }
@@ -119,7 +126,7 @@ class BlockLibraryPanel extends IslandPluginBase implements PluginFormInterface 
   /**
    * {@inheritdoc}
    */
-  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $builder_id = (string) $builder->id();
     $categories = $this->getGroupedChoices();
     $build = [];

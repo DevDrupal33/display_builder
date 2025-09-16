@@ -9,12 +9,12 @@ use Drupal\display_builder\IslandPluginManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * The event subscriber for display builder islands.
+ * The event subscriber for Display Builder islands.
  */
 class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
 
   /**
-   * Constructs a new ApiController object.
+   * Constructs a new DisplayBuilderEventsSubscriber object.
    *
    * @param \Drupal\display_builder\IslandPluginManagerInterface $islandManager
    *   The island plugin manager.

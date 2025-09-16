@@ -6,6 +6,7 @@ namespace Drupal\display_builder_test\Plugin\display_builder\Island;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 
@@ -19,5 +20,12 @@ use Drupal\display_builder\IslandType;
   type: IslandType::Menu,
 )]
 class TestIslandMenu extends IslandPluginBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
+    return [];
+  }
 
 }

@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Drupal\display_builder_test\Plugin\display_builder\Island;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\PluginFormInterface;
+// Use Drupal\Core\Plugin\PluginFormInterface;.
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\IslandConfigurationFormInterface;
+use Drupal\display_builder\IslandConfigurationFormTrait;
 use Drupal\display_builder\IslandPluginBase;
-use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
 
 /**
@@ -21,9 +23,16 @@ use Drupal\display_builder\IslandType;
   description: new TranslatableMarkup('A test island for testing configuration.'),
   type: IslandType::View,
 )]
-class TestIslandView extends IslandPluginBase implements PluginFormInterface {
+class TestIslandView extends IslandPluginBase implements IslandConfigurationFormInterface {
 
-  use IslandPluginConfigurationFormTrait;
+  use IslandConfigurationFormTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
+    return [];
+  }
 
   /**
    * {@inheritdoc}

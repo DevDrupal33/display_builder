@@ -7,15 +7,16 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ThemeExtensionList;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\IslandConfigurationFormInterface;
+use Drupal\display_builder\IslandConfigurationFormTrait;
 use Drupal\display_builder\IslandPluginBase;
-use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
+use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -28,9 +29,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   description: new TranslatableMarkup('List of available Components to use.'),
   type: IslandType::Library,
 )]
-class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterface {
+class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurationFormInterface {
 
-  use IslandPluginConfigurationFormTrait;
+  use IslandConfigurationFormTrait;
 
   private const HIDE_PROVIDER = ['display_builder', 'sdc_devel'];
 
@@ -48,6 +49,11 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
    * The module list extension service.
    */
   protected ModuleExtensionList $moduleList;
+
+  /**
+   * The UI Patterns source plugin manager.
+   */
+  protected SourcePluginManager $sourceManager;
 
   /**
    * The definitions filtered for current theme.
@@ -73,6 +79,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
     $instance->themeManager = $container->get('theme.manager');
     $instance->themeList = $container->get('extension.list.theme');
     $instance->moduleList = $container->get('extension.list.module');
+    $instance->sourceManager = $container->get('plugin.manager.ui_patterns_source');
 
     return $instance;
   }
@@ -219,7 +226,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
   /**
    * {@inheritdoc}
    */
-  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $builder_id = (string) $builder->id();
     // Try to call only once for each sub islands.
     $definitions = $this->getDefinitions();
@@ -271,38 +278,6 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
         'content' => $content,
       ],
     ];
-  }
-
-  /**
-   * Get all providers.
-   *
-   * @param array $definitions
-   *   Plugin definitions.
-   *
-   * @return array
-   *   Drupal extension definitions, keyed by extension ID
-   */
-  protected function getProviders(array $definitions): array {
-    $themes = $this->themeList->getAllInstalledInfo();
-    $modules = $this->moduleList->getAllInstalledInfo();
-    $providers = [];
-
-    foreach ($definitions as $definition) {
-      $provider_id = $definition['provider'];
-
-      if (\in_array($provider_id, self::HIDE_PROVIDER, TRUE)) {
-        continue;
-      }
-      $provider = $themes[$provider_id] ?? $modules[$provider_id] ?? NULL;
-
-      if (!$provider) {
-        continue;
-      }
-      $provider['count'] = isset($providers[$provider_id]) ? ($providers[$provider_id]['count']) + 1 : 1;
-      $providers[$provider_id] = $provider;
-    }
-
-    return $providers;
   }
 
   /**
@@ -528,6 +503,38 @@ class ComponentLibraryPanel extends IslandPluginBase implements PluginFormInterf
     }
 
     return $options;
+  }
+
+  /**
+   * Get all providers.
+   *
+   * @param array $definitions
+   *   Plugin definitions.
+   *
+   * @return array
+   *   Drupal extension definitions, keyed by extension ID
+   */
+  protected function getProviders(array $definitions): array {
+    $themes = $this->themeList->getAllInstalledInfo();
+    $modules = $this->moduleList->getAllInstalledInfo();
+    $providers = [];
+
+    foreach ($definitions as $definition) {
+      $provider_id = $definition['provider'];
+
+      if (\in_array($provider_id, self::HIDE_PROVIDER, TRUE)) {
+        continue;
+      }
+      $provider = $themes[$provider_id] ?? $modules[$provider_id] ?? NULL;
+
+      if (!$provider) {
+        continue;
+      }
+      $provider['count'] = isset($providers[$provider_id]) ? ($providers[$provider_id]['count']) + 1 : 1;
+      $providers[$provider_id] = $provider;
+    }
+
+    return $providers;
   }
 
 }

@@ -26,7 +26,7 @@ class ParentDisplayButton extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $url = self::findParentDisplayFromId((string) $builder->id());
 
     if (!$url) {

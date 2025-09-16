@@ -53,7 +53,7 @@ class LogsPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $load = $builder->toArray();
 
     if (!$load) {

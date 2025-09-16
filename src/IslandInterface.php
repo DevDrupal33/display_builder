@@ -28,16 +28,29 @@ interface IslandInterface extends ConfigurableInterface, ContainerFactoryPluginI
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   Display builder instance.
    * @param array $data
-   *   UI Patterns 2 sources data. It can be the full data state (so, the same
-   *   as $builder->getCurrentState()) or just some specific data of a single
-   *   source of a sub-tree of sources.
+   *   (Optional) UI Patterns 2 sources data. It can be the full data state
+   *   (so, the same as $builder->getCurrentState()) or just some specific data
+   *   of a single source of a sub-tree of sources.
    * @param array $options
    *   (Optional) Additional data to alter the island rendering.
    *
    * @return array
    *   A renderable array.
    */
-  public function build(InstanceInterface $builder, array $data, array $options = []): array;
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array;
+
+  /**
+   * Alter form element after its built.
+   *
+   * @param array $element
+   *   An associative array containing the structure of the form element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   *
+   * @return array
+   *   The altered form element.
+   */
+  public function afterBuild(array $element, FormStateInterface $form_state): array;
 
   /**
    * Returns the translated plugin label.
@@ -83,28 +96,5 @@ interface IslandInterface extends ConfigurableInterface, ContainerFactoryPluginI
    *   TRUE if plugin is applicable, FALSE otherwise.
    */
   public function isApplicable(): bool;
-
-  /**
-   * Alter form element after its built.
-   *
-   * @param array $element
-   *   An associative array containing the structure of the form element.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
-   *
-   * @return array
-   *   The altered form element.
-   */
-  public function afterBuild(array $element, FormStateInterface $form_state): array;
-
-  /**
-   * Returns a short summary for the current configuration.
-   *
-   * The configuration is managed by the ConfigurableInterface implementation.
-   *
-   * @return array<string|\Stringable>
-   *   A short summary of the configuration.
-   */
-  public function configurationSummary(): array;
 
 }

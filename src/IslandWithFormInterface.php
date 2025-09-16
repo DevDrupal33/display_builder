@@ -7,7 +7,7 @@ namespace Drupal\display_builder;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Interface for island plugins with a form.
+ * Interface for island plugins with a form inside.
  */
 interface IslandWithFormInterface {
 

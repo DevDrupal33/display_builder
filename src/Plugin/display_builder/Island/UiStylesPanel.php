@@ -8,9 +8,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\IslandPluginBase;
-use Drupal\display_builder\IslandPluginFormTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
+use Drupal\display_builder\IslandWithFormTrait;
 use Drupal\display_builder\RenderableAltererInterface;
 use Drupal\ui_styles\StylePluginManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -28,7 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 )]
 class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {
 
-  use IslandPluginFormTrait;
+  use IslandWithFormTrait;
 
   /**
    * The UI Styles styles manager.

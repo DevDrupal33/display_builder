@@ -252,7 +252,7 @@ final class ProfileForm extends EntityForm {
     $type = $island->getTypeId();
     /** @var \Drupal\display_builder\IslandPluginManagerInterface $islandPluginManager */
     $islandPluginManager = \Drupal::service('plugin.manager.db_island'); // phpcs:ignore
-    /** @var \Drupal\display_builder\IslandInterface $instance */
+    /** @var \Drupal\display_builder\IslandConfigurationFormInterface $instance */
     $instance = $islandPluginManager->createInstance($id, $configuration);
     $weight = isset($configuration['weight']) ? (string) $configuration['weight'] : '0';
 

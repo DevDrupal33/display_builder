@@ -7,13 +7,13 @@ namespace Drupal\display_builder;
 use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Base class for island plugins.
@@ -35,6 +35,11 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   protected string $builderId;
 
   /**
+   * The builder instance entity.
+   */
+  protected ?InstanceInterface $builder = NULL;
+
+  /**
    * The current island id which trigger action.
    */
   protected string $currentIslandId;
@@ -43,6 +48,11 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    * The instance id for this plugin.
    */
   protected ?string $instanceId = NULL;
+
+  /**
+   * The form builder.
+   */
+  protected ?FormBuilderInterface $formBuilder = NULL;
 
   /**
    * {@inheritdoc}
@@ -54,7 +64,6 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
     protected ComponentPluginManager $sdcManager,
     protected HtmxEvents $htmxEvents,
     protected EntityTypeManagerInterface $entityTypeManager,
-    protected EventSubscriberInterface $eventSubscriber,
     protected SourcePluginManager $sourceManager,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -73,9 +82,75 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
       $container->get('plugin.manager.sdc'),
       $container->get('display_builder.htmx_events'),
       $container->get('entity_type.manager'),
-      $container->get('display_builder.event_subscriber'),
       $container->get('plugin.manager.ui_patterns_source'),
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
+    $this->builder = $builder;
+
+    $builder_id = (string) $builder->id();
+    $this->builderId = $builder_id;
+    $this->instanceId = $data['_node_id'] ?? NULL;
+
+    // First, get specific data for the plugin.
+    if (isset($data['_third_party_settings'][$this->getPluginId()])) {
+      $this->data = $data['_third_party_settings'][$this->getPluginId()];
+    }
+    // Otherwise, fallback on global data.
+    else {
+      $this->data = $data;
+    }
+
+    if (!$this->isApplicable()) {
+      return [];
+    }
+
+    if (!$this instanceof IslandWithFormInterface) {
+      return [];
+    }
+
+    $contexts = $this->configuration['contexts'] ?? [];
+
+    $form_state = new FormState();
+
+    // We have to force form to not rebuild, otherwise, we are losing data of an
+    // island plugin when another is submitted.
+    // Example: submitting Styles Panel make lose default form values for
+    // Instance Form Panel.
+    $form_state->setRebuild(FALSE);
+    $form_state->setExecuted();
+
+    $form_state->addBuildInfo('args', [$this->getArgs(), $contexts, $options]);
+    $build = $this->formBuilder()->buildForm($this::getFormClass(), $form_state);
+
+    return $this->afterBuild($build, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function afterBuild(array $element, FormStateInterface $form_state): array {
+    if (!$this->isApplicable()) {
+      return [];
+    }
+
+    $definition = $this->getPluginDefinition();
+    $island_id = $definition instanceof PluginDefinitionInterface ? $definition->id() : ($definition['id'] ?? '');
+
+    return $this->htmxEvents->onThirdPartyFormChange($element, $this->builderId, $this->instanceId, $island_id);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isApplicable(): bool {
+    $definition = $this->getPluginDefinition();
+
+    return $this->instanceId !== NULL && \is_array($definition) && !empty($this->data);
   }
 
   /**
@@ -112,71 +187,6 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    */
   public function getIcon(): ?string {
     return $this->pluginDefinition['icon'] ?? NULL;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function isApplicable(): bool {
-    $definition = $this->getPluginDefinition();
-
-    return $this->instanceId !== NULL && \is_array($definition) && !empty($this->data);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function build(InstanceInterface $builder, array $data, array $options = []): array {
-    $builder_id = (string) $builder->id();
-    $this->builderId = $builder_id;
-    $this->instanceId = $data['_node_id'] ?? NULL;
-
-    // First, get specific data for the plugin.
-    if (isset($data['_third_party_settings'][$this->getPluginId()])) {
-      $this->data = $data['_third_party_settings'][$this->getPluginId()];
-    }
-    // Otherwise, fallback on global data.
-    else {
-      $this->data = $data;
-    }
-
-    if (!$this->isApplicable()) {
-      return [];
-    }
-
-    if ($this instanceof IslandWithFormInterface) {
-      $contexts = $this->configuration['contexts'] ?? [];
-
-      $form_state = new FormState();
-
-      // We have to force form to not rebuild, otherwise, we are losing data
-      // of an island plugin when another is submitted.
-      // Example: submitting Styles Panel make lose default form values for
-      // Instance Form Panel.
-      $form_state->setRebuild(FALSE);
-      $form_state->setExecuted();
-
-      $form_state->addBuildInfo('args', [self::getArgs(), $contexts, $options]);
-      $build = \Drupal::formBuilder()->buildForm($this::getFormClass(), $form_state);
-
-      return $this->afterBuild($build, $form_state);
-    }
-
-    return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function afterBuild(array $element, FormStateInterface $form_state): array {
-    if (!$this->isApplicable()) {
-      return [];
-    }
-
-    $definition = $this->getPluginDefinition();
-    $island_id = $definition instanceof PluginDefinitionInterface ? $definition->id() : ($definition['id'] ?? '');
-
-    return $this->htmxEvents->onThirdPartyFormChange($element, $this->builderId, $this->instanceId, $island_id);
   }
 
   /**
@@ -271,21 +281,6 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   }
 
   /**
-   * Get args passed to plugin.
-   *
-   * @return array
-   *   Array of arguments.
-   */
-  protected function getArgs(): array {
-    return [
-      'island_id' => $this->getPluginId(),
-      'builder_id' => $this->builderId,
-      'instance_id' => $this->instanceId,
-      'instance' => $this->data,
-    ];
-  }
-
-  /**
    * Helper method to reload island with global data.
    *
    * @param string $builder_id
@@ -295,14 +290,17 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    *   Returns a render array with out-of-band commands.
    */
   protected function reloadWithGlobalData(string $builder_id): array {
-    // @todo pass \Drupal\display_builder\InstanceInterface object in
-    // parameters instead of loading again.
-    /** @var \Drupal\display_builder\InstanceInterface $builder */
-    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
-    $data = $builder->getCurrentState();
+    if (!$this->builder) {
+      // @todo pass \Drupal\display_builder\InstanceInterface object in
+      // parameters instead of loading again.
+      /** @var \Drupal\display_builder\InstanceInterface $builder */
+      $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+      $this->builder = $builder;
+    }
+    $data = $this->builder->getCurrentState();
 
     return $this->addOutOfBand(
-      $this->build($builder, $data),
+      $this->build($this->builder, $data),
       '#' . $this->getHtmlId($builder_id),
       'innerHTML'
     );
@@ -320,13 +318,16 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    *   Returns a render array with out-of-band commands.
    */
   protected function reloadWithLocalData(string $builder_id, array $data): array {
-    // @todo pass \Drupal\display_builder\InstanceInterface object in
-    // parameters instead of loading again.
-    /** @var \Drupal\display_builder\InstanceInterface $builder */
-    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+    if (!$this->builder) {
+      // @todo pass \Drupal\display_builder\InstanceInterface object in
+      // parameters instead of loading again.
+      /** @var \Drupal\display_builder\InstanceInterface $builder */
+      $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+      $this->builder = $builder;
+    }
 
     return $this->addOutOfBand(
-      $this->build($builder, $data, []),
+      $this->build($this->builder, $data),
       '#' . $this->getHtmlId($builder_id),
       'innerHTML'
     );
@@ -344,90 +345,48 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    *   Returns a render array with out-of-band commands.
    */
   protected function reloadWithInstanceData(string $builder_id, string $instance_id): array {
-    // @todo pass \Drupal\display_builder\InstanceInterface object in
-    // parameters instead of loading again.
-    /** @var \Drupal\display_builder\InstanceInterface $builder */
-    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
-    $data = $builder->get($instance_id);
+    if (!$this->builder) {
+      // @todo pass \Drupal\display_builder\InstanceInterface object in
+      // parameters instead of loading again.
+      /** @var \Drupal\display_builder\InstanceInterface $builder */
+      $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+      $this->builder = $builder;
+    }
+    $data = $this->builder->get($instance_id);
 
     return $this->addOutOfBand(
-      $this->build($builder, $data),
+      $this->build($this->builder, $data),
       '#' . $this->getHtmlId($builder_id),
       'innerHTML'
     );
   }
 
   /**
-   * Helper method to replace a specific instance in the DOM.
+   * Returns the form builder service.
    *
-   * @param string $builder_id
-   *   The builder ID.
-   * @param string $instance_id
-   *   The instance ID.
+   * @return \Drupal\Core\Form\FormBuilderInterface
+   *   The form builder service.
+   */
+  protected function formBuilder() {
+    if (!$this->formBuilder) {
+      $this->formBuilder = \Drupal::formBuilder();
+    }
+    return $this->formBuilder;
+  }
+
+  /**
+   * Get args passed to plugin.
    *
    * @return array
-   *   Returns a render array with out-of-band commands.
+   *   Array of arguments.
    */
-  protected function replaceInstance(string $builder_id, string $instance_id): array {
-    $parent_selector = '#' . $this->getHtmlId($builder_id) . ' [data-node-id="' . $instance_id . '"]';
-    // @todo pass \Drupal\display_builder\InstanceInterface object in
-    // parameters instead of loading again.
-    /** @var \Drupal\display_builder\InstanceInterface $builder */
-    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
-    $data = $builder->get($instance_id);
-
-    $build = [];
-
-    if (isset($data['source_id']) && $data['source_id'] === 'component') {
-      $build = $this->buildSingleComponent($builder_id, $instance_id, $data);
-    }
-    else {
-      $build = $this->buildSingleBlock($builder_id, $instance_id, $data);
-    }
-
-    return $this->makeOutOfBand(
-      $build,
-      $parent_selector,
-      'outerHTML'
-    );
-  }
-
-  /**
-   * Build renderable from state data.
-   *
-   * @param string $builder_id
-   *   Builder ID.
-   * @param string $instance_id
-   *   Instance ID.
-   * @param array $data
-   *   The UI Patterns 2 form state data.
-   * @param int $index
-   *   (Optional) The index of the block. Default to 0.
-   *
-   * @return array|null
-   *   A renderable array.
-   */
-  protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
-    return [];
-  }
-
-  /**
-   * Build renderable from state data.
-   *
-   * @param string $builder_id
-   *   Builder ID.
-   * @param string $instance_id
-   *   Instance ID.
-   * @param array $data
-   *   The UI Patterns 2 form state data.
-   * @param int $index
-   *   (Optional) The index of the block. Default to 0.
-   *
-   * @return array|null
-   *   A renderable array.
-   */
-  protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
-    return [];
+  private function getArgs(): array {
+    return [
+      'island_id' => $this->getPluginId(),
+      'builder_id' => $this->builderId,
+      'instance_id' => $this->instanceId,
+      'instance' => $this->data,
+    ];
   }
 
 }

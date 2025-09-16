@@ -44,7 +44,7 @@ class StateButtons extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $builder_id = (string) $builder->id();
 
     if (!$builder->canSaveContextsRequirement()) {
@@ -182,13 +182,18 @@ class StateButtons extends IslandPluginBase {
    *   The rebuilt island.
    */
   private function rebuild(string $builder_id): array {
-    // @todo pass \Drupal\display_builder\InstanceInterface object in
-    // parameters instead of loading again.
-    /** @var \Drupal\display_builder\InstanceInterface $builder */
-    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+    if (!$this->builder) {
+      // @todo pass \Drupal\display_builder\InstanceInterface object in
+      // parameters instead of loading again.
+      /** @var \Drupal\display_builder\InstanceStorage $storage */
+      $storage = $this->entityTypeManager->getStorage('display_builder_instance');
+      /** @var \Drupal\display_builder\InstanceInterface $builder */
+      $builder = $storage->load($builder_id);
+      $this->builder = $builder;
+    }
 
     return $this->addOutOfBand(
-      $this->build($builder, []),
+      $this->build($this->builder),
       '#' . $this->getHtmlId($builder_id),
       'innerHTML'
     );

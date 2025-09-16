@@ -10,7 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Add methods to make plugin configuration forms.
  */
-trait IslandPluginConfigurationFormTrait {
+trait IslandConfigurationFormTrait {
 
   /**
    * Validate the Island configuration.

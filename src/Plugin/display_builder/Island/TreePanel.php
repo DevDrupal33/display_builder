@@ -50,7 +50,7 @@ class TreePanel extends BuilderPanel {
   /**
    * {@inheritdoc}
    */
-  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $builder_id = (string) $builder->id();
 
     return [
@@ -65,7 +65,7 @@ class TreePanel extends BuilderPanel {
   /**
    * {@inheritdoc}
    */
-  protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): array {
+  public function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): array {
     $component_id = $data['source']['component']['component_id'] ?? NULL;
     $instance_id = $instance_id ?: $data['_node_id'];
 
@@ -147,7 +147,7 @@ class TreePanel extends BuilderPanel {
   /**
    * {@inheritdoc}
    */
-  protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): array {
+  public function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): array {
     $instance_id = $instance_id ?: $data['_node_id'];
     $label = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
 

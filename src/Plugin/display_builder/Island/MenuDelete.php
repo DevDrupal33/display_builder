@@ -25,7 +25,7 @@ class MenuDelete extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $builder_id = (string) $builder->id();
     // Attribute data-contextual-menu is important for the js mapping.
     // @see assets/js/contextual_menu.js

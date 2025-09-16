@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 /**
- * Interface for island event subscriber.
+ * Interface for Island event subscriber.
  */
 interface IslandEventSubscriberInterface {
 

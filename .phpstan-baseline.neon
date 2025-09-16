@@ -1,49 +1,49 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Cannot access offset ''class'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
+			rawMessage: Cannot access offset 'class' on array|Drupal\Component\Plugin\Definition\PluginDefinitionInterface.
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php
 
 		-
-			message: '#^Method Drupal\\display_builder_views\\Plugin\\views\\display_extender\\DisplayExtender\:\:buildOptionsForm\(\) has parameter \$form with no type specified\.$#'
+			rawMessage: 'Method Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender::buildOptionsForm() has parameter $form with no type specified.'
 			identifier: missingType.parameter
 			count: 1
 			path: modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php
 
 		-
-			message: '#^Method Drupal\\display_builder_views\\Plugin\\views\\display_extender\\DisplayExtender\:\:optionsSummary\(\) has parameter \$categories with no type specified\.$#'
+			rawMessage: 'Method Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender::optionsSummary() has parameter $categories with no type specified.'
 			identifier: missingType.parameter
 			count: 1
 			path: modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php
 
 		-
-			message: '#^Method Drupal\\display_builder_views\\Plugin\\views\\display_extender\\DisplayExtender\:\:optionsSummary\(\) has parameter \$options with no type specified\.$#'
+			rawMessage: 'Method Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender::optionsSummary() has parameter $options with no type specified.'
 			identifier: missingType.parameter
 			count: 1
 			path: modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php
 
 		-
-			message: '#^Cannot access offset ''icon'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
+			rawMessage: Cannot access offset 'icon' on array|Drupal\Component\Plugin\Definition\PluginDefinitionInterface.
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/IslandPluginBase.php
 
 		-
-			message: '#^Cannot access offset ''id'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
+			rawMessage: Cannot access offset 'id' on array|Drupal\Component\Plugin\Definition\PluginDefinitionInterface.
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/IslandPluginBase.php
 
 		-
-			message: '#^Cannot access offset ''label'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
+			rawMessage: Cannot access offset 'label' on array|Drupal\Component\Plugin\Definition\PluginDefinitionInterface.
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/IslandPluginBase.php
 
 		-
-			message: '#^Cannot access offset ''type'' on array\|Drupal\\Component\\Plugin\\Definition\\PluginDefinitionInterface\.$#'
+			rawMessage: Cannot access offset 'type' on array|Drupal\Component\Plugin\Definition\PluginDefinitionInterface.
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/IslandPluginBase.php

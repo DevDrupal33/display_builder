@@ -14,7 +14,7 @@ display_builder.api_root_attach:
 
 # Attach a component_id, a block_id, or an node_id to a slot.
 display_builder.api_slot_attach:
-  path: '/api/display-builder/{builder}/node/{node_id}/{slot}'
+  path: '/api/display-builder/{builder}/_node/{node_id}/{slot}'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::attachToSlot'
@@ -27,7 +27,7 @@ display_builder.api_slot_attach:
         type: 'entity:display_builder_instance'
 
 display_builder.api_get:
-  path: '/api/display-builder/{builder}/node/{node_id}'
+  path: '/api/display-builder/{builder}/_node/{node_id}'
   methods: [GET]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::get'
@@ -40,7 +40,7 @@ display_builder.api_get:
         type: 'entity:display_builder_instance'
 
 display_builder.api_update:
-  path: '/api/display-builder/{builder}/node/{node_id}'
+  path: '/api/display-builder/{builder}/_node/{node_id}'
   methods: [PUT, POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::update'
@@ -53,7 +53,7 @@ display_builder.api_update:
         type: 'entity:display_builder_instance'
 
 display_builder.api_paste:
-  path: '/api/display-builder/{builder}/node/{node_id}/{parent_id}/{slot_id}/{slot_position}/paste'
+  path: '/api/display-builder/{builder}/_node/{node_id}/{parent_id}/{slot_id}/{slot_position}/paste'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::paste'
@@ -66,7 +66,7 @@ display_builder.api_paste:
         type: 'entity:display_builder_instance'
 
 display_builder.api_duplicate:
-  path: '/api/display-builder/{builder}/node/{node_id}/{parent_id}/{slot_id}/{slot_position}/duplicate'
+  path: '/api/display-builder/{builder}/_node/{node_id}/{parent_id}/{slot_id}/{slot_position}/duplicate'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::paste'
@@ -79,7 +79,7 @@ display_builder.api_duplicate:
         type: 'entity:display_builder_instance'
 
 display_builder.api_delete:
-  path: '/api/display-builder/{builder}/node/{node_id}'
+  path: '/api/display-builder/{builder}/_node/{node_id}'
   methods: [DELETE]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::delete'
@@ -92,7 +92,7 @@ display_builder.api_delete:
         type: 'entity:display_builder_instance'
 
 display_builder.api_save_preset:
-  path: '/api/display-builder/{builder}/node/{node_id}/save_as_preset'
+  path: '/api/display-builder/{builder}/_node/{node_id}/save_as_preset'
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::saveAsPreset'
@@ -105,7 +105,7 @@ display_builder.api_save_preset:
         type: 'entity:display_builder_instance'
 
 display_builder.api_third_party_settings_update:
-  path: '/api/display-builder/{builder}/node/{node_id}/settings/{island_id}'
+  path: '/api/display-builder/{builder}/_node/{node_id}/settings/{island_id}'
   methods: [PUT]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::thirdPartySettingsUpdate'

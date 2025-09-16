@@ -10,7 +10,7 @@ use Drupal\display_builder\Form\IslandFormBase;
 /**
  * Add methods to make plugin forms available.
  */
-trait IslandPluginFormTrait {
+trait IslandWithFormTrait {
 
   /**
    * Get the form class.

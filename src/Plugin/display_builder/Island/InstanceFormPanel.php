@@ -9,10 +9,11 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
-use Drupal\display_builder\IslandPluginFormTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
+use Drupal\display_builder\IslandWithFormTrait;
 use Drupal\ui_patterns\PropTypePluginManager;
+use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -27,7 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 )]
 class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterface {
 
-  use IslandPluginFormTrait;
+  use IslandWithFormTrait;
 
   /**
    * The prop type plugin manager.
@@ -35,11 +36,17 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
   protected PropTypePluginManager $propTypeManager;
 
   /**
+   * The UI Patterns source plugin manager.
+   */
+  protected SourcePluginManager $sourceManager;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->propTypeManager = $container->get('plugin.manager.ui_patterns_prop_type');
+    $instance->sourceManager = $container->get('plugin.manager.ui_patterns_source');
 
     return $instance;
   }
@@ -79,7 +86,7 @@ class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterf
   /**
    * {@inheritdoc}
    */
-  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $build = parent::build($builder, $data, $options);
 
     if (empty($build)) {

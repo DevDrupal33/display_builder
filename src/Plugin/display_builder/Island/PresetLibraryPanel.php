@@ -49,7 +49,7 @@ class PresetLibraryPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $builder_id = (string) $builder->id();
     /** @var \Drupal\display_builder\PatternPresetInterface[] $presets */
     $presets = $this->presetConfigStorage->loadByProperties(['status' => TRUE]);

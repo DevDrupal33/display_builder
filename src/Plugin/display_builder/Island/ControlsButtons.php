@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\IslandConfigurationFormInterface;
+use Drupal\display_builder\IslandConfigurationFormTrait;
 use Drupal\display_builder\IslandPluginBase;
-use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
 
 /**
@@ -23,9 +23,9 @@ use Drupal\display_builder\IslandType;
   description: new TranslatableMarkup('Control the building experience.'),
   type: IslandType::Button,
 )]
-class ControlsButtons extends IslandPluginBase implements PluginFormInterface {
+class ControlsButtons extends IslandPluginBase implements IslandConfigurationFormInterface {
 
-  use IslandPluginConfigurationFormTrait;
+  use IslandConfigurationFormTrait;
 
   /**
    * {@inheritdoc}
@@ -90,7 +90,7 @@ class ControlsButtons extends IslandPluginBase implements PluginFormInterface {
   /**
    * {@inheritdoc}
    */
-  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $configuration = $this->getConfiguration();
     $buttons = $library = [];
 

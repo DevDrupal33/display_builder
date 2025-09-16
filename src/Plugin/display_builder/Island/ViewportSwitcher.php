@@ -8,12 +8,12 @@ use Drupal\breakpoint\BreakpointManager;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ThemeExtensionList;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\IslandConfigurationFormInterface;
+use Drupal\display_builder\IslandConfigurationFormTrait;
 use Drupal\display_builder\IslandPluginBase;
-use Drupal\display_builder\IslandPluginConfigurationFormTrait;
 use Drupal\display_builder\IslandType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -26,9 +26,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   description: new TranslatableMarkup('Change main region width according to breakpoints.'),
   type: IslandType::Button,
 )]
-class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
+class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFormInterface {
 
-  use IslandPluginConfigurationFormTrait;
+  use IslandConfigurationFormTrait;
 
   private const HIDE_PROVIDER = ['toolbar'];
 
@@ -119,7 +119,7 @@ class ViewportSwitcher extends IslandPluginBase implements PluginFormInterface {
   /**
    * {@inheritdoc}
    */
-  public function build(InstanceInterface $builder, array $data, array $options = []): array {
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $configuration = $this->getConfiguration();
     $definitions = $this->getDefinitions();
 
