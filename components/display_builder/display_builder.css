@@ -3,7 +3,7 @@
   --db-text-color: var(--sl-color-neutral-1000);
   --db-background-image: repeating-linear-gradient(45deg, oklch(100% 0 0), oklch(100% 0 0) 13px, var(--sl-color-neutral-100) 13px, var(--sl-color-neutral-100) 14px);
   --db-background-size: 40px 40px;
-  --db-toolbar-height: 75px;
+  --db-toolbar-height: 72px;
   --db-z-index: 401;
   --db-table-bg: var(--sl-color-neutral-50);
   --db-table-border: var(--sl-color-neutral-200);

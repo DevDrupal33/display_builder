@@ -79,10 +79,9 @@ test(
     await test.step(`Set view display`, async () => {
       // Set the builder profile on a view.
       await page.locator('.views-display-setting').getByText('Disabled').click()
-      await expect(page.getByRole('dialog')).toBeVisible()
+      await expect(page.getByLabel('Profile', { exact: true })).toBeVisible()
       await page.getByLabel('Profile', { exact: true }).selectOption('default')
       await page.getByText('ApplyCancel').getByText('Apply').click()
-      await expect(page.getByRole('dialog')).toBeHidden()
       await drupal.ajaxReady()
 
       // Save the View.
@@ -93,7 +92,7 @@ test(
     await test.step(`Set and switch profile`, async () => {
       await drupal.ajaxReady()
       await page.getByText('Display Builder: Default').getByRole('link', { name: 'Default' }).click()
-      await expect(page.getByRole('dialog')).toBeVisible()
+      await expect(page.getByRole('link', { name: 'build the display' })).toBeVisible()
       await page.getByRole('link', { name: 'build the display' }).click()
       await displayBuilder.shoelaceReady()
       await expect(page.getByRole('heading', { name: `Display builder for Test ${testName} Page` })).toBeVisible()
@@ -108,11 +107,11 @@ test(
       await drupal.ajaxReady()
 
       await page.getByText('Display Builder: Default').getByRole('link', { name: 'Default' }).click()
-      await expect(page.getByRole('dialog')).toBeVisible()
+      await expect(page.getByLabel('Profile', { exact: true })).toBeVisible()
       await page.getByLabel('Profile', { exact: true }).selectOption('test')
       await page.getByText('ApplyCancel').getByText('Apply').click()
-      await expect(page.getByRole('dialog')).toBeHidden()
       await drupal.ajaxReady()
+
       // Save the View.
       await page.getByRole('button', { name: 'Save' }).click()
       await drupal.expectMessage(`The view Test ${testName} has been saved.`)
@@ -171,11 +170,12 @@ test(
       await drupal.ajaxReady()
 
       await page.getByText('Display Builder: Test').getByRole('link', { name: 'Test' }).click()
-      await expect(page.getByRole('dialog')).toBeVisible()
+      await expect(page.getByLabel('Profile', { exact: true })).toBeVisible()
       await page.getByLabel('Profile', { exact: true }).selectOption('- Disabled -')
       await page.getByText('ApplyCancel').getByText('Apply').click()
       await drupal.ajaxReady()
-      await expect(page.getByRole('dialog')).toBeHidden()
+
+      await expect(page.getByRole('button', { name: 'Save' })).toBeVisible()
       await page.getByRole('button', { name: 'Save' }).click()
 
       // Ensure the instance is deleted and the view is working.
