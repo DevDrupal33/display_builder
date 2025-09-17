@@ -43,7 +43,9 @@
   </rule>
 
   <!-- Detect missing doc -->
-  <rule ref="Squiz.Commenting.FunctionComment.MissingParamTag" />
+  <rule ref="Squiz.Commenting.FunctionComment.MissingParamTag">
+    <exclude-pattern>*.module</exclude-pattern>
+  </rule>
   <rule ref="Squiz.Commenting.FunctionComment">
     <properties>
       <property name="skipIfInheritdoc" value="true" />

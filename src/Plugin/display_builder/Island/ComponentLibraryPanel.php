@@ -207,6 +207,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
 
     if (\strlen($configuration['exclude_id'] ?? '') > 5) {
       $value = \preg_split('/\s+/', \trim($configuration['exclude_id'] ?? ''));
+
       if ($value === FALSE) {
         $summary[] = $this->t('Component(s) excluded');
       }
@@ -489,7 +490,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
         continue;
       }
 
-      if (isset($definition['provider']) &&  $exclude_by_id !== FALSE && \in_array($id, $exclude_by_id, TRUE)) {
+      if (isset($definition['provider']) && $exclude_by_id !== FALSE && \in_array($id, $exclude_by_id, TRUE)) {
         continue;
       }
 

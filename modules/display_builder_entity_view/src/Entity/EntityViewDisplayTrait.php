@@ -11,7 +11,6 @@ use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuildableInterface;
@@ -424,22 +423,6 @@ trait EntityViewDisplayTrait {
       return $build_list;
     }
 
-    // We alter the registry here instead of implementing
-    // hook_theme_registry_alter in order keep the alteration specific to each
-    // display.
-    $entry = $this->buildThemeRegistryEntry();
-    // Theme hook suggestion of the current entity view display.
-    // Example: 'node__article__teaser'.
-    $suggestion = \implode('__', [$this->getTargetEntityTypeId(), $this->getTargetBundle(), $this->getMode()]);
-    $this->themeRegistry->getRuntime()->set($suggestion, $entry);
-
-    if ($this->getMode() === 'default') {
-      // Full page displays don't work without this 'hack'.
-      // @todo Do we need to check if full is not already set?
-      $suggestion = \implode('__', [$this->getTargetEntityTypeId(), $this->getTargetBundle(), 'full']);
-      $this->themeRegistry->getRuntime()->set($suggestion, $entry);
-    }
-
     foreach ($entities as $id => $entity) {
       $sources = [];
 
@@ -455,8 +438,6 @@ trait EntityViewDisplayTrait {
         $sources = $this->getSources();
       }
 
-      // We clear the display because we only want our renderable.
-      $build_list[$id] = [];
       // @see entity.html.twig
       $build_list[$id]['content'] = $this->buildSources($entity, $sources);
     }
@@ -531,22 +512,6 @@ trait EntityViewDisplayTrait {
   }
 
   /**
-   * Build the theme registry entry.
-   *
-   * @return array
-   *   A theme registry entry.
-   */
-  private function buildThemeRegistryEntry(): array {
-    $theme_registry = $this->themeRegistry->get();
-    // Identical to the entity type entry with an unified template.
-    $entry = $theme_registry[$this->getTargetEntityTypeId()];
-    $entry['path'] = $this->modules->getPath('display_builder_entity_view') . '/templates';
-    $entry['template'] = 'entity';
-
-    return $entry;
-  }
-
-  /**
    * Builds the render array for the sources of a given entity.
    *
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
@@ -559,11 +524,6 @@ trait EntityViewDisplayTrait {
    */
   private function buildSources(FieldableEntityInterface $entity, array $sources): array {
     $contexts = $this->getContextsForEntity($entity);
-    $label = new TranslatableMarkup('@entity being viewed', [
-      '@entity' => $entity->getEntityType()->getSingularLabel(),
-    ]);
-    $contexts['display_builder.entity'] = EntityContext::fromEntity($entity, (string) $label);
-
     $cacheability = new CacheableMetadata();
     $fake_build = [];
 

@@ -204,6 +204,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       ],
       $builder->getContexts(),
     ]);
+    $form_state->setTemporaryValue('gathered_contexts', $builder->getContexts());
     // The body received corresponds to raw form values.
     // We need to set them in the form state to properly
     // take them into account.
@@ -261,6 +262,11 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       ],
       [],
     ]);
+
+    // phpcs:disable Drupal.Files.LineLength.TooLong
+    // @todo should context be injected for third party settings?
+    // $form_state->setTemporaryValue('gathered_contexts', $builder->getContexts());
+    // phpcs:enable Drupal.Files.LineLength.TooLong
     // The body received corresponds to raw form values.
     // We need to set them in the form state to properly
     // take them into account.

@@ -374,14 +374,36 @@ class BuilderDataConverter {
    */
   protected function convertBlock(BlockPluginInterface $block): array {
     $block_id = $block->getPluginId();
+    $blockConfiguration = $this->updateContextMapping($block->getConfiguration());
 
     return [
       'source_id' => 'block',
       'source' => [
         'plugin_id' => $block_id,
-        $block_id => $block->getConfiguration(),
+        $block_id => $blockConfiguration,
       ],
     ];
+  }
+
+  /**
+   * Update plugin configuration context mapping.
+   *
+   * @param array $configuration
+   *   A configuration array from a plugin.
+   *
+   * @return array
+   *   The updated configuration.
+   */
+  protected function updateContextMapping(array $configuration): array {
+    if (isset($configuration['context_mapping']) && \is_array($configuration['context_mapping'])) {
+      foreach ($configuration['context_mapping'] as $key => $value) {
+        if ($value === 'layout_builder.entity') {
+          $configuration['context_mapping'][$key] = 'entity';
+        }
+      }
+    }
+
+    return $configuration;
   }
 
 }

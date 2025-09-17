@@ -125,6 +125,8 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
     $form_state->setExecuted();
 
     $form_state->addBuildInfo('args', [$this->getArgs(), $contexts, $options]);
+    $form_state->setTemporaryValue('gathered_contexts', $contexts);
+
     $build = $this->formBuilder()->buildForm($this::getFormClass(), $form_state);
 
     return $this->afterBuild($build, $form_state);

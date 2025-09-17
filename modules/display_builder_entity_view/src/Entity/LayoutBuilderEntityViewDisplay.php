@@ -7,7 +7,6 @@ namespace Drupal\display_builder_entity_view\Entity;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
-use Drupal\Core\Theme\Registry;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
@@ -49,11 +48,6 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
   protected SampleEntityGeneratorInterface $sampleEntityGenerator;
 
   /**
-   * The theme registry.
-   */
-  protected Registry $themeRegistry;
-
-  /**
    * The list of modules.
    */
   protected ModuleExtensionList $modules;
@@ -83,7 +77,6 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
     $this->entityTypeManager = \Drupal::service('entity_type.manager');
     $this->componentElementBuilder = \Drupal::service('ui_patterns.component_element_builder');
     $this->sampleEntityGenerator = \Drupal::service('ui_patterns.sample_entity_generator');
-    $this->themeRegistry = \Drupal::service('theme.registry');
     $this->modules = \Drupal::service('extension.list.module');
     $this->dataConverter = \Drupal::service('display_builder_entity_view.builder_data_converter');
   }
@@ -125,7 +118,11 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
    */
   protected function initialImport(): array {
     if ($this->getThirdPartySetting('layout_builder', 'enabled')) {
-      $sections = $this->getThirdPartySetting('layout_builder', 'sections');
+      $sections = $this->getThirdPartySetting('layout_builder', 'sections', []);
+
+      if (!\is_array($sections)) {
+        $sections = [];
+      }
 
       return $this->dataConverter->convertFromLayoutBuilder($sections);
     }

@@ -7,7 +7,6 @@ namespace Drupal\display_builder_entity_view\Entity;
 use Drupal\Core\Entity\Entity\EntityViewDisplay as CoreEntityViewDisplay;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
-use Drupal\Core\Theme\Registry;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
@@ -48,11 +47,6 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
   protected SampleEntityGeneratorInterface $sampleEntityGenerator;
 
   /**
-   * The theme registry.
-   */
-  protected Registry $themeRegistry;
-
-  /**
    * The list of modules.
    */
   protected ModuleExtensionList $modules;
@@ -81,7 +75,6 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
     $this->entityTypeManager = \Drupal::service('entity_type.manager');
     $this->componentElementBuilder = \Drupal::service('ui_patterns.component_element_builder');
     $this->sampleEntityGenerator = \Drupal::service('ui_patterns.sample_entity_generator');
-    $this->themeRegistry = \Drupal::service('theme.registry');
     $this->modules = \Drupal::service('extension.list.module');
     $this->dataConverter = \Drupal::service('display_builder_entity_view.builder_data_converter');
   }
