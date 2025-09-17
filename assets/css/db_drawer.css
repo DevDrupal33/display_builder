@@ -4,7 +4,9 @@
     color: var(--sl-color-neutral-700);
     &::part(base) {
       z-index: calc(var(--db-z-index, 1) + 1);
-      margin-top: var(--drupal-displace-offset-top, 0);
+    }
+    &::part(panel) {
+      padding-top: var(--drupal-displace-offset-top, 0);
     }
   }
 }
@@ -32,10 +34,10 @@ body:has(> .admin-toolbar) .display-builder .shoelace-drawer {
 }
 
 /* Fullscreen display */
-.display-builder.display-builder--fullscreen .shoelace-drawer {
-  &::part(base) {
+.toolbar-horizontal.toolbar-fixed .display-builder.display-builder--fullscreen .shoelace-drawer {
+  &::part(panel) {
     /* Ignore the top toolbar, only check the Display Builder toolbar. */
-    margin-top: 92px;
+    padding-top: var(--db-toolbar-height, 0);
   }
 }
 .toolbar-loading .display-builder.display-builder--fullscreen {

@@ -82,6 +82,10 @@ display_builder.islands.component_library:
       type: sequence
       sequence:
         type: string
+    exclude_id:
+      type: sequence
+      sequence:
+        type: string
     status:
       type: sequence
       sequence:
@@ -105,6 +109,10 @@ display_builder.islands.block_library:
   type: mapping
   mapping:
     exclude:
+      type: sequence
+      sequence:
+        type: string
+    exclude_id:
       type: sequence
       sequence:
         type: string

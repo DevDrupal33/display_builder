@@ -143,6 +143,11 @@ class LayersPanel extends BuilderPanel {
    */
   public function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): array {
     $label = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
+
+    if (isset($data['source_id']) && $data['source_id'] === 'entity_field') {
+      $label['summary'] = (string) $this->t('Field: @label', ['@label' => $label['label']]);
+    }
+
     $build = [
       '#type' => 'component',
       '#component' => 'display_builder:layer',
@@ -157,7 +162,7 @@ class LayersPanel extends BuilderPanel {
     $build['#attributes']['data-node-title'] = $label['summary'];
     $build['#attributes']['data-slot-position'] = $index;
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['label'], $index);
+    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['summary'], $index);
   }
 
   /**

@@ -212,7 +212,7 @@ class LogsPanel extends IslandPluginBase {
     $save_found = FALSE;
 
     foreach ($steps as $step) {
-      if ($step->hash === $save->hash) {
+      if ($step && $step->hash === $save->hash) {
         $save_found = TRUE;
 
         break;

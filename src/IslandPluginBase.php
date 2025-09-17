@@ -371,6 +371,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
     if (!$this->formBuilder) {
       $this->formBuilder = \Drupal::formBuilder();
     }
+
     return $this->formBuilder;
   }
 

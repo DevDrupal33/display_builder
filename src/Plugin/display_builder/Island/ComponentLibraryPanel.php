@@ -97,6 +97,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
   public function defaultConfiguration(): array {
     return [
       'exclude' => [],
+      'exclude_id' => '',
       'status' => [
         'experimental',
       ],
@@ -119,6 +120,13 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
       '#title' => $this->t('Exclude providers'),
       '#options' => $this->getProvidersOptions($components, $this->t('component'), $this->t('components')),
       '#default_value' => $configuration['exclude'],
+    ];
+
+    $form['exclude_id'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Exclude by id'),
+      '#description' => $this->t('Provide a space separated list of components id to exclude, must be prefixed by provider. Example: "ui_suite_bootstrap:card_body<br>ui_suite_bootstrap:table_cell".'),
+      '#default_value' => $configuration['exclude_id'],
     ];
 
     // @see https://git.drupalcode.org/project/drupal/-/blob/11.x/core/assets/schemas/v1/metadata.schema.json#L217
@@ -196,6 +204,17 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     $summary[] = $this->t('Excluded providers: @exclude', [
       '@exclude' => ($exclude = \array_filter($configuration['exclude'] ?? [])) ? \implode(', ', $exclude) : $this->t('None'),
     ]);
+
+    if (\strlen($configuration['exclude_id'] ?? '') > 5) {
+      $value = \preg_split('/\s+/', \trim($configuration['exclude_id'] ?? ''));
+      if ($value === FALSE) {
+        $summary[] = $this->t('Component(s) excluded');
+      }
+      else {
+        $num = \count($value);
+        $summary[] = $this->formatPlural($num, '@count component excluded', '@count components excluded');
+      }
+    }
 
     $summary[] = $this->t('Allowed status: @status', [
       '@status' => \implode(', ', \array_filter(\array_unique(\array_merge(['stable', 'undefined'], $configuration['status'] ?? []))) ?: [$this->t('stable, undefined')]),
@@ -278,6 +297,38 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
         'content' => $content,
       ],
     ];
+  }
+
+  /**
+   * Get all providers.
+   *
+   * @param array $definitions
+   *   Plugin definitions.
+   *
+   * @return array
+   *   Drupal extension definitions, keyed by extension ID
+   */
+  protected function getProviders(array $definitions): array {
+    $themes = $this->themeList->getAllInstalledInfo();
+    $modules = $this->moduleList->getAllInstalledInfo();
+    $providers = [];
+
+    foreach ($definitions as $definition) {
+      $provider_id = $definition['provider'];
+
+      if (\in_array($provider_id, self::HIDE_PROVIDER, TRUE)) {
+        continue;
+      }
+      $provider = $themes[$provider_id] ?? $modules[$provider_id] ?? NULL;
+
+      if (!$provider) {
+        continue;
+      }
+      $provider['count'] = isset($providers[$provider_id]) ? ($providers[$provider_id]['count']) + 1 : 1;
+      $providers[$provider_id] = $provider;
+    }
+
+    return $providers;
   }
 
   /**
@@ -429,10 +480,16 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     $definitions = $this->sdcManager->getSortedDefinitions();
     $configuration = $this->getConfiguration();
 
+    $exclude_by_id = \preg_split('/\s+/', \trim($configuration['exclude_id'] ?? ''));
+
     $filtered_definitions = $grouped_definitions = [];
 
     foreach ($definitions as $id => $definition) {
       if (isset($definition['provider']) && \in_array($definition['provider'], self::HIDE_PROVIDER, TRUE)) {
+        continue;
+      }
+
+      if (isset($definition['provider']) &&  $exclude_by_id !== FALSE && \in_array($id, $exclude_by_id, TRUE)) {
         continue;
       }
 
@@ -503,38 +560,6 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     }
 
     return $options;
-  }
-
-  /**
-   * Get all providers.
-   *
-   * @param array $definitions
-   *   Plugin definitions.
-   *
-   * @return array
-   *   Drupal extension definitions, keyed by extension ID
-   */
-  protected function getProviders(array $definitions): array {
-    $themes = $this->themeList->getAllInstalledInfo();
-    $modules = $this->moduleList->getAllInstalledInfo();
-    $providers = [];
-
-    foreach ($definitions as $definition) {
-      $provider_id = $definition['provider'];
-
-      if (\in_array($provider_id, self::HIDE_PROVIDER, TRUE)) {
-        continue;
-      }
-      $provider = $themes[$provider_id] ?? $modules[$provider_id] ?? NULL;
-
-      if (!$provider) {
-        continue;
-      }
-      $provider['count'] = isset($providers[$provider_id]) ? ($providers[$provider_id]['count']) + 1 : 1;
-      $providers[$provider_id] = $provider;
-    }
-
-    return $providers;
   }
 
 }

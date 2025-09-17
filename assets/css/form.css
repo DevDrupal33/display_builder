@@ -1,3 +1,20 @@
+.display-builder.sl-theme-dark {
+  /* Some UO Styles adjustments for dark theme */
+  .form-check {
+    background-color: var(--sl-color-neutral-200) !important;
+    .form-check-label {
+      color: var(--sl-color-neutral-800) !important;
+    }
+  }
+  div:has(> .ui-styles-source-toolbar-plugin[type="radio"]:checked) {
+    background-color: rgb(255, 255, 255, 0.2) !important;
+  }
+  .ui-styles-source-select-plugin .bg-light {
+    background-color: rgb(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+  }
+}
+
+/* Fixes trying to be as global as possible. The theme can impact our form in a lot owf ways. */
 .display-builder .db-form {
   * {
     font-size: var(--sl-button-font-size-medium) !important;
@@ -30,114 +47,108 @@
     margin-top: 0.5rem;
   }
 
+  input.form-checkbox.form-check-input {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  p {
+    margin-bottom: 0.25rem;
+  }
+
   .form-item {
-    margin-block: 0.5rem;
+    margin-bottom: 0.25rem !important;
   }
 
-  /* Reset and adapt fieldset, details and summary */
-
-  summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    list-style: none;
-    font-size: var(--sl-button-font-size-medium);
-  }
-
-  summary::after {
-    width: 0;
-    height: 0;
-    content: "";
-    transition: 0.2s;
-    border-top: 8px solid var(--sl-color-neutral-500);
-    border-inline: 7px solid transparent;
-  }
-
-  details[open] > summary {
-    border-bottom: 0 none;
-  }
-
-  details[open] > summary::after {
-    transform: rotate(-180deg);
-  }
-
-  summary::-webkit-details-marker {
+  /* Hide the last weight field on ui pattern form */
+  [id$="-sources-0-weight"] {
     display: none;
   }
 
+  /* Global details styling. */
   details {
-    margin-bottom: 0.5rem;
-    padding: 0;
+    margin-bottom: 0.25rem;
+    padding: 0.125rem 0.25rem 0.125rem 0.25rem;
     border: 1px solid var(--sl-input-border-color);
     border-radius: var(--sl-input-border-radius-medium);
     box-shadow: var(--sl-shadow-small);
   }
 
-  details summary {
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--sl-input-border-radius-medium);
-    background-color: var(--sl-color-neutral-100);
+  summary {
+    /* Pin the custom marker to the container */
+    position: relative;
+    margin: 0.2rem;
+    padding: 0.2rem 0.5rem 0.2rem 0.2rem;
+    font-size: var(--sl-button-font-size-medium);
+    /* Register summary as an anchor element */
+    anchor-name: --summary;
+
+    &:hover {
+      color: var(--sl-color-neutral-900);
+      &::before,
+      &::after {
+        border-block-start-color: var(--sl-color-neutral-1000) !important;
+      }
+    }
+    &::marker {
+      content: "";
+    }
+
+    &::before,
+    &::after {
+      /* Anchor the shape to the summary */
+      position: absolute;
+      right: 8px;
+      width: 1rem;
+      height: 0;
+      /* Custom marker dimensions */
+      content: "";
+      border-block-start: 2px solid var(--sl-color-neutral-600);
+
+      /* Positions the lines */
+      inset-block-start: 50%;
+      inset-inline-end: 0;
+      position-anchor: --summary;
+      /* position-area: top end; */
+    }
+
+    /* Rotate just the ::after line to create a "+"" shape */
+    &::after {
+      transform: rotate(90deg);
+      transform-origin: 50%;
+    }
   }
 
-  /* Have a smaller global size and color for description text */
-  details {
-    color: var(--sl-color-neutral-600);
+  /* Rotate the line when open */
+  details[open] > summary::after {
+    transform: rotate(0deg);
   }
 
-  details {
-    padding: 0 0 0 0.5rem;
+  /* Table inside a ui patterns form. */
+  .table .delta-order {
+    max-width: 4rem;
   }
-
-  details > * {
+  .table .field-multiple-drag {
+    max-width: 1.5rem;
+    padding-right: 0.125rem;
+    padding-left: 0.125rem;
+    .handle {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+    }
+  }
+  .table > caption {
     padding: 0;
   }
-
-  form details > *:last-child {
-    margin-bottom: 0.5rem;
+  .table td:empty {
+    padding: 0;
   }
-
-  details > summary {
-    margin-left: -0.5rem;
+  .table > :not(caption) > * > * {
+    border-bottom-width: 0;
+    background-color: transparent;
   }
-
-  details > div {
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
-    padding: 0 0.1rem 0.1rem 0;
-  }
-
-  details summary,
-  details label,
-  details input {
-    color: var(--sl-color-neutral-800);
-  }
-
-  details summary {
-    padding: 0.5rem;
-    font-weight: normal;
-  }
-
-  details label {
-    display: inline-block;
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
-    margin-left: 0.25rem;
-  }
-
-  details > .js-form-type-checkbox {
-    margin-top: 1rem;
-  }
-
-  details[open] {
-    padding: 0 0.5rem 0 0.5rem;
-  }
-
-  details[open] summary {
-    border-radius: 5px 5px 0 0;
-    background-color: var(--sl-color-primary-300);
-  }
-
-  .form-check .form-check-input {
-    margin-left: 0;
+  .tabledrag-toggle-weight-wrapper button {
+    color: var(--sl-color-neutral-600);
   }
 }

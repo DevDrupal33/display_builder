@@ -5,48 +5,57 @@
   --layers-color-target: var(--sl-color-teal-600);
 }
 
-.db-island-layers .db-dropzone--root {
-  padding: 0.5rem;
-  outline: var(--layers-slot-outline-width) var(--layers-color-target) var(--layers-slot-outline-type-light);
+.display-builder.sl-theme-dark {
+  --layers-color-strong: var(--sl-color-warning-600);
+  --layers-color-light: var(--sl-color-sky-200);
+  --layers-color-active: var(--sl-color-sky-300);
+  --layers-color-target: var(--sl-color-teal-600);
 }
 
-.db-layer {
-  position: relative;
-  min-height: 1rem;
-  margin: 0 0 0.5rem 0;
-  padding: 3px 6px;
-  cursor: move;
-  border: dashed 1px var(--layers-color-strong);
-  background: var(--sl-color-neutral-100);
-  font-size: 0.9rem;
-}
+.db-island-layers {
+  .db-dropzone--root {
+    padding: 0.5rem;
+    outline: var(--layers-slot-outline-width) var(--layers-color-target) var(--layers-slot-outline-type-light);
+  }
 
-.db-layer:hover {
-  border-color: var(--layers-color-target);
-  background: var(--sl-color-neutral-200);
-}
+  .db-layer {
+    position: relative;
+    min-height: 1rem;
+    margin: 0 0 0.5rem 0;
+    padding: 3px 6px;
+    cursor: move;
+    border: dashed 1px var(--layers-color-strong);
+    background: var(--sl-color-neutral-100);
+    font-size: 0.9rem;
+  }
 
-.db-layer--block {
-  padding: 0.5rem 0 0.5rem 0.5rem;
-  border-radius: 4px;
-  background: var(--layers-color-light);
-}
+  .db-layer:hover {
+    border-color: var(--layers-color-target);
+    background: var(--sl-color-neutral-200);
+  }
 
-.db-layer--block:hover {
-  border-style: dashed;
-  background: var(--layers-color-active);
-}
+  .db-layer--block {
+    padding: 0.5rem 0 0.5rem 0.5rem;
+    border-radius: 4px;
+    background: var(--layers-color-light);
+  }
 
-.db-layer__title {
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: bold;
-}
+  .db-layer--block:hover {
+    border-style: dashed;
+    background: var(--layers-color-active);
+  }
 
-.db-layer__children {
-  padding-left: 0.7rem;
-}
+  .db-layer__title {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: bold;
+  }
 
-.db-layer__children > slot {
-  margin-top: 0.7rem;
+  .db-layer__children {
+    padding-left: 0.7rem;
+  }
+
+  .db-layer__children > slot {
+    margin-top: 0.7rem;
+  }
 }

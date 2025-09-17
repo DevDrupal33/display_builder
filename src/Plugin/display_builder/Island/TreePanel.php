@@ -151,6 +151,10 @@ class TreePanel extends BuilderPanel {
     $instance_id = $instance_id ?: $data['_node_id'];
     $label = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
 
+    if (isset($data['source_id']) && $data['source_id'] === 'entity_field') {
+      $label['summary'] = (string) $this->t('Field: @label', ['@label' => $label['label']]);
+    }
+
     return [
       '#type' => 'component',
       '#component' => 'display_builder:tree_item',
@@ -164,7 +168,7 @@ class TreePanel extends BuilderPanel {
         'data-node-id' => $instance_id,
         // This label is used for contextual menu.
         // @see assets/js/contextual_menu.js
-        'data-node-title' => $label['label'],
+        'data-node-title' => $label['summary'],
         'data-slot-position' => $index,
         'data-menu-type' => 'block',
       ],

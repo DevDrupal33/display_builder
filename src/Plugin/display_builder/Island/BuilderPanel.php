@@ -189,8 +189,6 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
       return NULL;
     }
 
-    $label = $data['source_id'] ?? $data['_node_id'] ?? NULL;
-
     $classes = ['db-block'];
 
     if (isset($data['source']['plugin_id'])) {
@@ -208,11 +206,23 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
       }
     }
 
+    $label = $data['source_id'] ?? $data['_node_id'] ?? NULL;
+
+    if (isset($data['source_id']) && $data['source_id'] === 'entity_field') {
+      $label = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
+      $label['summary'] = (string) $this->t('Field: @label', ['@label' => $label['label']]);
+    }
+
     // This is the placeholder without configuration or content yet.
     if ($this->isEmpty($build) || $is_empty) {
       // Keep the placeholder if the block is not renderable.
-      $label = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
-      $build = $this->buildPlaceholderButton($label['summary']);
+      $label_info = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
+
+      if (isset($data['source_id']) && $data['source_id'] === 'entity_field') {
+        $label_info['summary'] = (string) $this->t('Field: @label', ['@label' => $label_info['summary']]);
+        $is_empty = FALSE;
+      }
+      $build = $this->buildPlaceholderButton($label_info['summary']);
       // Highlight in the view to show it's a temporary block waiting for
       // configuration.
       $build['#attributes']['class'][] = 'db-background';
@@ -228,10 +238,14 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
 
     // This label is used for contextual menu.
     // @see assets/js/contextual_menu.js
+    // The 'data-node-title' attribute is expected to contain a human-readable
+    // label or summary describing the block instance. This value is usd in the
+    // contextual menu for user actions such as edit, delete. The format should
+    // be a plain string, typically the label or field summary.
     $build['#attributes']['data-node-title'] = $label['summary'] ?? $label;
     $build['#attributes']['data-slot-position'] = $index;
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['label'] ?? $label, $index);
+    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['summary'] ?? $label, $index);
   }
 
   /**
