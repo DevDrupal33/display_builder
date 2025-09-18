@@ -37,3 +37,5 @@ libraryOverrides:
     - htmx/drupal
     # Introduced by navigation module, internal but we can rely on it for now.
     - core/internal.floating-ui
+    # Seems require to avoid a bug on ajax. see #3547315
+    - core/internal.jquery.form
