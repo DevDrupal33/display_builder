@@ -9,13 +9,14 @@
  * for a given builder element, supporting plugin hooks, menu item updates,
  * and integration with Drupal's LocalStorageManager for copy/paste actions.
  *
+ * Menu accept plugins with the following hook:
+ * - onMenuOpen(menuInstance, instance, slotData, copyInstance)
+ *
  * @class
  *
  * @example
  * // Usage example:
  * const menu = new ContextualMenu(islandElement, floatingUIOptions, menu, true);
- *
- * @see https://www.drupal.org/docs/develop/javascript-api/javascript-api-overview
  *
  * @param {HTMLElement} island
  *   The DOM element representing the builder "island" to attach the menu to.
