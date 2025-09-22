@@ -5,21 +5,15 @@
 /* cspell:ignore uidom */
 ((Drupal, once, { computePosition, offset, shift, flip }) => {
   /**
-   * Disable all links in preview islands.
+   * Disable all links in an element.
    *
-   * @param {HTMLElement} island
-   *   The builder element to disable links inside
+   * @param {HTMLElement} element
+   *   The element that contain links to disable.
    *
    * @listens event:click
    */
-  function disableInsideLinks(island) {
-    if (
-      !island.classList.contains('db-island-builder') &&
-      !island.classList.contains('db-island-preview')
-    ) {
-      return;
-    }
-    island.querySelectorAll('a').forEach((link) => {
+  function disableInsideLinks(element) {
+    element.querySelectorAll('a').forEach((link) => {
       if (link.closest('div').classList === 'contextual') {
         return;
       }
@@ -122,6 +116,7 @@
       }
     });
 
+    // Highlight the active instance after request.
     builder.addEventListener('htmx:afterRequest', (event) => {
       builder.classList.remove('db-htmx-before-request');
       const url = new URL(event.detail.xhr.responseURL);
@@ -131,6 +126,20 @@
           builder.setAttribute('data-active-instance', instance.dataset.nodeId);
         }
       });
+    });
+
+    // Try to disable links after swap in the builder.
+    builder.addEventListener('htmx:afterSwap', (event) => {
+      const tagName = event.detail?.elt?.tagName;
+      // Skip form and tree items to avoid breaking their internal behaviors.
+      if (!tagName || tagName === 'FORM' || tagName === 'SL-TREE-ITEM') {
+        return;
+      }
+      // Skip the layers panel, we have no links here.
+      if (event.detail.elt.classList.contains('db-layer')) {
+        return;
+      }
+      disableInsideLinks(event.detail.elt);
     });
   }
 
@@ -157,14 +166,19 @@
         },
       );
 
-      // @todo limit to islands with possible menu.
+      once(
+        'dbIslandDisableLink',
+        '.db-island-builder, .db-island-preview',
+        context,
+      ).forEach((island) => {
+        disableInsideLinks(island);
+      });
+
       once(
         'dbIslandInit',
         '.db-island-builder, .db-island-layers, .db-island-tree',
         context,
       ).forEach((island) => {
-        disableInsideLinks(island);
-
         const menu = document.querySelector('.db-menu');
         if (!menu) return;
 
