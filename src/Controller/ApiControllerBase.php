@@ -66,7 +66,8 @@ abstract class ApiControllerBase extends ControllerBase {
     protected MemoryCacheInterface $memoryCache,
     protected RendererInterface $renderer,
     protected TimeInterface $time,
-    #[Autowire(service: 'tempstore.shared')] protected SharedTempStoreFactory $sharedTempStoreFactory,
+    #[Autowire(service: 'tempstore.shared')]
+    protected SharedTempStoreFactory $sharedTempStoreFactory,
     protected SessionInterface $session,
   ) {}
 

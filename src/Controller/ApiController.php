@@ -11,9 +11,9 @@ use Drupal\Core\Form\FormAjaxException;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextInterface;
+use Drupal\Core\Render\AttachmentsResponseProcessorInterface;
 use Drupal\Core\Render\BareHtmlPageRenderer;
 use Drupal\Core\Render\HtmlResponse;
-use Drupal\Core\Render\HtmlResponseAttachmentsProcessor;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
@@ -41,14 +41,16 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   private BareHtmlPageRenderer $bareHtmlPageRenderer;
 
   public function __construct(
-    EventDispatcherInterface $eventDispatcher,
-    MemoryCacheInterface $memoryCache,
-    RendererInterface $renderer,
-    TimeInterface $time,
-    #[Autowire(service: 'tempstore.shared')] SharedTempStoreFactory $sharedTempStoreFactory,
-    SessionInterface $session,
+    protected EventDispatcherInterface $eventDispatcher,
+    protected MemoryCacheInterface $memoryCache,
+    protected RendererInterface $renderer,
+    protected TimeInterface $time,
+    #[Autowire(service: 'tempstore.shared')]
+    protected SharedTempStoreFactory $sharedTempStoreFactory,
+    protected SessionInterface $session,
     private IslandPluginManagerInterface $islandPluginManager,
-    #[Autowire(service: 'html_response.attachments_processor')] private HtmlResponseAttachmentsProcessor $htmlResponseAttachmentsProcessor,
+    #[Autowire(service: 'html_response.attachments_processor')]
+    private AttachmentsResponseProcessorInterface $htmlResponseAttachmentsProcessor,
   ) {
     parent::__construct($eventDispatcher, $memoryCache, $renderer, $time, $sharedTempStoreFactory, $session);
     $this->bareHtmlPageRenderer = new BareHtmlPageRenderer($this->renderer, $this->htmlResponseAttachmentsProcessor);
