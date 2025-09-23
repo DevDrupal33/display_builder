@@ -8,6 +8,7 @@ use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandConfigurationFormInterface;
@@ -146,11 +147,22 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
       $category_choices = $category_data['choices'];
 
       foreach ($category_choices as $choice) {
-        $build[] = $this->buildPlaceholderButton(
-          $choice['label'],
-          $choice['data'] ?? [],
-          $choice['keywords'] ?? ''
-        );
+        if ($choice['preview']) {
+          $build[] = $this->buildPlaceholderButtonWithPreview(
+            $builder_id,
+            $choice['label'],
+            $choice['data'] ?? [],
+            $choice['preview'],
+            $choice['keywords'] ?? ''
+          );
+        }
+        else {
+          $build[] = $this->buildPlaceholderButton(
+            $choice['label'],
+            $choice['data'] ?? [],
+            $choice['keywords'] ?? ''
+          );
+        }
       }
     }
 
@@ -369,6 +381,7 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
           'label' => $definition['label'] ?? $source_id,
           'data' => ['source_id' => $source_id],
           'keywords' => \sprintf('%s %s %s', $definition['id'], $definition['label'] ?? $source_id, $definition['description'] ?? ''),
+          'preview' => FALSE,
         ];
 
         continue;
@@ -379,6 +392,7 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
         if (!$this->isChoiceValid($choice, $definition, $excluded_providers)) {
           continue;
         }
+        $preview_url = Url::fromRoute('display_builder.api_block_preview', ['block_id' => $choice_id]);
         $choice_label = $choice['label'] ?? $choice_id;
         $group_label = self::getChoiceGroupLabel($choice, $definition);
         $this->choices[] = [
@@ -389,6 +403,7 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
             'source' => $source->getChoiceSettings($choice_id),
           ],
           'keywords' => \sprintf('%s %s %s %s', $definition['id'], $choice_label, $definition['description'] ?? '', $choice_id),
+          'preview' => $preview_url,
         ];
       }
     }
