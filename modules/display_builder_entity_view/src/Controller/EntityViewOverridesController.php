@@ -40,8 +40,6 @@ final class EntityViewOverridesController extends IntegrationControllerBase {
    *   A render array containing the display builder.
    */
   public function getBuilder(RouteMatchInterface $route_match): array {
-    \Drupal::service('page_cache_kill_switch')->trigger(); // phpcs:ignore
-
     $entity_type_id = $route_match->getParameter('entity_type_id');
     /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
     $entity = $route_match->getParameter($entity_type_id);

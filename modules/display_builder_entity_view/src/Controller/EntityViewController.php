@@ -46,12 +46,6 @@ final class EntityViewController extends IntegrationControllerBase {
    *   A render array.
    */
   public function getBuilder(RouteMatchInterface $route_match): array {
-    // Builder is on the front theme, render cache is too hard and changes are
-    // not working with cache (move something and refresh, previous version
-    // will be shown).
-    // @todo evaluate with #3529284
-    \Drupal::service('page_cache_kill_switch')->trigger(); // phpcs:ignore
-
     $entity_type_id = $route_match->getParameter('entity_type_id');
     $bundle = $route_match->getParameter('bundle');
     $view_mode = $route_match->getParameter('view_mode_name');

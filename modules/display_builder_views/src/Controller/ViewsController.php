@@ -45,9 +45,6 @@ class ViewsController extends IntegrationControllerBase {
    *   The display builder renderable.
    */
   public function getBuilder(ViewEntityInterface $view, string $display): array {
-    // Disable cache page.
-    \Drupal::service('page_cache_kill_switch')->trigger(); // phpcs:ignore
-
     // The view here is not a "real" View storage, but the copy from the
     // tempstore provided by `view_ui` module. So, we have access to the state
     // not yet saved in config.
