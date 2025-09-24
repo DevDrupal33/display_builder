@@ -18,7 +18,10 @@ declare(strict_types=1);
 function display_builder_entity_view_preprocess_entity(array &$variables): void {
   $variables += ['content' => []];
 
-  if (isset($variables['elements']['content'])) {
+  if ($variables['theme_hook_original'] == 'block' && isset($variables['elements']['content']['content'])) {
+    $variables['content']['content'] = $variables['elements']['content']['content'];
+  }
+  elseif (isset($variables['elements']['content'])) {
     $variables['content']['content'] = $variables['elements']['content'];
   }
 }
