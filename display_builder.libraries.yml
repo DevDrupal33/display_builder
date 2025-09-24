@@ -73,6 +73,9 @@ preview:
       ./assets/css/preview.css: {}
   js:
     ./assets/js/preview.js: {}
+  dependencies:
+    - core/drupal
+    - core/internal.floating-ui
 
 contextual_menu:
   js:

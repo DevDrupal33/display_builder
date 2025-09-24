@@ -13,3 +13,8 @@
   border: 1px solid #ccc !important;
   border-radius: 5px !important;
 }
+
+/* Navigation left sidebar support. */
+body:has(> .admin-toolbar) .db-preview {
+  z-index: calc(var(--drupal-admin-z-index, 501) + 4);
+}
