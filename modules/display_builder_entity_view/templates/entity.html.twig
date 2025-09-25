@@ -1,1 +1,7 @@
-{{ content }}
+{% if attributes.storage() %}
+<div{{ attributes }}>
+{% endif %}
+  {{ content }}
+{% if attributes.storage() %}
+</div>
+{% endif %}
