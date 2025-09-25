@@ -213,9 +213,15 @@ class ApiPreviewController extends ControllerBase {
   private function renderSource(array $data): array {
     /** @var \Drupal\ui_patterns\Element\ComponentElementBuilder $builder */
     $builder = \Drupal::service('ui_patterns.component_element_builder'); // @phpcs:ignore
-    $build = $builder->buildSource([], 'content', [], $data, []) ?? [];
 
-    return $build['#slots']['content'][0] ?? [];
+    try {
+      $build = $builder->buildSource([], 'content', [], $data, []) ?? [];
+
+      return $build['#slots']['content'][0] ?? [];
+    }
+    catch (\Throwable $th) {
+      return [];
+    }
   }
 
 }

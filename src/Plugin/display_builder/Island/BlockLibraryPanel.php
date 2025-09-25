@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
-use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\BlockLibrarySourceHelper;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandConfigurationFormInterface;
 use Drupal\display_builder\IslandConfigurationFormTrait;
@@ -34,15 +33,6 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
 
   use IslandConfigurationFormTrait;
 
-  private const HIDE_BLOCK = [
-    'help_block',
-    'system_messages_block',
-    'htmx_loader',
-    'broken',
-    'system_main_block',
-    'page_title_block',
-  ];
-
   private const HIDE_SOURCE = [
     'component',
     // Used only for imports from Manage Display and Layout Builder.
@@ -55,11 +45,6 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
    * The sources.
    */
   protected ?array $sources = NULL;
-
-  /**
-   * The choices from all sources.
-   */
-  protected ?array $choices = NULL;
 
   /**
    * The module list extension service.
@@ -129,41 +114,21 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $builder_id = (string) $builder->id();
-    $categories = $this->getGroupedChoices();
+    $configuration = $this->getConfiguration();
+
+    $exclude_providers = \array_merge(
+      $configuration['exclude'] ?? [],
+      self::HIDE_PROVIDER
+    );
+    $categories = BlockLibrarySourceHelper::getGroupedChoices(
+      $this->getSources(),
+      $exclude_providers,
+    );
+
     $build = [];
 
     foreach ($categories as $category_data) {
-      if (!empty($category_data['label'])) {
-        $build[] = [
-          [
-            '#type' => 'html_tag',
-            '#tag' => 'h4',
-            // We hide the group titles on search.
-            '#attributes' => ['class' => 'db-filter-hide-on-search'],
-            '#value' => $category_data['label'],
-          ],
-        ];
-      }
-      $category_choices = $category_data['choices'];
-
-      foreach ($category_choices as $choice) {
-        if ($choice['preview']) {
-          $build[] = $this->buildPlaceholderButtonWithPreview(
-            $builder_id,
-            $choice['label'],
-            $choice['data'] ?? [],
-            $choice['preview'],
-            $choice['keywords'] ?? ''
-          );
-        }
-        else {
-          $build[] = $this->buildPlaceholderButton(
-            $choice['label'],
-            $choice['data'] ?? [],
-            $choice['keywords'] ?? ''
-          );
-        }
-      }
+      $build[] = $this->buildCategorySection($category_data, $builder_id);
     }
 
     return $this->buildDraggables($builder_id, $build);
@@ -177,115 +142,35 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
   }
 
   /**
-   * Get the group label for a choice.
+   * Build a category section.
    *
-   * @param array $choice
-   *   The choice to get the group for.
-   * @param array $source_definition
-   *   The source definition to use for the group.
-   *
-   * @return string
-   *   The group label for the choice.
-   */
-  private static function getChoiceGroupLabel(array &$choice, array &$source_definition): string {
-    $group = $source_definition['label'] ?? '';
-
-    switch ($source_definition['id']) {
-      case 'block':
-        $block_id = $choice['original_id'] ?? '';
-
-        if (\str_starts_with($block_id, 'views_block:') && $choice['group']) {
-          $group = $choice['group'];
-        }
-        elseif (\str_starts_with($block_id, 'system_menu_block:') && $choice['group']) {
-          $group = $choice['group'];
-        }
-        else {
-          $group = new TranslatableMarkup('Others');
-        }
-
-        break;
-
-      case 'entity_reference':
-        $group = new TranslatableMarkup('Referenced entities');
-
-        break;
-
-      case 'entity_field':
-        $group = new TranslatableMarkup('Fields');
-
-        break;
-
-      default:
-        break;
-    }
-
-    return ($group instanceof MarkupInterface) ? (string) $group : $group;
-  }
-
-  /**
-   * Get the choices grouped by category.
+   * @param array $category_data
+   *   The category data.
+   * @param string $builder_id
+   *   The builder ID.
    *
    * @return array
-   *   An array of grouped choices.
+   *   The render array for the category section.
    */
-  private function getGroupedChoices(): array {
-    $choices = $this->getChoices();
-    $categories = [];
+  private function buildCategorySection(array $category_data, string $builder_id): array {
+    $section = [];
 
-    foreach ($choices as $choice) {
-      $category = $choice['group'] ?? '';
-
-      if ($category instanceof MarkupInterface) {
-        $category = (string) $category;
-      }
-
-      if (!isset($categories[$category])) {
-        $categories[$category] = [
-          'label' => $category,
-          'metadata' => $choice,
-          'choices' => [],
-        ];
-      }
-      $categories[$category]['choices'][] = $choice;
+    if (!empty($category_data['label'])) {
+      $section[] = [
+        '#type' => 'html_tag',
+        '#tag' => 'h4',
+        '#attributes' => ['class' => 'db-filter-hide-on-search'],
+        '#value' => $category_data['label'],
+      ];
     }
-    self::sortGroupedChoices($categories);
 
-    return $categories;
-  }
+    foreach ($category_data['choices'] as $choice) {
+      $section[] = $choice['preview']
+        ? $this->buildPlaceholderButtonWithPreview($builder_id, $choice['label'], $choice['data'] ?? [], $choice['preview'], $choice['keywords'] ?? '')
+        : $this->buildPlaceholderButton($choice['label'], $choice['data'] ?? [], $choice['keywords'] ?? '');
+    }
 
-  /**
-   * Sorts the grouped choices.
-   *
-   * This method sorts the categories by their labels, placing empty category
-   * first, views blocks are sorted to the end of the list.
-   *
-   * @param array $categories
-   *   The categories to sort, passed by reference.
-   */
-  private static function sortGroupedChoices(array &$categories): void {
-    // Sort categories : empty first, views at the end.
-    \usort($categories, static function ($a, $b) {
-      if (empty($a['label'])) {
-        return -1;
-      }
-
-      if (empty($b['label'])) {
-        return 1;
-      }
-      $source_id_a = $a['metadata']['data']['source_id'] ?? '';
-      $source_id_b = $b['metadata']['data']['source_id'] ?? '';
-
-      if (($source_id_a === 'block') && ($source_id_b !== 'block')) {
-        return 1;
-      }
-
-      if (($source_id_b === 'block') && ($source_id_a !== 'block')) {
-        return -1;
-      }
-
-      return \strnatcmp($a['label'], $b['label']);
-    });
+    return $section;
   }
 
   /**
@@ -297,118 +182,31 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
    *   An array of sources.
    */
   private function getSources(): array {
-    if ($this->sources === NULL) {
-      $definitions = $this->sourceManager->getDefinitionsForPropType('slot', $this->configuration['contexts'] ?? []);
-      $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager->getSlotPropType()]];
+    if ($this->sources !== NULL) {
+      return $this->sources;
+    }
 
-      foreach ($definitions as $source_id => $definition) {
-        if (\in_array($source_id, self::HIDE_SOURCE, TRUE)) {
-          continue;
-        }
-        $source = $this->sourceManager->createInstance($source_id,
-          SourcePluginBase::buildConfiguration('slot', $slot_definition, ['source' => []], $this->configuration['contexts'] ?? [])
-        );
-        $this->sources[$source_id] = [
-          'definition' => $definition,
-          'source' => $source,
-        ];
+    $definitions = $this->sourceManager->getDefinitionsForPropType('slot', $this->configuration['contexts'] ?? []);
+    $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager->getSlotPropType()]];
 
-        if ($source instanceof SourceWithChoicesInterface) {
-          $this->sources[$source_id]['choices'] = $source->getChoices();
-        }
+    foreach ($definitions as $source_id => $definition) {
+      if (\in_array($source_id, self::HIDE_SOURCE, TRUE)) {
+        continue;
+      }
+      $source = $this->sourceManager->createInstance($source_id,
+        SourcePluginBase::buildConfiguration('slot', $slot_definition, ['source' => []], $this->configuration['contexts'] ?? [])
+      );
+      $this->sources[$source_id] = [
+        'definition' => $definition,
+        'source' => $source,
+      ];
+
+      if ($source instanceof SourceWithChoicesInterface) {
+        $this->sources[$source_id]['choices'] = $source->getChoices();
       }
     }
 
     return $this->sources;
-  }
-
-  /**
-   * Validate a choice against the source definition and allowed providers.
-   *
-   * @param array $choice
-   *   The choice to validate.
-   * @param array $source_definition
-   *   The source definition.
-   * @param array $excluded_providers
-   *   The excluded providers.
-   *
-   * @return bool
-   *   Whether the choice is valid or not.
-   */
-  private function isChoiceValid(array &$choice, array &$source_definition, array $excluded_providers = []): bool {
-    $provider = $choice['provider'] ?? '';
-
-    if ($provider) {
-      if (\in_array($provider, self::HIDE_PROVIDER, TRUE) && \in_array($provider, $excluded_providers, TRUE)) {
-        return FALSE;
-      }
-    }
-
-    if ($source_definition['id'] === 'block') {
-      $block_id = $choice['original_id'] ?? '';
-
-      if ($block_id && \in_array($block_id, self::HIDE_BLOCK, TRUE)) {
-        return FALSE;
-      }
-    }
-
-    return TRUE;
-  }
-
-  /**
-   * Get the choices from all sources.
-   *
-   * @return array
-   *   An array of choices.
-   */
-  private function getChoices(): array {
-    if ($this->choices !== NULL) {
-      return $this->choices;
-    }
-
-    $this->choices = [];
-
-    $configuration = $this->getConfiguration();
-    $excluded_providers = $configuration['exclude'] ?? [];
-    $sources = $this->getSources();
-
-    foreach ($sources as $source_id => $source_data) {
-      $definition = $source_data['definition'];
-      $source = $source_data['source'];
-
-      if (!isset($source_data['choices'])) {
-        $this->choices[] = [
-          'label' => $definition['label'] ?? $source_id,
-          'data' => ['source_id' => $source_id],
-          'keywords' => \sprintf('%s %s %s', $definition['id'], $definition['label'] ?? $source_id, $definition['description'] ?? ''),
-          'preview' => FALSE,
-        ];
-
-        continue;
-      }
-      $choices = $source_data['choices'];
-
-      foreach ($choices as $choice_id => $choice) {
-        if (!$this->isChoiceValid($choice, $definition, $excluded_providers)) {
-          continue;
-        }
-        $preview_url = Url::fromRoute('display_builder.api_block_preview', ['block_id' => $choice_id]);
-        $choice_label = $choice['label'] ?? $choice_id;
-        $group_label = self::getChoiceGroupLabel($choice, $definition);
-        $this->choices[] = [
-          'group' => $group_label,
-          'label' => $choice_label,
-          'data' => [
-            'source_id' => $source_id,
-            'source' => $source->getChoiceSettings($choice_id),
-          ],
-          'keywords' => \sprintf('%s %s %s %s', $definition['id'], $choice_label, $definition['description'] ?? '', $choice_id),
-          'preview' => $preview_url,
-        ];
-      }
-    }
-
-    return $this->choices;
   }
 
   /**

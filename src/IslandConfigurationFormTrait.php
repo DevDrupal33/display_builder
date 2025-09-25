@@ -35,6 +35,10 @@ trait IslandConfigurationFormTrait {
     $configuration = [];
 
     foreach ($values as $key => $value) {
+      if (($key === 'exclude' || $key === 'status') && \is_array($value)) {
+        // Remove unchecked values.
+        $value = \array_filter($value);
+      }
       $configuration[$key] = $value;
     }
 
