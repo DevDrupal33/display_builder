@@ -225,7 +225,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
 
     $filter = $this->buildInput((string) $builder->id(), '', 'search', 'medium', 'off', $this->t('Filter by name'), TRUE, 'search');
     // @see assets/js/search.js
-    $filter['#attributes']['class'] = ['db-search-contextual'];
+    $filter['#attributes']['class'] = ['db-search-instance'];
 
     return [
       '#type' => 'html_tag',

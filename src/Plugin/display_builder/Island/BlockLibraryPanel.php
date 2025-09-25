@@ -131,7 +131,13 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
       $build[] = $this->buildCategorySection($category_data, $builder_id);
     }
 
-    return $this->buildDraggables($builder_id, $build);
+    return [
+      '#type' => 'component',
+      '#component' => 'display_builder:library_panel',
+      '#slots' => [
+        'content' => $this->buildDraggables($builder_id, $build),
+      ],
+    ];
   }
 
   /**

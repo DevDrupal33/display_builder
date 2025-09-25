@@ -20,7 +20,8 @@
     attach(context, settings) {
       const debug = settings?.dbDebug ?? false;
 
-      once('dbSearch', '.db-search-contextual', context).forEach((input) => {
+      // Search inside Instance form, should be drawer end (right).
+      once('dbSearch', '.db-search-instance', context).forEach((input) => {
         // Debounce to wait for tipping ad not throw too much search.
         const eventHandler = debounce((event) => {
           triggerContextualSearch(context, event.target);
@@ -30,6 +31,7 @@
         input.addEventListener('sl-input', eventHandler);
       });
 
+      // Search for the library, should be drawer start (left);
       once('dbLibrarySearch', '.db-search-library', context).forEach(
         (filterInput) => {
           // Debounce to wait for tipping ad not throw too much search.
@@ -53,11 +55,17 @@
    *   The debug flag.
    */
   const triggerLibrarySearch = (element, input, debug) => {
+    if (!input.dataset?.searchContainerId) return;
+    const containerId = input.dataset.searchContainerId;
     if (!input.dataset?.elementsSelector) return;
-    const elements = element.querySelectorAll(input.dataset.elementsSelector);
-    if (debug)
-      console.warn(`No elements to search: ${input.dataset.elementsSelector}`);
-    if (!elements) return;
+    const selector = input.dataset.elementsSelector;
+
+    const elements = element.querySelectorAll(`#${containerId} ${selector}`);
+    if (!elements) {
+      if (debug)
+        console.warn(`No elements to search in: ${containerId} ${selector}`);
+      return;
+    }
 
     const query = input.value.trim().toLowerCase();
 

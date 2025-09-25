@@ -13,7 +13,7 @@
       clearable: true,
       attributes: {
         class: ['db-search-library'],
-        'data-target': id,
+        'data-search-container-id': id,
         'data-elements-selector': '.db-placeholder',
         autofocus: true,
       },
@@ -22,7 +22,7 @@
   </div>
 
   {% if tabs %}
-  <div class="db-library-island-wrap">
+  <div class="db-library-island-tabs">
     {{ tabs }}
   </div>
   {% endif %}

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Controller;
 
 use Drupal\Component\Datetime\TimeInterface;
-use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Form\FormAjaxException;
 use Drupal\Core\Form\FormState;
@@ -42,7 +41,6 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
   public function __construct(
     protected EventDispatcherInterface $eventDispatcher,
-    protected MemoryCacheInterface $memoryCache,
     protected RendererInterface $renderer,
     protected TimeInterface $time,
     #[Autowire(service: 'tempstore.shared')]
@@ -52,7 +50,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     #[Autowire(service: 'html_response.attachments_processor')]
     private AttachmentsResponseProcessorInterface $htmlResponseAttachmentsProcessor,
   ) {
-    parent::__construct($eventDispatcher, $memoryCache, $renderer, $time, $sharedTempStoreFactory, $session);
+    parent::__construct($eventDispatcher, $renderer, $time, $sharedTempStoreFactory, $session);
     $this->bareHtmlPageRenderer = new BareHtmlPageRenderer($this->renderer, $this->htmlResponseAttachmentsProcessor);
   }
 

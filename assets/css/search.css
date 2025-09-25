@@ -1,21 +1,20 @@
 .display-builder .shoelace-button-search,
-.display-builder .db-search-contextual {
+.display-builder .db-search-instance {
   width: 100%;
 }
 
 /* Search filter tweaks to hide the form and handle results */
 /* @see components/display_builder/display_builder.js */
-.display-builder .db-form .db-search-contextual {
+.display-builder .db-form .db-search-instance {
   display: none;
 }
 /* @todo add instance form when possible, currently only apply to styles and
  skins because instance form do not have an easy to use markup */
-/* .display-builder .db-form:has(.shoelace-tabs [active][data-target$="instance_form"]) .db-search-contextual, */
-.display-builder .db-form:has(.shoelace-tabs [active][data-target$="ui_styles"]) .db-search-contextual,
-.display-builder .db-form:has(.shoelace-tabs [active][data-target$="ui_skins"]) .db-search-contextual {
+.display-builder .db-form:has(.shoelace-tabs [active][data-target$="ui_styles"]) .db-search-instance,
+.display-builder .db-form:has(.shoelace-tabs [active][data-target$="ui_skins"]) .db-search-instance {
   display: block;
 }
-.db-search-contextual {
+.db-search-instance {
   margin-bottom: 0.5rem;
 }
 .db-form-search-found .db-island-ui_styles .db-search-found,
@@ -38,7 +37,7 @@
 }
 
 .display-builder .shoelace-button-search,
-.db-form .db-search-contextual {
+.db-form .db-search-instance {
   margin-bottom: 0.5rem;
   padding: 0;
   border: 0 none;

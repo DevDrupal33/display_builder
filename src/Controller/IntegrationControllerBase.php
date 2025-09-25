@@ -35,7 +35,6 @@ abstract class IntegrationControllerBase extends ControllerBase {
     // will be shown).
     // @todo evaluate with #3529284
     \Drupal::service('page_cache_kill_switch')->trigger(); // phpcs:ignore
-
     $instance_id = $buildable->getInstanceId();
     $buildable->initInstanceIfMissing();
     $view_builder = $this->entityTypeManager()->getViewBuilder('display_builder_profile');

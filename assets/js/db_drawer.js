@@ -14,10 +14,12 @@ Drupal.displayBuilder = Drupal.displayBuilder || {};
  *   The builder.
  * @param {Object} trigger
  *   The trigger button element that was clicked.
+ * @param {Object} event
+ *   The event associated.
  * @prop {string} trigger.variant
  *   The current variant of the trigger button (e.g., 'default', 'primary').
  */
-Drupal.displayBuilder.handleSecondDrawer = (builder, trigger) => {
+Drupal.displayBuilder.handleSecondDrawer = (builder, trigger, event) => {
   const secondDrawer = builder.querySelector('#db-second-drawer');
   if (!secondDrawer) return;
 
@@ -26,7 +28,7 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger) => {
   if (secondDrawer?.open && trigger === activeSecondDrawerButton) {
     secondDrawer.hide();
     activeSecondDrawerButton = null;
-  } else {
+  } else if (!secondDrawer.open && event.type === 'click') {
     secondDrawer.show();
     activeSecondDrawerButton = trigger;
   }
@@ -40,7 +42,7 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger) => {
  * @param {Boolean} debug
  *   The debug flag.
  *
- * @listens event:click
+ * @listens event:mouseup
  */
 Drupal.displayBuilder.initDrawer = (builder, debug) => {
   const firstDrawer = builder.querySelector('#db-first-drawer');
@@ -62,9 +64,10 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
     );
     if (firstDrawerButtons.length > 0) {
       firstDrawerButtons.forEach((button) => {
-        button.addEventListener('click', () =>
-          handleFirstDrawerTriggerClick(button, builder),
-        );
+        button.addEventListener('mouseup', (e) => {
+          console.log(e);
+          handleFirstDrawerTriggerClick(button, builder);
+        });
       });
     }
   };

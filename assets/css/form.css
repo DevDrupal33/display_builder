@@ -79,12 +79,14 @@
     position: relative;
     margin: 0.2rem;
     padding: 0.2rem 0.5rem 0.2rem 0.2rem;
-    font-size: var(--sl-button-font-size-medium);
+    font-size: var(--sl-button-font-size-medium) !important;
+    line-height: 1.2rem;
     /* Register summary as an anchor element */
     anchor-name: --summary;
 
     &:hover {
       color: var(--sl-color-neutral-900);
+      background-color: transparent;
       &::before,
       &::after {
         border-block-start-color: var(--sl-color-neutral-1000) !important;
@@ -101,15 +103,23 @@
       right: 8px;
       width: 1rem;
       height: 0;
+      margin-block-start: inherit;
       /* Custom marker dimensions */
       content: "";
+      transition: inherit;
+      transform: inherit;
+      text-align: inherit;
       border-block-start: 2px solid var(--sl-color-neutral-600);
+      background-image: none;
+      line-height: 1.2rem;
 
       /* Positions the lines */
       inset-block-start: 50%;
       inset-inline-end: 0;
       position-anchor: --summary;
-      /* position-area: top end; */
+
+      /* Some reset to avoid conflict */
+      inset-inline-start: inherit;
     }
 
     /* Rotate just the ::after line to create a "+"" shape */

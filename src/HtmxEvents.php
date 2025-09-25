@@ -225,8 +225,8 @@ class HtmxEvents {
       // Data used for contextual menu or drawer name.
       'data-node-title' => $label,
       'data-slot-position' => $index,
-      'hx-on::after-swap' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this)', $builder_id),
-      'hx-on:click' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this)', $builder_id),
+      'hx-on::after-swap' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event)', $builder_id),
+      'hx-on:click' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event)', $builder_id),
     ];
 
     return $this->setHtmxAttributes($build, $url, 'click consume', 'get', $attributes);

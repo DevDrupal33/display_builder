@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Controller;
 
 use Drupal\Component\Datetime\TimeInterface;
-use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
@@ -63,7 +62,6 @@ abstract class ApiControllerBase extends ControllerBase {
 
   public function __construct(
     protected EventDispatcherInterface $eventDispatcher,
-    protected MemoryCacheInterface $memoryCache,
     protected RendererInterface $renderer,
     protected TimeInterface $time,
     #[Autowire(service: 'tempstore.shared')]
@@ -90,26 +88,9 @@ abstract class ApiControllerBase extends ControllerBase {
    */
   protected function createEventWithEnabledIsland($event_id, $data, $node_id, $parent_id): DisplayBuilderEvent {
     $builder_id = (string) $this->builder->id();
-    $key = \sprintf('db_%s_island_enable', $builder_id);
-    $island_configuration_key = \sprintf('db_%s_island_configuration', $builder_id);
-    $island_enabled = $this->memoryCache->get($key);
-    $island_configuration = $this->memoryCache->get($island_configuration_key);
 
-    if ($island_configuration === FALSE) {
-      $island_configuration = $this->builder->getProfile()->getIslandConfigurations();
-      $this->memoryCache->set($island_configuration_key, $island_configuration);
-    }
-    else {
-      $island_configuration = $island_configuration->data;
-    }
-
-    if ($island_enabled === FALSE) {
-      $island_enabled = $this->builder->getProfile()->getEnabledIslands();
-      $this->memoryCache->set($key, $island_enabled);
-    }
-    else {
-      $island_enabled = $island_enabled->data;
-    }
+    $island_configuration = $this->builder->getProfile()->getIslandConfigurations();
+    $island_enabled = $this->builder->getProfile()->getEnabledIslands();
 
     $event = new DisplayBuilderEvent($builder_id, $island_enabled, $island_configuration, $data, $node_id, $parent_id, $this->islandId);
     $this->eventDispatcher->dispatch($event, $event_id);
