@@ -41,7 +41,6 @@ use Drupal\ui_patterns\SourcePluginManager;
   ],
   links: [
     'add-form' => '/admin/structure/display-builder/preset/add',
-    'edit-form' => '/admin/structure/display-builder/preset/{pattern_preset}',
     'delete-form' => '/admin/structure/display-builder/preset/{pattern_preset}/delete',
     'collection' => '/admin/structure/display-builder/preset',
   ],

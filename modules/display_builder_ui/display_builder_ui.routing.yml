@@ -39,6 +39,7 @@ entity.pattern_preset.collection:
     _title: 'Pattern presets'
   requirements:
     _permission: 'administer pattern preset'
+
 entity.pattern_preset.add_form:
   path: '/admin/structure/display-builder/preset/add'
   defaults:
