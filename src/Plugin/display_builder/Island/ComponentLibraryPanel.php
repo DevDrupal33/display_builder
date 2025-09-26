@@ -410,6 +410,13 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
         $keywords = \sprintf('%s %s', $definition['label'], $definition['provider']);
         $build_variant = $this->buildPlaceholderButtonWithPreview($builder_id, $this->t('Default'), $data, $component_preview_url, $keywords);
         $build_variant['#attributes']['data-filter-child'] = $definition['machineName'];
+        // Label is used by default to set drawer title when dragging. It is set
+        // on RenderableBuilderTrait::buildPlaceholderButton(), so here we need
+        // to override it to have the proper label and not the variant name.
+        // @see assets/js/db_drawer.js
+        // @see src/RenderableBuilderTrait::buildPlaceholderButton()
+        $build_variant['#attributes']['data-node-title'] = $definition['label'];
+
         $build[] = $build_variant;
 
         continue;
@@ -428,6 +435,13 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
         $keywords = \sprintf('%s %s %s', $definition['label'], $variant['title'], $definition['provider']);
         $build_variant = $this->buildPlaceholderButtonWithPreview($builder_id, $variant['title'], $data, $component_preview_url, $keywords);
         $build_variant['#attributes']['data-filter-child'] = $definition['machineName'];
+        // Label is used by default to set drawer title when dragging. It is set
+        // on RenderableBuilderTrait::buildPlaceholderButton(), so here we need
+        // to override it to have the proper label and not the variant name.
+        // @see assets/js/db_drawer.js
+        // @see src/RenderableBuilderTrait::buildPlaceholderButton()
+        $build_variant['#attributes']['data-node-title'] = $definition['label'];
+
         $build[] = $build_variant;
       }
     }
@@ -465,6 +479,12 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
       // Used for search filter.
       $keywords = \sprintf('%s %s', $component->metadata->name, \str_replace(':', ' ', $component_id));
       $build = $this->buildPlaceholderCardWithPreview($component->metadata->name, $vals, $component_preview_url, $keywords, $thumbnail);
+      // Label is used by default to set drawer title when dragging. It is set
+      // on RenderableBuilderTrait::buildPlaceholderButton(), so here we need
+      // to override it to have the proper label and not the variant name.
+      // @see assets/js/db_drawer.js
+      // @see src/RenderableBuilderTrait::buildPlaceholderButton()
+      $build['#attributes']['data-node-title'] = $component->metadata->name;
       $components[] = $build;
     }
 

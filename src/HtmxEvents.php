@@ -36,7 +36,11 @@ class HtmxEvents {
       ]
     );
 
-    return $this->setHtmxAttributes($build, $url, 'click consume', 'delete');
+    $attributes = [
+      'hx-on:click' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event, "close")', $builder_id),
+    ];
+
+    return $this->setHtmxAttributes($build, $url, 'click consume', 'delete', $attributes);
   }
 
   /**
@@ -156,7 +160,11 @@ class HtmxEvents {
       ]
     );
 
-    return $this->setHtmxAttributes($build, $url, 'dragend consume', 'post');
+    $attributes = [
+      'hx-on:dragend' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event, "dragend")', $builder_id),
+    ];
+
+    return $this->setHtmxAttributes($build, $url, 'dragend consume', 'post', $attributes);
   }
 
   /**
@@ -187,7 +195,11 @@ class HtmxEvents {
       ]
     );
 
-    return $this->setHtmxAttributes($build, $url, 'dragend consume', 'post');
+    $attributes = [
+      'hx-on:dragend' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event, "dragend")', $builder_id),
+    ];
+
+    return $this->setHtmxAttributes($build, $url, 'dragend consume', 'post', $attributes);
   }
 
   /**
@@ -216,18 +228,20 @@ class HtmxEvents {
       ]
     );
 
-    // Only for icon case, remove suffix without loading label.
-    $label = \ucfirst(\trim(\str_replace(['renderable', '_'], ['', ' '], $title)));
-
     $attributes = [
       'tabindex' => '0',
       'data-node-id' => $node_id,
-      // Data used for contextual menu or drawer name.
-      'data-node-title' => $label,
-      'data-slot-position' => $index,
-      'hx-on::after-swap' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event)', $builder_id),
-      'hx-on:click' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event)', $builder_id),
+      'hx-on:click' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event, "click")', $builder_id),
     ];
+
+    // If not set before we add information for contextual menu or drawer label.
+    if (!isset($build['#attributes']['data-node-title'])) {
+      // Only for icon case, remove suffix without loading label.
+      $attributes['data-node-title'] = ucfirst(\trim(\str_replace(['renderable', '_'], ['', ' '], $title)));
+    }
+    if (!isset($build['#attributes']['data-slot-position'])) {
+      $attributes['data-slot-position'] = $index;
+    }
 
     return $this->setHtmxAttributes($build, $url, 'click consume', 'get', $attributes);
   }

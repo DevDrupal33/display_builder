@@ -206,18 +206,23 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
       }
     }
 
-    $label = $data['source_id'] ?? $data['_node_id'] ?? NULL;
+    $label_info = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
 
-    if (isset($data['source_id']) && $data['source_id'] === 'entity_field') {
-      $label = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
-      $label['summary'] = (string) $this->t('Field: @label', ['@label' => $label['label']]);
+    if (isset($data['source_id'])) {
+      switch ($data['source_id']) {
+        case 'entity_field':
+          $label_info['summary'] = (string) $this->t('Field: @label', ['@label' => $label_info['label']]);
+          break;
+
+        case 'block':
+          $label_info['summary'] = (string) $this->t('Block: @label', ['@label' => $label_info['summary']]);
+          break;
+      }
     }
 
     // This is the placeholder without configuration or content yet.
     if ($this->isEmpty($build) || $is_empty) {
       // Keep the placeholder if the block is not renderable.
-      $label_info = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
-
       if (isset($data['source_id']) && $data['source_id'] === 'entity_field') {
         $label_info['summary'] = (string) $this->t('Field: @label', ['@label' => $label_info['summary']]);
         $is_empty = FALSE;
@@ -242,10 +247,12 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
     // label or summary describing the block instance. This value is usd in the
     // contextual menu for user actions such as edit, delete. The format should
     // be a plain string, typically the label or field summary.
-    $build['#attributes']['data-node-title'] = $label['summary'] ?? $label;
+    $build['#attributes']['data-node-title'] = $label_info['summary'] ?? $data['source_id'] ?? $data['_node_id'] ?? '';
     $build['#attributes']['data-slot-position'] = $index;
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['summary'] ?? $label, $index);
+    $build = $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label_info['summary'] ?? $label_info['label'] ?? '', $index);
+
+    return $build;
   }
 
   /**

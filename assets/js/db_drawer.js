@@ -10,27 +10,74 @@ Drupal.displayBuilder = Drupal.displayBuilder || {};
 /**
  * Handles the click event for the second drawer trigger button.
  *
+ * Allow open and close second drawer based on a clicked element in the builder,
+ * layers or tree. Second click will close the drawer. Label of the drawer is
+ * set to the element title.
+ * There is a special 'close' case used by delete menu and 'dragend' for when
+ * something is dragged in the builder.
+ *
  * @param {Object} builder
  *   The builder.
  * @param {Object} trigger
  *   The trigger button element that was clicked.
  * @param {Object} event
  *   The event associated.
+ * @param {string} type
+ *   The type, can be 'click', 'close' or 'dragend'.
  * @prop {string} trigger.variant
  *   The current variant of the trigger button (e.g., 'default', 'primary').
  */
-Drupal.displayBuilder.handleSecondDrawer = (builder, trigger, event) => {
+Drupal.displayBuilder.handleSecondDrawer = (builder, trigger, event, type) => {
+  if (!type) return;
+
   const secondDrawer = builder.querySelector('#db-second-drawer');
   if (!secondDrawer) return;
 
-  let activeSecondDrawerButton = null;
+  // Handle 'close' type. Used when contextual menu > delete is used.
+  if (type === 'close') {
+    if (secondDrawer.open) {
+      secondDrawer.hide();
+      secondDrawer.removeAttribute('data-trigger-node-id');
+      secondDrawer.label = Drupal.t('Settings');
+    }
+    return;
+  }
 
-  if (secondDrawer?.open && trigger === activeSecondDrawerButton) {
-    secondDrawer.hide();
-    activeSecondDrawerButton = null;
-  } else if (!secondDrawer.open && event.type === 'click') {
-    secondDrawer.show();
-    activeSecondDrawerButton = trigger;
+  // Handle 'dragend' type. Used when a block or component is moved from the
+  // library. We ignore move from inside.
+  if (type === 'dragend') {
+    // Only act if drawer is open and no nodeId is present.
+    if (
+      secondDrawer.open &&
+      !(
+        event.target.dataset?.nodeId ||
+        secondDrawer.getAttribute('data-trigger-node-id') === ''
+      )
+    ) {
+      secondDrawer.label =
+        event.target.dataset?.nodeTitle ?? Drupal.t('Settings');
+      // We don't have a node id yet, better to remove the trigger attribute.
+      secondDrawer.removeAttribute('data-trigger-node-id');
+    }
+    return;
+  }
+
+  // Handle 'click' type. Main action, when something is clicked in the builder.
+  if (type === 'click') {
+    const triggerId = trigger.dataset.nodeId || '';
+    const triggerNodeId = secondDrawer.dataset?.triggerNodeId;
+
+    if (!secondDrawer.open) {
+      secondDrawer.label = trigger.dataset.nodeTitle;
+      secondDrawer.setAttribute('data-trigger-node-id', triggerId);
+      secondDrawer.show();
+    } else if (triggerNodeId === triggerId) {
+      secondDrawer.hide();
+      secondDrawer.removeAttribute('data-trigger-node-id');
+    } else {
+      secondDrawer.label = trigger.dataset.nodeTitle;
+      secondDrawer.setAttribute('data-trigger-node-id', triggerId);
+    }
   }
 };
 
@@ -64,8 +111,7 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
     );
     if (firstDrawerButtons.length > 0) {
       firstDrawerButtons.forEach((button) => {
-        button.addEventListener('mouseup', (e) => {
-          console.log(e);
+        button.addEventListener('mouseup', () => {
           handleFirstDrawerTriggerClick(button, builder);
         });
       });
@@ -226,6 +272,7 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
       toggleFirstDrawerContent(showIslandId);
 
       firstDrawer.show();
+      firstDrawer.label = trigger.dataset?.nodeTitle || trigger.innerText;
       trigger.variant = 'primary';
 
       if (activeFirstDrawerButton) activeFirstDrawerButton.variant = 'default';

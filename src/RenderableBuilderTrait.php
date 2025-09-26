@@ -122,6 +122,8 @@ trait RenderableBuilderTrait {
   protected function buildPlaceholderButton(string|TranslatableMarkup $label, array $vals = [], ?string $keywords = NULL): array {
     $build = $this->buildPlaceholder($label, '', $vals);
     $build['#props']['variant'] = 'button';
+    // To be able to identify the node when dragging and set the drawer title.
+    $build['#attributes']['data-node-title'] = (string) $label;
 
     if ($keywords) {
       $build['#attributes']['data-keywords'] = \trim(\strtolower($keywords));

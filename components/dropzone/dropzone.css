@@ -172,11 +172,13 @@ handle it instead of shoelace */
   .db-island-builder .db-dropzone [data-node-id]::before,
   .db-island-builder .db-dropzone [data-node-id]:not([data-component-id])::before,
   .db-island-builder .db-placeholder[data-node-id]::before {
+    white-space: nowrap;
     background-color: var(--dropzone-color-strong);
   }
   .db-island-builder .db-dropzone [data-node-id]:hover::before,
   .db-island-builder .db-dropzone [data-node-id]:not([data-component-id]):hover::before,
   .db-island-builder .db-placeholder[data-node-id]:hover::before {
+    white-space: nowrap;
     background-color: var(--dropzone-color-hover) !important;
   }
 
@@ -253,6 +255,7 @@ handle it instead of shoelace */
     padding: 0 3px;
     content: attr(data-node-title);
     text-align: left;
+    white-space: nowrap;
     color: var(--db-background-color);
     background-color: var(--dropzone-color-hover);
     font-size: 0.9rem;
