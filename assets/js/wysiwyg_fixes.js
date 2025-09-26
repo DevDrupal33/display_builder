@@ -4,7 +4,7 @@
 /* eslint no-unused-vars: 0 */
 /* eslint no-console: 0 */
 function fixWysiwygUpdate(elt, event) {
-  const _form = elt.closest('.db-island-instance_form');
+  const _form = elt.closest('.db-island-contextual_form');
   if (!_form) return;
   const _textarea = _form.querySelector('textarea[data-ckeditor5-id]');
   if (!_textarea) return;

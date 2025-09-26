@@ -15,13 +15,13 @@ use Drupal\display_builder\IslandType;
  * Help parent link island plugin implementation.
  */
 #[Island(
-  id: 'parent_display',
+  id: 'back',
   enabled_by_default: TRUE,
-  label: new TranslatableMarkup('Parent display link'),
-  description: new TranslatableMarkup('Allow a direct link to parent display.'),
+  label: new TranslatableMarkup('Back'),
+  description: new TranslatableMarkup('A link to exit the display builder and go back to admin UI.'),
   type: IslandType::Button,
 )]
-class ParentDisplayButton extends IslandPluginBase {
+class BackButton extends IslandPluginBase {
 
   /**
    * {@inheritdoc}

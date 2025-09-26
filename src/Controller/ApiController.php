@@ -19,7 +19,7 @@ use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
-use Drupal\display_builder\Plugin\display_builder\Island\InstanceFormPanel;
+use Drupal\display_builder\Plugin\display_builder\Island\ContextualFormPanel;
 use Drupal\display_builder\RenderableBuilderTrait;
 use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -198,7 +198,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     // Default values are the existing values from the state.
     $form_state->addBuildInfo('args', [
       [
-        'island_id' => 'instance_form',
+        'island_id' => 'contextual_form',
         'builder_id' => (string) $builder->id(),
         'instance' => $instance,
       ],
@@ -210,7 +210,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     // take them into account.
     $form_state->setValues($body);
 
-    $formClass = InstanceFormPanel::getFormClass();
+    $formClass = ContextualFormPanel::getFormClass();
     $values = $this->validateIslandForm($formClass, $form_state);
     $data = [
       'source' => $values,

@@ -171,7 +171,7 @@
       // @todo pass to once
       if (
         context.classList &&
-        context.classList.contains('db-island-instance_form')
+        context.classList.contains('db-island-contextual_form')
       ) {
         const tabsComponents = document.querySelectorAll(
           '.display-builder .shoelace-tabs--contextual',

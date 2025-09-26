@@ -32,7 +32,7 @@ islands:
   ui_styles:
     enable: true
     weight: -9
-  instance_form:
+  contextual_form:
     enable: true
     weight: -10
   ui_skins:
@@ -116,7 +116,7 @@ islands:
     format: compact
     enable: true
     weight: -6
-  parent_display:
+  back:
     enable: true
     weight: -5
 weight: 0

@@ -20,13 +20,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Instance form island plugin implementation.
  */
 #[Island(
-  id: 'instance_form',
+  id: 'contextual_form',
   enabled_by_default: TRUE,
-  label: new TranslatableMarkup('Instance form'),
-  description: new TranslatableMarkup('Configuration of the active element.'),
+  label: new TranslatableMarkup('Contextual form'),
+  description: new TranslatableMarkup('Configuration of the selected source.'),
   type: IslandType::Contextual,
 )]
-class InstanceFormPanel extends IslandPluginBase implements IslandWithFormInterface {
+class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInterface {
 
   use IslandWithFormTrait;
 
