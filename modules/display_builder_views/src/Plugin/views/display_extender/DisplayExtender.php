@@ -21,7 +21,9 @@ use Drupal\display_builder\ProfileInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\views\Attribute\ViewsDisplayExtender;
 use Drupal\views\Plugin\views\display_extender\DisplayExtenderPluginBase;
+use Drupal\views\ViewEntityInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
  * Styles display extender plugin.
@@ -211,6 +213,36 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements Display
     }
 
     return Url::fromRoute('display_builder_views.views.manage', $params);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function createFromRoute(string $route, ParameterBag $params): ?DisplayBuildableInterface {
+    if ($route !== 'display_builder_views.views.manage') {
+      return NULL;
+    }
+    $display = $params->get('display');
+
+    if (!\is_string($display)) {
+      return NULL;
+    }
+
+    $view = $params->get('view');
+
+    if (!($view instanceof ViewEntityInterface)) {
+      return NULL;
+    }
+
+    $view = $view->getExecutable();
+    $view->setDisplay($display);
+    $extenders = $view->getDisplay()->getExtenders();
+
+    if (!isset($extenders['display_builder']) || !($extenders['display_builder'] instanceof DisplayBuildableInterface)) {
+      return NULL;
+    }
+
+    return $extenders['display_builder'];
   }
 
   /**

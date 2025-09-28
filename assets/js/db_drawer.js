@@ -339,8 +339,8 @@ Drupal.displayBuilder.initDrawer = (builder) => {
       }
     };
 
-    const firstDrawerButtons = builder.querySelectorAll(
-      '[data-open-first-drawer]',
+    const firstDrawerButtons = document.querySelectorAll(
+      '.top-bar__tools [data-open-first-drawer]',
     );
     if (firstDrawerButtons.length > 0) {
       firstDrawerButtons.forEach((button) => {

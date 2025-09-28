@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Plugin\TopBarItem;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\navigation\TopBarItemBase;
-use Drupal\views\ViewEntityInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -23,6 +23,7 @@ abstract class ToolbarBase extends TopBarItemBase implements ContainerFactoryPlu
     $plugin_definition,
     protected RouteMatchInterface $routeMatch,
     protected EntityTypeManagerInterface $entityTypeManager,
+    protected ModuleHandlerInterface $moduleHandler,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -37,6 +38,7 @@ abstract class ToolbarBase extends TopBarItemBase implements ContainerFactoryPlu
       $plugin_definition,
       $container->get(RouteMatchInterface::class),
       $container->get(EntityTypeManagerInterface::class),
+      $container->get('module_handler')
     );
   }
 
@@ -49,39 +51,16 @@ abstract class ToolbarBase extends TopBarItemBase implements ContainerFactoryPlu
         'contexts' => ['route'],
       ],
     ];
+    $buildable = $this->getDisplayBuildable();
 
-    $entity = NULL;
-    $routeName = $this->routeMatch->getRouteName();
-
-    if ($routeName === NULL) {
+    if (!$buildable) {
       return $build;
     }
 
-    if ($routeName === 'display_builder_views.views.manage') {
-      $entity = $this->getDisplayEntityFromViews();
+    if ($profile = $buildable->getProfile()) {
+      $build['#cache']['tags'] = $profile->getCacheTags();
     }
-    elseif (\str_starts_with($routeName, 'display_builder_entity_view.')) {
-      $entity = $this->getDisplayEntityFromEntityView();
-    }
-    // Fallback or new non-core case. Loop on all route parameters and check if
-    // one is an object implementing DisplayBuildableInterface.
-    else {
-      $routeParameters = $this->routeMatch->getParameters();
-
-      foreach ($routeParameters as $parameter) {
-        if ($parameter instanceof DisplayBuildableInterface) {
-          $entity = $parameter;
-
-          break;
-        }
-      }
-    }
-
-    if (!($entity instanceof DisplayBuildableInterface)) {
-      return $build;
-    }
-
-    $toolbar = $this->buildToolbar($entity);
+    $toolbar = $this->buildToolbar($buildable);
 
     if (empty($toolbar)) {
       return $build;
@@ -95,72 +74,47 @@ abstract class ToolbarBase extends TopBarItemBase implements ContainerFactoryPlu
   }
 
   /**
-   * Get display entity from entity view.
+   * Get display buildable.
+   *
+   * @return \Drupal\display_builder\DisplayBuildableInterface
+   *   An entity or a plugin with a buildable display.
    */
-  protected function getDisplayEntityFromEntityView(): ?DisplayBuildableInterface {
-    $entity_type_id = $this->routeMatch->getParameter('entity_type_id');
-    $bundle = $this->routeMatch->getParameter('bundle');
-    $view_mode = $this->routeMatch->getParameter('view_mode_name');
+  protected function getDisplayBuildable(): ?DisplayBuildableInterface {
+    $route = $this->routeMatch->getRouteName();
 
-    if ($entity_type_id === NULL || $bundle === NULL || $view_mode === NULL) {
+    if ($route === NULL) {
       return NULL;
     }
 
-    $display_id = "{$entity_type_id}.{$bundle}.{$view_mode}";
-    $storage = $this->entityTypeManager->getStorage('entity_view_display');
+    $routeParameters = $this->routeMatch->getParameters();
+    $providers = $this->moduleHandler->invokeAll('display_builder_provider_info');
 
-    $entity_display = $storage->load($display_id);
-
-    if (!($entity_display instanceof DisplayBuildableInterface)) {
-      return NULL;
+    foreach ($providers as $provider) {
+      if ($buildable = $provider['class']::createFromRoute($route, $routeParameters)) {
+        return $buildable;
+      }
     }
 
-    return $entity_display;
-  }
-
-  /**
-   * Get display entity from views.
-   */
-  protected function getDisplayEntityFromViews(): ?DisplayBuildableInterface {
-    $display = $this->routeMatch->getParameter('display');
-
-    if (!\is_string($display)) {
-      return NULL;
-    }
-
-    $view = $this->routeMatch->getParameter('view');
-
-    if (!($view instanceof ViewEntityInterface)) {
-      return NULL;
-    }
-
-    $view = $view->getExecutable();
-    $view->setDisplay($display);
-    $extenders = $view->getDisplay()->getExtenders();
-
-    if (!isset($extenders['display_builder']) || !($extenders['display_builder'] instanceof DisplayBuildableInterface)) {
-      return NULL;
-    }
-
-    return $extenders['display_builder'];
+    return NULL;
   }
 
   /**
    * Build toolbar.
+   *
+   * @param \Drupal\display_builder\DisplayBuildableInterface $buildable
+   *   An entity or a plugin with a buildable display.
+   *
+   * @return array
+   *   A renderable array.
    */
-  protected function buildToolbar(DisplayBuildableInterface $entity): array {
-    $profile = $entity->getProfile();
-
-    if (!$profile) {
-      // Display Builder profile is not activated for this entity. This is not
-      // supposed to happen because Display Builder is mandatory.
+  protected function buildToolbar(DisplayBuildableInterface $buildable): array {
+    if (!$buildable->getProfile()) {
+      // Display Builder is not activated for this display buildable.
       return [];
     }
 
-    $instanceId = $entity->getInstanceId();
-
     /** @var \Drupal\display_builder\InstanceInterface $instance */
-    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($instanceId);
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($buildable->getInstanceId());
 
     if (!$instance) {
       // Display Builder instance was not created yet, or was deleted, for this
@@ -169,7 +123,7 @@ abstract class ToolbarBase extends TopBarItemBase implements ContainerFactoryPlu
     }
 
     $contexts = $instance->getContexts() ?? [];
-
+    /** @var \Drupal\display_builder\ProfileViewBuilder $view_builder */
     $view_builder = $this->entityTypeManager->getViewBuilder('display_builder_profile');
 
     return $view_builder->buildToolbar($instance, $contexts);

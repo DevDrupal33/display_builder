@@ -213,7 +213,6 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
       $this->t('Clear history (shortcut: Shift+C)'),
       ['C' => $this->t('Clear all changes history (Shift+C)')]
     );
-    $clear['#props']['variant'] = 'warning';
     $clear['#attributes']['outline'] = TRUE;
 
     if (empty($past) && empty($future)) {

@@ -21,6 +21,7 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
  * Common methods for entity view display.
@@ -178,6 +179,44 @@ trait EntityViewDisplayTrait {
     $route_name = \sprintf('display_builder_entity_view.%s', $this->getTargetEntityTypeId());
 
     return Url::fromRoute($route_name, $parameters);
+  }
+
+  /**
+   * Create a display buildable from route.
+   *
+   * @param string $route
+   *   The route name.
+   * @param \Symfony\Component\HttpFoundation\ParameterBag $params
+   *   The parameters of the route we check.
+   *
+   * @return \Drupal\display_builder\DisplayBuildableInterface
+   *   An implementation of the interface.
+   *
+   * @see \Drupal\display_builder\DisplayBuildableInterface
+   */
+  public static function createFromRoute(string $route, ParameterBag $params): ?DisplayBuildableInterface {
+    $entity_type = $params->get('entity_type_id');
+    $bundle = $params->get('bundle');
+    $view_mode = $params->get('view_mode_name');
+
+    if ($entity_type === NULL || $bundle === NULL || $view_mode === NULL) {
+      return NULL;
+    }
+
+    if ($route !== 'display_builder_entity_view.' . $entity_type) {
+      return NULL;
+    }
+
+    $display_id = "{$entity_type}.{$bundle}.{$view_mode}";
+    $storage = \Drupal::service('entity_type.manager')->getStorage('entity_view_display');
+
+    $entity_display = $storage->load($display_id);
+
+    if (!($entity_display instanceof DisplayBuildableInterface)) {
+      return NULL;
+    }
+
+    return $entity_display;
   }
 
   /**

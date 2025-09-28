@@ -72,7 +72,7 @@
     if (
       Drupal.displayBuilder.LocalStorageManager.get(builder.id, 'fullscreen')
     ) {
-      const button = builder.querySelector('[data-set-fullscreen]');
+      const button = document.querySelector('[data-set-fullscreen]');
       // Specific shoelace event handler.
       // @todo avoid using this kind of specific.
       const icon = button.querySelector('sl-icon');
@@ -94,7 +94,7 @@
     attach(context) {
       once('dbFullscreen', '[data-set-fullscreen]', context).forEach(
         (button) => {
-          const builder = button.closest('.display-builder');
+          const builder = document.querySelector('.display-builder');
           button.addEventListener('click', () => {
             // @todo avoid using this kind of specific.
             const icon = button.querySelector('sl-icon');

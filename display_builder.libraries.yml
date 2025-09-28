@@ -106,6 +106,9 @@ preview:
     - core/internal.floating-ui
 
 contextual_menu:
+  css:
+    component:
+      ./assets/css/contextual_menu.css: {}
   js:
     ./assets/js/contextual_menu.js: {}
   dependencies:

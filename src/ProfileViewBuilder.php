@@ -111,14 +111,16 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     $view_islands = $islands[IslandType::View->value] ?? [];
 
     $buttons = [];
+    $sidebar_buttons = [];
 
     if (!empty($button_islands)) {
-      $buttons = $this->buildPanes($instance, $button_islands, [], [], 'span');
+      $buttons = $this->buildPanes($instance, $button_islands, $builder_data, [], 'span');
     }
 
     $view_islands_data = $this->prepareViewIslands($instance, $view_islands);
-    $this->toolbar = [
-      TopBarRegion::Tools->value => [
+
+    if (!empty($view_islands_data['view_sidebar_buttons'])) {
+      $sidebar_buttons = [
         '#type' => 'component',
         '#component' => 'display_builder:button_group',
         '#slots' => [
@@ -127,7 +129,11 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         '#attributes' => [
           'label' => $this->t('Sidebar buttons'),
         ],
-      ],
+      ];
+    }
+
+    $this->toolbar = [
+      TopBarRegion::Tools->value => $sidebar_buttons,
       TopBarRegion::Context->value => $view_islands_data['view_main_tabs'],
       TopBarRegion::Actions->value => $buttons,
     ];

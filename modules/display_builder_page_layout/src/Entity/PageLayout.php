@@ -15,6 +15,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\ProfileInterface;
@@ -24,6 +25,7 @@ use Drupal\display_builder_page_layout\PageLayoutInterface;
 use Drupal\display_builder_page_layout\PageLayoutListBuilder;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\ui_patterns\SourcePluginManager;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
  * Defines the page layout entity type.
@@ -177,6 +179,26 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
     }
 
     return Url::fromRoute('entity.page_layout.display_builder', $params);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function createFromRoute(string $route, ParameterBag $params): ?DisplayBuildableInterface {
+    if ($route !== 'entity.page_layout.display_builder') {
+      return NULL;
+    }
+
+    if (!$params->has('page_layout')) {
+      return NULL;
+    }
+    $page_layout = $params->get('page_layout');
+
+    if ($page_layout instanceof DisplayBuildableInterface) {
+      return $page_layout;
+    }
+
+    return NULL;
   }
 
   /**

@@ -28,6 +28,7 @@
       );
     }
 
+    const toolbar = document.querySelector('.top-bar');
     let theme = getTheme();
 
     function isDark() {
@@ -39,12 +40,12 @@
     }
 
     function updateSelection() {
-      const menu = builder.querySelector('[data-theme-switch] sl-menu');
+      const menu = toolbar.querySelector('[data-theme-switch] sl-menu');
       if (!menu) return;
       [...menu.querySelectorAll('sl-menu-item')].map(
         (item) => (item.checked = item.getAttribute('value') === theme),
       );
-      const icon = builder.querySelector('[data-theme-switch] sl-icon');
+      const icon = toolbar.querySelector('[data-theme-switch] sl-icon');
       if (!icon) return;
       icon.setAttribute('name', theme === 'dark' ? 'moon-fill' : 'sun');
     }
@@ -61,18 +62,18 @@
       updateSelection();
 
       // Toggle the dark mode class.
-      builder.classList.toggle('sl-theme-dark', isDark());
+      toolbar.classList.toggle('sl-theme-dark', isDark());
     }
 
     // Selection is not preserved when changing page, so update when opening dropdown.
-    builder.addEventListener('sl-show', (event) => {
+    toolbar.addEventListener('sl-show', (event) => {
       const themeSelector = event.target.closest('[data-theme-switch]');
       if (!themeSelector) return;
       updateSelection();
     });
 
     // Listen for selections.
-    builder.addEventListener('sl-select', (event) => {
+    toolbar.addEventListener('sl-select', (event) => {
       const menu = event.target.closest('[data-theme-switch] sl-menu');
       if (!menu) return;
       setTheme(event.detail.item.value);

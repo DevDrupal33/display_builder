@@ -48,7 +48,7 @@
   Drupal.behaviors.displayBuilderHighlight = {
     attach(context) {
       once('dbHighlight', '[data-set-highlight]', context).forEach((button) => {
-        const builder = button.closest('.display-builder');
+        const builder = document.querySelector('.display-builder');
         button.addEventListener('click', () => {
           // @todo avoid using this kind of specific.
           const icon = button.querySelector('sl-icon');

@@ -1,10 +1,6 @@
-:root {
-  --db-menu-z-index: 901;
-}
-
 .display-builder .db-menu {
   position: absolute;
-  z-index: var(--db-menu-z-index);
+  z-index: var(--sl-z-index-dropdown);
   display: none;
   border: 1px dashed var(--sl-color-neutral-200) !important;
   box-shadow: var(--sl-shadow-x-large);
