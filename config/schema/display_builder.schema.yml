@@ -31,7 +31,7 @@ display_builder.islands.*:
   type: mapping
   label: 'Island configuration'
   mapping:
-    enable:
+    status:
       type: boolean
       label: Enabled
     weight:
@@ -46,7 +46,7 @@ display_builder.islands.history:
   mapping:
     display_clear_button:
       type: boolean
-    enable:
+    status:
       type: boolean
       label: Enabled
     weight:
@@ -68,7 +68,7 @@ display_builder.islands.controls:
     theme_mode:
       type: boolean
       label: Theme mode selector
-    enable:
+    status:
       type: boolean
       label: Enabled
     weight:
@@ -86,7 +86,7 @@ display_builder.islands.component_library:
       type: sequence
       sequence:
         type: string
-    status:
+    component_status:
       type: sequence
       sequence:
         type: string
@@ -98,7 +98,7 @@ display_builder.islands.component_library:
       type: boolean
     show_mosaic:
       type: boolean
-    enable:
+    status:
       type: boolean
       label: Enabled
     weight:
@@ -116,7 +116,7 @@ display_builder.islands.block_library:
       type: sequence
       sequence:
         type: string
-    enable:
+    status:
       type: boolean
       label: Enabled
     weight:
@@ -130,7 +130,7 @@ display_builder.islands.collaboration:
       type: machine_name
     image_style:
       type: machine_name
-    enable:
+    status:
       type: boolean
       label: Enabled
     weight:
@@ -147,7 +147,7 @@ display_builder.islands.viewport:
     format:
       type: string
       label: Format
-    enable:
+    status:
       type: boolean
       label: Enabled
     weight:

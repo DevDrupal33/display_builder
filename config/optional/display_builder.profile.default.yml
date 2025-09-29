@@ -9,7 +9,7 @@ debug: false
 islands:
   component_library:
     exclude: {}
-    status:
+    component_status:
       experimental: experimental
       deprecated: '0'
       obsolete: '0'
@@ -17,88 +17,88 @@ islands:
     show_grouped: true
     show_variants: true
     show_mosaic: true
-    enable: true
+    status: true
     weight: -10
   block_library:
     exclude: {}
-    enable: true
+    status: true
     weight: -9
   preset_library:
-    enable: true
+    status: true
     weight: -8
   builder:
-    enable: true
+    status: true
     weight: -7
     region: main
   layers:
-    enable: true
+    status: true
     weight: -6
     region: main
   preview:
-    enable: true
+    status: true
     weight: -5
     region: main
   library:
-    enable: true
+    status: true
     weight: -10
     region: sidebar
   tree:
-    enable: true
+    status: true
     weight: -9
     region: sidebar
   logs:
-    enable: true
+    status: true
     weight: -8
     region: sidebar
   history:
     display_clear_button: false
-    enable: true
+    status: true
     weight: -9
   state:
-    enable: true
+    status: true
     weight: -10
   controls:
-    enable: true
+    status: true
     weight: -8
     toggle_highlight: true
     toggle_fullscreen: true
     keyboard_help: true
     theme_mode: false
   contextual_form:
-    enable: true
+    status: true
     weight: -10
   ui_styles:
-    enable: true
+    status: true
     weight: -9
   ui_skins:
-    enable: true
+    status: true
     weight: -8
   visibility_conditions:
-    enable: true
+    status: true
     weight: -7
   menu:
-    enable: true
+    status: true
     weight: -10
   menu_preset:
-    enable: true
+    status: true
     weight: -9
   menu_delete:
-    enable: true
+    status: true
     weight: -8
   collaboration:
-    enable: false
+    status: false
     weight: -4
   viewport:
     exclude: {}
-    enable: false
+    status: false
     weight: -3
   back:
-    enable: true
+    status: true
     weight: -6
   operation:
-    enable: false
+    status: false
     weight: -1
   reset:
-    enable: false
+    status: false
     weight: 0
 weight: 0

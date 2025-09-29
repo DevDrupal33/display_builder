@@ -130,10 +130,10 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
    */
   public function setIslandConfiguration(string $island_id, array $configuration = []): void {
     // When $configuration is updated from ProfileIslandPluginForm,
-    // 'weight', 'enable' and 'region' properties are missing but they must not
+    // 'weight', 'status' and 'region' properties are missing but they must not
     // be reset.
     $configuration['weight'] = $configuration['weight'] ?? $this->islands[$island_id]['weight'] ?? 0;
-    $configuration['enable'] = $configuration['enable'] ?? $this->islands[$island_id]['enable'] ?? FALSE;
+    $configuration['status'] = $configuration['status'] ?? $this->islands[$island_id]['status'] ?? FALSE;
 
     // Only View islands have regions.
     if (isset($this->islands[$island_id]['region'])) {
@@ -150,7 +150,7 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
     $island_enabled = [];
 
     foreach ($this->islands as $island_id => $configuration) {
-      if (isset($configuration['enable']) && (bool) $configuration['enable']) {
+      if (isset($configuration['status']) && $configuration['status']) {
         $island_enabled[$island_id] = $configuration['weight'] ?? 0;
       }
     }

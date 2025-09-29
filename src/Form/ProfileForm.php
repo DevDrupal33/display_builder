@@ -200,7 +200,7 @@ final class ProfileForm extends EntityForm {
       '#type' => 'table',
       '#header' => [
         'drag' => '',
-        'enable' => $this->t('Enable'),
+        'status' => $this->t('Enabled'),
         'name' => $this->t('Island'),
         'summary' => $this->t('Configuration'),
         'region' => ($type === IslandType::View->value) ? $this->t('Region') : '',
@@ -261,11 +261,11 @@ final class ProfileForm extends EntityForm {
     $row['#weight'] = (int) $weight;
 
     $row[''] = [];
-    $row['enable'] = [
+    $row['status'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Enable'),
+      '#title' => $this->t('Enabled'),
       '#title_display' => 'invisible',
-      '#default_value' => $configuration['enable'] ?? $definition['enabled_by_default'] ?? FALSE,
+      '#default_value' => $configuration['status'] ?? $definition['enabled_by_default'] ?? FALSE,
     ];
     $row['name'] = [
       '#type' => 'inline_template',
@@ -319,7 +319,7 @@ final class ProfileForm extends EntityForm {
         ],
         '#states' => [
           'visible' => [
-            'input[name="islands[button][' . $id . '][enable]"]' => ['checked' => TRUE],
+            'input[name="islands[' . $id . '][status]"]' => ['checked' => TRUE],
           ],
         ],
       ];

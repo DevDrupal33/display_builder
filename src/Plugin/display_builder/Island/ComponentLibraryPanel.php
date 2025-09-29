@@ -98,7 +98,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     return [
       'exclude' => [],
       'exclude_id' => '',
-      'status' => [
+      'component_status' => [
         'experimental',
       ],
       'include_no_ui' => FALSE,
@@ -130,7 +130,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     ];
 
     // @see https://git.drupalcode.org/project/drupal/-/blob/11.x/core/assets/schemas/v1/metadata.schema.json#L217
-    $form['status'] = [
+    $form['component_status'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Allowed status'),
       '#options' => [
@@ -139,7 +139,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
         'obsolete' => $this->t('Obsolete'),
       ],
       '#description' => $this->t('Components with stable or undefined status will always be available.'),
-      '#default_value' => $configuration['status'],
+      '#default_value' => $configuration['component_status'],
     ];
 
     $form['show_grouped'] = [
@@ -218,7 +218,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     }
 
     $summary[] = $this->t('Allowed status: @status', [
-      '@status' => \implode(', ', \array_filter(\array_unique(\array_merge(['stable', 'undefined'], $configuration['status'] ?? []))) ?: [$this->t('stable, undefined')]),
+      '@status' => \implode(', ', \array_filter(\array_unique(\array_merge(['stable', 'undefined'], $configuration['component_status'] ?? []))) ?: [$this->t('stable, undefined')]),
     ]);
 
     $summary[] = $configuration['include_no_ui'] ? $this->t('Include no UI components') : $this->t('Exclude no UI components');
@@ -527,12 +527,12 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
 
       // Filter components according to configuration.
       // Components with stable or undefined status will always be available.
-      $allowed_status = \array_merge($configuration['status'], ['stable']);
+      $allowed_status = \array_merge($configuration['component_status'], ['stable']);
 
-      if (isset($definition['status']) && !\in_array($definition['status'], $allowed_status, TRUE)) {
+      if (isset($definition['component_status']) && !\in_array($definition['component_status'], $allowed_status, TRUE)) {
         continue;
       }
-      $allowed_status = \array_merge($configuration['status'], ['stable']);
+      $allowed_status = \array_merge($configuration['component_status'], ['stable']);
 
       $filtered_definitions[$id] = $definition;
       $grouped_definitions[(string) $definition['category']][$id] = $definition;

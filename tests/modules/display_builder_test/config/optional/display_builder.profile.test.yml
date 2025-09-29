@@ -8,103 +8,103 @@ library: local
 debug: true
 islands:
   state:
-    enable: true
+    status: true
     weight: -10
   controls:
     toggle_highlight: true
     toggle_fullscreen: true
     keyboard_help: true
     theme_mode: true
-    enable: true
+    status: true
     weight: -8
   collaboration:
     image_field: user_picture
     image_style: thumbnail
-    enable: false
+    status: false
     weight: -2
   history:
     display_clear_button: true
-    enable: true
+    status: true
     weight: -9
   test_island_button:
-    enable: false
+    status: false
     weight: -1
   ui_styles:
-    enable: true
+    status: true
     weight: -9
   contextual_form:
-    enable: true
+    status: true
     weight: -10
   ui_skins:
-    enable: true
+    status: true
     weight: -8
   visibility_conditions:
-    enable: true
+    status: true
     weight: -6
   test_island_contextual:
-    enable: false
+    status: false
     weight: -5
   component_library:
     exclude: {}
-    status:
+    component_status:
       experimental: experimental
     include_no_ui: true
     show_grouped: true
     show_variants: true
     show_mosaic: true
-    enable: true
+    status: true
     weight: -10
   block_library:
     exclude:
       devel: devel
       htmx: htmx
       shortcut: shortcut
-    enable: true
+    status: true
     weight: -9
   preset_library:
-    enable: true
+    status: true
     weight: -8
   test_island_library:
-    enable: false
+    status: false
     weight: -7
   menu:
-    enable: true
+    status: true
     weight: 0
   menu_delete:
-    enable: true
+    status: true
     weight: 0
   menu_preset:
-    enable: true
+    status: true
     weight: 0
   test_island_menu:
-    enable: false
+    status: false
     weight: 0
   preview:
-    enable: true
+    status: true
     weight: -4
     region: main
   library:
-    enable: true
+    status: true
     weight: -10
     region: sidebar
   logs:
-    enable: true
+    status: true
     weight: -5
     region: main
   builder:
-    enable: true
+    status: true
     weight: -7
     region: main
   layers:
-    enable: true
+    status: true
     weight: -6
     region: main
   tree:
-    enable: true
+    status: true
     weight: -8
     region: sidebar
   test_island_view:
-    enable: false
+    status: false
     weight: -4
     region: main
     string_value: test
@@ -114,9 +114,9 @@ islands:
   viewport:
     exclude: {}
     format: compact
-    enable: true
+    status: true
     weight: -6
   back:
-    enable: true
+    status: true
     weight: -5
 weight: 0

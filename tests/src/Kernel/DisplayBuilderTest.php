@@ -44,8 +44,8 @@ final class DisplayBuilderTest extends KernelTestBase {
    * Tests creating and editing a Display Builder entity.
    */
   public function testDisplayBuilderEntityCrud(): void {
-    $enable_island = ['enable' => TRUE, 'weight' => 2];
-    $updated_island = ['enable' => FALSE, 'weight' => 3];
+    $enable_island = ['status' => TRUE, 'weight' => 2];
+    $updated_island = ['status' => FALSE, 'weight' => 3];
 
     // Create a new display builder entity.
     $displayBuilder = Profile::create([
@@ -125,7 +125,7 @@ final class DisplayBuilderTest extends KernelTestBase {
       'description' => 'Test Description',
       'islands' => [
         $islandId => [
-          'enable' => TRUE,
+          'status' => TRUE,
           'weight' => 0,
           'region' => 'main',
           'string_value' => 'test value',
@@ -139,7 +139,7 @@ final class DisplayBuilderTest extends KernelTestBase {
     // Test getting island configuration.
     $islandConfig = $displayBuilder->getIslandConfiguration($islandId);
     self::assertNotEmpty($islandConfig);
-    self::assertTrue($islandConfig['enable']);
+    self::assertTrue($islandConfig['status']);
     self::assertSame(0, $islandConfig['weight']);
     self::assertSame('main', $islandConfig['region']);
 
@@ -150,7 +150,7 @@ final class DisplayBuilderTest extends KernelTestBase {
 
     // Test setting new island configuration with updated custom values.
     $newConfig = [
-      'enable' => FALSE,
+      'status' => FALSE,
       'weight' => 10,
       'region' => 'sidebar',
       'string_value' => 'updated value',
@@ -163,13 +163,13 @@ final class DisplayBuilderTest extends KernelTestBase {
     // Reload and verify island configuration changes.
     $updated = Profile::load('test_islands');
     $updatedConfig = $updated->getIslandConfiguration($islandId);
-    self::assertFalse($updatedConfig['enable']);
+    self::assertFalse($updatedConfig['status']);
     self::assertSame(10, $updatedConfig['weight']);
     self::assertSame('sidebar', $updatedConfig['region']);
     // Verify updated configuration including custom values.
     $updated = Profile::load('test_islands');
     $updatedConfig = $updated->getIslandConfiguration($islandId);
-    self::assertFalse($updatedConfig['enable']);
+    self::assertFalse($updatedConfig['status']);
     self::assertSame(10, $updatedConfig['weight']);
     self::assertSame('sidebar', $updatedConfig['region']);
 
@@ -188,7 +188,7 @@ final class DisplayBuilderTest extends KernelTestBase {
     self::assertEmpty($enabledIslands);
 
     // Enable the island and test again.
-    $displayBuilder->setIslandConfiguration($islandId, ['enable' => TRUE] + $newConfig);
+    $displayBuilder->setIslandConfiguration($islandId, ['status' => TRUE] + $newConfig);
     $displayBuilder->save();
     $updated = Profile::load('test_islands');
     $enabledIslands = $updated->getEnabledIslands();
