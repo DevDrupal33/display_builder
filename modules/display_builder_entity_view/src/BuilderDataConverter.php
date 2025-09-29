@@ -49,7 +49,7 @@ class BuilderDataConverter {
         continue;
       }
 
-      if (!$definitions[$field_id]->isDisplayConfigurable('view')) {
+      if (isset($definitions[$field_id]) && !$definitions[$field_id]->isDisplayConfigurable('view')) {
         // Hidden from Manage Display.
         continue;
       }
