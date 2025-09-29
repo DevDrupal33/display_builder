@@ -9,6 +9,7 @@ debug: false
 islands:
   component_library:
     exclude: {}
+    exclude_id: ''
     component_status:
       experimental: experimental
       deprecated: '0'
@@ -20,7 +21,9 @@ islands:
     status: true
     weight: -10
   block_library:
-    exclude: {}
+    exclude:
+      htmx: htmx
+      shortcut: shortcut
     status: true
     weight: -9
   preset_library:
@@ -28,11 +31,11 @@ islands:
     weight: -8
   builder:
     status: true
-    weight: -7
+    weight: -8
     region: main
   layers:
     status: true
-    weight: -6
+    weight: -7
     region: main
   preview:
     status: true
@@ -48,8 +51,8 @@ islands:
     region: sidebar
   logs:
     status: true
-    weight: -8
-    region: sidebar
+    weight: -6
+    region: main
   history:
     display_clear_button: false
     status: true
@@ -58,12 +61,12 @@ islands:
     status: true
     weight: -10
   controls:
-    status: true
-    weight: -8
     toggle_highlight: true
     toggle_fullscreen: true
     keyboard_help: true
     theme_mode: false
+    status: true
+    weight: -8
   contextual_form:
     status: true
     weight: -10

@@ -39,7 +39,7 @@ islands:
     status: true
     weight: -8
   visibility_conditions:
-    status: true
+    status: false
     weight: -6
   test_island_contextual:
     status: false
