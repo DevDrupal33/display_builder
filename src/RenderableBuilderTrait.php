@@ -157,9 +157,10 @@ trait RenderableBuilderTrait {
       'hx-get' => $preview_url->toString(),
       'hx-target' => \sprintf('#preview-%s', $builder_id),
       'hx-trigger' => 'mouseover delay:250ms',
-      'hx-on:mouseover' => \sprintf('Drupal.displayBuilder.showPreview(%s, this)', $builder_id),
+      'hx-on:mouseenter' => \sprintf('Drupal.displayBuilder.showPreview(%s, this)', $builder_id),
+      'hx-on:mouseleave' => $hide_script,
+      // Disable the preview on click for a dragging operation.
       'hx-on:mousedown' => $hide_script,
-      'hx-on:mouseout' => $hide_script,
     ];
 
     $build['#attributes'] = \array_merge($build['#attributes'], $attributes);

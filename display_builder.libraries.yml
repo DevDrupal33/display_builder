@@ -80,6 +80,8 @@ preview:
 contextual_menu:
   js:
     ./assets/js/contextual_menu.js: {}
+  dependencies:
+    - core/internal.floating-ui
 
 # Keyboard mapping behavior.
 keyboard:
