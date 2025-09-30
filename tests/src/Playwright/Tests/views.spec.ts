@@ -8,8 +8,6 @@ test.beforeEach('Setup', async ({ drupal }) => {
   // Allays show advanced panel and disable preview.
   await drupal.drush('config:set -y views.settings ui.show.advanced_column true')
   await drupal.drush('config:set -y views.settings ui.show.preview_information true')
-
-  // await drupal.setPreprocessing({ css: true, javascript: true })
 })
 
 test(

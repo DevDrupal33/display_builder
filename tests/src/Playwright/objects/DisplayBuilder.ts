@@ -19,7 +19,6 @@ export class Displaybuilder {
   async toggleSidebarView(targetId: string = 'library'): Promise<void> {
     const sidebarFirst = this.page.locator('#db-first-drawer')
     const toolbarButton = this.page.locator(`.db-toolbar__start [data-target="${targetId}"]`)
-    // await expect(toolbarButton).toBeVisible()
 
     if (await sidebarFirst.isVisible()) {
       await toolbarButton.click()
@@ -41,7 +40,7 @@ export class Displaybuilder {
     if (await sidebarFirst.isHidden()) {
       await this.toggleSidebarView()
     }
-    // await expect(sidebarFirst.getByRole('tab', { name, exact: true })).toBeVisible()
+
     await sidebarFirst.getByRole('tab', { name, exact: true }).locator('div').click()
 
     await this.htmxReady()
@@ -66,7 +65,7 @@ export class Displaybuilder {
   ): Promise<void> {
     await this.openLibrariesTab(type)
     const element = this.page.locator(`.db-island-library [hx-vals*="${id}"]`).first()
-    // await expect(element).toBeVisible()
+
     await this.dragElementFromLibrary(type, element, target, targetPosition)
   }
 
@@ -143,16 +142,12 @@ export class Displaybuilder {
     value: string,
     valuePath?: Array<{ action: 'click' | 'fill'; locator: Locator }>
   ): Promise<void> {
-    // await expect(element).toBeVisible()
 
     await element.click({ position: { x: 5, y: 10 } })
     await this.htmxReady()
 
-    // await expect(this.page.getByRole('dialog', { name: 'Settings' })).toBeVisible()
-
     if (valuePath && Array.isArray(valuePath)) {
       for (const step of valuePath) {
-        // await expect(step.locator).toBeVisible()
         if (step.action === 'click') {
           await step.locator.click()
         } else if (step.action === 'fill') {
@@ -274,8 +269,7 @@ export class Displaybuilder {
       await this.page.getByLabel('Initial data').selectOption(fixture)
     }
     await this.page.getByRole('button', { name: 'Save' }).click()
-    // await expect(this.page.getByRole('heading', { name: `Display builder: ${dbName}` })).toBeVisible()
-    // await expect(this.page.getByRole('tab', { name: 'Builder' })).toBeVisible()
+
     await this.shoelaceReady()
   }
 
@@ -293,7 +287,6 @@ export class Displaybuilder {
       .getByRole('button')
       .click()
     await this.page.getByRole('link', { name: 'Delete', exact: true }).click()
-    // await expect(this.page.getByRole('heading', { name: `Do you want to delete ${config.develPrefix}${dbName}?` })).toBeVisible()
     await this.page.getByRole('button', { name: 'Confirm' }).click()
     await expect(this.page.getByRole('link', { name: dbName })).not.toBeVisible()
   }
@@ -308,7 +301,7 @@ export class Displaybuilder {
     const componentSimpleSlot = this.page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
     await this.dragElementFromLibraryById('Blocks', 'token', componentSimpleSlot)
     await this.setElementValue(
-      this.page.locator(`.db-island-builder [data-node-title="Token"]`).first(),
+      this.page.locator(`.db-island-builder [data-node-title^="Token"]`).first(),
       tokenTest,
       [
         {
@@ -333,7 +326,6 @@ export class Displaybuilder {
     // @todo handle hx-vals instead of simple button.
     for (const [ source, label ] of Object.entries(blocks)) {
       await expect(this.page.locator(`.db-island-block_library [hx-vals*="${source}"]`)).toHaveCount(1)
-      // await expect(this.page.locator('.db-island-block_library').getByRole('button', { name: label })).toHaveCount(1)
       if (builder) {
         await expect(this.page.locator('.db-island-builder').getByRole('button', { name: label })).toHaveCount(1)
       }

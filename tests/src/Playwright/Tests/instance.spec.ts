@@ -5,7 +5,6 @@ import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.installModules(['display_builder_dev_tools'])
-  // await drupal.setPreprocessing({ css: true, javascript: true })
 })
 
 test('From fixture', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
@@ -33,21 +32,12 @@ test('From fixture', { tag: ['@display_builder_dev_tools'] }, async ({ page, dru
     await displayBuilder.expectPreviewAriaSnapshot('dev-instance-1.aria.yml')
   })
 
-  await test.step(`Check preview on hover`, async () => {
-    await displayBuilder.openLibrariesTab('Components')
-    const testComponent = page.getByRole('button', { name: 'Test simple', exact: true })
-    await testComponent.hover()
-    await displayBuilder.htmxReady()
-    // From the test component.
-    await expect(page.getByRole('tooltip', { name: 'label: Bar Foo Click me' })).toBeVisible()
-  })
-
   await test.step(`Build instance`, async () => {
     // Add a token in a slot and set a value
     const componentSimpleSlot = page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
     await displayBuilder.dragElementFromLibraryById('Blocks', 'token', componentSimpleSlot)
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title="Token"]`).first(),
+      page.locator(`.db-island-builder [data-node-title^="Token"]`).first(),
       'I am a test token in a slot! ',
       [
         {
@@ -78,6 +68,73 @@ test('From fixture', { tag: ['@display_builder_dev_tools'] }, async ({ page, dru
   })
 })
 
+test('Secondary actions', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
+  const dbName = `test_${utils.createRandomString()}`
+
+  const firstDrawerId = 'db-first-drawer'
+  const secondDrawerId = 'db-second-drawer'
+
+  await test.step(`Admin login`, async () => {
+    await drupal.loginAsAdmin()
+  })
+
+  // Create a Display builder with a fixture from the fixture:
+  // tests/themes/display_builder_theme_test/fixtures/test_simple.yml
+  await test.step(`Create dev instance`, async () => {
+    await displayBuilder.createDisplayBuilderFromUi(dbName, 'Test simple')
+    // Enable highlight to ease drag.
+    await displayBuilder.fullHighlight()
+  })
+
+  await test.step(`Check preview on components`, async () => {
+    await displayBuilder.openLibrariesTab('Components')
+    const testComponent = page.getByRole('button', { name: 'Test simple', exact: true })
+    await testComponent.hover()
+    await displayBuilder.htmxReady()
+    // From the test component.
+    await expect(page.getByRole('tooltip', { name: 'label: Bar Foo Click me' })).toBeVisible()
+  })
+
+  await test.step(`Check preview on blocks`, async () => {
+    await displayBuilder.openLibrariesTab('Blocks')
+    const testBlock = page.getByRole('button', { name: 'Powered by Drupal', exact: true })
+    await testBlock.hover()
+    await displayBuilder.htmxReady()
+    await expect(page.getByRole('tooltip')).toMatchAriaSnapshot({ name: 'block-powered-hover.aria.yml' })
+  })
+
+  await test.step(`Drawer resize`, async () => {
+    await page.locator(`.db-island-builder [data-node-title^="Token"]`).first().click({ position: { x: 5, y: 10 } })
+    await displayBuilder.htmxReady()
+
+    const firstDrawer = page.locator(`#${firstDrawerId}`);
+    await firstDrawer.locator(`.shoelace-resize-handle`).hover()
+    await page.mouse.down()
+    await page.mouse.move(400 + 133, 400)
+    await page.mouse.up()
+    let box = await firstDrawer.locator(`.drawer__panel`).boundingBox();
+
+    await expect(firstDrawer).toHaveAttribute('style', '--size: 533px;');
+    await expect(firstDrawer).toHaveAttribute('data-offset-left', '533px');
+    await expect(box?.width).toEqual(533);
+
+    const secondDrawer = page.locator(`#${secondDrawerId}`);
+    await secondDrawer.locator(`.shoelace-resize-handle`).hover()
+    await page.mouse.down()
+    box = await secondDrawer.locator(`.drawer__panel`).boundingBox();
+    await page.mouse.move((box?.x ?? 0) - 133, 400)
+    await page.mouse.up()
+
+    await expect(secondDrawer).toHaveAttribute('style', '--size: 533px;');
+    box = await secondDrawer.locator(`.drawer__panel`).boundingBox();
+    await expect(box?.width).toEqual(533);
+  })
+
+  await test.step(`Delete`, async () => {
+    await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
+  })
+})
+
 test('From scratch', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
   const dbName = `test_${utils.createRandomString()}`
 
@@ -104,7 +161,7 @@ test('From scratch', { tag: ['@display_builder_dev_tools'] }, async ({ page, dru
     await displayBuilder.dragElementFromLibraryById('Blocks', 'token', componentSimpleSlot.nth(1))
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title="Token"]`).first(),
+      page.locator(`.db-island-builder [data-node-title^="Token"]`).first(),
       'I am a test token in a slot',
       [
         {
@@ -208,7 +265,7 @@ test('Contextual', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupa
     )
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title="Token"]`).first(),
+      page.locator(`.db-island-builder [data-node-title^="Token"]`).first(),
       'I am a test token in a slot',
       [
         {

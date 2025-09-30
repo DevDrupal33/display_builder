@@ -75,7 +75,7 @@ test('Toolbar buttons', { tag: ['@display_builder_dev_tools'] }, async ({ page, 
 
   await test.step(`Undo / Redo / Clear`, async () => {
     // Test the undo/redo/clear buttons
-    const builderToken = page.locator(`.db-island-builder [data-node-title="Token"]`)
+    const builderToken = page.locator(`.db-island-builder [data-node-title^="Token"]`)
     await expect(builderToken).toHaveCount(2)
 
     // Position required to avoid icon to intercept the click.
@@ -98,7 +98,7 @@ test('Toolbar buttons', { tag: ['@display_builder_dev_tools'] }, async ({ page, 
   // This is helping next tests.
   await test.step(`Set some values for next tests`, async () => {
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title="Token"]`).first(),
+      page.locator(`.db-island-builder [data-node-title^="Token"]`).first(),
       'I am first',
       [
         {
@@ -108,7 +108,7 @@ test('Toolbar buttons', { tag: ['@display_builder_dev_tools'] }, async ({ page, 
       ]
     )
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title="Token"]`).nth(1),
+      page.locator(`.db-island-builder [data-node-title^="Token"]`).nth(1),
       'I am second',
       [
         {
@@ -234,7 +234,7 @@ test('Toolbar keyboard', { tag: ['@display_builder_dev_tools'] }, async ({ page,
   })
 
   await test.step(`Keyboard Undo / Redo / Clear`, async () => {
-    const builderToken = page.locator(`.db-island-builder [data-node-title="Token"]`)
+    const builderToken = page.locator(`.db-island-builder [data-node-title^="Token"]`)
 
     await displayBuilder.dragElementFromLibraryById('Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
     await displayBuilder.closeDialog()
@@ -259,7 +259,7 @@ test('Toolbar keyboard', { tag: ['@display_builder_dev_tools'] }, async ({ page,
   // This is helping next tests.
   await test.step(`Set some values for next tests`, async () => {
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title="Token"]`).first(),
+      page.locator(`.db-island-builder [data-node-title^="Token"]`).first(),
       'I am first',
       [
         {
@@ -269,7 +269,7 @@ test('Toolbar keyboard', { tag: ['@display_builder_dev_tools'] }, async ({ page,
       ]
     )
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title="Token"]`).nth(1),
+      page.locator(`.db-island-builder [data-node-title^="Token"]`).nth(1),
       'I am second',
       [
         {

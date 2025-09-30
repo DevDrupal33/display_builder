@@ -5,7 +5,6 @@ import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.installModules(['display_builder_dev_tools'])
-  // await drupal.setPreprocessing({ css: true, javascript: true })
 })
 
 test('Preset', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
@@ -36,12 +35,12 @@ test('Preset', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, d
     )
 
     await displayBuilder.dragElement(
-      page.locator(`.db-island-builder [data-node-title="Token"]`),
+      page.locator(`.db-island-builder [data-node-title^="Token"]`),
       page.locator(`.db-island-builder [data-slot-id="slot_1"]`)
     )
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title="Token"]`),
+      page.locator(`.db-island-builder [data-node-title^="Token"]`),
       'I am a test token in a slot',
       [
         {
