@@ -154,3 +154,10 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
     padding: 0.3rem;
   }
 }
+
+/* Olivero fixes */
+:has(.display-builder):has(.site-header__fixable) {
+  .site-header {
+    z-index: 2;
+  }
+}
