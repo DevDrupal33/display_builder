@@ -4,6 +4,26 @@
 /* cspell:ignore uidom */
 /* eslint no-console: 0 */
 
+// ((Drupal, debounce, once) => {
+//   /**
+//    * Drupal behavior for display builder search.
+//    *
+//    * @type {Drupal~behavior}
+//    *
+//    * @prop {Drupal~behaviorAttach} attach
+//    *   Attaches the behavior.
+//    *
+//    * @listens shoelace:sl-input
+//    */
+//   Drupal.behaviors.builderPreviewBehaviors = {
+//     attach(context, settings) {
+//       once('dbPreview', '.', context).forEach((input) => {
+
+//       })
+//     }
+//   }
+// });
+
 Drupal.displayBuilder = Drupal.displayBuilder || {};
 
 /**
@@ -24,9 +44,13 @@ Drupal.displayBuilder.showPreview = (builder, trigger) => {
   FloatingUIDOM.computePosition(trigger, preview, {
     placement: 'right-start',
     middleware: [
-      FloatingUIDOM.offset({ mainAxis: 20, alignmentAxis: 40 }),
-      FloatingUIDOM.shift({ crossAxis: true }),
-      FloatingUIDOM.autoPlacement({}),
+      FloatingUIDOM.offset({ mainAxis: 10 }),
+      FloatingUIDOM.shift({}),
+      FloatingUIDOM.autoPlacement({
+        alignment: 'start',
+        autoAlignment: false,
+        allowedPlacements: ['top', 'right'],
+      }),
     ],
   }).then(({ x, y }) => {
     Object.assign(preview.style, {
