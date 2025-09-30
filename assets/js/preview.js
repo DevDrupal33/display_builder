@@ -13,9 +13,12 @@ Drupal.displayBuilder = Drupal.displayBuilder || {};
  * @param {HTMLElement} trigger - The menu element.
  */
 Drupal.displayBuilder.showPreview = (builder, trigger) => {
-  const preview = document.getElementById(`preview-${builder.id}`);
+  if (!FloatingUIDOM) return;
+
+  const preview = builder.querySelector('.db-preview');
   if (!preview) return;
 
+  preview.innerHTML = '';
   preview.style.display = 'block';
 
   FloatingUIDOM.computePosition(trigger, preview, {
@@ -23,7 +26,7 @@ Drupal.displayBuilder.showPreview = (builder, trigger) => {
     middleware: [
       FloatingUIDOM.offset({ mainAxis: 20, alignmentAxis: 40 }),
       FloatingUIDOM.shift({ crossAxis: true }),
-      FloatingUIDOM.autoPlacement(),
+      FloatingUIDOM.autoPlacement({}),
     ],
   }).then(({ x, y }) => {
     Object.assign(preview.style, {
@@ -39,7 +42,7 @@ Drupal.displayBuilder.showPreview = (builder, trigger) => {
  * @param {HTMLElement} builder - The builder.
  */
 Drupal.displayBuilder.hidePreview = (builder) => {
-  const preview = document.getElementById(`preview-${builder.id}`);
+  const preview = builder.querySelector('.db-preview');
   if (!preview) return;
   preview.style.display = 'none';
   preview.innerHTML = '';

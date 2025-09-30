@@ -157,7 +157,7 @@
 
       once('dbInit', '.display-builder', context).forEach((builder) => {
         alterHtmxEvents(builder);
-        Drupal.displayBuilder.initDrawer(builder, debug);
+        Drupal.displayBuilder.initDrawer(builder);
       });
 
       once('dbContextualMenu', '.display-builder', context).forEach(

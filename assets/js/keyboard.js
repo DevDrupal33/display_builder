@@ -56,7 +56,7 @@
 
             // Avoid action when on a textfield, textarea or CKEditor content.
             if (
-              // @todo: find a more generic way.
+              // @todo find a more generic way.
               event.target.tagName === 'SL-INPUT' ||
               event.target.tagName === 'SL-TEXTAREA' ||
               event.target.tagName === 'INPUT' ||

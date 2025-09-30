@@ -86,137 +86,44 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger, event, type) => {
  *
  * @param {HTMLElement} builder
  *   The Display Builder element.
- * @param {Boolean} debug
- *   The debug flag.
  *
  * @listens event:mouseup
  */
-Drupal.displayBuilder.initDrawer = (builder, debug) => {
-  const firstDrawer = builder.querySelector('#db-first-drawer');
-  if (firstDrawer) {
-    firstDrawer.removeAttribute('data-offset-left');
-  }
+Drupal.displayBuilder.initDrawer = (builder) => {
+  // Drawer selector constants
+  const FIRST_DRAWER_ID = '#db-first-drawer';
+  const SECOND_DRAWER_ID = '#db-second-drawer';
 
-  const firstDrawerPanes = builder.querySelectorAll(
-    '.shoelace-drawer__content_island',
-  );
-  const secondDrawer = builder.querySelector('#db-second-drawer');
-
-  let activeFirstDrawerButton = null;
-
-  // Attach drawer opening to any button in toolbar.
-  const attachEventListenersToFirstDrawerButtons = () => {
-    const firstDrawerButtons = builder.querySelectorAll(
-      '[data-open-first-drawer]',
-    );
-    if (firstDrawerButtons.length > 0) {
-      firstDrawerButtons.forEach((button) => {
-        button.addEventListener('mouseup', () => {
-          handleFirstDrawerTriggerClick(button, builder);
-        });
-      });
-    }
-  };
-
-  // Attach drawer opening to any button in toolbar.
-  attachEventListenersToFirstDrawerButtons();
-
-  /**
-   * Helper function to convert rem to px.
-   *
-   * @param {number} rem
-   *   The rem value to convert.
-   * @return {number}
-   *   The px size.
-   */
+  // Common utility: convert rem to px
   const remToPx = (rem) =>
     rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
 
-  // Helper function to get the current drawer width in px.
-  const getDrawerWidth = () => {
-    if (!firstDrawer) return 0;
-    const size = getComputedStyle(firstDrawer)
-      .getPropertyValue('--size')
-      .trim();
-    return size.endsWith('rem') ? remToPx(parseFloat(size)) : parseFloat(size);
-  };
-
-  const adjustMainMarginOnShow = () => {
-    const drawerWidth = getDrawerWidth() || 400;
-    if (builder.classList.contains('display-builder--fullscreen')) {
-      builder.querySelector('.display-builder__main').style.marginLeft =
-        `${drawerWidth}px`;
-    }
-
-    firstDrawer.setAttribute('data-offset-left', `${drawerWidth}px`);
-    Drupal.displace(true);
-  };
-
-  const resetMainMarginOnHide = () => {
-    if (builder.classList.contains('display-builder--fullscreen')) {
-      builder.querySelector('.display-builder__main').style.marginLeft = '0';
-    }
-
-    firstDrawer.removeAttribute('data-offset-left');
-    Drupal.displace(true);
-  };
-
-  const handleResize = (event, drawer, isFirst) => {
-    if (!drawer) return;
-
-    const newWidth = isFirst
-      ? Math.max(
-          200,
-          Math.min(event.clientX, parseInt(window.innerWidth / 1.2, 10)),
-        )
-      : Math.max(
-          200,
-          Math.min(
-            window.innerWidth - event.clientX,
-            parseInt(window.innerWidth / 1.5, 10),
-          ),
-        );
-
-    drawer.style.setProperty('--size', `${newWidth}px`);
-
-    if (isFirst) {
-      firstDrawer.setAttribute('data-offset-left', `${newWidth}px`);
-      Drupal.displace(true);
-      if (builder.classList.contains('display-builder--fullscreen')) {
-        builder.querySelector('.display-builder__main').style.marginLeft =
-          `${newWidth}px`;
+  // Common utility: Escape key handler for both drawers
+  const addEscapeKeyHandler = (firstDrawer, secondDrawer) => {
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        if (secondDrawer && secondDrawer.open) {
+          secondDrawer.hide();
+        } else if (firstDrawer && firstDrawer.open) {
+          firstDrawer.hide();
+        }
       }
-    }
+    });
   };
 
-  /**
-   * Sets up mouse event listeners for resizing the drawer.
-   *
-   * @param {HTMLElement} drawer
-   *   The drawer element.
-   * @param {boolean} isFirst
-   *   Whether it's the first drawer.
-   *
-   * @listens event:mousedown
-   * @listens event:mousemove
-   * @listens event:mouseup
-   */
-  const handleResizeHandler = (drawer, isFirst) => {
+  // Shared resize handler for drawers
+  const handleResizeHandler = (drawer, handleResize) => {
     const resizeHandler = drawer.querySelector('.shoelace-resize-handle');
     if (!resizeHandler) return;
-
     let isResizing = false;
-
     resizeHandler.addEventListener('mousedown', (event) => {
       isResizing = true;
       document.body.style.cursor = 'ew-resize';
       event.preventDefault();
     });
-
     document.addEventListener('mousemove', (event) => {
-      if (isResizing) handleResize(event, drawer, isFirst);
+      if (isResizing) handleResize(event);
     });
-
     document.addEventListener('mouseup', () => {
       if (isResizing) {
         isResizing = false;
@@ -224,94 +131,157 @@ Drupal.displayBuilder.initDrawer = (builder, debug) => {
       }
     });
   };
+  // First Drawer initialization
+  function initFirstDrawer() {
+    const firstDrawer = builder.querySelector(FIRST_DRAWER_ID);
+    if (!firstDrawer) return;
 
-  const onHideResetActiveTrigger = (event) => {
-    if (event.target?.id === 'db-first-drawer' && activeFirstDrawerButton) {
-      activeFirstDrawerButton.variant = 'default';
-      activeFirstDrawerButton = null;
-    }
-  };
+    let startDrawerWidth =
+      Drupal.displayBuilder.LocalStorageManager.get(
+        builder.id,
+        'startDrawerWidth',
+      ) || null;
 
-  const toggleFirstDrawerContent = (showId = null) => {
-    firstDrawerPanes.forEach((pane) => {
-      // Island is wrapped in a span in the drawer
-      // @see components/display_builder/display_builder.twig
-      if (showId && pane.firstElementChild.id === showId) {
-        pane.classList.remove('shoelace-drawer__hidden');
-        if (debug)
-          console.debug(`[drawer] Showing pane: ${pane.firstElementChild.id}`);
-      } else {
-        pane.classList.add('shoelace-drawer__hidden');
-        if (debug)
-          console.debug(`[drawer] Hiding pane: ${pane.firstElementChild.id}`);
+    // Reset left margin value for Drupal displace.
+    firstDrawer.removeAttribute('data-offset-left');
+
+    const firstDrawerPanes = builder.querySelectorAll(
+      '.shoelace-drawer__content_island',
+    );
+    let activeFirstDrawerButton = null;
+
+    const getDrawerWidth = (drawer) => {
+      const size = getComputedStyle(drawer).getPropertyValue('--size').trim();
+      return size.endsWith('rem')
+        ? remToPx(parseFloat(size))
+        : parseFloat(size);
+    };
+
+    const adjustMainMarginOnShow = () => {
+      const drawerWidth = getDrawerWidth(firstDrawer) || 400;
+      if (builder.classList.contains('display-builder--fullscreen')) {
+        builder.querySelector('.display-builder__main').style.marginLeft =
+          `${drawerWidth}px`;
       }
-    });
-  };
-
-  /**
-   * Handles the click event for the first drawer trigger button.
-   *
-   * @param {Object} trigger
-   *   The trigger button element that was clicked.
-   * @prop {string} trigger.variant
-   *   The current variant of the trigger button (e.g., 'default', 'primary').
-   *
-   * @listens shoelace:sl-show
-   * @listens shoelace:sl-hide
-   */
-  const handleFirstDrawerTriggerClick = (trigger) => {
-    if (firstDrawer.open && trigger === activeFirstDrawerButton) {
-      if (debug) console.debug('[drawer] first Drawer open: hide');
-      firstDrawer.hide();
-      toggleFirstDrawerContent();
-      trigger.variant = 'default';
-      activeFirstDrawerButton = null;
-    } else {
-      if (debug) console.debug('[drawer] first Drawer hidden: open');
-      const showIslandId = `island-${builder.id}-${trigger.dataset?.target}`;
-      toggleFirstDrawerContent(showIslandId);
-
-      firstDrawer.show();
-      firstDrawer.label = trigger.dataset?.nodeTitle || trigger.innerText;
-      trigger.variant = 'primary';
-
-      if (activeFirstDrawerButton) activeFirstDrawerButton.variant = 'default';
-      activeFirstDrawerButton = trigger;
-
-      // Push the content for the first sidebar.
-      const drawerWidth = getDrawerWidth() || 400;
-      firstDrawer.setAttribute(`data-offset-left`, `${drawerWidth}px`);
+      firstDrawer.setAttribute('data-offset-left', `${drawerWidth}px`);
       Drupal.displace(true);
-    }
-  };
+    };
 
-  // Init the first drawer.
-  if (firstDrawer) {
-    // @todo avoid using this kind of shoelace specific.
+    const resetMainMarginOnHide = () => {
+      if (builder.classList.contains('display-builder--fullscreen')) {
+        builder.querySelector('.display-builder__main').style.marginLeft = '0';
+      }
+      firstDrawer.removeAttribute('data-offset-left');
+      Drupal.displace(true);
+    };
+
+    const handleResize = (event) => {
+      startDrawerWidth = Math.max(
+        200,
+        Math.min(event.clientX, parseInt(window.innerWidth / 1.2, 10)),
+      );
+      firstDrawer.setAttribute('data-offset-left', `${startDrawerWidth}px`);
+      Drupal.displace(true);
+      if (builder.classList.contains('display-builder--fullscreen')) {
+        builder.querySelector('.display-builder__main').style.marginLeft =
+          `${startDrawerWidth}px`;
+      }
+      firstDrawer.style.setProperty('--size', `${startDrawerWidth}px`);
+      Drupal.displayBuilder.LocalStorageManager.set(
+        builder.id,
+        'startDrawerWidth',
+        startDrawerWidth,
+      );
+    };
+
+    handleResizeHandler(firstDrawer, handleResize);
+
+    const onHideResetActiveTrigger = (event) => {
+      if (event.target?.id === 'db-first-drawer' && activeFirstDrawerButton) {
+        activeFirstDrawerButton.variant = 'default';
+        activeFirstDrawerButton = null;
+      }
+    };
+
+    const toggleFirstDrawerContent = (showId = null) => {
+      firstDrawerPanes.forEach((pane) => {
+        if (showId && pane.firstElementChild.id === showId) {
+          pane.classList.remove('shoelace-drawer__hidden');
+        } else {
+          pane.classList.add('shoelace-drawer__hidden');
+        }
+      });
+    };
+
+    const handleFirstDrawerTriggerClick = (trigger) => {
+      if (firstDrawer.open && trigger === activeFirstDrawerButton) {
+        firstDrawer.hide();
+        toggleFirstDrawerContent();
+        trigger.variant = 'default';
+        activeFirstDrawerButton = null;
+      } else {
+        const showIslandId = `island-${builder.id}-${trigger.dataset?.target}`;
+        toggleFirstDrawerContent(showIslandId);
+        firstDrawer.show();
+        firstDrawer.label = trigger.dataset?.nodeTitle || trigger.innerText;
+        trigger.variant = 'primary';
+        if (activeFirstDrawerButton)
+          activeFirstDrawerButton.variant = 'default';
+        activeFirstDrawerButton = trigger;
+        const drawerWidth = getDrawerWidth(firstDrawer) || 400;
+        firstDrawer.setAttribute(`data-offset-left`, `${drawerWidth}px`);
+        Drupal.displace(true);
+      }
+    };
+
+    const attachEventListenersToFirstDrawerButtons = () => {
+      const firstDrawerButtons = builder.querySelectorAll(
+        '[data-open-first-drawer]',
+      );
+      if (firstDrawerButtons.length > 0) {
+        firstDrawerButtons.forEach((button) => {
+          // Click is important to allow keyboard click action mapping.
+          button.addEventListener('click', () => {
+            handleFirstDrawerTriggerClick(button, builder);
+          });
+        });
+      }
+    };
+
+    attachEventListenersToFirstDrawerButtons();
+
     firstDrawer.addEventListener('sl-show', adjustMainMarginOnShow);
     firstDrawer.addEventListener('sl-hide', resetMainMarginOnHide);
     firstDrawer.addEventListener('sl-hide', onHideResetActiveTrigger);
 
-    handleResizeHandler(firstDrawer, true);
+    return firstDrawer;
   }
 
-  // Init the second drawer.
-  if (secondDrawer) {
-    handleResizeHandler(secondDrawer, false);
+  // Second Drawer initialization
+  function initSecondDrawer() {
+    const secondDrawer = builder.querySelector(SECOND_DRAWER_ID);
+    if (!secondDrawer) return;
+
+    let endDrawerWidth = 400;
+
+    const handleResize = (event) => {
+      endDrawerWidth = Math.max(
+        200,
+        Math.min(
+          window.innerWidth - event.clientX,
+          parseInt(window.innerWidth / 1.5, 10),
+        ),
+      );
+      secondDrawer.style.setProperty('--size', `${endDrawerWidth}px`);
+    };
+
+    handleResizeHandler(secondDrawer, handleResize);
+
+    return secondDrawer;
   }
 
-  /**
-   * Add Escape key support, as we use shoelace contained drawer version.
-   *
-   * @listens event:keydown
-   */
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      if (secondDrawer && secondDrawer.open) {
-        secondDrawer.hide();
-      } else if (firstDrawer && firstDrawer.open) {
-        firstDrawer.hide();
-      }
-    }
-  });
+  // Initialize both drawers and add Escape key handler
+  const firstDrawer = initFirstDrawer();
+  const secondDrawer = initSecondDrawer();
+  addEscapeKeyHandler(firstDrawer, secondDrawer);
 };
