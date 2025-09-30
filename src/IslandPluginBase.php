@@ -94,7 +94,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
 
     $builder_id = (string) $builder->id();
     $this->builderId = $builder_id;
-    $this->instanceId = $data['_node_id'] ?? NULL;
+    $this->instanceId = $data['node_id'] ?? NULL;
 
     // First, get specific data for the plugin.
     if (isset($data['_third_party_settings'][$this->getPluginId()])) {

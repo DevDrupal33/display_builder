@@ -162,14 +162,14 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
   }
 
   /**
-   * Recursively fill the _node_id key.
+   * Recursively fill the node_id key.
    *
    * @param array $array
    *   The array reference.
    */
   private static function fillNodeId(array &$array): void {
-    if (isset($array['source_id']) && !isset($array['_node_id'])) {
-      $array['_node_id'] = \uniqid();
+    if (isset($array['source_id']) && !isset($array['node_id'])) {
+      $array['node_id'] = \uniqid();
     }
 
     foreach ($array as &$value) {

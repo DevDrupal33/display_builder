@@ -322,7 +322,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
    *   The array reference.
    */
   private static function removeNodeId(array &$array): void {
-    unset($array['_node_id']);
+    unset($array['node_id']);
 
     foreach ($array as $key => &$value) {
       if (\is_array($value)) {

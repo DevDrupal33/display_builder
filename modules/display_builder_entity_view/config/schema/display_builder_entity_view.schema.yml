@@ -37,6 +37,6 @@ core.entity_view_display.*.*.*.third_party.display_builder:
 #     source:
 #       type: ui_patterns_source.[%parent.source_id]
 #       label: 'Source configuration'
-#     _node_id:
+#     node_id:
 #       type: string
 #       label: 'Instance id'

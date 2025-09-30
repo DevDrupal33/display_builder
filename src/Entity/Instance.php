@@ -251,7 +251,7 @@ class Instance extends EntityBase implements InstanceInterface {
    */
   public function attachToRoot(int $position, string $source_id, array $data, array $third_party_settings = []): string {
     $data = [
-      '_node_id' => \uniqid(),
+      'node_id' => \uniqid(),
       'source_id' => $source_id,
       'source' => $data,
     ];
@@ -272,7 +272,7 @@ class Instance extends EntityBase implements InstanceInterface {
     ]);
     $this->setNewPresent($root, $log, FALSE);
 
-    return $data['_node_id'];
+    return $data['node_id'];
   }
 
   /**
@@ -281,7 +281,7 @@ class Instance extends EntityBase implements InstanceInterface {
   public function attachToSlot(string $parent_id, string $slot_id, int $position, string $source_id, array $data, array $third_party_settings = []): string {
     $root = $this->getCurrentState();
     $data = [
-      '_node_id' => \uniqid(),
+      'node_id' => \uniqid(),
       'source_id' => $source_id,
       'source' => $data,
     ];
@@ -304,7 +304,7 @@ class Instance extends EntityBase implements InstanceInterface {
     ]);
     $this->setNewPresent($root, $log);
 
-    return $data['_node_id'];
+    return $data['node_id'];
   }
 
   /**
@@ -337,7 +337,7 @@ class Instance extends EntityBase implements InstanceInterface {
     $path = $this->getPath($root, $node_id);
     $existing_data = NestedArray::getValue($root, $path) ?? [];
 
-    if (!isset($existing_data['_node_id']) || ($existing_data['_node_id'] !== $node_id)) {
+    if (!isset($existing_data['node_id']) || ($existing_data['node_id'] !== $node_id)) {
       throw new \Exception('Node ID mismatch');
     }
     $existing_data['source_id'] = $source_id;
@@ -735,7 +735,7 @@ class Instance extends EntityBase implements InstanceInterface {
    */
   private function changeSourcePositionInSlot(array $slot, string $node_id, int $to): array {
     foreach ($slot as $position => $source) {
-      if ($source['_node_id'] === $node_id) {
+      if ($source['node_id'] === $node_id) {
         $p1 = \array_splice($slot, $position, 1);
         $p2 = \array_splice($slot, 0, $to);
 
@@ -778,9 +778,9 @@ class Instance extends EntityBase implements InstanceInterface {
    *   The slot data with the index updated.
    */
   private function buildIndexFromSource(array $path, array $data = []): array {
-    // First job: Add missing _node_id keys.
-    $node_id = $data['_node_id'] ?? \uniqid();
-    $data['_node_id'] = $node_id;
+    // First job: Add missing node_id keys.
+    $node_id = $data['node_id'] ?? \uniqid();
+    $data['node_id'] = $node_id;
     // Second job: Save the path to the index.
     $this->pathIndex[$node_id] = $path;
 

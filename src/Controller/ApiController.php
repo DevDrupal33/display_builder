@@ -694,14 +694,14 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   }
 
   /**
-   * Recursively regenerate the _node_id key.
+   * Recursively regenerate the node_id key.
    *
    * @param array $array
    *   The array reference.
    */
   private static function recursiveRefreshNodeId(array &$array): void {
-    if (isset($array['_node_id'])) {
-      $array['_node_id'] = \uniqid();
+    if (isset($array['node_id'])) {
+      $array['node_id'] = \uniqid();
     }
 
     foreach ($array as &$value) {
@@ -712,7 +712,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   }
 
   /**
-   * Recursively regenerate the _node_id key.
+   * Recursively regenerate the node_id key.
    *
    * @param array $array
    *   The array reference.
@@ -720,7 +720,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * @todo set as utils because clone in ExportForm.php?
    */
   private static function cleanNodeId(array &$array): void {
-    unset($array['_node_id']);
+    unset($array['node_id']);
 
     foreach ($array as $key => &$value) {
       if (\is_array($value)) {

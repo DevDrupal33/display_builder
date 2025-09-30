@@ -142,7 +142,7 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
    */
   public function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
     $component_id = $data['source']['component']['component_id'] ?? NULL;
-    $instance_id = $instance_id ?: $data['_node_id'];
+    $instance_id = $instance_id ?: $data['node_id'];
 
     if (!$instance_id && !$component_id) {
       return NULL;
@@ -183,7 +183,7 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
    * {@inheritdoc}
    */
   public function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
-    $instance_id = $instance_id ?: $data['_node_id'];
+    $instance_id = $instance_id ?: $data['node_id'];
 
     if (!$instance_id) {
       return NULL;
@@ -247,7 +247,7 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
     // label or summary describing the block instance. This value is usd in the
     // contextual menu for user actions such as edit, delete. The format should
     // be a plain string, typically the label or field summary.
-    $build['#attributes']['data-node-title'] = $label_info['summary'] ?? $data['source_id'] ?? $data['_node_id'] ?? '';
+    $build['#attributes']['data-node-title'] = $label_info['summary'] ?? $data['source_id'] ?? $data['node_id'] ?? '';
     $build['#attributes']['data-slot-position'] = $index;
 
     $build = $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label_info['summary'] ?? $label_info['label'] ?? '', $index);

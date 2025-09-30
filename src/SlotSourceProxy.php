@@ -30,7 +30,7 @@ class SlotSourceProxy {
   public function getLabelWithSummary(array $data, array $contexts = []): array {
     /** @var \Drupal\ui_patterns\SourcePluginManager $sourceManager */
     $sourceManager = $this->sourceManager;
-    $source = $sourceManager->getSource($data['_node_id'] ?? '', [], $data, $contexts);
+    $source = $sourceManager->getSource($data['node_id'] ?? '', [], $data, $contexts);
 
     if (!$source) {
       return [

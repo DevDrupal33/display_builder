@@ -66,7 +66,7 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
       $contexts = $form_state->getBuildInfo()['args'][1] ?? [];
 
       $this->alterFormValues($form_state);
-      $source = $this->sourceManager->getSource($this->data['_node_id'], [], $this->data, $contexts);
+      $source = $this->sourceManager->getSource($this->data['node_id'], [], $this->data, $contexts);
       $form = $source ? $source->settingsForm([], $form_state) : [];
 
       if ($this->isMultipleItemsSlotSource($this->data['source'])) {
@@ -107,9 +107,9 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
       ],
     ];
 
-    $build = $this->htmxEvents->onInstanceFormChange($build, $this->builderId, $this->getPluginId(), $this->data['_node_id']);
+    $build = $this->htmxEvents->onInstanceFormChange($build, $this->builderId, $this->getPluginId(), $this->data['node_id']);
 
-    return $this->htmxEvents->onInstanceUpdateButtonClick($build, $this->builderId, $this->getPluginId(), $this->data['_node_id']);
+    return $this->htmxEvents->onInstanceUpdateButtonClick($build, $this->builderId, $this->getPluginId(), $this->data['node_id']);
   }
 
   /**
@@ -158,7 +158,7 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
    * {@inheritdoc}
    */
   public function isApplicable(): bool {
-    return isset($this->data['source_id']) && isset($this->data['_node_id']);
+    return isset($this->data['source_id']) && isset($this->data['node_id']);
   }
 
   /**

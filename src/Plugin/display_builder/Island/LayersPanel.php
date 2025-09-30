@@ -69,7 +69,7 @@ class LayersPanel extends BuilderPanel {
    */
   public function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): array {
     $component_id = $data['source']['component']['component_id'] ?? NULL;
-    $instance_id = $instance_id ?: $data['_node_id'];
+    $instance_id = $instance_id ?: $data['node_id'];
 
     if (!$instance_id && !$component_id) {
       return [];
@@ -155,7 +155,7 @@ class LayersPanel extends BuilderPanel {
         'title' => $label['summary'],
       ],
     ];
-    $instance_id = $instance_id ?: $data['_node_id'];
+    $instance_id = $instance_id ?: $data['node_id'];
 
     // This label is used for contextual menu.
     // @see assets/js/contextual_menu.js
