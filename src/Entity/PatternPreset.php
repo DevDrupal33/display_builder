@@ -30,6 +30,7 @@ use Drupal\ui_patterns\SourcePluginManager;
     'description' => 'description',
     'group' => 'group',
     'sources' => 'sources',
+    'weight' => 'weight',
   ],
   handlers: [
     'list_builder' => PatternPresetListBuilder::class,
@@ -56,6 +57,7 @@ use Drupal\ui_patterns\SourcePluginManager;
     'description',
     'group',
     'sources',
+    'weight',
   ],
 )]
 final class PatternPreset extends ConfigEntityBase implements PatternPresetInterface {
@@ -86,14 +88,26 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
   protected array $sources;
 
   /**
+   * Weight to order the entity in lists.
+   *
+   * @var int
+   */
+  protected $weight = 0;
+
+  /**
    * Slot source proxy.
    */
   protected SlotSourceProxy $slotSourceProxy;
 
   /**
    * {@inheritdoc}
-   *
-   * @see \Drupal\display_builder\PatternPresetInterface
+   */
+  public function getGroup(): string {
+    return $this->group;
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function getSummary(): string {
     $contexts = [];
@@ -105,8 +119,6 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
 
   /**
    * {@inheritdoc}
-   *
-   * @see \Drupal\display_builder\PatternPresetInterface
    */
   public function getSources(array $contexts = [], bool $fillNodeId = TRUE): array {
     $data = $this->get('sources') ?? [];
@@ -181,6 +193,9 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
 
   /**
    * Slot source proxy.
+   *
+   * @return \Drupal\display_builder\SlotSourceProxy
+   *   The slot source proxy.
    */
   private function slotSourceProxy(): SlotSourceProxy {
     return $this->slotSourceProxy ??= \Drupal::service('display_builder.slot_sources_proxy');

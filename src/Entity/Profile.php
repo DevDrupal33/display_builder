@@ -97,9 +97,7 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
   protected ?array $islands = [];
 
   /**
-   * Weight of this page layout when negotiating the page variant.
-   *
-   * The first/lowest that is accessible according to conditions is loaded.
+   * Weight to order the entity in lists.
    *
    * @var int
    */

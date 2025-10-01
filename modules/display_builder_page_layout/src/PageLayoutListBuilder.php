@@ -6,6 +6,8 @@ namespace Drupal\display_builder_page_layout;
 
 use Drupal\Core\Config\Entity\DraggableListBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 
@@ -103,6 +105,20 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
     ];
 
     return $operations;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildForm(array $form, FormStateInterface $form_state) {
+    $form = parent::buildForm($form, $form_state);
+    $rows = Element::children($form['entities']);
+
+    if (\count($rows) < 2) {
+      unset($form['actions']['submit']);
+    }
+
+    return $form;
   }
 
   /**

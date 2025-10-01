@@ -1,7 +1,7 @@
 entity.display_builder_profile.collection:
-  title: Display Builder
+  title: Display builder
   parent: system.admin_structure
-  description: 'Create and manage Display Builder profile, preset and instance.'
+  description: 'Create and manage Display Builder profiles, presets and instances.'
   route_name: entity.display_builder_profile.collection
 
 entity.pattern_preset.collection:

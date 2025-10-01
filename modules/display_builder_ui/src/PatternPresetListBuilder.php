@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_ui;
 
-use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
+use Drupal\Core\Config\Entity\DraggableListBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 
 /**
  * Provides a listing of Pattern presets.
  */
-final class PatternPresetListBuilder extends ConfigEntityListBuilder {
+final class PatternPresetListBuilder extends DraggableListBuilder {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormId(): string {
+    return 'pattern_preset_list_builder';
+  }
 
   /**
    * {@inheritdoc}
@@ -18,8 +27,9 @@ final class PatternPresetListBuilder extends ConfigEntityListBuilder {
   public function buildHeader(): array {
     $header = [];
     $header['label'] = $this->t('Label');
+    $header['group'] = $this->t('Group');
     $header['description'] = $this->t('Description');
-    $header['themes'] = $this->t('Themes');
+    $header['theme'] = $this->t('Theme');
 
     return $header + parent::buildHeader();
   }
@@ -31,8 +41,9 @@ final class PatternPresetListBuilder extends ConfigEntityListBuilder {
     /** @var \Drupal\display_builder\PatternPresetInterface $entity */
     $row = [];
     $row['label'] = $entity->label();
-    $row['description'] = $entity->get('description') ?: $entity->getSummary();
-    $row['themes'] = \implode(', ', $entity->getDependencies()['theme'] ?? []);
+    $row['group']['data']['#plain_text'] = $entity->getGroup();
+    $row['description']['data']['#plain_text'] = $entity->get('description') ?: $entity->getSummary();
+    $row['theme']['data']['#plain_text'] = \implode(', ', $entity->getDependencies()['theme'] ?? []);
 
     return $row + parent::buildRow($entity);
   }
@@ -50,6 +61,20 @@ final class PatternPresetListBuilder extends ConfigEntityListBuilder {
     ];
 
     return $build;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildForm(array $form, FormStateInterface $form_state) {
+    $form = parent::buildForm($form, $form_state);
+    $rows = Element::children($form['entities']);
+
+    if (\count($rows) < 2) {
+      unset($form['actions']['submit']);
+    }
+
+    return $form;
   }
 
 }

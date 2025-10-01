@@ -1,4 +1,4 @@
-name: 'Display Builder core'
+name: 'Display Builder'
 type: module
 description: 'An advanced Display Builder for Drupal, require to have a sub module enable to build Entity view, Page or Views.'
 core_version_requirement: ^11.2

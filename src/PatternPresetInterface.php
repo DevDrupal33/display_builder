@@ -12,6 +12,14 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
 interface PatternPresetInterface extends ConfigEntityInterface {
 
   /**
+   * Get the preset group.
+   *
+   * @return string
+   *   The group
+   */
+  public function getGroup(): string;
+
+  /**
    * Return the ready to use sources.
    *
    * This is not the same as DisplayBuildableInterface::getSources() because

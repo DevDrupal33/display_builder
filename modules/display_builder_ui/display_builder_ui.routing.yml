@@ -3,7 +3,7 @@ entity.display_builder_profile.collection:
   path: '/admin/structure/display-builder'
   defaults:
     _entity_list: 'display_builder_profile'
-    _title: 'Display Builder'
+    _title: 'Display builder'
   requirements:
     _permission: 'administer display builder profile'
 

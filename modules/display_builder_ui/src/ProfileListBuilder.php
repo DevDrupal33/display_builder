@@ -8,22 +8,22 @@ use Drupal\Core\Config\Entity\DraggableListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\ProfileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides a listing of display builders.
+ * Provides a listing of Display Builder profiles.
  */
 final class ProfileListBuilder extends DraggableListBuilder {
 
   /**
-   * Island plugin manager.
-   *
-   * @var \Drupal\display_builder\IslandPluginManagerInterface
+   * The island plugin manager.
    */
-  protected $islandManager;
+  protected IslandPluginManagerInterface $islandManager;
 
   /**
    * {@inheritdoc}
@@ -96,6 +96,20 @@ final class ProfileListBuilder extends DraggableListBuilder {
     ];
 
     return $build;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildForm(array $form, FormStateInterface $form_state) {
+    $form = parent::buildForm($form, $form_state);
+    $rows = Element::children($form['entities']);
+
+    if (\count($rows) < 2) {
+      unset($form['actions']['submit']);
+    }
+
+    return $form;
   }
 
   /**
