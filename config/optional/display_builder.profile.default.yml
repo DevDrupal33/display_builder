@@ -4,7 +4,6 @@ dependencies: {}
 id: default
 label: Default
 description: 'With sensible configuration, for the common usage.'
-library: cdn
 debug: false
 islands:
   component_library:

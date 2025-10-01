@@ -21,3 +21,4 @@ libraryOverrides:
     - core/drupal
     - core/once
     - display_builder/local-storage-manager
+    - display_builder/shoelace

@@ -71,15 +71,24 @@ drush -y en display_builder
 Install as you would normally install a contributed Drupal module.
 See: [Installing Modules](https://www.drupal.org/docs/extending-drupal/installing-modules) for further information.
 
-## Libraries for local development
+## Local libraries
 
 Display Builder rely on [Shoelace component library](https://shoelace.style/getting-started/installation),
 and HTMX [sse extension](https://htmx.org/extensions/sse/).
 
-Libraries are loaded by CDN, but you can use local copies instead with a setting
-in Display builder profiles.
+By default libraries are loaded with CDN, but you can switch to local copies with drush:
 
-### Local development installation
+```shell
+$ drush state:set display_builder.asset_libraries_local true
+$ drush cache:rebuild
+```
+
+And switch back to CDN mode with drush:
+
+```shell
+$ drush state:delete display_builder.asset_libraries_local
+$ drush cache:rebuild
+```
 
 Currently asset.packagist provide a version of Shoelace with Lit dependencies.
 

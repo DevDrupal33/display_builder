@@ -21,3 +21,6 @@ props:
     expanded:
       title: Expanded
       type: boolean
+libraryOverrides:
+  dependencies:
+    - display_builder/shoelace

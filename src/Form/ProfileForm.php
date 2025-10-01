@@ -103,17 +103,6 @@ final class ProfileForm extends EntityForm {
       $form['islands'][$type] = $this->buildIslandTypeTable(IslandType::from($type), $islands, $island_configuration);
     }
 
-    $form['library'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Shoelace library'),
-      '#description' => $this->t('Select the library mode. If local must be installed in libraries folder, see README.'),
-      '#options' => [
-        'cdn' => $this->t('CDN'),
-        'local' => $this->t('Local'),
-      ],
-      '#default_value' => $entity->get('library'),
-    ];
-
     $form['debug'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Debug mode'),

@@ -5,7 +5,3 @@ props:
     - title: Tab 1
     - title: Tab 2
     - title: Tab 3
-library_wrapper: >
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
-  {{ _story }}

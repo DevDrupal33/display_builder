@@ -65,17 +65,6 @@ interface ProfileInterface extends ConfigEntityInterface {
   public function getRoles(): array;
 
   /**
-   * Return the library 'mode'.
-   *
-   * @todo To remove once we find a better way of switching between CDN and
-   * local.
-   *
-   * @return string
-   *   'cdn' or 'local'
-   */
-  public function getLibrary(): string;
-
-  /**
    * Is debug mode activated?
    *
    * @return bool

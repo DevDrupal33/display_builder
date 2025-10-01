@@ -63,7 +63,6 @@ use Drupal\user\RoleInterface;
   config_export: [
     'id',
     'label',
-    'library',
     'description',
     'islands',
     'debug',
@@ -86,11 +85,6 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
    * The display builder description.
    */
   protected string $description;
-
-  /**
-   * The display builder library mode.
-   */
-  protected string $library = 'cdn';
 
   /**
    * The display builder debug mode.
@@ -197,13 +191,6 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
     }
 
     return parent::toUrl($rel, $options);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getLibrary(): string {
-    return $this->library;
   }
 
   /**

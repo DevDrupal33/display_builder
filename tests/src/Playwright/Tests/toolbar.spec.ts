@@ -26,7 +26,8 @@ const key = {
 
 test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.installModules(['display_builder_dev_tools'])
-  await drupal.setPreprocessing({ css: false, javascript: false })
+  // await drupal.setPreprocessing({ css: false, javascript: false })
+  await drupal.drush('state:set -y display_builder.asset_libraries_local true')
 })
 
 test.afterEach('Clean', async ({ displayBuilder }) => {

@@ -8,8 +8,10 @@ dropzones
 FloatingUIDOM
 htmx
 offcanvas
+phpdbg
 unchoose
 uswds
+dsfr
 
 beate
 censent

@@ -6,7 +6,3 @@ props:
 slots:
   title:
     title: Prefix Icon
-library_wrapper: >
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
-  {{ _story }}

@@ -1,15 +1,38 @@
-htmx_sse_cdn:
+htmx_sse:
+  remote: https://htmx.org/extensions/sse/
+  version: 2.2.3
+  license:
+    name: BSD Zero Clause License
+    gpl-compatible: true
+  dependencies:
+    # @see \Drupal\display_builder\Hook\LibrariesSwitcher
+    - display_builder/_htmx_sse_cdn
+
+_htmx_sse_cdn:
   js:
     https://cdn.jsdelivr.net/npm/htmx-ext-sse@2.2.3/dist/sse.min.js:
       type: external
       minified: true
 
-htmx_sse_local:
+_htmx_sse_local:
   js:
     /libraries/htmx-ext-sse/node_modules/htmx-ext-sse/dist/sse.min.js:
       minified: true
 
-shoelace_cdn:
+shoelace:
+  remote: https://shoelace.style/
+  version: 2.20.1
+  license:
+    name: MIT
+    url: https://github.com/shoelace-style/shoelace/blob/next/LICENSE.md
+    gpl-compatible: true
+  dependencies:
+    # @see \Drupal\display_builder\Hook\LibrariesSwitcher
+    - display_builder/_shoelace_cdn
+
+# Only to be loaded as a display_builder/shoelace dependency.
+# The default value for Web users.
+_shoelace_cdn:
   css:
     theme:
       https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.min.css:
@@ -26,7 +49,9 @@ shoelace_cdn:
       attributes:
         type: module
 
-shoelace_local:
+# Only to be loaded as a display_builder/shoelace dependency.
+# The default value for pipeline jobs.
+_shoelace_local:
   css:
     theme:
       /libraries/shoelace/node_modules/@shoelace-style/shoelace/cdn/themes/light.css:

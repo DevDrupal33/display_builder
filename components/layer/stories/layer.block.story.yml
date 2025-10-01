@@ -2,7 +2,3 @@ name: Block
 description: A block doesn't have children.
 slots:
   title: Lorem ipsum
-library_wrapper: >
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
-  {{ _story }}

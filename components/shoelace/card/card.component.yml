@@ -13,3 +13,6 @@ slots:
     title: Content
   footer:
     title: Footer
+libraryOverrides:
+  dependencies:
+    - display_builder/shoelace

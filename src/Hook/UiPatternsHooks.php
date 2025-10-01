@@ -10,7 +10,7 @@ use Drupal\display_builder\RenderableAltererInterface;
 use Drupal\ui_patterns\SourceInterface;
 
 /**
- * Hook implementations for display_builder_entity_view.
+ * Hook implementations for display_builder.
  */
 class UiPatternsHooks {
 

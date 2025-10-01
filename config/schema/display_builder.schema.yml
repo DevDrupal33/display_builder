@@ -12,9 +12,6 @@ display_builder.profile.*:
       type: uuid
     description:
       type: text
-    library:
-      type: string
-      label: 'Library type'
     debug:
       type: boolean
       label: 'Debug mode'

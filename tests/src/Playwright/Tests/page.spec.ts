@@ -5,6 +5,7 @@ import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.installModules(['display_builder_page_layout'])
+  await drupal.drush('state:set -y display_builder.asset_libraries_local true')
 })
 
 test(

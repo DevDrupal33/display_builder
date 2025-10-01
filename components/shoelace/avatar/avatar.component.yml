@@ -13,3 +13,6 @@ props:
     image:
       title: Image
       $ref: ui-patterns://url
+libraryOverrides:
+  dependencies:
+    - display_builder/shoelace

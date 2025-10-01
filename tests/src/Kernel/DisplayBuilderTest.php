@@ -52,7 +52,6 @@ final class DisplayBuilderTest extends KernelTestBase {
       'id' => 'test_builder',
       'label' => 'Test Builder',
       'description' => 'Test Description',
-      'library' => 'cdn',
       'debug' => FALSE,
       'islands' => [
         'test_island_button' => $enable_island,
@@ -68,7 +67,6 @@ final class DisplayBuilderTest extends KernelTestBase {
     self::assertSame('test_builder', $displayBuilder->id());
     self::assertSame('Test Builder', $displayBuilder->label());
     self::assertSame('Test Description', $displayBuilder->get('description'));
-    self::assertSame('cdn', $displayBuilder->get('library'));
     self::assertFalse($displayBuilder->get('debug'));
 
     // Test islands enabled.
@@ -87,7 +85,6 @@ final class DisplayBuilderTest extends KernelTestBase {
     // Update the entity.
     $displayBuilder->set('label', 'Updated Builder');
     $displayBuilder->set('description', 'Updated Description');
-    $displayBuilder->set('library', 'local');
     $displayBuilder->set('debug', TRUE);
     $displayBuilder->set('islands', [
       'test_island_button' => $updated_island,
@@ -101,7 +98,6 @@ final class DisplayBuilderTest extends KernelTestBase {
     $updated = Profile::load('test_builder');
     self::assertSame('Updated Builder', $updated->label());
     self::assertSame('Updated Description', $updated->get('description'));
-    self::assertSame('local', $updated->get('library'));
     self::assertTrue($updated->get('debug'));
 
     // Test islands enabled.
@@ -236,15 +232,13 @@ final class DisplayBuilderTest extends KernelTestBase {
   /**
    * Test the library and debug mode.
    */
-  public function testGetLibraryAndDebug(): void {
+  public function testDebug(): void {
     $displayBuilder = Profile::create([
       'id' => 'lib_test',
       'label' => 'Lib Test',
       'description' => 'Test Description',
-      'library' => 'cdn',
       'debug' => TRUE,
     ]);
-    self::assertSame('cdn', $displayBuilder->getLibrary());
     self::assertTrue($displayBuilder->isDebugModeActivated());
   }
 

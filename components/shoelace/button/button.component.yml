@@ -32,3 +32,6 @@ props:
     icon:
       title: Icon name
       type: string
+libraryOverrides:
+  dependencies:
+    - display_builder/shoelace

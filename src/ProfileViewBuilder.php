@@ -72,15 +72,6 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
       ];
     }
 
-    if ($entity->getLibrary() === 'local') {
-      $build['#attached']['library'][] = 'display_builder/shoelace_local';
-      $build['#attached']['library'][] = 'display_builder/htmx_sse_local';
-    }
-    else {
-      $build['#attached']['library'][] = 'display_builder/shoelace_cdn';
-      $build['#attached']['library'][] = 'display_builder/htmx_sse_cdn';
-    }
-
     return $build;
   }
 
