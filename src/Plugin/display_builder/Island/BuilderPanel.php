@@ -212,21 +212,18 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
       switch ($data['source_id']) {
         case 'entity_field':
           $label_info['summary'] = (string) $this->t('Field: @label', ['@label' => $label_info['label']]);
+
           break;
 
         case 'block':
           $label_info['summary'] = (string) $this->t('Block: @label', ['@label' => $label_info['summary']]);
+
           break;
       }
     }
 
     // This is the placeholder without configuration or content yet.
     if ($this->isEmpty($build) || $is_empty) {
-      // Keep the placeholder if the block is not renderable.
-      if (isset($data['source_id']) && $data['source_id'] === 'entity_field') {
-        $label_info['summary'] = (string) $this->t('Field: @label', ['@label' => $label_info['summary']]);
-        $is_empty = FALSE;
-      }
       $build = $this->buildPlaceholderButton($label_info['summary']);
       // Highlight in the view to show it's a temporary block waiting for
       // configuration.

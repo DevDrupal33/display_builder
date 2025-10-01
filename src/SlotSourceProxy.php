@@ -38,7 +38,7 @@ class SlotSourceProxy {
         'summary' => '',
       ];
     }
-    $label = (string) $source->label();
+    $label = (string) $source->label(TRUE);
 
     $summary = $source->settingsSummary();
     $labelSummary = $label;
