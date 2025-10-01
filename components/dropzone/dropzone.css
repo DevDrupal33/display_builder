@@ -192,6 +192,7 @@ handle it instead of shoelace */
     padding: 0 3px;
     content: attr(title);
     text-align: left;
+    white-space: nowrap;
     color: var(--db-background-color);
     background-color: var(--dropzone-color-target);
     font-size: 0.9rem;
@@ -235,6 +236,7 @@ handle it instead of shoelace */
     top: -2px;
     left: -2px;
     width: auto;
+    max-height: 2rem;
     margin-top: 0;
     margin-left: 0;
   }
