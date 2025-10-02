@@ -4,26 +4,6 @@
 /* cspell:ignore uidom */
 /* eslint no-console: 0 */
 
-// ((Drupal, debounce, once) => {
-//   /**
-//    * Drupal behavior for display builder search.
-//    *
-//    * @type {Drupal~behavior}
-//    *
-//    * @prop {Drupal~behaviorAttach} attach
-//    *   Attaches the behavior.
-//    *
-//    * @listens shoelace:sl-input
-//    */
-//   Drupal.behaviors.builderPreviewBehaviors = {
-//     attach(context, settings) {
-//       once('dbPreview', '.', context).forEach((input) => {
-
-//       })
-//     }
-//   }
-// });
-
 Drupal.displayBuilder = Drupal.displayBuilder || {};
 
 /**
