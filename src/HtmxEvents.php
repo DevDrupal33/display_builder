@@ -237,8 +237,9 @@ class HtmxEvents {
     // If not set before we add information for contextual menu or drawer label.
     if (!isset($build['#attributes']['data-node-title'])) {
       // Only for icon case, remove suffix without loading label.
-      $attributes['data-node-title'] = ucfirst(\trim(\str_replace(['renderable', '_'], ['', ' '], $title)));
+      $attributes['data-node-title'] = \ucfirst(\trim(\str_replace(['renderable', '_'], ['', ' '], $title)));
     }
+
     if (!isset($build['#attributes']['data-slot-position'])) {
       $attributes['data-slot-position'] = $index;
     }

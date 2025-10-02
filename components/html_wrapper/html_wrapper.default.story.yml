@@ -1,6 +1,9 @@
 name: Default
 slots:
   content: Can be used to wrap something in HTML.
+props:
+  tag: 'details'
+  attributes: { open: true }
 library_wrapper: >
   {% set tags = [
     'a',

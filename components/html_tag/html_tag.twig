@@ -1,2 +1,4 @@
 {# https://developer.mozilla.org/en-US/docs/Glossary/Void_element #}
-<{{ tag|default('hr') }}{{ attributes }}/>
+{% if tag is defined %}
+<{{ tag }}{{ attributes }}/>
+{% endif %}

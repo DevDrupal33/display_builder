@@ -25,6 +25,18 @@ parameters:
 			path: modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php
 
 		-
+			rawMessage: 'Call to an undefined method object::getPluginDefinition().'
+			identifier: method.notFound
+			count: 1
+			path: src/ComponentLibraryDefinitionHelper.php
+
+		-
+			rawMessage: 'Call to an undefined method object::getPluginId().'
+			identifier: method.notFound
+			count: 1
+			path: src/ComponentLibraryDefinitionHelper.php
+
+		-
 			rawMessage: Cannot access offset 'icon' on array|Drupal\Component\Plugin\Definition\PluginDefinitionInterface.
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1

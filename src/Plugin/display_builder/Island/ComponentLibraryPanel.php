@@ -11,6 +11,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\ComponentLibraryDefinitionHelper;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandConfigurationFormInterface;
 use Drupal\display_builder\IslandConfigurationFormTrait;
@@ -32,8 +33,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurationFormInterface {
 
   use IslandConfigurationFormTrait;
-
-  private const HIDE_PROVIDER = ['display_builder', 'sdc_devel'];
 
   /**
    * The module list extension service.
@@ -70,6 +69,14 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
    *   The definitions filtered and grouped.
    */
   private array $definitionsGrouped = [];
+
+  /**
+   * The source data for components.
+   *
+   * @var array
+   *   The source data already prepared.
+   */
+  private array $sourcesData = [];
 
   /**
    * {@inheritdoc}
@@ -248,12 +255,17 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $builder_id = (string) $builder->id();
-    // Try to call only once for each sub islands.
-    $definitions = $this->getDefinitions();
+    // Run a single time and saved as properties to avoid repeating processing
+    // in ::getComponentsMosaic(), ::getComponentsVariants() and
+    // ::getComponentsGrouped().
     $configuration = $this->getConfiguration();
+
+    $componentDefinitions = new ComponentLibraryDefinitionHelper($this->sdcManager, $this->sourceManager);
+    $definitions = $componentDefinitions->getDefinitions($configuration);
 
     $this->definitionsFiltered = $definitions['filtered'] ?? [];
     $this->definitionsGrouped = $definitions['grouped'] ?? [];
+    $this->sourcesData = $definitions['sources'] ?? [];
 
     $panes = [];
 
@@ -317,9 +329,6 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     foreach ($definitions as $definition) {
       $provider_id = $definition['provider'];
 
-      if (\in_array($provider_id, self::HIDE_PROVIDER, TRUE)) {
-        continue;
-      }
       $provider = $themes[$provider_id] ?? $modules[$provider_id] ?? NULL;
 
       if (!$provider) {
@@ -344,9 +353,6 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
   private function getComponentsGrouped(string $builder_id): array {
     $build = [];
 
-    /** @var \Drupal\ui_patterns\SourceWithChoicesInterface $source */
-    $source = $this->sourceManager->createInstance('component');
-
     foreach ($this->definitionsGrouped as $group_name => $group) {
       $build[] = [
         '#type' => 'html_tag',
@@ -363,7 +369,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
 
         $data = [
           'source_id' => 'component',
-          'source' => $source->getChoiceSettings($component_id),
+          'source' => $this->sourcesData[$component_id],
         ];
         // Used for search filter.
         $keywords = \sprintf('%s %s', $definition['label'], $definition['provider']);
@@ -386,9 +392,6 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
   private function getComponentsVariants(string $builder_id): array {
     $build = [];
 
-    /** @var \Drupal\ui_patterns\SourceWithChoicesInterface $source */
-    $source = $this->sourceManager->createInstance('component');
-
     foreach ($this->definitionsFiltered as $component_id => $definition) {
       $build[] = [
         '#type' => 'html_tag',
@@ -401,7 +404,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
 
       $data = [
         'source_id' => 'component',
-        'source' => $source->getChoiceSettings($component_id),
+        'source' => $this->sourcesData[$component_id],
       ];
 
       if (!isset($definition['variants'])) {
@@ -461,18 +464,14 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
   private function getComponentsMosaic(string $builder_id): array {
     $components = [];
 
-    /** @var \Drupal\ui_patterns\SourceInterface $source */
-    $source = $this->sourceManager->createInstance('component');
-
     foreach (\array_keys($this->definitionsFiltered) as $component_id) {
       $component_id = (string) $component_id;
       $component = $this->sdcManager->find($component_id);
       $component_preview_url = Url::fromRoute('display_builder.api_component_preview', ['component_id' => $component_id]);
 
-      /** @var \Drupal\ui_patterns\SourceWithChoicesInterface $source */
       $vals = [
         'source_id' => 'component',
-        'source' => $source->getChoiceSettings($component_id),
+        'source' => $this->sourcesData[$component_id],
       ];
       $thumbnail = $component->metadata->getThumbnailPath();
 
@@ -489,67 +488,6 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     }
 
     return $this->buildDraggables($builder_id, $components, 'mosaic');
-  }
-
-  /**
-   * Get filtered and grouped definitions.
-   *
-   * @return array
-   *   The definitions filtered and grouped.
-   */
-  private function getDefinitions(): array {
-    $definitions = $this->sdcManager->getSortedDefinitions();
-    $configuration = $this->getConfiguration();
-
-    $exclude_by_id = \preg_split('/\s+/', \trim($configuration['exclude_id'] ?? ''));
-
-    $filtered_definitions = $grouped_definitions = [];
-
-    foreach ($definitions as $id => $definition) {
-      if (isset($definition['provider']) && \in_array($definition['provider'], self::HIDE_PROVIDER, TRUE)) {
-        continue;
-      }
-
-      if (isset($definition['provider']) && $exclude_by_id !== FALSE && \in_array($id, $exclude_by_id, TRUE)) {
-        continue;
-      }
-
-      if (isset($definition['provider']) && \in_array($definition['provider'], $configuration['exclude'], TRUE)) {
-        continue;
-      }
-
-      // Excluded no ui components unless forced.
-      if (isset($definition['noUi']) && $definition['noUi'] === TRUE) {
-        if ((bool) $configuration['include_no_ui'] !== TRUE) {
-          continue;
-        }
-      }
-
-      // Filter components according to configuration.
-      // Components with stable or undefined status will always be available.
-      $allowed_status = \array_merge($configuration['component_status'], ['stable']);
-
-      if (isset($definition['component_status']) && !\in_array($definition['component_status'], $allowed_status, TRUE)) {
-        continue;
-      }
-      $allowed_status = \array_merge($configuration['component_status'], ['stable']);
-
-      $filtered_definitions[$id] = $definition;
-      $grouped_definitions[(string) $definition['category']][$id] = $definition;
-    }
-
-    // Order list ignoring starting '(' that is used for components names that
-    // are sub components.
-    \uasort($filtered_definitions, static function ($a, $b) {
-      $nameA = \ltrim($a['name'] ?? $a['label'], '(');
-
-      return \strnatcasecmp($nameA, \ltrim($b['name'] ?? $b['label'], '('));
-    });
-
-    return [
-      'grouped' => $grouped_definitions,
-      'filtered' => $filtered_definitions,
-    ];
   }
 
   /**
