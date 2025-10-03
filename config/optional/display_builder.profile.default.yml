@@ -97,10 +97,4 @@ islands:
   back:
     status: true
     weight: -6
-  operation:
-    status: false
-    weight: -1
-  reset:
-    status: false
-    weight: 0
 weight: 0
