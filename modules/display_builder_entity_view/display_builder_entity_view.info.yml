@@ -7,5 +7,3 @@ dependencies:
   - drupal:field_ui
   - display_builder:display_builder
   - ui_patterns:ui_patterns_field
-  # @todo remove when https://www.drupal.org/project/display_builder/issues/3541423
-  - ui_patterns:ui_patterns_field_formatters

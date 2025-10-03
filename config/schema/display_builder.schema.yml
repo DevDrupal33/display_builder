@@ -153,22 +153,28 @@ display_builder.pattern_preset.*:
   type: config_entity
   label: Display builder Preset
   mapping:
+    uuid:
+      type: uuid
     id:
       type: machine_name
       label: ID
+    weight:
+      type: weight
+      label: Weight
     label:
       type: label
       label: Label
-    uuid:
-      type: uuid
     description:
       type: text
+      label: Description
     group:
       type: string
+      label: Group
     sources:
       label: 'UI Patterns sources'
-      # See Drupal\display_builder\Hook\UiPatternsHooks::schemaInfoAlter().
-      type: ui_patterns_slot_source
+      type: sequence
+      sequence:
+        type: ignore
 
 ui_patterns_slot_source.third_party_setting.ui_styles:
   label: 'UI Styles settings'

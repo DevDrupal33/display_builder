@@ -32,7 +32,7 @@ $local_rules = [
   'blank_line_after_opening_tag' => true,
   'ordered_imports' => true,
   'ordered_interfaces' => true,
-  'php_unit_strict' => true,
+  'php_unit_strict' => false,
   'return_assignment' => false,
   'php_unit_test_class_requires_covers' => false,
   'new_expression_parentheses' => ['use_parentheses' => true],

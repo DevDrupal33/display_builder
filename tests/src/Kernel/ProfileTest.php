@@ -17,7 +17,7 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[CoversClass('\Drupal\display_builder\Entity\Profile')]
 #[Group('display_builder')]
-final class DisplayBuilderTest extends KernelTestBase {
+final class ProfileTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}

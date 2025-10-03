@@ -56,15 +56,6 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
   }
 
   /**
-   * Helper to create a mock component.
-   */
-  private function createComponent(string $id, array $definition): ComponentPlugin {
-    $definition['path'] = 'tests/fixtures/' . $id;
-    // The third argument to ComponentPlugin is the plugin definition.
-    return new ComponentPlugin(['app_root' => '.'], $id, $definition);
-  }
-
-  /**
    * Test the getDefinitions method with a simple configuration.
    */
   public function testSimpleGetDefinitions(): void {
@@ -98,20 +89,20 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
 
     $result = $this->helper->getDefinitions($configuration);
 
-    $this->assertCount(3, $result['filtered']);
-    $this->assertEquals([
+    self::assertCount(3, $result['filtered']);
+    self::assertEquals([
       'test:six' => $definitions['test:six'],
       'test:one' => $definitions['test:one'],
       'test:two' => $definitions['test:two'],
     ], $result['filtered']);
 
-    $this->assertCount(1, $result['grouped']);
-    $this->assertCount(3, $result['grouped']['Test Category']);
+    self::assertCount(1, $result['grouped']);
+    self::assertCount(3, $result['grouped']['Test Category']);
 
-    $this->assertCount(3, $result['sources']);
-    $this->assertArrayHasKey('test:one', $result['sources']);
-    $this->assertArrayHasKey('test:two', $result['sources']);
-    $this->assertArrayHasKey('test:six', $result['sources']);
+    self::assertCount(3, $result['sources']);
+    self::assertArrayHasKey('test:one', $result['sources']);
+    self::assertArrayHasKey('test:two', $result['sources']);
+    self::assertArrayHasKey('test:six', $result['sources']);
   }
 
   /**
@@ -140,8 +131,8 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
 
     $result = $this->helper->getDefinitions($configuration);
 
-    $this->assertCount(1, $result['filtered']);
-    $this->assertArrayHasKey('test:two', $result['filtered']);
+    self::assertCount(1, $result['filtered']);
+    self::assertArrayHasKey('test:two', $result['filtered']);
   }
 
   /**
@@ -173,7 +164,7 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
 
     $result = $this->helper->getDefinitions($configuration);
 
-    $this->assertCount(2, $result['filtered']);
+    self::assertCount(2, $result['filtered']);
   }
 
   /**
@@ -208,10 +199,10 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
 
     $result = $this->helper->getDefinitions($configuration);
 
-    $this->assertCount(3, $result['filtered']);
-    $this->assertArrayHasKey('test:two', $result['filtered']);
-    $this->assertArrayHasKey('test:three', $result['filtered']);
-    $this->assertArrayHasKey('test:four', $result['filtered']);
+    self::assertCount(3, $result['filtered']);
+    self::assertArrayHasKey('test:two', $result['filtered']);
+    self::assertArrayHasKey('test:three', $result['filtered']);
+    self::assertArrayHasKey('test:four', $result['filtered']);
   }
 
   /**
@@ -254,7 +245,17 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
 
     $result = $this->helper->getDefinitions($configuration);
 
-    $this->assertCount(0, $result['filtered']);
+    self::assertCount(0, $result['filtered']);
+  }
+
+  /**
+   * Helper to create a mock component.
+   */
+  private function createComponent(string $id, array $definition): ComponentPlugin {
+    $definition['path'] = 'tests/fixtures/' . $id;
+
+    // The third argument to ComponentPlugin is the plugin definition.
+    return new ComponentPlugin(['app_root' => '.'], $id, $definition);
   }
 
 }

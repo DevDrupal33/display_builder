@@ -12,6 +12,7 @@ use Drupal\display_builder\Form\PatternPresetForm;
 use Drupal\display_builder\PatternPresetInterface;
 use Drupal\display_builder\SlotSourceProxy;
 use Drupal\display_builder_ui\PatternPresetListBuilder;
+use Drupal\ui_patterns\SourceInterface;
 use Drupal\ui_patterns\SourcePluginManager;
 
 /**
@@ -70,22 +71,22 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
   /**
    * The preset label.
    */
-  protected string $label;
+  protected string $label = '';
 
   /**
    * The preset description.
    */
-  protected string $description;
+  protected string $description = '';
 
   /**
    * The preset group.
    */
-  protected string $group;
+  protected string $group = '';
 
   /**
    * The preset sources.
    */
-  protected array $sources;
+  protected array $sources = [];
 
   /**
    * Weight to order the entity in lists.
@@ -93,6 +94,11 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
    * @var int
    */
   protected $weight = 0;
+
+  /**
+   * The UI Patterns source plugin manager.
+   */
+  protected SourcePluginManager $sourcePluginManager;
 
   /**
    * Slot source proxy.
@@ -120,7 +126,7 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
   /**
    * {@inheritdoc}
    */
-  public function getSources(array $contexts = [], bool $fillNodeId = TRUE): array {
+  public function getSources(array $contexts = [], bool $fillInternalId = TRUE): array {
     $data = $this->get('sources') ?? [];
 
     if (isset($data[0]) && \count($data) === 1) {
@@ -131,8 +137,8 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
       return [];
     }
 
-    if ($fillNodeId) {
-      self::fillNodeId($data);
+    if ($fillInternalId) {
+      self::fillInternalId($data);
     }
 
     return $data;
@@ -143,34 +149,115 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
    *
    * @see \Drupal\Core\Config\Entity\ConfigEntityInterface
    */
-  public function calculateDependencies() {
-    parent::calculateDependencies();
+  public function getContexts(): array {
     // The root level is a single nestable source plugin.
-    $source = $this->sources;
+    if (!isset($this->sources['source_id']) || !isset($this->sources['source'])) {
+      return [];
+    }
 
-    if (!isset($source['source_id'])) {
+    return $this->getContextFromSource($this->sources['source_id'], $this->sources['source']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies(): self {
+    parent::calculateDependencies();
+
+    // The root level is a single nestable source plugin.
+    if (!isset($this->sources['source_id'])) {
       return $this;
     }
     // This will automatically be done by parent::calculateDependencies() if we
     // implement EntityWithPluginCollectionInterface.
     $configuration = [
-      'settings' => $source['source'] ?? [],
+      'settings' => $this->sources['source'] ?? [],
     ];
     /** @var \Drupal\ui_patterns\SourceInterface $source */
-    $source = $this->getSourceManager()->createInstance($source['source_id'], $configuration);
+    $source = $this->sourcePluginManager()->createInstance($this->sources['source_id'], $configuration);
     $this->addDependencies($source->calculateDependencies());
 
     return $this;
   }
 
   /**
-   * Gets the source plugin manager.
-   *
-   * @return \Drupal\ui_patterns\SourcePluginManager
-   *   The source plugin manager.
+   * {@inheritdoc}
    */
-  protected static function getSourceManager(): SourcePluginManager {
-    return \Drupal::service('plugin.manager.ui_patterns_source');
+  public function areContextsSatisfied(array $contexts): bool {
+    $context_definitions = $this->getContexts();
+
+    if (empty($context_definitions)) {
+      return TRUE;
+    }
+
+    foreach ($context_definitions as $key => $context_definition) {
+      if (!$context_definition->isRequired()) {
+        continue;
+      }
+
+      if (!\array_key_exists($key, $contexts)) {
+        return FALSE;
+      }
+
+      if (!$context_definition->isSatisfiedBy($contexts[$key])) {
+        return FALSE;
+      }
+    }
+
+    return TRUE;
+  }
+
+  /**
+   * Recursively get the source contexts.
+   *
+   * @param string $source_id
+   *   Source plugin ID.
+   * @param array $source
+   *   Source plugin configuration.
+   *
+   * @return array
+   *   Context definitions of the source.
+   */
+  private function getContextFromSource(string $source_id, array $source): array {
+    /** @var \Drupal\ui_patterns\SourceInterface $source */
+    $source = $this->sourcePluginManager()->createInstance($source_id, ['settings' => $source]);
+
+    if ($source->getPluginId() === 'component') {
+      return $this->getContextsFromComponent($source);
+    }
+
+    // @todo Traverse also context switchers.
+    return $source->getContextDefinitions();
+  }
+
+  /**
+   * Get contexts from component.
+   *
+   * Go through all slots and props to get the nested sources contexts.
+   *
+   * @param \Drupal\ui_patterns\SourceInterface $source
+   *   Source plugin.
+   *
+   * @return array
+   *   Context definitions of the component source.
+   */
+  private function getContextsFromComponent(SourceInterface $source): array {
+    $contexts = [];
+    $slots = $source->getSetting('component')['slots'] ?? [];
+
+    foreach ($slots as $slot) {
+      foreach ($slot['sources'] ?? [] as $slot_source) {
+        $contexts = \array_merge($contexts, $this->getContextFromSource($slot_source['source_id'], $slot_source['source']));
+      }
+    }
+
+    $props = $source->getSetting('component')['props'] ?? [];
+
+    foreach ($props as $prop_source) {
+      $contexts = \array_merge($contexts, $this->getContextFromSource($prop_source['source_id'], $prop_source['source']));
+    }
+
+    return $contexts;
   }
 
   /**
@@ -179,16 +266,26 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
    * @param array $array
    *   The array reference.
    */
-  private static function fillNodeId(array &$array): void {
+  private static function fillInternalId(array &$array): void {
     if (isset($array['source_id']) && !isset($array['node_id'])) {
       $array['node_id'] = \uniqid();
     }
 
     foreach ($array as &$value) {
       if (\is_array($value)) {
-        self::fillNodeId($value);
+        self::fillInternalId($value);
       }
     }
+  }
+
+  /**
+   * Gets the source plugin manager.
+   *
+   * @return \Drupal\ui_patterns\SourcePluginManager
+   *   The source plugin manager.
+   */
+  private function sourcePluginManager(): SourcePluginManager {
+    return $this->sourcePluginManager ??= \Drupal::service('plugin.manager.ui_patterns_source');
   }
 
   /**

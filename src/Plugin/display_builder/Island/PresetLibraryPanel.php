@@ -58,6 +58,13 @@ class PresetLibraryPanel extends IslandPluginBase {
       ->execute();
     /** @var \Drupal\display_builder\PatternPresetInterface[] $presets */
     $presets = $this->presetConfigStorage->loadMultiple($entity_ids);
+    $contexts = $this->configuration['contexts'] ?? [];
+
+    foreach ($presets as $preset_id => $preset) {
+      if (!$preset->areContextsSatisfied($contexts)) {
+        unset($presets[$preset_id]);
+      }
+    }
 
     if (empty($presets)) {
       $content = [
