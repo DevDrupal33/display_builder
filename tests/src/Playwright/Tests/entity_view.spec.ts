@@ -133,6 +133,55 @@ test(
       await page.goto(config.dbList)
       await expect(page.getByRole('cell', { name: `${config.entityPrefix}node__${name}__default`, exact: true })).toBeVisible()
     })
+  }
+)
+
+test(
+  'Entity view override',
+  { tag: ['@display_builder', '@display_builder_entity_view', '@display_builder_min'] },
+  async ({ page, drupal, displayBuilder }) => {
+    const testName = utils.createRandomString()
+    const name = `test_${testName}`
+
+    await test.step(`Admin login`, async () => {
+      await drupal.loginAsAdmin()
+    })
+
+    await test.step(`Create entity type and set display`, async () => {
+      // Go to the content entity and create the display.
+      await page.goto(config.contentTypesAdd)
+      await page.getByLabel('Name', { exact: true }).fill(`Test ${testName}`)
+      await page.getByText('Save and manage fields').click()
+      await page.getByRole('link', { name: '+Re-use an existing field' }).click()
+      await expect(page.getByRole('dialog')).toBeVisible()
+      await page.getByRole('button', { name: 'Reuse body' }).click()
+      await page.getByRole('button', { name: 'Save settings' }).click()
+      await drupal.expectMessage('Saved')
+
+      await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
+      // Save the fields for copy in the builder.
+      await expect(page.getByRole('button', { name: 'Display builder' })).toBeVisible()
+
+      // Enable the Display builder for default display
+      await page.getByLabel('Profile', { exact: true }).selectOption('Test')
+      await page.getByRole('button', { name: 'Save' }).click()
+      await drupal.expectMessage('Your settings have been saved.')
+    })
+
+    await test.step(`Check the display`, async () => {
+      await page.getByRole('link', { name: 'Build the display' }).click()
+      await displayBuilder.shoelaceReady()
+
+      // Enable highlight to ease drag.
+      await displayBuilder.fullHighlight()
+
+      // Test the proper blocks are available for Entity view context.
+      // @todo test more fields in sources list.
+      const sources = {
+        entity_link: '[Entity] Link',
+      }
+      await displayBuilder.expectBlocksAvailable(sources, false)
+    })
 
     await test.step(`Create override`, async () => {
       // Create a field ui patterns for sources, hide it and select a profile.

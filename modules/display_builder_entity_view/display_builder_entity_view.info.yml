@@ -7,3 +7,4 @@ dependencies:
   - drupal:field_ui
   - display_builder:display_builder
   - ui_patterns:ui_patterns_field
+  - ui_patterns:ui_patterns_field_formatters
