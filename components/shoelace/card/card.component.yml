@@ -13,6 +13,9 @@ slots:
     title: Content
   footer:
     title: Footer
+props:
+  type: object
+  properties: {}
 libraryOverrides:
   dependencies:
     - display_builder/shoelace

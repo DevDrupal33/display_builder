@@ -7,3 +7,6 @@ slots:
     title: Label
   items:
     title: Items
+props:
+  type: object
+  properties: {}

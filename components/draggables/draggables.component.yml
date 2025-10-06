@@ -9,6 +9,9 @@ variants:
 slots:
   content:
     title: Content
+props:
+  type: object
+  properties: {}
 libraryOverrides:
   dependencies:
     - core/drupal

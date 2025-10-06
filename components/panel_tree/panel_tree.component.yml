@@ -5,6 +5,9 @@ group: Display builder
 slots:
   items:
     title: Items
+props:
+  type: object
+  properties: {}
 libraryOverrides:
   dependencies:
     - core/drupal

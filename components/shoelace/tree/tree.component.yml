@@ -7,6 +7,9 @@ links:
 slots:
   items:
     title: Items
+props:
+  type: object
+  properties: {}
 libraryOverrides:
   dependencies:
     - display_builder/shoelace

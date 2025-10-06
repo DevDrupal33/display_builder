@@ -6,3 +6,6 @@ slots:
     title: Title
   children:
     title: Children
+props:
+  type: object
+  properties: {}
