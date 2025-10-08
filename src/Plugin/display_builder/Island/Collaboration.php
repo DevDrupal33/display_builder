@@ -287,6 +287,11 @@ class Collaboration extends IslandPluginBase implements IslandConfigurationFormI
       '#attributes' => [
         'class' => 'sl-avatar-group',
       ],
+      '#attached' => [
+        'library' => [
+          'display_builder/htmx_sse',
+        ],
+      ],
       'avatars' => $avatars,
     ];
   }
