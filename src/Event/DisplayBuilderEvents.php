@@ -29,4 +29,6 @@ final class DisplayBuilderEvents {
 
   public const ON_SAVE = 'onSave';
 
+  public const ON_LOCK_SWITCH = 'onLockSwitch';
+
 }

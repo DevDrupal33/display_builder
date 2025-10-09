@@ -666,6 +666,30 @@ class Instance extends EntityBase implements InstanceInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function switchLock(string $node_id): bool {
+    $node = $this->get($node_id);
+    $node['lock'] = !($node['lock'] ?? FALSE);
+
+    $root = $this->getCurrentState();
+    $path = $this->getPath($root, $node_id);
+    NestedArray::setValue($root, $path, $node);
+
+    // Get friendly label to display in log instead of ids.
+    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($node, $this->getContexts());
+
+    $log = $node['lock'] ? new FormattableMarkup('%source has been locked.', [
+      '%source' => $labelWithSummary['summary'],
+    ]) : new FormattableMarkup('%source has been unlocked.', [
+      '%source' => $labelWithSummary['summary'],
+    ]);
+    $this->setNewPresent($root, $log);
+
+    return $node['lock'];
+  }
+
+  /**
    * Build the index from a slot.
    *
    * @param array $path

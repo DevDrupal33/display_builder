@@ -129,11 +129,12 @@ class LayersPanel extends BuilderPanel {
       $name = \sprintf('%s - %s', $name, $variant);
     }
 
+    $lock = $data['lock'] ?? FALSE;
     $build = [
       '#type' => 'component',
       '#component' => 'display_builder:layer',
       '#slots' => [
-        'title' => $name,
+        'title' => $name . ($lock ? ' 🔒' : ''),
         'children' => $slots,
       ],
       // Required for the context menu label.
@@ -175,6 +176,13 @@ class LayersPanel extends BuilderPanel {
     $build['#attributes']['data-slot-position'] = $index;
 
     return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['summary'], $index);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onLockSwitch(string $builder_id, string $instance_id): array {
+    return $this->replaceInstance($builder_id, $instance_id);
   }
 
   /**

@@ -245,4 +245,15 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
    */
   public static function getUniqId(array $data): int;
 
+  /**
+   * Switch the lock status.
+   *
+   * @param string $node_id
+   *   The node ID of the source.
+   *
+   * @return bool
+   *   The status of the lock after the switch.
+   */
+  public function switchLock(string $node_id): bool;
+
 }

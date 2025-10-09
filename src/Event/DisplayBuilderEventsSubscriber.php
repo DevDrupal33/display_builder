@@ -35,6 +35,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
       DisplayBuilderEvents::ON_UPDATE => 'onUpdate',
       DisplayBuilderEvents::ON_SAVE => 'onSave',
       DisplayBuilderEvents::ON_PRESET_SAVE => 'onPresetSave',
+      DisplayBuilderEvents::ON_LOCK_SWITCH => 'onLockSwitch',
     ];
   }
 
@@ -126,6 +127,16 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    */
   public function onPresetSave(DisplayBuilderEvent $event): void {
     $this->dispatchToIslands($event, __FUNCTION__);
+  }
+
+  /**
+   * Event handler for when a lock is switched.
+   *
+   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
+   *   The event object.
+   */
+  public function onLockSwitch(DisplayBuilderEvent $event): void {
+    $this->dispatchToIslands($event, __FUNCTION__, [$event->getInstanceId()]);
   }
 
   /**
