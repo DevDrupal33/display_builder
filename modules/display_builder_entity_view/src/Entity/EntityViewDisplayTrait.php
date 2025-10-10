@@ -16,6 +16,7 @@ use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\ProfileInterface;
+use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 
 /**
@@ -378,8 +379,36 @@ trait EntityViewDisplayTrait {
    * @see \Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE): void {
-    if ($this->getProfile()) {
+    if ($profile = $this->getProfile()) {
       $this->initInstanceIfMissing();
+
+      // Save the profile in the instance if changed.
+      $instance = $this->getInstance();
+      $profile_id = (string) $profile->id();
+
+      if ($instance->getProfile()->id() !== $profile_id) {
+        $instance->setProfile($profile_id);
+        $instance->save();
+      }
+    }
+
+    // Do also overrides.
+    if ($profile = $this->getDisplayBuilderOverrideProfile()) {
+      $profile_id = (string) $profile->id();
+      $storage = $this->entityTypeManager->getStorage('display_builder_instance');
+
+      foreach ($storage->loadMultiple() as $override) {
+        /** @var \Drupal\display_builder\InstanceInterface $override */
+        if (!$this->isOverrideOfCurrentDisplay($override)) {
+          continue;
+        }
+
+        if ($override->getProfile()->id() === $profile_id) {
+          continue;
+        }
+        $override->setProfile($profile_id);
+        $override->save();
+      }
     }
 
     parent::postSave($storage, $update);
@@ -443,6 +472,33 @@ trait EntityViewDisplayTrait {
     }
 
     return $build_list;
+  }
+
+  /**
+   * Chef if the instance is overriding this display.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   A list of display builder instances.
+   *
+   * @return bool
+   *   Is the instance overriding this display?
+   */
+  protected function isOverrideOfCurrentDisplay(InstanceInterface $instance): bool {
+    $parts = DisplayBuilderItemList::checkInstanceId((string) $instance->id());
+
+    if (!$parts) {
+      return FALSE;
+    }
+
+    if ($parts['entity_type_id'] !== $this->getTargetEntityTypeId()) {
+      return FALSE;
+    }
+
+    if ($parts['field_name'] !== $this->getDisplayBuilderOverrideField()) {
+      return FALSE;
+    }
+
+    return TRUE;
   }
 
   /**

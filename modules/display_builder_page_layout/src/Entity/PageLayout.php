@@ -90,9 +90,9 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   protected $weight = 0;
 
   /**
-   * Display Builder ID.
+   * Display Builder Profile ID.
    */
-  protected string $display_builder = '';
+  protected string $profile = '';
 
   /**
    * A list of sources plugins.
@@ -327,6 +327,13 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE): void {
     $this->initInstanceIfMissing();
+    $instance = $this->getInstance();
+
+    // Save the profile in the instance if changed.
+    if ($instance->getProfile()->id() !== $this->profile) {
+      $instance->setProfile($this->profile);
+      $instance->save();
+    }
     parent::postSave($storage, $update);
   }
 

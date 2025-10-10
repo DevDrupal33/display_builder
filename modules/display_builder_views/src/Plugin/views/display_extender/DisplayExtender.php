@@ -103,20 +103,29 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements Display
     }
 
     // @todo we should have always a fallback.
-    $display_builder_config = $form_state->getValue(ConfigFormBuilderInterface::PROFILE_PROPERTY, 'default');
-    $this->options[ConfigFormBuilderInterface::PROFILE_PROPERTY] = $display_builder_config;
+    $profile_id = $form_state->getValue(ConfigFormBuilderInterface::PROFILE_PROPERTY, 'default');
+    $this->options[ConfigFormBuilderInterface::PROFILE_PROPERTY] = $profile_id;
 
-    if (!empty($display_builder_config)) {
-      $this->initInstanceIfMissing();
+    if (empty($profile_id)) {
+      // If no Display Builder selected, we delete the related instance.
+      // @todo Do we move that to the View's EntityInterface::delete() method?
+      // @todo Also, when the changed are canceled from UI leaving the View
+      // without Display Builder.
+      $storage = $this->entityTypeManager->getStorage('display_builder_instance');
+      $storage->delete([$this->getInstance()]);
 
       return;
     }
 
-    // If no Display Builder selected, we delete the related instance.
-    // @todo Do we move that to the View's EntityInterface::delete() method?
-    // @todo Also, when the changed are canceled from UI leaving the View
-    // without Display Builder.
-    $this->entityTypeManager->getStorage('display_builder_instance')->delete([$this->getInstance()]);
+    $this->initInstanceIfMissing();
+
+    // Save the profile in the instance if changed.
+    $instance = $this->getInstance();
+
+    if ($instance && $instance->getProfile()->id() !== $profile_id) {
+      $instance->setProfile($profile_id);
+      $instance->save();
+    }
   }
 
   /**

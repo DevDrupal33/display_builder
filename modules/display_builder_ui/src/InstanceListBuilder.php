@@ -52,6 +52,7 @@ final class InstanceListBuilder extends EntityListBuilder {
   public function buildHeader(): array {
     $header = [
       'id' => $this->t('Instance'),
+      'profile' => $this->t('Profile'),
       'context' => $this->t('Context'),
       'updated' => $this->t('Updated'),
       'log' => $this->t('Last log'),
@@ -66,7 +67,9 @@ final class InstanceListBuilder extends EntityListBuilder {
   public function render(): array {
     $build = parent::render();
     $build['notice'] = [
-      '#markup' => $this->t('List of all Display builder instances.<br>An instance is a saved arrangement of components and styles for a specific display context (a view mode, a page layout or a view).<br>Instances are created directly from display pages like Entity view, Page layout or Views and should be managed directly from each display context.'),
+      '#markup' => $this->t('An instance is a saved arrangement of components and styles for a specific display context (a view mode, a page layout or a view).<br>Instances are created directly from display pages like Entity view, Page layout or Views and should be managed directly from each display context.'),
+      '#prefix' => '<p class="description">',
+      '#suffix' => '</p>',
       '#weight' => -100,
     ];
 
@@ -93,6 +96,7 @@ final class InstanceListBuilder extends EntityListBuilder {
     }
 
     $row['id']['data'] = $instance_id;
+    $row['profile']['data'] = $instance->getProfile()->label();
     $row['context']['data'] = $type;
 
     /** @var \Drupal\display_builder\HistoryStep $present */
