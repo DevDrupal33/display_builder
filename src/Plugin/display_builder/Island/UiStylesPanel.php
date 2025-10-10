@@ -23,7 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 #[Island(
   id: 'ui_styles',
   label: new TranslatableMarkup('UI Styles'),
-  description: new TranslatableMarkup('Style utilities to apply to the active element.'),
+  description: new TranslatableMarkup('Apply style utilities to the active component or block'),
   type: IslandType::Contextual,
 )]
 class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {

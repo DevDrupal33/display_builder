@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   id: 'builder',
   enabled_by_default: TRUE,
   label: new TranslatableMarkup('Builder'),
-  description: new TranslatableMarkup('The Display Builder main island, allow to build the display.'),
+  description: new TranslatableMarkup('The Display Builder main island.'),
   type: IslandType::View,
   icon: 'tools',
 )]

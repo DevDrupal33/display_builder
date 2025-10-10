@@ -15,8 +15,8 @@ use Drupal\display_builder\IslandType;
  */
 #[Island(
   id: 'menu_preset',
-  label: new TranslatableMarkup('Preset actions'),
-  description: new TranslatableMarkup('Provide preset actions.'),
+  label: new TranslatableMarkup('Preset'),
+  description: new TranslatableMarkup('Save as a preset.'),
   type: IslandType::Menu,
 )]
 class MenuPreset extends IslandPluginBase {

@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 #[Island(
   id: 'tree',
   label: new TranslatableMarkup('Tree'),
-  description: new TranslatableMarkup('Manageable hierarchical tree view of elements.'),
+  description: new TranslatableMarkup('Hierarchical view of components and blocks.'),
   type: IslandType::View,
   icon: 'bar-chart-steps',
 )]

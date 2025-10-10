@@ -68,9 +68,20 @@ class PresetLibraryPanel extends IslandPluginBase {
 
     if (empty($presets)) {
       $content = [
-        '#type' => 'html_tag',
-        '#tag' => 'em',
-        '#value' => $this->t('No preset yet.'),
+        [
+          '#type' => 'html_tag',
+          '#tag' => 'p',
+        ],
+        [
+          '#type' => 'html_tag',
+          '#tag' => 'p',
+          '#value' => $this->t('Pattern presets are reusable arrangements of components and blocks.'),
+        ],
+        [
+          '#type' => 'html_tag',
+          '#tag' => 'p',
+          '#value' => $this->t('Add presets from the contextual menu.'),
+        ],
       ];
     }
     else {

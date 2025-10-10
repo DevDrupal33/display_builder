@@ -73,7 +73,7 @@ class LogsPanel extends IslandPluginBase {
       '#theme' => 'table',
       '#header' => [
         ['data' => $this->t('Step')],
-        ['data' => $this->t('Saved')],
+        ['data' => $this->t('Published')],
         ['data' => $this->t('Time')],
         ['data' => $this->t('User')],
         ['data' => $this->t('Message')],

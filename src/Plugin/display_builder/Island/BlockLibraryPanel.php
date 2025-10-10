@@ -26,7 +26,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   id: 'block_library',
   enabled_by_default: TRUE,
   label: new TranslatableMarkup('Blocks library'),
-  description: new TranslatableMarkup('List of available Drupal blocks to use.'),
+  description: new TranslatableMarkup('List of available blocks.'),
   type: IslandType::Library,
 )]
 class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationFormInterface {

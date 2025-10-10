@@ -118,7 +118,7 @@ test(
       await expect(page.locator(`.db-island-builder [data-test="test_simple"]`)).toHaveClass(/test-style-1 foo bar test_simple/)
 
       await displayBuilder.closeDialog('both')
-      await displayBuilder.saveDisplayBuilder()
+      await displayBuilder.publishDisplayBuilder()
 
       await displayBuilder.expectPreviewAriaSnapshot('entity.aria.yml')
     })
@@ -213,7 +213,7 @@ test(
 
       // Check result on preview and on view entity page.
       await displayBuilder.closeDialog('both')
-      await displayBuilder.saveDisplayBuilder()
+      await displayBuilder.publishDisplayBuilder()
       await displayBuilder.expectPreviewAriaSnapshot('entity-override.aria.yml')
       await page.getByRole('link', { name: 'View' }).click()
       await expect(page.locator('.block-system-main-block')).toMatchAriaSnapshot({ name: 'entity-override.aria.yml' })

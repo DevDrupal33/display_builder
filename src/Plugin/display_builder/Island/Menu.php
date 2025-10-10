@@ -15,8 +15,8 @@ use Drupal\display_builder\IslandType;
  */
 #[Island(
   id: 'menu',
-  label: new TranslatableMarkup('Main actions'),
-  description: new TranslatableMarkup('Provide copy/paste/duplicate actions.'),
+  label: new TranslatableMarkup('Main menu items'),
+  description: new TranslatableMarkup('Copy, paste and duplicate.'),
   type: IslandType::Menu,
 )]
 class Menu extends IslandPluginBase {

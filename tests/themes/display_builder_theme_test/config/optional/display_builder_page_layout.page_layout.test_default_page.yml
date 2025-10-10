@@ -1,0 +1,208 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - display_builder.profile.default
+    - filter.format.plain_text
+    - system.menu.account
+    - system.menu.footer
+    - system.menu.main
+  module:
+    - display_builder
+    - system
+    - ui_patterns
+  theme:
+    - display_builder_theme_test
+id: test_default_page
+label: 'Default page for test'
+weight: 0
+conditions:
+  request_path:
+    id: request_path
+    negate: false
+    pages: /test-display-builder-page
+profile: default
+sources:
+  - source_id: component
+    source:
+      component:
+        component_id: 'display_builder:html_wrapper'
+        variant_id: null
+        props:
+          attributes:
+            source_id: attributes
+            source:
+              value: 'style="margin: 20px; border: 2px solid grey; padding: 20px;background-color: #FFFAF0;"'
+          tag:
+            source_id: textfield
+            source:
+              value: div
+        slots:
+          content:
+            sources:
+              - source_id: component
+                source:
+                  component:
+                    component_id: 'display_builder_theme_test:test_simple'
+                    variant_id: null
+                    props:
+                      attributes:
+                        source_id: attributes
+                        source:
+                          value: ''
+                      label:
+                        source_id: textfield
+                        source:
+                          value: 'This is a test'
+                      tag:
+                        source_id: textfield
+                        source:
+                          value: span
+                    slots:
+                      slot_1:
+                        sources:
+                          - source_id: block
+                            source:
+                              plugin_id: system_branding_block
+              - source_id: block
+                source:
+                  plugin_id: system_breadcrumb_block
+              - source_id: page_title
+                source: {}
+              - source_id: component
+                source:
+                  component:
+                    component_id: 'display_builder:html_wrapper'
+                    variant_id: null
+                    props:
+                      attributes:
+                        source_id: attributes
+                        source:
+                          value: 'style="display: flex;flex-direction: row;flex-wrap: wrap;width: 100%;margin: 15px;background-color: #F0F8FF;"'
+                      tag:
+                        source_id: textfield
+                        source:
+                          value: div
+                    slots:
+                      content:
+                        sources:
+                          - source_id: component
+                            source:
+                              component:
+                                component_id: 'display_builder:html_wrapper'
+                                variant_id: null
+                                props:
+                                  attributes:
+                                    source_id: attributes
+                                    source:
+                                      value: 'style="display: flex;flex-direction: column;flex-basis: 100%;flex: 1;margin: 10px;background-color: #FFF8DC;"'
+                                  tag:
+                                    source_id: textfield
+                                    source:
+                                      value: div
+                                slots:
+                                  content:
+                                    sources:
+                                      - source_id: block
+                                        source:
+                                          plugin_id: 'system_menu_block:main'
+                                      - source_id: block
+                                        source:
+                                          plugin_id: 'system_menu_block:account'
+                          - source_id: component
+                            source:
+                              component:
+                                component_id: 'display_builder:html_wrapper'
+                                variant_id: null
+                                props:
+                                  attributes:
+                                    source_id: attributes
+                                    source:
+                                      value: 'style="display: flex;flex-direction: column;flex-basis: 100%;flex: 3;margin: 10px;background-color: #F8F8FF;"'
+                                  tag:
+                                    source_id: textfield
+                                    source:
+                                      value: div
+                                slots:
+                                  content:
+                                    sources:
+                                      - source_id: component
+                                        source:
+                                          component:
+                                            component_id: 'display_builder_theme_test:test_simple'
+                                            slots:
+                                              slot_1:
+                                                sources:
+                                                  - source_id: local_tasks
+                                                    source: {}
+                                                  - source_id: local_actions
+                                                    source: {}
+                                                  - source_id: main_page_content
+                                                    source: {}
+                                      - source_id: component
+                                        source:
+                                          component:
+                                            component_id: 'display_builder_theme_test:test_complex'
+                                            slots:
+                                              slot_1:
+                                                sources:
+                                                  - source_id: wysiwyg
+                                                    source:
+                                                      value:
+                                                        value: 'Complex text 1'
+                                                        format: plain_text
+                                              sub_slot_1_3:
+                                                sources:
+                                                  - source_id: wysiwyg
+                                                    source:
+                                                      value:
+                                                        value: 'Complex text 1'
+                                                        format: plain_text
+                                              sub_slot_1_2:
+                                                sources:
+                                                  - source_id: wysiwyg
+                                                    source:
+                                                      value:
+                                                        value: 'Complex text 1-2'
+                                                        format: plain_text
+                                              sub_slot_1_1:
+                                                sources:
+                                                  - source_id: wysiwyg
+                                                    source:
+                                                      value:
+                                                        value: 'Complex text 1-1'
+                                                        format: plain_text
+                                              slot_2:
+                                                sources:
+                                                  - source_id: wysiwyg
+                                                    source:
+                                                      value:
+                                                        value: 'Complex text 2'
+                                                        format: plain_text
+                                              sub_slot_2_1:
+                                                sources:
+                                                  - source_id: wysiwyg
+                                                    source:
+                                                      value:
+                                                        value: 'Complex text 2-1'
+                                                        format: plain_text
+                                              sub_slot_2_2:
+                                                sources:
+                                                  - source_id: block
+                                                    source:
+                                                      plugin_id: 'system_menu_block:footer'
+                                                  - source_id: wysiwyg
+                                                    source:
+                                                      value:
+                                                        value: 'Complex text 2-2'
+                                                        format: plain_text
+                                              sub_slot_2_3:
+                                                sources:
+                                                  - source_id: wysiwyg
+                                                    source:
+                                                      value:
+                                                        value: 'Complex text 2-3'
+                                                        format: plain_text
+              - source_id: block
+                source:
+                  plugin_id: system_powered_by_block

@@ -18,7 +18,7 @@ export class Displaybuilder {
    */
   async toggleSidebarView(targetId: string = 'library'): Promise<void> {
     const sidebarFirst = this.page.locator('#db-first-drawer')
-    const toolbarButton = this.page.locator(`.db-toolbar__start [data-target="${targetId}"]`)
+    const toolbarButton = this.page.locator(`[data-target="${targetId}"]`)
 
     if (await sidebarFirst.isVisible()) {
       await toolbarButton.click()
@@ -164,14 +164,13 @@ export class Displaybuilder {
   }
 
   /**
-   * Saves the current state in the Display Builder from the UI
+   * Publish the current state in the Display Builder from the UI
    *
    * @async
    * @returns {Promise<void>}
    */
-  async saveDisplayBuilder(): Promise<void> {
-    await this.htmxReady()
-    await this.page.locator('.db-toolbar__end [data-keyboard-key="S"]').click()
+  async publishDisplayBuilder(): Promise<void> {
+    await this.page.locator('[data-island-action="publish"]').click()
     await this.htmxReady()
   }
 
@@ -366,7 +365,8 @@ export class Displaybuilder {
    * @returns {Promise<void>}
    */
   async highlight(): Promise<void> {
-    await this.keyboardShortcut(config.keyHighlight)
+    await this.page.locator('[data-island-action="highlight"]').click()
+    await this.htmxReady()
   }
 
   /**
@@ -376,7 +376,8 @@ export class Displaybuilder {
    * @returns {Promise<void>}
    */
   async fullscreen(): Promise<void> {
-    await this.keyboardShortcut(config.keyFullscreen)
+    await this.page.locator('[data-island-action="fullscreen"]').click()
+    await this.htmxReady()
   }
 
   /**

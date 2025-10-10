@@ -16,8 +16,8 @@ use Drupal\display_builder\IslandType;
 #[Island(
   id: 'menu_delete',
   enabled_by_default: TRUE,
-  label: new TranslatableMarkup('Delete action'),
-  description: new TranslatableMarkup('Provide remove action.'),
+  label: new TranslatableMarkup('Delete'),
+  description: new TranslatableMarkup('Remove a component or block.'),
   type: IslandType::Menu,
 )]
 class MenuDelete extends IslandPluginBase {

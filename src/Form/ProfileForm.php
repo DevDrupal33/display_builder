@@ -10,6 +10,7 @@ use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\display_builder\Entity\Profile;
@@ -25,6 +26,11 @@ use Drupal\user\RoleInterface;
 final class ProfileForm extends EntityForm {
 
   use AutowireTrait;
+
+  /**
+   * Module extension list.
+   */
+  protected ModuleExtensionList $moduleExtensionList;
 
   /**
    * {@inheritdoc}
@@ -79,11 +85,30 @@ final class ProfileForm extends EntityForm {
       ];
     }
 
+    $path = $this->moduleExtensionList()->getPath('display_builder');
+    $form['islands_intro'] = [
+      [
+        '#type' => 'html_tag',
+        '#tag' => 'label',
+        '#value' => $this->t('Islands'),
+        '#attributes' => [
+          'class' => ['form-item__label'],
+        ],
+      ],
+      [
+        '#type' => 'html_tag',
+        '#tag' => 'img',
+        '#attributes' => [
+          'src' => base_path() . $path . '/assets/images/islands-regions.png',
+          'width' => '1200',
+        ],
+        '#prefix' => '<div style="text-align: center;">',
+        '#suffix' => '</div>',
+      ],
+    ];
+
     $form['islands'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Islands configuration'),
-      '#tree' => TRUE,
-      '#open' => TRUE,
+      '#type' => 'vertical_tabs',
     ];
 
     $island_configuration = $entity->get('islands') ?? [];
@@ -91,16 +116,24 @@ final class ProfileForm extends EntityForm {
     /** @var \Drupal\display_builder\IslandPluginManagerInterface $islandPluginManager */
     $islandPluginManager = \Drupal::service('plugin.manager.db_island'); // phpcs:ignore
     $island_by_types = $islandPluginManager->getIslandsByTypes();
-
-    \ksort($island_by_types);
+    $labels = [
+      'view' => $this->t('View panels'),
+      'button' => $this->t('Toolbar buttons'),
+      'contextual' => $this->t('Contextual panels'),
+      'library' => $this->t('Library panels'),
+      'menu' => $this->t('Menu items'),
+    ];
+    // Sort the types according to the labels.
+    $island_by_types = \array_merge($labels, $island_by_types);
 
     foreach ($island_by_types as $type => $islands) {
-      $form['islands']['title_' . $type] = [
-        '#type' => 'fieldgroup',
-        '#title' => $this->t('@type islands', ['@type' => $type]),
+      $form['islands'][$type] = [
+        '#type' => 'details',
+        '#title' => $labels[$type] ?? $type,
         '#description' => IslandType::description($type),
+        '#group' => 'islands',
+        'content' => $this->buildIslandTypeTable(IslandType::from($type), $islands, $island_configuration),
       ];
-      $form['islands'][$type] = $this->buildIslandTypeTable(IslandType::from($type), $islands, $island_configuration);
     }
 
     $form['debug'] = [
@@ -350,6 +383,16 @@ final class ProfileForm extends EntityForm {
       }
       $entity->set($key, $value);
     }
+  }
+
+  /**
+   * Wraps the module extension list service repository service.
+   *
+   * @return \Drupal\Core\Extension\ModuleExtensionList
+   *   The module extension list service.
+   */
+  protected function moduleExtensionList(): ModuleExtensionList {
+    return $this->moduleExtensionList ??= \Drupal::service('extension.list.module'); // phpcs:ignore
   }
 
 }

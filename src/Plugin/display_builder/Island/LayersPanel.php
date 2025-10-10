@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 #[Island(
   id: 'layers',
   label: new TranslatableMarkup('Layers'),
-  description: new TranslatableMarkup('Manageable hierarchical layer view of elements.'),
+  description: new TranslatableMarkup('Manage hierarchical layer view of elements without preview.'),
   type: IslandType::View,
   icon: 'layers',
 )]

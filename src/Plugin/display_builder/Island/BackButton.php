@@ -8,7 +8,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\IslandPluginBase;
+use Drupal\display_builder\IslandPluginToolbarButtonConfigurationBase;
 use Drupal\display_builder\IslandType;
 
 /**
@@ -18,10 +18,19 @@ use Drupal\display_builder\IslandType;
   id: 'back',
   enabled_by_default: TRUE,
   label: new TranslatableMarkup('Back'),
-  description: new TranslatableMarkup('A link to exit the display builder and go back to admin UI.'),
+  description: new TranslatableMarkup('Exit the display builder and go back to admin UI.'),
   type: IslandType::Button,
 )]
-class BackButton extends IslandPluginBase {
+class BackButton extends IslandPluginToolbarButtonConfigurationBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasButtons(): array {
+    return [
+      'back' => ['label' => FALSE, 'icon' => TRUE],
+    ];
+  }
 
   /**
    * {@inheritdoc}
@@ -33,17 +42,13 @@ class BackButton extends IslandPluginBase {
       return [];
     }
 
-    $button = [
-      '#type' => 'component',
-      '#component' => 'display_builder:button',
-      '#props' => [
-        'icon' => 'box-arrow-up-right',
-        'tooltip' => $this->t('Go to the parent display that manage this instance.'),
-      ],
-      '#attributes' => [
-        'href' => $url->toString(),
-      ],
-    ];
+    $button = $this->buildButton(
+      ($this->showLabel('back')) ? $this->t('Back') : '',
+      'back',
+      $this->showIcon('back') ? 'box-arrow-up-right' : '',
+      $this->t('Exit without losing any data.'),
+    );
+    $button['#attributes']['href'] = $url->toString();
 
     return $button;
   }

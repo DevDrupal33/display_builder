@@ -67,9 +67,8 @@ final class InstanceListBuilder extends EntityListBuilder {
   public function render(): array {
     $build = parent::render();
     $build['notice'] = [
-      '#markup' => $this->t('An instance is a saved arrangement of components and styles for a specific display context (a view mode, a page layout or a view).<br>Instances are created directly from display pages like Entity view, Page layout or Views and should be managed directly from each display context.'),
-      '#prefix' => '<p class="description">',
-      '#suffix' => '</p>',
+      '#markup' => '<p>' . $this->t('Instances are versions of displays (entity views, page layouts, views...) currently under work.') . ' '
+      . $this->t('They are created automatically from the displays and must be managed from them.') . '</p>',
       '#weight' => -100,
     ];
 

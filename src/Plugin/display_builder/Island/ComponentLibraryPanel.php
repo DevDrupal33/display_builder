@@ -27,7 +27,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   id: 'component_library',
   enabled_by_default: TRUE,
   label: new TranslatableMarkup('Components library'),
-  description: new TranslatableMarkup('List of available Components to use.'),
+  description: new TranslatableMarkup('List of available components.'),
   type: IslandType::Library,
 )]
 class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurationFormInterface {

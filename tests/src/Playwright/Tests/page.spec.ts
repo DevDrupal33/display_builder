@@ -59,7 +59,7 @@ test(
       // Result is based on the default page fixture with previous actions.
       // @see modules/display_builder_page_layout/fixtures/default_page_layout.yml
       await displayBuilder.closeDialog('both')
-      await displayBuilder.saveDisplayBuilder()
+      await displayBuilder.publishDisplayBuilder()
 
       // Test only the component and token as the urls from blocks account change
       // in ci.

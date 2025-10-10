@@ -9,7 +9,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\IslandPluginBase;
+use Drupal\display_builder\IslandPluginToolbarButtonConfigurationBase;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -21,10 +21,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   id: 'state',
   enabled_by_default: TRUE,
   label: new TranslatableMarkup('State'),
-  description: new TranslatableMarkup('Buttons to publish and reset the display.'),
+  description: new TranslatableMarkup('Publish and reset the display.'),
   type: IslandType::Button,
 )]
-class StateButtons extends IslandPluginBase {
+class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
 
   /**
    * The module handler.
@@ -44,6 +44,17 @@ class StateButtons extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
+  public function hasButtons(): array {
+    return [
+      'publish' => ['label' => TRUE, 'icon' => FALSE],
+      'restore' => ['label' => FALSE, 'icon' => TRUE],
+      'revert' => ['label' => FALSE, 'icon' => TRUE],
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $builder_id = (string) $builder->id();
 
@@ -51,37 +62,26 @@ class StateButtons extends IslandPluginBase {
       return [];
     }
 
-    $buttonGroup = [
-      '#type' => 'component',
-      '#component' => 'display_builder:button_group',
-      '#slots' => [
-        'buttons' => [],
-      ],
-    ];
-
+    $buttons = [];
     $hasSave = $builder->hasSave();
     $saveIsCurrent = $hasSave ? $builder->saveIsCurrent() : FALSE;
 
     if (!$saveIsCurrent) {
-      $save = $this->buildButton('', 'save', 'floppy', $this->t('Save this display in current state, this will publish your display. (shortcut: S)'), ['S' => $this->t('Save this display (shift+S)')]);
-      $save['#props']['variant'] = 'primary';
-      $save['#attributes']['outline'] = TRUE;
-      $buttonGroup['#slots']['buttons'][] = $this->htmxEvents->onSave($save, $builder_id);
-
-      $restore = $this->buildButton('', 'restore', 'arrow-repeat', $this->t('Restore to last saved version'));
-      $restore['#props']['variant'] = 'warning';
-      $restore['#attributes']['outline'] = TRUE;
-      $buttonGroup['#slots']['buttons'][] = $this->htmxEvents->onReset($restore, $builder_id);
+      $buttons[] = $this->htmxEvents->onSave($this->buildPublishButton(), $builder_id);
+      $buttons[] = $this->htmxEvents->onReset($this->buildRestoreButton(), $builder_id);
     }
 
     if ($this->isOverridden($builder_id)) {
-      $save = $this->buildButton('', 'revert', 'box-arrow-in-down', $this->t('Revert to default display (not overridden)'));
-      $revert['#props']['variant'] = 'danger';
-      $revert['#attributes']['outline'] = TRUE;
-      $buttonGroup['#slots']['buttons'][] = $this->htmxEvents->onRevert($revert, $builder_id);
+      $buttons[] = $this->htmxEvents->onRevert($this->buildRevertButton(), $builder_id);
     }
 
-    return $buttonGroup;
+    return [
+      '#type' => 'component',
+      '#component' => 'display_builder:button_group',
+      '#slots' => [
+        'buttons' => $buttons,
+      ],
+    ];
   }
 
   /**
@@ -170,6 +170,63 @@ class StateButtons extends IslandPluginBase {
     }
 
     return TRUE;
+  }
+
+  /**
+   * Builds the publish button.
+   *
+   * @return array
+   *   The publish button render array.
+   */
+  private function buildPublishButton(): array {
+    $button = $this->buildButton(
+      $this->showLabel('publish') ? $this->t('Publish') : '',
+      'publish',
+      $this->showIcon('publish') ? 'upload' : '',
+      $this->t('Publish this display in current state. (shortcut: P)'), ['P' => $this->t('Publish this display (shift+P)')]
+    );
+    $button['#props']['variant'] = 'primary';
+    $button['#attributes']['outline'] = TRUE;
+
+    return $button;
+  }
+
+  /**
+   * Builds the restore button.
+   *
+   * @return array
+   *   The restore button render array.
+   */
+  private function buildRestoreButton(): array {
+    $button = $this->buildButton(
+      $this->showLabel('restore') ? $this->t('Restore') : '',
+      'restore',
+      $this->showIcon('restore') ? 'arrow-repeat' : '',
+      $this->t('Restore to last saved version')
+    );
+    $button['#props']['variant'] = 'warning';
+    $button['#attributes']['outline'] = TRUE;
+
+    return $button;
+  }
+
+  /**
+   * Builds the revert button.
+   *
+   * @return array
+   *   The revert button render array.
+   */
+  private function buildRevertButton(): array {
+    $button = $this->buildButton(
+      $this->showLabel('revert') ? $this->t('Revert') : '',
+      'revert',
+      $this->showIcon('revert') ? 'box-arrow-in-down' : '',
+      $this->t('Revert to default display (not overridden)')
+    );
+    $button['#props']['variant'] = 'danger';
+    $button['#attributes']['outline'] = TRUE;
+
+    return $button;
   }
 
   /**

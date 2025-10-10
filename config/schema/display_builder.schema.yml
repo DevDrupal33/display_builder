@@ -38,6 +38,22 @@ display_builder.islands.*:
       type: machine_name
       label: Region
 
+display_builder.islands.state:
+  type: mapping
+  mapping:
+    status:
+      type: boolean
+      label: Enabled
+    weight:
+      type: weight
+      label: Weight
+    publish:
+      type: display_builder.toolbar.button
+    restore:
+      type: display_builder.toolbar.button
+    revert:
+      type: display_builder.toolbar.button
+
 display_builder.islands.history:
   type: mapping
   mapping:
@@ -49,6 +65,12 @@ display_builder.islands.history:
     weight:
       type: weight
       label: Weight
+    undo:
+      type: display_builder.toolbar.button
+    redo:
+      type: display_builder.toolbar.button
+    clear:
+      type: display_builder.toolbar.button
 
 display_builder.islands.controls:
   type: mapping
@@ -71,6 +93,14 @@ display_builder.islands.controls:
     weight:
       type: weight
       label: Weight
+    highlight:
+      type: display_builder.toolbar.button
+    fullscreen:
+      type: display_builder.toolbar.button
+    theme:
+      type: display_builder.toolbar.button
+    help:
+      type: display_builder.toolbar.button
 
 display_builder.islands.component_library:
   type: mapping
@@ -149,6 +179,18 @@ display_builder.islands.viewport:
       type: weight
       label: Weight
 
+display_builder.islands.back:
+  type: mapping
+  mapping:
+    status:
+      type: boolean
+      label: Enabled
+    weight:
+      type: weight
+      label: Weight
+    back:
+      type: display_builder.toolbar.button
+
 display_builder.pattern_preset.*:
   type: config_entity
   label: Display builder Preset
@@ -182,3 +224,12 @@ ui_patterns_slot_source.third_party_setting.ui_styles:
   mapping:
     styles:
       type: ui_styles.selected_mapping
+
+display_builder.toolbar.button:
+  label: 'Label and icon visibility'
+  type: mapping
+  mapping:
+    label:
+      type: integer
+    icon:
+      type: integer

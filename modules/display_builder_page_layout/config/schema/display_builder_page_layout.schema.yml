@@ -29,7 +29,7 @@ display_builder_page_layout.page_layout.*:
       label: 'UI Patterns sources'
       type: sequence
       sequence:
-        type: ui_patterns_source.[source_id]
+        type: ignore
   constraints:
     FullyValidatable: ~
 

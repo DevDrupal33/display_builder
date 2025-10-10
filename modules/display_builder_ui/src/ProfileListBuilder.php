@@ -91,7 +91,7 @@ final class ProfileListBuilder extends DraggableListBuilder {
   public function render(): array {
     $build = parent::render();
     $build['notice'] = [
-      '#markup' => $this->t('A Display builder profile is a configuration of the builder itself.<br>Each Display builder profile can be used to build a display with specific settings and capabilities.'),
+      '#markup' => $this->t('Profiles define the display building experience (available features, layout arrangement) for specific user roles.'),
       '#weight' => -100,
     ];
 

@@ -150,7 +150,7 @@ test(
       // Result is based on the default page fixture with previous actions.
       // @see modules/display_builder_views/fixtures/default_view.yml
       await displayBuilder.closeDialog('both')
-      await displayBuilder.saveDisplayBuilder()
+      await displayBuilder.publishDisplayBuilder()
       await displayBuilder.expectPreviewAriaSnapshot('view.aria.yml')
     })
 
