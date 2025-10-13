@@ -4,55 +4,104 @@ dependencies: {}
 id: test
 label: Test
 description: 'Testing Display builder config.'
-debug: true
+debug: false
 islands:
+  library:
+    status: true
+    weight: -10
+    region: sidebar
+  tree:
+    status: true
+    weight: -9
+    region: sidebar
+  builder:
+    status: true
+    weight: -8
+    region: main
+  layers:
+    status: true
+    weight: -7
+    region: main
+  logs:
+    status: true
+    weight: -6
+    region: main
+  preview:
+    status: true
+    weight: -5
+    region: main
+  index_debug:
+    status: false
+    weight: -4
+    region: main
+  state_debug:
+    status: false
+    weight: -3
+    region: main
+  test_island_view:
+    status: false
+    weight: -2
+    region: main
+  viewport:
+    exclude: {}
+    format: compact
+    status: true
+    weight: -7
+  collaboration:
+    status: false
+    weight: -5
+  back:
+    status: true
+    weight: -6
+    back:
+      value: icon
+  controls:
+    status: true
+    weight: -8
+    highlight:
+      value: icon
+    fullscreen:
+      value: icon
+    theme:
+      value: icon
+    help:
+      value: icon
+  history:
+    status: true
+    weight: -9
+    undo:
+      value: icon_label
+    redo:
+      value: icon_label
+    clear:
+      value: hidden
   state:
     status: true
     weight: -10
-  controls:
-    toggle_highlight: true
-    toggle_fullscreen: true
-    keyboard_help: true
-    theme_mode: true
-    status: true
-    weight: -8
-  collaboration:
-    image_field: user_picture
-    image_style: thumbnail
-    status: false
-    weight: -2
-  history:
-    display_clear_button: true
-    status: true
-    weight: -9
+    publish:
+      value: label
+    restore:
+      value: icon
+    revert:
+      value: icon
   test_island_button:
     status: false
-    weight: -1
-  ui_styles:
-    status: true
-    weight: -9
+    weight: -2
   contextual_form:
     status: true
     weight: -10
   ui_skins:
     status: true
     weight: -8
+  ui_styles:
+    status: true
+    weight: -9
   visibility_conditions:
     status: false
-    weight: -6
+    weight: -7
   test_island_contextual:
     status: false
-    weight: -5
-  component_library:
-    exclude: {}
-    component_status:
-      experimental: experimental
-    include_no_ui: true
-    show_grouped: true
-    show_variants: true
-    show_mosaic: true
-    status: true
-    weight: -10
+    weight: -6
   block_library:
     exclude:
       devel: devel
@@ -60,6 +109,19 @@ islands:
       shortcut: shortcut
     status: true
     weight: -9
+  component_library:
+    exclude: {}
+    exclude_id: ''
+    component_status:
+      experimental: experimental
+      deprecated: deprecated
+      obsolete: obsolete
+    include_no_ui: true
+    show_grouped: true
+    show_variants: true
+    show_mosaic: true
+    status: true
+    weight: -10
   preset_library:
     status: true
     weight: -8
@@ -68,54 +130,14 @@ islands:
     weight: -7
   menu:
     status: true
-    weight: 0
+    weight: -10
   menu_delete:
     status: true
-    weight: 0
+    weight: -8
   menu_preset:
     status: true
-    weight: 0
+    weight: -9
   test_island_menu:
     status: false
-    weight: 0
-  preview:
-    status: true
-    weight: -4
-    region: main
-  library:
-    status: true
-    weight: -10
-    region: sidebar
-  logs:
-    status: true
-    weight: -5
-    region: main
-  builder:
-    status: true
-    weight: -7
-    region: main
-  layers:
-    status: true
     weight: -6
-    region: main
-  tree:
-    status: true
-    weight: -8
-    region: sidebar
-  test_island_view:
-    status: false
-    weight: -4
-    region: main
-    string_value: test
-    bool_value: 0
-    string_array:
-      bar: bar
-  viewport:
-    exclude: {}
-    format: compact
-    status: true
-    weight: -6
-  back:
-    status: true
-    weight: -5
 weight: 0

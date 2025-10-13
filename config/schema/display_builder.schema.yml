@@ -57,8 +57,6 @@ display_builder.islands.state:
 display_builder.islands.history:
   type: mapping
   mapping:
-    display_clear_button:
-      type: boolean
     status:
       type: boolean
       label: Enabled
@@ -75,18 +73,6 @@ display_builder.islands.history:
 display_builder.islands.controls:
   type: mapping
   mapping:
-    toggle_highlight:
-      type: boolean
-      label: Toggle highlight
-    toggle_fullscreen:
-      type: boolean
-      label: Toggle fullscreen
-    keyboard_help:
-      type: boolean
-      label: Keyboard help
-    theme_mode:
-      type: boolean
-      label: Theme mode selector
     status:
       type: boolean
       label: Enabled
@@ -229,7 +215,12 @@ display_builder.toolbar.button:
   label: 'Label and icon visibility'
   type: mapping
   mapping:
-    label:
-      type: integer
-    icon:
-      type: integer
+    value:
+      type: string
+      constraints:
+        Choice:
+          - label
+          - icon
+          - icon_label
+          - hidden
+      FullyValidatable: ~

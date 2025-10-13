@@ -56,8 +56,8 @@ enum IslandTypeViewDisplay: string {
    */
   public static function regions(): array {
     return [
-      IslandTypeViewDisplay::Sidebar->value => new TranslatableMarkup('Sidebar (OffCanvas)'),
-      IslandTypeViewDisplay::Main->value => new TranslatableMarkup('Main area (Tabs in the toolbar)'),
+      IslandTypeViewDisplay::Sidebar->value => new TranslatableMarkup('Sidebar'),
+      IslandTypeViewDisplay::Main->value => new TranslatableMarkup('Main area (Tabs)'),
     ];
   }
 

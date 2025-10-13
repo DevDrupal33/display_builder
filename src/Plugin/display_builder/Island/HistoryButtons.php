@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
@@ -26,70 +25,23 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
   /**
    * {@inheritdoc}
    */
-  public function defaultConfiguration(): array {
-    $configuration = parent::defaultConfiguration();
-    $configuration['display_clear_button'] = TRUE;
-
-    return $configuration;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
-    $form = parent::buildConfigurationForm($form, $form_state);
-
-    $configuration = $this->getConfiguration();
-
-    $form['display_clear_button'] = [
-      '#title' => $this->t('Enable the "Clear" button'),
-      '#description' => $this->t('A button to clear the logs history (past and future).'),
-      '#type' => 'checkbox',
-      '#default_value' => $configuration['display_clear_button'],
-    ];
-
-    return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function configurationSummary(): array {
-    $summary = [];
-
-    $configuration = $this->getConfiguration();
-
-    $summary[] = $configuration['display_clear_button'] ? $this->t('With clear button.') : $this->t('Without clear button.');
-
-    return \array_merge($summary, parent::configurationSummary());
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function hasButtons(): array {
-    return [
-      'undo' => ['label' => FALSE, 'icon' => TRUE],
-      'redo' => ['label' => FALSE, 'icon' => TRUE],
-      'clear' => ['label' => FALSE, 'icon' => TRUE],
-    ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $builder_id = (string) $builder->id();
+    $buttons = [
+      $this->isButtonEnabled('undo') ? $this->buildUndoButton($builder, $builder_id) : [],
+      $this->isButtonEnabled('redo') ? $this->buildRedoButton($builder, $builder_id) : [],
+      $this->isButtonEnabled('clear') ? $this->buildClearButton($builder, $builder_id) : [],
+    ];
+
+    if (empty(\array_filter($buttons))) {
+      return [];
+    }
 
     return [
       '#type' => 'component',
       '#component' => 'display_builder:button_group',
       '#slots' => [
-        'buttons' => [
-          $this->buildUndoButton($builder, $builder_id),
-          $this->buildRedoButton($builder, $builder_id),
-          $this->buildClearButton($builder, $builder_id),
-        ],
+        'buttons' => $buttons,
       ],
     ];
   }
@@ -137,6 +89,32 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  protected function hasButtons(): array {
+    return [
+      'undo' => [
+        'title' => $this->t('Undo'),
+        'description' => $this->t('Undo action, icon is always visible, label is number of undo.'),
+        'default' => 'icon_label',
+        'remove' => 'icon',
+      ],
+      'redo' => [
+        'title' => $this->t('Redo'),
+        'description' => $this->t('Redo action, icon is always visible, label is number of redo.'),
+        'default' => 'icon_label',
+        'remove' => 'icon',
+      ],
+      'clear' => [
+        'title' => $this->t('Clear'),
+        'description' => $this->t('A button to clear the logs history (past and future).'),
+        'default' => 'hidden',
+        'remove' => 'icon',
+      ],
+    ];
+  }
+
+  /**
    * Rebuilds the island with the given builder ID.
    *
    * @param string $builder_id
@@ -177,7 +155,7 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
     $undo = $this->buildButton(
       ($this->showLabel('undo') && $past) ? (string) $past : '',
       'undo',
-      $this->showIcon('undo') ? 'arrow-counterclockwise' : '',
+      'arrow-counterclockwise',
       $this->t('Undo (shortcut: u)'),
       ['u' => $this->t('Undo last change')]
     );
@@ -205,7 +183,7 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
     $redo = $this->buildButton(
       ($this->showLabel('redo') && $future) ? (string) $future : '',
       'redo',
-      $this->showIcon('redo') ? 'arrow-clockwise' : '',
+      'arrow-clockwise',
       $this->t('Redo (shortcut: r)'),
       ['r' => $this->t('Redo last undone change')]
     );
@@ -241,9 +219,7 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
     $clear['#props']['variant'] = 'warning';
     $clear['#attributes']['outline'] = TRUE;
 
-    $configuration = $this->getConfiguration();
-
-    if (!$configuration['display_clear_button'] || (empty($past) && empty($future))) {
+    if (empty($past) && empty($future)) {
       $clear['#attributes']['class'] = ['hidden'];
     }
 

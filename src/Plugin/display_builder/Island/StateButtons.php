@@ -44,35 +44,15 @@ class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
   /**
    * {@inheritdoc}
    */
-  public function hasButtons(): array {
-    return [
-      'publish' => ['label' => TRUE, 'icon' => FALSE],
-      'restore' => ['label' => FALSE, 'icon' => TRUE],
-      'revert' => ['label' => FALSE, 'icon' => TRUE],
-    ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    $builder_id = (string) $builder->id();
-
     if (!$builder->canSaveContextsRequirement()) {
       return [];
     }
 
-    $buttons = [];
-    $hasSave = $builder->hasSave();
-    $saveIsCurrent = $hasSave ? $builder->saveIsCurrent() : FALSE;
+    $buttons = $this->buildStateButtons($builder);
 
-    if (!$saveIsCurrent) {
-      $buttons[] = $this->htmxEvents->onSave($this->buildPublishButton(), $builder_id);
-      $buttons[] = $this->htmxEvents->onReset($this->buildRestoreButton(), $builder_id);
-    }
-
-    if ($this->isOverridden($builder_id)) {
-      $buttons[] = $this->htmxEvents->onRevert($this->buildRevertButton(), $builder_id);
+    if (empty($buttons)) {
+      return [];
     }
 
     return [
@@ -131,6 +111,56 @@ class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
    */
   public function onDelete(string $builder_id, string $parent_id): array {
     return $this->rebuild($builder_id);
+  }
+
+  /**
+   * Build state buttons.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The current display builder instance.
+   *
+   * @return array
+   *   A renderable array of buttons.
+   */
+  protected function buildStateButtons(InstanceInterface $instance): array {
+    $instance_d = (string) $instance->id();
+    $buttons = [];
+    $hasSave = $instance->hasSave();
+    $saveIsCurrent = $hasSave ? $instance->saveIsCurrent() : FALSE;
+
+    if ($this->isButtonEnabled('publish') && !$saveIsCurrent) {
+      $buttons[] = $this->htmxEvents->onSave($this->buildPublishButton(), $instance_d);
+    }
+
+    if ($this->isButtonEnabled('restore') && !$saveIsCurrent) {
+      $buttons[] = $this->htmxEvents->onReset($this->buildRestoreButton(), $instance_d);
+    }
+
+    if ($this->isButtonEnabled('revert') && $this->isOverridden($instance_d)) {
+      $buttons[] = $this->htmxEvents->onRevert($this->buildRevertButton(), $instance_d);
+    }
+
+    return $buttons;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function hasButtons(): array {
+    return [
+      'publish' => [
+        'title' => $this->t('Publish'),
+        'default' => 'label',
+      ],
+      'restore' => [
+        'title' => $this->t('Restore'),
+        'default' => 'icon',
+      ],
+      'revert' => [
+        'title' => $this->t('Revert'),
+        'default' => 'icon',
+      ],
+    ];
   }
 
   /**

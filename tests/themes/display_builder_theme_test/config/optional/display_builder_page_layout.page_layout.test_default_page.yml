@@ -32,7 +32,7 @@ sources:
           attributes:
             source_id: attributes
             source:
-              value: 'style="margin: 20px; border: 2px solid grey; padding: 20px;background-color: #FFFAF0;"'
+              value: 'style="margin: 20px; border: 2px solid gray; padding: 20px;background-color: #FFFAF0;"'
           tag:
             source_id: textfield
             source:

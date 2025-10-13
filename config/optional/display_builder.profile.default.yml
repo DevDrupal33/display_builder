@@ -53,19 +53,34 @@ islands:
     weight: -6
     region: main
   history:
-    display_clear_button: false
     status: true
     weight: -9
+    undo:
+      value: icon_label
+    redo:
+      value: icon_label
+    clear:
+      value: hidden
   state:
     status: true
     weight: -10
+    publish:
+      value: label
+    restore:
+      value: icon
+    revert:
+      value: icon
   controls:
-    toggle_highlight: true
-    toggle_fullscreen: true
-    keyboard_help: true
-    theme_mode: false
     status: true
     weight: -8
+    highlight:
+      value: icon
+    fullscreen:
+      value: icon
+    theme:
+      value: hidden
+    help:
+      value: icon
   contextual_form:
     status: true
     weight: -10
@@ -97,4 +112,6 @@ islands:
   back:
     status: true
     weight: -6
+    back:
+      value: icon
 weight: 0

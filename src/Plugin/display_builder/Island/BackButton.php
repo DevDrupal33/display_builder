@@ -26,19 +26,10 @@ class BackButton extends IslandPluginToolbarButtonConfigurationBase {
   /**
    * {@inheritdoc}
    */
-  public function hasButtons(): array {
-    return [
-      'back' => ['label' => FALSE, 'icon' => TRUE],
-    ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $url = self::findParentDisplayFromId((string) $builder->id());
 
-    if (!$url) {
+    if (!$url || !$this->isButtonEnabled('back')) {
       return [];
     }
 
@@ -51,6 +42,18 @@ class BackButton extends IslandPluginToolbarButtonConfigurationBase {
     $button['#attributes']['href'] = $url->toString();
 
     return $button;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function hasButtons(): array {
+    return [
+      'back' => [
+        'title' => $this->t('Back'),
+        'default' => 'icon',
+      ],
+    ];
   }
 
   /**
