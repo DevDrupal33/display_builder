@@ -70,6 +70,9 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         'hx-ext' => 'sse',
         'sse-connect' => Url::fromRoute('display_builder.api_sse', ['builder_id' => $builder_id])->toString(),
       ];
+      // We don't attach it from the island plugin because the island doesn't
+      // always render something in the toolbar.
+      $build['#attached']['library'][] = 'display_builder/htmx_sse';
     }
 
     return $build;

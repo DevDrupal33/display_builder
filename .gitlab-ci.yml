@@ -166,7 +166,7 @@ phpunit:
     - *manual-rule
 
 cspell:
-  allow_failure: true
+  allow_failure: false
   variables:
     _CSPELL_IGNORE_PATHS: '**/fixtures/*.yml, *.neon, **/*.story.yml, **/build.env, **/*.patch, **/tests/playwright'
 
@@ -281,7 +281,7 @@ playwright:
     - *skip-playwright-rule
     - *playwright-tests-exist-rule
     - *manual-rule
-  allow_failure: true
+  allow_failure: false
   variables:
     DRUPAL_TEST_BASE_URL: "${SIMPLETEST_BASE_URL}"
     DRUPAL_TEST_SETUP_FILE: '${CI_PROJECT_DIR}/tests/src/TestSite/DisplayBuilderTestSetup.php'
