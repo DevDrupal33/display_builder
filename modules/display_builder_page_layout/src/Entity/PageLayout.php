@@ -4,25 +4,20 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_page_layout\Entity;
 
-use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
-use Drupal\display_builder\DisplayBuilderHelpers;
+use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder_page_layout\AccessControlHandler;
 use Drupal\display_builder_page_layout\Form\PageLayoutForm;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
 use Drupal\display_builder_page_layout\PageLayoutListBuilder;
-use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\ui_patterns\SourcePluginManager;
 
 /**
@@ -124,164 +119,10 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getPrefix(): string {
-    return 'page_layout__';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getPluginCollections(): array {
     return [
       'conditions' => $this->getConditions(),
     ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getContextRequirement(): string {
-    return 'page';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function checkInstanceId(string $instance_id): ?array {
-    if (!\str_starts_with($instance_id, self::getPrefix())) {
-      return NULL;
-    }
-    [, $page_layout] = \explode('__', $instance_id);
-
-    return [
-      'page_layout' => $page_layout,
-    ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getBuilderUrl(): Url {
-    return Url::fromRoute('entity.page_layout.display_builder', ['page_layout' => $this->id()]);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getUrlFromInstanceId(string $instance_id): Url {
-    $params = self::checkInstanceId($instance_id);
-
-    if (!$params) {
-      // Fallback to the list of instances.
-      return Url::fromRoute('entity.display_builder_instance.collection');
-    }
-
-    return Url::fromRoute('entity.page_layout.display_builder', $params);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getDisplayUrlFromInstanceId(string $instance_id): Url {
-    $params = self::checkInstanceId($instance_id);
-
-    if (!$params) {
-      // Fallback to the list of instances.
-      return Url::fromRoute('entity.display_builder_instance.collection');
-    }
-
-    return Url::fromRoute('entity.page_layout.edit_form', $params);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getProfile(): ?ProfileInterface {
-    $storage = $this->entityTypeManager()->getStorage('display_builder_profile');
-    $profile_id = $this->get(ConfigFormBuilderInterface::PROFILE_PROPERTY);
-
-    if (!$profile_id) {
-      return NULL;
-    }
-
-    /** @var \Drupal\display_builder\ProfileInterface $builder */
-    $builder = $storage->load($profile_id);
-
-    return $builder;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInstanceId(): ?string {
-    // Usually an entity is new if no ID exists for it yet.
-    if ($this->isNew()) {
-      return NULL;
-    }
-
-    return \sprintf('%s%s', self::getPrefix(), $this->id());
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function checkAccess(string $instance_id, AccountInterface $account): AccessResultInterface {
-    return $account->hasPermission('administer page_layout') ? AccessResult::allowed() : AccessResult::forbidden();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function initInstanceIfMissing(): void {
-    /** @var \Drupal\display_builder\InstanceStorage $storage */
-    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
-
-    /** @var \Drupal\display_builder\InstanceInterface $instance */
-    $instance = $storage->load($this->getInstanceId());
-
-    if (!$instance) {
-      $instance = $storage->createFromImplementation($this);
-      $instance->save();
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInitialSources(): array {
-    $sources = $this->getSources();
-
-    if (empty($sources)) {
-      // Fallback to a fixture mimicking the standard page layout.
-      $sources = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_page_layout', 'default_page_layout');
-    }
-
-    return $sources;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInitialContext(): array {
-    $contexts = [];
-    $contexts = RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
-
-    return $contexts;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getSources(): array {
-    return $this->sources;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function saveSources(): void {
-    $this->sources = $this->getInstance()->getCurrentState();
-    $this->save();
   }
 
   /**
@@ -310,7 +151,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
       $this->addDependency('config', $display_builder->getConfigDependencyName());
       $contexts = $instance->getContexts() ?? [];
 
-      foreach ($this->getSources() as $source_data) {
+      foreach ($this->displayBuildable()->getSources() as $source_data) {
         /** @var \Drupal\ui_patterns\SourceInterface $source */
         $source = $this->sourceManager()->getSource('', [], $source_data, $contexts);
         $this->addDependencies($source->calculateDependencies());
@@ -336,7 +177,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
    * {@inheritdoc}
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE): void {
-    $this->initInstanceIfMissing();
+    $this->displayBuildable()->initInstanceIfMissing();
     $instance = $this->getInstance();
 
     // Save the profile in the instance if changed.
@@ -357,6 +198,58 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
     }
 
     parent::postSave($storage, $update);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getProfile(): ?ProfileInterface {
+    $storage = $this->entityTypeManager()->getStorage('display_builder_profile');
+    $profile_id = $this->get(ConfigFormBuilderInterface::PROFILE_PROPERTY);
+
+    if (!$profile_id) {
+      return NULL;
+    }
+
+    /** @var \Drupal\display_builder\ProfileInterface $builder */
+    $builder = $storage->load($profile_id);
+
+    return $builder;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSources(): array {
+    return $this->sources;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setSources(array $sources): void {
+    $this->sources = $sources;
+  }
+
+  /**
+   * Gets the Display Builder instance.
+   *
+   * @return \Drupal\display_builder\InstanceInterface|null
+   *   A display builder instance.
+   */
+  protected function getInstance(): ?InstanceInterface {
+    if (!$this->displayBuildable()->getInstanceId()) {
+      return NULL;
+    }
+
+    if (!isset($this->instance)) {
+      $instance_id = $this->displayBuildable()->getInstanceId();
+      /** @var \Drupal\display_builder\InstanceInterface|null $instance */
+      $instance = $this->entityTypeManager()->getStorage('display_builder_instance')->load($instance_id);
+      $this->instance = $instance;
+    }
+
+    return $this->instance;
   }
 
   /**
@@ -402,23 +295,18 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   }
 
   /**
-   * Gets the Display Builder instance.
+   * Gets the display buildable manager.
    *
-   * @return \Drupal\display_builder\InstanceInterface|null
-   *   A display builder instance.
+   * @return \Drupal\display_builder\DisplayBuildableInterface
+   *   The manager for display buildable.
    */
-  private function getInstance(): ?InstanceInterface {
-    if (!$this->getInstanceId()) {
-      return NULL;
-    }
+  private function displayBuildable(): DisplayBuildableInterface {
+    /** @var \Drupal\display_builder\DisplayBuildablePluginManager $manager */
+    $manager = \Drupal::service('plugin.manager.display_buildable');
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $manager->createInstance('page_layout', ['entity' => $this]);
 
-    if (!isset($this->instance)) {
-      /** @var \Drupal\display_builder\InstanceInterface|null $instance */
-      $instance = $this->entityTypeManager()->getStorage('display_builder_instance')->load($this->getInstanceId());
-      $this->instance = $instance;
-    }
-
-    return $this->instance;
+    return $buildable;
   }
 
   /**

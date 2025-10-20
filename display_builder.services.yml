@@ -28,3 +28,7 @@ services:
       - '@entity_type.manager'
     tags:
       - { name: 'event_subscriber' }
+
+  plugin.manager.display_buildable:
+    class: Drupal\display_builder\DisplayBuildablePluginManager
+    parent: default_plugin_manager

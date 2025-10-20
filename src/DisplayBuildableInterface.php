@@ -81,6 +81,14 @@ interface DisplayBuildableInterface {
   public function getProfile(): ?ProfileInterface;
 
   /**
+   * Gets the Display Builder instance.
+   *
+   * @return \Drupal\display_builder\InstanceInterface|null
+   *   A display builder instance.
+   */
+  public function getInstance(): ?InstanceInterface;
+
+  /**
    * Get instance ID.
    *
    * Will be used as HTML id & class attributes and Javascript variables names
@@ -93,7 +101,7 @@ interface DisplayBuildableInterface {
    * - an underscore (_)
    *
    * @return string|null
-   *   Instance entity ID.
+   *   The instance ID for the display builder, or NULL if the entity is new.
    */
   public function getInstanceId(): ?string;
 

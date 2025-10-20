@@ -11,7 +11,7 @@ use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginToolbarButtonConfigurationBase;
 use Drupal\display_builder\IslandType;
-use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
+use Drupal\display_builder_entity_view\Plugin\DisplayBuildable\EntityViewOverride;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -177,7 +177,7 @@ class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
       return FALSE;
     }
 
-    $instanceInfos = DisplayBuilderItemList::checkInstanceId($builder_id);
+    $instanceInfos = EntityViewOverride::checkInstanceId($builder_id);
 
     if (!isset($instanceInfos['entity_type_id'], $instanceInfos['entity_id'], $instanceInfos['field_name'])) {
       return FALSE;

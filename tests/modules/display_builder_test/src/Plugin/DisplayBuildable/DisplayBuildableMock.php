@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\display_builder\Kernel;
+namespace Drupal\display_builder_test\Plugin\DisplayBuildable;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
-use Drupal\display_builder\DisplayBuildableInterface;
-use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\Attribute\DisplayBuildable;
+use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\ProfileInterface;
 
 /**
@@ -17,25 +18,24 @@ use Drupal\display_builder\ProfileInterface;
  *
  * phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundInImplementedInterface
  */
-final class DisplayBuildableMock implements DisplayBuildableInterface {
+#[DisplayBuildable(
+  id: 'mock',
+  label: new TranslatableMarkup('Mock for tests'),
+  instance_prefix: 'test__',
+)]
+final class DisplayBuildableMock extends DisplayBuildablePluginBase {
 
   /**
-   * A display builder instance.
+   * {@inheritdoc}
    */
-  private ?InstanceInterface $instance;
+  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $instance_id = $configuration['instance_id'];
+    $profile_id = $configuration['profile_id'];
 
-  /**
-   * DisplayBuildableMock constructor.
-   *
-   * @param string $profile_id
-   *   The display builder profile ID.
-   * @param string $instance_id
-   *   The display builder instance ID.
-   */
-  public function __construct(?string $profile_id, string $instance_id) {
     $storage = \Drupal::service('entity_type.manager')->getStorage('display_builder_instance');
     $instance = $storage->create([
-      'id' => $instance_id,
+      'id' => $instance_id ?? 'test__' . \uniqid(),
     ]);
 
     if ($profile_id) {

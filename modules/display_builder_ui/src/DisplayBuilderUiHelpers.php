@@ -48,13 +48,13 @@ class DisplayBuilderUiHelpers {
 
             break;
 
-          case 'views':
-            $instances = \array_merge($instances, self::collectViewInstances($entities, $state_instances, $provider['prefix']));
+          case 'view_display':
+            $instances = \array_merge($instances, self::collectViewInstances($entities, $state_instances, $provider['instance_prefix']));
 
             break;
 
           default:
-            $instances = \array_merge($instances, self::collectInstances($entities, $state_instances, $provider['prefix']));
+            $instances = \array_merge($instances, self::collectInstances($entities, $state_instances, $provider['instance_prefix']));
 
             break;
         }
@@ -112,10 +112,13 @@ class DisplayBuilderUiHelpers {
    */
   private static function collectPageLayoutInstances(array $entities, array $state_instances): array {
     $instances = [];
+    $displayBuildableManager = \Drupal::service('plugin.manager.display_buildable');
 
     foreach ($entities as $page_layout) {
       /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $page_layout */
-      $instance_id = $page_layout->getInstanceId();
+      /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+      $buildable = $displayBuildableManager->createInstance('page_layout', ['entity' => $page_layout]);
+      $instance_id = $buildable->getInstanceId();
       $instances[$instance_id] = [
         'id' => $instance_id,
         'instance' => $state_instances[$instance_id] ?? NULL,
@@ -189,7 +192,7 @@ class DisplayBuilderUiHelpers {
 
       // Find simple entity display enabled.
       if (!empty($display_builder['profile'] ?? NULL)) {
-        $instance_id = \sprintf('%s%s', $providers['entity_view']['prefix'], \str_replace('.', '__', $display_id));
+        $instance_id = \sprintf('%s%s', $providers['entity_view']['instance_prefix'], \str_replace('.', '__', $display_id));
         $instances[$instance_id] = [
           'id' => $instance_id,
           'instance' => $state_instances[$instance_id] ?? NULL,
@@ -222,7 +225,7 @@ class DisplayBuilderUiHelpers {
 
         foreach ($ids as $id) {
           $instance_id = \sprintf('%s%s__%s__%s',
-            $providers['entity_view_override']['prefix'],
+            $providers['entity_view_override']['instance_prefix'],
             $type,
             $id,
             $field_name,

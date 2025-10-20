@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder_entity_view\Kernel;
 
 use Drupal\display_builder\InstanceAccessControlHandler;
-use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
+use Drupal\display_builder_entity_view\Plugin\DisplayBuildable\EntityViewOverride;
 use Drupal\Tests\display_builder\Kernel\AccessControlTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -72,7 +72,7 @@ final class InstanceEntityViewDisplayOverrideAccessControlTest extends AccessCon
     $user = $this->setUpCurrentUser([], $permissions ?? []);
 
     // Create the instance with profile and instance id.
-    $instance = $this->createDisplayBuilderInstance($data['instance_use_profile_id'] ?? NULL, DisplayBuilderItemList::getPrefix() . 'user__1__field_test');
+    $instance = $this->createDisplayBuilderInstance($data['instance_use_profile_id'] ?? NULL, EntityViewOverride::getPrefix() . 'user__1__field_test');
 
     // Test the expected results.
     if ($expect['view']) {

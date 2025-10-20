@@ -6,7 +6,7 @@ namespace Drupal\Tests\display_builder_entity_view\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\display_builder\InstanceAccessControlHandler;
-use Drupal\display_builder_entity_view\Entity\EntityViewDisplayTrait;
+use Drupal\display_builder_entity_view\Plugin\DisplayBuildable\EntityView;
 use Drupal\Tests\display_builder\Kernel\AccessControlTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -88,7 +88,7 @@ final class InstanceEntityViewDisplayAccessControlTest extends AccessControlTest
     $user = $this->setUpCurrentUser([], $permissions ?? []);
 
     // Create the instance with profile and instance id.
-    $instance = $this->createDisplayBuilderInstance($data['instance_use_profile_id'] ?? NULL, EntityViewDisplayTrait::getPrefix() . 'user__user__default');
+    $instance = $this->createDisplayBuilderInstance($data['instance_use_profile_id'] ?? NULL, EntityView::getPrefix() . 'user__user__default');
 
     // Test the expected results.
     if ($expect['view']) {

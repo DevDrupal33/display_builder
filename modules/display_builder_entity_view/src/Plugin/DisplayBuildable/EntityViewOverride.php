@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\display_builder_entity_view\Field;
+namespace Drupal\display_builder_entity_view\Plugin\DisplayBuildable;
 
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Access\AccessResult;
@@ -11,35 +11,31 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\RevisionableEntityBundleInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
-use Drupal\Core\Field\MapFieldItemList;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\TypedData\TypedDataInterface;
 use Drupal\Core\Url;
-use Drupal\display_builder\DisplayBuildableInterface;
-use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\Attribute\DisplayBuildable;
+use Drupal\display_builder\DisplayBuildablePluginBase;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 
 /**
- * Defines an item list class for layout section fields.
- *
- * @internal
- *   Plugin classes are internal.
- *
- * @see \Drupal\layout_builder\Plugin\Field\FieldType\LayoutSectionItem
- *
- * phpcs:disable DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
+ * Plugin implementation of the display_buildable.
  */
-final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBuildableInterface {
-
-  /**
-   * The entity type manager.
-   */
-  protected ?EntityTypeManagerInterface $entityTypeManager;
+#[DisplayBuildable(
+  id: 'entity_view_override',
+  label: new TranslatableMarkup('Entity view'),
+  instance_prefix: 'entity_override__',
+)]
+final class EntityViewOverride extends DisplayBuildablePluginBase {
 
   /**
    * The time service.
@@ -47,9 +43,34 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
   protected ?TimeInterface $time;
 
   /**
-   * The loaded display builder instance.
+   * The field items where the override is stored.
    */
-  protected ?InstanceInterface $instance;
+  private FieldItemListInterface $field;
+
+  /**
+   * The display buildable plugin manager.
+   */
+  private DisplayBuildablePluginManager $displayBuildableManager;
+
+  /**
+   * The overridden display.
+   */
+  private DisplayBuilderEntityDisplayInterface $display;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->field = $configuration['field'];
+    \assert(\is_string($this->field->getName()));
+    $entity = $this->field->getEntity();
+    $this->display = self::getEntityViewDisplay(
+      $entity->getEntityTypeId(),
+      $entity->bundle(),
+      $this->field->getName(),
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -69,20 +90,15 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
    * {@inheritdoc}
    */
   public function getBuilderUrl(): Url {
-    \assert(\is_string($this->getName()));
-    $entity = $this->getEntity();
-    $entity_view = self::getEntityViewDisplay(
-      $entity->getEntityTypeId(),
-      $entity->bundle(),
-      $this->getName(),
-    );
-    $entity_type_id = $entity_view->getTargetEntityTypeId();
+    \assert(\is_string($this->field->getName()));
+    $entity = $this->field->getEntity();
+    $entity_type_id = $this->display->getTargetEntityTypeId();
     $parameters = [
       $entity_type_id => $entity->id(),
-      'view_mode_name' => $entity_view->getMode(),
+      'view_mode_name' => $this->display->getMode(),
     ];
 
-    return Url::fromRoute(\sprintf('entity.%s.display_builder.%s', $entity_type_id, $entity_view->getMode()), $parameters);
+    return Url::fromRoute(\sprintf('entity.%s.display_builder.%s', $entity_type_id, $this->display->getMode()), $parameters);
   }
 
   /**
@@ -139,49 +155,16 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
    * {@inheritdoc}
    */
   public function getProfile(): ?ProfileInterface {
-    \assert(\is_string($this->getName()));
-    $entity = $this->getEntity();
+    \assert($this->display instanceof DisplayBuilderOverridableInterface);
 
-    $entity_view = self::getEntityViewDisplay(
-      $entity->getEntityTypeId(),
-      $entity->bundle(),
-      $this->getName(),
-    );
-    \assert($entity_view instanceof DisplayBuilderOverridableInterface);
-
-    return $entity_view->getDisplayBuilderOverrideProfile();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInstanceId(): ?string {
-    // Usually an entity is new if no ID exists for it yet.
-    if ($this->getEntity()->isNew()) {
-      return NULL;
-    }
-
-    $entity = $this->getEntity();
-
-    return \sprintf('%s%s__%s__%s',
-      self::getPrefix(),
-      $entity->getEntityTypeId(),
-      $entity->id(),
-      $this->getName()
-    );
+    return $this->display->getDisplayBuilderOverrideProfile();
   }
 
   /**
    * {@inheritdoc}
    */
   public function getSources(): array {
-    $data = [];
-
-    foreach ($this->list as $offset => $item) {
-      $data[$offset] = $item->getValue();
-    }
-
-    return $data;
+    return $this->field->getValue();
   }
 
   /**
@@ -189,17 +172,19 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
    */
   public function saveSources(): void {
     $data = $this->getInstance()->getCurrentState();
-    $this->list = [];
+    $values = [];
 
     foreach ($data as $offset => $item) {
-      $this->list[$offset] = $this->createItem($offset, $item);
+      $values[$offset] = $this->createItem($offset, $item);
     }
-    $entity = $this->getEntity();
+    $entity = $this->field->getEntity();
 
     if ($entity instanceof ContentEntityInterface) {
       $this->setRevision($entity);
     }
     $entity->save();
+    $this->field->setValue($values);
+    $this->field->getEntity()->save();
   }
 
   /**
@@ -207,7 +192,6 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
    */
   public static function checkAccess(string $instance_id, AccountInterface $account): AccessResultInterface {
     [, $entity_type_id, $entity_id] = \explode('__', $instance_id);
-
     $entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->load($entity_id);
 
     if (!$entity) {
@@ -238,14 +222,14 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
    */
   public function getInitialSources(): array {
     $sources = $this->getSources();
-    $entity = $this->getEntity();
 
     if (\count($sources) === 0) {
-      \assert(\is_string($this->getName()));
-      $display = self::getEntityViewDisplay($entity->getEntityTypeId(), $entity->bundle(), $this->getName());
+      \assert(\is_string($this->field->getName()));
+      /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+      $buildable = $this->displayBuildableManager()->createInstance('entity_view', ['entity' => $this->display]);
 
-      if ($display->getProfile() !== NULL) {
-        $sources = $display->getSources();
+      if ($buildable->getProfile() !== NULL) {
+        $sources = $buildable->getSources();
       }
     }
 
@@ -256,11 +240,11 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
    * {@inheritdoc}
    */
   public function getInitialContext(): array {
-    $entity = $this->getEntity();
+    $entity = $this->field->getEntity();
     $bundle = $entity->bundle();
-    \assert(\is_string($this->getName()));
+    \assert(\is_string($this->field->getName()));
 
-    $view_mode = self::getEntityViewDisplay($entity->getEntityTypeId(), $bundle, $this->getName())->getMode();
+    $view_mode = $this->display->getMode();
     $contexts = [
       'entity' => EntityContext::fromEntity($entity),
       'bundle' => new Context(ContextDefinition::create('string'), $bundle),
@@ -268,6 +252,25 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
     ];
 
     return RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getInstanceId(): ?string {
+    // Usually an entity is new if no ID exists for it yet.
+    if ($this->field->getEntity()->isNew()) {
+      return NULL;
+    }
+
+    $entity = $this->field->getEntity();
+
+    return \sprintf('%s%s__%s__%s',
+      self::getPrefix(),
+      $entity->getEntityTypeId(),
+      $entity->id(),
+      $this->field->getName()
+    );
   }
 
   /**
@@ -294,6 +297,31 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
   }
 
   /**
+   * Get the time service.
+   *
+   * @return \Drupal\Component\Datetime\TimeInterface
+   *   The time service.
+   */
+  protected function time(): TimeInterface {
+    return $this->time ??= \Drupal::service('datetime.time');
+  }
+
+  /**
+   * Helper for creating a list item object.
+   *
+   * @param int $offset
+   *   Field item delta.
+   * @param mixed $value
+   *   Field item value.
+   *
+   * @return \Drupal\Core\TypedData\TypedDataInterface
+   *   The new property instance.
+   */
+  protected function createItem(int $offset = 0, mixed $value = NULL): TypedDataInterface {
+    return \Drupal::service('plugin.manager.field.field_type')->createFieldItem($this->field, $offset, $value);
+  }
+
+  /**
    * Get the entity type manager.
    *
    * @return \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -304,13 +332,13 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
   }
 
   /**
-   * Get the time service.
+   * Gets the display buildable manager.
    *
-   * @return \Drupal\Component\Datetime\TimeInterface
-   *   The time service.
+   * @return \Drupal\display_builder\DisplayBuildablePluginManager
+   *   The manager for display buildable.
    */
-  protected function time(): TimeInterface {
-    return $this->time ??= \Drupal::service('datetime.time');
+  protected function displayBuildableManager(): DisplayBuildablePluginManager {
+    return $this->displayBuildableManager ??= \Drupal::service('plugin.manager.display_buildable');
   }
 
   /**
@@ -343,22 +371,6 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
     }
 
     return NULL;
-  }
-
-  /**
-   * Gets the Display Builder instance.
-   *
-   * @return \Drupal\display_builder\InstanceInterface|null
-   *   A display builder instance.
-   */
-  private function getInstance(): ?InstanceInterface {
-    if (!isset($this->instance)) {
-      /** @var \Drupal\display_builder\InstanceInterface|null $instance */
-      $instance = $this->entityTypeManager()->getStorage('display_builder_instance')->load($this->getInstanceId());
-      $this->instance = $instance;
-    }
-
-    return $this->instance;
   }
 
 }

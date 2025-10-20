@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Pager\PagerManagerInterface;
 use Drupal\Core\Utility\TableSort;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder_ui\Form\InstanceListFilterForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -45,11 +46,12 @@ final class InstanceListBuilder extends EntityListBuilder {
     private readonly FormBuilderInterface $formBuilder,
     private readonly PagerManagerInterface $pagerManager,
     private readonly RequestStack $requestStack,
+    private DisplayBuildablePluginManager $displayBuildableManager,
   ) {
     parent::__construct($entity_type, $storage);
 
     // Cache providers so we don't call invokeAll multiple times.
-    $this->providers = $this->moduleHandler()->invokeAll('display_builder_provider_info');
+    $this->providers = $this->displayBuildableManager->getDefinitions();
   }
 
   /**
@@ -64,6 +66,7 @@ final class InstanceListBuilder extends EntityListBuilder {
       $container->get('form_builder'),
       $container->get('pager.manager'),
       $container->get('request_stack'),
+      $container->get('plugin.manager.display_buildable'),
     );
   }
 
@@ -155,7 +158,7 @@ final class InstanceListBuilder extends EntityListBuilder {
     $type = '-';
 
     foreach ($this->providers as $provider) {
-      if (\str_starts_with($instance_id, $provider['prefix'])) {
+      if (\str_starts_with($instance_id, $provider['instance_prefix'])) {
         $type = $provider['label'];
 
         break;
