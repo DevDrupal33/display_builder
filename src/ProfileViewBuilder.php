@@ -8,7 +8,6 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityViewBuilder;
 use Drupal\Core\Security\TrustedCallbackInterface;
-use Drupal\Core\Url;
 
 /**
  * View builder handler for display builder profiles.
@@ -64,15 +63,10 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
       ],
     ];
 
-    // Enable SSE if the active users button is enabled.
-    if (isset($islands_enabled_sorted['button']['collaboration'])) {
-      $build['#attributes'] = [
-        'hx-ext' => 'sse',
-        'sse-connect' => Url::fromRoute('display_builder.api_sse', ['builder_id' => $builder_id])->toString(),
-      ];
-      // We don't attach it from the island plugin because the island doesn't
-      // always render something in the toolbar.
-      $build['#attached']['library'][] = 'display_builder/htmx_sse';
+    foreach ($islands_enabled_sorted as $islands) {
+      foreach ($islands as $island) {
+        $build = $island->alterRenderable($builder, $build);
+      }
     }
 
     return $build;

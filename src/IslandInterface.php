@@ -97,4 +97,17 @@ interface IslandInterface extends ConfigurableInterface, ContainerFactoryPluginI
    */
   public function isApplicable(): bool;
 
+  /**
+   * Alter the renderable of the display builder instance.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   Display builder instance.
+   * @param array $build
+   *   The renderable to alter.
+   *
+   * @return array
+   *   The altered renderable.
+   */
+  public function alterRenderable(InstanceInterface $instance, array $build): array;
+
 }

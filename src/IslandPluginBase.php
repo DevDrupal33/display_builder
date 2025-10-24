@@ -283,6 +283,13 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function alterRenderable(InstanceInterface $instance, array $build): array {
+    return $build;
+  }
+
+  /**
    * Helper method to reload island with global data.
    *
    * @param string $builder_id

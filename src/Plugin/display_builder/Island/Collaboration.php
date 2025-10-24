@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandConfigurationFormInterface;
@@ -162,6 +163,21 @@ class Collaboration extends IslandPluginBase implements IslandConfigurationFormI
     }
 
     return $this->buildRenderable($users);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function alterRenderable(InstanceInterface $instance, array $build): array {
+    $build['#attributes'] = [
+      'hx-ext' => 'sse',
+      'sse-connect' => Url::fromRoute('display_builder.api_sse', ['builder_id' => (string) $instance->id()])->toString(),
+    ];
+    // We don't attach it from the ::build() because the island doesn't
+    // always render something in the toolbar.
+    $build['#attached']['library'][] = 'display_builder/htmx_sse';
+
+    return $build;
   }
 
   /**
