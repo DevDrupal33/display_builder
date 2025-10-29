@@ -1,3 +1,10 @@
+symmetric_translatable:
+  label: Symmetric translatable
+  translatable: true
+  class: '\Drupal\display_builder\Config\Schema\SymmetricTranslatable'
+  definition_class: '\Drupal\display_builder\Config\Schema\SymmetricTranslatableDefinition'
+  form_element_class: '\Drupal\display_builder\FormElement\SymmetricTranslationElement'
+
 display_builder.profile.*:
   type: config_entity
   label: Display builder profile

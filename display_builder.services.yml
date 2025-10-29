@@ -39,3 +39,12 @@ services:
       - '@theme.initialization'
       - '@config.factory'
       - '%renderer.config%'
+
+  config.factory:
+    class: Drupal\display_builder\Config\SymmetricTranslationConfigFactory
+    tags:
+        - { name: service_collector, tag: config.factory.override, call: addOverride }
+    arguments:
+        - '@config.storage'
+        - '@event_dispatcher'
+        - '@config.typed'
