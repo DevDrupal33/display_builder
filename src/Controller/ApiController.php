@@ -10,8 +10,7 @@ use Drupal\Core\Form\FormAjaxException;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextInterface;
-use Drupal\Core\Render\AttachmentsResponseProcessorInterface;
-use Drupal\Core\Render\BareHtmlPageRenderer;
+use Drupal\Core\Render\BareHtmlPageRendererInterface;
 use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -34,11 +33,6 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
   use RenderableBuilderTrait;
 
-  /**
-   * The bare html page renderer.
-   */
-  private BareHtmlPageRenderer $bareHtmlPageRenderer;
-
   public function __construct(
     protected EventDispatcherInterface $eventDispatcher,
     protected RendererInterface $renderer,
@@ -47,11 +41,9 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     protected SharedTempStoreFactory $sharedTempStoreFactory,
     protected SessionInterface $session,
     private IslandPluginManagerInterface $islandPluginManager,
-    #[Autowire(service: 'html_response.attachments_processor')]
-    private AttachmentsResponseProcessorInterface $htmlResponseAttachmentsProcessor,
+    private BareHtmlPageRendererInterface $bareHtmlPageRenderer,
   ) {
     parent::__construct($eventDispatcher, $renderer, $time, $sharedTempStoreFactory, $session);
-    $this->bareHtmlPageRenderer = new BareHtmlPageRenderer($this->renderer, $this->htmlResponseAttachmentsProcessor);
   }
 
   /**
