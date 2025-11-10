@@ -117,12 +117,50 @@ class PresetLibraryPanel extends IslandPluginBase {
    */
   protected function buildPresets(string $builder_id, array $presets): array {
     $build = [];
+    $grouped_presets = [];
+
+    // Group presets by their 'group' key. If a preset has no group, it's assigned to 'Other'.
 
     foreach ($presets as $preset_id => $preset) {
-      $keywords = \sprintf('%s %s', $preset->get('label'), $preset->get('description') ?? '');
-      $preset_preview_url = Url::fromRoute('display_builder.api_preset_preview', ['preset_id' => $preset_id]);
-      $build[] = $this->buildPlaceholderButtonWithPreview($builder_id, $preset->get('label'), ['preset_id' => $preset_id], $preset_preview_url, $keywords);
+      $group_name = $preset->getGroup();
+      if (empty($group_name)) {
+        $group_name = $this->t('Other');
+      }
+      $group_key = (string) $group_name;
+      $grouped_presets[$group_key][$preset_id] = $preset;
     }
+
+    // If there is only one group, render a flat list.
+    if (count($grouped_presets) === 1) {
+      $group_presets = reset($grouped_presets);
+      foreach ($group_presets as $preset_id => $preset) {
+        $keywords = \sprintf('%s %s', $preset->get('label'), $preset->get('description') ?? '');
+        $preset_preview_url = Url::fromRoute('display_builder.api_preset_preview', ['preset_id' => $preset_id]);
+        $build[] = $this->buildPlaceholderButtonWithPreview($builder_id, $preset->get('label'), ['preset_id' => $preset_id], $preset_preview_url, $keywords);
+      }
+    } else {
+      // Sort groups alphabetically.
+      ksort($grouped_presets);
+
+      // Build the render array with groups.
+      foreach ($grouped_presets as $group_name => $group_presets) {
+        $build[] = [
+          '#type' => 'html_tag',
+          '#tag' => 'h4',
+          '#value' => $group_name,
+          '#attributes' => [
+            'class' => ['db-filter-hide-on-search'],
+          ],
+        ];
+
+        foreach ($group_presets as $preset_id => $preset) {
+          $keywords = \sprintf('%s %s', $preset->get('label'), $preset->get('description') ?? '');
+          $preset_preview_url = Url::fromRoute('display_builder.api_preset_preview', ['preset_id' => $preset_id]);
+          $build[] = $this->buildPlaceholderButtonWithPreview($builder_id, $preset->get('label'), ['preset_id' => $preset_id], $preset_preview_url, $keywords);
+        }
+      }
+    }
+
     $build = $this->buildDraggables($builder_id, $build);
     $build['#source_contexts'] = $this->configuration['contexts'] ?? [];
 
