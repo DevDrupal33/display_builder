@@ -30,11 +30,6 @@ abstract class IntegrationControllerBase extends ControllerBase {
       throw new NotFoundHttpException();
     }
 
-    // Builder is on the front theme, render cache is too hard and changes are
-    // not working with cache (move something and refresh, previous version
-    // will be shown).
-    // @todo evaluate with #3529284
-    \Drupal::service('page_cache_kill_switch')->trigger(); // phpcs:ignore
     $instance_id = $buildable->getInstanceId();
     $buildable->initInstanceIfMissing();
     $view_builder = $this->entityTypeManager()->getViewBuilder('display_builder_profile');

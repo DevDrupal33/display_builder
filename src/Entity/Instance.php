@@ -131,6 +131,16 @@ class Instance extends EntityBase implements InstanceInterface {
 
   /**
    * {@inheritdoc}
+   */
+  public function isNew() {
+    // We don't support enforceIsNew property because we have no practical
+    // use of it and because it seems to break the invalidation of
+    // ::getCacheTags().
+    return !$this->id();
+  }
+
+  /**
+   * {@inheritdoc}
    *
    * @see \Drupal\Core\Entity\EntityInterface
    */

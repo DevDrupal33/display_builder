@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder_page_layout\Plugin\DisplayVariant;
 
 use Drupal\Component\Render\MarkupInterface;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Display\Attribute\PageDisplayVariant;
 use Drupal\Core\Display\PageVariantInterface;
 use Drupal\Core\Display\VariantBase;
@@ -141,7 +142,13 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
       $data[] = $build['#slots']['content'][0] ?? [];
     }
 
-    return [
+    $cache = new CacheableMetadata();
+    $cache->addCacheableDependency($this);
+    // See also: PageLayout::postSave().
+    // See also: PageVariantSubscriber::onSelectPageDisplayVariant()
+    $cache->addCacheTags($page_layout->getCacheTags());
+
+    $build = [
       'content' => [
         'status_messages' => [
           '#type' => 'status_messages',
@@ -154,6 +161,9 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
         ],
       ],
     ];
+    $cache->applyTo($build);
+
+    return $build;
   }
 
   /**

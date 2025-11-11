@@ -70,6 +70,14 @@ class PageVariantSubscriber implements EventSubscriberInterface {
     $access_control = $this->entityTypeManager->getAccessControlHandler('page_layout');
     $page_layout = $access_control->loadCurrentPageLayout();
 
+    // In DisplayBuilderPageVariant we add PageLayout::getCacheTags() to the
+    // page renderable but it works only for the pages already managed by
+    // Display Builder.
+    // So let's add a custom tag for the others.
+    /** @var \Drupal\Core\Config\Entity\ConfigEntityTypeInterface $entity_type */
+    $entity_type = $this->entityTypeManager->getDefinition('page_layout');
+    $event->addCacheTags([$entity_type->getConfigPrefix()]);
+
     if (!$page_layout) {
       return;
     }

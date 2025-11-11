@@ -334,7 +334,61 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
       $instance->setProfile($this->profile);
       $instance->save();
     }
+
+    if ($this->isImpactingPageVariantDetection($update)) {
+      // In DisplayBuilderPageVariant we add PageLayout::>getCacheTags() to the
+      // page renderable but it works only for the pages already managed by
+      // Display Builder.
+      // In PageVariantSubscriber::onSelectPageDisplayVariant() we add a custom
+      // tag for the others.
+      /** @var \Drupal\Core\Config\Entity\ConfigEntityTypeInterface $entity_type */
+      $entity_type = $this->getEntityType();
+      \Drupal::service('cache_tags.invalidator')->invalidateTags([$entity_type->getConfigPrefix()]);
+    }
+
     parent::postSave($storage, $update);
+  }
+
+  /**
+   * Does the page cache need to be flushed?
+   *
+   * Flushing a cache is something to be careful enough. Let's flush only when
+   * needed.
+   *
+   * @param bool $update
+   *   TRUE if the entity has been updated, or FALSE if it has been inserted.
+   *
+   * @return bool
+   *   TRUE if the cache need to be flushed.
+   */
+  private function isImpactingPageVariantDetection(bool $update = TRUE): bool {
+    // A new active page layout has been added.
+    if (!$update && $this->status && !empty($this->sources)) {
+      return TRUE;
+    }
+
+    // Other additions have no impact.
+    if (!$update) {
+      return FALSE;
+    }
+
+    $previous = $this->originalEntity;
+
+    // Those properties are impacting AccessControlHandler logic and
+    // PageVariantSubscriber results.
+    foreach (['weight', 'conditions', 'status'] as $property) {
+      if ($this->get($property) !== $previous->get($property)) {
+        return TRUE;
+      }
+    }
+
+    // A page layout with empty sources is skipped by AccessControlHandler.
+    // This is also altering PageVariantSubscriber results.
+    if (empty($this->sources) !== empty($previous->get('sources'))) {
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
   /**

@@ -18,7 +18,8 @@
     "extra": {
         "patches": {
             "drupal/core": {
-                "1 - LayoutBuilderEntityViewDisplay class does not correspond to an entity type - https://www.drupal.org/project/drupal/issues/3127026#comment-13617105": "https://www.drupal.org/files/issues/2020-05-15/3127026-originalclass-12.patch"
+                "1 - LayoutBuilderEntityViewDisplay class does not correspond to an entity type - https://www.drupal.org/project/drupal/issues/3127026#comment-13617105": "https://www.drupal.org/files/issues/2020-05-15/3127026-originalclass-12.patch",
+                "2 - PageDisplayVariant does not transmit cache metadata - https://www.drupal.org/project/drupal/issues/3557014": "https://git.drupalcode.org/issue/drupal-3557014/-/commit/3b38aa264d9101548946a06c27dc23997de55fb4.patch"
             }
         }
     }
