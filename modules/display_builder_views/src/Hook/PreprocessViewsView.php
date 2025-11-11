@@ -51,6 +51,7 @@ class PreprocessViewsView {
     $contexts = [];
     $view_entity = $this->entityTypeManager->getStorage('view')->load($view->id());
     $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($view_entity);
+    $contexts['ui_patterns_views:view'] = new Context(new ContextDefinition('any'), $view);
     $contexts['ui_patterns_views:rows'] = new Context(new ContextDefinition('any'), $variables['rows'] ?? []);
     // @todo pass all variables for each source, find a way to do it sooner than
     // in this preprocess if possible.

@@ -4,7 +4,7 @@
   source: {}
 - source_id: view_attachment_before
   source: {}
-- source_id: view_rows_tmp
+- source_id: view_rows
   source: {}
 - source_id: view_pager
   source: {}

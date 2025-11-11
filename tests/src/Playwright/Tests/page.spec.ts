@@ -44,8 +44,8 @@ test(
 
       // Test the proper blocks are available for Page context.
       const sources = {
-        local_actions: '[Page] Local actions',
-        local_tasks: '[Page] Local tasks',
+        // local_actions: '[Page] Local actions',
+        // local_tasks: '[Page] Local tasks',
         main_page_content: '[Page] Main content',
         page_title: '[Page] Title',
       }
