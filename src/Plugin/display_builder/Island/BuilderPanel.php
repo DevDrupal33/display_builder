@@ -15,6 +15,7 @@ use Drupal\display_builder\IslandType;
 use Drupal\display_builder\SlotSourceProxy;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_styles\Render\Element;
+use Masterminds\HTML5;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -229,7 +230,7 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
       // configuration.
       $build['#attributes']['class'][] = 'db-background';
     }
-    elseif (!Element::isAcceptingAttributes($build)) {
+    elseif (!Element::isAcceptingAttributes($build) || $this->hasMultipleRoot($build)) {
       $build = [
         '#type' => 'html_tag',
         '#tag' => 'div',
@@ -388,6 +389,23 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
     }
 
     return $renderable;
+  }
+
+  /**
+   * Check if a renderable has multiple HTML root elements once rendered.
+   *
+   * @param array $renderable
+   *   The renderable array to check.
+   *
+   * @return bool
+   *   TRUE if the rendered output has multiple root elements, FALSE otherwise.
+   */
+  private function hasMultipleRoot(array $renderable): bool {
+    $html = (string) $this->renderer->renderInIsolation($renderable);
+    $dom = new HTML5(['disable_html_ns' => TRUE, 'encoding' => 'UTF-8']);
+    $dom = $dom->loadHTMLFragment($html);
+
+    return $dom->childElementCount > 1;
   }
 
   /**
