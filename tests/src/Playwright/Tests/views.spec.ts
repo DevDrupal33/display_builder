@@ -6,9 +6,9 @@ import config from '../playwright.config.loader'
 test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.installModules(['views', 'views_ui', 'display_builder_views', 'display_builder_views_test'])
   await drupal.drush('state:set -y display_builder.asset_libraries_local true')
-  // Allays show advanced panel and disable preview.
-  await drupal.drush('config:set -y views.settings ui.show.advanced_column true')
-  await drupal.drush('config:set -y views.settings ui.show.preview_information true')
+  // Disable preview to avoid ajax refresh.
+  await drupal.drush('config:set -y views.settings ui.show.preview_information false')
+  await drupal.drush('config:set -y views.settings ui.always_live_preview false')
 })
 
 test(

@@ -11,7 +11,7 @@ You must install `Drush` and `drupal/core-dev` in your project:
 
 ```sh
 composer require drush/drush --dev
-composer require drupal/core-dev:^11.2 -W --dev
+composer require drupal/core-dev:^11.3 -W --dev
 ```
 
 ## Quick Start
@@ -43,20 +43,20 @@ for more details.
 Pull and run Playwright server from this folder:
 
 ```sh
-docker pull mcr.microsoft.com/playwright:v1.55.0-noble
-docker run --add-host=hostmachine:host-gateway -p 3000:3000 --rm --init -it --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.55.0-noble /bin/sh -c "npx -y playwright@1.55.0 run-server --port 3000 --host 0.0.0.0"
+docker pull mcr.microsoft.com/playwright:v1.56.1-noble
+docker run --add-host=hostmachine:host-gateway -p 3000:3000 --rm --init -it --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.56.1-noble /bin/sh -c "npx -y playwright@1.56.1 run-server --port 3000 --host 0.0.0.0"
 ```
 
 Launch a webserver on Drupal **root**, for example:
 
 ```sh
-php -S 0.0.0.0:8000 -t web
+php -S 0.0.0.0:8000
 ```
 
 Copy `.env.dist` to `.env`, adapt values for first case:
 
 ```sh
-DRUPAL_TEST_BASE_URL='http://hostmachine:8000'
+DRUPAL_TEST_BASE_URL='http://localhost:8000/web'
 ```
 
 Run the test from this folder:
@@ -97,7 +97,7 @@ npm install
 npx playwright install
 ```
 
-Even if you see some error messages, tests should work on **Fedora**.
+Even if you see some **error** messages, tests should now work on **Fedora**.
 
 #### Local Tests
 
@@ -109,11 +109,13 @@ Without a local server, with Drupal and Drush installed, you can quickly launch 
 npm run test
 ```
 
-For local tests with installed Drupal you must enable `extension_discovery_scan_tests` in your **settings.php** and disable js aggregation:
+For local tests with installed Drupal you **MUST** enable `extension_discovery_scan_tests` in your **settings.php**.
+
+It is recommended to disable js aggregation until [#3529284](https://www.drupal.org/project/display_builder/issues/3529284) is resolved:
 
 ```php
-$config['system.performance']['js']['preprocess'] = FALSE;
 $settings['extension_discovery_scan_tests'] = TRUE;
+$config['system.performance']['js']['preprocess'] = FALSE;
 ```
 
 Modules that **MUST** be enabled:
@@ -123,7 +125,7 @@ Modules that **MUST** be enabled:
 - display_builder_ui
 - display_builder_entity_view
 - display_builder_page_layout
-- display_builder_dev_tools (external module, must be installed)
+- display_builder_dev_tools (external module, must be installed separately)
 
 Theme **MUST** be `display_builder_theme_test` by default, unless test is
 specific for a theme.

@@ -537,11 +537,9 @@ trait EntityViewDisplayTrait {
    *   A display builder instance.
    */
   protected function getInstance(): ?InstanceInterface {
-    if (!isset($this->instance)) {
-      /** @var \Drupal\display_builder\InstanceInterface|null $instance */
-      $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($this->getInstanceId());
-      $this->instance = $instance;
-    }
+    /** @var \Drupal\display_builder\InstanceInterface|null $instance */
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($this->getInstanceId());
+    $this->instance = $instance;
 
     return $this->instance;
   }

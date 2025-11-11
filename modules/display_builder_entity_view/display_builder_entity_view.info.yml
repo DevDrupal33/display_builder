@@ -1,7 +1,7 @@
 name: 'Display Builder for entity view'
 description: 'Provide integration of Display Builder to entity view.'
 type: module
-core_version_requirement: ^11.2
+core_version_requirement: ^11.3
 package: 'User interface'
 dependencies:
   - drupal:field_ui

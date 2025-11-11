@@ -24,15 +24,20 @@ test(
       await page.goto(config.contentTypesAdd)
       await page.getByLabel('Name', { exact: true }).fill(`Test ${testName}`)
       await page.getByText('Save and manage fields').click()
-      await page.getByRole('link', { name: '+Re-use an existing field' }).click()
+      await page.getByRole('link', { name: 'Create a new field' }).click()
       await expect(page.getByRole('dialog')).toBeVisible()
-      await page.getByRole('button', { name: 'Reuse body' }).click()
-      await page.getByRole('button', { name: 'Save settings' }).click()
+      await page.locator('.add-field-container > a').nth(1).click()
+      await expect(page.getByRole('textbox', { name: 'Label' })).toBeVisible()
+      await page.getByRole('textbox', { name: 'Label' }).fill(`Body ${name}`)
+      await page.getByRole('radio', { name: 'Text (formatted, long)' }).click()
+      await page.getByRole('button', { name: 'Continue' }).click()
+      await page.getByRole('button', { name: 'Save' }).click()
+      await expect(page.getByRole('dialog')).toBeHidden()
       await drupal.expectMessage('Saved')
 
       await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
       // Save the fields for copy in the builder.
-      await expect(page.getByRole('button', { name: 'Display builder' })).toBeVisible()
+      await expect(page.locator('main').getByRole('button', { name: 'Display builder' })).toBeVisible()
 
       // Enable the Display builder for default display
       await page.getByLabel('Profile', { exact: true }).selectOption('Test')
@@ -152,15 +157,20 @@ test(
       await page.goto(config.contentTypesAdd)
       await page.getByLabel('Name', { exact: true }).fill(`Test ${testName}`)
       await page.getByText('Save and manage fields').click()
-      await page.getByRole('link', { name: '+Re-use an existing field' }).click()
+      await page.getByRole('link', { name: 'Create a new field' }).click()
       await expect(page.getByRole('dialog')).toBeVisible()
-      await page.getByRole('button', { name: 'Reuse body' }).click()
-      await page.getByRole('button', { name: 'Save settings' }).click()
+      await page.locator('.add-field-container > a').nth(1).click()
+      await expect(page.getByRole('textbox', { name: 'Label' })).toBeVisible()
+      await page.getByRole('textbox', { name: 'Label' }).fill(`Body ${name}`)
+      await page.getByRole('radio', { name: 'Text (formatted, long)' }).click()
+      await page.getByRole('button', { name: 'Continue' }).click()
+      await page.getByRole('button', { name: 'Save' }).click()
+      await expect(page.getByRole('dialog')).toBeHidden()
       await drupal.expectMessage('Saved')
 
       await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
       // Save the fields for copy in the builder.
-      await expect(page.getByRole('button', { name: 'Display builder' })).toBeVisible()
+      await expect(page.locator('main').getByRole('button', { name: 'Display builder' })).toBeVisible()
 
       // Enable the Display builder for default display
       await page.getByLabel('Profile', { exact: true }).selectOption('Test')

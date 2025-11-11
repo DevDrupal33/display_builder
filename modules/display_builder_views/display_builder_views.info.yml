@@ -1,7 +1,7 @@
 name: 'Display Builder for Views'
 type: module
 description: 'Associate Display Builder with Views.'
-core_version_requirement: ^11.2
+core_version_requirement: ^11.3
 package: 'User interface'
 dependencies:
   - drupal:views
