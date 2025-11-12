@@ -164,16 +164,14 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
   /**
    * {@inheritdoc}
-   *
-   * @todo factorize with thirdPartySettingsUpdate.
    */
-  public function update(Request $request, InstanceInterface $builder, string $node_id): array {
+  public function update(Request $request, InstanceInterface $builder, string $node_id): HtmlResponse {
     $this->builder = $builder;
     $body = $request->getPayload()->all();
 
     if (!isset($body['form_id'])) {
-      // @todo log an error.
-      return [];
+      $message = $this->t('[update] Missing payload!');
+      return $this->responseMessageError((string) $builder->id(), $message, $body);
     }
 
     // Load the instance to properly alter the form data into config data.
@@ -203,10 +201,17 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $form_state->setValues($body);
 
     $formClass = ContextualFormPanel::getFormClass();
-    $values = $this->validateIslandForm($formClass, $form_state);
-    $data = [
-      'source' => $values,
-    ];
+    $data = [];
+    try {
+      $values = $this->validateIslandForm($formClass, $form_state);
+      $data['source'] = $values;
+    }
+    catch (FormAjaxException $e) {
+      throw $e;
+    }
+    catch (\Exception $e) {
+      return $this->responseMessageError((string) $builder->id(), $e->getMessage(), []);
+    }
 
     if (isset($instance['source']['component']['slots'], $data['source']['component'])
       && ($data['source']['component']['component_id'] === $instance['source']['component']['component_id'])) {
@@ -220,7 +225,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $this->builder = $builder;
     $this->islandId = (string) $request->query->get('from', NULL);
 
-    return $this->dispatchDisplayBuilderEventWithRenderApi(
+    return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_UPDATE,
       NULL,
       $node_id,
@@ -585,10 +590,9 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     ?string $node_id = NULL,
     ?string $parent_id = NULL,
   ): HtmlResponse {
-    $event = $this->createEventWithEnabledIsland($event_id, $data, $node_id, $parent_id);
-    $this->saveSseData($event_id);
+    $result = $this->dispatchDisplayBuilderEventWithRenderApi($event_id, $data, $node_id, $parent_id);
 
-    return $this->bareHtmlPageRenderer->renderBarePage($event->getResult(), '', 'markup');
+    return $this->bareHtmlPageRenderer->renderBarePage($result, '', 'markup');
   }
 
   /**
@@ -629,7 +633,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * @return array
    *   The validated values.
    */
-  protected function validateIslandForm(string $formClass, FormStateInterface $form_state): array {
+  private function validateIslandForm(string $formClass, FormStateInterface $form_state): array {
     /** @var \Drupal\Core\Form\FormBuilder $formBuilder */
     $formBuilder = $this->formBuilder();
 
@@ -638,10 +642,24 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
       if (!$triggering_element && !isset($form_state->getValues()['_triggering_element_name'])) {
         // We set a fake triggering element to avoid form API error.
-        $form_state->setTriggeringElement(['#type' => 'submit', '#value' => (string) $this->t('Submit')]);
+        $form_state->setTriggeringElement([
+          '#type' => 'submit',
+          '#limit_validation_errors' => FALSE,
+          '#value' => (string) $this->t('Submit'),
+        ]);
       }
       $form = $formBuilder->buildForm($formClass, $form_state);
+      $formErrors = $form_state->getErrors();
+      if (!empty($formErrors)) {
+        $first_error = reset($formErrors);
+        throw new \Exception((string) $first_error);
+      }
       $formBuilder->validateForm($formClass, $form, $form_state);
+      $formErrors = $form_state->getErrors();
+      if (!empty($formErrors)) {
+        $first_error = reset($formErrors);
+        throw new \Exception((string) $first_error);
+      }
     }
     catch (FormAjaxException $e) {
       throw $e;

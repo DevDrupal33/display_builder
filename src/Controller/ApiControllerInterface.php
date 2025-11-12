@@ -68,10 +68,10 @@ interface ApiControllerInterface {
    * @param string $node_id
    *   Node ID of the source.
    *
-   * @return array
-   *   The render array response.
+   * @return \Drupal\Core\Render\HtmlResponse
+   *   The HTML response.
    */
-  public function update(Request $request, InstanceInterface $builder, string $node_id): array;
+  public function update(Request $request, InstanceInterface $builder, string $node_id): HtmlResponse;
 
   /**
    * Update source's 3rd party settings.
