@@ -26,13 +26,9 @@ class WysiwygWidget extends SourcePluginBase {
 
 ![Source slots](images/source-slots.webp)
 
-> 🚧 2025-07-01: "[Entity] ➜ [Field]" will be flatten. [#3529260](https://www.drupal.org/project/display_builder/issues/3529260)
-
 Source configuration from `PluginSettingsInterface::settingsForm()` is available in the contextual sidebar. For example:
 
 ![Source slots configuration](images/sources-slot-config.webp)
-
-> 🚧 2025-07-01: Sidebar title is not dynamic yet [#3531253](https://www.drupal.org/project/display_builder/issues/3531253)
 
 ### Source plugins for props
 

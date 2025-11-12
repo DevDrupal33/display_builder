@@ -72,7 +72,7 @@ final class ProfileListBuilder extends DraggableListBuilder {
     /** @var \Drupal\display_builder\ProfileInterface $entity */
     $row['label'] = $entity->label();
     // List enabled view panels instead of showing an empty description.
-    $description = $entity->get('description') ?? $this->listViewPanels($entity);
+    $description = $entity->get('description') ?: $this->listViewPanels($entity);
     $row['description']['data']['#plain_text'] = $description;
     $row['roles']['data'] = [
       '#theme' => 'item_list',

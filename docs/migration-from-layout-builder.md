@@ -6,23 +6,16 @@ In Display Builder Entity View sub-module.
 
 This migration can be triggered in two different ways:
 
-### Initialization of display builder data
-
-When the Display Builder is initialized for the first time and Layout Builder is already activated:
-
-![Trigger initial migration](images/migration-activate.webp)
-
-If Layout Builder is not used for the display, it will migrate from "Manage Display" data instead.
-
-### Each time the Layout Builder is saved.
-
-![Trigger initial migration](images/migration-activate.webp)
+- When the Display Builder is initialized for the first time and Layout Builder is already activated. If Layout Builder is not used for the display, it will migrate from "Manage Display" data instead.
+- Each time the Layout Builder is saved.
 
 Each migration is a full migration, overriding the current Display Builder data, and is creating a new step in Display Builder logs:
 
 ![Migration logs](images/migration-logs.webp)
 
-So, it is possible to undo each of them. We can have both tool installed at the same time and still using Layout Builder and keep testing Display Builder before doing the switch.
+So, it is possible to undo each of them. We can have both tool installed at the same time and still using Layout Builder and keep testing Display Builder before doing the switch:
+
+![Trigger initial migration](images/migration-activate.webp)
 
 ## Migration of the override content field
 
@@ -46,6 +39,8 @@ Layout builder sections:
 | SDC component (UI Patterns) | ✅ SDC component                                                                                |
 | Other layouts               | ❌ No proper conversion, we extract the blocks and put them as a flat list where the layout is. |
 
+> 🚧 2025-11-11: We may add layout plugin support. See: [#3531521](https://www.drupal.org/project/display_builder/issues/3531521)
+
 | Section's other data | Migrated as              |
 | -------------------- | ------------------------ |
 | UI Styles data       |  ✅ Third party settings |
@@ -55,7 +50,7 @@ Layout builder components:
 | Component's block plugin     | Migrated as                                            |
 | ---------------------------- | ------------------------------------------------------ |
 |  SDC component (UI Patterns) | ✅ SDC component.                                      |
-| Field                        | ✅ Field. ⚠️ However, mechanisms                       |
+| Field                        | ✅ Field                                               |
 | Extra field                  | ❌ No proper conversion, only a placeholder is placed. |
 | Other blocks                 | ✅ Imported as they are configured.                    |
 
@@ -68,7 +63,7 @@ Layout builder components:
 
 Display Builder rendering is skipping do not load `block.html.twig` and `field.html.twig`, so it does not execute `hook_preprocess_block` and `hook_preprocess_field`.
 
-so, the modules adding third-party settings and executing those hooks will still have the form displayed in the contextual panel, but the alteration of the renderable will not be executed.
+So, the modules adding third-party settings and executing those hooks will still have the form displayed in the contextual panel, but the alteration of the renderable will not be executed.
 
 Examples of such modules:
 

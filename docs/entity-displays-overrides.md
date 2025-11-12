@@ -8,13 +8,11 @@ Contrary to Layout Builder, there is no "Allow each content item to have its lay
 
 You can assign a different configurable field to each display:
 
-![Activate](images/overrides-activate.webp)
+![Activate](images/entity-view-activate-2.webp)
 
 You can add a "Source (UI Patterns)" field using the usual Field UI:
 
 ![Add field](images/add-field.webp)
-
-> 🚧 2025-07-01: Field description may change
 
 Or by clicking the "Add a UI Patterns Source field" link:
 
@@ -23,6 +21,12 @@ Or by clicking the "Add a UI Patterns Source field" link:
 It is better, but not mandatory, to chose unlimited number of value in field storage:
 
 ![field storage](images/field-storage.webp)
+
+> 🚧 2025-11-05: Field cardinality has an impact on content storage but it is not visible yet on Display Builder UI. See [#3544026](https://www.drupal.org/project/display_builder/issues/3544026)
+
+Most of the time, you will want to remove the field from the content form:
+
+![field storage](images/field-form.webp)
 
 Once the field is created, you can pick it to store the overrides:
 

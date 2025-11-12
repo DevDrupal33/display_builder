@@ -8,20 +8,20 @@ You need `display_builder_entity_view` module.
 
 Display builder can be activated for each display, in the "Display builder" fieldset:
 
-![](images/entity-view-activate.webp)
+![Activate display builder](images/entity-view-activate.webp)
 
 ## Use
 
 Once yor Display builder selection is submitted, you will have access to twice the same link:
 
 - The big "Display builder" button replacing the field formatter table
-- A link under
+- An other button under the profile selector
 
-![](images/entity-view-activate-2.webp)
+![Activated](images/entity-view-activate-2.webp)
 
 Slot sources specific to the Entity Display context will show up in the "Block Library" panel:
 
-![](images/entity-display-sources.webp)
+![Entity sources](images/entity-display-sources.webp)
 
 Display Builder is saving every state in the memory, but is not auto-saving to the configuration.
 

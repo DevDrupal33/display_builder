@@ -12,9 +12,10 @@ They must not be confused with UI components:
 
 ## Activate
 
-"Preset actions" menu island must be enabled in the Display Builder's profile:
+"Preset actions" menu and "Preset library" must be enabled in the Display Builder's profile:
 
 ![Menu island configuration](images/menu-islands-config.webp)
+![Menu island configuration](images/menu-library-config.webp)
 
 ## Create a pattern preset
 
@@ -35,15 +36,12 @@ The pattern preset is now available in the `Patterns Library` panel if:
 
 ![Presets library](images/presets-library.webp)
 
-> 🚧 2025-07-01: Context-aware yet and dependency checks are not implemented yet. [#3534190](https://www.drupal.org/project/display_builder/issues/3534190)
-
 ## Presets management from admin UI
 
 You need `ui_patterns_ui` module enabled to have access to `/admin/structure/display-builder/preset`:
 
 ![Presets management](images/presets-mgmt.webp)
 
-> 🚧 2025-07-01: Context-aware yet and dependency checks are not implemented yet. [#3534190](https://www.drupal.org/project/display_builder/issues/3534190)
 > 🚧 2025-07-01: Group is not used in `Patterns Library` panel yet. [#3534217](https://www.drupal.org/project/display_builder/issues/3534217)
 
 ## Under the hood
@@ -66,8 +64,6 @@ group: ''
 theme: usb_sub
 sources: [...]
 ```
-
-> 🚧 2025-07-01: Context-aware yet and dependency checks are not implemented yet. [#3534190](https://www.drupal.org/project/display_builder/issues/3534190)
 
 This source merge the state tree with the current state tree at the position where the source is “called”.
 

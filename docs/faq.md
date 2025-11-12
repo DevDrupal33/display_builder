@@ -28,32 +28,39 @@ This is a display building tool made by a team specialized in design systems and
 
 This project is new but it is only a thin layer upon APIs we are building for many years, and which are already used, tested and loved by many: [UI Patterns](https://www.drupal.org/project/ui_patterns).
 
-## Is it related to Experience Builder?
+## Is it related to Canvas (Experience Builder)?
 
-Like Experience Builder, this project is a next generation display building tool for Drupal.
+Like Canvas, this project is a next generation display building tool for Drupal.
 
 However, the 2 projects are different. Display Builder is currently targeting a wider **horizontal** scope (more display building coverage):
 
-|                             | Experience Builder                   | Display Builder                                                   |
-| --------------------------- | ------------------------------------ | ----------------------------------------------------------------- |
-| Layout builder replacement  | ✅ Config & content overrides        | ✅ Config & content overrides with powerful data retrieval system |
-| Page layout replacement     | ⚠️ Yes, but each region is a builder | ✅ Full page support                                              |
-| View (displays) replacement | ⚠️ Is it still planned?              | ✅                                                                |
-| Entity form modes           | ❌ Out of scope?                     | ✅ Planned                                                        |
+|                             | Canvas                               | Display Builder               |
+| --------------------------- | ------------------------------------ | ----------------------------- |
+| Layout builder replacement  | ✅ Config & content overrides        | ✅ Config & content overrides |
+| Page layout replacement     | ⚠️ Yes, but each region is a builder | ✅ Full page support          |
+| View (displays) replacement | ❌ Out of scope                      | ✅                            |
+| Entity form modes           | ❌ Out of scope                      | ⚠️ Planned                    |
 
-But Experience Builder is currently targeting a deeper <strong>vertical</strong> scope (before and after display building):
+But Canvas is currently targeting a deeper <strong>vertical</strong> scope (before and after display building):
 
-|                            | Experience Builder            | Display Builder                         |
-| -------------------------- | ----------------------------- | --------------------------------------- |
-| Content editing            | ✅ the first use case covered | ⚠️ Yes, but not a central feature       |
-| Component authoring        | ✅ as shown in DrupalCon NA   | ❌ Out of scope, we promote SDC instead |
-| Designer tool (Figma-Lite) | ✅ Planned                    | ❌ Out of scope                         |
+|                     | Canvas                   | Display Builder                         |
+| ------------------- | ------------------------ | --------------------------------------- |
+| Content editing     | ✅ the main feature      | ⚠️ Planned                              |
+| Component authoring | ✅ the "code components" | ❌ Out of scope, we promote SDC instead |
 
 Visual explanation:
 
 ![XB](images/xb.webp)
 
-And they also differ by the technical and strategic choices. For example, Experience Builder is a complete ReactJS app, aside of Drupal, when Display Builder is just an usual Drupal module using HTMX.
+Both share more or less the same feature set:
+
+|                         | Canvas              | Display Builder     |
+| ----------------------- | ------------------- | ------------------- |
+| Pattern presets         | ✅ as config entity | ✅ as config entity |
+| History, undo, redo     | ✅                  | ✅                  |
+| Real-time collaboration | ❌                  | ✅                  |
+
+And they also differ by the technical and strategic choices. For example, Canvas is a complete ReactJS app, aside of Drupal, when Display Builder is just an usual Drupal module using HTMX.
 
 So we are going in 2 different directions and our friendly competition will be only on the shared subset of our scopes. So, not such a big deal.
 
@@ -73,4 +80,4 @@ This is doable with Display Builder by creating different Display builder profil
 
 Layout Builder Lock allows administrators to lock sections of a default layout so users can't perform certain actions when overriding the layout for an individual entity.
 
-This is doable with Display Builder by creating many _Component source_ and use them as "slots". See [Entity Display Overrides](entity-displays-overrides.md)
+This feature is planned for [#3551232](www.drupal.org/project/display_builder/issues/3551232)

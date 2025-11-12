@@ -17,7 +17,7 @@ use Drupal\display_builder\IslandType;
   id: 'library',
   enabled_by_default: TRUE,
   label: new TranslatableMarkup('Libraries'),
-  description: new TranslatableMarkup('List of elements from library islands to use in the display.'),
+  description: new TranslatableMarkup('Pick elements from libraries and drop them in the display.'),
   type: IslandType::View,
   icon: 'collection',
 )]

@@ -37,14 +37,22 @@ Each island can be:
 - ordered relatively to the other ones of a same type
 - configured one by one
 
-For example, here is the configuration of View panels:
+For example, here is the configuration of Toolbar buttons, where some are configurable:
 
-![Islands configuration](images/config.webp)
+![Islands configuration](images/config-1.webp)
+
+Configuration happens in a modal:
+
+![Islands modal](images/config-modal.webp)
 
 View panels have an extra feature, they can be moved between 2 different regions:
 
 - tabbed in the center of the toolbar
 - or as buttons in the start of the toolbar
+
+![Islands configuration](images/config-2.webp)
+
+> 🚧 2025-11-05: This mechanism may be made generic. See [#3555920](https://www.drupal.org/project/display_builder/issues/3555920)
 
 ## Access & permissions
 

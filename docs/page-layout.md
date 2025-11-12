@@ -6,14 +6,16 @@ As a replacement of Block Layout (`/admin/structure/block`)
 
 You need `display_builder_page_layout` module.
 
-There is no page layout activated by default. You need to create your owns in Administration > Structure > Page layouts (`/admin/structure/page-layout`).
+There is no page layout activated by default. You need to create your owns in Administration > Structure > Page layouts (`/admin/structure/page-layout`):
+
+![Page layout overview](images/page-layout-overview-1.webp)
 
 ## Create and edit
 
 Adding a page layout is simple:
 
 - Set the Label
-- Pick your Display builder
+- Pick your Display builder profile
 - Set your conditions
 
 ![Add page layout](images/page-layout-add.webp)
@@ -27,7 +29,13 @@ Condition plugins is the heart of the form:
 
 ## Use Display Builder
 
-You will be able to build the display once the Page Layout is created:
+You will be able to build the display once the Page Layout is created.
+
+From the overview page:
+
+![Page layout overview](images/page-layout-overview-2.webp)
+
+Or from the edit page:
 
 ![Edit page layout](images/page-layout-edit.webp)
 
@@ -46,7 +54,7 @@ Other modules can provide Source plugins, and [you can add your owns](island-plu
 
 All _Page layouts_ are manageable from the overview page:
 
-![Page layout overview](images/page-layout-overview.webp)
+![Page layout overview](images/page-layout-overview-3.webp)
 
 _Page layouts_ are draggable and orderable. Order is important. Don't forget to save.
 
@@ -83,7 +91,7 @@ conditions:
   request_path:
     id: request_path
     pages: /user/1
-    negate: '0'
+    negate: "0"
 ```
 
 Overview:

@@ -1,10 +1,5 @@
 # Display Builder documentation
 
-!!! warning "Development stage"
-
-    The module is still in heavy development and is **not intended for Production** yet!
-    Follow us on slack [#display_builder](https://drupal.slack.com/archives/C092EUNPCRW)</h2>
-
 A display building tool by the [UI Suite](https://www.drupal.org/project/ui_suite) team:
 
 - **Design system native**: fully use your design system (components, style utilities, icons, themes/modes, CSS variables...) directly in Drupal without the burden of compatibility layers
@@ -16,6 +11,8 @@ Display Builder provides sub-modules for each Drupal Core's display building nee
 - [Entity view](entity-displays.md) and [entity view overrides](entity-displays-overrides.md) (`display_builder_entity_view`)
 - [Page layout](page-layout.md) (`display_builder_page_layout`)
 - [Views](with-views.md) (`display_builder_views`)
+
+Follow us on slack [#display_builder](https://drupal.slack.com/archives/C092EUNPCRW)
 
 ## Maintainers
 
