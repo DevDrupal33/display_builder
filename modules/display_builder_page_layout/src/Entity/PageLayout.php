@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_page_layout\Entity;
 
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
@@ -217,6 +220,13 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
     }
 
     return \sprintf('%s%s', self::getPrefix(), $this->id());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function checkAccess(string $instance_id, AccountInterface $account): AccessResultInterface {
+    return $account->hasPermission('administer page_layout') ? AccessResult::allowed() : AccessResult::forbidden();
   }
 
   /**

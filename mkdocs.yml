@@ -59,9 +59,11 @@ nav:
   - Extending Display Builder:
       - With island plugins: 'island-plugins.md'
       - With source plugins: 'source-plugins.md'
-  - Contributing: 'contributing.md'
+  - Contributing:
+      - Contributing: 'contributing.md'
+      - Tests: 'tests.md'
+      - Security model: 'security-model.md'
   - Frequently asked questions: 'faq.md'
-  - Tests: 'tests.md'
 
 plugins:
   - search

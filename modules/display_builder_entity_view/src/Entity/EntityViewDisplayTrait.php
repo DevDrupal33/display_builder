@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_entity_view\Entity;
 
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
@@ -11,6 +13,7 @@ use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuildableInterface;
@@ -291,6 +294,26 @@ trait EntityViewDisplayTrait {
     }
 
     return \sprintf('%s%s', EntityViewDisplay::getPrefix(), \str_replace('.', '__', $this->id));
+  }
+
+  /**
+   * Checks access.
+   *
+   * @param string $instance_id
+   *   Instance entity ID.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user session for which to check access.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   *
+   * @see \Drupal\display_builder\InstanceAccessControlHandler
+   */
+  public static function checkAccess(string $instance_id, AccountInterface $account): AccessResultInterface {
+    $params = self::getUrlParamsFromInstanceId($instance_id);
+    $permission = 'administer ' . $params['entity'] . ' display';
+
+    return $account->hasPermission($permission) ? AccessResult::allowed() : AccessResult::forbidden();
   }
 
   /**

@@ -5,6 +5,7 @@ display_builder_views.views.manage:
     _controller: '\Drupal\display_builder_views\Controller\ViewsController::getBuilder'
   requirements:
     _entity_access: view.update
+    _permission: 'administer views'
     _module_dependencies: views_ui
   options:
     _admin_route: false

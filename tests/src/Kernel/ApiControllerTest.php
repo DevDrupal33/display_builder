@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @internal
  */
-#[CoversClass('\Drupal\display_builder\Controller\ApiController')]
+#[CoversClass(ApiController::class)]
 #[Group('display_builder')]
 final class ApiControllerTest extends KernelTestBase {
 

@@ -32,8 +32,8 @@ class ApiSseController extends ApiControllerBase {
    * ON_DELETE, ON_PRESET_SAVE, ON_SAVE and ON_HISTORY_CHANGE.
    * Skip ON_ACTIVE.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
+   *   Display builder instance.
    *
    * @return \Symfony\Component\HttpFoundation\EventStreamResponse
    *   The event stream response.
@@ -41,7 +41,9 @@ class ApiSseController extends ApiControllerBase {
    * @see https://v1.htmx.org/extensions/server-sent-events/
    * @see https://symfony.com/blog/new-in-symfony-7-3-simpler-server-event-streaming
    */
-  public function sse(string $builder_id): EventStreamResponse {
+  public function sse(InstanceInterface $display_builder_instance): EventStreamResponse {
+    $builder_id = (string) $display_builder_instance->id();
+
     return new EventStreamResponse(function () use ($builder_id) {
       $sessionId = $this->session->getId();
       $collection = $this->sharedTempStoreFactory->get($this::SSE_COLLECTION);

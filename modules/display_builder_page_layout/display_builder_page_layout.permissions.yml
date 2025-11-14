@@ -1,2 +1,3 @@
 administer page_layout:
-  title: 'Administer page layout'
+  title: 'Administer page layouts'
+  description: 'View, edit and delete any page layout.'

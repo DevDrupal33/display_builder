@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\Group;
  *
  * @internal
  */
-#[CoversClass('\Drupal\display_builder\Entity\PatternPreset')]
+#[CoversClass(PatternPreset::class)]
 #[Group('display_builder')]
 final class PatternPresetTest extends KernelTestBase {
 

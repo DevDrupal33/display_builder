@@ -93,6 +93,21 @@ final class PageLayoutForm extends EntityForm {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  protected function actionsElement(array $form, FormStateInterface $form_state): array {
+    $form = parent::actionsElement($form, $form_state);
+    /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $page_layout */
+    $page_layout = $this->entity;
+
+    if ($page_layout->isNew() && !$this->configFormBuilder->isAllowed($page_layout)) {
+      $form['submit']['#disabled'] = TRUE;
+    }
+
+    return $form;
+  }
+
+  /**
    * Helper function for building the conditions UI form.
    *
    * @param array $form

@@ -1,6 +1,2 @@
 permission_callbacks:
   - Drupal\display_builder\ProfilePermissions::permissions
-
-access display builder:
-  title: 'Access and use Display Builder'
-  description: 'Required to use and configure Display Builder instance, should be granted to any role that can administer Entity view, Page Layout or Views.'

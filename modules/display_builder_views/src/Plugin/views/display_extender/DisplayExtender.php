@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_views\Plugin\views\display_extender;
 
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\Registry;
 use Drupal\Core\Url;
@@ -253,6 +256,13 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements Display
     }
 
     return \sprintf('%s%s__%s', self::getPrefix(), $this->view->id(), $this->view->current_display);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function checkAccess(string $instance_id, AccountInterface $account): AccessResultInterface {
+    return $account->hasPermission('administer views') ? AccessResult::allowed() : AccessResult::forbidden();
   }
 
   /**

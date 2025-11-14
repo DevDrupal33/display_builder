@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
+use Drupal\Core\Access\AccessResultInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 
 /**
@@ -94,6 +96,21 @@ interface DisplayBuildableInterface {
    *   Instance entity ID.
    */
   public function getInstanceId(): ?string;
+
+  /**
+   * Checks access.
+   *
+   * @param string $instance_id
+   *   Instance entity ID.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user session for which to check access.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   *
+   * @see \Drupal\display_builder\InstanceAccessControlHandler
+   */
+  public static function checkAccess(string $instance_id, AccountInterface $account): AccessResultInterface;
 
   /**
    * Init instance if missing.

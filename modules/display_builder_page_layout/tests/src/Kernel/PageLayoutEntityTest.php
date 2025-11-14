@@ -17,7 +17,7 @@ use PHPUnit\Framework\Attributes\Group;
  *
  * @internal
  */
-#[CoversClass('\Drupal\display_builder_page_layout\Entity\PageLayout')]
+#[CoversClass(PageLayout::class)]
 #[Group('display_builder')]
 final class PageLayoutEntityTest extends KernelTestBase {
 

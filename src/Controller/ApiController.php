@@ -49,13 +49,13 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function attachToRoot(Request $request, InstanceInterface $builder): HtmlResponse {
+  public function attachToRoot(Request $request, InstanceInterface $display_builder_instance): HtmlResponse {
     $position = (int) $request->request->get('position', 0);
 
     if ($request->request->has('preset_id')) {
       $preset_id = (string) $request->request->get('preset_id');
 
-      return $this->attachPresetToRoot($builder, $preset_id, $position);
+      return $this->attachPresetToRoot($display_builder_instance, $preset_id, $position);
     }
 
     $is_move = FALSE;
@@ -63,10 +63,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     if ($request->request->has('node_id')) {
       $node_id = (string) $request->request->get('node_id');
 
-      if (!$builder->moveToRoot($node_id, $position)) {
+      if (!$display_builder_instance->moveToRoot($node_id, $position)) {
         $message = $this->t('[attachToRoot] moveToRoot failed with invalid data');
 
-        return $this->responseMessageError((string) $builder->id(), $message, $request->request->all());
+        return $this->responseMessageError((string) $display_builder_instance->id(), $message, $request->request->all());
       }
 
       $is_move = TRUE;
@@ -74,16 +74,16 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     elseif ($request->request->has('source_id')) {
       $source_id = (string) $request->request->get('source_id');
       $data = $request->request->has('source') ? \json_decode((string) $request->request->get('source'), TRUE) : [];
-      $node_id = $builder->attachToRoot($position, $source_id, $data);
+      $node_id = $display_builder_instance->attachToRoot($position, $source_id, $data);
     }
     else {
       $message = '[attachToRoot] Missing content (source_id, node_id or preset_id)';
 
-      return $this->responseMessageError((string) $builder->id(), $message, $request->request->all());
+      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $request->request->all());
     }
-    $builder->save();
+    $display_builder_instance->save();
 
-    $this->builder = $builder;
+    $this->builder = $display_builder_instance;
     // Let's refresh when we add new source to get the placeholder replacement.
     $this->islandId = $is_move ? (string) $request->query->get('from', NULL) : NULL;
 
@@ -97,14 +97,14 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function attachToSlot(Request $request, InstanceInterface $builder, string $node_id, string $slot): HtmlResponse {
+  public function attachToSlot(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $slot): HtmlResponse {
     $parent_id = $node_id;
     $position = (int) $request->request->get('position', 0);
 
     if ($request->request->has('preset_id')) {
       $preset_id = (string) $request->request->get('preset_id');
 
-      return $this->attachPresetToSlot($builder, $preset_id, $parent_id, $slot, $position);
+      return $this->attachPresetToSlot($display_builder_instance, $preset_id, $parent_id, $slot, $position);
     }
 
     $is_move = FALSE;
@@ -113,10 +113,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     if ($request->request->has('node_id')) {
       $node_id = (string) $request->request->get('node_id');
 
-      if (!$builder->moveToSlot($node_id, $parent_id, $slot, $position)) {
+      if (!$display_builder_instance->moveToSlot($node_id, $parent_id, $slot, $position)) {
         $message = $this->t('[attachToRoot] moveToRoot failed with invalid data');
 
-        return $this->responseMessageError((string) $builder->id(), $message, $request->request->all());
+        return $this->responseMessageError((string) $display_builder_instance->id(), $message, $request->request->all());
       }
 
       $is_move = TRUE;
@@ -124,7 +124,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     elseif ($request->request->has('source_id')) {
       $source_id = (string) $request->request->get('source_id');
       $data = $request->request->has('source') ? \json_decode((string) $request->request->get('source'), TRUE) : [];
-      $node_id = $builder->attachToSlot($parent_id, $slot, $position, $source_id, $data);
+      $node_id = $display_builder_instance->attachToSlot($parent_id, $slot, $position, $source_id, $data);
     }
     else {
       $message = $this->t('[attachToSlot] Missing content (component_id, block_id or node_id)');
@@ -134,11 +134,11 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         'request' => $request->request->all(),
       ];
 
-      return $this->responseMessageError((string) $builder->id(), $message, $debug);
+      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
     }
-    $builder->save();
+    $display_builder_instance->save();
 
-    $this->builder = $builder;
+    $this->builder = $display_builder_instance;
     // Let's refresh when we add new source to get the placeholder replacement.
     $this->islandId = $is_move ? (string) $request->query->get('from', NULL) : NULL;
 
@@ -153,29 +153,30 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function get(Request $request, InstanceInterface $builder, string $node_id): array {
-    $this->builder = $builder;
+  public function get(Request $request, InstanceInterface $display_builder_instance, string $node_id): array {
+    $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEventWithRenderApi(
       DisplayBuilderEvents::ON_ACTIVE,
-      $builder->get($node_id),
+      $display_builder_instance->get($node_id),
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function update(Request $request, InstanceInterface $builder, string $node_id): HtmlResponse {
-    $this->builder = $builder;
+  public function update(Request $request, InstanceInterface $display_builder_instance, string $node_id): HtmlResponse {
+    $this->builder = $display_builder_instance;
     $body = $request->getPayload()->all();
 
     if (!isset($body['form_id'])) {
       $message = $this->t('[update] Missing payload!');
-      return $this->responseMessageError((string) $builder->id(), $message, $body);
+
+      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $body);
     }
 
     // Load the instance to properly alter the form data into config data.
-    $instance = $builder->get($node_id);
+    $instance = $display_builder_instance->get($node_id);
 
     if (isset($body['source']['form_build_id'])) {
       unset($body['source']['form_build_id'], $body['source']['form_token'], $body['source']['form_id']);
@@ -189,12 +190,12 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $form_state->addBuildInfo('args', [
       [
         'island_id' => 'contextual_form',
-        'builder_id' => (string) $builder->id(),
+        'builder_id' => (string) $display_builder_instance->id(),
         'instance' => $instance,
       ],
-      $builder->getContexts(),
+      $display_builder_instance->getContexts(),
     ]);
-    $form_state->setTemporaryValue('gathered_contexts', $builder->getContexts());
+    $form_state->setTemporaryValue('gathered_contexts', $display_builder_instance->getContexts());
     // The body received corresponds to raw form values.
     // We need to set them in the form state to properly
     // take them into account.
@@ -202,6 +203,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     $formClass = ContextualFormPanel::getFormClass();
     $data = [];
+
     try {
       $values = $this->validateIslandForm($formClass, $form_state);
       $data['source'] = $values;
@@ -210,7 +212,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       throw $e;
     }
     catch (\Exception $e) {
-      return $this->responseMessageError((string) $builder->id(), $e->getMessage(), []);
+      return $this->responseMessageError((string) $display_builder_instance->id(), $e->getMessage(), []);
     }
 
     if (isset($instance['source']['component']['slots'], $data['source']['component'])
@@ -219,10 +221,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       $data['source']['component']['slots'] = $instance['source']['component']['slots'];
     }
 
-    $builder->setSource($node_id, $instance['source_id'], $data['source']);
-    $builder->save();
+    $display_builder_instance->setSource($node_id, $instance['source_id'], $data['source']);
+    $display_builder_instance->save();
 
-    $this->builder = $builder;
+    $this->builder = $display_builder_instance;
     $this->islandId = (string) $request->query->get('from', NULL);
 
     return $this->dispatchDisplayBuilderEvent(
@@ -235,18 +237,18 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function thirdPartySettingsUpdate(Request $request, InstanceInterface $builder, string $node_id, string $island_id): HtmlResponse {
+  public function thirdPartySettingsUpdate(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $island_id): HtmlResponse {
     $body = $request->getPayload()->all();
 
     if (!isset($body['form_id'])) {
       $message = $this->t('[thirdPartySettingsUpdate] Missing payload!');
 
-      return $this->responseMessageError((string) $builder->id(), $message, $body);
+      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $body);
     }
 
     $islandDefinition = $this->islandPluginManager->getDefinition($island_id);
     // Load the instance to properly alter the form data into config data.
-    $instance = $builder->get($node_id);
+    $instance = $display_builder_instance->get($node_id);
     unset($body['form_build_id'], $body['form_token'], $body['form_id']);
 
     $form_state = new FormState();
@@ -254,7 +256,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $form_state->addBuildInfo('args', [
       [
         'island_id' => $island_id,
-        'builder_id' => (string) $builder->id(),
+        'builder_id' => (string) $display_builder_instance->id(),
         'instance' => $instance,
       ],
       [],
@@ -262,7 +264,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     // phpcs:disable Drupal.Files.LineLength.TooLong
     // @todo should context be injected for third party settings?
-    // $form_state->setTemporaryValue('gathered_contexts', $builder->getContexts());
+    // $form_state->setTemporaryValue('gathered_contexts', $display_builder_instance->getContexts());
     // phpcs:enable Drupal.Files.LineLength.TooLong
     // The body received corresponds to raw form values.
     // We need to set them in the form state to properly
@@ -272,10 +274,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $formClass = ($islandDefinition['class'])::getFormClass();
     $values = $this->validateIslandForm($formClass, $form_state);
     // We update the state with the new data.
-    $builder->setThirdPartySettings($node_id, $island_id, $values);
-    $builder->save();
+    $display_builder_instance->setThirdPartySettings($node_id, $island_id, $values);
+    $display_builder_instance->save();
 
-    $this->builder = $builder;
+    $this->builder = $display_builder_instance;
     $this->islandId = $island_id;
 
     return $this->dispatchDisplayBuilderEvent(
@@ -289,9 +291,9 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function paste(Request $request, InstanceInterface $builder, string $node_id, string $parent_id, string $slot_id, string $slot_position): HtmlResponse {
-    $this->builder = $builder;
-    $dataToCopy = $builder->get($node_id);
+  public function paste(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $parent_id, string $slot_id, string $slot_position): HtmlResponse {
+    $this->builder = $display_builder_instance;
+    $dataToCopy = $display_builder_instance->get($node_id);
 
     // Keep flag for move or attach to root.
     $is_paste_root = FALSE;
@@ -306,15 +308,15 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       // @todo for duplicate and not parent root seems not detected and copy is inside the slot.
       if ($parent_id === '__root__') {
         $is_paste_root = TRUE;
-        $builder->attachToRoot(0, $source_id, $data, $dataToCopy['_third_party_settings'] ?? []);
+        $display_builder_instance->attachToRoot(0, $source_id, $data, $dataToCopy['_third_party_settings'] ?? []);
       }
       else {
-        $builder->attachToSlot($parent_id, $slot_id, (int) $slot_position, $source_id, $data, $dataToCopy['_third_party_settings'] ?? []);
+        $display_builder_instance->attachToSlot($parent_id, $slot_id, (int) $slot_position, $source_id, $data, $dataToCopy['_third_party_settings'] ?? []);
       }
     }
-    $builder->save();
+    $display_builder_instance->save();
 
-    $this->builder = $builder;
+    $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(
       $is_paste_root ? DisplayBuilderEvents::ON_MOVE : DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
@@ -326,13 +328,13 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function delete(Request $request, InstanceInterface $builder, string $node_id): HtmlResponse {
-    $current = $builder->getCurrentState();
-    $parent_id = $builder->getParentId($current, $node_id);
-    $builder->remove($node_id);
-    $builder->save();
+  public function delete(Request $request, InstanceInterface $display_builder_instance, string $node_id): HtmlResponse {
+    $current = $display_builder_instance->getCurrentState();
+    $parent_id = $display_builder_instance->getParentId($current, $node_id);
+    $display_builder_instance->remove($node_id);
+    $display_builder_instance->save();
 
-    $this->builder = $builder;
+    $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_DELETE,
@@ -345,9 +347,9 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function saveAsPreset(Request $request, InstanceInterface $builder, string $node_id): HtmlResponse {
+  public function saveAsPreset(Request $request, InstanceInterface $display_builder_instance, string $node_id): HtmlResponse {
     $label = (string) $this->t('New preset');
-    $data = $builder->get($node_id);
+    $data = $display_builder_instance->get($node_id);
     self::cleanNodeId($data);
 
     $preset_storage = $this->entityTypeManager()->getStorage('pattern_preset');
@@ -361,7 +363,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     ]);
     $preset->save();
 
-    $this->builder = $builder;
+    $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_PRESET_SAVE);
   }
@@ -369,26 +371,26 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function save(Request $request, InstanceInterface $builder): HtmlResponse {
-    $builder->setSave($builder->getCurrentState());
-    $builder->save();
+  public function save(Request $request, InstanceInterface $display_builder_instance): HtmlResponse {
+    $display_builder_instance->setSave($display_builder_instance->getCurrentState());
+    $display_builder_instance->save();
 
-    $this->builder = $builder;
+    $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_SAVE,
-      $builder->getContexts()
+      $display_builder_instance->getContexts()
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function restore(Request $request, InstanceInterface $builder): HtmlResponse {
-    $builder->restore();
-    $builder->save();
+  public function restore(Request $request, InstanceInterface $display_builder_instance): HtmlResponse {
+    $display_builder_instance->restore();
+    $display_builder_instance->save();
 
-    $this->builder = $builder;
+    $this->builder = $display_builder_instance;
 
     // @todo on history change is closest to a data change that we need here
     // without any instance id. Perhaps we need a new event?
@@ -398,8 +400,8 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function revert(Request $request, InstanceInterface $builder): HtmlResponse {
-    $instanceInfos = DisplayBuilderItemList::checkInstanceId((string) $builder->id());
+  public function revert(Request $request, InstanceInterface $display_builder_instance): HtmlResponse {
+    $instanceInfos = DisplayBuilderItemList::checkInstanceId((string) $display_builder_instance->id());
 
     if (isset($instanceInfos['entity_type_id'], $instanceInfos['entity_id'], $instanceInfos['field_name'])) {
       // Do not get the profile entity ID from Instance context because the
@@ -410,9 +412,9 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
       if ($entity instanceof FieldableEntityInterface) {
         // Remove the saved state as the field values will be deleted.
-        $builder->setNewPresent([], 'Revert 1/2: clear overridden data and save');
-        $builder->save();
-        $builder->setSave($builder->getCurrentState());
+        $display_builder_instance->setNewPresent([], 'Revert 1/2: clear overridden data and save');
+        $display_builder_instance->save();
+        $display_builder_instance->setSave($display_builder_instance->getCurrentState());
 
         // Clear field value.
         $field = $entity->get($instanceInfos['field_name']);
@@ -420,7 +422,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         $entity->save();
 
         // Repopulate the Instance entity from the entity view display config.
-        $data = $builder->toArray();
+        $data = $display_builder_instance->toArray();
 
         if (isset($data['contexts']['view_mode'])
           && $data['contexts']['view_mode'] instanceof ContextInterface
@@ -433,13 +435,13 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
             ->load($display_id);
 
           $sources = $display->getSources();
-          $builder->setNewPresent($sources, 'Revert 2/2: retrieve existing data from config');
-          $builder->save();
+          $display_builder_instance->setNewPresent($sources, 'Revert 2/2: retrieve existing data from config');
+          $display_builder_instance->save();
         }
       }
     }
 
-    $this->builder = $builder;
+    $this->builder = $display_builder_instance;
 
     // @todo on history change is closest to a data change that we need here
     // without any instance id. Perhaps we need a new event?
@@ -449,23 +451,11 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function undo(Request $request, InstanceInterface $builder): HtmlResponse {
-    $builder->undo();
-    $builder->save();
+  public function undo(Request $request, InstanceInterface $display_builder_instance): HtmlResponse {
+    $display_builder_instance->undo();
+    $display_builder_instance->save();
 
-    $this->builder = $builder;
-
-    return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_HISTORY_CHANGE);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function redo(Request $request, InstanceInterface $builder): HtmlResponse {
-    $builder->redo();
-    $builder->save();
-
-    $this->builder = $builder;
+    $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_HISTORY_CHANGE);
   }
@@ -473,11 +463,23 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function clear(Request $request, InstanceInterface $builder): HtmlResponse {
-    $builder->clear();
-    $builder->save();
+  public function redo(Request $request, InstanceInterface $display_builder_instance): HtmlResponse {
+    $display_builder_instance->redo();
+    $display_builder_instance->save();
 
-    $this->builder = $builder;
+    $this->builder = $display_builder_instance;
+
+    return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_HISTORY_CHANGE);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function clear(Request $request, InstanceInterface $display_builder_instance): HtmlResponse {
+    $display_builder_instance->clear();
+    $display_builder_instance->save();
+
+    $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_HISTORY_CHANGE);
   }
@@ -487,7 +489,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    *
    * Presets are "resolved" after attachment, so they are never moved around.
    *
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    * @param string $preset_id
    *   Pattern preset ID.
@@ -497,7 +499,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  protected function attachPresetToRoot(InstanceInterface $builder, string $preset_id, int $position): HtmlResponse {
+  protected function attachPresetToRoot(InstanceInterface $display_builder_instance, string $preset_id, int $position): HtmlResponse {
     $presetStorage = $this->entityTypeManager()->getStorage('pattern_preset');
 
     /** @var \Drupal\display_builder\PatternPresetInterface $preset */
@@ -507,14 +509,14 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     if (!isset($data['source_id']) || !isset($data['source'])) {
       $message = $this->t('[attachToRoot] Missing preset source_id data');
 
-      return $this->responseMessageError((string) $builder->id(), $message, $data);
+      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $data);
     }
-    $node_id = $builder->attachToRoot($position, $data['source_id'], $data['source']);
+    $node_id = $display_builder_instance->attachToRoot($position, $data['source_id'], $data['source']);
 
     foreach ($data['_third_party_settings'] ?? [] as $provider => $settings) {
-      $builder->setThirdPartySettings($node_id, $provider, $settings ?? []);
+      $display_builder_instance->setThirdPartySettings($node_id, $provider, $settings ?? []);
     }
-    $this->builder = $builder;
+    $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
@@ -528,7 +530,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    *
    * Presets are "resolved" after attachment, so they are never moved around.
    *
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    * @param string $preset_id
    *   Pattern preset ID.
@@ -542,7 +544,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  protected function attachPresetToSlot(InstanceInterface $builder, string $preset_id, string $parent_id, string $slot, int $position): HtmlResponse {
+  protected function attachPresetToSlot(InstanceInterface $display_builder_instance, string $preset_id, string $parent_id, string $slot, int $position): HtmlResponse {
     $presetStorage = $this->entityTypeManager()->getStorage('pattern_preset');
 
     /** @var \Drupal\display_builder\PatternPresetInterface $preset */
@@ -552,15 +554,15 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     if (!isset($data['source_id']) || !isset($data['source'])) {
       $message = $this->t('[attachToSlot] Missing preset source_id data');
 
-      return $this->responseMessageError((string) $builder->id(), $message, $data);
+      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $data);
     }
-    $node_id = $builder->attachToSlot($parent_id, $slot, $position, $data['source_id'], $data['source']);
+    $node_id = $display_builder_instance->attachToSlot($parent_id, $slot, $position, $data['source_id'], $data['source']);
 
     foreach ($data['_third_party_settings'] ?? [] as $provider => $settings) {
-      $builder->setThirdPartySettings($node_id, $provider, $settings ?? []);
+      $display_builder_instance->setThirdPartySettings($node_id, $provider, $settings ?? []);
     }
 
-    $this->builder = $builder;
+    $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
@@ -650,14 +652,18 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       }
       $form = $formBuilder->buildForm($formClass, $form_state);
       $formErrors = $form_state->getErrors();
+
       if (!empty($formErrors)) {
-        $first_error = reset($formErrors);
+        $first_error = \reset($formErrors);
+
         throw new \Exception((string) $first_error);
       }
       $formBuilder->validateForm($formClass, $form, $form_state);
       $formErrors = $form_state->getErrors();
+
       if (!empty($formErrors)) {
-        $first_error = reset($formErrors);
+        $first_error = \reset($formErrors);
+
         throw new \Exception((string) $first_error);
       }
     }
@@ -679,7 +685,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * Render an error message in the display builder.
    *
-   * @param string $builder_id
+   * @param string $display_builder_instance_id
    *   The builder ID.
    * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $message
    *   The error message.
@@ -690,11 +696,11 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    *   The response with the component.
    */
   private function responseMessageError(
-    string $builder_id,
+    string $display_builder_instance_id,
     string|TranslatableMarkup $message,
     array $debug,
   ): HtmlResponse {
-    $build = $this->buildError($builder_id, $message, \print_r($debug, TRUE), NULL, TRUE);
+    $build = $this->buildError($display_builder_instance_id, $message, \print_r($debug, TRUE), NULL, TRUE);
 
     $html = $this->renderer->renderInIsolation($build);
     $response = new HtmlResponse();

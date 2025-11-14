@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_entity_view\Field;
 
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\MapFieldItemList;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\InstanceInterface;
@@ -174,6 +176,17 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
       $this->list[$offset] = $this->createItem($offset, $item);
     }
     $this->getEntity()->save();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function checkAccess(string $instance_id, AccountInterface $account): AccessResultInterface {
+    [, $entity_type_id, $entity_id] = \explode('__', $instance_id);
+
+    $entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->load($entity_id);
+
+    return $entity->access('update', $account, TRUE);
   }
 
   /**

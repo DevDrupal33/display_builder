@@ -18,20 +18,20 @@ interface ApiControllerInterface {
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    *
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function attachToRoot(Request $request, InstanceInterface $builder): HtmlResponse;
+  public function attachToRoot(Request $request, InstanceInterface $display_builder_instance): HtmlResponse;
 
   /**
    * Attach a component_id, a block_id, or an source, to a component slot.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    * @param string $node_id
    *   Node ID of the parent.
@@ -41,14 +41,14 @@ interface ApiControllerInterface {
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function attachToSlot(Request $request, InstanceInterface $builder, string $node_id, string $slot): HtmlResponse;
+  public function attachToSlot(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $slot): HtmlResponse;
 
   /**
    * Open source's contextual islands.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    * @param string $node_id
    *   Node ID of the source.
@@ -56,14 +56,14 @@ interface ApiControllerInterface {
    * @return array
    *   The render array response.
    */
-  public function get(Request $request, InstanceInterface $builder, string $node_id): array;
+  public function get(Request $request, InstanceInterface $display_builder_instance, string $node_id): array;
 
   /**
    * Update source.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    * @param string $node_id
    *   Node ID of the source.
@@ -71,14 +71,14 @@ interface ApiControllerInterface {
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function update(Request $request, InstanceInterface $builder, string $node_id): HtmlResponse;
+  public function update(Request $request, InstanceInterface $display_builder_instance, string $node_id): HtmlResponse;
 
   /**
    * Update source's 3rd party settings.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    * @param string $node_id
    *   Node ID of the source.
@@ -88,14 +88,14 @@ interface ApiControllerInterface {
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function thirdPartySettingsUpdate(Request $request, InstanceInterface $builder, string $node_id, string $island_id): HtmlResponse;
+  public function thirdPartySettingsUpdate(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $island_id): HtmlResponse;
 
   /**
    * Paste a source.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    * @param string $node_id
    *   Node ID of the source.
@@ -109,14 +109,14 @@ interface ApiControllerInterface {
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function paste(Request $request, InstanceInterface $builder, string $node_id, string $parent_id, string $slot_id, string $slot_position): HtmlResponse;
+  public function paste(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $parent_id, string $slot_id, string $slot_position): HtmlResponse;
 
   /**
    * Delete a source.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    * @param string $node_id
    *   Node ID of the source to delete.
@@ -124,14 +124,14 @@ interface ApiControllerInterface {
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function delete(Request $request, InstanceInterface $builder, string $node_id): HtmlResponse;
+  public function delete(Request $request, InstanceInterface $display_builder_instance, string $node_id): HtmlResponse;
 
   /**
    * Save a source as preset.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    * @param string $node_id
    *   Node ID of the source to save.
@@ -139,84 +139,84 @@ interface ApiControllerInterface {
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function saveAsPreset(Request $request, InstanceInterface $builder, string $node_id): HtmlResponse;
+  public function saveAsPreset(Request $request, InstanceInterface $display_builder_instance, string $node_id): HtmlResponse;
 
   /**
    * Save display builder instance.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    *
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function save(Request $request, InstanceInterface $builder): HtmlResponse;
+  public function save(Request $request, InstanceInterface $display_builder_instance): HtmlResponse;
 
   /**
    * Restore to last save.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    *
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function restore(Request $request, InstanceInterface $builder): HtmlResponse;
+  public function restore(Request $request, InstanceInterface $display_builder_instance): HtmlResponse;
 
   /**
    * Revert entity override to default display.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    *
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function revert(Request $request, InstanceInterface $builder): HtmlResponse;
+  public function revert(Request $request, InstanceInterface $display_builder_instance): HtmlResponse;
 
   /**
    * Move history to the last past state.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    *
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function undo(Request $request, InstanceInterface $builder): HtmlResponse;
+  public function undo(Request $request, InstanceInterface $display_builder_instance): HtmlResponse;
 
   /**
    * Move history to the first future state.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    *
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function redo(Request $request, InstanceInterface $builder): HtmlResponse;
+  public function redo(Request $request, InstanceInterface $display_builder_instance): HtmlResponse;
 
   /**
    * Clear history.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $builder
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    *
    * @return \Drupal\Core\Render\HtmlResponse
    *   The HTML response.
    */
-  public function clear(Request $request, InstanceInterface $builder): HtmlResponse;
+  public function clear(Request $request, InstanceInterface $display_builder_instance): HtmlResponse;
 
 }

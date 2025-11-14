@@ -31,7 +31,7 @@ class HistoryStep {
     // Writable because of Instance::postCreate().
     public array $data,
     public readonly int $hash,
-    public readonly null|FormattableMarkup|string $log,
+    public readonly FormattableMarkup|string|null $log,
     #[Assert\Positive]
     public readonly int $time,
     #[Assert\PositiveOrZero]

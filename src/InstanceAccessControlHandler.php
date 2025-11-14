@@ -5,40 +5,80 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
  * Defines the access control handler for the instance entity type.
- *
- * @see https://www.drupal.org/project/coder/issues/3185082
  */
 final class InstanceAccessControlHandler extends EntityAccessControlHandler {
 
   /**
    * {@inheritdoc}
    */
-  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account): AccessResult {
-    if ($account->hasPermission((string) $this->entityType->getAdminPermission())) {
-      return AccessResult::allowed()->cachePerPermissions();
-    }
+  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account): AccessResultInterface {
+    // dump(get_class($entity));
+    /** @var \Drupal\display_builder\InstanceInterface $entity */
+    // 1. Profile-related access.
+    $profile_result = $this->checkProfileAccess($entity, $account);
 
-    return match ($operation) {
-      'view' => AccessResult::allowedIfHasPermission($account, 'view display_builder_instance'),
-      'update' => AccessResult::allowedIfHasPermission($account, 'edit display_builder_instance'),
-      'delete' => AccessResult::allowedIfHasPermission($account, 'delete display_builder_instance'),
-      default => AccessResult::neutral(),
-    };
+    if ($profile_result->isForbidden()) {
+      return $profile_result;
+    }
+    // 2. Access to DisplayBuildableInterface implementation.
+    $buildable_result = $this->checkBuildableAccess($entity, $account);
+
+    return $profile_result->andIf($buildable_result);
   }
 
   /**
-   * {@inheritdoc}
+   * Checks permission to use the profile.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The entity for which to check access.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user session for which to check access.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
    */
-  protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL): AccessResult {
-    $permissions = ['create display_builder_instance', 'administer display_builder_instance'];
+  private function checkProfileAccess(InstanceInterface $instance, AccountInterface $account): AccessResultInterface {
+    if ($profile = $instance->getProfile()) {
+      return $profile->access('view', $account, TRUE);
+    }
 
-    return AccessResult::allowedIfHasPermissions($account, $permissions, 'OR');
+    // If the profile does not exist, forbid access to this instance.
+    return AccessResult::forbidden('Invalid profileId on display_builder_instance.');
+  }
+
+  /**
+   * Checks access based on instance prefix/type.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The entity for which to check access.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user session for which to check access.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   */
+  private function checkBuildableAccess(InstanceInterface $instance, AccountInterface $account): AccessResultInterface {
+    $instance_id = (string) $instance->id();
+    // "Providers" are implementations of
+    // \Drupal\display_builder\DisplayBuildableInterface.
+    $providers = $this->moduleHandler->invokeAll('display_builder_provider_info');
+
+    foreach ($providers as $provider) {
+      if (\str_starts_with($instance_id, $provider['prefix'])) {
+        return $provider['class']::checkAccess($instance_id, $account);
+      }
+    }
+
+    // If an instance is not managed by a provider (for example: a demo or a
+    // test), we allow.
+    return AccessResult::allowed();
   }
 
 }

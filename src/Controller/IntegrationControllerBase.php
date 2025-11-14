@@ -6,6 +6,7 @@ namespace Drupal\display_builder\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\display_builder\DisplayBuildableInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -28,6 +29,10 @@ abstract class IntegrationControllerBase extends ControllerBase {
 
     if (!$profile) {
       throw new NotFoundHttpException();
+    }
+
+    if (!$profile->access('view')) {
+      throw new AccessDeniedHttpException();
     }
 
     $instance_id = $buildable->getInstanceId();

@@ -58,7 +58,7 @@ class ProfilePermissions implements ContainerInjectionInterface {
       $permission = $builder->getPermissionName();
       $permissions[$permission] = [
         'title' => $this->t(
-          'Use the %label display builder',
+          'Use the %label Display Builder profile',
           [
             '%label' => $builder->label(),
           ]

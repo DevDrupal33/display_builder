@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\display_builder_entity_view\Kernel;
 
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Entity\Entity\EntityViewMode;
-use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
+use Drupal\display_builder_entity_view\Entity\EntityViewDisplayTrait;
+use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -19,7 +21,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @internal
  */
 #[CoversClass(EntityViewDisplay::class)]
-#[CoversClass('\Drupal\display_builder_entity_view\Entity\EntityViewDisplayTrait')]
+#[CoversClass(EntityViewDisplayTrait::class)]
 #[Group('display_builder')]
 final class EntityViewDisplayTest extends EntityKernelTestBase {
 
@@ -250,6 +252,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     // Create the instance and fill sources.
     $display->initInstanceIfMissing();
 
+    /** @var \Drupal\display_builder\InstanceInterface $instance */
     $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($display->getInstanceId());
     $instance->setNewPresent($expected);
     $instance->save();

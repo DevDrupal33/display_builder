@@ -1,11 +1,11 @@
 administer display builder profile:
-  title: 'Administer profile'
+  title: 'Administer Display Builder profiles'
   description: 'View, edit and delete any Display Builder profile.'
 
 administer pattern preset:
-  title: 'Administer pattern preset'
+  title: 'Administer Display Builder presets'
   description: 'View, edit and delete any pattern preset.'
 
 view display builder instance:
-  title: 'View instance'
-  description: 'View any Display Builder instance.'
+  title: 'List Display Builder instances'
+  description: 'View the admin page about Display Builder instances.'

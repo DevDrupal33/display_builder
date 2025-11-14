@@ -232,7 +232,7 @@ trait RenderableBuilderTrait {
     string|TranslatableMarkup $label,
     ?string $action,
     ?string $icon = NULL,
-    null|string|TranslatableMarkup $tooltip = NULL,
+    string|TranslatableMarkup|null $tooltip = NULL,
     ?array $keyboard = NULL,
   ): array {
     $button = [

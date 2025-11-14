@@ -5,17 +5,21 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder_views\Kernel;
 
 use Drupal\Core\Form\FormState;
-use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
+use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\views\Entity\View;
 use Drupal\views\Views;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Kernel test for the Views Display Extender.
  *
  * @internal
  */
+#[CoversClass(DisplayExtender::class)]
+#[Group('display_builder')]
 final class DisplayExtenderTest extends KernelTestBase {
 
   /**

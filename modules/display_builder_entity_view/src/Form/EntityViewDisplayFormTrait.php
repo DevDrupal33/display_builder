@@ -171,7 +171,7 @@ trait EntityViewDisplayFormTrait {
     $form[ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY] = [
       '#type' => 'select',
       '#title' => $this->t('Override profile'),
-      '#description' => $this->t('The profile used for content overrides. It can be changed anytime.'),
+      '#description' => $this->t('The profile used for content overrides.'),
       '#options' => $this->configFormBuilder->getAllowedProfiles(),
       '#default_value' => $overridable->getDisplayBuilderOverrideProfile()?->id(),
       '#states' => [
@@ -180,6 +180,12 @@ trait EntityViewDisplayFormTrait {
         ],
       ],
     ];
+
+    if (!$this->configFormBuilder->isAllowed($entity)) {
+      $form[ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY]['#disabled'] = TRUE;
+      unset($form[ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY]['#description']);
+      $form[ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY]['#disabled'] = TRUE;
+    }
 
     return $form;
   }

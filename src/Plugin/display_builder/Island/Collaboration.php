@@ -171,7 +171,7 @@ class Collaboration extends IslandPluginBase implements IslandConfigurationFormI
   public function alterRenderable(InstanceInterface $instance, array $build): array {
     $build['#attributes'] = [
       'hx-ext' => 'sse',
-      'sse-connect' => Url::fromRoute('display_builder.api_sse', ['builder_id' => (string) $instance->id()])->toString(),
+      'sse-connect' => Url::fromRoute('display_builder.api_sse', ['display_builder_instance' => (string) $instance->id()])->toString(),
     ];
     // We don't attach it from the ::build() because the island doesn't
     // always render something in the toolbar.

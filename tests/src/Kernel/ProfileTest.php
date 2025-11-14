@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\display_builder\Entity\Profile;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\Role;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -17,7 +16,7 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[CoversClass('\Drupal\display_builder\Entity\Profile')]
 #[Group('display_builder')]
-final class ProfileTest extends KernelTestBase {
+final class ProfileTest extends DisplayBuilderKernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -48,29 +47,28 @@ final class ProfileTest extends KernelTestBase {
     $updated_island = ['status' => FALSE, 'weight' => 3];
 
     // Create a new display builder entity.
-    $displayBuilder = Profile::create([
-      'id' => 'test_builder',
-      'label' => 'Test Builder',
-      'description' => 'Test Description',
-      'debug' => FALSE,
+    $id = 'test_builder';
+    $data = [
+      'label' => 'Test Builder crud',
+      'description' => 'Test Description crud',
       'islands' => [
         'test_island_button' => $enable_island,
         'test_island_contextual' => $enable_island,
         'test_island_library' => $enable_island,
         'test_island_menu' => $enable_island,
       ],
-    ]);
-    $displayBuilder->save();
+    ];
+    $profile = self::createDisplayBuilderProfile('test_builder', $data);
 
     // Test that the entity was created correctly.
-    self::assertNotEmpty($displayBuilder->id());
-    self::assertSame('test_builder', $displayBuilder->id());
-    self::assertSame('Test Builder', $displayBuilder->label());
-    self::assertSame('Test Description', $displayBuilder->get('description'));
-    self::assertFalse($displayBuilder->get('debug'));
+    self::assertNotEmpty($profile->id());
+    self::assertSame($id, $profile->id());
+    self::assertSame($data['label'], $profile->label());
+    self::assertSame($data['description'], $profile->get('description'));
+    self::assertFalse($profile->get('debug'));
 
     // Test islands enabled.
-    $config = $displayBuilder->getIslandConfigurations();
+    $config = $profile->getIslandConfigurations();
     self::assertSame($enable_island, $config['test_island_button']);
     self::assertSame($enable_island, $config['test_island_contextual']);
     self::assertSame($enable_island, $config['test_island_library']);
@@ -79,20 +77,20 @@ final class ProfileTest extends KernelTestBase {
     // Test entity loading.
     $loaded = Profile::load('test_builder');
     self::assertNotNull($loaded);
-    self::assertSame($displayBuilder->id(), $loaded->id());
-    self::assertSame($displayBuilder->label(), $loaded->label());
+    self::assertSame($profile->id(), $loaded->id());
+    self::assertSame($profile->label(), $loaded->label());
 
     // Update the entity.
-    $displayBuilder->set('label', 'Updated Builder');
-    $displayBuilder->set('description', 'Updated Description');
-    $displayBuilder->set('debug', TRUE);
-    $displayBuilder->set('islands', [
+    $profile->set('label', 'Updated Builder');
+    $profile->set('description', 'Updated Description');
+    $profile->set('debug', TRUE);
+    $profile->set('islands', [
       'test_island_button' => $updated_island,
       'test_island_contextual' => $updated_island,
       'test_island_library' => $updated_island,
       'test_island_menu' => $updated_island,
     ]);
-    $displayBuilder->save();
+    $profile->save();
 
     // Reload and verify changes.
     $updated = Profile::load('test_builder');
@@ -101,7 +99,7 @@ final class ProfileTest extends KernelTestBase {
     self::assertTrue($updated->get('debug'));
 
     // Test islands enabled.
-    $config = $displayBuilder->getIslandConfigurations();
+    $config = $profile->getIslandConfigurations();
     self::assertSame($updated_island, $config['test_island_button']);
     self::assertSame($updated_island, $config['test_island_contextual']);
     self::assertSame($updated_island, $config['test_island_library']);
@@ -113,27 +111,23 @@ final class ProfileTest extends KernelTestBase {
    */
   public function testIslandConfiguration(): void {
     $islandId = 'test_island_view';
+    $data = [];
 
     // Create a display builder with island configuration.
-    $displayBuilder = Profile::create([
-      'id' => 'test_islands',
-      'label' => 'Test Islands',
-      'description' => 'Test Description',
-      'islands' => [
-        $islandId => [
-          'status' => TRUE,
-          'weight' => 0,
-          'region' => 'main',
-          'string_value' => 'test value',
-          'bool_value' => 1,
-          'string_array' => ['foo' => 'value1', 'bar' => 'value2'],
-        ],
+    $data['islands'] = [
+      $islandId => [
+        'status' => TRUE,
+        'weight' => 0,
+        'region' => 'main',
+        'string_value' => 'test value',
+        'bool_value' => 1,
+        'string_array' => ['foo' => 'value1', 'bar' => 'value2'],
       ],
-    ]);
-    $displayBuilder->save();
+    ];
+    $profile = self::createDisplayBuilderProfile('test_islands', $data);
 
     // Test getting island configuration.
-    $islandConfig = $displayBuilder->getIslandConfiguration($islandId);
+    $islandConfig = $profile->getIslandConfiguration($islandId);
     self::assertNotEmpty($islandConfig);
     self::assertTrue($islandConfig['status']);
     self::assertSame(0, $islandConfig['weight']);
@@ -153,8 +147,8 @@ final class ProfileTest extends KernelTestBase {
       'bool_value' => 0,
       'string_array' => ['foo' => 'new1', 'bar' => 'new2'],
     ];
-    $displayBuilder->setIslandConfiguration($islandId, $newConfig);
-    $displayBuilder->save();
+    $profile->setIslandConfiguration($islandId, $newConfig);
+    $profile->save();
 
     // Reload and verify island configuration changes.
     $updated = Profile::load('test_islands');
@@ -184,8 +178,8 @@ final class ProfileTest extends KernelTestBase {
     self::assertEmpty($enabledIslands);
 
     // Enable the island and test again.
-    $displayBuilder->setIslandConfiguration($islandId, ['status' => TRUE] + $newConfig);
-    $displayBuilder->save();
+    $profile->setIslandConfiguration($islandId, ['status' => TRUE] + $newConfig);
+    $profile->save();
     $updated = Profile::load('test_islands');
     $enabledIslands = $updated->getEnabledIslands();
     self::assertArrayHasKey($islandId, $enabledIslands);
@@ -195,12 +189,7 @@ final class ProfileTest extends KernelTestBase {
    * Test the getRoles() method.
    */
   public function testGetRoles(): void {
-    $displayBuilder = Profile::create([
-      'id' => 'role_test',
-      'label' => 'Role Test',
-      'description' => 'Test Description',
-    ]);
-    $displayBuilder->save();
+    $profile = self::createDisplayBuilderProfile('role_test');
 
     // Create a role with the permission.
     $role = Role::create([
@@ -210,7 +199,7 @@ final class ProfileTest extends KernelTestBase {
     ]);
     $role->save();
 
-    $roles = $displayBuilder->getRoles();
+    $roles = $profile->getRoles();
     self::assertContains('Test Role', $roles);
   }
 
@@ -218,14 +207,9 @@ final class ProfileTest extends KernelTestBase {
    * Test the toUrl() method.
    */
   public function testToUrlEditPluginForm(): void {
-    $displayBuilder = Profile::create([
-      'id' => 'url_test',
-      'label' => 'URL Test',
-      'description' => 'Test Description',
-    ]);
-    $displayBuilder->save();
+    $profile = self::createDisplayBuilderProfile('url_test');
 
-    $url = $displayBuilder->toUrl('edit-plugin-form', ['island_id' => 'foo']);
+    $url = $profile->toUrl('edit-plugin-form', ['island_id' => 'foo']);
     self::assertSame('/admin/structure/display-builder/url_test/edit/foo', $url->toString());
   }
 
@@ -233,13 +217,8 @@ final class ProfileTest extends KernelTestBase {
    * Test the library and debug mode.
    */
   public function testDebug(): void {
-    $displayBuilder = Profile::create([
-      'id' => 'lib_test',
-      'label' => 'Lib Test',
-      'description' => 'Test Description',
-      'debug' => TRUE,
-    ]);
-    self::assertTrue($displayBuilder->isDebugModeActivated());
+    $profile = self::createDisplayBuilderProfile('lib_test', ['debug' => TRUE]);
+    self::assertTrue($profile->isDebugModeActivated());
   }
 
 }
