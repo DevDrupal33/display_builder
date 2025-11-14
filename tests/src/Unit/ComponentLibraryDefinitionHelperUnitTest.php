@@ -6,7 +6,7 @@ namespace Drupal\Tests\display_builder\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Plugin\Component as ComponentPlugin;
-use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\ui_patterns\ComponentPluginManager as UiPatternsComponentPluginManager;
 use Drupal\display_builder\ComponentLibraryDefinitionHelper;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_patterns\SourcePluginManager;
@@ -45,7 +45,7 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
   protected function setUp(): void {
     parent::setUp();
 
-    $this->sdcManager = $this->createMock(ComponentPluginManager::class);
+    $this->sdcManager = $this->createMock(UiPatternsComponentPluginManager::class);
     $this->sourceManager = $this->createMock(SourcePluginManager::class);
 
     $this->helper = new ComponentLibraryDefinitionHelper($this->sdcManager, $this->sourceManager);
@@ -68,7 +68,7 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
       'test:six' => ['id' => 'test:six', 'machineName' => 'six', 'name' => '(Six)', 'provider' => 'test', 'category' => 'Test Category', 'template' => 'component.twig'],
     ];
 
-    $this->sdcManager->method('getSortedDefinitions')->willReturn($definitions);
+    $this->sdcManager->method('getNegotiatedSortedDefinitions')->willReturn($definitions);
 
     $sourceMock = $this->createMock(SourceWithChoicesInterface::class);
     $sourceMock->method('getChoiceSettings')->willReturn(['component' => ['props' => []]]);
@@ -114,7 +114,7 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
       'test:two' => ['id' => 'test:two', 'machineName' => 'two', 'name' => 'Two', 'provider' => 'test', 'category' => 'Test Category', 'template' => 'component.twig'],
     ];
 
-    $this->sdcManager->method('getSortedDefinitions')->willReturn($definitions);
+    $this->sdcManager->method('getNegotiatedSortedDefinitions')->willReturn($definitions);
 
     $sourceMock = $this->createMock(SourceWithChoicesInterface::class);
     $sourceMock->method('getChoiceSettings')->willReturn(['component' => ['props' => []]]);
@@ -144,7 +144,7 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
       'test:two' => ['id' => 'test:two', 'machineName' => 'two', 'name' => 'Two', 'provider' => 'test', 'category' => 'Test Category', 'template' => 'component.twig'],
     ];
 
-    $this->sdcManager->method('getSortedDefinitions')->willReturn($definitions);
+    $this->sdcManager->method('getNegotiatedSortedDefinitions')->willReturn($definitions);
 
     $sourceMock = $this->createMock(SourceWithChoicesInterface::class);
     $sourceMock->method('getChoiceSettings')->willReturn(['component' => ['props' => []]]);
@@ -178,7 +178,7 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
       'test:four' => ['id' => 'test:four', 'machineName' => 'four', 'name' => 'Four', 'provider' => 'test', 'category' => 'Test Category', 'template' => 'component.twig'],
     ];
 
-    $this->sdcManager->method('getSortedDefinitions')->willReturn($definitions);
+    $this->sdcManager->method('getNegotiatedSortedDefinitions')->willReturn($definitions);
 
     $sourceMock = $this->createMock(SourceWithChoicesInterface::class);
     $sourceMock->method('getChoiceSettings')->willReturn(['component' => ['props' => []]]);
@@ -229,7 +229,7 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
       ],
     ];
 
-    $this->sdcManager->method('getSortedDefinitions')->willReturn($definitions);
+    $this->sdcManager->method('getNegotiatedSortedDefinitions')->willReturn($definitions);
 
     $sourceMock = $this->createMock(SourceWithChoicesInterface::class);
     $sourceMock->method('getChoiceSettings')->willReturn(['component' => ['props' => []]]);

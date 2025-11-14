@@ -41,7 +41,9 @@ class ComponentLibraryDefinitionHelper {
    *    component ID.
    */
   public function getDefinitions(array $configuration): array {
-    $definitions = $this->sdcManager->getSortedDefinitions();
+    /** @var \Drupal\ui_patterns\ComponentPluginManager $uiPatternsSdcManager */
+    $uiPatternsSdcManager = $this->sdcManager;
+    $definitions = $uiPatternsSdcManager->getNegotiatedSortedDefinitions();
     $filtered = $grouped = $sources = [];
     $exclude_by_id = \preg_split('/\s+/', \trim($configuration['exclude_id'] ?? '')) ?: [];
     /** @var \Drupal\ui_patterns\SourceWithChoicesInterface $source */
