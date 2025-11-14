@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Controller\IntegrationControllerBase;
 use Drupal\display_builder\DisplayBuildableInterface;
@@ -26,6 +27,28 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  *   Controller classes are internal.
  */
 final class EntityViewOverridesController extends IntegrationControllerBase {
+
+  /**
+   * Provides a generic title callback for a display used in entities.
+   *
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match object.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The title for the display page.
+   */
+  public function title(RouteMatchInterface $route_match): TranslatableMarkup {
+    $entity_type = $route_match->getParameter('entity_type_id');
+    $entity = $route_match->getParameter($entity_type);
+    $param = [
+      '@title' => $entity->label(),
+      // view_mode_name route parameter is never supposed to be NULL but Drupal
+      // trigger a warning if we omit to check this.
+      '@view_mode_name' => $route_match->getParameter('view_mode_name') ?? '',
+    ];
+
+    return $this->t('Display builder for @title, @view_mode_name', $param);
+  }
 
   /**
    * Renders the Layout UI for override entities.

@@ -104,6 +104,7 @@ final class OverridesRoutes implements EventSubscriberInterface {
   private function buildSingleRoute(string $entity_type_id, string $path, string $controller, string $custom_access): Route {
     $defaults = [
       '_controller' => EntityViewOverridesController::class . '::' . $controller,
+      '_title_callback' => EntityViewOverridesController::class . '::title',
       'entity_type_id' => $entity_type_id,
     ];
     $requirements = [
