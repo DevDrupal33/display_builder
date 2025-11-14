@@ -207,6 +207,14 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
       }
     }
 
+    if (($data['source']['plugin_id'] ?? '') === 'system_messages_block') {
+      // system_messages_block is never empty, but often invisible.
+      // See: core/modules/system/src/Plugin/Block/SystemMessagesBlock.php
+      // See: core/lib/Drupal/Core/Render/Element/StatusMessages.php
+      // Let's always display it in a placeholder.
+      $is_empty = TRUE;
+    }
+
     $label_info = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
 
     if (isset($data['source_id'])) {

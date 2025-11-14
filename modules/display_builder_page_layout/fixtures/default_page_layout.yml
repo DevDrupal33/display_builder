@@ -1,26 +1,31 @@
 - source_id: block
   source:
     plugin_id: system_branding_block
+- source_id: block
+  source:
+    plugin_id: 'system_menu_block:main'
+- source_id: block
+  source:
+    plugin_id: 'system_menu_block:account'
+- source_id: block
+  source:
+    plugin_id: system_breadcrumb_block
 - source_id: page_title
   source: {}
 - source_id: block
   source:
-    plugin_id: "system_menu_block:main"
+    plugin_id: system_messages_block
 - source_id: block
   source:
-    plugin_id: "system_menu_block:account"
+    plugin_id: local_tasks_block
 - source_id: block
   source:
-    plugin_id: system_breadcrumb_block
-- source_id: local_tasks
-  source: {}
-- source_id: local_actions
-  source: {}
+    plugin_id: local_actions_block
 - source_id: main_page_content
   source: {}
 - source_id: block
   source:
-    plugin_id: "system_menu_block:footer"
+    plugin_id: 'system_menu_block:footer'
 - source_id: block
   source:
     plugin_id: system_powered_by_block

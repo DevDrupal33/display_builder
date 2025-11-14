@@ -14,8 +14,6 @@ use Drupal\Core\Url;
 class BlockLibrarySourceHelper {
 
   private const HIDE_BLOCK = [
-    'help_block',
-    'system_messages_block',
     'htmx_loader',
     'broken',
     'system_main_block',

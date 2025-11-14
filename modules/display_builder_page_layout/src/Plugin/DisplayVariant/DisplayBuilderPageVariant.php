@@ -149,16 +149,9 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
     $cache->addCacheTags($page_layout->getCacheTags());
 
     $build = [
-      'content' => [
-        'status_messages' => [
-          '#type' => 'status_messages',
-          '#weight' => -1000,
-          '#include_fallback' => TRUE,
-        ],
-        'display_builder_content' => [
-          'data' => $data,
-          '#weight' => -800,
-        ],
+      'display_builder_content' => [
+        'data' => $data,
+        '#weight' => -800,
       ],
     ];
     $cache->applyTo($build);

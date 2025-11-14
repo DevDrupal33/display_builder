@@ -133,10 +133,12 @@ sources:
                                             slots:
                                               slot_1:
                                                 sources:
-                                                  - source_id: local_tasks
-                                                    source: {}
-                                                  - source_id: local_actions
-                                                    source: {}
+                                                  - source_id: block
+                                                    source:
+                                                      plugin_id: local_tasks_block
+                                                  - source_id: block
+                                                    source:
+                                                      plugin_id: local_actions_block
                                                   - source_id: main_page_content
                                                     source: {}
                                       - source_id: component
