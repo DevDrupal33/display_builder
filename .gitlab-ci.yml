@@ -293,6 +293,5 @@ playwright (min):
   extends: .playwright-base
   allow_failure: false
   variables:
-    PLAYWRIGHT_DEBUG_LEVEL: verbose
     PLAYWRIGHT_TEST_PROJECT: firefox
     PLAYWRIGHT_TEST_TAG: display_builder_min
