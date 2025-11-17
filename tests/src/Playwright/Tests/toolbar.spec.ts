@@ -93,7 +93,7 @@ test('Toolbar buttons', { tag: ['@display_builder_dev_tools'] }, async ({ page, 
     await expect(builderToken).toHaveCount(2)
     await expect(undo).toBeVisible()
     await expect(redo).toBeVisible()
-    await expect(clear).not.toBeVisible()
+    await expect(clear).toBeVisible()
   })
 
   // This is helping next tests.
@@ -254,7 +254,7 @@ test('Toolbar keyboard', { tag: ['@display_builder_dev_tools'] }, async ({ page,
     await expect(builderToken).toHaveCount(3)
     await expect(page.locator('[data-island-action="undo"]')).toBeVisible()
     await expect(page.locator('[data-island-action="redo"]')).toBeVisible()
-    await expect(page.locator('[data-island-action="clear"]')).not.toBeVisible()
+    await expect(page.locator('[data-island-action="clear"]')).toBeVisible()
   })
 
   // This is helping next tests.
