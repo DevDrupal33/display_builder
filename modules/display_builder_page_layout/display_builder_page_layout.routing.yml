@@ -43,3 +43,14 @@ entity.page_layout.delete_form:
     _title: 'Delete a page layout'
   requirements:
     _permission: 'administer page_layout'
+# Defines a new route for duplicating an existing page layout.  
+# This route directs to the 'duplicate' method in the PageLayoutController class,
+# which handles the duplication logic and displays the entity form for the new,
+# duplicated page layout.
+entity.page_layout.duplicate_form:
+  path: '/admin/structure/page-layout/{page_layout}/duplicate'
+  defaults:
+    _controller: '\Drupal\display_builder_page_layout\Controller\PageLayoutController::duplicate'
+    _title: 'Duplicate page layout'
+  requirements:
+    _permission: 'administer page_layout'
