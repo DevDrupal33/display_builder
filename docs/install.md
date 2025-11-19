@@ -52,22 +52,6 @@ It's recommended to ease this step using [Composer patches Plugin](https://githu
 }
 ```
 
-## Configuration steps
-
-Before enabling `display_builder`, you **MUST**:
-
-- Disable JavaScript files aggregation to avoid issues with the _[Entity] ➜ [Field]_ context switcher in entity view displays
-- Activate your component-based theme as the default front theme (to allow some temporary demo fixtures to be loaded)
-
-With command-line:
-
-```shell
-drush -y config-set system.performance js.preprocess 0
-drush theme:enable my_theme
-drush -y config-set system.theme default my_theme
-drush -y en display_builder
-```
-
 Install as you would normally install a contributed Drupal module.
 See: [Installing Modules](https://www.drupal.org/docs/extending-drupal/installing-modules) for further information.
 
