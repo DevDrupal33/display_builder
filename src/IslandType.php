@@ -50,6 +50,10 @@ enum IslandType: string {
         'sidebar' => new TranslatableMarkup('Sidebar'),
         'main' => new TranslatableMarkup('Main area (Tabs)'),
       ],
+      self::Button->value => [
+        'start' => new TranslatableMarkup('Start'),
+        'end' => new TranslatableMarkup('End'),
+      ],
       default => [],
     };
   }

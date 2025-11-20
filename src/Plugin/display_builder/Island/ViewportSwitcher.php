@@ -26,6 +26,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   description: new TranslatableMarkup('Change main region width according to breakpoints.'),
   type: IslandType::Button,
   modules: ['breakpoint'],
+  default_region: 'end',
 )]
 class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFormInterface {
 

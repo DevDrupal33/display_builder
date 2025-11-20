@@ -20,6 +20,7 @@ use Drupal\display_builder\IslandType;
   label: new TranslatableMarkup('Back'),
   description: new TranslatableMarkup('Exit the display builder and go back to admin UI.'),
   type: IslandType::Button,
+  default_region: 'end',
 )]
 class BackButton extends IslandPluginToolbarButtonConfigurationBase {
 
