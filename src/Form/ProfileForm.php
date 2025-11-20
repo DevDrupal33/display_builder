@@ -294,6 +294,7 @@ final class ProfileForm extends EntityForm {
     ];
 
     $regions = IslandType::regions($type);
+
     if (!empty($regions)) {
       $row['region'] = [
         '#type' => 'radios',

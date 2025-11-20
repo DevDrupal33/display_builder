@@ -144,7 +144,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   The builder instance.
    * @param \Drupal\display_builder\IslandInterface[] $buttonIslands
-   *   The button islands
+   *   The button islands.
    * @param string $region
    *   The button region.
    *
@@ -153,17 +153,21 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    */
   private function buildButtons(InstanceInterface $builder, array $buttonIslands, string $region = 'end'): array {
     $islands = [];
+
     foreach ($buttonIslands as $island) {
       $islandRegion = $island->getConfiguration()['region'] ?? 'end';
-      if ($islandRegion == $region) {
+
+      if ($islandRegion === $region) {
         $islands[] = $island;
       }
     }
 
     $buttons = [];
+
     if (!empty($islands)) {
       $buttons = $this->buildPanes($builder, $islands, [], [], 'span');
     }
+
     return $buttons;
   }
 
