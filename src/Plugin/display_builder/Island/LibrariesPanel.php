@@ -19,6 +19,7 @@ use Drupal\display_builder\IslandType;
   label: new TranslatableMarkup('Libraries'),
   description: new TranslatableMarkup('Pick elements from libraries and drop them in the display.'),
   type: IslandType::View,
+  default_region: 'sidebar',
   icon: 'collection',
 )]
 class LibrariesPanel extends IslandPluginBase {

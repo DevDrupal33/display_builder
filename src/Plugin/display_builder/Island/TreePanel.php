@@ -19,6 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Tree'),
   description: new TranslatableMarkup('Hierarchical view of components and blocks.'),
   type: IslandType::View,
+  default_region: 'main',
   icon: 'bar-chart-steps',
 )]
 class TreePanel extends BuilderPanel {

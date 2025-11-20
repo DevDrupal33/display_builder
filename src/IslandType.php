@@ -38,27 +38,20 @@ enum IslandType: string {
     };
   }
 
-}
-
-/**
- * List the island sub types for IslandType::View.
- */
-enum IslandTypeViewDisplay: string {
-
-  case Sidebar = 'sidebar';
-  case Main = 'main';
-
   /**
-   * Get the type list regions.
+   * Get the available regions by type.
    *
    * @return array
-   *   The type list regions as key => description.
+   *   The type regions as key => description.
    */
-  public static function regions(): array {
-    return [
-      IslandTypeViewDisplay::Sidebar->value => new TranslatableMarkup('Sidebar'),
-      IslandTypeViewDisplay::Main->value => new TranslatableMarkup('Main area (Tabs)'),
-    ];
+  public static function regions(string $type): array {
+    return match ($type) {
+      self::View->value => [
+        'sidebar' => new TranslatableMarkup('Sidebar'),
+        'main' => new TranslatableMarkup('Main area (Tabs)'),
+      ],
+      default => [],
+    };
   }
 
 }

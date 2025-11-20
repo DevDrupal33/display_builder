@@ -16,7 +16,6 @@ use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\display_builder\Entity\Profile;
 use Drupal\display_builder\IslandInterface;
 use Drupal\display_builder\IslandType;
-use Drupal\display_builder\IslandTypeViewDisplay;
 use Drupal\display_builder\ProfileInterface;
 use Drupal\user\RoleInterface;
 
@@ -218,7 +217,7 @@ final class ProfileForm extends EntityForm {
         'status' => $this->t('Enabled'),
         'name' => $this->t('Island'),
         'summary' => $this->t('Configuration'),
-        'region' => ($type === IslandType::View->value) ? $this->t('Region') : '',
+        'region' => empty(IslandType::regions($type)) ? '' : $this->t('Region'),
         'actions' => $this->t('Actions'),
         'weight' => $this->t('Weight'),
       ],
@@ -294,21 +293,14 @@ final class ProfileForm extends EntityForm {
       '#markup' => \implode('<br>', $instance->configurationSummary()),
     ];
 
-    if ($type === IslandType::View->value) {
-      // If new, only library is on sidebar by default.
-      // @todo move this position option to Island configuration.
-      if ($id !== 'library' && !isset($configuration['region']) && isset($definition['enabled_by_default'])) {
-        $region = IslandTypeViewDisplay::Main->value;
-      }
-      else {
-        $region = $configuration['region'] ?? NULL;
-      }
+    $regions = IslandType::regions($type);
+    if (!empty($regions)) {
       $row['region'] = [
         '#type' => 'radios',
-        '#title' => $this->t('Display'),
+        '#title' => $this->t('Region'),
         '#title_display' => 'invisible',
-        '#options' => IslandTypeViewDisplay::regions(),
-        '#default_value' => $region,
+        '#options' => $regions,
+        '#default_value' => $configuration['region'] ?? $definition['default_region'] ?? NULL,
       ];
     }
     else {
