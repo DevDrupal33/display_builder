@@ -576,6 +576,11 @@ class Instance extends EntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function saveIsCurrent(): bool {
+    // If either present or save is null, they can't be equal unless both are
+    // null.
+    if ($this->present === NULL || $this->save === NULL) {
+      return $this->present === NULL && $this->save === NULL;
+    }
     return $this->present->hash === $this->save->hash;
   }
 
