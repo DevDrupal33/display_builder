@@ -6,6 +6,11 @@ include:
       - "/includes/include.drupalci.variables.yml"
       - "/includes/include.drupalci.workflows.yml"
 
+# @todo remove when 11.3 is stable in CI.
+composer:
+  variables:
+    DRUPAL_CORE: $CORE_NEXT_MINOR
+
 variables:
   # Needed to allow this to run locally.
   # https://project.pages.drupalcode.org/gitlab_templates/info/test-locally/
@@ -159,6 +164,8 @@ cspell:
 phpmd:
   extends: .phpmd-base
   rules:
+    - exists:
+      - web/modules/custom/display_builder/.phpmd.baseline.xml
     - *skip-phpmd-rule
     - !reference [.php-files-exist-rule]
     - *is-push-rule
@@ -166,18 +173,6 @@ phpmd:
     - *manual-rule
 
 ### Playwright tests in ci. ###
-
-# To match against Drupal 11.3
-# @todo remove when 11.3 is stable in CI.
-composer (D11.3):
-  extends: .composer-base
-  rules:
-    - when: always
-  variables:
-    PHP_VERSION: $CORE_PHP_NEXT
-    DRUPAL_CORE: $CORE_NEXT_MINOR
-    IGNORE_PROJECT_DRUPAL_CORE_VERSION: 1
-    MINIMUM_STABILITY_OVERRIDE: 'dev'
 
 # Basic Playwright rules.
 .skip-playwright-rule: &skip-playwright-rule
@@ -196,10 +191,6 @@ composer (D11.3):
   stage: test
   services:
     - !reference [.with-database]
-  needs:
-    # To match against Drupal 11.3
-    # @todo remove when 11.3 is stable in CI.
-    - composer (D11.3)
   # @todo have a full tests on all browsers on a release.
   # parallel: 3
   # parallel:

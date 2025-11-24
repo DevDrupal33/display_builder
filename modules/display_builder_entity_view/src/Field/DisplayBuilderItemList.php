@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_entity_view\Field;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Access\AccessResultInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\RevisionableEntityBundleInterface;
+use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\Core\Field\MapFieldItemList;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
@@ -35,6 +39,11 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
    * The entity type manager.
    */
   protected ?EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * The time service.
+   */
+  protected ?TimeInterface $time;
 
   /**
    * The loaded display builder instance.
@@ -175,7 +184,11 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
     foreach ($data as $offset => $item) {
       $this->list[$offset] = $this->createItem($offset, $item);
     }
-    $this->getEntity()->save();
+    $entity = $this->getEntity();
+    if ($entity instanceof ContentEntityInterface) {
+      $this->setRevision($entity);
+    }
+    $entity->save();
   }
 
   /**
@@ -250,6 +263,37 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
    */
   protected function entityTypeManager(): EntityTypeManagerInterface {
     return $this->entityTypeManager ??= \Drupal::service('entity_type.manager');
+  }
+
+  /**
+   * Get the time service.
+   *
+   * @return \Drupal\Component\Datetime\TimeInterface
+   *   The time service.
+   */
+  protected function time(): TimeInterface {
+    return $this->time ??= \Drupal::service('datetime.time');
+  }
+
+  /**
+   * Set revision if appropriate.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity to set revision if appropriate.
+   */
+  public function setRevision(ContentEntityInterface $entity): void {
+    $bundle = $entity->getBundleEntity();
+    if ($bundle instanceof RevisionableEntityBundleInterface
+      && !$bundle->shouldCreateNewRevision()
+    ) {
+      return;
+    }
+
+    $entity->setNewRevision();
+    if ($entity instanceof RevisionLogInterface) {
+      $entity->setRevisionLogMessage($this->t('Updated using Display Builder.')->render());
+      $entity->setRevisionCreationTime($this->time()->getCurrentTime());
+    }
   }
 
   /**
