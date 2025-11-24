@@ -516,6 +516,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     foreach ($data['_third_party_settings'] ?? [] as $provider => $settings) {
       $display_builder_instance->setThirdPartySettings($node_id, $provider, $settings ?? []);
     }
+    $display_builder_instance->save();
     $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(
@@ -562,6 +563,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       $display_builder_instance->setThirdPartySettings($node_id, $provider, $settings ?? []);
     }
 
+    $display_builder_instance->save();
     $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(
