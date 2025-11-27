@@ -161,7 +161,8 @@ class BlockLibrarySourceHelper {
    * @return string
    *   The group label for the choice.
    */
-  private static function getSourceGroupLabel(array $source_definition): string {
+  public static function getSourceGroupLabel(array $source_definition): string {
+    // Public for reuse by PresetLibraryPanel.
     $group = (string) new TranslatableMarkup('Others');
 
     $provider = $source_definition['provider'] ?? NULL;
@@ -211,7 +212,8 @@ class BlockLibrarySourceHelper {
    * @return string
    *   The group label for the choice.
    */
-  private static function getChoiceGroupLabel(array $choice, array $source_definition): string {
+  public static function getChoiceGroupLabel(array $choice, array $source_definition): string {
+    // Public for reuse by PresetLibraryPanel.
     $group = (string) new TranslatableMarkup('Others');
     $source_id = $source_definition['id'] ?? NULL;
 
@@ -250,7 +252,8 @@ class BlockLibrarySourceHelper {
    * @param array $categories
    *   The categories to sort, passed by reference.
    */
-  private static function sortGroupedChoices(array &$categories): void {
+  public static function sortGroupedChoices(array &$categories): void {
+    // Public for reuse by PresetLibraryPanel.
     $category_weight = [
       // Different builder contexts.
       (string) new TranslatableMarkup('Page') => 1,

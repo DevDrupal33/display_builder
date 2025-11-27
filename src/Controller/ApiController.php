@@ -18,7 +18,7 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\Plugin\display_builder\Island\ContextualFormPanel;
 use Drupal\display_builder\RenderableBuilderTrait;
-// For retrieving component definitions to support preset grouping
+// For retrieving component definitions to support preset grouping.
 use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -41,8 +41,9 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     protected SharedTempStoreFactory $sharedTempStoreFactory,
     protected SessionInterface $session,
     private IslandPluginManagerInterface $islandPluginManager,
-    private BareHtmlPageRendererInterface $bareHtmlPageRenderer,
-    // For retrieving component definitions to support preset grouping.
+    // Add ComponentPluginManager as a dependency to enable the retrieval
+    // of component definitions, which is needed for categorizing presets
+    // based on their group.
     private ComponentPluginManager $sdcManager,
   ) {
     parent::__construct($eventDispatcher, $renderer, $time, $sharedTempStoreFactory, $session);
@@ -355,9 +356,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     $group = '';
     // Determine the group for the preset based on the component's category.
-    // If the source is a component and has a component_id, its definition is retrieved.
-    // The component's category (from its definition) is then assigned to the $group variable,
-    // which is used as the preset's group, enabling better organization of presets in the library.
+    // If the source is a component and has a component_id, its definition
+    // is retrieved. The component's category (from its definition) is then
+    // assigned to the $group variable, which is used as the preset's group,
+    // enabling better organization of presets in the library.
     if (isset($data['source_id']) && $data['source_id'] === 'component' && isset($data['source']['component']['component_id'])) {
       $component_id = $data['source']['component']['component_id'];
       $definition = $this->sdcManager->getDefinition($component_id);
