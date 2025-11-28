@@ -12,9 +12,6 @@ services:
     class: Drupal\display_builder\SlotSourceProxy
     arguments:
       - '@plugin.manager.ui_patterns_source'
-      - '@entity.memory_cache'
-      - '@plugin.manager.ui_patterns_source'
-      - '@entity.memory_cache'
 
   display_builder.config_form_builder:
     class: Drupal\display_builder\ConfigFormBuilder
