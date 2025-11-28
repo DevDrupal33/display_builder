@@ -89,6 +89,13 @@ class Instance extends EntityBase implements InstanceInterface {
   protected array $future = [];
 
   /**
+   * Latest step.
+   *
+   * Update by setNewPresent(), never by undo/redo.
+   */
+  protected ?HistoryStep $latest = NULL;
+
+  /**
    * Contexts.
    *
    * @var \Drupal\Core\Plugin\Context\ContextInterface[]
@@ -153,6 +160,7 @@ class Instance extends EntityBase implements InstanceInterface {
       'present' => $this->present,
       'future' => $this->future,
       'save' => $this->save,
+      'latest' => $this->latest,
     ];
   }
 
@@ -422,7 +430,7 @@ class Instance extends EntityBase implements InstanceInterface {
    */
   public function setSave(array $save_data): void {
     $hash = self::getUniqId($save_data);
-    $this->save = new HistoryStep($save_data, $hash, NULL, \time(), NULL);
+    $this->save = new HistoryStep($save_data, $hash, NULL, \time(), NULL, NULL);
   }
 
   /**
@@ -625,13 +633,16 @@ class Instance extends EntityBase implements InstanceInterface {
     }
 
     // 2. Set the present to the new state.
+    $session = \Drupal::service('session');
     $this->present = new HistoryStep(
       $data,
       $hash,
       $log_message,
       \time(),
       (int) $this->currentUser()->id(),
+      $session->getId(),
     );
+    $this->latest = $this->present;
 
     // 3. Clear the future.
     $this->future = [];
@@ -644,6 +655,12 @@ class Instance extends EntityBase implements InstanceInterface {
    */
   public function getCurrent(): ?HistoryStep {
     return $this->present;
+  }
+  /**
+   * {@inheritdoc}
+   */
+  public function getLatest(): ?HistoryStep {
+    return $this->latest;
   }
 
   /**

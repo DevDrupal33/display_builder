@@ -59,12 +59,14 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
    */
   public function createFromImplementation(DisplayBuildableInterface $implementation): EntityInterface {
     $data = $implementation->getInitialSources();
+    $session = \Drupal::service('session');
     $present = new HistoryStep(
       $data,
       Instance::getUniqId($data),
       'Initialization of the display builder.',
       \time(),
       (int) $this->currentUser->id(),
+      $session->getId(),
     );
     $data = [
       'id' => $implementation->getInstanceId(),
