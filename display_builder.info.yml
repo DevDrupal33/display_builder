@@ -8,4 +8,3 @@ dependencies:
   - ui_patterns:ui_patterns_library
   - ui_skins:ui_skins
   - ui_styles:ui_styles
-  - htmx:htmx

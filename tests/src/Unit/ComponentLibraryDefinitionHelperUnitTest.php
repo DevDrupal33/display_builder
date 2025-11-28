@@ -6,9 +6,9 @@ namespace Drupal\Tests\display_builder\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Plugin\Component as ComponentPlugin;
-use Drupal\ui_patterns\ComponentPluginManager as UiPatternsComponentPluginManager;
 use Drupal\display_builder\ComponentLibraryDefinitionHelper;
 use Drupal\Tests\UnitTestCase;
+use Drupal\ui_patterns\ComponentPluginManager as UiPatternsComponentPluginManager;
 use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\ui_patterns\SourceWithChoicesInterface;
 use PHPUnit\Framework\Attributes\CoversClass;

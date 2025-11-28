@@ -211,4 +211,16 @@
       });
     },
   };
+
+  function triggerDrupalBehaviorsFromHtmxEvent(htmxLoadEvent) {
+    Drupal.attachBehaviors(
+      htmxLoadEvent.detail.elt?.parentElement.closest('.display-builder'),
+      drupalSettings,
+    );
+  }
+  window.addEventListener(
+    'htmx:oobAfterSwap',
+    triggerDrupalBehaviorsFromHtmxEvent,
+  );
+  window.addEventListener('htmx:load', triggerDrupalBehaviorsFromHtmxEvent);
 })(Drupal, once, FloatingUIDOM);

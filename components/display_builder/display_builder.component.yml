@@ -34,7 +34,7 @@ libraryOverrides:
     - display_builder/local-storage-manager
     - display_builder/preview
     - display_builder/search
-    - htmx/drupal
+    - core/drupal.htmx
     # Introduced by navigation module, internal but we can rely on it for now.
     - core/internal.floating-ui
     # Seems require to avoid a bug on ajax. see #3547315

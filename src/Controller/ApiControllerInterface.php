@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Controller;
 
-use Drupal\Core\Render\HtmlResponse;
 use Drupal\display_builder\InstanceInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -21,10 +20,10 @@ interface ApiControllerInterface {
    * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array
    */
-  public function attachToRoot(Request $request, InstanceInterface $display_builder_instance): HtmlResponse;
+  public function attachToRoot(Request $request, InstanceInterface $display_builder_instance): array;
 
   /**
    * Attach a component_id, a block_id, or an source, to a component slot.
@@ -38,10 +37,10 @@ interface ApiControllerInterface {
    * @param string $slot
    *   Slot.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array
    */
-  public function attachToSlot(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $slot): HtmlResponse;
+  public function attachToSlot(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $slot): array;
 
   /**
    * Open source's contextual islands.
@@ -68,10 +67,10 @@ interface ApiControllerInterface {
    * @param string $node_id
    *   Node ID of the source.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array
    */
-  public function update(Request $request, InstanceInterface $display_builder_instance, string $node_id): HtmlResponse;
+  public function update(Request $request, InstanceInterface $display_builder_instance, string $node_id): array;
 
   /**
    * Update source's 3rd party settings.
@@ -85,10 +84,10 @@ interface ApiControllerInterface {
    * @param string $island_id
    *   Island ID.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array
    */
-  public function thirdPartySettingsUpdate(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $island_id): HtmlResponse;
+  public function thirdPartySettingsUpdate(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $island_id): array;
 
   /**
    * Paste a source.
@@ -106,10 +105,10 @@ interface ApiControllerInterface {
    * @param string $slot_position
    *   Slot position.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array
    */
-  public function paste(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $parent_id, string $slot_id, string $slot_position): HtmlResponse;
+  public function paste(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $parent_id, string $slot_id, string $slot_position): array;
 
   /**
    * Delete a source.
@@ -121,10 +120,10 @@ interface ApiControllerInterface {
    * @param string $node_id
    *   Node ID of the source to delete.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array
    */
-  public function delete(Request $request, InstanceInterface $display_builder_instance, string $node_id): HtmlResponse;
+  public function delete(Request $request, InstanceInterface $display_builder_instance, string $node_id): array;
 
   /**
    * Save a source as preset.
@@ -136,10 +135,10 @@ interface ApiControllerInterface {
    * @param string $node_id
    *   Node ID of the source to save.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array
    */
-  public function saveAsPreset(Request $request, InstanceInterface $display_builder_instance, string $node_id): HtmlResponse;
+  public function saveAsPreset(Request $request, InstanceInterface $display_builder_instance, string $node_id): array;
 
   /**
    * Save display builder instance.
@@ -149,10 +148,10 @@ interface ApiControllerInterface {
    * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array
    */
-  public function save(Request $request, InstanceInterface $display_builder_instance): HtmlResponse;
+  public function save(Request $request, InstanceInterface $display_builder_instance): array;
 
   /**
    * Restore to last save.
@@ -162,10 +161,10 @@ interface ApiControllerInterface {
    * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array
    */
-  public function restore(Request $request, InstanceInterface $display_builder_instance): HtmlResponse;
+  public function restore(Request $request, InstanceInterface $display_builder_instance): array;
 
   /**
    * Revert entity override to default display.
@@ -175,10 +174,10 @@ interface ApiControllerInterface {
    * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array
    */
-  public function revert(Request $request, InstanceInterface $display_builder_instance): HtmlResponse;
+  public function revert(Request $request, InstanceInterface $display_builder_instance): array;
 
   /**
    * Move history to the last past state.
@@ -188,10 +187,10 @@ interface ApiControllerInterface {
    * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array
    */
-  public function undo(Request $request, InstanceInterface $display_builder_instance): HtmlResponse;
+  public function undo(Request $request, InstanceInterface $display_builder_instance): array;
 
   /**
    * Move history to the first future state.
@@ -201,10 +200,10 @@ interface ApiControllerInterface {
    * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array
    */
-  public function redo(Request $request, InstanceInterface $display_builder_instance): HtmlResponse;
+  public function redo(Request $request, InstanceInterface $display_builder_instance): array;
 
   /**
    * Clear history.
@@ -214,9 +213,9 @@ interface ApiControllerInterface {
    * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   Display builder instance.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array
    */
-  public function clear(Request $request, InstanceInterface $display_builder_instance): HtmlResponse;
+  public function clear(Request $request, InstanceInterface $display_builder_instance): array;
 
 }

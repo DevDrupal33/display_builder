@@ -10,8 +10,6 @@ use Drupal\Core\Form\FormAjaxException;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextInterface;
-use Drupal\Core\Render\BareHtmlPageRendererInterface;
-use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
@@ -41,7 +39,6 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     protected SharedTempStoreFactory $sharedTempStoreFactory,
     protected SessionInterface $session,
     private IslandPluginManagerInterface $islandPluginManager,
-    private BareHtmlPageRendererInterface $bareHtmlPageRenderer,
   ) {
     parent::__construct($eventDispatcher, $renderer, $time, $sharedTempStoreFactory, $session);
   }
@@ -49,7 +46,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function attachToRoot(Request $request, InstanceInterface $display_builder_instance): HtmlResponse {
+  public function attachToRoot(Request $request, InstanceInterface $display_builder_instance): array {
     $position = (int) $request->request->get('position', 0);
 
     if ($request->request->has('preset_id')) {
@@ -97,7 +94,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function attachToSlot(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $slot): HtmlResponse {
+  public function attachToSlot(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $slot): array {
     $parent_id = $node_id;
     $position = (int) $request->request->get('position', 0);
 
@@ -156,7 +153,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   public function get(Request $request, InstanceInterface $display_builder_instance, string $node_id): array {
     $this->builder = $display_builder_instance;
 
-    return $this->dispatchDisplayBuilderEventWithRenderApi(
+    return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_ACTIVE,
       $display_builder_instance->get($node_id),
     );
@@ -165,7 +162,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function update(Request $request, InstanceInterface $display_builder_instance, string $node_id): HtmlResponse {
+  public function update(Request $request, InstanceInterface $display_builder_instance, string $node_id): array {
     $this->builder = $display_builder_instance;
     $body = $request->getPayload()->all();
 
@@ -237,7 +234,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function thirdPartySettingsUpdate(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $island_id): HtmlResponse {
+  public function thirdPartySettingsUpdate(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $island_id): array {
     $body = $request->getPayload()->all();
 
     if (!isset($body['form_id'])) {
@@ -291,7 +288,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function paste(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $parent_id, string $slot_id, string $slot_position): HtmlResponse {
+  public function paste(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $parent_id, string $slot_id, string $slot_position): array {
     $this->builder = $display_builder_instance;
     $dataToCopy = $display_builder_instance->get($node_id);
 
@@ -328,12 +325,11 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function delete(Request $request, InstanceInterface $display_builder_instance, string $node_id): HtmlResponse {
+  public function delete(Request $request, InstanceInterface $display_builder_instance, string $node_id): array {
     $current = $display_builder_instance->getCurrentState();
     $parent_id = $display_builder_instance->getParentId($current, $node_id);
     $display_builder_instance->remove($node_id);
     $display_builder_instance->save();
-
     $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(
@@ -347,7 +343,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function saveAsPreset(Request $request, InstanceInterface $display_builder_instance, string $node_id): HtmlResponse {
+  public function saveAsPreset(Request $request, InstanceInterface $display_builder_instance, string $node_id): array {
     $label = (string) $this->t('New preset');
     $data = $display_builder_instance->get($node_id);
     self::cleanNodeId($data);
@@ -371,7 +367,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function save(Request $request, InstanceInterface $display_builder_instance): HtmlResponse {
+  public function save(Request $request, InstanceInterface $display_builder_instance): array {
     $display_builder_instance->setSave($display_builder_instance->getCurrentState());
     $display_builder_instance->save();
 
@@ -386,7 +382,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function restore(Request $request, InstanceInterface $display_builder_instance): HtmlResponse {
+  public function restore(Request $request, InstanceInterface $display_builder_instance): array {
     $display_builder_instance->restore();
     $display_builder_instance->save();
 
@@ -400,7 +396,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function revert(Request $request, InstanceInterface $display_builder_instance): HtmlResponse {
+  public function revert(Request $request, InstanceInterface $display_builder_instance): array {
     $instanceInfos = DisplayBuilderItemList::checkInstanceId((string) $display_builder_instance->id());
 
     if (isset($instanceInfos['entity_type_id'], $instanceInfos['entity_id'], $instanceInfos['field_name'])) {
@@ -451,7 +447,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function undo(Request $request, InstanceInterface $display_builder_instance): HtmlResponse {
+  public function undo(Request $request, InstanceInterface $display_builder_instance): array {
     $display_builder_instance->undo();
     $display_builder_instance->save();
 
@@ -463,7 +459,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function redo(Request $request, InstanceInterface $display_builder_instance): HtmlResponse {
+  public function redo(Request $request, InstanceInterface $display_builder_instance): array {
     $display_builder_instance->redo();
     $display_builder_instance->save();
 
@@ -475,7 +471,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function clear(Request $request, InstanceInterface $display_builder_instance): HtmlResponse {
+  public function clear(Request $request, InstanceInterface $display_builder_instance): array {
     $display_builder_instance->clear();
     $display_builder_instance->save();
 
@@ -496,10 +492,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * @param int $position
    *   Position.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array.
    */
-  protected function attachPresetToRoot(InstanceInterface $display_builder_instance, string $preset_id, int $position): HtmlResponse {
+  protected function attachPresetToRoot(InstanceInterface $display_builder_instance, string $preset_id, int $position): array {
     $presetStorage = $this->entityTypeManager()->getStorage('pattern_preset');
 
     /** @var \Drupal\display_builder\PatternPresetInterface $preset */
@@ -542,10 +538,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * @param int $position
    *   Position.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array.
    */
-  protected function attachPresetToSlot(InstanceInterface $display_builder_instance, string $preset_id, string $parent_id, string $slot, int $position): HtmlResponse {
+  protected function attachPresetToSlot(InstanceInterface $display_builder_instance, string $preset_id, string $parent_id, string $slot, int $position): array {
     $presetStorage = $this->entityTypeManager()->getStorage('pattern_preset');
 
     /** @var \Drupal\display_builder\PatternPresetInterface $preset */
@@ -585,36 +581,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * @param string|null $parent_id
    *   Optional parent ID.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The HTML response.
+   * @return array
+   *   A renderable array.
    */
   protected function dispatchDisplayBuilderEvent(
-    string $event_id,
-    ?array $data = NULL,
-    ?string $node_id = NULL,
-    ?string $parent_id = NULL,
-  ): HtmlResponse {
-    $result = $this->dispatchDisplayBuilderEventWithRenderApi($event_id, $data, $node_id, $parent_id);
-
-    return $this->bareHtmlPageRenderer->renderBarePage($result, '', 'markup');
-  }
-
-  /**
-   * Dispatches a display builder event with render API.
-   *
-   * @param string $event_id
-   *   The event ID.
-   * @param array|null $data
-   *   The data.
-   * @param string|null $node_id
-   *   Optional instance ID.
-   * @param string|null $parent_id
-   *   Optional parent ID.
-   *
-   * @return array
-   *   The render array result of the event.
-   */
-  protected function dispatchDisplayBuilderEventWithRenderApi(
     string $event_id,
     ?array $data = NULL,
     ?string $node_id = NULL,
@@ -694,21 +664,15 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * @param array $debug
    *   The debug code.
    *
-   * @return \Drupal\Core\Render\HtmlResponse
-   *   The response with the component.
+   * @return array
+   *   A renderable array.
    */
   private function responseMessageError(
     string $display_builder_instance_id,
     string|TranslatableMarkup $message,
     array $debug,
-  ): HtmlResponse {
-    $build = $this->buildError($display_builder_instance_id, $message, \print_r($debug, TRUE), NULL, TRUE);
-
-    $html = $this->renderer->renderInIsolation($build);
-    $response = new HtmlResponse();
-    $response->setContent($html);
-
-    return $response;
+  ): array {
+    return $this->buildError($display_builder_instance_id, $message, \print_r($debug, TRUE), NULL, TRUE);
   }
 
   /**
