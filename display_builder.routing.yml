@@ -188,6 +188,7 @@ display_builder.api_clear:
   methods: [POST]
   defaults:
     _controller: '\Drupal\display_builder\Controller\ApiController::clear'
+  requirements:
     _entity_access: 'display_builder_instance.update'
   options:
     _htmx_route: true

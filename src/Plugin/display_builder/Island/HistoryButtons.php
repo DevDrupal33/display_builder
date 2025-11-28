@@ -97,19 +97,16 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
         'title' => $this->t('Undo'),
         'description' => $this->t('Undo action, icon is always visible, label is number of undo.'),
         'default' => 'icon_label',
-        'remove' => 'icon',
       ],
       'redo' => [
         'title' => $this->t('Redo'),
         'description' => $this->t('Redo action, icon is always visible, label is number of redo.'),
         'default' => 'icon_label',
-        'remove' => 'icon',
       ],
       'clear' => [
         'title' => $this->t('Clear'),
         'description' => $this->t('A button to clear the logs history (past and future).'),
         'default' => 'hidden',
-        'remove' => 'icon',
       ],
     ];
   }

@@ -46,9 +46,6 @@ abstract class IslandPluginToolbarButtonConfigurationBase extends IslandPluginBa
     ];
 
     foreach ($this->hasButtons() as $button_id => $button) {
-      if (isset($button['remove'])) {
-        unset($options[$button['remove']]);
-      }
       $default_value = $configuration[$button_id][self::KEY_VALUE] ?? $button['default'] ?? 'hidden';
       $form[$button_id][self::KEY_VALUE] = [
         '#type' => 'select',
