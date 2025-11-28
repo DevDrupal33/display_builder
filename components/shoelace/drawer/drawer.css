@@ -9,12 +9,12 @@
 
   /* Reduce the header as we don't have labels, only close button. */
   &::part(title) {
-    padding: 0.5rem 1rem;
+    padding: var(--admin-toolbar-space-16, 16px);
   }
   &::part(body) {
     padding-top: 0;
-    padding-right: 0.5rem;
-    padding-left: 0.5rem;
+    padding-right: var(--admin-toolbar-space-16, 16px);
+    padding-left: var(--admin-toolbar-space-16, 16px);
   }
   &::part(base) {
     position: fixed;

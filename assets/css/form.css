@@ -56,8 +56,20 @@
     margin-bottom: 0.25rem;
   }
 
+  .form-label {
+    margin-bottom: var(--admin-toolbar-space-8, 8px);
+  }
+
+  label[data-drupal-selector] {
+    display: none;
+  }
+
   .form-item {
-    margin-bottom: 0.25rem !important;
+    margin: var(--admin-toolbar-space-16, 16px) 0;
+  }
+
+  details > .form-item {
+    margin: var(--admin-toolbar-space-8, 8px);
   }
 
   /* Hide the last weight field on ui pattern form */
@@ -67,8 +79,8 @@
 
   /* Global details styling. */
   details {
-    margin-bottom: 0.25rem;
-    padding: 0.125rem 0.25rem 0.125rem 0.25rem;
+    margin-bottom: var(--admin-toolbar-space-8, 8px);
+    padding: var(--admin-toolbar-space-4, 4px);
     border: 1px solid var(--sl-input-border-color);
     border-radius: var(--sl-input-border-radius-medium);
     box-shadow: var(--sl-shadow-small);
@@ -114,8 +126,8 @@
       line-height: 1.2rem;
 
       /* Positions the lines */
-      inset-block-start: 50%;
-      inset-inline-end: 0;
+      inset-block-start: 36%;
+      inset-inline-end: 4px;
       position-anchor: --summary;
 
       /* Some reset to avoid conflict */

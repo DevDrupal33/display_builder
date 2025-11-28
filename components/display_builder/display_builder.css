@@ -1,7 +1,6 @@
 :root {
   --db-background-color: var(--sl-color-neutral-0);
   --db-text-color: var(--sl-color-neutral-1000);
-  --db-background-image: repeating-linear-gradient(45deg, oklch(100% 0 0), oklch(100% 0 0) 13px, var(--sl-color-neutral-100) 13px, var(--sl-color-neutral-100) 14px);
   --db-background-size: 40px 40px;
   --db-toolbar-height: 72px;
   --db-z-index: 401;
@@ -11,13 +10,14 @@
   --db-table-header-color: var(--sl-color-neutral-900);
   --db-table-row-hover: var(--sl-color-neutral-200);
   --sl-tooltip-arrow-size: 0;
+  /* Design tokens mapping between Drupal and Shoelace */
+  --sl-font-sans: var(--admin-toolbar-font-family);
 }
 
 /* Dark mode overrides using .sl-theme-dark class */
 .display-builder.sl-theme-dark {
   --db-background-color: var(--sl-color-neutral-1000);
   --db-text-color: var(--sl-color-neutral-0);
-  --db-background-image: repeating-linear-gradient(45deg, oklch(20% 0 0), oklch(20% 0 0) 13px, var(--sl-color-neutral-50) 13px, var(--sl-color-neutral-50) 14px);
   --db-table-bg: var(--sl-color-neutral-50);
   --db-table-border: var(--sl-color-neutral-200);
   --db-table-header-bg: var(--sl-color-neutral-100);
@@ -55,7 +55,6 @@
 }
 
 body:has(.display-builder) .dialog-off-canvas-main-canvas {
-  /* margin-inline-start: var(--db-body-margin-left, 0); */
   margin-inline-start: var(--drupal-displace-offset-left, 0);
 }
 
@@ -108,7 +107,6 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
   .db-background,
   .db-background::part(panel),
   .db-background.shoelace-button::part(base) {
-    background-image: var(--db-background-image);
     background-size: var(--db-background-size);
     box-shadow: var(--sl-shadow-medium);
   }

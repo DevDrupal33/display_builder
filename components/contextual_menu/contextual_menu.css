@@ -30,3 +30,9 @@
     font-size: 0.8rem;
   }
 }
+
+/* Shoelace menu items are HTML checkboxes. Some themes are styling checkboxes a bit aggressively. */
+sl-menu-item[type="checkbox"] {
+  width: auto;
+  height: auto;
+}
