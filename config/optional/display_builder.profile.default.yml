@@ -10,7 +10,7 @@ islands:
     exclude: {}
     exclude_id: ''
     component_status:
-      experimental: experimental
+      experimental: '0'
       deprecated: '0'
       obsolete: '0'
     include_no_ui: false
