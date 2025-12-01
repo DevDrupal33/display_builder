@@ -201,6 +201,12 @@ class PresetLibraryPanel extends IslandPluginBase {
   /**
    * Get the group for a preset.
    *
+   * This method checks the type of preset in order to determine the relevant
+   * method for finding the group name: SDC / Drupal Block / Other Sources.
+   *
+   * A final fallback to 'Others' is applied here if any delegated method
+   * returns an empty string.
+   *
    * @param \Drupal\display_builder\PatternPresetInterface $preset
    *   The preset entity.
    *
@@ -210,61 +216,122 @@ class PresetLibraryPanel extends IslandPluginBase {
   protected function getPresetGroup(PatternPresetInterface $preset): string {
     $sources = $preset->getSources();
     $source_id = $sources['source_id'] ?? NULL;
-    $group_name = $preset->getGroup();
+    $group_name = '';
 
-    // If it's a block preset (source_id is 'block').
-    if ($source_id === 'block') {
-      $plugin_id = $sources['source']['plugin_id'] ?? '';
-      // Default category to 'Others' (plural).
-      $category = (string) $this->t('Others');
-
-      if ($this->sourceManager->hasDefinition($source_id)) {
-        $source_definition = $this->sourceManager->getDefinition($source_id);
-
-        // For standard Drupal blocks, prioritize the category from
-        // the Block Manager's definition if available.
-        if ($plugin_id) {
-          try {
-            $block_definition = $this->blockManager->getDefinition($plugin_id);
-            $block_manager_category = (string) ($block_definition['category'] ?? $this->t('Others'));
-            if ($block_manager_category !== (string) $this->t('Others')) {
-              $category = $block_manager_category;
-            }
-          }
-          catch (\Exception $e) {
-            // Block definition might be missing, fall back to other methods.
-          }
-        }
-
-        // If category is still generic,
-        // try BlockLibrarySourceHelper's choice-based logic.
-        // (e.g., for entity_reference, entity_field sources).
-        if ($category === (string) $this->t('Others')) {
-          $choice = [
-            'original_id' => $plugin_id,
-
-          ];
-          $choice_category = BlockLibrarySourceHelper::getChoiceGroupLabel($choice, $source_definition);
-          if ($choice_category !== (string) $this->t('Others')) {
-            $category = $choice_category;
-          }
-        }
-
-        // If category is still generic, try
-        // BlockLibrarySourceHelper's source-provider-based logic
-        // (e.g., for 'ui_patterns' sources -> 'Utilities').
-        if ($category === (string) $this->t('Others')) {
-          $source_provider_category = BlockLibrarySourceHelper::getSourceGroupLabel($source_definition);
-          if ($source_provider_category !== (string) $this->t('Others')) {
-            $category = $source_provider_category;
-          }
-        }
-      }
-      return $category;
+    if ($source_id === 'component') {
+      $group_name = $this->getComponentPresetGroup($preset);
+    }
+    elseif ($source_id === 'block') {
+      $group_name = $this->getBlockPresetGroup($sources, $source_id);
+    }
+    else {
+      $group_name = $this->getOtherSourcePresetGroup($preset);
     }
 
-    // Standardize default group name to 'Others' (plural).
-    return (string) ($group_name ?: $this->t('Others'));
+    return $group_name ?: (string) $this->t('Others');
+  }
+
+  /**
+   * Get the group for a component preset.
+   *
+   * Target: SDC.
+   * Logic: Retrieve the group name directly from the preset entity,
+   * which for SDC comes from its YAML definition.
+   *
+   * @param \Drupal\display_builder\PatternPresetInterface $preset
+   *   The preset entity.
+   *
+   * @return string
+   *   The group name.
+   */
+  protected function getComponentPresetGroup(PatternPresetInterface $preset): string {
+    return (string) $preset->getGroup();
+  }
+
+  /**
+   * Get the group for a block preset.
+   *
+   * Target: Drupal Blocks in the formal sense (source_id='block').
+   * Uses BlockManager to get the block plugin's 'category' from the
+   * plugin definition (e.g., "System" for the Breadcrumbs block).
+   *
+   * @param array $sources
+   *   The sources array from the preset.
+   * @param string $source_id
+   *   The source ID, which is 'block'.
+   *
+   * @return string
+   *   The group name for the block preset.
+   */
+  protected function getBlockPresetGroup(array $sources, string $source_id): string {
+    $plugin_id = $sources['source']['plugin_id'] ?? '';
+    $group_name = '';
+
+    if (!$this->sourceManager->hasDefinition($source_id)) {
+      return $group_name;
+    }
+
+    if ($plugin_id) {
+      try {
+        $block_definition = $this->blockManager->getDefinition($plugin_id);
+        $block_manager_group_name = (string) ($block_definition['category'] ?? '');
+        if (!empty($block_manager_group_name) && $block_manager_group_name !== (string) $this->t('Others')) {
+          $group_name = $block_manager_group_name;
+        }
+      }
+      // If Block Manager fails to provide a category.
+      catch (\Exception $e) {
+        // The group_name remains empty, triggering the default 'Others'
+        // fallback in the main getPresetGroup dispatcher.
+      }
+    }
+
+    return $group_name;
+  }
+
+  /**
+   * Get the group for other sources.
+   *
+   * Target: Items under Blocks in the Display Builder UI but are not blocks in
+   * the technical sense, i.e. not 'source_id=block'.
+   * BlockLibrarySourceHelper's getChoiceGroupLabel and getSourceGroupLabel
+   * are used in BlockLibraryPanel.php.
+   *
+   * @param \Drupal\display_builder\PatternPresetInterface $preset
+   *   The preset entity.
+   *
+   * @return string
+   *   The group name.
+   */
+  protected function getOtherSourcePresetGroup(PatternPresetInterface $preset): string {
+    $group_name = $preset->getGroup();
+    if (!empty($group_name)) {
+      return (string) $group_name;
+    }
+
+    $sources = $preset->getSources();
+    $source_id = $sources['source_id'] ?? NULL;
+
+    if ($source_id && $this->sourceManager->hasDefinition($source_id)) {
+      $source_definition = $this->sourceManager->getDefinition($source_id);
+
+      // Try BlockLibrarySourceHelper's choice-based logic.
+      // group is constructed from source_id e.g for source_id
+      // entity_reference, the group_name might be "Referenced Entities".
+      $choice_group = BlockLibrarySourceHelper::getChoiceGroupLabel([], $source_definition);
+      if ($choice_group !== (string) $this->t('Others')) {
+        return $choice_group;
+      }
+
+      // Try getting the group_name from the source provider
+      // e.g. for the provider ui_patterns, the group_name might be "Utilities".
+      $source_provider_group = BlockLibrarySourceHelper::getSourceGroupLabel($source_definition);
+      if ($source_provider_group !== (string) $this->t('Others')) {
+        return $source_provider_group;
+      }
+    }
+
+    return '';
   }
 
 }
