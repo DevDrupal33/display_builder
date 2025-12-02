@@ -61,7 +61,10 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         ],
       ],
       '#cache' => [
-        'tags' => $builder->getCacheTags(),
+        'tags' => \array_merge(
+          $builder->getCacheTags(),
+          $entity->getCacheTags()
+        ),
       ],
     ];
 

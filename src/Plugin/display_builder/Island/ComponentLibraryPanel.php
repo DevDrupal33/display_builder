@@ -306,7 +306,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
       '#type' => 'component',
       '#component' => 'display_builder:library_panel',
       '#slots' => [
-        'tabs' => $this->buildTabs('db-' . $builder_id . '-components-tabs', $tabs),
+        'tabs' => (\count($panes) > 1) ? $this->buildTabs('db-' . $builder_id . '-components-tabs', $tabs) : [],
         'content' => $content,
       ],
     ];

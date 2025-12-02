@@ -18,7 +18,7 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[CoversClass(Instance::class)]
 #[Group('display_builder')]
-class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
+final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -48,11 +48,11 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $instance = $this->createDisplayBuilderInstance();
 
     // Test initial state.
-    $this->assertNull($instance->getCurrent());
-    $this->assertEmpty($instance->getCurrentState());
-    $this->assertEquals(0, $instance->getCountPast());
-    $this->assertEquals(0, $instance->getCountFuture());
-    $this->assertFalse($instance->hasSave());
+    self::assertNull($instance->getCurrent());
+    self::assertEmpty($instance->getCurrentState());
+    self::assertEquals(0, $instance->getCountPast());
+    self::assertEquals(0, $instance->getCountFuture());
+    self::assertFalse($instance->hasSave());
   }
 
   /**
@@ -67,17 +67,17 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Verify state is set.
     $current = $instance->getCurrent();
-    $this->assertInstanceOf(HistoryStep::class, $current);
-    $this->assertEquals($testData, $current->data);
-    $this->assertEquals('Initial state', $current->log);
-    $this->assertIsInt($current->hash);
-    $this->assertIsInt($current->time);
-    $this->assertGreaterThanOrEqual(0, $current->user);
+    self::assertInstanceOf(HistoryStep::class, $current);
+    self::assertEquals($testData, $current->data);
+    self::assertEquals('Initial state', $current->log);
+    self::assertIsInt($current->hash);
+    self::assertIsInt($current->time);
+    self::assertGreaterThanOrEqual(0, $current->user);
 
     // Verify current state.
-    $this->assertEquals($testData, $instance->getCurrentState());
-    $this->assertEquals(1, $instance->getCountPast());
-    $this->assertEquals(0, $instance->getCountFuture());
+    self::assertEquals($testData, $instance->getCurrentState());
+    self::assertEquals(1, $instance->getCountPast());
+    self::assertEquals(0, $instance->getCountFuture());
   }
 
   /**
@@ -93,12 +93,12 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Try to set same data again - should be ignored due to hash check.
     $instance->setNewPresent($testData, 'Duplicate state', TRUE);
-    $this->assertEquals($initialPastCount, $instance->getCountPast(), 'Duplicate state should be ignored');
+    self::assertEquals($initialPastCount, $instance->getCountPast(), 'Duplicate state should be ignored');
 
     // Set different data - should be added.
     $differentData = ['component' => ['id' => 'different_component']];
     $instance->setNewPresent($differentData, 'Different state', TRUE);
-    $this->assertGreaterThan($initialPastCount, $instance->getCountPast(), 'Different state should be added');
+    self::assertGreaterThan($initialPastCount, $instance->getCountPast(), 'Different state should be added');
   }
 
   /**
@@ -114,7 +114,7 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Try to set same data again with check_hash disabled - should be added.
     $instance->setNewPresent($testData, 'Duplicate state', FALSE);
-    $this->assertGreaterThan($initialPastCount, $instance->getCountPast(), 'Duplicate state should be added when hash check is disabled');
+    self::assertGreaterThan($initialPastCount, $instance->getCountPast(), 'Duplicate state should be added when hash check is disabled');
   }
 
   /**
@@ -133,32 +133,32 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $instance->setNewPresent($state3, 'State 3');
 
     // Verify we're at state 3.
-    $this->assertEquals($state3, $instance->getCurrentState());
-    $this->assertEquals(3, $instance->getCountPast());
-    $this->assertEquals(0, $instance->getCountFuture());
+    self::assertEquals($state3, $instance->getCurrentState());
+    self::assertEquals(3, $instance->getCountPast());
+    self::assertEquals(0, $instance->getCountFuture());
 
     // Undo once.
     $instance->undo();
-    $this->assertEquals($state2, $instance->getCurrentState());
-    $this->assertEquals(2, $instance->getCountPast());
-    $this->assertEquals(1, $instance->getCountFuture());
+    self::assertEquals($state2, $instance->getCurrentState());
+    self::assertEquals(2, $instance->getCountPast());
+    self::assertEquals(1, $instance->getCountFuture());
 
     // Undo again.
     $instance->undo();
-    $this->assertEquals($state1, $instance->getCurrentState());
-    $this->assertEquals(1, $instance->getCountPast());
-    $this->assertEquals(2, $instance->getCountFuture());
+    self::assertEquals($state1, $instance->getCurrentState());
+    self::assertEquals(1, $instance->getCountPast());
+    self::assertEquals(2, $instance->getCountFuture());
 
     // Undo to beginning.
     $instance->undo();
-    $this->assertNull($instance->getCurrent());
-    $this->assertEmpty($instance->getCurrentState());
-    $this->assertEquals(0, $instance->getCountPast());
-    $this->assertEquals(3, $instance->getCountFuture());
+    self::assertNull($instance->getCurrent());
+    self::assertEmpty($instance->getCurrentState());
+    self::assertEquals(0, $instance->getCountPast());
+    self::assertEquals(3, $instance->getCountFuture());
 
     // Try to undo when at beginning.
     $instance->undo();
-    $this->assertNull($instance->getCurrent());
+    self::assertNull($instance->getCurrent());
   }
 
   /**
@@ -179,23 +179,23 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     // Undo to state 1.
     $instance->undo();
     $instance->undo();
-    $this->assertEquals($state1, $instance->getCurrentState());
+    self::assertEquals($state1, $instance->getCurrentState());
 
     // Redo once.
     $instance->redo();
-    $this->assertEquals($state2, $instance->getCurrentState());
-    $this->assertEquals(2, $instance->getCountPast());
-    $this->assertEquals(1, $instance->getCountFuture());
+    self::assertEquals($state2, $instance->getCurrentState());
+    self::assertEquals(2, $instance->getCountPast());
+    self::assertEquals(1, $instance->getCountFuture());
 
     // Redo again.
     $instance->redo();
-    $this->assertEquals($state3, $instance->getCurrentState());
-    $this->assertEquals(3, $instance->getCountPast());
-    $this->assertEquals(0, $instance->getCountFuture());
+    self::assertEquals($state3, $instance->getCurrentState());
+    self::assertEquals(3, $instance->getCountPast());
+    self::assertEquals(0, $instance->getCountFuture());
 
     // Try to redo when at end.
     $instance->redo();
-    $this->assertEquals($state3, $instance->getCurrentState());
+    self::assertEquals($state3, $instance->getCurrentState());
   }
 
   /**
@@ -215,18 +215,18 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $instance->undo();
 
     // Verify we have history.
-    $this->assertNotNull($instance->getCurrent());
-    $this->assertEquals(1, $instance->getCountPast());
-    $this->assertEquals(1, $instance->getCountFuture());
+    self::assertNotNull($instance->getCurrent());
+    self::assertEquals(1, $instance->getCountPast());
+    self::assertEquals(1, $instance->getCountFuture());
 
     // Clear history.
     $instance->clear();
 
     // Verify history is cleared but current state remains.
-    $this->assertNotNull($instance->getCurrent());
-    $this->assertEquals($state1, $instance->getCurrentState());
-    $this->assertEquals(0, $instance->getCountPast());
-    $this->assertEquals(0, $instance->getCountFuture());
+    self::assertNotNull($instance->getCurrent());
+    self::assertEquals($state1, $instance->getCurrentState());
+    self::assertEquals(0, $instance->getCountPast());
+    self::assertEquals(0, $instance->getCountFuture());
   }
 
   /**
@@ -236,18 +236,18 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $instance = $this->createDisplayBuilderInstance();
 
     // Create more states than MAX_HISTORY (10)
-    for ($i = 1; $i <= 15; $i++) {
+    for ($i = 1; $i <= 15; ++$i) {
       $state = ['component' => ['id' => 'state' . $i]];
-      $instance->setNewPresent($state, "State $i");
+      $instance->setNewPresent($state, "State {$i}");
     }
 
     // Should only keep last 10 states.
-    $this->assertEquals(10, $instance->getCountPast());
+    self::assertEquals(10, $instance->getCountPast());
 
     // Verify oldest states are removed (should not contain state1 or state2)
     // Since getPast() doesn't exist in HistoryInterface, we'll test this
     // indirectly by verifying the count limit is enforced.
-    $this->assertEquals(10, $instance->getCountPast());
+    self::assertEquals(10, $instance->getCountPast());
   }
 
   /**
@@ -258,20 +258,20 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $testData = ['component' => ['id' => 'test_component']];
 
     // Initially no save.
-    $this->assertFalse($instance->hasSave());
+    self::assertFalse($instance->hasSave());
 
     // Set save data.
     $instance->setSave($testData);
 
     // Verify save is set.
-    $this->assertTrue($instance->hasSave());
-    $this->assertNotNull($instance->save);
-    $this->assertInstanceOf(HistoryStep::class, $instance->save);
-    $this->assertEquals($testData, $instance->save->data);
-    $this->assertNull($instance->save->log);
-    $this->assertIsInt($instance->save->hash);
-    $this->assertIsInt($instance->save->time);
-    $this->assertNull($instance->save->user);
+    self::assertTrue($instance->hasSave());
+    self::assertNotNull($instance->save);
+    self::assertInstanceOf(HistoryStep::class, $instance->save);
+    self::assertEquals($testData, $instance->save->data);
+    self::assertNull($instance->save->log);
+    self::assertIsInt($instance->save->hash);
+    self::assertIsInt($instance->save->time);
+    self::assertNull($instance->save->user);
   }
 
   /**
@@ -287,12 +287,12 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Modify current state.
     $instance->setNewPresent($modifiedData, 'Modified state');
-    $this->assertEquals($modifiedData, $instance->getCurrentState());
+    self::assertEquals($modifiedData, $instance->getCurrentState());
 
     // Restore to save.
     $instance->restore();
-    $this->assertEquals($testData, $instance->getCurrentState());
-    $this->assertEquals('Back to saved data.', $instance->getCurrent()->log);
+    self::assertEquals($testData, $instance->getCurrentState());
+    self::assertEquals('Back to saved data.', $instance->getCurrent()->log);
   }
 
   /**
@@ -303,11 +303,11 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $testData = ['component' => ['id' => 'test_component']];
 
     // Initially Save match init, so is true.
-    $this->assertTrue($instance->saveIsCurrent());
+    self::assertTrue($instance->saveIsCurrent());
 
     // Set save data.
     $instance->setSave($testData);
-    $this->assertFalse($instance->saveIsCurrent());
+    self::assertFalse($instance->saveIsCurrent());
 
     // Modify state - should no longer be current.
     $modifiedData = ['component' => ['id' => 'modified_component']];
@@ -316,18 +316,18 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     // Note: There may be edge cases where saveIsCurrent returns unexpected
     // results.
     // The important thing is that restore() works correctly, which it does.
-    $this->assertFalse($instance->saveIsCurrent());
+    self::assertFalse($instance->saveIsCurrent());
 
     // Restore - should be current again.
     $instance->restore();
     // After restore, present should equal save, so saveIsCurrent() should be
     // true.
-    $this->assertTrue($instance->saveIsCurrent());
+    self::assertTrue($instance->saveIsCurrent());
 
     // Test edge case: when both present and save are null, should return true
     // This covers the null-safe operator behavior.
     $instance2 = $this->createDisplayBuilderInstance();
-    $this->assertTrue($instance2->saveIsCurrent());
+    self::assertTrue($instance2->saveIsCurrent());
   }
 
   /**
@@ -354,15 +354,15 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Test get users.
     $users = $instance->getUsers();
-    $this->assertArrayHasKey(1, $users);
-    $this->assertArrayHasKey(2, $users);
-    $this->assertArrayHasKey(3, $users);
-    $this->assertCount(3, $users);
+    self::assertArrayHasKey(1, $users);
+    self::assertArrayHasKey(2, $users);
+    self::assertArrayHasKey(3, $users);
+    self::assertCount(3, $users);
 
     // Verify timestamps are set.
     foreach ($users as $timestamp) {
-      $this->assertGreaterThan(0, $timestamp);
-      $this->assertIsInt($timestamp);
+      self::assertGreaterThan(0, $timestamp);
+      self::assertIsInt($timestamp);
     }
   }
 
@@ -378,15 +378,15 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     // Test that identical data produces same hash.
     $hash1 = Instance::getUniqId($data1);
     $hash3 = Instance::getUniqId($data3);
-    $this->assertEquals($hash1, $hash3);
+    self::assertEquals($hash1, $hash3);
 
     // Test that different data produces different hash.
     $hash2 = Instance::getUniqId($data2);
-    $this->assertNotEquals($hash1, $hash2);
+    self::assertNotEquals($hash1, $hash2);
 
     // Test that hash is an integer.
-    $this->assertIsInt($hash1);
-    $this->assertIsInt($hash2);
+    self::assertIsInt($hash1);
+    self::assertIsInt($hash2);
   }
 
   /**
@@ -397,7 +397,7 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Set initial present state.
     $testData = ['component' => ['id' => 'test_component']];
-    $instance->present = new HistoryStep($testData, 123, 'Test', time(), 1);
+    $instance->present = new HistoryStep($testData, 123, 'Test', \time(), 1);
 
     // Mock storage.
     $mockStorage = $this->prophesize(EntityStorageInterface::class);
@@ -409,9 +409,9 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $pathIndex = $instance->getPathIndex();
     // The path index should contain entries for the components in the data
     // Since we're using test_component, it should have a node_id.
-    $this->assertNotEmpty($pathIndex);
+    self::assertNotEmpty($pathIndex);
     // Check that the path index contains at least one entry.
-    $this->assertNotEmpty(array_keys($pathIndex));
+    self::assertNotEmpty(\array_keys($pathIndex));
   }
 
   /**
@@ -423,18 +423,18 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $instance = $this->createDisplayBuilderInstance();
 
     // Create multiple states.
-    for ($i = 1; $i <= 5; $i++) {
+    for ($i = 1; $i <= 5; ++$i) {
       $state = ['component' => ['id' => 'state' . $i]];
-      $instance->setNewPresent($state, "State $i");
+      $instance->setNewPresent($state, "State {$i}");
     }
 
     // Since getPast() doesn't exist in HistoryInterface, we can't directly test
     // the array, instead, we'll test the count which is available.
-    $this->assertEquals(5, $instance->getCountPast());
+    self::assertEquals(5, $instance->getCountPast());
 
     // Test that past count decreases during undo.
     $instance->undo();
-    $this->assertEquals(4, $instance->getCountPast());
+    self::assertEquals(4, $instance->getCountPast());
   }
 
   /**
@@ -446,9 +446,9 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $instance = $this->createDisplayBuilderInstance();
 
     // Create multiple states.
-    for ($i = 1; $i <= 3; $i++) {
+    for ($i = 1; $i <= 3; ++$i) {
       $state = ['component' => ['id' => 'state' . $i]];
-      $instance->setNewPresent($state, "State $i");
+      $instance->setNewPresent($state, "State {$i}");
     }
 
     // Undo twice to create future history.
@@ -457,11 +457,11 @@ class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Since getFuture() doesn't exist in HistoryInterface, we can't directly
     // test the array, instead, we'll test the count which is available.
-    $this->assertEquals(2, $instance->getCountFuture());
+    self::assertEquals(2, $instance->getCountFuture());
 
     // Test that future count changes during redo.
     $instance->redo();
-    $this->assertEquals(1, $instance->getCountFuture());
+    self::assertEquals(1, $instance->getCountFuture());
   }
 
 }

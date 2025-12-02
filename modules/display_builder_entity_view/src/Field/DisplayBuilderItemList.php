@@ -185,6 +185,7 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
       $this->list[$offset] = $this->createItem($offset, $item);
     }
     $entity = $this->getEntity();
+
     if ($entity instanceof ContentEntityInterface) {
       $this->setRevision($entity);
     }
@@ -256,6 +257,29 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
   }
 
   /**
+   * Set revision if appropriate.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity to set revision if appropriate.
+   */
+  public function setRevision(ContentEntityInterface $entity): void {
+    $bundle = $entity->getBundleEntity();
+
+    if ($bundle instanceof RevisionableEntityBundleInterface
+      && !$bundle->shouldCreateNewRevision()
+    ) {
+      return;
+    }
+
+    $entity->setNewRevision();
+
+    if ($entity instanceof RevisionLogInterface) {
+      $entity->setRevisionLogMessage($this->t('Updated using Display Builder.')->render());
+      $entity->setRevisionCreationTime($this->time()->getCurrentTime());
+    }
+  }
+
+  /**
    * Get the entity type manager.
    *
    * @return \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -273,27 +297,6 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
    */
   protected function time(): TimeInterface {
     return $this->time ??= \Drupal::service('datetime.time');
-  }
-
-  /**
-   * Set revision if appropriate.
-   *
-   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   *   The entity to set revision if appropriate.
-   */
-  public function setRevision(ContentEntityInterface $entity): void {
-    $bundle = $entity->getBundleEntity();
-    if ($bundle instanceof RevisionableEntityBundleInterface
-      && !$bundle->shouldCreateNewRevision()
-    ) {
-      return;
-    }
-
-    $entity->setNewRevision();
-    if ($entity instanceof RevisionLogInterface) {
-      $entity->setRevisionLogMessage($this->t('Updated using Display Builder.')->render());
-      $entity->setRevisionCreationTime($this->time()->getCurrentTime());
-    }
   }
 
   /**

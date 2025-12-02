@@ -581,6 +581,7 @@ class Instance extends EntityBase implements InstanceInterface {
     if ($this->present === NULL || $this->save === NULL) {
       return $this->present === NULL && $this->save === NULL;
     }
+
     return $this->present->hash === $this->save->hash;
   }
 
