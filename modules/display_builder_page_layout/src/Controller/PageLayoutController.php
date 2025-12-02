@@ -42,9 +42,11 @@ class PageLayoutController extends IntegrationControllerBase {
   /**
    * Creates a duplicate of a page layout and presents the add page layout form.
    *
-   * This function serves as the controller for the 'duplicate-form' route (e.g., admin/structure/page-layout/my_page_layout/duplicate).
-   * It duplicates the provided page layout, assigns a new label (e.g., "Duplicate of Original Label"),
-   * and then redirects the user to the entity creation form to save the new page layout.
+   * This function serves as the controller for the 'duplicate-form' route
+   * (e.g., admin/structure/page-layout/my_page_layout/duplicate).
+   * It duplicates the provided page layout, assigns a new label
+   * (e.g., "Duplicate of Original Label"), and then redirects the user
+   * to the entity creation form to save the new page layout.
    *
    * @param \Drupal\display_builder_page_layout\PageLayoutInterface $page_layout
    *   The page layout entity to duplicate.
@@ -57,4 +59,5 @@ class PageLayoutController extends IntegrationControllerBase {
     $duplicate->set('label', $this->t('Duplicate of @label', ['@label' => $page_layout->label()]));
     return $this->entityFormBuilder()->getForm($duplicate, 'add');
   }
+
 }

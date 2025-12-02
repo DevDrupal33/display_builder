@@ -104,11 +104,7 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
       'url' => $page_layout->getBuilderUrl(),
     ];
 
-    // Check if the entity has a link template for the duplicate form.
-    // This ensures the "Duplicate" operation is only added if the corresponding
-    // route and functionality exist.
     if ($entity->hasLinkTemplate('duplicate-form')) {
-      // Add the 'Duplicate' operation to the list of operations.
       $operations['duplicate'] = [
         'title' => $this->t('Duplicate'),
         'weight' => 15,

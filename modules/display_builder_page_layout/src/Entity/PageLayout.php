@@ -56,7 +56,6 @@ use Drupal\ui_patterns\SourcePluginManager;
     'edit-form' => '/admin/structure/page-layout/{page_layout}',
     'display-builder' => '/admin/structure/page-layout/{page_layout}/builder',
     'delete-form' => '/admin/structure/page-layout/{page_layout}/delete',
-    // new link for duplicating the page layout
     'duplicate-form' => '/admin/structure/page-layout/{page_layout}/duplicate',
   ],
   admin_permission: 'administer page_layout',
