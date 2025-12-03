@@ -45,7 +45,7 @@ islands:
     weight: -10
     region: sidebar
   tree:
-    status: true
+    status: false
     weight: -9
     region: sidebar
   logs:
@@ -88,10 +88,10 @@ islands:
     status: true
     weight: -9
   ui_skins:
-    status: true
+    status: false
     weight: -8
   visibility_conditions:
-    status: true
+    status: false
     weight: -7
   menu:
     status: true
