@@ -129,12 +129,16 @@ class LayersPanel extends BuilderPanel {
       $name .= ' - ' . $variant;
     }
 
+    $is_element = ($component['provider'] === 'display_builder') && ($component['group'] === 'Generic');
     $build = [
       '#type' => 'component',
       '#component' => 'display_builder:layer',
       '#slots' => [
         'title' => $name,
         'children' => $slots,
+      ],
+      '#props' => [
+        'type' => $is_element ? 'element' : 'component',
       ],
       // Required for the context menu label.
       // @see assets/js/contextual_menu.js

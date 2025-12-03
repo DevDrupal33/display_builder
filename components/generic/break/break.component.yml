@@ -1,0 +1,17 @@
+name: Break
+description: Insert a break in text.
+noUi: true
+group: Generic
+props:
+  type: object
+  properties:
+    tag:
+      title: Element
+      type: string
+      enum:
+        - br
+        - hr
+      meta:enum:
+        br: Line break
+        hr: Horizontal rule
+      default: br
