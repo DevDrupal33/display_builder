@@ -1,6 +1,6 @@
 # Installation
 
-⚠️ The **1.0.x** branch targets Drupal 11.1. No Drupal 10.x support planned for now.
+⚠️ The **1.0.x** branch targets Drupal 11.3. No Drupal 10.x support planned for now.
 
 ## Patches
 
