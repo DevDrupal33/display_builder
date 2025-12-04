@@ -63,12 +63,6 @@ _shoelace_local:
       attributes:
         type: module
 
-# Wysiwyg fixes with HTMX and our SlotSourceForm
-# @todo find a better way and fix this
-wysiwyg_fixes.js:
-  js:
-    ./assets/js/wysiwyg_fixes.js: {}
-
 db_drawer:
   css:
     component:
@@ -136,3 +130,14 @@ highlight:
 fullscreen:
   js:
     ./assets/js/fullscreen.js: {}
+
+# Custom fixes for CKEditor and Wysiwyg.
+_fix_wysiwyg:
+  js:
+    ./assets/js/_fix_wysiwyg.js: {}
+
+# Global fixes meant to disappear or replaced by a cleaner solution.
+_fix:
+  css:
+    theme:
+      ./assets/css/_fix.css: {}

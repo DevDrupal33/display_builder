@@ -398,7 +398,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
         '#tag' => 'h4',
         '#value' => $definition['annotated_name'],
         '#attributes' => [
-          'data-filter-parent' => $definition['machineName'],
+          'data-search-section' => $definition['machineName'],
         ],
       ];
 

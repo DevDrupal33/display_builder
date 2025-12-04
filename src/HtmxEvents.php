@@ -273,11 +273,10 @@ class HtmxEvents {
     );
 
     $extra_attr = [];
-
     // Specific Wysiwyg extra code to make it work.
     if (isset($build['source']['value']['#type']) && $build['source']['value']['#type'] === 'text_format') {
-      $extra_attr['hx-on:htmx:config-request'] = 'fixWysiwygUpdate(this, event)';
-      $build['#attached']['library'][] = 'display_builder/wysiwyg_fixes.js';
+      $extra_attr['hx-on:htmx:config-request'] = 'Drupal.displayBuilder.fixWysiwyg(this, event)';
+      $build['#attached']['library'][] = 'display_builder/_fix_wysiwyg';
     }
 
     return $this->setHtmxAttributesOnSubKey($build, $url, 'change consume', 'put', $extra_attr, 'source');
@@ -317,8 +316,8 @@ class HtmxEvents {
 
     // Specific Wysiwyg extra code to make it work.
     if (isset($build['source']['value']['#type']) && $build['source']['value']['#type'] === 'text_format') {
-      $extra_attr['hx-on:htmx:config-request'] = 'fixWysiwygUpdate(this, event)';
-      $build['#attached']['library'][] = 'display_builder/wysiwyg_fixes.js';
+      $extra_attr['hx-on:htmx:config-request'] = 'Drupal.displayBuilder.fixWysiwyg(this, event)';
+      $build['#attached']['library'][] = 'display_builder/_fix_wysiwyg';
     }
 
     return $this->setHtmxAttributesOnSubKey($build, $url, 'click consume', 'put', $extra_attr, 'update');

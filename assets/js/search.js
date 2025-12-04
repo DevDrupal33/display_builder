@@ -7,6 +7,27 @@
 
 ((Drupal, debounce, once) => {
   /**
+   * The minimum query length to trigger search.
+   *
+   * @type {number}
+   */
+  const minimumQueryLength = 0;
+
+  /**
+   * The class to hide elements during search.
+   *
+   * @type {string}
+   */
+  const hideClass = 'db-library-search-hide';
+
+  /**
+   * The class of elements to hide during search.
+   *
+   * @type {string}
+   */
+  const librarySearchHideClass = 'db-filter-hide-on-search';
+
+  /**
    * Drupal behavior for display builder search.
    *
    * @type {Drupal~behavior}
@@ -24,14 +45,14 @@
       once('dbSearch', '.db-search-instance', context).forEach((input) => {
         // Debounce to wait for tipping ad not throw too much search.
         const eventHandler = debounce((event) => {
-          triggerContextualSearch(context, event.target);
+          triggerInstanceSearch(context, event.target);
         }, 300);
         // Specific shoelace event handler.
-        // @todo avoid using this kind of specific.
         input.addEventListener('sl-input', eventHandler);
       });
 
-      // Search for the library, should be drawer start (left);
+      // Search for the library, should be drawer start (left).
+      // @see components/library_panel/library_panel.twig
       once('dbLibrarySearch', '.db-search-library', context).forEach(
         (filterInput) => {
           // Debounce to wait for tipping ad not throw too much search.
@@ -57,6 +78,7 @@
   const triggerLibrarySearch = (element, input, debug) => {
     if (!input.dataset?.searchContainerId) return;
     const containerId = input.dataset.searchContainerId;
+
     if (!input.dataset?.elementsSelector) return;
     const selector = input.dataset.elementsSelector;
 
@@ -67,28 +89,16 @@
       return;
     }
 
+    const parentList = element.querySelector(`#${containerId}`);
+
+    // If no query, reset search.
     const query = input.value.trim().toLowerCase();
-
-    const filterGroup = new Set();
-    // Store the result of those query once.
-    const hiddenElements = element.querySelectorAll(
-      '.db-filter-hide-on-search',
-    );
-    const parentElements = element.querySelectorAll('[data-filter-parent]');
-
-    // Early exit if no query
-    if (query.length <= 2) {
-      elements.forEach((elt) => {
-        elt.classList.remove('db-library-search-out');
-      });
-      hiddenElements.forEach((entry) => {
-        entry.classList.remove('db-library-search-out');
-      });
-      parentElements.forEach((entry) => {
-        entry.classList.remove('db-library-search-out');
-      });
+    if (query.length <= minimumQueryLength) {
+      resetLibrarySearch(parentList);
       return;
     }
+
+    const filterGroup = new Set();
 
     elements.forEach((elt) => {
       // Use data-keywords as search terms. Fallback to inner text.
@@ -98,43 +108,69 @@
       }
       match = match.trim().toLowerCase();
       if (match && match.includes(query)) {
-        elt.classList.remove('db-library-search-out');
+        elt.classList.remove(hideClass);
         if (elt.dataset.filterChild) {
           filterGroup.add(elt.dataset.filterChild);
         }
       } else {
-        elt.classList.add('db-library-search-out');
+        elt.classList.add(hideClass);
       }
     });
 
-    hiddenElements.forEach((entry) => {
-      entry.classList.toggle('db-library-search-out', query.length > 0);
-    });
+    // Get the list of elements to hide on search.
+    const elementsToHideWhenSearch = parentList.querySelectorAll(
+      `.${librarySearchHideClass}`,
+    );
+    if (elementsToHideWhenSearch.length !== 0) {
+      elementsToHideWhenSearch.forEach((elt) => {
+        elt.classList.toggle(hideClass, query.length > 0);
+      });
+    }
 
-    parentElements.forEach((entry) => {
+    // Collect section titles that we keep after filtering (for 'Variants' tab).
+    const sectionElements = parentList.querySelectorAll(
+      '[data-search-section]',
+    );
+    if (sectionElements.length === 0) return;
+
+    sectionElements.forEach((elt) => {
       if (query.length > 0) {
-        entry.classList.toggle(
-          'db-library-search-out',
-          !filterGroup.has(entry.dataset.filterParent),
+        elt.classList.toggle(
+          hideClass,
+          !filterGroup.has(elt.dataset.searchSection),
         );
       } else {
-        entry.classList.remove('db-library-search-out');
+        elt.classList.remove(hideClass);
       }
     });
   };
 
   /**
-   * Sends a search event each time we have an input of 2 letters or more.
+   * Reset the library search by removing hide class.
+   *
+   * @param {HTMLElement} parent
+   *   The parent element containing the elements to reset.
+   */
+  const resetLibrarySearch = (parent) => {
+    const elements = parent.querySelectorAll(`.${hideClass}`);
+    if (elements.length === 0) return;
+    elements.forEach((elt) => {
+      elt.classList.remove(hideClass);
+    });
+  };
+
+  /**
+   * Sends a search event each time we have an input.
    *
    * @param {HTMLElement} element
    *   The element containing the search input and results to filter.
    * @param {HTMLElement} input
    *   The input to trigger search on.
    */
-  const triggerContextualSearch = (element, input) => {
+  const triggerInstanceSearch = (element, input) => {
     const query = input.value.trim().toLowerCase();
     // Clear or delete input.
-    if (query.length <= 2) {
+    if (query.length <= minimumQueryLength) {
       element
         .querySelector('.db-form')
         .classList.remove('db-form-search-found');

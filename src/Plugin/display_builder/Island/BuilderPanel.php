@@ -256,6 +256,11 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
     $build['#attributes']['data-node-title'] = $label_info['summary'] ?? $data['source_id'] ?? $data['node_id'] ?? '';
     $build['#attributes']['data-slot-position'] = $index;
 
+    // Add data-node-type for easier identification of block types in JS or CSS.
+    if (isset($data['source_id'])) {
+      $build['#attributes']['data-node-type'] = $data['source_id'];
+    }
+
     $build = $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label_info['summary'] ?? $label_info['label'] ?? '', $index);
 
     return $build;

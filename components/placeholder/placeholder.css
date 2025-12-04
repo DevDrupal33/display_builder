@@ -13,8 +13,3 @@
   color: var(--sl-color-primary-600);
   box-shadow: var(--sl-shadow-medium);
 }
-
-/* Fix block on the builder view to stay close to preview for inline/block elements. */
-.display-builder__main .db-placeholder {
-  /* display: block; */
-}

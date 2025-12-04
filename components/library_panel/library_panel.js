@@ -27,18 +27,18 @@
     const hiddenElements = wrapper.querySelectorAll(
       '.db-filter-hide-on-search',
     );
-    const parentElements = wrapper.querySelectorAll('[data-filter-parent]');
+    const parentElements = wrapper.querySelectorAll('[data-search-section]');
 
     // Early exit if no query
     if (query.length <= 2) {
       elements.forEach((element) => {
-        element.classList.remove('db-library-search-out');
+        element.classList.remove('db-library-search-hide');
       });
       hiddenElements.forEach((entry) => {
-        entry.classList.remove('db-library-search-out');
+        entry.classList.remove('db-library-search-hide');
       });
       parentElements.forEach((entry) => {
-        entry.classList.remove('db-library-search-out');
+        entry.classList.remove('db-library-search-hide');
       });
       return;
     }
@@ -51,27 +51,27 @@
       }
       match = match.trim().toLowerCase();
       if (match && match.includes(query)) {
-        element.classList.remove('db-library-search-out');
+        element.classList.remove('db-library-search-hide');
         if (element.dataset.filterChild) {
           filterGroup.add(element.dataset.filterChild);
         }
       } else {
-        element.classList.add('db-library-search-out');
+        element.classList.add('db-library-search-hide');
       }
     });
 
     hiddenElements.forEach((entry) => {
-      entry.classList.toggle('db-library-search-out', query.length > 0);
+      entry.classList.toggle('db-library-search-hide', query.length > 0);
     });
 
     parentElements.forEach((entry) => {
       if (query.length > 0) {
         entry.classList.toggle(
-          'db-library-search-out',
+          'db-library-search-hide',
           !filterGroup.has(entry.dataset.filterParent),
         );
       } else {
-        entry.classList.remove('db-library-search-out');
+        entry.classList.remove('db-library-search-hide');
       }
     });
   }

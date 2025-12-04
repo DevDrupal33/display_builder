@@ -1,0 +1,20 @@
+/* Temporary fixes related to themes and plugins */
+
+/* Olivero fixes */
+:has(.display-builder):has(.site-header__fixable) {
+  .site-header {
+    z-index: 2;
+  }
+}
+
+/* Display Views, page and Entity block as block */
+.db-island-builder .db-placeholder:not([data-node-type="token"]),
+.db-island-preview .db-placeholder:not([data-node-type="token"]) {
+  display: block;
+  padding: 1rem;
+}
+
+.ck.ck-balloon-panel.ck-balloon-panel_visible {
+  /* display: block; */
+  /* border: 1px solid red; */
+}

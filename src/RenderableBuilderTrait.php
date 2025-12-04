@@ -152,6 +152,11 @@ trait RenderableBuilderTrait {
   protected function buildPlaceholderButtonWithPreview(string $builder_id, string|TranslatableMarkup $label, array $vals, Url $preview_url, ?string $keywords = NULL): array {
     $build = $this->buildPlaceholderButton($label, $vals, $keywords);
 
+    // Do not include entity field previews as we don't have generated value.
+    if (isset($vals['source_id']) && ($vals['source_id'] === 'entity_field' || $vals['source_id'] === 'entity_reference')) {
+      return $build;
+    }
+
     $hide_script = \sprintf('Drupal.displayBuilder.hidePreview(%s)', $builder_id);
     $attributes = [
       'hx-get' => $preview_url->toString(),

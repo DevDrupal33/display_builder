@@ -6,6 +6,7 @@
   display: none;
   width: max-content;
   max-width: 50rem;
+  background-color: var(--db-background-color);
 }
 
 .db-preview > * {
