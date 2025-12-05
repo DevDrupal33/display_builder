@@ -1,6 +1,6 @@
 # Tests e2e
 
-End-to-end (E2E) tests in Drupal with [Playwright](https://playwright.dev/docs/intro).  
+End-to-end (E2E) tests in Drupal with [Playwright](https://playwright.dev/docs/intro).
 Playwright enables reliable end-to-end testing for modern web apps.
 
 Tests are located in `tests/src/Playwright/Tests`.
@@ -111,11 +111,8 @@ npm run test
 
 For local tests with installed Drupal you **MUST** enable `extension_discovery_scan_tests` in your **settings.php**.
 
-It is recommended to disable js aggregation until [#3529284](https://www.drupal.org/project/display_builder/issues/3529284) is resolved:
-
 ```php
 $settings['extension_discovery_scan_tests'] = TRUE;
-$config['system.performance']['js']['preprocess'] = FALSE;
 ```
 
 Modules that **MUST** be enabled:
