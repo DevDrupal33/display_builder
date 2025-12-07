@@ -349,9 +349,13 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     self::cleanNodeId($data);
 
     $preset_storage = $this->entityTypeManager()->getStorage('pattern_preset');
+    $label = $request->headers->get('hx-prompt', $label) ?: $label;
+    // In HTTP headers, only ASCII is guaranteed to work but historically,
+    // HTTP has allowed header values with the ISO-8859-1 charset.
+    $label = \mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
     $preset = $preset_storage->create([
       'id' => \uniqid(),
-      'label' => $request->headers->get('hx-prompt', $label) ?: $label,
+      'label' => $label,
       'status' => TRUE,
       'group' => '',
       'description' => '',
