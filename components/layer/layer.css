@@ -35,7 +35,7 @@
   }
 
   .db-layer--block {
-    padding: 0.5rem 0 0.5rem 0.5rem;
+    padding: 0.5rem;
     border-radius: 4px;
     background: var(--layers-color-light);
   }
@@ -49,6 +49,12 @@
     margin: 0;
     font-size: 0.9rem;
     font-weight: bold;
+  }
+
+  .db-layer__info {
+    float: right;
+    margin: 0;
+    font-size: 0.9rem;
   }
 
   .db-layer__children {

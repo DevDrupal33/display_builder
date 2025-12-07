@@ -4,6 +4,8 @@ group: Display builder
 slots:
   title:
     title: Title
+  info:
+    title: Info
   children:
     title: Children
 props:

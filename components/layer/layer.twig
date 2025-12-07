@@ -1,6 +1,7 @@
 {% if title or children %}
   {% set modifier = children ? 'component' : 'block' %}
   <div{{ attributes.addClass('db-layer').addClass('db-layer--' ~ modifier) }}>
+    {% if info %}<p class="db-layer__info">{{ info }}</p>{% endif %}
     {% if title %}<p class="db-layer__title">{{ title }}</p>{% endif %}
     {% if children %}
     <div class="db-layer__children">

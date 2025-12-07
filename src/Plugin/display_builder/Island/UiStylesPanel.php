@@ -12,6 +12,7 @@ use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
 use Drupal\display_builder\IslandWithFormTrait;
 use Drupal\display_builder\RenderableAltererInterface;
+use Drupal\display_builder\ThirdPartySettingsInterface;
 use Drupal\ui_styles\StylePluginManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -26,7 +27,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   description: new TranslatableMarkup('Apply style utilities to the active component or block'),
   type: IslandType::Contextual,
 )]
-class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {
+class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface, ThirdPartySettingsInterface {
 
   use IslandWithFormTrait;
 
@@ -95,6 +96,25 @@ class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface,
     $extra = $data['extra'] ?? '';
 
     return $this->stylesManager->addClasses($element, $selected, $extra);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSummary(): ?TranslatableMarkup {
+    if (empty($this->data['selected'])) {
+      // We don't cover 'extra'.
+      return NULL;
+    }
+    $styles = [];
+
+    foreach ($this->data['selected'] ?? [] as $style_id => $option) {
+      $style = $this->stylesManager->getDefinition($style_id);
+      $option = $style->getOptionsAsOptions()[$option];
+      $styles[] = $option . ' ' . \strtolower((string) $style->getLabel());
+    }
+
+    return new TranslatableMarkup('Styles: @styles', ['@styles' => \implode(', ', $styles)]);
   }
 
   /**

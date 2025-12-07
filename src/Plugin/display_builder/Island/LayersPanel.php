@@ -7,8 +7,10 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\SlotSourceProxy;
+use Drupal\display_builder\ThirdPartySettingsInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -29,11 +31,17 @@ class LayersPanel extends BuilderPanel {
   protected SlotSourceProxy $slotSourceProxy;
 
   /**
+   * Island plugins manager.
+   */
+  protected IslandPluginManagerInterface $islandManager;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->slotSourceProxy = $container->get('display_builder.slot_sources_proxy');
+    $instance->islandManager = $container->get('plugin.manager.db_island');
 
     return $instance;
   }
@@ -134,6 +142,7 @@ class LayersPanel extends BuilderPanel {
         'data-node-title' => $name,
       ],
     ];
+    $build = $this->addThirdPartySettingsSummary($data, $build);
 
     return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, (string) $component['label'], $index);
   }
@@ -156,6 +165,8 @@ class LayersPanel extends BuilderPanel {
       ],
     ];
     $instance_id = $instance_id ?: $data['node_id'];
+
+    $build = $this->addThirdPartySettingsSummary($data, $build);
 
     // This label is used for contextual menu.
     // @see assets/js/contextual_menu.js
@@ -191,6 +202,33 @@ class LayersPanel extends BuilderPanel {
     }
 
     return $definition['variants'][$variant_id]['title'] ?? '';
+  }
+
+  /**
+   * Add third party settings summary to layer's info slot.
+   *
+   * @param array $data
+   *   The node data.
+   * @param array $build
+   *   The layer component renderable array.
+   *
+   * @return array
+   *   The layer component renderable array.
+   */
+  private function addThirdPartySettingsSummary(array $data, array $build): array {
+    if (!isset($data['_third_party_settings'])) {
+      return $build;
+    }
+
+    foreach ($data['_third_party_settings'] as $island_id => $settings) {
+      $island = $this->islandManager->createInstance($island_id, $settings);
+
+      if ($island instanceof ThirdPartySettingsInterface && $summary = $island->getSummary()) {
+        $build['#slots']['info'][] = $summary;
+      }
+    }
+
+    return $build;
   }
 
 }
