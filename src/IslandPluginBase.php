@@ -45,9 +45,9 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   protected string $currentIslandId;
 
   /**
-   * The instance id for this plugin.
+   * The tree node id (when the island is executed in the context of a node).
    */
-  protected ?string $instanceId = NULL;
+  protected ?string $nodeId = NULL;
 
   /**
    * The form builder.
@@ -94,7 +94,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
 
     $builder_id = (string) $builder->id();
     $this->builderId = $builder_id;
-    $this->instanceId = $data['node_id'] ?? NULL;
+    $this->nodeId = $data['node_id'] ?? NULL;
 
     // First, get specific data for the plugin.
     if (isset($data['_third_party_settings'][$this->getPluginId()])) {
@@ -143,7 +143,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
     $definition = $this->getPluginDefinition();
     $island_id = $definition instanceof PluginDefinitionInterface ? $definition->id() : ($definition['id'] ?? '');
 
-    return $this->htmxEvents->onThirdPartyFormChange($element, $this->builderId, $this->instanceId, $island_id);
+    return $this->htmxEvents->onThirdPartyFormChange($element, $this->builderId, $this->nodeId, $island_id);
   }
 
   /**
@@ -152,7 +152,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   public function isApplicable(): bool {
     $definition = $this->getPluginDefinition();
 
-    return $this->instanceId !== NULL && \is_array($definition) && !empty($this->data);
+    return $this->nodeId !== NULL && \is_array($definition) && !empty($this->data);
   }
 
   /**
@@ -194,63 +194,63 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * {@inheritdoc}
    */
-  public function onAttachToRoot(string $builder_id, string $instance_id): array {
+  public function onAttachToRoot(string $instance_id, string $node_id): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onAttachToSlot(string $builder_id, string $instance_id, string $parent_id): array {
+  public function onAttachToSlot(string $instance_id, string $node_id, string $parent_id): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onMove(string $builder_id, string $instance_id): array {
+  public function onMove(string $instance_id, string $node_id): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onActive(string $builder_id, array $data): array {
+  public function onActive(string $instance_id, array $data): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onUpdate(string $builder_id, string $instance_id): array {
+  public function onUpdate(string $instance_id, string $node_id): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onDelete(string $builder_id, string $parent_id): array {
+  public function onDelete(string $instance_id, string $parent_id): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onHistoryChange(string $builder_id): array {
+  public function onHistoryChange(string $instance_id): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onSave(string $builder_id): array {
+  public function onSave(string $instance_id): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onPresetSave(string $builder_id): array {
+  public function onPresetSave(string $instance_id): array {
     return [];
   }
 
@@ -345,27 +345,27 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * Helper method to reload island with instance-specific data.
    *
-   * @param string $builder_id
-   *   The builder ID.
    * @param string $instance_id
-   *   The instance ID.
+   *   The Display Builder instance ID.
+   * @param string $node_id
+   *   The tree node ID.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  protected function reloadWithInstanceData(string $builder_id, string $instance_id): array {
+  protected function reloadWithInstanceData(string $instance_id, string $node_id): array {
     if (!$this->builder) {
       // @todo pass \Drupal\display_builder\InstanceInterface object in
       // parameters instead of loading again.
       /** @var \Drupal\display_builder\InstanceInterface $builder */
-      $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+      $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($instance_id);
       $this->builder = $builder;
     }
-    $data = $this->builder->get($instance_id);
+    $data = $this->builder->get($node_id);
 
     return $this->addOutOfBand(
       $this->build($this->builder, $data),
-      '#' . $this->getHtmlId($builder_id),
+      '#' . $this->getHtmlId($instance_id),
       'innerHTML'
     );
   }
@@ -394,7 +394,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
     return [
       'island_id' => $this->getPluginId(),
       'builder_id' => $this->builderId,
-      'instance_id' => $this->instanceId,
+      'instance_id' => $this->nodeId,
       'instance' => $this->data,
     ];
   }

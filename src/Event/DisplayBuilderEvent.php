@@ -29,10 +29,10 @@ final class DisplayBuilderEvent extends Event {
    *   The island configuration.
    * @param array|null $data
    *   The data associated with this event.
-   * @param string|null $instance_id
-   *   The instance ID.
+   * @param string|null $node_id
+   *   The tree node ID.
    * @param string|null $parent_id
-   *   The parent instance ID.
+   *   The parent node ID.
    * @param string|null $current_island_id
    *   Optional current island ID which trigger action.
    */
@@ -41,7 +41,7 @@ final class DisplayBuilderEvent extends Event {
     private array $island_enabled,
     private array $island_configuration,
     private ?array $data = NULL,
-    private ?string $instance_id = NULL,
+    private ?string $node_id = NULL,
     private ?string $parent_id = NULL,
     private ?string $current_island_id = NULL,
   ) {}
@@ -79,13 +79,13 @@ final class DisplayBuilderEvent extends Event {
   }
 
   /**
-   * Gets the instance ID.
+   * Gets the tree node ID.
    *
    * @return string
-   *   The instance ID.
+   *   The tree node ID.
    */
-  public function getInstanceId(): ?string {
-    return $this->instance_id;
+  public function getNodeId(): ?string {
+    return $this->node_id;
   }
 
   /**
@@ -109,10 +109,10 @@ final class DisplayBuilderEvent extends Event {
   }
 
   /**
-   * Gets the parent instance ID.
+   * Gets the parent node ID.
    *
    * @return string
-   *   The parent instance ID.
+   *   The parent node ID.
    */
   public function getParentId(): ?string {
     return $this->parent_id;

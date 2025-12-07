@@ -172,8 +172,8 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       return $this->responseMessageError((string) $display_builder_instance->id(), $message, $body);
     }
 
-    // Load the instance to properly alter the form data into config data.
-    $instance = $display_builder_instance->get($node_id);
+    // Load the node to properly alter the form data into config data.
+    $node = $display_builder_instance->get($node_id);
 
     if (isset($body['source']['form_build_id'])) {
       unset($body['source']['form_build_id'], $body['source']['form_token'], $body['source']['form_id']);
@@ -188,7 +188,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       [
         'island_id' => 'contextual_form',
         'builder_id' => (string) $display_builder_instance->id(),
-        'instance' => $instance,
+        'instance' => $node,
       ],
       $display_builder_instance->getContexts(),
     ]);
@@ -212,13 +212,13 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       return $this->responseMessageError((string) $display_builder_instance->id(), $e->getMessage(), []);
     }
 
-    if (isset($instance['source']['component']['slots'], $data['source']['component'])
-      && ($data['source']['component']['component_id'] === $instance['source']['component']['component_id'])) {
+    if (isset($node['source']['component']['slots'], $data['source']['component'])
+      && ($data['source']['component']['component_id'] === $node['source']['component']['component_id'])) {
       // We keep the slots.
-      $data['source']['component']['slots'] = $instance['source']['component']['slots'];
+      $data['source']['component']['slots'] = $node['source']['component']['slots'];
     }
 
-    $display_builder_instance->setSource($node_id, $instance['source_id'], $data['source']);
+    $display_builder_instance->setSource($node_id, $node['source_id'], $data['source']);
     $display_builder_instance->save();
 
     $this->builder = $display_builder_instance;
@@ -245,7 +245,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     $islandDefinition = $this->islandPluginManager->getDefinition($island_id);
     // Load the instance to properly alter the form data into config data.
-    $instance = $display_builder_instance->get($node_id);
+    $node = $display_builder_instance->get($node_id);
     unset($body['form_build_id'], $body['form_token'], $body['form_id']);
 
     $form_state = new FormState();
@@ -254,7 +254,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       [
         'island_id' => $island_id,
         'builder_id' => (string) $display_builder_instance->id(),
-        'instance' => $instance,
+        'instance' => $node,
       ],
       [],
     ]);

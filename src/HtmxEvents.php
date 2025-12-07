@@ -139,7 +139,7 @@ class HtmxEvents {
   }
 
   /**
-   * Drop a component_id, a block_id, or an instance_id, to the root dropzone.
+   * Drop a component_id, a block_id, or an node_id, to the root dropzone.
    *
    * @param array $build
    *   The render array.
@@ -168,7 +168,7 @@ class HtmxEvents {
   }
 
   /**
-   * Drop a component_id, a block_id, or an instance_id, to a component slot.
+   * Drop a component_id, a block_id, or an node_id, to a component slot.
    *
    * @param array $build
    *   The render array.
@@ -273,6 +273,7 @@ class HtmxEvents {
     );
 
     $extra_attr = [];
+
     // Specific Wysiwyg extra code to make it work.
     if (isset($build['source']['value']['#type']) && $build['source']['value']['#type'] === 'text_format') {
       $extra_attr['hx-on:htmx:config-request'] = 'Drupal.displayBuilder.fixWysiwyg(this, event)';

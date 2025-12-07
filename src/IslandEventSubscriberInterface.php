@@ -10,116 +10,116 @@ namespace Drupal\display_builder;
 interface IslandEventSubscriberInterface {
 
   /**
-   * Event triggered when a block becomes active.
+   * Event triggered when a node becomes active.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param string $instance_id
+   *   The Display Builder instance ID.
    * @param array $data
-   *   The block data.
+   *   The node data.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onActive(string $builder_id, array $data): array;
+  public function onActive(string $instance_id, array $data): array;
 
   /**
-   * Event triggered when a block is attached to the root.
+   * Event triggered when a node is attached to the root.
    *
-   * @param string $builder_id
-   *   The builder ID.
    * @param string $instance_id
-   *   The instance ID.
+   *   The Display Builder instance ID.
+   * @param string $node_id
+   *   The tree node ID.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onAttachToRoot(string $builder_id, string $instance_id): array;
+  public function onAttachToRoot(string $instance_id, string $node_id): array;
 
   /**
-   * Event triggered when a block is attached to a slot.
+   * Event triggered when a node is attached to a slot.
    *
-   * @param string $builder_id
-   *   The builder ID.
    * @param string $instance_id
-   *   The instance ID.
+   *   The Display Builder instance ID.
+   * @param string $node_id
+   *   The tree node ID.
    * @param string $parent_id
-   *   The parent block instance ID.
+   *   The parent node instance ID.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onAttachToSlot(string $builder_id, string $instance_id, string $parent_id): array;
+  public function onAttachToSlot(string $instance_id, string $node_id, string $parent_id): array;
 
   /**
-   * Event triggered when a block is deleted.
+   * Event triggered when a node is deleted.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param string $instance_id
+   *   The Display Builder instance ID.
    * @param string $parent_id
-   *   The parent block instance ID.
+   *   The parent node instance ID.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onDelete(string $builder_id, string $parent_id): array;
+  public function onDelete(string $instance_id, string $parent_id): array;
 
   /**
    * Event triggered when the history changes.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param string $instance_id
+   *   The Display Builder instance ID.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onHistoryChange(string $builder_id): array;
+  public function onHistoryChange(string $instance_id): array;
 
   /**
-   * Event triggered when a block is moved.
+   * Event triggered when a node is moved.
    *
-   * @param string $builder_id
-   *   The builder ID.
    * @param string $instance_id
-   *   The instance ID.
+   *   The Display Builder instance ID.
+   * @param string $node_id
+   *   The tree node ID.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onMove(string $builder_id, string $instance_id): array;
+  public function onMove(string $instance_id, string $node_id): array;
 
   /**
-   * Event triggered when a block is updated.
+   * Event triggered when a node is updated.
    *
-   * @param string $builder_id
-   *   The builder ID.
    * @param string $instance_id
-   *   The instance ID.
+   *   The Display Builder instance ID.
+   * @param string $node_id
+   *   The tree node ID.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onUpdate(string $builder_id, string $instance_id): array;
+  public function onUpdate(string $instance_id, string $node_id): array;
 
   /**
    * Event triggered when a builder is saved.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param string $instance_id
+   *   The Display Builder instance ID.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onSave(string $builder_id): array;
+  public function onSave(string $instance_id): array;
 
   /**
    * Event triggered when a preset is saved.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param string $instance_id
+   *   The Display Builder instance ID.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onPresetSave(string $builder_id): array;
+  public function onPresetSave(string $instance_id): array;
 
 }

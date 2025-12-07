@@ -28,7 +28,7 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
   public function setProfile(string $profile_id): void;
 
   /**
-   * Move an instance to root.
+   * Move a source to root.
    *
    * @param string $node_id
    *   The node ID of the source.
@@ -41,7 +41,7 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
   public function moveToRoot(string $node_id, int $position): bool;
 
   /**
-   * Attach a new source instance to root.
+   * Attach a new source to root.
    *
    * @param int $position
    *   The position.
@@ -79,7 +79,7 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
   public function attachToSlot(string $parent_id, string $slot_id, int $position, string $source_id, array $data, array $third_party_settings = []): string;
 
   /**
-   * Move an instance to a slot.
+   * Move a source to a slot.
    *
    * @param string $node_id
    *   The node ID of the source.
@@ -96,18 +96,18 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
   public function moveToSlot(string $node_id, string $parent_id, string $slot_id, int $position): bool;
 
   /**
-   * Get instance data.
+   * Get node data.
    *
    * @param string $node_id
    *   The node ID of the source.
    *
    * @return array
-   *   The instance data.
+   *   The node data.
    */
   public function get(string $node_id): array;
 
   /**
-   * Get the parent id of an instance.
+   * Get the parent id of an node.
    *
    * @param array $root
    *   The root data.
@@ -120,7 +120,7 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
   public function getParentId(array $root, string $node_id): string;
 
   /**
-   * Set the source for an instance.
+   * Set the source for a tree node.
    *
    * @param string $node_id
    *   The node ID of the source.
@@ -132,7 +132,7 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
   public function setSource(string $node_id, string $source_id, array $data): void;
 
   /**
-   * Set the third party settings for an instance.
+   * Set the third party settings for a tree node.
    *
    * @param string $node_id
    *   The node ID of the source.
@@ -144,7 +144,7 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
   public function setThirdPartySettings(string $node_id, string $island_id, array $data): void;
 
   /**
-   * Remove an instance.
+   * Remove an tree node.
    *
    * @param string $node_id
    *   The node ID of the source.

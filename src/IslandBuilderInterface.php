@@ -12,10 +12,10 @@ interface IslandBuilderInterface {
   /**
    * Build renderable from state data.
    *
-   * @param string $builder_id
-   *   Builder ID.
    * @param string $instance_id
-   *   Instance ID.
+   *   Display Builder instance ID.
+   * @param string $node_id
+   *   Tree node ID.
    * @param array $data
    *   The UI Patterns 2 form state data.
    * @param int $index
@@ -24,15 +24,15 @@ interface IslandBuilderInterface {
    * @return array|null
    *   A renderable array.
    */
-  public function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): ?array;
+  public function buildSingleComponent(string $instance_id, string $node_id, array $data, int $index = 0): ?array;
 
   /**
    * Build renderable from state data.
    *
-   * @param string $builder_id
-   *   Builder ID.
    * @param string $instance_id
-   *   Instance ID.
+   *   Display Builder instance ID.
+   * @param string $node_id
+   *   Tree node ID.
    * @param array $data
    *   The UI Patterns 2 form state data.
    * @param int $index
@@ -41,6 +41,6 @@ interface IslandBuilderInterface {
    * @return array|null
    *   A renderable array.
    */
-  public function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): ?array;
+  public function buildSingleBlock(string $instance_id, string $node_id, array $data, int $index = 0): ?array;
 
 }

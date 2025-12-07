@@ -75,15 +75,15 @@ trait IslandWithFormTrait {
   }
 
   /**
-   * Get the builder id.
+   * Set the tree node ID.
    *
-   * @param string|null $instance_id
-   *   The instance id.
+   * @param string|null $node_id
+   *   The tree node ID.
    *
    * @todo remove this, should be on base class
    */
-  public function setInstanceId(?string $instance_id): void {
-    $this->instanceId = $instance_id;
+  public function setNodeId(?string $node_id): void {
+    $this->nodeId = $node_id;
   }
 
 }

@@ -79,11 +79,11 @@ interface IslandWithFormInterface {
   public function setBuilderId(string $builder_id): void;
 
   /**
-   * Set instance id used for this plugin.
+   * Set the tree node ID.
    *
-   * @param string|null $instance_id
-   *   The instance id.
+   * @param string|null $node_id
+   *   The tree node ID.
    */
-  public function setInstanceId(?string $instance_id): void;
+  public function setNodeId(?string $node_id): void;
 
 }

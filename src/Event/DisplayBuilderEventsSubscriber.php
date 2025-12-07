@@ -60,7 +60,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onAttachToRoot(DisplayBuilderEvent $event): void {
-    $this->dispatchToIslands($event, __FUNCTION__, [$event->getInstanceId()]);
+    $this->dispatchToIslands($event, __FUNCTION__, [$event->getNodeId()]);
   }
 
   /**
@@ -70,7 +70,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onAttachToSlot(DisplayBuilderEvent $event): void {
-    $this->dispatchToIslands($event, __FUNCTION__, [$event->getInstanceId(), $event->getParentId()]);
+    $this->dispatchToIslands($event, __FUNCTION__, [$event->getNodeId(), $event->getParentId()]);
   }
 
   /**
@@ -100,7 +100,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onMove(DisplayBuilderEvent $event): void {
-    $this->dispatchToIslands($event, __FUNCTION__, [$event->getInstanceId()]);
+    $this->dispatchToIslands($event, __FUNCTION__, [$event->getNodeId()]);
   }
 
   /**
@@ -110,7 +110,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onUpdate(DisplayBuilderEvent $event): void {
-    $this->dispatchToIslands($event, __FUNCTION__, [$event->getInstanceId(), $event->getCurrentIslandId()]);
+    $this->dispatchToIslands($event, __FUNCTION__, [$event->getNodeId(), $event->getCurrentIslandId()]);
   }
 
   /**
