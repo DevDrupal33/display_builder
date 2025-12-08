@@ -224,7 +224,7 @@ class LayersPanel extends BuilderPanel {
       $island = $this->islandManager->createInstance($island_id, $settings);
 
       if ($island instanceof ThirdPartySettingsInterface && $summary = $island->getSummary()) {
-        $build['#slots']['info'][] = $summary;
+        $build['#slots']['info'] = \array_merge($build['#slots']['info'] ?? [], $summary);
       }
     }
 

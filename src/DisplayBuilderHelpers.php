@@ -136,9 +136,15 @@ class DisplayBuilderHelpers {
    *   The formatted date.
    */
   public static function formatTime(DateFormatterInterface $dateFormatter, int $timestamp): string {
-    $delta = \time() - $timestamp;
+    $now = \time();
 
-    if ($delta < 86400) {
+    // Delta based on midnight today to not include day before.
+    $midnightToday = \strtotime('today');
+    $deltaToday = $now - $midnightToday;
+
+    $deltaEvent = $now - $timestamp;
+
+    if ($deltaEvent <= $deltaToday) {
       return $dateFormatter->format($timestamp, 'custom', 'G:i');
     }
 

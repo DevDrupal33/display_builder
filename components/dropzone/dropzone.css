@@ -91,18 +91,20 @@ handle it instead of shoelace */
 /** Hover context, when something is to be dropped **/
 
 /* When nothing happen, slightly highlight containers of slot */
-.db-dropzone [data-component-id]:not([data-slot-id]) {
-  outline: var(--dropzone-slot-outline-width-light) var(--dropzone-color-light) var(--dropzone-slot-outline-type-light);
-}
+.db-island-builder {
+  .db-dropzone [data-component-id]:not([data-slot-id]) {
+    outline: var(--dropzone-slot-outline-width-light) var(--dropzone-color-light) var(--dropzone-slot-outline-type-light);
+  }
 
-/* On hover, highlight only possible selectable elements */
-.db-dropzone [data-node-id]:hover,
-.db-dropzone [data-node-id]:not([data-component-id]):hover,
-.db-placeholder[data-node-id]:hover {
-  position: relative;
-  cursor: hand !important;
-  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-hover) var(--dropzone-slot-outline-type) !important;
-  outline-offset: var(--dropzone-slot-outline-offset-light) !important;
+  /* On hover, highlight only possible selectable elements */
+  .db-dropzone [data-node-id]:hover,
+  .db-dropzone [data-node-id]:not([data-component-id]):hover,
+  .db-placeholder[data-node-id]:hover {
+    position: relative;
+    cursor: hand !important;
+    outline: var(--dropzone-slot-outline-width) var(--dropzone-color-hover) var(--dropzone-slot-outline-type) !important;
+    outline-offset: var(--dropzone-slot-outline-offset-light) !important;
+  }
 }
 
 /* Try to have highlight mode full for builder and lighter for layers. */
@@ -273,18 +275,20 @@ handle it instead of shoelace */
   outline-offset: 0;
 }
 
-.db-dropzone--ghost,
-.db-dropzone--chosen {
-  border: var(--dropzone-slot-outline-width) var(--dropzone-color-hover) var(--dropzone-slot-outline-type);
-}
+.db-island-builder {
+  .db-dropzone--ghost,
+  .db-dropzone--chosen {
+    border: var(--dropzone-slot-outline-width) var(--dropzone-color-hover) var(--dropzone-slot-outline-type);
+  }
 
-.db-dropzone--chosen {
-  opacity: 0.9;
-}
+  .db-dropzone--chosen {
+    opacity: 0.9;
+  }
 
-/* From library drag need more visual hint */
-.db-draggable--chosen {
-  opacity: 0.5;
+  /* From library drag need more visual hint */
+  .db-draggable--chosen {
+    opacity: 0.5;
+  }
 }
 
 /* Completely hide the drag element to avoid confusion with what's under the mouse when selected */

@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-
 /**
  * Interface for island plugins providing third party settings.
  */
 interface ThirdPartySettingsInterface {
 
   /**
-   * Get settings summary.
+   * Get settings summary renderable.
    *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
-   *   The summary.
+   * @return array|null
+   *   The renderable summary including translations.
    */
-  public function getSummary(): ?TranslatableMarkup;
+  public function getSummary(): ?array;
 
 }

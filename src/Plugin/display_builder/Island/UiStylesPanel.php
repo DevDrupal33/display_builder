@@ -101,20 +101,51 @@ class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface,
   /**
    * {@inheritdoc}
    */
-  public function getSummary(): ?TranslatableMarkup {
+  public function getSummary(): ?array {
     if (empty($this->data['selected'])) {
-      // We don't cover 'extra'.
+      // We do not cover 'extra'.
       return NULL;
     }
-    $styles = [];
 
-    foreach ($this->data['selected'] ?? [] as $style_id => $option) {
+    $items = [];
+
+    foreach ($this->data['selected'] ?? [] as $style_id => $option_key) {
       $style = $this->stylesManager->getDefinition($style_id);
-      $option = $style->getOptionsAsOptions()[$option];
-      $styles[] = $option . ' ' . \strtolower((string) $style->getLabel());
+      $options = $style->getOptionsAsOptions();
+      $option = $options[$option_key] ?? $option_key;
+      // Translate each summary item and cast to string for safe concatenation.
+      $item = (string) new TranslatableMarkup('@option @label', [
+        '@option' => $option,
+        '@label' => \strtolower((string) $style->getLabel()),
+      ]);
+      $items[] = [
+        '#type' => 'html_tag',
+        '#tag' => 'li',
+        '#value' => $item,
+      ];
     }
 
-    return new TranslatableMarkup('Styles: @styles', ['@styles' => \implode(', ', $styles)]);
+    if (empty($items)) {
+      return NULL;
+    }
+
+    $summary = [
+      [
+        '#type' => 'html_tag',
+        '#tag' => 'em',
+        '#value' => new TranslatableMarkup('Styles'),
+      ],
+      [
+        '#type' => 'html_tag',
+        '#tag' => 'ul',
+        '#attributes' => [
+          'class' => ['summary'],
+        ],
+        0 => $items,
+      ],
+    ];
+
+    return $summary;
   }
 
   /**

@@ -49,6 +49,19 @@ final class InstanceListBuilder extends EntityListBuilder {
   /**
    * {@inheritdoc}
    */
+  public function load() {
+    $entity = parent::load();
+    // Sort by most recently updated.
+    \usort($entity, static function ($a, $b) {
+      return $b->present->time <=> $a->present->time;
+    });
+
+    return $entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildHeader(): array {
     $header = [
       'id' => $this->t('Instance'),

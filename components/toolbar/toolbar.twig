@@ -1,5 +1,6 @@
 {% set attributes = sticky ? attributes.addClass('db-toolbar--sticky') : attributes %}
-<div {{ attributes.addClass('db-toolbar').addClass('db-background') }}>
+<div class="db-toolbar-sentinel"></div>
+<div{{ attributes.addClass('db-toolbar').addClass('db-background') }}>
   <aside class="db-toolbar__start">
     {{ start }}
   </aside>

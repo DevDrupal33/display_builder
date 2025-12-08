@@ -1,6 +1,12 @@
 parameters:
 	ignoreErrors:
 		-
+			rawMessage: Access to an undefined property Drupal\Core\Entity\EntityInterface::$present.
+			identifier: property.notFound
+			count: 2
+			path: modules/display_builder_ui/src/InstanceListBuilder.php
+
+		-
 			rawMessage: Cannot access offset 'class' on array|Drupal\Component\Plugin\Definition\PluginDefinitionInterface.
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1

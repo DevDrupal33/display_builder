@@ -1,7 +1,6 @@
 :root {
   --db-background-color: var(--sl-color-neutral-0);
   --db-text-color: var(--sl-color-neutral-1000);
-  --db-background-size: 40px 40px;
   --db-toolbar-height: 72px;
   --db-z-index: 401;
   --db-table-bg: var(--sl-color-neutral-50);
@@ -107,8 +106,7 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
   .db-background,
   .db-background::part(panel),
   .db-background.shoelace-button::part(base) {
-    background-size: var(--db-background-size);
-    box-shadow: var(--sl-shadow-medium);
+    box-shadow: var(--sl-shadow-large);
   }
 
   /* When on a viewport switch context. */

@@ -1,48 +1,92 @@
 :root {
-  --layers-color-strong: var(--sl-color-warning-600);
-  --layers-color-light: var(--sl-color-sky-200);
-  --layers-color-active: var(--sl-color-sky-300);
-  --layers-color-target: var(--sl-color-teal-600);
-}
-
-.display-builder.sl-theme-dark {
-  --layers-color-strong: var(--sl-color-warning-600);
-  --layers-color-light: var(--sl-color-sky-200);
-  --layers-color-active: var(--sl-color-sky-300);
-  --layers-color-target: var(--sl-color-teal-600);
+  --layer-base-container-bg: var(--sl-color-neutral-100);
+  --layer-drag-drop-bg: var(--sl-color-neutral-50);
+  --layer-drag-drop-border: var(--sl-color-neutral-300);
+  --layer-drag-drop-border-hover: var(--sl-color-neutral-500);
+  --layer-drag-drop-text: var(--sl-color-neutral-700);
+  --layer-drag-item-bg: var(--sl-color-primary-100);
+  --layer-drag-item-border: var(--sl-color-primary-500);
+  --layer-drag-item-border-hover: var(--sl-color-primary-700);
+  --layer-drag-item-text: var(--sl-color-primary-800);
+  --layer-pill-bg: var(--sl-color-indigo-50);
+  --layer-pill-border: var(--sl-color-warning-300);
+  --layer-pill-text: var(--sl-color-neutral-950);
+  --layer-slot-title-color: var(--sl-color-warning-800);
+  --layer-component-border-color: var(--sl-color-neutral-300);
+  --layer-component-border-color-hover: var(--sl-color-primary-300);
 }
 
 .db-island-layers {
   .db-dropzone--root {
-    padding: 0.5rem;
-    outline: var(--layers-slot-outline-width) var(--layers-color-target) var(--layers-slot-outline-type-light);
+    padding: 1rem;
+    background-color: var(--layer-base-container-bg);
   }
 
   .db-layer {
     position: relative;
+    width: 100%;
     min-height: 1rem;
     margin: 0 0 0.5rem 0;
-    padding: 3px 6px;
     cursor: move;
-    border: dashed 1px var(--layers-color-strong);
-    background: var(--sl-color-neutral-100);
+    transition: all 0.2s ease;
+    color: var(--layer-drag-drop-text);
     font-size: 0.9rem;
   }
 
-  .db-layer:hover {
-    border-color: var(--layers-color-target);
-    background: var(--sl-color-neutral-200);
+  .db-layer::part(base) {
+    padding: 0.25rem;
+    border: 0.125rem dashed var(--layer-drag-drop-border);
+    &:hover {
+      border: 0.25rem dashed var(--layer-drag-item-bg-light);
+      outline-color: var(--layer-drag-item-bg-light);
+    }
+  }
+
+  .db-layer::part(base):hover {
+    border-color: var(--layer-component-border-color-hover);
+    background-color: var(--layer-drag-drop-bg);
   }
 
   .db-layer--block {
-    padding: 0.5rem;
-    border-radius: 4px;
-    background: var(--layers-color-light);
+    margin-bottom: 0.5rem;
+    padding: 0;
+    cursor: grab;
+    color: var(--layer-drag-item-text);
+    border: none;
+    border-radius: initial;
+    background-color: initial;
   }
 
-  .db-layer--block:hover {
-    border-style: dashed;
-    background: var(--layers-color-active);
+  .db-layer--component::part(base) {
+    padding: 0;
+  }
+
+  .db-layer--component::part(body) {
+    padding: 0.5rem 1rem 0.5rem 0.5rem;
+  }
+
+  .db-layer--component:hover::part(base) {
+    box-shadow:
+      0 0.25rem 0.375rem -0.0625rem rgb(0, 0, 0, 0.1),
+      0 0.125rem 0.25rem -0.125rem rgb(0, 0, 0, 0.06);
+  }
+
+  .db-layer--block::part(base) {
+    padding: 0;
+    border: 0.0625rem solid transparent;
+    border-radius: var(--sl-border-radius-small);
+    background-color: var(--layer-drag-item-bg);
+  }
+
+  .db-layer--block:hover::part(base) {
+    background-color: var(--layer-drag-item-bg);
+    box-shadow:
+      0 0.25rem 0.375rem -0.0625rem rgb(0, 0, 0, 0.1),
+      0 0.125rem 0.25rem -0.125rem rgb(0, 0, 0, 0.06);
+  }
+
+  .db-layer--block::part(body) {
+    padding: 0.75rem;
   }
 
   .db-layer__title {
@@ -51,17 +95,49 @@
     font-weight: bold;
   }
 
+  .db-layer__header {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
   .db-layer__info {
-    float: right;
-    margin: 0;
-    font-size: 0.9rem;
+    position: absolute;
+    z-index: 10;
+    right: 0;
+    margin: 0 0.25rem;
+    color: var(--layer-pill-text);
+    border-radius: 0.5rem;
+    background-color: var(--layer-pill-bg);
+    font-size: 0.75rem;
+    em {
+      margin-right: 0.2rem;
+      margin-left: 0.3rem;
+    }
+    ul {
+      display: inline;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    li {
+      display: inline-block;
+      margin-right: 0.125rem;
+      padding: 0.1rem 0.5rem;
+      color: var(--layer-pill-text);
+      border: 1px solid var(--layer-pill-border);
+      border-radius: 0.125rem;
+      border-radius: var(--sl-border-radius-pill);
+      background-color: var(--layer-pill-bg);
+    }
   }
 
   .db-layer__children {
-    padding-left: 0.7rem;
+    padding-left: 0.4375rem;
+    color: var(--layer-slot-title-color);
   }
 
   .db-layer__children > slot {
-    margin-top: 0.7rem;
+    margin-top: 0.4375rem;
   }
 }

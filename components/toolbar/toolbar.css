@@ -3,13 +3,28 @@
   align-items: center;
   justify-content: space-between;
   height: var(--admin-toolbar-top-bar-height, 64px);
+  border: 1px solid var(--admin-toolbar-color-gray-100, var(--sl-color-neutral-200));
   background-color: white;
+
+  &.db-toolbar-is-sticky {
+    position: fixed;
+    left: var(--drupal-displace-offset-left, var(--admin-toolbar-sidebar-width));
+    width: 100%;
+    padding-right: var(--drupal-displace-offset-left, var(--admin-toolbar-sidebar-width));
+    border: 0 none;
+  }
 
   sl-tooltip::part(body) {
     color: var(--sl-color-neutral-700);
     border: 1px solid var(--sl-color-neutral-200);
     background-color: var(--sl-color-neutral-50);
   }
+}
+
+.db-toolbar-sentinel {
+  height: 1px;
+  margin-top: -1px; /* Optional: ensures it sits exactly where the content starts */
+  background: transparent;
 }
 
 .display-builder {
@@ -24,6 +39,7 @@
 .db-toolbar--sticky {
   position: sticky;
   z-index: var(--db-z-index, 1);
+  top: 0;
 }
 
 .db-toolbar__middle {
@@ -53,6 +69,10 @@
 .display-builder--fullscreen .db-toolbar {
   z-index: calc(var(--db-z-index, 1) + 1);
   top: 0;
+  &.db-toolbar-is-sticky {
+    left: 0;
+    padding-right: 1rem;
+  }
 }
 
 .db-toolbar sl-tab-group {

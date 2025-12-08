@@ -150,6 +150,7 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
 
     $build = [
       'display_builder_content' => [
+        '#instance_id' => $instance_id,
         'data' => $data,
         '#weight' => -800,
       ],

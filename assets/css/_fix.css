@@ -11,10 +11,6 @@
 .db-island-builder .db-placeholder:not([data-node-type="token"]),
 .db-island-preview .db-placeholder:not([data-node-type="token"]) {
   display: block;
+  width: 100%;
   padding: 1rem;
-}
-
-.ck.ck-balloon-panel.ck-balloon-panel_visible {
-  /* display: block; */
-  /* border: 1px solid red; */
 }

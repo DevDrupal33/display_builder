@@ -12,4 +12,7 @@
  * @ingroup themeable
  */
 #}
+{% if page.display_builder_content['#instance_id'] is defined %}
+<!-- Display Builder Page Layout: {{ page.display_builder_content['#instance_id'] }} -->
+{% endif %}
 {{ page }}
