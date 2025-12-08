@@ -23,6 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   description: new TranslatableMarkup('Show a real time preview of the display.'),
   type: IslandType::View,
   icon: 'binoculars',
+  theme: 'front',
 )]
 class PreviewPanel extends IslandPluginBase {
 

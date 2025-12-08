@@ -28,3 +28,16 @@ services:
       - '@entity_type.manager'
     tags:
       - { name: 'event_subscriber' }
+
+  display_builder.declarative_shadow_dom_renderer:
+    class: Drupal\display_builder\Render\DeclarativeShadowDomRenderer
+    arguments:
+      - '@renderer'
+      - '@theme.manager'
+      - '@theme.initialization'
+      - '@config.factory'
+      - '@asset.css.collection_renderer'
+      - '@asset.js.collection_renderer'
+      - '@asset.resolver'
+      - '@language_manager'
+      - '@state'

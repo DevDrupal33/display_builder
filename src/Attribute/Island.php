@@ -35,7 +35,8 @@ final class Island extends AttributeBase {
    * @param string|null $icon
    *   (Optional) Icon for this island.
    * @param string $theme
-   *   (Optional) Set 'admin' to load the island with the admin theme.
+   *   (Optional) Set 'front' or 'admin' to force loading the island with the
+   *   front or admin theme in a declarative shadow DOM.
    * @param array $modules
    *   (Optional) List of other modules required for this Island.
    */
@@ -47,7 +48,7 @@ final class Island extends AttributeBase {
     public readonly ?string $deriver = NULL,
     public readonly ?IslandType $type = NULL,
     public readonly ?string $icon = NULL,
-    public readonly string $theme = 'default',
+    public readonly string $theme = '',
     public readonly array $modules = [],
   ) {}
 
