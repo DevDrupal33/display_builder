@@ -72,6 +72,12 @@
       once('dbDropzone', '.db-dropzone--root', context).forEach(
         (dropzoneRoot) => {
           setDropzone(dropzoneRoot);
+          // After swap need to apply on updated panel.
+          dropzoneRoot.addEventListener('htmx:oobAfterSwap', (event) => {
+            if (event.detail.target.classList.contains('db-dropzone')) {
+              setDropzone(dropzoneRoot);
+            }
+          });
         },
       );
     },
