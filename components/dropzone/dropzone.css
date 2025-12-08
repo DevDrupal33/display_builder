@@ -38,9 +38,11 @@
   width: 100%;
   min-height: var(--dropzone-slot-min-height);
 }
-.db-dropzone[data-component-id][data-slot-id]:empty {
-  min-width: var(--dropzone-slot-min-width);
-  min-height: var(--dropzone-slot-min-height);
+.db-island-builder {
+  .db-dropzone[data-component-id][data-slot-id]:empty {
+    min-width: var(--dropzone-slot-min-width);
+    min-height: var(--dropzone-slot-min-height);
+  }
 }
 
 /* Because builder placeholders are normal button, reset hover as we want to
@@ -312,7 +314,7 @@ handle it instead of shoelace */
 }
 
 /* When moving something inside the builder highlight the slots. */
-.display-builder--onMove .display-builder__main [data-slot-id] {
+.display-builder--onMove .db-island-builder [data-slot-id] {
   padding: 0;
   outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
   outline-offset: var(--dropzone-slot-outline-offset);

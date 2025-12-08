@@ -19,6 +19,11 @@
       line-height: calc(var(--admin-toolbar-top-bar-height, 64px) - var(--admin-toolbar-space-12, 12px) * 2);
     }
   }
+
+  /* Hide contextual panes when loading, mostly for onInstanceClick */
+  &.db-htmx-before-request .db-island-contextual {
+    opacity: var(--db-loading-opacity);
+  }
 }
 
 /* Navigation left sidebar support. */

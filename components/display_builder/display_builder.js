@@ -212,15 +212,30 @@
     },
   };
 
+  /**
+   * Trigger Drupal behaviors on HTMX load events.
+   *
+   * Fix required for core HTMX integration and will need some refactor when
+   * HTMX in Drupal core is done.
+   *
+   * @todo refactor when HTMX is in core.
+   *
+   * @param {CustomEvent} htmxLoadEvent
+   *   Trhe HTMX load event.
+   */
   function triggerDrupalBehaviorsFromHtmxEvent(htmxLoadEvent) {
     Drupal.attachBehaviors(
       htmxLoadEvent.detail.elt?.parentElement.closest('.display-builder'),
       drupalSettings,
     );
   }
+
+  // Trigger on HTMX out-of-band swaps and load events.
   window.addEventListener(
     'htmx:oobAfterSwap',
     triggerDrupalBehaviorsFromHtmxEvent,
   );
+
+  // Trigger on HTMX load events.
   window.addEventListener('htmx:load', triggerDrupalBehaviorsFromHtmxEvent);
 })(Drupal, once, FloatingUIDOM);

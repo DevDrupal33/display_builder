@@ -15,4 +15,4 @@ libraryOverrides:
   dependencies:
     - core/drupal
     - core/once
-    - display_builder/local-storage-manager
+    - display_builder/local_storage_manager

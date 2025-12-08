@@ -174,7 +174,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
 
       // Render some islands with the admin theme, loading the expected
       // templates and executing the expected hooks.
-      if ($definition['theme'] === 'admin') {
+      if (isset($definition['theme']) && $definition['theme'] === 'admin') {
         $result = $this->renderer->render($result, TRUE);
       }
 

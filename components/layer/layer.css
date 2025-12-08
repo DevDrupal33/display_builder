@@ -14,9 +14,23 @@
   --layer-slot-title-color: var(--sl-color-warning-800);
   --layer-component-border-color: var(--sl-color-neutral-300);
   --layer-component-border-color-hover: var(--sl-color-primary-300);
+  --layer-dropzone-slot-min-height: 0.75rem;
+  /* --dropzone-slot-min-width: 1rem; */
+}
+
+/* When moving something inside the builder highlight the slots. */
+.display-builder--onMove .db-island-layers [data-slot-id] {
+  padding: 1rem 1rem 0.5rem 1rem;
+  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
+  outline-offset: var(--dropzone-slot-outline-offset);
 }
 
 .db-island-layers {
+  .db-dropzone[data-component-id][data-slot-id]:empty {
+    min-width: 0;
+    min-height: var(--layer-dropzone-slot-min-height);
+  }
+
   .db-dropzone--root {
     padding: 1rem;
     background-color: var(--layer-base-container-bg);
@@ -28,7 +42,6 @@
     min-height: 1rem;
     margin: 0 0 0.5rem 0;
     cursor: move;
-    transition: all 0.2s ease;
     color: var(--layer-drag-drop-text);
     font-size: 0.9rem;
   }
@@ -86,7 +99,7 @@
   }
 
   .db-layer--block::part(body) {
-    padding: 0.75rem;
+    padding: 0.5rem;
   }
 
   .db-layer__title {

@@ -236,10 +236,35 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
     $build = [];
 
     if ($description = $component->metadata->description) {
+      $description = [
+        [
+          '#type' => 'html_tag',
+          '#tag' => 'p',
+          '#value' => $description,
+          '#attributes' => [
+            'class' => ['description'],
+          ],
+        ],
+        [
+          '#type' => 'html_tag',
+          '#tag' => 'sl-button',
+          '#value' => new TranslatableMarkup('Hide description'),
+          '#attributes' => [
+            'size' => 'small',
+            'variant' => 'default',
+            'class' => ['db-description-toggle'],
+          ],
+        ],
+      ];
       $build[] = [
         '#type' => 'html_tag',
-        '#tag' => 'p',
-        '#value' => $description,
+        '#tag' => 'div',
+        'content' => $description,
+        '#attributes' => [
+          // Important for description toggle.
+          // @see assets/js/form_description.js
+          'class' => ['db-instance-description'],
+        ],
       ];
     }
 

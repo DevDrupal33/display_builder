@@ -6,4 +6,47 @@
   .db-island form {
     zoom: 85%;
   }
+
+  p.description {
+    margin: 1rem 0;
+  }
+
+  details {
+    margin-block: var(--space-xs);
+  }
+
+  .db-description-hide {
+    .description {
+      display: none;
+    }
+    .db-description-toggle {
+      margin-top: 0.5rem;
+    }
+  }
+
+  /* Compact claro. */
+  p {
+    margin: 0;
+  }
+
+  .claro-details__description {
+    margin-block-end: var(--space-xs);
+  }
+
+  .form-item {
+    margin-block: var(--space-xs);
+  }
+
+  .button {
+    margin-block: var(--space-xs);
+    margin-inline: 0 var(--space-xs);
+    padding: var(--space-xs);
+    font-size: var(--font-size-xs);
+  }
+
+  @media screen and (min-width: 40.0625rem) {
+    .claro-details__wrapper {
+      margin: 0 var(--space-s);
+    }
+  }
 }

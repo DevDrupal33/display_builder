@@ -11,6 +11,8 @@
   --sl-tooltip-arrow-size: 0;
   /* Design tokens mapping between Drupal and Shoelace */
   --sl-font-sans: var(--admin-toolbar-font-family);
+  /* Opacity when htmx load. */
+  --db-loading-opacity: 0.6;
 }
 
 /* Dark mode overrides using .sl-theme-dark class */
@@ -100,7 +102,7 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
     pointer-events: none;
 
     > * {
-      opacity: 0.6;
+      opacity: var(--db-loading-opacity);
     }
   }
 
