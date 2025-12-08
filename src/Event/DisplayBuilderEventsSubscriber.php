@@ -6,6 +6,7 @@ namespace Drupal\display_builder\Event;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
+use Drupal\display_builder\Render\DeclarativeShadowDomRenderer;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -15,15 +16,11 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
 
   /**
    * Constructs a new DisplayBuilderEventsSubscriber object.
-   *
-   * @param \Drupal\display_builder\IslandPluginManagerInterface $islandManager
-   *   The island plugin manager.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   The entity type manager service.
    */
   public function __construct(
     protected IslandPluginManagerInterface $islandManager,
     protected EntityTypeManagerInterface $entityTypeManager,
+    protected DeclarativeShadowDomRenderer $renderer,
   ) {}
 
   /**
@@ -172,6 +169,14 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
         continue;
       }
       $result = $island->{$method}(...$parameters);
+
+      $definition = (array) $island->getPluginDefinition();
+
+      // Render some islands with the admin theme, loading the expected
+      // templates and executing the expected hooks.
+      if ($definition['theme'] === 'admin') {
+        $result = $this->renderer->render($result, TRUE);
+      }
 
       if ($result !== NULL) {
         $event->appendResult($island_id, $result);

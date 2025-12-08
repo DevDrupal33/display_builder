@@ -23,6 +23,19 @@ services:
 
   display_builder.event_subscriber:
     class: '\Drupal\display_builder\Event\DisplayBuilderEventsSubscriber'
-    arguments: ['@plugin.manager.db_island', '@entity_type.manager']
+    arguments:
+      - '@plugin.manager.db_island'
+      - '@entity_type.manager'
+      - '@display_builder.declarative_shadow_dom_renderer'
     tags:
       - { name: 'event_subscriber' }
+
+  display_builder.declarative_shadow_dom_renderer:
+    class: Drupal\display_builder\Render\DeclarativeShadowDomRenderer
+    arguments:
+      - '@renderer'
+      - '@render_cache'
+      - '@theme.manager'
+      - '@theme.initialization'
+      - '@config.factory'
+      - '%renderer.config%'

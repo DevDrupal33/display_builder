@@ -82,8 +82,9 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
 }
 
 .display-builder {
-  /* Shoelace avoid clipping before the web components are attached */
-  :not(:defined) {
+  /* Avoid clipping before the web components are attached, without hiding
+  the declarative shadow dom of db-isolate */
+  :not(db-isolate, :defined) {
     visibility: hidden;
   }
 

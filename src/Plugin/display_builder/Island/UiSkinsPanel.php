@@ -26,6 +26,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('UI Skins'),
   description: new TranslatableMarkup('Override CSS variables for the active component or block.'),
   type: IslandType::Contextual,
+  theme: 'admin',
 )]
 class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {
 

@@ -112,7 +112,7 @@ local-storage-manager:
   js:
     ./assets/js/localStorageManager.js: {}
 
-# Contextual form fixes.
+# Contextual forms tweaks.
 form:
   css:
     theme:

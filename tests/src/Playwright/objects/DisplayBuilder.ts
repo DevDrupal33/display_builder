@@ -295,7 +295,7 @@ export class Displaybuilder {
     await this.dragElementFromLibraryById(
       'Components',
       'test_simple',
-      this.page.locator(`.db-island-builder > slot.db-dropzone`)
+      this.page.locator(`.db-island-builder > div.db-dropzone`)
     )
     const componentSimpleSlot = this.page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
     await this.dragElementFromLibraryById('Blocks', 'token', componentSimpleSlot)

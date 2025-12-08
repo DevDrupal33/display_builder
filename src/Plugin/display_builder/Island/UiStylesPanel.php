@@ -26,6 +26,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('UI Styles'),
   description: new TranslatableMarkup('Apply style utilities to the active component or block'),
   type: IslandType::Contextual,
+  theme: 'admin',
 )]
 class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface, ThirdPartySettingsInterface {
 
