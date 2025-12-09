@@ -267,7 +267,7 @@ class Instance extends EntityBase implements InstanceInterface {
     ];
 
     if ($third_party_settings) {
-      $data['_third_party_settings'] = $third_party_settings;
+      $data['third_party_settings'] = $third_party_settings;
     }
 
     $root = $this->getCurrentState();
@@ -297,7 +297,7 @@ class Instance extends EntityBase implements InstanceInterface {
     ];
 
     if ($third_party_settings) {
-      $data['_third_party_settings'] = $third_party_settings;
+      $data['third_party_settings'] = $third_party_settings;
     }
 
     $root = $this->doAttachToSlot($root, $parent_id, $slot_id, $position, $data);
@@ -371,10 +371,10 @@ class Instance extends EntityBase implements InstanceInterface {
     $path = $this->getPath($root, $node_id);
     $existing_data = NestedArray::getValue($root, $path);
 
-    if (!isset($existing_data['_third_party_settings'])) {
-      $existing_data['_third_party_settings'] = [];
+    if (!isset($existing_data['third_party_settings'])) {
+      $existing_data['third_party_settings'] = [];
     }
-    $existing_data['_third_party_settings'][$island_id] = $data;
+    $existing_data['third_party_settings'][$island_id] = $data;
     NestedArray::setValue($root, $path, $existing_data);
 
     // Get friendly label to display in log instead of ids.

@@ -172,7 +172,7 @@ class BuilderDataConverter {
     $data['source']['component']['component_id'] = \str_replace('ui_patterns:', '', $section->getLayoutId());
 
     foreach ($section->getThirdPartyProviders() ?: [] as $provider_id) {
-      $data['_third_party_settings'][$provider_id] = $section->getThirdPartySettings($provider_id);
+      $data['third_party_settings'][$provider_id] = $section->getThirdPartySettings($provider_id);
     }
     $data = $this->moveUiStylesAttributesSource($data);
 
@@ -201,8 +201,8 @@ class BuilderDataConverter {
       'selected' => $data['source']['component']['props']['attributes']['source']['styles']['selected'],
       'extra' => $data['source']['component']['props']['attributes']['source']['extra'],
     ];
-    $styles_2 = $data['_third_party_settings']['ui_styles'] ?? [];
-    $data['_third_party_settings']['ui_styles'] = NestedArray::mergeDeep($styles_1, $styles_2);
+    $styles_2 = $data['third_party_settings']['ui_styles'] ?? [];
+    $data['third_party_settings']['ui_styles'] = NestedArray::mergeDeep($styles_1, $styles_2);
     $data['source']['component']['props']['attributes'] = [];
 
     return $data;
@@ -257,13 +257,13 @@ class BuilderDataConverter {
     $styles = \array_unique(\array_merge($additional['ui_styles_wrapper'] ?? [], $additional['ui_styles'] ?? []));
 
     if ($styles) {
-      $source['_third_party_settings']['ui_styles']['selected'] = $styles;
+      $source['third_party_settings']['ui_styles']['selected'] = $styles;
     }
 
     $extra = \trim(($additional['ui_styles_wrapper_extra'] ?? '') . ' ' . ($additional['ui_styles_extra'] ?? ''));
 
     if ($extra) {
-      $source['_third_party_settings']['ui_styles']['extra'] = $extra;
+      $source['third_party_settings']['ui_styles']['extra'] = $extra;
     }
 
     return $source;

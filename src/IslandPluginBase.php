@@ -97,8 +97,8 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
     $this->nodeId = $data['node_id'] ?? NULL;
 
     // First, get specific data for the plugin.
-    if (isset($data['_third_party_settings'][$this->getPluginId()])) {
-      $this->data = $data['_third_party_settings'][$this->getPluginId()];
+    if (isset($data['third_party_settings'][$this->getPluginId()])) {
+      $this->data = $data['third_party_settings'][$this->getPluginId()];
     }
     // Otherwise, fallback on global data.
     else {

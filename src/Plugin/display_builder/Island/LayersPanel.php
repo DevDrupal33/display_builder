@@ -216,11 +216,11 @@ class LayersPanel extends BuilderPanel {
    *   The layer component renderable array.
    */
   private function addThirdPartySettingsSummary(array $data, array $build): array {
-    if (!isset($data['_third_party_settings'])) {
+    if (!isset($data['third_party_settings'])) {
       return $build;
     }
 
-    foreach ($data['_third_party_settings'] as $island_id => $settings) {
+    foreach ($data['third_party_settings'] as $island_id => $settings) {
       $island = $this->islandManager->createInstance($island_id, $settings);
 
       if ($island instanceof ThirdPartySettingsInterface && $summary = $island->getSummary()) {

@@ -26,7 +26,7 @@
                 value:
                   value: '<p>This is a <b>Wysiwyg</b> test</p>'
                   format: basic_html
-  _third_party_settings:
+  third_party_settings:
     ui_styles:
       selected:
         test_style_1: test-style-1

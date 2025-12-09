@@ -30,11 +30,11 @@ class UiPatternsHooks {
    */
   #[Hook('ui_patterns_source_value_alter')]
   public function sourceValueAlter(mixed &$build, SourceInterface $source, array &$source_configuration): void {
-    if (!isset($source_configuration['_third_party_settings'])) {
+    if (!isset($source_configuration['third_party_settings'])) {
       return;
     }
 
-    foreach ($source_configuration['_third_party_settings'] as $island_id => $settings) {
+    foreach ($source_configuration['third_party_settings'] as $island_id => $settings) {
       $island = $this->islandManager->createInstance($island_id);
 
       if ($build && $island instanceof RenderableAltererInterface) {
@@ -55,7 +55,7 @@ class UiPatternsHooks {
    */
   #[Hook('config_schema_info_alter')]
   public function schemaInfoAlter(array &$definitions): void {
-    $definitions['ui_patterns_slot_source']['mapping']['_third_party_settings'] = [
+    $definitions['ui_patterns_slot_source']['mapping']['third_party_settings'] = [
       'type' => 'sequence',
       'sequence' => [
         'type' => 'ui_patterns_slot_source.third_party_setting.[%key]',

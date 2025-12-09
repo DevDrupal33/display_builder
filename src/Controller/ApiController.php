@@ -305,10 +305,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       // @todo for duplicate and not parent root seems not detected and copy is inside the slot.
       if ($parent_id === '__root__') {
         $is_paste_root = TRUE;
-        $display_builder_instance->attachToRoot(0, $source_id, $data, $dataToCopy['_third_party_settings'] ?? []);
+        $display_builder_instance->attachToRoot(0, $source_id, $data, $dataToCopy['third_party_settings'] ?? []);
       }
       else {
-        $display_builder_instance->attachToSlot($parent_id, $slot_id, (int) $slot_position, $source_id, $data, $dataToCopy['_third_party_settings'] ?? []);
+        $display_builder_instance->attachToSlot($parent_id, $slot_id, (int) $slot_position, $source_id, $data, $dataToCopy['third_party_settings'] ?? []);
       }
     }
     $display_builder_instance->save();
@@ -513,7 +513,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     }
     $node_id = $display_builder_instance->attachToRoot($position, $data['source_id'], $data['source']);
 
-    foreach ($data['_third_party_settings'] ?? [] as $provider => $settings) {
+    foreach ($data['third_party_settings'] ?? [] as $provider => $settings) {
       $display_builder_instance->setThirdPartySettings($node_id, $provider, $settings ?? []);
     }
     $display_builder_instance->save();
@@ -559,7 +559,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     }
     $node_id = $display_builder_instance->attachToSlot($parent_id, $slot, $position, $data['source_id'], $data['source']);
 
-    foreach ($data['_third_party_settings'] ?? [] as $provider => $settings) {
+    foreach ($data['third_party_settings'] ?? [] as $provider => $settings) {
       $display_builder_instance->setThirdPartySettings($node_id, $provider, $settings ?? []);
     }
 

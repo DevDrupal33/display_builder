@@ -221,7 +221,7 @@
    * @todo refactor when HTMX is in core.
    *
    * @param {CustomEvent} htmxLoadEvent
-   *   Trhe HTMX load event.
+   *   The HTMX load event.
    */
   function triggerDrupalBehaviorsFromHtmxEvent(htmxLoadEvent) {
     Drupal.attachBehaviors(
