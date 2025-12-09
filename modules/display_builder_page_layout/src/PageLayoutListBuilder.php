@@ -100,7 +100,7 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
     $operations = parent::getDefaultOperations($entity);
     $operations[] = [
       'title' => new TranslatableMarkup('Build display'),
-      'weight' => '-100',
+      'weight' => -10,
       'url' => $page_layout->getBuilderUrl(),
     ];
 

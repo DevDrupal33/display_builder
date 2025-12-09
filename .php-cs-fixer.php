@@ -39,8 +39,8 @@ $local_rules = [
   'php_unit_data_provider_method_order' => true,
   'method_argument_space' => ['on_multiline' => 'ensure_fully_multiline'],
   'ordered_class_elements' => ['case_sensitive' => false],
-  '@PHP83Migration' => true,
-  '@PHP84Migration' => false,
+  '@PHP8x3Migration' => true,
+  '@PHP8x4Migration' => false,
   'native_function_invocation' => ['include' => ['@internal'], 'scope' => 'all', 'strict' => true],
 ];
 

@@ -1,5 +1,7 @@
 :root {
   --db-background-color: var(--sl-color-neutral-0);
+  --db-background-image: repeating-linear-gradient(45deg, oklch(100% 0 0), oklch(100% 0 0) 13px, var(--sl-color-neutral-100) 13px, var(--sl-color-neutral-100) 14px);
+  --db-background-size: 40px 40px;
   --db-text-color: var(--sl-color-neutral-1000);
   --db-toolbar-height: 72px;
   --db-z-index: 401;
@@ -18,6 +20,7 @@
 /* Dark mode overrides using .sl-theme-dark class */
 .display-builder.sl-theme-dark {
   --db-background-color: var(--sl-color-neutral-1000);
+  --db-background-image: repeating-linear-gradient(45deg, oklch(20% 0 0), oklch(20% 0 0) 13px, var(--sl-color-neutral-50) 13px, var(--sl-color-neutral-50) 14px);
   --db-text-color: var(--sl-color-neutral-0);
   --db-table-bg: var(--sl-color-neutral-50);
   --db-table-border: var(--sl-color-neutral-200);
@@ -150,6 +153,22 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
 
   /* Preview Island specific */
   .db-preview-placeholder {
-    padding: 0.3rem;
+    margin: 0.2rem 0 0.2rem 0;
+    padding: 1rem;
+    color: var(--sl-color-neutral-600);
+    border-radius: 0.25rem;
+    outline: 2px dotted var(--sl-color-neutral-400);
+    background-image: var(--db-background-image);
+    background-size: var(--db-background-size);
+    box-shadow: var(--sl-shadow-large);
+    font-style: italic;
+  }
+
+  .db-preview-placeholder-md {
+    min-height: 10rem;
+  }
+
+  .db-preview-placeholder-lg {
+    min-height: 20rem;
   }
 }

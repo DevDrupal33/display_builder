@@ -15,6 +15,71 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 class DisplayBuilderHelpers {
 
   /**
+   * Recursively search and replace values in a multi-dimensional array.
+   *
+   * This function traverses an array and replaces elements based on a set of
+   * search criteria. It's optimized to perform multiple replacements in a
+   * single pass.
+   *
+   * @param array &$array
+   *   The array to search and replace in (passed by reference).
+   * @param array $replacements
+   *   An array of replacement rules. Each rule is an associative array with:
+   *   - 'search': An associative array with a single key-value pair to find.
+   *               Example: ['plugin_id' => 'system_messages_block'].
+   *   - 'new_value': The value to replace the matched element with.
+   */
+  public static function findAndReplaceInArray(array &$array, array $replacements): void {
+    foreach ($array as $key => &$value) {
+      if (!\is_array($value)) {
+        continue;
+      }
+
+      foreach ($replacements as $replacement) {
+        $search = $replacement['search'];
+        $class = $replacement['new_value_class'] ?? '';
+        $newValue = [
+          'source_id' => 'token',
+          'source' => [
+            'value' => '<div class="db-background db-preview-placeholder ' . $class . '">' . $replacement['new_value_title'] . '</div>',
+          ],
+        ];
+        $searchKey = \array_key_first($search);
+        $searchValue = $search[$searchKey] ?? NULL;
+
+        $match = FALSE;
+
+        // Match "source_id" directly on the child.
+        if ($searchKey === 'source_id' && isset($value['source_id']) && $value['source_id'] === $searchValue) {
+          $match = TRUE;
+        }
+        // Match "plugin_id" either directly on the child or inside its 'source'
+        // sub-array.
+        elseif ($searchKey === 'plugin_id') {
+          if ((isset($value['plugin_id']) && $value['plugin_id'] === $searchValue)
+            || (isset($value['source']) && \is_array($value['source']) && isset($value['source']['plugin_id']) && $value['source']['plugin_id'] === $searchValue)
+          ) {
+            $match = TRUE;
+          }
+        }
+
+        if ($match) {
+          $array[$key] = $newValue;
+
+          // Item replaced, continue to next item in the main array to avoid
+          // unnecessary recursion into the new value or other replacements.
+          continue 2;
+        }
+      }
+
+      // Recurse into deeper arrays if no replacement was made at this level.
+      self::findAndReplaceInArray($value, $replacements);
+    }
+    // Break the reference to the last iterated value.
+    unset($value);
+  }
+
+  /**
    * Multi-array search and replace parent.
    *
    * @param array $array

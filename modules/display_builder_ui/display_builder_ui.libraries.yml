@@ -1,0 +1,4 @@
+instance_list:
+  css:
+    theme:
+      css/instance-list.css: {}

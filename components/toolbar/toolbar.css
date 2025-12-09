@@ -8,9 +8,9 @@
 
   &.db-toolbar-is-sticky {
     position: fixed;
-    left: var(--drupal-displace-offset-left, var(--admin-toolbar-sidebar-width));
+    left: var(--drupal-displace-offset-left, var(--admin-toolbar-sidebar-width, 0));
     width: 100%;
-    padding-right: var(--drupal-displace-offset-left, var(--admin-toolbar-sidebar-width));
+    padding-right: var(--drupal-displace-offset-left, var(--admin-toolbar-sidebar-width, 0));
     border: 0 none;
   }
 

@@ -10,7 +10,6 @@ use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
-use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -55,22 +54,11 @@ class PreviewPanel extends IslandPluginBase {
    * {@inheritdoc}
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    $builder_id = (string) $builder->id();
-
     if (empty($data)) {
       return [];
     }
-
-    // Page layout display need preview. We don't have source for title and
-    // content, so let replace it on the fly for preview.
-    if (\class_exists('Drupal\display_builder_page_layout\Entity\PageLayout') && \str_starts_with($builder_id, PageLayout::getPrefix())) {
-      $content_placeholder = '<div class="db-background db-preview-placeholder"><h2>[Page] Content placeholder</h2></div>';
-      $title_placeholder = '<div class="db-background db-preview-placeholder"><h1 class="title">[Page] Title placeholder</h1></div>';
-
-      // @todo one pass and placeholder style?
-      DisplayBuilderHelpers::findArrayReplaceSource($data, ['source_id' => 'page_title'], ['#markup' => $title_placeholder]);
-      DisplayBuilderHelpers::findArrayReplaceSource($data, ['source_id' => 'main_page_content'], ['#markup' => $content_placeholder]);
-    }
+    // Replace preview for empty block until #3561447.
+    $this->alterPreviewPlaceholder($data);
 
     $returned = [];
 
@@ -122,6 +110,77 @@ class PreviewPanel extends IslandPluginBase {
    */
   public function onDelete(string $builder_id, string $parent_id): array {
     return $this->reloadWithGlobalData($builder_id);
+  }
+
+  /**
+   * Replace placeholder for preview.
+   *
+   * Some block source will not be created, create a simple placeholder to have
+   * a preview instead of nothing. Until #3561447 is resoled.
+   *
+   * @param array $data
+   *   The instance data to replace.
+   */
+  private function alterPreviewPlaceholder(array &$data): void {
+    $replacements = [
+      [
+        'search' => ['plugin_id' => 'system_messages_block'],
+        'new_value_title' => new TranslatableMarkup('[Placeholder] Block messages'),
+      ],
+      [
+        'search' => ['source_id' => 'page_title'],
+        'new_value_title' => new TranslatableMarkup('[Placeholder] Page title'),
+      ],
+      [
+        'search' => ['source_id' => 'main_page_content'],
+        'new_value_title' => new TranslatableMarkup('[Placeholder] Page content'),
+        'new_value_class' => 'db-preview-placeholder-lg',
+      ],
+      [
+        'search' => ['source_id' => 'view_attachment_before'],
+        'new_value_title' => new TranslatableMarkup('[Placeholder] View attachment before'),
+        'new_value_class' => 'db-preview-placeholder-md',
+      ],
+      [
+        'search' => ['source_id' => 'view_exposed'],
+        'new_value_title' => new TranslatableMarkup('[Placeholder] View exposed form'),
+        'new_value_class' => 'db-preview-placeholder-md',
+      ],
+      [
+        'search' => ['source_id' => 'view_header'],
+        'new_value_title' => new TranslatableMarkup('[Placeholder] View header'),
+        'new_value_class' => 'db-preview-placeholder-md',
+      ],
+      [
+        'search' => ['source_id' => 'view_rows'],
+        'new_value_title' => new TranslatableMarkup('[Placeholder] View rows'),
+        'new_value_class' => 'db-preview-placeholder-lg',
+      ],
+      [
+        'search' => ['source_id' => 'view_attachment_after'],
+        'new_value_title' => new TranslatableMarkup('[Placeholder] View attachment after'),
+        'new_value_class' => 'db-preview-placeholder-md',
+      ],
+      [
+        'search' => ['source_id' => 'view_pager'],
+        'new_value_title' => new TranslatableMarkup('[Placeholder] View pager'),
+      ],
+      [
+        'search' => ['source_id' => 'view_more'],
+        'new_value_title' => new TranslatableMarkup('[Placeholder] View more'),
+      ],
+      [
+        'search' => ['source_id' => 'view_footer'],
+        'new_value_title' => new TranslatableMarkup('[Placeholder] View footer'),
+        'new_value_class' => 'db-preview-placeholder-md',
+      ],
+      [
+        'search' => ['source_id' => 'view_feed_icons'],
+        'new_value_title' => new TranslatableMarkup('[Placeholder] View feed icons'),
+      ],
+    ];
+
+    DisplayBuilderHelpers::findAndReplaceInArray($data, $replacements);
   }
 
 }

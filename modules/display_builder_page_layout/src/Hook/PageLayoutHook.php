@@ -37,7 +37,7 @@ class PageLayoutHook {
         'weight' => -1,
       ];
       $operations['edit'] = [
-        'title' => new TranslatableMarkup('Edit page'),
+        'title' => new TranslatableMarkup('Edit profile'),
         'url' => PageLayout::getDisplayUrlFromInstanceId($id),
         'weight' => 10,
       ];

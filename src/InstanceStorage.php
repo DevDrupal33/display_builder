@@ -147,7 +147,6 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
 
     $this->state->set(self::STORAGE_INDEX, $display_builder_list);
     $this->state->set(self::STORAGE_PREFIX . $entity->id(), $entity->toArray());
-    $this->state->set(self::STORAGE_PREFIX . $entity->id() . '_hash', $entity->getCurrent()->hash ?? '');
 
     return TRUE;
   }
@@ -163,7 +162,6 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
 
       $this->state->set(self::STORAGE_INDEX, $display_builder_list);
       $this->state->delete(self::STORAGE_PREFIX . $id);
-      $this->state->delete(self::STORAGE_PREFIX . $id . '_hash');
     }
   }
 
