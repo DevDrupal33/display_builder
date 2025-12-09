@@ -37,6 +37,8 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
     'component',
     // Used only for imports from Manage Display and Layout Builder.
     'extra_field',
+    // No Wysiwyg from our UI until #3561474 is fixed.
+    'wysiwyg',
   ];
 
   private const HIDE_PROVIDER = ['ui_patterns_blocks'];
