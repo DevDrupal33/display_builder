@@ -1,6 +1,6 @@
 /* Prevent wrapping on the important columns. */
 .db-nowrap {
-  white-space: nowrap;
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
 }
