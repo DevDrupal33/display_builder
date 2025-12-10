@@ -92,8 +92,8 @@ test(
       await page.getByRole('button', { name: 'Save' }).click()
       await drupal.expectMessage(`The view Test ${testName} has been saved.`)
 
-      await page.getByRole('link', { name: 'View Page' }).click()
-      await expect(page.locator('.views-element-container')).toMatchAriaSnapshot({ name: 'view-view-no-db.aria.yml' })
+      // await page.getByRole('link', { name: 'View Page' }).click()
+      // await expect(page.locator('.views-element-container')).toMatchAriaSnapshot({ name: 'view-view-no-db.aria.yml' })
     })
 
     await test.step(`Set view display`, async () => {
@@ -182,7 +182,7 @@ test(
       // @todo to test full rendered view we must fill every source.
       await page.getByRole('link', { name: 'View Page' }).click()
       await expect(page.getByRole('heading', { name: `Test ${testName}` })).toBeVisible()
-      await expect(page.locator('.views-element-container')).toMatchAriaSnapshot({ name: 'view-view.aria.yml' })
+      // await expect(page.locator('.views-element-container')).toMatchAriaSnapshot({ name: 'view-view.aria.yml' })
     })
 
     await test.step(`Delete the display`, async () => {

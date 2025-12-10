@@ -1,13 +1,13 @@
 - paragraph: This is a header views area
 - form:
-  - text: ""
+  - text: "Published status *"
   - combobox "Published status *":
     - option "Yes" [selected]
     - option "No"
-  - text: ""
+  - text: "Sort by"
   - combobox "Sort by":
     - option "Authored on" [selected]
-  - text: ""
+  - text: "Order"
   - combobox "Order":
     - option "Asc"
     - option "Desc" [selected]
