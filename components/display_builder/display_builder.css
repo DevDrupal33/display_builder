@@ -1,22 +1,29 @@
 :root {
-  --db-z-index: 501;
-  /* Try to be hover everything */
-  --db-z-index-fullscreen: 1251;
+  /* Global background color */
   --db-background-color: var(--sl-color-neutral-0);
+  --db-text-color: var(--sl-color-neutral-900);
+
+  /* Placeholders */
   --db-background-image: repeating-linear-gradient(45deg, oklch(100% 0 0), oklch(100% 0 0) 13px, var(--sl-color-neutral-100) 13px, var(--sl-color-neutral-100) 14px);
   --db-background-size: 40px 40px;
-  --db-text-color: var(--sl-color-neutral-1000);
-  --db-toolbar-height: 72px;
+
+  /* Table if for panel logs, could have it's own file at some point */
   --db-table-bg: var(--sl-color-neutral-50);
   --db-table-border: var(--sl-color-neutral-200);
   --db-table-header-bg: var(--sl-color-neutral-100);
   --db-table-header-color: var(--sl-color-neutral-900);
   --db-table-row-hover: var(--sl-color-neutral-200);
+
+  /* Shoelace override */
   --sl-tooltip-arrow-size: 0;
-  /* Design tokens mapping between Drupal and Shoelace */
+  /* Design tokens mapping between Shoelace and Navigation */
   --sl-font-sans: var(--admin-toolbar-font-family);
+
   /* Opacity when htmx load. */
   --db-loading-opacity: 0.7;
+  --db-z-index: 501;
+  /* Try to be hover everything */
+  --db-z-index-fullscreen: 1251;
   /* With Admin toolbar. */
   &:has(.toolbar-horizontal) {
     --db-z-index: 401;
@@ -26,8 +33,8 @@
 /* Dark mode overrides using .sl-theme-dark class */
 .display-builder.sl-theme-dark {
   --db-background-color: var(--sl-color-neutral-0);
+  --db-text-color: var(--sl-color-neutral-900);
   --db-background-image: repeating-linear-gradient(45deg, oklch(20% 0 0), oklch(20% 0 0) 13px, var(--sl-color-neutral-50) 13px, var(--sl-color-neutral-50) 14px);
-  --db-text-color: var(--sl-color-neutral-0);
   --db-table-bg: var(--sl-color-neutral-50);
   --db-table-border: var(--sl-color-neutral-200);
   --db-table-header-bg: var(--sl-color-neutral-100);
@@ -38,7 +45,6 @@
 /* Table styling uses variables, so it switches automatically */
 .db-island-logs table {
   width: 100%;
-  color: var(--db-text-color);
   border: 1px solid var(--db-table-border);
   border-collapse: collapse;
   background: var(--db-table-bg);
@@ -71,6 +77,7 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
 /* Fullscreen button toggle @see components/fullscreen_button. */
 .display-builder {
   z-index: var(--db-z-index);
+  color: var(--db-text-color);
 }
 .display-builder.display-builder--fullscreen {
   position: fixed;
@@ -152,7 +159,7 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
   .db-preview-placeholder {
     margin: 0.2rem 0 0.2rem 0;
     padding: 1rem;
-    color: var(--sl-color-neutral-600);
+    color: var(--db-text-color);
     border-radius: 0.25rem;
     outline: 2px dotted var(--sl-color-neutral-400);
     background-image: var(--db-background-image);

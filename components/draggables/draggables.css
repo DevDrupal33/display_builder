@@ -1,12 +1,8 @@
 .db-draggables {
   padding-top: 16px;
-  sl-card::part(body) {
-    /* color: var(--sl-color-neutral-700); */
-  }
 }
 
 .db-draggables > h4 {
-  /* color: var(--sl-color-neutral-700); */
   margin: 8px 8px 16px;
   font-size: 1rem;
   font-weight: bold;

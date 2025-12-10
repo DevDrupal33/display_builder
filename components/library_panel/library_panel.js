@@ -1,4 +1,7 @@
 /**
+ * @param Drupal
+ * @param once
+ * @param debounce
  * @file
  * Provides filtering behavior for the Display Builder library islands.
  */

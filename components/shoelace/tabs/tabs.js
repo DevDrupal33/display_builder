@@ -1,4 +1,6 @@
 /**
+ * @param Drupal
+ * @param once
  * @file
  * Specific behaviors for the display builder tabs component.
  */

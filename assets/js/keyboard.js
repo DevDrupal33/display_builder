@@ -1,5 +1,7 @@
 /* eslint max-nested-callbacks: 0 */
 /**
+ * @param Drupal
+ * @param once
  * @file
  * Specific behaviors for keyboard mapping.
  *

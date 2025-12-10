@@ -29,3 +29,8 @@
   border: 1px solid var(--preview-color-border, #ccc) !important;
   border-radius: 5px !important;
 }
+
+/* @todo When drag preview should be hidden. */
+/* .display-builder--onDrag .db-preview { */
+/* display: none !important; */
+/* } */

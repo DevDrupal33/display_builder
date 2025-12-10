@@ -51,7 +51,11 @@ handle it instead of shoelace */
 
 /* Start when builder is empty, show root and label to help start */
 /* Same when start dragging to avoid non trigger of HTMX when the mouse is out of the dropzone. */
-.display-builder--onDrag .db-dropzone--root,
+.display-builder--onDrag .db-dropzone--root {
+  /* width: 98%; */
+  /* height: 100%; */
+  /* min-height: 50vh; */
+}
 .db-dropzone--root:empty {
   width: 98%;
   height: 100%;
@@ -80,7 +84,7 @@ handle it instead of shoelace */
 /* Highlight empty slots */
 [data-slot-id]:empty {
   margin: 0.2rem;
-  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-strong) var(--dropzone-slot-outline-type);
+  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
 }
 
 /** Hover context, when something is to be dropped **/
@@ -273,23 +277,28 @@ handle it instead of shoelace */
 .db-island-builder {
   .db-dropzone--ghost,
   .db-dropzone--chosen {
+    opacity: 0.4;
     border: var(--dropzone-slot-outline-width) var(--dropzone-color-hover) var(--dropzone-slot-outline-type);
   }
 
   .db-dropzone--chosen {
-    opacity: 0.9;
+    opacity: 0.8;
   }
 
-  /* From library drag need more visual hint */
   .db-draggable--chosen {
-    opacity: 0.5;
+    opacity: 0.8;
   }
+}
+
+/* From library drag need more visual hint */
+.db-island-library .db-draggable--chosen {
+  opacity: 0.8;
 }
 
 /* Completely hide the drag element to avoid confusion with what's under the mouse when selected */
 .db-draggable--drag,
 .db-dropzone--drag {
-  opacity: 0;
+  opacity: 0 !important;
 }
 
 /* Reset the hover effect when on drag to focus on possible targets */

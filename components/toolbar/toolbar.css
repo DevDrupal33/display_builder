@@ -1,10 +1,12 @@
 :root,
 .display-builder.sl-theme-dark {
-  --toolbar-color: var(--sl-color-neutral-700);
+  --toolbar-color: var(--db-text-color);
   --toolbar-color-border: var(--sl-color-neutral-200);
-  --toolbar-color-background: var(--sl-color-neutral-50);
-  --toolbar-z-index: calc(var(--db-z-index, 501) + 1);
+  --toolbar-color-background: var(--sl-color-neutral-0);
+  --toolbar-z-index: calc(var(--db-z-index, 501) - 1);
   --toolbar-z-index-fullscreen: calc(var(--db-z-index-fullscreen, 1251) + 1);
+  /* Module core navigation compatibility */
+  --toolbar-height: var(--admin-toolbar-top-bar-height, 64px);
 }
 
 .db-toolbar {
@@ -12,7 +14,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: var(--admin-toolbar-top-bar-height, 64px);
+  height: var(--toolbar-height);
   border: 1px solid var(--admin-toolbar-color-gray-100, var(--toolbar-color-border));
   background-color: var(--toolbar-color-background);
 

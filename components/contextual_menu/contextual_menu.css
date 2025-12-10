@@ -11,7 +11,7 @@
 
   .db-menu__label::part(base) {
     padding-left: 0.5rem;
-    color: var(--sl-color-primary-800);
+    color: var(--db-text-color);
     font-style: italic;
   }
   .menu__item::part(checked-icon) {
@@ -25,8 +25,8 @@
     min-width: 20rem;
     margin: 0;
     padding: 3px;
-    border: 1px solid gray;
-    background-color: white;
+    border: 1px solid var(--sl-color-neutral-600);
+    background-color: var(--db-background-color);
     font-size: 0.8rem;
   }
 }

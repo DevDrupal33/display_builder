@@ -1,4 +1,7 @@
 /**
+ * @param Drupal
+ * @param once
+ * @param Sortable
  * @file
  * Attaches behaviors for Drupal's Display Builder Draggables.
  */

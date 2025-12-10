@@ -6,7 +6,7 @@
 /* Normal display. */
 .display-builder {
   .shoelace-drawer {
-    color: var(--sl-color-neutral-700);
+    color: var(--db-text-color);
     &::part(panel) {
       /* --drupal-displace-offset-top is used by toolbar, admin_toolbar & navigation */
       padding-top: var(--drupal-displace-offset-top, 0);
