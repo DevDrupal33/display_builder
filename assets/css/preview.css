@@ -17,5 +17,5 @@
 
 /* Navigation left sidebar support. */
 body:has(> .admin-toolbar) .db-preview {
-  z-index: calc(var(--drupal-admin-z-index, 501) + 4);
+  z-index: calc(var(--drupal-admin-z-index, 501) + 3);
 }

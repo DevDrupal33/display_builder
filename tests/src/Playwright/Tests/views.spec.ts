@@ -42,6 +42,7 @@ test(
       await page.getByRole('checkbox', { name: 'Update Text area' }).check()
       await page.getByRole('button', { name: 'Add and configure header' }).click()
       await page.getByRole('textbox', { name: 'Content' }).fill('This is a header views area')
+      await page.getByRole('checkbox', { name: 'Display even if view has no' }).click()
       await applyDialog.click()
       await drupal.ajaxReady()
 
@@ -51,6 +52,7 @@ test(
       await page.getByRole('checkbox', { name: 'Update Text area' }).check()
       await page.getByRole('button', { name: 'Add and configure footer' }).click()
       await page.getByRole('textbox', { name: 'Content' }).fill('This is a footer views test area')
+      await page.getByRole('checkbox', { name: 'Display even if view has no' }).click()
       await applyDialog.click()
       await drupal.ajaxReady()
 
@@ -60,6 +62,18 @@ test(
       await page.getByRole('button', { name: 'Add and configure no results' }).click()
       await page.getByRole('textbox', { name: 'Content' }).fill('This is the no results views area')
       await applyDialog.click()
+      await drupal.ajaxReady()
+
+      await page.getByRole('link', { name: 'Mini pager, 10 items' }).click()
+      await drupal.ajaxReady()
+      await page.getByRole('spinbutton', { name: 'Items per page' }).fill("1")
+      await page.getByRole('button', { name: 'Apply' }).click()
+      await drupal.ajaxReady()
+
+      await page.getByTitle('Specify whether this display').click()
+      await drupal.ajaxReady()
+      await page.getByRole('checkbox', { name: 'Create more link' }).check()
+      await page.getByRole('button', { name: 'Apply' }).click()
       await drupal.ajaxReady()
 
       await page.getByRole('link', { name: 'Content: Published (= Yes)' }).click()
@@ -73,9 +87,17 @@ test(
       await page.getByRole('checkbox', { name: 'Expose this sort to visitors' }).check()
       await applyDialog.click()
       await drupal.ajaxReady()
+
+      // Save the View.
+      await page.getByRole('button', { name: 'Save' }).click()
+      await drupal.expectMessage(`The view Test ${testName} has been saved.`)
+
+      await page.getByRole('link', { name: 'View Page' }).click()
+      await expect(page.locator('.views-element-container')).toMatchAriaSnapshot({ name: 'view-view-no-db.aria.yml' })
     })
 
     await test.step(`Set view display`, async () => {
+      await page.goto(config.viewsEditUrl.replace('{view_id}', name))
       // Set the builder profile on a view.
       await page.locator('.views-display-setting').getByText('Disabled').click()
       await expect(page.getByLabel('Profile', { exact: true })).toBeVisible()
