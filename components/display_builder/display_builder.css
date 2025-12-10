@@ -1,10 +1,12 @@
 :root {
+  --db-z-index: 501;
+  /* Try to be hover everything */
+  --db-z-index-fullscreen: 1251;
   --db-background-color: var(--sl-color-neutral-0);
   --db-background-image: repeating-linear-gradient(45deg, oklch(100% 0 0), oklch(100% 0 0) 13px, var(--sl-color-neutral-100) 13px, var(--sl-color-neutral-100) 14px);
   --db-background-size: 40px 40px;
   --db-text-color: var(--sl-color-neutral-1000);
   --db-toolbar-height: 72px;
-  --db-z-index: 501;
   --db-table-bg: var(--sl-color-neutral-50);
   --db-table-border: var(--sl-color-neutral-200);
   --db-table-header-bg: var(--sl-color-neutral-100);
@@ -14,12 +16,16 @@
   /* Design tokens mapping between Drupal and Shoelace */
   --sl-font-sans: var(--admin-toolbar-font-family);
   /* Opacity when htmx load. */
-  --db-loading-opacity: 0.6;
+  --db-loading-opacity: 0.7;
+  /* With Admin toolbar. */
+  &:has(.toolbar-horizontal) {
+    --db-z-index: 401;
+  }
 }
 
 /* Dark mode overrides using .sl-theme-dark class */
 .display-builder.sl-theme-dark {
-  --db-background-color: var(--sl-color-neutral-1000);
+  --db-background-color: var(--sl-color-neutral-0);
   --db-background-image: repeating-linear-gradient(45deg, oklch(20% 0 0), oklch(20% 0 0) 13px, var(--sl-color-neutral-50) 13px, var(--sl-color-neutral-50) 14px);
   --db-text-color: var(--sl-color-neutral-0);
   --db-table-bg: var(--sl-color-neutral-50);
@@ -63,27 +69,18 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
 }
 
 /* Fullscreen button toggle @see components/fullscreen_button. */
-.display-builder--fullscreen {
+.display-builder {
+  z-index: var(--db-z-index);
+}
+.display-builder.display-builder--fullscreen {
   position: fixed;
-  z-index: 900;
+  z-index: var(--db-z-index-fullscreen);
   top: 0;
   left: 0;
   overflow: auto;
   width: 100%;
   height: 100%;
   background-color: var(--db-background-color);
-}
-
-/* Olivero fix for fullscreen */
-.display-builder-is-fullscreen {
-  #toolbar-administration {
-    display: none;
-  }
-
-  .site-header {
-    z-index: 1;
-    opacity: 0;
-  }
 }
 
 .display-builder {

@@ -7,6 +7,18 @@
   }
 }
 
+/* Olivero fix for fullscreen */
+.display-builder-is-fullscreen {
+  #toolbar-administration {
+    display: none;
+  }
+
+  .site-header {
+    z-index: 1;
+    opacity: 0;
+  }
+}
+
 /* Display Views, page and Entity block as block */
 .db-island-builder .db-placeholder:not([data-node-type="token"]),
 .db-island-preview .db-placeholder:not([data-node-type="token"]) {

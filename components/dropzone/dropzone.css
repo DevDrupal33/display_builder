@@ -1,4 +1,5 @@
-:root {
+:root,
+.display-builder.sl-theme-dark {
   --dropzone-placeholder-min-height: 1rem;
   --dropzone-slot-min-height: 2rem;
   --dropzone-slot-min-width: 3rem;
@@ -21,14 +22,6 @@
   --dropzone-z-index-label-root: 203;
   --dropzone-z-index-label-element: 202;
   --dropzone-z-index-label-slot: 201;
-}
-
-.display-builder.sl-theme-dark {
-  --dropzone-color-light: var(--sl-color-warning-300);
-  --dropzone-color-strong: var(--sl-color-warning-600);
-  --dropzone-color-hover: var(--sl-color-primary-300);
-  --dropzone-color-target: var(--sl-color-warning-800);
-  --dropzone-color-target-light: var(--sl-color-teal-600);
 }
 
 .db-dropzone {

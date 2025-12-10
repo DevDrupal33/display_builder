@@ -1,21 +1,31 @@
+:root {
+  --preview-color-background: var(--sl-color-neutral-0);
+  --preview-color-border: var(--sl-color-neutral-200);
+  --preview-z-index: calc(var(--db-z-index, 501) + 3);
+  --preview-z-index-fullscreen: calc(var(--db-z-index-fullscreen, 1251) + 3);
+}
+.display-builder.sl-theme-dark {
+  --preview-color-background: var(--sl-color-neutral-0);
+  --preview-color-border: var(--sl-color-neutral-200);
+}
+
 .db-preview {
   position: absolute;
-  z-index: calc(var(--db-z-index) + 4);
+  z-index: var(--preview-z-index);
   top: 15%;
   left: 25rem;
   display: none;
   width: max-content;
   max-width: 50rem;
-  background-color: var(--db-background-color);
+  background-color: var(--preview-color-background);
+}
+
+.display-builder--fullscreen .db-preview {
+  z-index: var(--preview-z-index-fullscreen);
 }
 
 .db-preview > * {
   padding: 10px !important;
-  border: 1px solid #ccc !important;
+  border: 1px solid var(--preview-color-border, #ccc) !important;
   border-radius: 5px !important;
-}
-
-/* Navigation left sidebar support. */
-body:has(> .admin-toolbar) .db-preview {
-  z-index: calc(var(--drupal-admin-z-index, 501) + 3);
 }

@@ -1,4 +1,5 @@
-:root {
+:root,
+.display-builder.sl-theme-dark {
   --layer-base-container-bg: var(--sl-color-neutral-100);
   --layer-drag-drop-bg: var(--sl-color-neutral-50);
   --layer-drag-drop-border: var(--sl-color-neutral-300);
@@ -15,7 +16,6 @@
   --layer-component-border-color: var(--sl-color-neutral-300);
   --layer-component-border-color-hover: var(--sl-color-primary-300);
   --layer-dropzone-slot-min-height: 0.75rem;
-  /* --dropzone-slot-min-width: 1rem; */
 }
 
 /* When moving something inside the builder highlight the slots. */
