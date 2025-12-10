@@ -36,7 +36,7 @@ test.afterEach('Clean', async ({ displayBuilder }) => {
 
 // Buttons in toolbar configuration is based on display_builder.profile.test.yml
 // Any change to the profile will be reflected here.
-test('Toolbar buttons', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
+test('Toolbar buttons', { tag: ['@display_builder', '@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
   dbName = `test_${utils.createRandomString()}`
 
   await test.step(`Admin login`, async () => {
@@ -63,43 +63,43 @@ test('Toolbar buttons', { tag: ['@display_builder_dev_tools'] }, async ({ page, 
   await test.step(`Minimal build instance`, async () => {
     await displayBuilder.dragElementFromLibraryById(
       'Blocks',
-      'token',
-      page.locator(`.db-island-builder > slot.db-dropzone`)
+      'textfield',
+      page.locator('.db-dropzone--root').first()
     )
     await displayBuilder.dragElementFromLibraryById(
       'Blocks',
-      'token',
-      page.locator(`.db-island-builder > slot.db-dropzone`)
+      'textfield',
+      page.locator('.db-dropzone--root').first()
     )
     await displayBuilder.closeDialog()
   })
 
   await test.step(`Undo / Redo / Clear`, async () => {
     // Test the undo/redo/clear buttons
-    const builderToken = page.locator(`.db-island-builder [data-node-title^="Token"]`)
-    await expect(builderToken).toHaveCount(2)
+    const builderTextfield = page.locator(`.db-island-builder [data-node-type="textfield"]`)
+    await expect(builderTextfield).toHaveCount(2)
 
     // Position required to avoid icon to intercept the click.
     const undo = page.locator('[data-island-action="undo"]')
     await undo.click(position)
-    await expect(builderToken).toHaveCount(1)
+    await expect(builderTextfield).toHaveCount(1)
 
     const redo = page.locator('[data-island-action="redo"]')
     await redo.click(position)
-    await expect(builderToken).toHaveCount(2)
+    await expect(builderTextfield).toHaveCount(2)
 
     const clear = page.locator('[data-island-action="clear"]')
     await clear.click(position)
-    await expect(builderToken).toHaveCount(2)
+    await expect(builderTextfield).toHaveCount(2)
     await expect(undo).toBeVisible()
     await expect(redo).toBeVisible()
-    await expect(clear).toBeVisible()
+    await expect(clear).toBeHidden()
   })
 
   // This is helping next tests.
   await test.step(`Set some values for next tests`, async () => {
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title^="Token"]`).first(),
+      page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
       'I am first',
       [
         {
@@ -109,7 +109,7 @@ test('Toolbar buttons', { tag: ['@display_builder_dev_tools'] }, async ({ page, 
       ]
     )
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title^="Token"]`).nth(1),
+      page.locator(`.db-island-builder [data-node-type="textfield"]`).nth(1),
       'I am second',
       [
         {
@@ -198,7 +198,7 @@ test('Toolbar buttons', { tag: ['@display_builder_dev_tools'] }, async ({ page, 
   }
 })
 
-test('Toolbar keyboard', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
+test('Toolbar keyboard', { tag: ['@display_builder', '@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
   dbName = `test_${utils.createRandomString()}`
 
   await test.step(`Admin login`, async () => {
@@ -223,44 +223,44 @@ test('Toolbar keyboard', { tag: ['@display_builder_dev_tools'] }, async ({ page,
   await test.step(`Minimal build instance`, async () => {
     await displayBuilder.dragElementFromLibraryById(
       'Blocks',
-      'token',
-      page.locator(`.db-island-builder > slot.db-dropzone`)
+      'textfield',
+      page.locator('.db-dropzone--root').first()
     )
     await displayBuilder.dragElementFromLibraryById(
       'Blocks',
-      'token',
-      page.locator(`.db-island-builder > slot.db-dropzone`)
+      'textfield',
+      page.locator('.db-dropzone--root').first()
     )
     await displayBuilder.closeDialog()
   })
 
   await test.step(`Keyboard Undo / Redo / Clear`, async () => {
-    const builderToken = page.locator(`.db-island-builder [data-node-title^="Token"]`)
+    const builderTextfield = page.locator(`.db-island-builder [data-node-type="textfield"]`)
 
-    await displayBuilder.dragElementFromLibraryById('Blocks', 'token', page.locator(`.db-island-builder > slot.db-dropzone`))
+    await displayBuilder.dragElementFromLibraryById('Blocks', 'textfield', page.locator('.db-dropzone--root').first())
     await displayBuilder.closeDialog()
-    await expect(builderToken).toHaveCount(3)
+    await expect(builderTextfield).toHaveCount(3)
     await displayBuilder.keyboardShortcut(key.undo)
     await displayBuilder.htmxReady()
     await displayBuilder.shoelaceReady()
-    await expect(builderToken).toHaveCount(2)
+    await expect(builderTextfield).toHaveCount(2)
     await displayBuilder.keyboardShortcut(key.redo)
     await displayBuilder.htmxReady()
     await displayBuilder.shoelaceReady()
-    await expect(builderToken).toHaveCount(3)
+    await expect(builderTextfield).toHaveCount(3)
     await displayBuilder.keyboardShortcut(key.clear)
     await displayBuilder.htmxReady()
     await displayBuilder.shoelaceReady()
-    await expect(builderToken).toHaveCount(3)
+    await expect(builderTextfield).toHaveCount(3)
     await expect(page.locator('[data-island-action="undo"]')).toBeVisible()
     await expect(page.locator('[data-island-action="redo"]')).toBeVisible()
-    await expect(page.locator('[data-island-action="clear"]')).toBeVisible()
+    await expect(page.locator('[data-island-action="clear"]')).toBeHidden()
   })
 
   // This is helping next tests.
   await test.step(`Set some values for next tests`, async () => {
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title^="Token"]`).first(),
+      page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
       'I am first',
       [
         {
@@ -270,7 +270,7 @@ test('Toolbar keyboard', { tag: ['@display_builder_dev_tools'] }, async ({ page,
       ]
     )
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title^="Token"]`).nth(1),
+      page.locator(`.db-island-builder [data-node-type="textfield"]`).nth(1),
       'I am second',
       [
         {

@@ -17,15 +17,13 @@
         slot_1:
           sources:
             -
-              source_id: token
+              source_id: textfield
               source:
                 value: 'This is a token test'
             -
-              source_id: wysiwyg
+              source_id: textfield
               source:
-                value:
-                  value: '<p>This is a <b>Wysiwyg</b> test</p>'
-                  format: basic_html
+                value: '<p>This is a <b>Wysiwyg</b> test</p>'
   third_party_settings:
     ui_styles:
       selected:

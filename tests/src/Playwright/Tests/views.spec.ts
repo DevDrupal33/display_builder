@@ -144,7 +144,7 @@ test(
     })
 
     await test.step(`Build the display`, async () => {
-      await displayBuilder.dragSimpleComponentsWithToken('I am a test token in a slot in a View!')
+      await displayBuilder.dragSimpleComponentsWithTextfield('I am a test textfield in a slot in a View!')
 
       // Result is based on the default page fixture with previous actions.
       // @see modules/display_builder_views/fixtures/default_view.yml
@@ -184,7 +184,7 @@ test(
 
       await page.getByRole('link', { name: 'View Page' }).click()
       await expect(page.getByRole('heading', { name: `Test ${testName}` })).toBeVisible()
-      await expect(page.getByText('I am a test token in a views')).not.toBeVisible()
+      await expect(page.getByText('I am a test textfield in a views')).not.toBeVisible()
     })
   }
 )

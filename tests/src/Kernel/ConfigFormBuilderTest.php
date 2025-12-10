@@ -107,7 +107,7 @@ final class ConfigFormBuilderTest extends DisplayBuilderKernelTestBase {
       self::assertArrayHasKey('#default_value', $data, 'Default value is set.');
 
       if (isset($expect['default_value'])) {
-        self::assertEquals($expect['default_value'], $data['#default_value'], 'Default value matches expected.');
+        self::assertSame($expect['default_value'], $data['#default_value'], 'Default value matches expected.');
       }
     }
     else {
@@ -119,7 +119,7 @@ final class ConfigFormBuilderTest extends DisplayBuilderKernelTestBase {
     }
 
     if (!empty($expect['description'])) {
-      self::assertEquals($expect['description'], (string) $data['#description'], 'Disabled description matches expected.');
+      self::assertSame($expect['description'], (string) $data['#description'], 'Disabled description matches expected.');
     }
 
     // Test the mandatory flag, default is FALSE, build again for TRUE.

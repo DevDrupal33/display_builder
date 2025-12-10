@@ -7,17 +7,15 @@
         slot_1:
           sources:
             -
-              source_id: token
+              source_id: textfield
               source:
                 value: 'This is a test'
         sub_slot_1_1:
           sources:
             -
-              source_id: wysiwyg
+              source_id: textfield
               source:
-                value:
-                  value: '<p><strong>This</strong> is a <em>simple</em> <em><strong>HTML</strong></em> test <strong>content</strong>.</p><p><strong>This</strong> is a <em>simple</em> <em><strong>HTML</strong></em> test <strong>content</strong>.</p>'
-                  format: basic_html
+                value: '<p><strong>This</strong> is a <em>simple</em> <em><strong>HTML</strong></em> test <strong>content</strong>.</p><p><strong>This</strong> is a <em>simple</em> <em><strong>HTML</strong></em> test <strong>content</strong>.</p>'
         sub_slot_1_2:
           sources:
             -
@@ -53,17 +51,15 @@
                     slot_1:
                       sources:
                         -
-                          source_id: token
+                          source_id: textfield
                           source:
                             value: 'This is a test again'
                     sub_slot_1_1:
                       sources:
                         -
-                          source_id: wysiwyg
+                          source_id: textfield
                           source:
-                            value:
-                              value: '<p><strong>This</strong> is again a <em>simple</em> <em><strong>HTML</strong></em> test <strong>content.</strong></p><p><strong>This</strong> is again a <em>simple</em> <em><strong>HTML</strong></em> test <strong>content</strong>.</p>'
-                              format: basic_html
+                            value: '<p><strong>This</strong> is again a <em>simple</em> <em><strong>HTML</strong></em> test <strong>content.</strong></p><p><strong>This</strong> is again a <em>simple</em> <em><strong>HTML</strong></em> test <strong>content</strong>.</p>'
                     sub_slot_1_2:
                       sources:
                         -

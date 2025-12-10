@@ -129,7 +129,7 @@ export class Displaybuilder {
   }
 
   /**
-   * Drags a token block into a target slot and sets its value in a Playwright test.
+   * Set a block textfield value in a Playwright test.
    *
    * @async
    * @param {Page} page - The Playwright Page object representing the browser this.page.
@@ -282,7 +282,8 @@ export class Displaybuilder {
   async deleteDisplayBuilderFromDevUi(dbName: string): Promise<void> {
     await this.page.goto(config.dbList)
     await this.page
-      .getByRole('row', { name: `${config.develPrefix}${dbName}` })
+      // .getByRole('row', { name: `Dev tools ${config.develPrefix}${dbName} Test` })
+      .locator(`tr.${config.develPrefix}${dbName}`)
       .getByRole('button')
       .click()
     await this.page.getByRole('link', { name: 'Delete', exact: true }).click()
@@ -290,7 +291,14 @@ export class Displaybuilder {
     await expect(this.page.getByRole('link', { name: dbName })).not.toBeVisible()
   }
 
-  async dragSimpleComponentsWithToken(tokenTest: string = 'I am a test token in a slot!'): Promise<void> {
+  /**
+   * Drag test simple component with a textfield in the UI.
+   *
+   * @async
+   * @param {string} textfieldTest - Text for the textfield.
+   * @returns {Promise<void>}
+   */
+  async dragSimpleComponentsWithTextfield(textfieldTest: string = 'I am a test textfield in a slot!'): Promise<void> {
     await this.toggleSidebarView()
     await this.dragElementFromLibraryById(
       'Components',
@@ -298,10 +306,10 @@ export class Displaybuilder {
       this.page.locator(`.db-island-builder > div.db-dropzone`)
     )
     const componentSimpleSlot = this.page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
-    await this.dragElementFromLibraryById('Blocks', 'token', componentSimpleSlot)
+    await this.dragElementFromLibraryById('Blocks', 'textfield', componentSimpleSlot)
     await this.setElementValue(
-      this.page.locator(`.db-island-builder [data-node-title^="Token"]`).first(),
-      tokenTest,
+      this.page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
+      textfieldTest,
       [
         {
           action: 'fill',

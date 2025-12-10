@@ -8,7 +8,7 @@ test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.drush('state:set -y display_builder.asset_libraries_local true')
 })
 
-test('From fixture', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
+test('From fixture', { tag: ['@display_builder', '@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
   const dbName = `test_${utils.createRandomString()}`
 
   await test.step(`Admin login`, async () => {
@@ -34,12 +34,12 @@ test('From fixture', { tag: ['@display_builder_dev_tools'] }, async ({ page, dru
   })
 
   await test.step(`Build instance`, async () => {
-    // Add a token in a slot and set a value
-    const componentSimpleSlot = page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
-    await displayBuilder.dragElementFromLibraryById('Blocks', 'token', componentSimpleSlot)
+    // Add a textfield in a slot and set a value
+    await displayBuilder.dragElementFromLibraryById('Blocks', 'textfield', page.locator('.db-island-builder [data-test="test_simple_slot"]'))
+
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title^="Token"]`).first(),
-      'I am a test token in a slot! ',
+      page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
+      'Test fixture: I am a test textfield in a slot! ',
       [
         {
           action: 'fill',
@@ -51,7 +51,7 @@ test('From fixture', { tag: ['@display_builder_dev_tools'] }, async ({ page, dru
     await displayBuilder.expectPreviewAriaSnapshot('dev-instance-2.aria.yml')
   })
 
-  await test.step(`Move token to the end of slot`, async () => {
+  await test.step(`Move textfield to the end of slot`, async () => {
     await displayBuilder.dragElement(
       page.locator(`.db-island-builder .test_simple .slot_test [data-slot-position="0"]`),
       page.locator(`.db-island-builder .test_simple .slot_test [data-slot-position="2"]`),
@@ -69,7 +69,7 @@ test('From fixture', { tag: ['@display_builder_dev_tools'] }, async ({ page, dru
   })
 })
 
-test('Secondary actions', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
+test('Secondary actions', { tag: ['@display_builder', '@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
   const dbName = `test_${utils.createRandomString()}`
 
   const firstDrawerId = 'db-first-drawer'
@@ -105,30 +105,30 @@ test('Secondary actions', { tag: ['@display_builder_dev_tools'] }, async ({ page
   })
 
   await test.step(`Drawer resize`, async () => {
-    await page.locator(`.db-island-builder [data-node-title^="Token"]`).first().click({ position: { x: 5, y: 10 } })
+    await page.locator(`.db-island-builder [data-node-type="textfield"]`).first().click({ position: { x: 5, y: 10 } })
     await displayBuilder.htmxReady()
 
-    const firstDrawer = page.locator(`#${firstDrawerId}`);
+    const firstDrawer = page.locator(`#${firstDrawerId}`)
     await firstDrawer.locator(`.shoelace-resize-handle`).hover()
     await page.mouse.down()
     await page.mouse.move(400 + 133, 400)
     await page.mouse.up()
-    let box = await firstDrawer.locator(`.drawer__panel`).boundingBox();
+    let box = await firstDrawer.locator(`.drawer__panel`).boundingBox()
 
-    await expect(firstDrawer).toHaveAttribute('style', '--size: 533px;');
-    await expect(firstDrawer).toHaveAttribute('data-offset-left', '533px');
-    await expect(box?.width).toEqual(533);
+    await expect(firstDrawer).toHaveAttribute('style', '--size: 533px;')
+    await expect(firstDrawer).toHaveAttribute('data-offset-left', '533px')
+    await expect(box?.width).toEqual(533)
 
-    const secondDrawer = page.locator(`#${secondDrawerId}`);
+    const secondDrawer = page.locator(`#${secondDrawerId}`)
     await secondDrawer.locator(`.shoelace-resize-handle`).hover()
     await page.mouse.down()
-    box = await secondDrawer.locator(`.drawer__panel`).boundingBox();
+    box = await secondDrawer.locator(`.drawer__panel`).boundingBox()
     await page.mouse.move((box?.x ?? 0) - 133, 400)
     await page.mouse.up()
 
-    await expect(secondDrawer).toHaveAttribute('style', '--size: 533px;');
-    box = await secondDrawer.locator(`.drawer__panel`).boundingBox();
-    await expect(box?.width).toEqual(533);
+    await expect(secondDrawer).toHaveAttribute('style', '--size: 533px;')
+    box = await secondDrawer.locator(`.drawer__panel`).boundingBox()
+    await expect(box?.width).toEqual(533)
   })
 
   await test.step(`Delete`, async () => {
@@ -136,7 +136,7 @@ test('Secondary actions', { tag: ['@display_builder_dev_tools'] }, async ({ page
   })
 })
 
-test('From scratch', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
+test('From scratch', { tag: ['@display_builder', '@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
   const dbName = `test_${utils.createRandomString()}`
 
   await test.step(`Admin login`, async () => {
@@ -156,14 +156,14 @@ test('From scratch', { tag: ['@display_builder_dev_tools'] }, async ({ page, dru
     await displayBuilder.dragElementFromLibraryById(
       'Components',
       'test_simple',
-      page.locator(`.db-island-builder > slot.db-dropzone`)
+      page.locator('.db-dropzone--root').first()
     )
     await displayBuilder.dragElementFromLibraryById('Components', 'test_simple', componentSimpleSlot)
-    await displayBuilder.dragElementFromLibraryById('Blocks', 'token', componentSimpleSlot.nth(1))
+    await displayBuilder.dragElementFromLibraryById('Blocks', 'textfield', componentSimpleSlot.nth(1))
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title^="Token"]`).first(),
-      'I am a test token in a slot',
+      page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
+      'I am a test textfield in a slot',
       [
         {
           action: 'fill',
@@ -189,7 +189,7 @@ test('From scratch', { tag: ['@display_builder_dev_tools'] }, async ({ page, dru
 
     await displayBuilder.setElementValue(
       page.locator(`.db-island-builder [data-node-title="Test simple"]`).nth(1),
-      'Second component with a token',
+      'Second component with a textfield',
       [
         {
           action: 'click',
@@ -210,7 +210,7 @@ test('From scratch', { tag: ['@display_builder_dev_tools'] }, async ({ page, dru
   })
 })
 
-test('Contextual', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
+test('Contextual', { tag: ['@display_builder', '@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
   const dbName = `test_${utils.createRandomString()}`
 
   await test.step(`Admin login`, async () => {
@@ -230,10 +230,10 @@ test('Contextual', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupa
     await displayBuilder.dragElementFromLibraryById(
       'Components',
       'test_simple',
-      page.locator(`.db-island-builder > slot.db-dropzone`)
+      page.locator('.db-dropzone--root').first()
     )
     await displayBuilder.dragElementFromLibraryById('Components', 'test_simple', componentSimpleSlot)
-    await displayBuilder.dragElementFromLibraryById('Blocks', 'token', componentSimpleSlot.nth(1))
+    await displayBuilder.dragElementFromLibraryById('Blocks', 'textfield', componentSimpleSlot.nth(1))
 
     await displayBuilder.setElementValue(
       page.locator(`.db-island-builder [data-node-title="Test simple"]`).first(),
@@ -252,7 +252,7 @@ test('Contextual', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupa
 
     await displayBuilder.setElementValue(
       page.locator(`.db-island-builder [data-node-title="Test simple"]`).nth(1),
-      'I am component inside component with a token',
+      'I am component inside component with a textfield',
       [
         {
           action: 'click',
@@ -266,8 +266,8 @@ test('Contextual', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupa
     )
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title^="Token"]`).first(),
-      'I am a test token in a slot',
+      page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
+      'I am a test textfield in a slot',
       [
         {
           action: 'fill',
@@ -281,7 +281,7 @@ test('Contextual', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupa
     await expect(page.locator('.db-island-builder')).toMatchAriaSnapshot({ name: 'contextual.aria.yml' })
 
     await page
-      .getByRole('heading', { name: 'label: I am component inside component with a token' })
+      .getByRole('heading', { name: 'label: I am component inside component with a textfield' })
       .click({ button: 'right', position: { x: 40, y: 10 } })
 
     await page.getByRole('menuitemcheckbox', { name: 'Duplicate Test simple' }).locator('slot').nth(1).click()
@@ -290,7 +290,7 @@ test('Contextual', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupa
     await expect(page.locator('.db-island-builder')).toMatchAriaSnapshot({ name: 'contextual-duplicate.aria.yml' })
 
     await page
-      .getByRole('heading', { name: 'label: I am component inside component with a token' }).nth(1)
+      .getByRole('heading', { name: 'label: I am component inside component with a textfield' }).nth(1)
       .click({ button: 'right', position: { x: 40, y: 10 } })
   
     await page.getByRole('menuitemcheckbox', { name: 'Remove' }).locator('slot').nth(1).click()

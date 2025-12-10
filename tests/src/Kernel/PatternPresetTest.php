@@ -117,7 +117,7 @@ final class PatternPresetTest extends KernelTestBase {
 
     // Remove it for comparison.
     unset($loadedSources['node_id']);
-    self::assertEquals($sources, $loadedSources);
+    self::assertSame($sources, $loadedSources);
   }
 
   /**

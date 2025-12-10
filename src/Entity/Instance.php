@@ -162,9 +162,19 @@ class Instance extends EntityBase implements InstanceInterface {
    * @see \Drupal\Core\Entity\EntityInterface
    */
   public function postCreate(EntityStorageInterface $storage): void {
-    if ($this->present) {
-      $this->present->data = $this->buildIndexFromSlot([], $this->getCurrentState());
+    if (!$this->present) {
+      return;
     }
+
+    $indexed = $this->buildIndexFromSlot([], $this->present->data ?? []);
+    $hash = self::getUniqId($indexed);
+    $this->present = new HistoryStep(
+      $indexed,
+      $hash,
+      $this->present->log,
+      $this->present->time,
+      $this->present->user,
+    );
   }
 
   /**
@@ -421,8 +431,9 @@ class Instance extends EntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function setSave(array $save_data): void {
-    $hash = self::getUniqId($save_data);
-    $this->save = new HistoryStep($save_data, $hash, NULL, \time(), NULL);
+    $indexed = $this->buildIndexFromSlot([], $save_data);
+    $hash = self::getUniqId($indexed);
+    $this->save = new HistoryStep($indexed, $hash, NULL, \time(), NULL);
   }
 
   /**

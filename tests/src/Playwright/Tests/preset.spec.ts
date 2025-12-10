@@ -8,7 +8,7 @@ test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.drush('state:set -y display_builder.asset_libraries_local true')
 })
 
-test('Preset', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
+test('Preset', { tag: ['@display_builder', '@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
   const dbName = `test_${utils.createRandomString()}`
 
   await test.step(`Admin login`, async () => {
@@ -27,22 +27,22 @@ test('Preset', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, d
     await displayBuilder.dragElementFromLibraryById(
       'Components',
       'test_simple',
-      page.locator(`.db-island-builder > slot.db-dropzone`)
+      page.locator('.db-dropzone--root').first()
     )
     await displayBuilder.dragElementFromLibraryById(
       'Blocks',
-      'token',
-      page.locator(`.db-island-builder > slot.db-dropzone`)
+      'textfield',
+      page.locator('.db-dropzone--root').first()
     )
 
     await displayBuilder.dragElement(
-      page.locator(`.db-island-builder [data-node-title^="Token"]`),
+      page.locator(`.db-island-builder [data-node-type="textfield"]`),
       page.locator(`.db-island-builder [data-slot-id="slot_1"]`)
     )
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title^="Token"]`),
-      'I am a test token in a slot',
+      page.locator(`.db-island-builder [data-node-type="textfield"]`),
+      'I am a test textfield in a slot',
       [
         {
           action: 'fill',
@@ -53,7 +53,7 @@ test('Preset', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, d
 
     await displayBuilder.setElementValue(
       page.locator(`.db-island-builder [data-node-title="Test simple"]`),
-      'I am a component with a token',
+      'I am a component with a textfield',
       [
         {
           action: 'click',
@@ -76,7 +76,7 @@ test('Preset', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, d
     })
 
     await page
-      .getByRole('heading', { name: 'label: I am a component with a token' })
+      .getByRole('heading', { name: 'label: I am a component with a textfield' })
       .click({ button: 'right', position: { x: 40, y: 10 } })
     await page.getByRole('menuitemcheckbox', { name: 'Save as preset' }).locator('slot').nth(1).click()
   })
@@ -95,7 +95,7 @@ test('Preset', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, d
     await displayBuilder.dragElementFromLibrary(
       'Presets',
       preset,
-      page.getByRole('heading', { name: 'label: I am a component with a token' })
+      page.getByRole('heading', { name: 'label: I am a component with a textfield' })
     )
   })
 

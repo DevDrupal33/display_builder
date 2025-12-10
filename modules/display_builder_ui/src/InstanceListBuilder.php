@@ -66,6 +66,10 @@ final class InstanceListBuilder extends EntityListBuilder {
    */
   public function buildHeader(): array {
     $header = [
+      'id' => [
+        'data' => $this->t('ID'),
+        'class' => ['hidden'],
+      ],
       'context' => [
         'data' => $this->t('Context'),
         'class' => ['priority-medium'],
@@ -122,7 +126,11 @@ final class InstanceListBuilder extends EntityListBuilder {
   public function buildRow(EntityInterface $instance): array {
     /** @var \Drupal\display_builder\InstanceInterface $instance */
     $instance_id = (string) $instance->id();
+
     $row = [];
+
+    $row['id']['data'] = $instance_id;
+    $row['id']['class'] = ['hidden'];
 
     $type = '-';
     $providers = $this->moduleHandler->invokeAll('display_builder_provider_info');
@@ -155,7 +163,12 @@ final class InstanceListBuilder extends EntityListBuilder {
     $row['save']['data'] = $instance->saveIsCurrent() ? $this->T('Yes') : $this->t('No');
     $row['history']['data'] = \sprintf('%d - %d', \count($instance->past ?? 0), \count($instance->future ?? 0));
 
-    return $row + parent::buildRow($instance);
+    $result = [
+      'data' => $row + parent::buildRow($instance),
+      'class' => $instance_id,
+    ];
+
+    return $result;
   }
 
   /**

@@ -1,3 +1,4 @@
-- 'tooltip "label: I am a component with a token I am a test token in a slot Click me"':
-  - 'heading "label: I am a component with a token" [level=5]'
+- 'tooltip "label: I am a component with a textfield I am a test textfield in a slot Click me"':
+  - 'heading "label: I am a component with a textfield" [level=5]'
+  - text: ""
   - button "Click me"

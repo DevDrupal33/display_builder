@@ -1,6 +1,6 @@
-- 'heading "label: I am a component with a token" [level=5]'
-- text: I am a test token in a slot
+- 'heading "label: I am a component with a textfield" [level=5]'
+- text: I am a test textfield in a slot
 - button "Click me"
-- 'heading "label: I am a component with a token" [level=5]'
-- text: I am a test token in a slot
+- 'heading "label: I am a component with a textfield" [level=5]'
+- text: I am a test textfield in a slot
 - button "Click me"

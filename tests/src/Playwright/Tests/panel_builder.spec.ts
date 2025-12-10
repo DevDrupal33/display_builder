@@ -8,7 +8,7 @@ test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.drush('state:set -y display_builder.asset_libraries_local true')
 })
 
-test('Drag and move', { tag: ['@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
+test('Builder: Drag and move', { tag: ['@display_builder', '@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
   const dbName = `test_${utils.createRandomString()}`
 
   await test.step(`Admin login`, async () => {
@@ -23,35 +23,37 @@ test('Drag and move', { tag: ['@display_builder_dev_tools'] }, async ({ page, dr
     await displayBuilder.shoelaceReady()
     await displayBuilder.fullHighlight()
 
-    await displayBuilder.dragSimpleComponentsWithToken('I am a test token in a slot in a Page Layout!')
+    const dropzoneRoot = page.locator('.db-dropzone--root').first()
+
+    await displayBuilder.dragSimpleComponentsWithTextfield('I am a test textfield in a slot!')
 
     await displayBuilder.dragElementFromLibraryById(
       'Components',
       'test_simple',
-      page.locator(`.db-island-builder > slot.db-dropzone`)
+      dropzoneRoot,
     )
 
     await displayBuilder.dragElementFromLibraryById(
       'Blocks',
-      'token',
-      page.locator(`.db-island-builder > slot.db-dropzone`)
+      'textfield',
+      dropzoneRoot,
     )
 
     await displayBuilder.dragElement(
-      page.locator(`.db-island-builder [data-node-title^="Token"]`).first(),
+      page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
       page.locator(`.db-island-builder [data-slot-id="slot_1"]`).first(),
     )
 
     await expect(page.locator(`.db-island-builder`)).toMatchAriaSnapshot(`
       - text: Test simple
       - 'heading \"label: none\" [level=5]'
-      - text: Token
-      - button \"Token\"
+      - text: Textfield
+      - button \"Textfield\"
       - text: Slot 1
       - button \"Click me\"
       - text: Test simple
       - 'heading \"label: none\" [level=5]'
-      - text: \"Token: I am a test token in a slot in a Page Layout! I am a test token in a slot in a Page Layout! Slot 1\"
+      - text: \"Textfield: I am a test textfield in a slot! I am a test textfield in a slot! Slot 1\"
       - button \"Click me\"
     `)
   })

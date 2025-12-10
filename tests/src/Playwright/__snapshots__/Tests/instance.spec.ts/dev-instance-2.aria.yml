@@ -1,3 +1,4 @@
+- text: "Test fixture: I am a test textfield in a slot!"
 - 'heading "label: This is a test" [level=5]'
-- text: I am a test token in a slot! This is a token test
+- text: This is a textfield test<p>This is a <b>Wysiwyg</b> test</p>
 - button "Click me"

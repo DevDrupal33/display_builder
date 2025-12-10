@@ -51,16 +51,16 @@ test(
     })
 
     await test.step(`Build the display`, async () => {
-      // Basic common drag component and token.
-      await displayBuilder.dragSimpleComponentsWithToken('I am a test token in a slot in a Page Layout!')
+      // Basic common drag component and textfield.
+      await displayBuilder.dragSimpleComponentsWithTextfield('I am a test textfield in a slot in a Page Layout!')
 
       // Result is based on the default page fixture with previous actions.
       // @see modules/display_builder_page_layout/fixtures/default_page_layout.yml
       await displayBuilder.closeDialog('both')
       await displayBuilder.publishDisplayBuilder()
 
-      // Test only the component and token as the urls from blocks account change
-      // in ci.
+      // Test only the component and textfield as the urls from blocks account
+      // change in ci.
       await displayBuilder.expectPreviewAriaSnapshot('page.aria.yml', '.db-island-preview .test_simple ')
     })
 
@@ -75,7 +75,7 @@ test(
       await page.getByRole('link', { name: 'Delete Test' }).click()
       // Instance is deleted(?) not yet...
       await page.goto(config.dbList)
-      await expect(page.getByRole('cell', { name: `${config.pagePrefix}${name}`, exact: true })).toBeVisible()
+      await expect(page.locator(`tr.${config.pagePrefix}${name}`)).toBeVisible()
     })
   }
 )

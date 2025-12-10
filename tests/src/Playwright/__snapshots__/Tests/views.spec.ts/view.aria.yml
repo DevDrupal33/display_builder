@@ -1,11 +1,4 @@
 - 'heading "label: none" [level=5]'
-- text: I am a test token in a slot in a View!
+- text: I am a test textfield in a slot in a View!
 - button "Click me"
-- button "[View] Header placeholder"
-- button "[View] Exposed placeholder"
-- button "[View] Attachment_before placeholder"
-- button "[View] Pager placeholder"
-- button "[View] Attachment_after placeholder"
-- button "[View] More placeholder"
-- button "[View] Footer placeholder"
-- button "[View] Feed_icons placeholder"
+- text: "[Placeholder] View header [Placeholder] View exposed form [Placeholder] View attachment before [Placeholder] View rows [Placeholder] View pager [Placeholder] View attachment after [Placeholder] View more [Placeholder] View footer [Placeholder] View feed icons"

@@ -1,3 +1,4 @@
 - 'heading "label: none" [level=5]'
-- text: I am a test token in a slot in a View!
+- text: I am a test textfield in a slot in a View!
 - button "Click me"
+- paragraph: This is the no results views area

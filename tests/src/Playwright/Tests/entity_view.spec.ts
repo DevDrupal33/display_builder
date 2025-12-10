@@ -71,13 +71,15 @@ test(
     })
 
     await test.step(`Build the display`, async () => {
-      // Basic common drag component and token.
-      await displayBuilder.dragSimpleComponentsWithToken('I am a test token in a slot in an Entity view!')
+      // Basic common drag component and textfield.
+      await displayBuilder.dragSimpleComponentsWithTextfield('I am a test textfield in a slot in an Entity view!')
+
+      await displayBuilder.closeDialog('second')
 
       // Instance form variant configuration
       await page
         .locator(`.db-island-builder [data-test="test_simple"]`)
-        .click()
+        .click({ position: {x: 5, y: 5} }) // Avoid click on the slot textfield.
       await displayBuilder.htmxReady()
 
       // Apply multiple config
@@ -134,9 +136,9 @@ test(
       await page.getByLabel('Profile', { exact: true }).selectOption('- Disabled -')
       await page.getByRole('button', { name: 'Save' }).click()
 
-      // Check it is not deleted (should it be?)
+      // @todo Check it is not deleted (should it be?)
       await page.goto(config.dbList)
-      await expect(page.getByRole('cell', { name: `${config.entityPrefix}node__${name}__default`, exact: true })).toBeVisible()
+      await expect(page.locator(`tr.${config.entityPrefix}node__${name}__default`)).toBeVisible()
     })
   }
 )
@@ -218,8 +220,8 @@ test(
 
       await page.getByRole('link', { name: 'Default display' }).click()
       await displayBuilder.shoelaceReady()
-      // Basic common drag component and token.
-      await displayBuilder.dragSimpleComponentsWithToken('I am a test token in a slot in an Entity view override!')
+      // Basic common drag component and textfield.
+      await displayBuilder.dragSimpleComponentsWithTextfield('I am a test textfield in a slot in an Entity view override!')
 
       // Check result on preview and on view entity page.
       await displayBuilder.closeDialog('both')
