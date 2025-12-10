@@ -9,7 +9,6 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\IslandBuilderInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\SlotSourceProxy;
@@ -29,7 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   type: IslandType::View,
   icon: 'tools',
 )]
-class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
+class BuilderPanel extends IslandPluginBase {
 
   /**
    * The renderer service.
@@ -139,9 +138,21 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
   }
 
   /**
-   * {@inheritdoc}
+   * Build renderable from state data.
+   *
+   * @param string $builder_id
+   *   Display Builder ID.
+   * @param string $instance_id
+   *   The instance ID.
+   * @param array $data
+   *   The UI Patterns form state data.
+   * @param int $index
+   *   (Optional) The index of the block. Default to 0.
+   *
+   * @return array|null
+   *   A renderable array.
    */
-  public function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
+  protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
     $component_id = $data['source']['component']['component_id'] ?? NULL;
     $instance_id = $instance_id ?: $data['node_id'];
 
@@ -181,9 +192,21 @@ class BuilderPanel extends IslandPluginBase implements IslandBuilderInterface {
   }
 
   /**
-   * {@inheritdoc}
+   * Build renderable from state data.
+   *
+   * @param string $builder_id
+   *   Display Builder ID.
+   * @param string $instance_id
+   *   The instance ID.
+   * @param array $data
+   *   The UI Patterns form state data.
+   * @param int $index
+   *   (Optional) The index of the block. Default to 0.
+   *
+   * @return array|null
+   *   A renderable array.
    */
-  public function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
+  protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
     $instance_id = $instance_id ?: $data['node_id'];
 
     if (!$instance_id) {
