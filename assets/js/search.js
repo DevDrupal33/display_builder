@@ -39,8 +39,6 @@
    */
   Drupal.behaviors.builderSearchBehaviors = {
     attach(context, settings) {
-      const debug = settings?.dbDebug ?? false;
-
       // Search inside Instance form, should be drawer end (right).
       once('dbSearch', '.db-search-instance', context).forEach((input) => {
         // Debounce to wait for tipping ad not throw too much search.
@@ -57,7 +55,7 @@
         (filterInput) => {
           // Debounce to wait for tipping ad not throw too much search.
           const eventHandler = debounce((event) => {
-            triggerLibrarySearch(context, event.target, debug);
+            triggerLibrarySearch(context, event.target);
           }, 300);
           filterInput.addEventListener('sl-input', eventHandler);
         },
@@ -72,10 +70,8 @@
    *   The element containing the search input and results to filter.
    * @param {HTMLElement} input
    *   The input to trigger search on.
-   * @param {boolean} debug
-   *   The debug flag.
    */
-  const triggerLibrarySearch = (element, input, debug) => {
+  const triggerLibrarySearch = (element, input) => {
     if (!input.dataset?.searchContainerId) return;
     const containerId = input.dataset.searchContainerId;
 
@@ -84,8 +80,6 @@
 
     const elements = element.querySelectorAll(`#${containerId} ${selector}`);
     if (!elements) {
-      if (debug)
-        console.warn(`No elements to search in: ${containerId} ${selector}`);
       return;
     }
 

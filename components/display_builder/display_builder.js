@@ -153,8 +153,6 @@
    */
   Drupal.behaviors.displayBuilder = {
     attach(context, settings) {
-      const debug = settings.dbDebug;
-
       once('dbInit', '.display-builder', context).forEach((builder) => {
         alterHtmxEvents(builder);
         Drupal.displayBuilder.initDrawer(builder);
@@ -162,7 +160,7 @@
 
       once('dbContextualMenu', '.display-builder', context).forEach(
         (builder) => {
-          Drupal.displayBuilder.menuAlterHtmxEvents(builder, debug);
+          Drupal.displayBuilder.menuAlterHtmxEvents(builder);
         },
       );
 
@@ -191,7 +189,6 @@
             flip,
           },
           menu,
-          debug,
         );
 
         // Register all plugins from the namespace

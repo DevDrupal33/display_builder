@@ -136,13 +136,6 @@ final class ProfileForm extends EntityForm {
       ];
     }
 
-    $form['debug'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Debug mode'),
-      '#description' => $this->t('Enable verbose JavaScript and error logs.'),
-      '#default_value' => $entity->get('debug'),
-    ];
-
     $form['status'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enabled'),

@@ -67,7 +67,6 @@ use Drupal\user\RoleInterface;
     'label',
     'description',
     'islands',
-    'debug',
     'weight',
   ],
 )]

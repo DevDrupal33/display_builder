@@ -65,7 +65,6 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
     self::assertSame($id, $profile->id());
     self::assertSame($data['label'], $profile->label());
     self::assertSame($data['description'], $profile->get('description'));
-    self::assertFalse($profile->get('debug'));
 
     // Test islands enabled.
     $config = $profile->getIslandConfigurations();
@@ -83,7 +82,6 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
     // Update the entity.
     $profile->set('label', 'Updated Builder');
     $profile->set('description', 'Updated Description');
-    $profile->set('debug', TRUE);
     $profile->set('islands', [
       'test_island_button' => $updated_island,
       'test_island_contextual' => $updated_island,
@@ -96,7 +94,6 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
     $updated = Profile::load('test_builder');
     self::assertSame('Updated Builder', $updated->label());
     self::assertSame('Updated Description', $updated->get('description'));
-    self::assertTrue($updated->get('debug'));
 
     // Test islands enabled.
     $config = $profile->getIslandConfigurations();
@@ -211,14 +208,6 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
 
     $url = $profile->toUrl('edit-plugin-form', ['island_id' => 'foo']);
     self::assertSame('/admin/structure/display-builder/url_test/edit/foo', $url->toString());
-  }
-
-  /**
-   * Test the library and debug mode.
-   */
-  public function testDebug(): void {
-    $profile = self::createDisplayBuilderProfile('lib_test', ['debug' => TRUE]);
-    self::assertTrue($profile->isDebugModeActivated());
   }
 
 }

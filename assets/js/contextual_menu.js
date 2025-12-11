@@ -18,34 +18,22 @@
  * // Usage example:
  * const menu = new ContextualMenu(islandElement, floatingUIOptions, menu, true);
  *
- * @param {HTMLElement} island
- *   The DOM element representing the builder "island" to attach the menu to.
- * @param {Object} options
- *   Options for FloatingUIDOM positioning middleware.
- * @param {HTMLElement} menu
- *   The DOM element representing the contextual menu.
- * @param {boolean} debug
- *   Whether to enable debug messages.
- *
  * @prop {HTMLElement} island
  *   The builder island element.
  * @prop {Object} options
  *   FloatingUIDOM options for menu positioning.
  * @prop {HTMLElement} menu
  *   The contextual menu element.
- * @prop {boolean} debug
- *   Debug flag.
  * @prop {string} builderId
  *   The builder instance ID, extracted from the menu dataset.
  * @prop {Array<Object>} plugins
  *   Registered plugin objects with hooks.
  */
 class ContextualMenu {
-  constructor(island, options, menu, debug) {
+  constructor(island, options, menu) {
     this.island = island;
     this.options = options;
     this.menu = menu;
-    this.debug = debug;
     this.builderId = menu?.dataset?.dbId;
     this.plugins = [];
     if (!this.menu || !this.builderId) return;
@@ -545,13 +533,11 @@ Drupal.displayBuilder.ContextualMenu = ContextualMenu;
  *
  * @param {Object} builder
  *   The builder.
- * @param {boolean} debug
- *   Whether to enable debug messages.
  *
  * @listens htmx:configRequest
  * @listens htmx:afterRequest
  */
-Drupal.displayBuilder.menuAlterHtmxEvents = (builder, debug) => {
+Drupal.displayBuilder.menuAlterHtmxEvents = (builder) => {
   builder.addEventListener('htmx:configRequest', (event) => {
     if (!event.target.dataset?.contextualMenu) return;
 
@@ -587,8 +573,6 @@ Drupal.displayBuilder.menuAlterHtmxEvents = (builder, debug) => {
       '__slot_position__',
       slotPosition,
     );
-
-    if (debug) console.log(`[menu] configRequest: ${event.detail.path}`);
   });
 
   builder.addEventListener('htmx:afterRequest', (event) => {
