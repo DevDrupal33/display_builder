@@ -182,8 +182,8 @@ trait RenderableBuilderTrait {
    *   The placeholder label.
    * @param array $vals
    *   HTMX vals data if the placeholder is triggering something when moving.
-   * @param \Drupal\Core\Url $preview_url
-   *   The preview_url prop value.
+   * @param \Drupal\Core\Url|null $preview_url
+   *   (Optional) The preview_url prop value.
    * @param string|null $keywords
    *   (Optional) Keywords attributes to add used by search.
    * @param string|null $thumbnail
@@ -192,7 +192,7 @@ trait RenderableBuilderTrait {
    * @return array
    *   A renderable array.
    */
-  protected function buildPlaceholderCardWithPreview(string|TranslatableMarkup $label, array $vals, Url $preview_url, ?string $keywords = NULL, ?string $thumbnail = NULL): array {
+  protected function buildPlaceholderCardWithPreview(string|TranslatableMarkup $label, array $vals, ?Url $preview_url, ?string $keywords = NULL, ?string $thumbnail = NULL): array {
     $build = $this->buildPlaceholder($label, '', $vals);
     $build['#props']['preview_url'] = $preview_url;
 

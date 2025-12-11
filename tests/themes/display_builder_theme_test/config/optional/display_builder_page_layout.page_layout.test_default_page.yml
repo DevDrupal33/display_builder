@@ -26,7 +26,7 @@ sources:
   - source_id: component
     source:
       component:
-        component_id: 'display_builder:html_wrapper'
+        component_id: 'display_builder_theme_test:html_wrapper'
         variant_id: null
         props:
           attributes:
@@ -72,7 +72,7 @@ sources:
               - source_id: component
                 source:
                   component:
-                    component_id: 'display_builder:html_wrapper'
+                    component_id: 'display_builder_theme_test:html_wrapper'
                     variant_id: null
                     props:
                       attributes:
@@ -89,7 +89,7 @@ sources:
                           - source_id: component
                             source:
                               component:
-                                component_id: 'display_builder:html_wrapper'
+                                component_id: 'display_builder_theme_test:html_wrapper'
                                 variant_id: null
                                 props:
                                   attributes:
@@ -112,7 +112,7 @@ sources:
                           - source_id: component
                             source:
                               component:
-                                component_id: 'display_builder:html_wrapper'
+                                component_id: 'display_builder_theme_test:html_wrapper'
                                 variant_id: null
                                 props:
                                   attributes:

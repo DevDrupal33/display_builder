@@ -75,11 +75,11 @@ class LayersPanel extends BuilderPanel {
   /**
    * {@inheritdoc}
    */
-  protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): array {
+  public function buildSingleComponent(string $builder_id, string $node_id, array $data, int $index = 0): array {
     $component_id = $data['source']['component']['component_id'] ?? NULL;
-    $instance_id = $instance_id ?: $data['node_id'];
+    $node_id = $node_id ?: $data['node_id'];
 
-    if (!$instance_id && !$component_id) {
+    if (!$node_id && !$component_id) {
       return [];
     }
 
@@ -92,35 +92,7 @@ class LayersPanel extends BuilderPanel {
     $slots = [];
 
     foreach ($component['slots'] ?? [] as $slot_id => $definition) {
-      $dropzone = [
-        '#type' => 'component',
-        '#component' => 'display_builder:dropzone',
-        '#props' => [
-          'title' => $definition['title'],
-          'variant' => 'highlighted',
-        ],
-        '#attributes' => [
-          // Required for JavaScript @see components/dropzone/dropzone.js.
-          'data-db-id' => $builder_id,
-          // Slot is needed for contextual menu paste.
-          // @see assets/js/contextual_menu.js
-          'data-slot-id' => $slot_id,
-          'data-slot-title' => $definition['title'],
-          'data-node-title' => $component['label'],
-        ],
-      ];
-
-      if (isset($data['source']['component']['slots'][$slot_id]['sources'])) {
-        $sources = $data['source']['component']['slots'][$slot_id]['sources'];
-        $dropzone['#slots']['content'] = $this->digFromSlot($builder_id, $sources);
-      }
-      $dropzone = $this->htmxEvents->onSlotDrop($dropzone, $builder_id, $this->getPluginID(), $instance_id, $slot_id);
-      $slots[] = [
-        [
-          '#plain_text' => $definition['title'],
-        ],
-        $dropzone,
-      ];
+      $slots[] = $this->buildSlot($builder_id, $node_id, $data, $component['label'], $slot_id, $definition['title']);
     }
     $name = $component['name'];
     $variant = $this->getComponentVariantLabel($data, $component);
@@ -129,12 +101,16 @@ class LayersPanel extends BuilderPanel {
       $name .= ' - ' . $variant;
     }
 
+    $is_element = ($component['provider'] === 'display_builder') && ($component['group'] === 'Generic');
     $build = [
       '#type' => 'component',
       '#component' => 'display_builder:layer',
       '#slots' => [
         'title' => $name,
         'children' => $slots,
+      ],
+      '#props' => [
+        'type' => $is_element ? 'element' : 'component',
       ],
       // Required for the context menu label.
       // @see assets/js/contextual_menu.js
@@ -144,7 +120,7 @@ class LayersPanel extends BuilderPanel {
     ];
     $build = $this->addThirdPartySettingsSummary($data, $build);
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, (string) $component['label'], $index);
+    return $this->htmxEvents->onInstanceClick($build, $builder_id, $node_id, (string) $component['label'], $index);
   }
 
   /**
@@ -174,6 +150,58 @@ class LayersPanel extends BuilderPanel {
     $build['#attributes']['data-slot-position'] = $index;
 
     return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['summary'], $index);
+  }
+
+  /**
+   * Build renderable from state data.
+   *
+   * @param string $instance_id
+   *   Display Builder instance ID.
+   * @param string $node_id
+   *   Tree node ID.
+   * @param array $data
+   *   The UI Patterns 2 form state data.
+   * @param string $component_label
+   *   Component label according to the SDC definition.
+   * @param string $slot_id
+   *   Slot ID according to the SDC definition.
+   * @param string $slot_label
+   *   Slot label according to the SDC definition.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  private function buildSlot(string $instance_id, string $node_id, array $data, string $component_label, string $slot_id, string $slot_label): array {
+    $dropzone = [
+      '#type' => 'component',
+      '#component' => 'display_builder:dropzone',
+      '#props' => [
+        'title' => $slot_label,
+        'variant' => 'highlighted',
+      ],
+      '#attributes' => [
+        // Required for JavaScript @see components/dropzone/dropzone.js.
+        'data-db-id' => $instance_id,
+        // Slot is needed for contextual menu paste.
+        // @see assets/js/contextual_menu.js
+        'data-slot-id' => $slot_id,
+        'data-slot-title' => $slot_label,
+        'data-node-title' => $component_label,
+      ],
+    ];
+
+    if (isset($data['source']['component']['slots'][$slot_id]['sources'])) {
+      $sources = $data['source']['component']['slots'][$slot_id]['sources'];
+      $dropzone['#slots']['content'] = $this->digFromSlot($instance_id, $sources);
+    }
+    $dropzone = $this->htmxEvents->onSlotDrop($dropzone, $instance_id, $this->getPluginID(), $node_id, $slot_id);
+
+    return [
+      [
+        '#plain_text' => $slot_label,
+      ],
+      $dropzone,
+    ];
   }
 
   /**

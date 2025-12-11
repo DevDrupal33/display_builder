@@ -10,4 +10,8 @@ slots:
     title: Children
 props:
   type: object
-  properties: {}
+  properties:
+    type:
+      title: Type
+      type: string
+      enum: ['component', 'block', 'element']

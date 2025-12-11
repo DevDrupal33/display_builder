@@ -50,6 +50,11 @@ class ComponentLibraryDefinitionHelper {
     $source = $this->sourceManager->createInstance('component');
 
     foreach ($definitions as $id => $definition) {
+      // Generic components are managed by ElementLibraryPanel.
+      if ($definition['provider'] === 'display_builder' && $definition['group'] === 'Generic') {
+        continue;
+      }
+
       if (!self::filterAccordingToConfiguration($id, $definition, $configuration, $exclude_by_id)) {
         continue;
       }
@@ -101,7 +106,7 @@ class ComponentLibraryDefinitionHelper {
    *   If NULL, that means a required prop has no default value and the
    *   component will be skipped.
    */
-  private function prepareComponentData(SourceWithChoicesInterface $source, Component $component): ?array {
+  public function prepareComponentData(SourceWithChoicesInterface $source, Component $component): ?array {
     $data = $source->getChoiceSettings($component->getPluginId());
     $props = $component->metadata->schema['properties'] ?? [];
     $source_cache = [];
@@ -224,6 +229,7 @@ class ComponentLibraryDefinitionHelper {
     // There is this weird mechanism in SDC adding the object type to all
     // props. We need to deal with that until we remove it.
     // @see \Drupal\Core\Theme\Component\ComponentMetadata::parseSchemaInfo()
+    // @see
     if ($prop['type'] === 'boolean' || empty(\array_diff($prop['type'], ['object', 'boolean']))) {
       return FALSE;
     }
