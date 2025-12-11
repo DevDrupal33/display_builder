@@ -7,10 +7,10 @@ namespace Drupal\display_builder_entity_view\Routing;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Routing\RouteBuildEvent;
 use Drupal\Core\Routing\RoutingEvents;
+use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder_entity_view\Controller\EntityViewController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -149,7 +149,7 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
    */
   private function getEntityTypes(): array {
     return \array_filter($this->entityTypeManager->getDefinitions(), static function (EntityTypeInterface $entity_type) {
-      return $entity_type->entityClassImplements(FieldableEntityInterface::class) && $entity_type->hasViewBuilderClass() && $entity_type->get('field_ui_base_route');
+      return DisplayBuilderHelpers::isDisplayBuilderEntityType($entity_type) && $entity_type->get('field_ui_base_route');
     });
   }
 

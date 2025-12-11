@@ -74,7 +74,7 @@ final class EntityViewController extends IntegrationControllerBase {
    *   The corresponding entity view display.
    */
   protected function getEntityViewDisplay(string $entity_type_id, string $bundle, string $view_mode): ?DisplayBuildableInterface {
-    $display_id = "{$entity_type_id}.{$bundle}.{$view_mode}";
+    $display_id = \sprintf('%s.%s.%s', $entity_type_id, $bundle, $view_mode);
 
     /** @var \Drupal\display_builder\DisplayBuildableInterface|null $display */
     $display = $this->entityTypeManager()->getStorage('entity_view_display')

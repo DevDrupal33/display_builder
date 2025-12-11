@@ -6,6 +6,8 @@ namespace Drupal\display_builder;
 
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
@@ -13,6 +15,20 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
  * Helpers related class for Display builder.
  */
 class DisplayBuilderHelpers {
+
+  /**
+   * Determines if a given entity type is display builder relevant or not.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entityType
+   *   The entity type.
+   *
+   * @return bool
+   *   Whether this entity type is a display builder candidate or not.
+   */
+  public static function isDisplayBuilderEntityType(EntityTypeInterface $entityType): bool {
+    return $entityType->entityClassImplements(FieldableEntityInterface::class)
+      && $entityType->hasViewBuilderClass();
+  }
 
   /**
    * Recursively search and replace values in a multi-dimensional array.

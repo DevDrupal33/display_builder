@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder_entity_view\Field;
 
 use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -81,7 +82,7 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
       'view_mode_name' => $entity_view->getMode(),
     ];
 
-    return Url::fromRoute("entity.{$entity_type_id}.display_builder.{$entity_view->getMode()}", $parameters);
+    return Url::fromRoute(\sprintf('entity.%s.display_builder.%s', $entity_type_id, $entity_view->getMode()), $parameters);
   }
 
   /**
@@ -107,6 +108,11 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
     [, $entity_type_id, $entity_id, $field_name] = \explode('__', $instance_id);
 
     $entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->load($entity_id);
+
+    if (!$entity) {
+      return Url::fromRoute('entity.display_builder_instance.collection');
+    }
+
     $display = self::getEntityViewDisplay($entity_type_id, $entity->bundle(), $field_name);
     $params = [
       $entity_type_id => $entity_id,
@@ -199,6 +205,10 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
     [, $entity_type_id, $entity_id] = \explode('__', $instance_id);
 
     $entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->load($entity_id);
+
+    if (!$entity) {
+      return AccessResult::neutral();
+    }
 
     return $entity->access('update', $account, TRUE);
   }

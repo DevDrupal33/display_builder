@@ -82,8 +82,7 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
   /**
    * Gets entity_view_display information grouped by entity type.
    *
-   * @todo To remove.
-   * https://www.drupal.org/project/display_builder/issues/3542273
+   * @todo should be replaced by service, see #3542273
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager service.

@@ -6,8 +6,8 @@ namespace Drupal\display_builder_entity_view\Hook;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Hook\Attribute\Hook;
+use Drupal\display_builder\DisplayBuilderHelpers;
 
 /**
  * Hook implementations for Navigation module support.
@@ -40,7 +40,7 @@ class Navigation {
       $canonical = $entityType->getLinkTemplate('canonical');
 
       foreach ($viewModeIds as $viewModeId) {
-        $entityType->setLinkTemplate("display_builder_override.{$viewModeId}", \sprintf('%s/display/%s', $canonical, $viewModeId));
+        $entityType->setLinkTemplate(\sprintf('display_builder_override.%s', $viewModeId), \sprintf('%s/display/%s', $canonical, $viewModeId));
       }
     }
   }
@@ -58,8 +58,7 @@ class Navigation {
    * @see \Drupal\layout_builder\Plugin\SectionStorage\OverridesSectionStorage::getEntityTypes()
    */
   protected function isDisplayBuilderEntityType(EntityTypeInterface $entityType): bool {
-    return $entityType->entityClassImplements(FieldableEntityInterface::class)
-      && $entityType->hasViewBuilderClass()
+    return DisplayBuilderHelpers::isDisplayBuilderEntityType($entityType)
       && $entityType->hasLinkTemplate('canonical');
   }
 
@@ -80,7 +79,7 @@ class Navigation {
       $viewModes = $this->configFactory->loadMultiple($viewModesList);
 
       foreach ($viewModes as $viewMode => $viewModeConfig) {
-        $viewModeIds[] = \str_replace("core.entity_view_mode.{$entityTypeId}.", '', $viewMode);
+        $viewModeIds[] = \str_replace(\sprintf('core.entity_view_mode.%s.', $entityTypeId), '', $viewMode);
       }
     }
 

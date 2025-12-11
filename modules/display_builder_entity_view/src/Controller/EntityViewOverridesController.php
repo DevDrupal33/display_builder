@@ -95,7 +95,7 @@ final class EntityViewOverridesController extends IntegrationControllerBase {
     $view_mode = $this->getFirstOverridableViewMode($entity, $account);
 
     if ($view_mode) {
-      $route = "entity.{$entity_type_id}.display_builder.{$view_mode}";
+      $route = \sprintf('entity.%s.display_builder.%s', $entity_type_id, $view_mode);
       $url = Url::fromRoute($route, [$entity_type_id => $entity->id()]);
       $response = new TrustedRedirectResponse($url->toString());
 

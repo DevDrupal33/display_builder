@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Drupal\display_builder_entity_view\Hook;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay;
@@ -23,6 +26,7 @@ class DisplayBuilderEntityViewHook {
 
   public function __construct(
     protected ModuleHandlerInterface $moduleHandler,
+    protected EntityTypeManagerInterface $entityTypeManager,
   ) {}
 
   /**
@@ -96,6 +100,56 @@ class DisplayBuilderEntityViewHook {
         'url' => DisplayBuilderItemList::getUrlFromInstanceId($id),
         'weight' => 10,
       ];
+    }
+  }
+
+  /**
+   * Implements hook_entity_delete().
+   *
+   * If the entity deleted has a display override, need to be deleted as well.
+   */
+  #[Hook('entity_delete')]
+  public function entityDelete(EntityInterface $entity): void {
+    $entity_type_id = $entity->getEntityTypeId();
+
+    if ($entity_type_id === 'display_builder_instance') {
+      return;
+    }
+    $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
+
+    // Only entities with display are concerned.
+    if (!DisplayBuilderHelpers::isDisplayBuilderEntityType($entity_type)) {
+      return;
+    }
+
+    $displays = $this->entityTypeManager->getStorage('entity_view_display')->loadByProperties([
+      'targetEntityType' => $entity_type_id,
+      'bundle' => $entity->bundle(),
+    ]);
+
+    $storage = $this->entityTypeManager->getStorage('display_builder_instance');
+
+    foreach ($displays as $display) {
+      // @phpstan-ignore-next-line
+      if (!$display->getDisplayBuilderOverrideField()) {
+        continue;
+      }
+      $field_name = $display->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY);
+
+      // Instance id same as in DisplayBuilderItemList.
+      $instance_id = \sprintf('%s%s__%s__%s',
+        DisplayBuilderItemList::getPrefix(),
+        $entity_type_id,
+        $entity->id(),
+        $field_name,
+      );
+
+      $instance = $storage->load($instance_id);
+
+      if (!$instance) {
+        return;
+      }
+      $storage->delete([$instance]);
     }
   }
 
