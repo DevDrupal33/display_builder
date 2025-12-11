@@ -4,3 +4,25 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+/* Mimic admin filters form like views exposed form. */
+.db-instances-filters {
+  display: flex;
+  flex-wrap: wrap;
+  margin-block: var(--space-l);
+  padding: var(--space-xs) var(--space-l) var(--space-l) var(--space-l);
+  border: var(--details-border-size) solid var(--details-border-color);
+  border-radius: var(--details-border-size-radius);
+  background-color: var(--color-white);
+  box-shadow: var(--details-box-shadow);
+  .form-item {
+    max-width: 100%;
+    margin-block: var(--space-s) 0;
+    margin-inline: 0 var(--space-xs);
+  }
+  .form-actions {
+    margin-top: calc(var(--line-height-form-label) + var(--space-s) + var(--space-xs));
+    .form-submit {
+      margin: 0 var(--space-s) 0 0;
+    }
+  }
+}
