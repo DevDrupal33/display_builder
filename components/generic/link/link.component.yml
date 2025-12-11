@@ -1,0 +1,14 @@
+name: Link wrapper
+description: A hyperlink to anything a URL can address.
+status: experimental
+group: Generic
+slots:
+  content:
+    title: Content
+props:
+  type: object
+  properties:
+    url:
+      title: URL
+      type: string
+      format: iri-reference

@@ -1,0 +1,21 @@
+name: Section
+description: Organize the document content into logical pieces.
+status: experimental
+group: Generic
+slots:
+  content:
+    title: Content
+props:
+  type: object
+  properties:
+    tag:
+      title: Element
+      type: string
+      enum:
+        - section
+        - article
+        - aside
+        - header
+        - footer
+        - div
+      default: section

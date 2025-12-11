@@ -134,7 +134,13 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
 
     /** @var \Drupal\display_builder\InstanceInterface $instance */
     $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($instance_id);
-    $contexts = $instance->getContexts() ?? [];
+
+    if (!$instance) {
+      $contexts = [];
+    }
+    else {
+      $contexts = $instance->getContexts() ?? [];
+    }
     $data = [];
 
     foreach ($sources as $source) {
