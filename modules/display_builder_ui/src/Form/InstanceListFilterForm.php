@@ -34,7 +34,7 @@ final class InstanceListFilterForm extends FormBase {
     ];
 
     // Context options from providers.
-    $context_options = ['' => $this->t('- Select context -')];
+    $context_options = ['' => $this->t('- Any -')];
 
     foreach ($providers as $provider) {
       $context_options[$provider['prefix']] = $provider['label'];
@@ -50,8 +50,8 @@ final class InstanceListFilterForm extends FormBase {
 
     $form['filters']['name'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Name'),
-      '#placeholder' => $this->t('Name contains'),
+      '#title' => $this->t('Instance name'),
+      '#placeholder' => $this->t('Instance contains'),
       '#title_display' => 'invisible',
       '#default_value' => $filters['name'] ?? '',
       '#size' => 30,

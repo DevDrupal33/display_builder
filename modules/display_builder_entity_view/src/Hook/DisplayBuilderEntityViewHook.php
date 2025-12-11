@@ -80,7 +80,7 @@ class DisplayBuilderEntityViewHook {
         'weight' => -1,
       ];
       $operations['edit'] = [
-        'title' => new TranslatableMarkup('Edit profile'),
+        'title' => new TranslatableMarkup('Edit display'),
         'url' => EntityViewDisplay::getDisplayUrlFromInstanceId($id),
         'weight' => 10,
       ];
@@ -92,7 +92,7 @@ class DisplayBuilderEntityViewHook {
         'weight' => -1,
       ];
       $operations['edit'] = [
-        'title' => new TranslatableMarkup('Edit profile'),
+        'title' => new TranslatableMarkup('Edit display'),
         'url' => DisplayBuilderItemList::getUrlFromInstanceId($id),
         'weight' => 10,
       ];
