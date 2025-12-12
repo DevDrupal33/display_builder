@@ -10,7 +10,7 @@ The feature is available as soon as the "Real-time collaboration" island is atta
 
 The island is showing the faces of the users which did a change the last 10 minutes.
 
-![Use](images/islands/collaboration.png)
+![Use](images/islands/collaboration.webp)
 
 If no users, or only the current user, were active the last 10 minutes, the island is not displayed.
 

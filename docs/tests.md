@@ -43,8 +43,8 @@ for more details.
 Pull and run Playwright server from this folder:
 
 ```sh
-docker pull mcr.microsoft.com/playwright:v1.56.1-noble
-docker run --add-host=hostmachine:host-gateway -p 3000:3000 --rm --init -it --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.56.1-noble /bin/sh -c "npx -y playwright@1.56.1 run-server --port 3000 --host 0.0.0.0"
+docker pull mcr.microsoft.com/playwright:v1.57.0-noble
+docker run --add-host=hostmachine:host-gateway -p 3000:3000 --rm --init -it --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.57.0-noble /bin/sh -c "npx -y playwright@1.57.0 run-server --port 3000 --host 0.0.0.0"
 ```
 
 Launch a webserver on Drupal **root**, for example:

@@ -61,7 +61,7 @@ nav:
       - With source plugins: 'source-plugins.md'
   - Contributing:
       - Contributing: 'contributing.md'
-      - Tests: 'tests.md'
+      - Tests e2e: 'tests.md'
       - Security model: 'security-model.md'
   - Frequently asked questions: 'faq.md'
 

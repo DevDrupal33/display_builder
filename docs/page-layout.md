@@ -41,10 +41,10 @@ Or from the edit page:
 
 The Display Builder instance is a normal one with some data preloaded (but not already saved) and some sources specific to the "Page" context:
 
-- Page title
-- Main content
-- Local tasks
-- Local actions
+- `[Page] title`
+- `[Page] Main content`
+- `Primary admin actions`
+- `Tabs`
 
 ![Display Builder for Page layout](images/page-layout-builder.webp)
 
@@ -91,7 +91,7 @@ conditions:
   request_path:
     id: request_path
     pages: /user/1
-    negate: "0"
+    negate: '0'
 ```
 
 Overview:

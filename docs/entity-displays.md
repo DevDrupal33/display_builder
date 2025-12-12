@@ -27,13 +27,13 @@ Display Builder is saving every state in the memory, but is not auto-saving to t
 
 You can manually save the current state in the configuration or restore the state currently saved in the configuration:
 
-![](images/state-buttons.webp)
+![State Buttons](images/state-buttons.webp)
 
 ## Use with Layout Builder
 
 Both can be activated at the same time and they don't conflict while building the display:
 
-![](images/entity-view-lb.webp)
+![Entity View](images/entity-view-lb.webp)
 
 However, only one of the tool will be used to render the content.
 
@@ -61,4 +61,4 @@ third_party_settings:
 
 Overview:
 
-![](images/entity-view-internals.webp)
+![Entity View internal](images/entity-view-internals.webp)

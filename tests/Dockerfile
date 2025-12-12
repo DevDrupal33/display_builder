@@ -5,4 +5,4 @@ RUN mkdir -p /app/
 
 WORKDIR /app
 
-RUN npx -y playwright@1.56.1 install --with-deps
+RUN npx -y playwright@1.57.0 install --with-deps

@@ -6,18 +6,18 @@
     "require": {
         "php": ">=8.3",
         "drupal/core": "^11.3",
-        "drupal/ui_patterns": "^2.0.11"
+        "drupal/ui_patterns": "^2.0.13"
     },
     "require-dev": {
         "drupal/ui_icons": "^1.1",
         "drupal/ui_skins": "^1.1",
-        "drupal/ui_styles": "^1.18",
+        "drupal/ui_styles": "^1.19",
         "drupal/display_builder_dev_tools": "1.0.x-dev"
     },
     "extra": {
         "patches": {
             "drupal/core": {
-                "1 - LayoutBuilderEntityViewDisplay class does not correspond to an entity type - https://www.drupal.org/project/drupal/issues/3127026#comment-13617105": "https://git.drupalcode.org/project/drupal/-/merge_requests/12799.diff",
+                "1 - LayoutBuilderEntityViewDisplay class does not correspond to an entity type - https://www.drupal.org/project/drupal/issues/3127026": "https://git.drupalcode.org/project/drupal/-/merge_requests/12799.diff",
                 "2 - PageDisplayVariant does not transmit cache metadata - https://www.drupal.org/project/drupal/issues/3557014": "https://git.drupalcode.org/issue/drupal-3557014/-/commit/3b38aa264d9101548946a06c27dc23997de55fb4.patch"
             }
         }

@@ -26,43 +26,35 @@ Display Builder **could** require patches, always check and include what's in [c
 It's recommended to ease this step using [Composer patches Plugin](https://github.com/cweagans/composer-patches) with this configuration in your main composer file:
 
 ```yaml
-{
-  "require": {
-    "cweagans/composer-patches": "^1.7",
-    # [...]
-  },
-  "config": {
-    "allow-plugins": {
-      "cweagans/composer-patches": true,
+{ 'require': {
+      'cweagans/composer-patches': '^1.7',
       # [...]
-    },
-  },
-  "extra": {
-    "enable-patching": true,
-    "patchLevel": {
-      "drupal/core": "-p2"
-    },
-    # [...]
-    "patches": {
-      "drupal/core": {
-         "__ADD_ANY_DISPLAY_BUILDER_PATCH_CORE_HERE__": "__ADD_ANY_DISPLAY_BUILDER_PATCH_CORE_HERE__"
-      }
-    }
-  }
-}
+    }, 'config': { 'allow-plugins': {
+          'cweagans/composer-patches': true,
+          # [...]
+        } }, 'extra': {
+      'enable-patching': true,
+      'patchLevel': { 'drupal/core': '-p2' },
+      # [...]
+      'patches':
+        {
+          'drupal/core':
+            {
+              '__ADD_ANY_DISPLAY_BUILDER_PATCH_CORE_HERE__': '__ADD_ANY_DISPLAY_BUILDER_PATCH_CORE_HERE__',
+            },
+        },
+    } }
 ```
 
 ## Configuration steps
 
 Before enabling `display_builder`, you **MUST**:
 
-- Disable JavaScript files aggregation to avoid issues with the _[Entity] ➜ [Field]_ context switcher in entity view displays
 - Activate your component-based theme as the default front theme (to allow some temporary demo fixtures to be loaded)
 
 With command-line:
 
 ```shell
-drush -y config-set system.performance js.preprocess 0
 drush theme:enable my_theme
 drush -y config-set system.theme default my_theme
 drush -y en display_builder

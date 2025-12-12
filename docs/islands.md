@@ -26,19 +26,19 @@ By default, 3 libraries are available:
 - Block for all other data sources for slots (field, blocks, WYSIWYG...)
 - Presets for pattern presets
 
-![Library](images/islands/library.png)
+![Library](images/islands/library.webp)
 
 ### Builder
 
 The Display Builder main island. Build the display with dynamic preview.
 
-![Builder](images/islands/builder.png)
+![Builder](images/islands/builder.webp)
 
 ### Layers
 
 Manage hierarchical layer view of elements without preview.
 
-![Layers](images/islands/layers.png)
+![Layers](images/islands/layers.webp)
 
 Layers is better for dropping components and blocks when the preview in the builder panel is making thinks complicated. For examples: a modal, a sliding slider, a collapsing accordion...
 
@@ -46,19 +46,19 @@ Layers is better for dropping components and blocks when the preview in the buil
 
 Hierarchical view of components and blocks.
 
-![Library](images/islands/tree.png)
+![Library](images/islands/tree.webp)
 
 ### Preview
 
 Show a real time preview of the display.
 
-![Preview](images/islands/preview.png)
+![Preview](images/islands/preview.webp)
 
 ### Logs
 
 Logs based on changes history.
 
-![Logs](images/islands/logs.png)
+![Logs](images/islands/logs.webp)
 
 > 🚧 2025-11-09: History steps are currently limited to 10.
 
@@ -75,7 +75,7 @@ When a buttons island is made of proper button component it is possible to confi
 
 Undo and redo changes.
 
-![History](images/islands/history.png)
+![History](images/islands/history.webp)
 
 > 🚧 2025-11-09: History steps are currently limited to 10.
 
@@ -83,60 +83,37 @@ Undo and redo changes.
 
 Publish and reset the display.
 
-![State](images/islands/state.png)
+![State](images/islands/state.webp)
 
 With 3 available buttons:
 
-- XXX
-- XXX
-- XXX (for entity view override only)
+- Publish
+- Restore (Restore to last published version)
+- Revert (for entity view override only, revert to default display for this entity)
 
 ### Controls
 
 Control the building experience.
 
-![Controls](images/islands/controls.png)
-
-With 4 available buttons:
-
-- Help (keyboard and more)
-- Toggle full screen
-- Highlight
-- Theme mode selector
-
-> 🚧 2025-07-01: Do we keep Theme mode selector?
+![Controls](images/islands/controls.webp)
 
 ### Real-time collaboration
 
 See [real-time collaboration documentation](realtime-collaboration.md).
 
-![Preview](images/islands/back.png)
-
-Configuration:
-
-| Option      | Type | Default value |
-| ----------- | ---- | ------------- |
-| Image field | XXX  | XXX           |
-| Image style | XXX  | XXX           |
+![Preview](images/islands/back.webp)
 
 ### Viewport switcher
 
 Change main region width according to breakpoints.
 
-![Preview](images/islands/viewport.png)
-
-Configuration:
-
-| Option            | Type | Default value |
-| ----------------- | ---- | ------------- |
-| Selector format   | XXX  | XXX           |
-| Exclude providers | XXX  | XXX           |
+![Preview](images/islands/viewport.webp)
 
 ### Back
 
 Exit the display builder and go back to admin UI.
 
-![Preview](images/islands/back.png)
+![Preview](images/islands/back.webp)
 
 ## Library panels
 
@@ -144,33 +121,15 @@ Exit the display builder and go back to admin UI.
 
 List of available components (SDC).
 
-![Preview](images/islands/component_library.png)
+![Preview](images/islands/component_library.webp)
 
-Configuration:
-
-| Option                                 | Type | Default value |
-| -------------------------------------- | ---- | ------------- |
-| Exclude providers                      | XXX  | XXX           |
-| Exclude by ID                          | XXX  | XXX           |
-| Allowed status                         | XXX  | XXX           |
-| Show components grouped                | XXX  | XXX           |
-| Show components variants               | XXX  | XXX           |
-| Show components mosaic                 | XXX  | XXX           |
-| Include marked as excluded from the UI | XXX  | XXX           |
-
-> 🚧 2025-11-09: Those options may change.
+A specific configuration allow to pick available components.
 
 ### Blocks
 
-List of available blocks. XXX
+List of available blocks.
 
-![Preview](images/islands/block_library.png)
-
-Configuration:
-
-| Option          | Type | Default value |
-| --------------- | ---- | ------------- |
-| Exclude modules | XXX  | XXX           |
+![Preview](images/islands/block_library.webp)
 
 ### Presets
 
@@ -180,39 +139,17 @@ See [patterns presets documentation](pattern-presets.md).
 
 Available on secondary click on a block, component or slot, in Builder or Layer panels:
 
-![Logs](images/islands/menu.png)
+![Logs](images/islands/menu.webp)
 
-The menu title is the block, or component
-
-HOW IS IT BUILT?
-
-### Main actions
-
-Actions:
-
-| Action    | On a component | On a component slot     | On a block |
-| --------- | -------------- | ----------------------- | ---------- |
-| Copy      | ✅             | ✅ the parent component | ✅         |
-| Paste     | ???            | ???                     | ???        |
-| Duplicate | ✅             | ✅ the parent component | ✅         |
+The menu title is the block, or component with tree position.
 
 ### Preset
 
-Actions:
-
-| Action           | On a component | On a component slot     | On a block |
-| ---------------- | -------------- | ----------------------- | ---------- |
-| Save as a preset | ✅             | ✅ the parent component | ✅         |
-
-See also: Preset library.
+See also: [patterns presets documentation](pattern-presets.md).
 
 ### Delete
 
-Remove a component or block:
-
-| Action | On a component | On a component slot     | On a block |
-| ------ | -------------- | ----------------------- | ---------- |
-| Delete | ✅             | ✅ the parent component | ✅         |
+Remove a component or block with all children.
 
 ## Contextual panels
 
@@ -220,11 +157,11 @@ Remove a component or block:
 
 Configure the active component or block.
 
-### UI Styles
+### Styles
 
 Apply style utilities to the active component or block.
 
-### UI Skins
+### Skins
 
 Override CSS variables for the active component or block.
 

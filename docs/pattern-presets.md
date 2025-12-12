@@ -2,8 +2,8 @@
 
 A pattern preset is a reusable arrangement of components, because:
 
-- "Pattern" is the design systems term for "an arrangement of components for a specific purpose" (not to be confused with "UI Patterns" module which was previously using "patterns" term for "components")
-- "Preset" is what is actually happening under the hood: saving and reusing those arrangements
+- **Pattern** is the design systems term for "an arrangement of components for a specific purpose" (not to be confused with "UI Patterns" module which was previously using "patterns" term for "components")
+- **Preset** is what is actually happening under the hood: saving and reusing those arrangements
 
 They must not be confused with UI components:
 
@@ -12,14 +12,14 @@ They must not be confused with UI components:
 
 ## Activate
 
-"Preset actions" menu and "Preset library" must be enabled in the Display Builder's profile:
+**Preset actions** menu and **Preset library** must be enabled in the Display Builder's profile:
 
 ![Menu island configuration](images/menu-islands-config.webp)
 ![Menu island configuration](images/menu-library-config.webp)
 
 ## Create a pattern preset
 
-You can click on any element of the builder panel and select "Save as preset":
+You can click on any element of the builder panel and select **Save as preset**:
 
 ![Presets menu](images/presets-menu.webp)
 

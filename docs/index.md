@@ -1,6 +1,8 @@
-# Display Builder documentation
+# Display Builder
 
-A display building tool by the [UI Suite](https://www.drupal.org/project/ui_suite) team:
+![Entity sources](images/entity-display-sources.webp)
+
+A display building tool by the [UI Suite](https://www.drupal.org/project/ui_suite) team.
 
 - **Design system native**: fully use your design system (components, style utilities, icons, themes/modes, CSS variables...) directly in Drupal without the burden of compatibility layers
 - **Unified**: can be used instead of Layout Builder for entity view displays, Block Layout for page displays, and as a replacement of the Views' display building feature
