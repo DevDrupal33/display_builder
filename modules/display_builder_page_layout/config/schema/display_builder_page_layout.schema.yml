@@ -27,9 +27,9 @@ display_builder_page_layout.page_layout.*:
           prefix: 'display_builder.profile.'
     sources:
       label: 'UI Patterns sources'
-      type: sequence
+      type: symmetric_translatable
       sequence:
-        type: ignore
+        type: ui_patterns_source.[source_id]
   constraints:
     FullyValidatable: ~
 
