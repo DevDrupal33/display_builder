@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_page_layout\Form;
 
-use Drupal\Core\Condition\ConditionManager;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Executable\ExecutableManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -23,8 +24,9 @@ final class PageLayoutForm extends EntityForm {
 
   public function __construct(
     private readonly ConfigFormBuilderInterface $configFormBuilder,
+    private readonly ContextRepositoryInterface $contextRepository,
     #[Autowire(service: 'plugin.manager.condition')]
-    private readonly ConditionManager $conditionManager,
+    private readonly ExecutableManagerInterface $conditionManager,
     private readonly LanguageManagerInterface $languageManager,
   ) {}
 
@@ -33,6 +35,14 @@ final class PageLayoutForm extends EntityForm {
    */
   public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
+
+    /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $entity */
+    $entity = $this->entity;
+
+    // Store the gathered contexts in the form state for other objects to use
+    // during form building.
+    $form_state->setTemporaryValue('gathered_contexts', $this->contextRepository->getAvailableContexts());
+
     // Because of $form['conditions'].
     $form['#tree'] = TRUE;
 
@@ -40,21 +50,19 @@ final class PageLayoutForm extends EntityForm {
       '#type' => 'textfield',
       '#title' => $this->t('Label'),
       '#maxlength' => 255,
-      '#default_value' => $this->entity->label(),
+      '#default_value' => $entity->label(),
       '#required' => TRUE,
     ];
 
     $form['id'] = [
       '#type' => 'machine_name',
-      '#default_value' => $this->entity->id(),
+      '#default_value' => $entity->id(),
       '#machine_name' => [
         'exists' => [PageLayout::class, 'load'],
       ],
-      '#disabled' => !$this->entity->isNew(),
+      '#disabled' => !$entity->isNew(),
     ];
 
-    /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $entity */
-    $entity = $this->entity;
     $form = \array_merge($form, $this->configFormBuilder->build($entity));
 
     $form['conditions'] = $this->buildConditionsForm([], $form_state);
@@ -129,7 +137,9 @@ final class PageLayoutForm extends EntityForm {
     $entity = $this->entity;
     // @todo \PluginNotFoundException:
     $conditions = $entity->getConditions()->getConfiguration();
-    $definitions = $this->conditionManager->getDefinitions();
+
+    // Important to filter with contexts to have ContextAware working.
+    $definitions = $this->conditionManager->getFilteredDefinitions('page_layout', $form_state->getTemporaryValue('gathered_contexts'), ['page_layout' => $entity]);
 
     foreach ($definitions as $condition_id => $definition) {
       // Don't display the current theme condition.

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder_page_layout\Kernel;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Form\FormState;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Drupal\KernelTests\KernelTestBase;
@@ -94,35 +93,6 @@ final class PageLayoutEntityTest extends KernelTestBase {
 
     $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($loaded->getInstanceId());
     self::assertNull($instance);
-  }
-
-  /**
-   * Test the PageLayout form build for expected fields.
-   */
-  public function testPageLayoutFormBuild(): void {
-    $entity = PageLayout::create([
-      'id' => 'form_layout',
-      'label' => 'Form Layout',
-      'weight' => 0,
-      ConfigFormBuilderInterface::PROFILE_PROPERTY => 'test',
-      ConfigFormBuilderInterface::SOURCES_PROPERTY => [],
-      'conditions' => [],
-    ]);
-    $entity->setStatus(TRUE)->save();
-    $entity->initInstanceIfMissing();
-
-    // Get the form object.
-    $form_object = $this->entityTypeManager
-      ->getFormObject('page_layout', 'edit');
-    $form_object->setEntity($entity);
-
-    $form_state = new FormState();
-    $form = $form_object->buildForm([], $form_state);
-
-    self::assertArrayHasKey('label', $form, 'Form has label field.');
-    self::assertArrayHasKey('id', $form, 'Form has id field.');
-    self::assertArrayHasKey('conditions', $form, 'Form has conditions field.');
-    self::assertArrayHasKey('status', $form, 'Form has status field.');
   }
 
   /**

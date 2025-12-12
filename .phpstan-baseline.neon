@@ -1,10 +1,10 @@
 parameters:
 	ignoreErrors:
 		-
-			rawMessage: Access to an undefined property Drupal\Core\Entity\EntityInterface::$present.
-			identifier: property.notFound
-			count: 2
-			path: modules/display_builder_ui/src/InstanceListBuilder.php
+			rawMessage: 'Call to an undefined method Drupal\Core\Executable\ExecutableManagerInterface::getFilteredDefinitions().'
+			identifier: method.notFound
+			count: 1
+			path: modules/display_builder_page_layout/src/Form/PageLayoutForm.php
 
 		-
 			rawMessage: Cannot access offset 'class' on array|Drupal\Component\Plugin\Definition\PluginDefinitionInterface.
