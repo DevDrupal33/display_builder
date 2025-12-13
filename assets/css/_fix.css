@@ -26,3 +26,11 @@
   width: 100%;
   padding: 1rem;
 }
+
+/* DSFR fixes */
+/* Checkbox in config details without label is hidden below */
+.display-builder .db-form details .fr-checkbox-group input[type="checkbox"] {
+  position: relative;
+  width: 1rem;
+  opacity: 1;
+}
