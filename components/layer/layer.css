@@ -15,20 +15,21 @@
   --layer-pill-border: var(--sl-color-warning-300);
   --layer-pill-text: var(--sl-color-neutral-950);
   --layer-slot-title-color: var(--sl-color-warning-800);
-  --layer-dropzone-slot-min-height: 0.75rem;
+  --layer-dropzone-slot-min-height: 1rem;
 }
 
 /* When moving something inside the builder highlight the slots. */
 .display-builder--onMove .db-island-layers [data-slot-id] {
-  padding: 1rem 1rem 0.5rem 1rem;
+  /* padding: 1rem 1rem 0.5rem 1rem; */
   outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
   outline-offset: var(--dropzone-slot-outline-offset);
 }
 
 .display-builder--onMove {
   .db-dropzone--root {
-    border: 2px dashed var(--dropzone-color-target);
+    outline: 2px dashed var(--dropzone-color-target);
   }
+
   .db-island-layers .db-layer--component:hover::part(base) {
     border-color: var(--layer-component-border-color) !important;
     background-color: var(--layer-base-container-bg-color) !important;
@@ -60,6 +61,7 @@
       border: 2px dashed transparent;
       border-radius: var(--sl-border-radius-small);
     }
+
     &::part(header) {
       padding: 0.2rem 0.5rem;
       border-bottom: none;
@@ -67,6 +69,7 @@
 
     &:hover {
       color: var(--layer-text-color-hover);
+
       &::part(base) {
         box-shadow: var(--sl-shadow-large);
       }
@@ -87,16 +90,19 @@
       margin: 0 0.25rem 0 1rem;
       text-align: right;
       font-size: 0.75rem;
+
       em {
         margin-right: 0.2rem;
         margin-left: 0.3rem;
       }
+
       ul {
         display: inline;
         margin: 0;
         padding: 0;
         list-style: none;
       }
+
       li {
         display: inline-block;
         margin-right: 0.125rem;
@@ -113,6 +119,7 @@
       padding-left: 0.4375rem;
       color: var(--layer-slot-title-color);
       font-style: italic;
+
       > * {
         font-style: normal;
       }
