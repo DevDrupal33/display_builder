@@ -52,7 +52,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
       '#component' => 'display_builder:display_builder',
       '#props' => [
         'builder_id' => $builder_id,
-        'hash' => (string) $builder->getCurrent()->hash,
+        'hash' => (string) $builder->getRevisionId(),
       ],
       '#slots' => $this->buildSlots($builder, $islands_enabled_sorted),
       '#attached' => [

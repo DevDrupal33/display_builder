@@ -7,8 +7,9 @@ namespace Drupal\display_builder;
 use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageBase;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\RevisionableInterface;
+use Drupal\Core\Entity\RevisionableStorageInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\display_builder\Entity\Instance;
@@ -17,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Base class for content entity storage handlers.
  */
-class InstanceStorage extends EntityStorageBase implements EntityStorageInterface {
+class InstanceStorage extends EntityStorageBase implements RevisionableStorageInterface {
 
   private const STORAGE_PREFIX = 'display_builder_';
 
@@ -94,6 +95,91 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
     $this->state->resetCache();
 
     return parent::loadUnchanged($id);
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableStorageInterface
+   */
+  public function createRevision(RevisionableInterface $entity, mixed $default = TRUE): RevisionableInterface {
+    // @todo implements
+    return $entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableStorageInterface
+   */
+  public function loadRevision(mixed $revision_id): ?RevisionableInterface {
+    return $this->loadMultipleRevisions([$revision_id])[0];
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableStorageInterface
+   */
+  public function loadMultipleRevisions(array $revision_ids): array {
+    if (empty($revision_ids)) {
+      return [];
+    }
+    $revisions = [];
+
+    foreach ($this->doLoadMultiple() as $instance) {
+      /** @var \Drupal\display_builder\Entity\Instance $instance */
+      $data = $instance->toArray();
+      $steps = \array_merge($data['past'], [$data['present']], $data['future']);
+
+      foreach ($steps as $step) {
+        if (!\in_array($step->hash, $revision_ids, TRUE)) {
+          continue;
+        }
+        // @todo set the step/revision
+        $revisions[] = $instance;
+        $revision_ids = \array_filter($revision_ids, static function ($value) use ($step) {
+          return $value !== $step->hash;
+        });
+
+        if (empty($revision_ids)) {
+          return $revisions;
+        }
+      }
+    }
+
+    return $revisions;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableStorageInterface
+   */
+  public function loadRevisionUnchanged(mixed $revision_id): ?EntityInterface {
+    // @todo what is the difference with ::loadRevision()?
+    return $this->loadRevision($revision_id);
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableStorageInterface
+   */
+  public function deleteRevision(mixed $revision_id): void {
+    // @todo implements
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableStorageInterface
+   */
+  public function getLatestRevisionId(mixed $entity_id): int|string|null {
+    $data = $this->load($entity_id)->toArray();
+
+    // @todo is it really the last item?
+    return $data['future'][\array_key_last($data['future'])]->hash;
   }
 
   /**

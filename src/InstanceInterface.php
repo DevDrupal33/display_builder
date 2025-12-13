@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\RevisionLogInterface;
 
 /**
  * Provides an interface defining a display builder instance entity type.
  */
-interface InstanceInterface extends EntityInterface, HistoryInterface {
+interface InstanceInterface extends EntityInterface, HistoryInterface, RevisionLogInterface {
 
   /**
    * Returns the display builder profile.

@@ -10,6 +10,8 @@ use Drupal\Core\Entity\Attribute\EntityType;
 use Drupal\Core\Entity\EntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\RevisionableInterface;
+use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -22,6 +24,7 @@ use Drupal\display_builder\SlotSourceProxy;
 use Drupal\display_builder_ui\InstanceListBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
+use Drupal\user\UserInterface;
 
 /**
  * Defines the display builder instance entity class.
@@ -442,7 +445,7 @@ class Instance extends EntityBase implements InstanceInterface {
    * @see \Drupal\display_builder\HistoryInterface
    */
   public function getCurrentState(): array {
-    return $this->getCurrent()->data ?? [];
+    return $this->present->data ?? [];
   }
 
   /**
@@ -664,6 +667,170 @@ class Instance extends EntityBase implements InstanceInterface {
   public static function getUniqId(array $data): int {
     return \crc32((string) \serialize($data));
   }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionLogInterface
+   */
+  public function getRevisionCreationTime(): int {
+    return $this->present->time;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionLogInterface
+   */
+  public function setRevisionCreationTime(mixed $timestamp): RevisionLogInterface {
+    // @todo implements
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionLogInterface
+   */
+  public function getRevisionUser(): ?UserInterface {
+    $uid = $this->getRevisionUserId();
+
+    if ($uid !== NULL) {
+      return $this->entityTypeManager()->getStorage('user')->load($uid);
+    }
+
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionLogInterface
+   */
+  public function setRevisionUser(UserInterface $account): RevisionLogInterface {
+    // @todo implements
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionLogInterface
+   */
+  public function getRevisionUserId(): ?int {
+    return $this->present->user;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionLogInterface
+   */
+  public function setRevisionUserId(mixed $user_id): RevisionLogInterface {
+    // @todo implements
+    return $this;
+  }
+
+  /**
+   * Returns the entity revision log message.
+   *
+   * @return string|null
+   *   The revision log message, or NULL if not set.
+   */
+  public function getRevisionLogMessage(): ?string {
+    return (string) $this->present?->log;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionLogInterface
+   */
+  public function setRevisionLogMessage(mixed $revision_log_message): RevisionLogInterface {
+    // @todo implements
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableInterface
+   */
+  public function isNewRevision(): bool {
+    // @todo latest & not saved
+    return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableInterface
+   */
+  public function setNewRevision(mixed $value = TRUE): void {}
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableInterface
+   */
+  public function getRevisionId(): int|string|null {
+    return $this->present?->hash;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableInterface
+   */
+  public function getLoadedRevisionId(): int {
+    // @todo what is the difference with ::getRevisionId()?
+    return $this->present->hash;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableInterface
+   */
+  public function updateLoadedRevisionId(): RevisionableInterface {
+    // @todo implements
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableInterface
+   */
+  public function isDefaultRevision(mixed $new_value = NULL): bool {
+    return $this->saveIsCurrent();
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableInterface
+   */
+  public function wasDefaultRevision(): bool {
+    // @todo check if present is in past
+    return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableInterface
+   */
+  public function isLatestRevision(): bool {
+    return empty($this->future);
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @see \Drupal\Core\Entity\RevisionableInterface
+   */
+  public function preSaveRevision(EntityStorageInterface $storage, \stdClass $record): void {}
 
   /**
    * Build the index from a slot.
