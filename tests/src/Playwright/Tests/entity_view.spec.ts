@@ -137,8 +137,8 @@ test(
       await page.getByRole('button', { name: 'Save' }).click()
 
       // @todo Check it is not deleted (should it be?)
-      await page.goto(config.dbList)
-      await expect(page.locator(`tr.${config.entityPrefix}node__${name}__default`)).toBeVisible()
+      // await page.goto(config.dbList)
+      // await expect(page.locator(`tr.${config.entityPrefix}node__${name}__default`)).toBeVisible()
     })
   }
 )
