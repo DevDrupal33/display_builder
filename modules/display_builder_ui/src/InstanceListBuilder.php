@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Pager\PagerManagerInterface;
 use Drupal\Core\Utility\TableSort;
@@ -34,6 +35,7 @@ final class InstanceListBuilder extends EntityListBuilder {
   public function __construct(
     protected EntityTypeInterface $entity_type,
     EntityStorageInterface $storage,
+    private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly DateFormatterInterface $dateFormatter,
     private readonly FormBuilderInterface $formBuilder,
     private readonly PagerManagerInterface $pagerManager,
@@ -49,6 +51,7 @@ final class InstanceListBuilder extends EntityListBuilder {
     return new self(
       $entity_type,
       $container->get('entity_type.manager')->getStorage($entity_type->id()),
+      $container->get('entity_type.manager'),
       $container->get('date.formatter'),
       $container->get('form_builder'),
       $container->get('pager.manager'),
@@ -93,12 +96,6 @@ final class InstanceListBuilder extends EntityListBuilder {
         'data' => $this->t('Last log'),
         'class' => ['priority-low'],
       ],
-      'save' => [
-        'data' => $this->t('Save is present?'),
-        'field' => 'save_is_present',
-        'sort' => 'asc',
-      ],
-      'history' => $this->t('History (past - future)'),
     ];
 
     return $header + parent::buildHeader();
@@ -112,9 +109,15 @@ final class InstanceListBuilder extends EntityListBuilder {
 
     $build['#attached']['library'][] = 'display_builder_ui/instance_list';
 
+    $info = $this->t('Instances are versions of displays (entity views, page layouts, views...) currently under work.');
+    $info .= '<br>';
+    $info .= $this->t('They are created automatically from the displays and saved in the display configuration.');
+
     $build['notice'] = [
-      '#markup' => '<p>' . $this->t('Instances are versions of displays (entity views, page layouts, views...) currently under work.') . ' '
-      . $this->t('They are created automatically from the displays and must be managed from them.') . '</p>',
+      '#type' => 'html_tag',
+      '#tag' => 'p',
+      '#value' => $info,
+      '#attributes' => ['class' => ['description']],
       '#weight' => -11,
     ];
 
@@ -156,22 +159,18 @@ final class InstanceListBuilder extends EntityListBuilder {
     // Set a human readable name from id.
     $row['context']['data'] = $type;
     $row['context']['class'] = ['priority-medium'];
-    $name = \explode('__', $instance_id);
-    \array_shift($name);
-    $row['name']['data'] = \ucfirst(\implode(' ', $name));
+
+    $row['name']['data'] = self::extractEntityName($instance_id);
     $row['name']['class'] = ['priority-medium'];
 
-    $row['profile']['data'] = $instance->getProfile()->label();
+    $row['profile']['data'] = $instance->getProfile()?->label() ?? '';
 
     /** @var \Drupal\display_builder\HistoryStep $present */
-    $present = $instance->getCurrent();
-    $row['updated']['data'] = $present->time ? DisplayBuilderHelpers::formatTime($this->dateFormatter, (int) $present->time) : '-';
+    $present = $instance->getCurrent() ?? NULL;
+    $row['updated']['data'] = ($present && $present->time) ? DisplayBuilderHelpers::formatTime($this->dateFormatter, (int) $present->time) : '-';
     $row['updated']['class'] = ['priority-medium', 'db-nowrap'];
-    $row['log']['data'] = $present->log ?? '-';
+    $row['log']['data'] = ($present && $present->log) ? $present->log : '-';
     $row['log']['class'] = ['priority-low'];
-
-    $row['save']['data'] = $instance->saveIsCurrent() ? $this->T('Yes') : $this->t('No');
-    $row['history']['data'] = \sprintf('%d - %d', \count($instance->past ?? 0), \count($instance->future ?? 0));
 
     $result = [
       'data' => $row + parent::buildRow($instance),
@@ -185,9 +184,10 @@ final class InstanceListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function load() {
-    $entities = parent::load();
+    $providers = $this->moduleHandler->invokeAll('display_builder_provider_info');
+    $entities = DisplayBuilderHelpers::guessInstancesList($providers, $this->entityTypeManager);
 
-    // Apply filters from session.
+    // Apply filters from session and create missing instances if any.
     $entities = $this->filterEntities($entities);
 
     // Build headers & request once.
@@ -267,16 +267,6 @@ final class InstanceListBuilder extends EntityListBuilder {
 
         break;
 
-      case 'save_is_present':
-        \usort($entities, static function ($a, $b) use ($factor) {
-          $aVal = $a->saveIsCurrent() ? 1 : 0;
-          $bVal = $b->saveIsCurrent() ? 1 : 0;
-
-          return $factor * ($aVal <=> $bVal);
-        });
-
-        break;
-
       default:
         // Unknown sort: fallback to updated desc behavior for predictability.
         \usort($entities, static function ($a, $b) {
@@ -349,30 +339,21 @@ final class InstanceListBuilder extends EntityListBuilder {
     $context = $filters['context'] ?? '';
     $name = $filters['name'] ?? '';
 
-    if ($context === '' && $name === '') {
-      return $entities;
-    }
-
     $result = [];
 
     foreach ($entities as $entity) {
-      $instance_id = (string) $entity->id();
-
-      // Context filter: id starts with provider prefix.
-      if ($context !== '' && !\str_starts_with($instance_id, $context)) {
+      if ($context !== '' && $context !== $entity['context']) {
         continue;
       }
 
-      // Name filter: attempt to compute display name (same logic as buildRow).
-      $parts = \explode('__', $instance_id);
-      \array_shift($parts);
-      $display_name = \ucfirst(\implode(' ', $parts));
-
-      if ($name !== '' && \mb_stripos($display_name, $name) === FALSE) {
+      if ($name !== '' && !\str_contains($entity['id'] ?? '', $name)) {
         continue;
       }
 
-      $result[] = $entity;
+      if (!$entity['instance']) {
+        $entity['instance'] = $this->getStorage()->create(['id' => $entity['id'], 'label' => $entity['id']]);
+      }
+      $result[] = $entity['instance'];
     }
 
     return $result;

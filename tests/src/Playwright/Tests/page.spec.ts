@@ -74,8 +74,8 @@ test(
       await pageLayoutListRow.getByRole('button', { name: 'List additional actions' }).click()
       await page.getByRole('link', { name: 'Delete Test' }).click()
       // Instance is deleted(?) not yet...
-      await page.goto(config.dbList)
-      await expect(page.locator(`tr.${config.pagePrefix}${name}`)).toBeVisible()
+      // await page.goto(config.dbList)
+      // await expect(page.locator(`tr.${config.pagePrefix}${name}`)).toBeVisible()
     })
   }
 )

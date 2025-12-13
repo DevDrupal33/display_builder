@@ -40,7 +40,7 @@ final class InstanceListFilterForm extends FormBase {
     $context_options = ['' => $this->t('- Any -')];
 
     foreach ($providers as $provider) {
-      $context_options[$provider['prefix']] = $provider['label'];
+      $context_options[\trim($provider['prefix'], '__')] = $provider['label'];
     }
 
     $form['filters']['context'] = [
