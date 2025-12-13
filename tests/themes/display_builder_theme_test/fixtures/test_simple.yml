@@ -25,7 +25,7 @@
               source:
                 value: '<p>This is a <b>Wysiwyg</b> test</p>'
   third_party_settings:
-    ui_styles:
+    styles:
       selected:
         test_style_1: test-style-1
         test_style_2: h2

@@ -22,13 +22,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @todo must move to UI Styles module.
  */
 #[Island(
-  id: 'ui_skins',
-  label: new TranslatableMarkup('UI Skins'),
+  id: 'tokens',
+  label: new TranslatableMarkup('Design tokens (CSS variables)'),
   description: new TranslatableMarkup('Override CSS variables for the active component or block.'),
   type: IslandType::Contextual,
   theme: 'admin',
 )]
-class UiSkinsPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {
+class DesignTokensPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {
 
   use IslandWithFormTrait;
 

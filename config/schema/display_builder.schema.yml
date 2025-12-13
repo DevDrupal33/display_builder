@@ -204,7 +204,7 @@ display_builder.pattern_preset.*:
       sequence:
         type: ignore
 
-ui_patterns_slot_source.third_party_setting.ui_styles:
+ui_patterns_slot_source.third_party_setting.styles:
   label: 'UI Styles settings'
   type: mapping
   mapping:

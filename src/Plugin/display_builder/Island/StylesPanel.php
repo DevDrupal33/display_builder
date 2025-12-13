@@ -22,13 +22,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @todo must move to UI Styles module.
  */
 #[Island(
-  id: 'ui_styles',
-  label: new TranslatableMarkup('UI Styles'),
+  id: 'styles',
+  label: new TranslatableMarkup('Style utilities'),
   description: new TranslatableMarkup('Apply style utilities to the active component or block'),
   type: IslandType::Contextual,
   theme: 'admin',
 )]
-class UiStylesPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface, ThirdPartySettingsInterface {
+class StylesPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface, ThirdPartySettingsInterface {
 
   use IslandWithFormTrait;
 

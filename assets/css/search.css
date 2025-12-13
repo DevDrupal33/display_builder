@@ -10,30 +10,30 @@
 }
 /* @todo add instance form when possible, currently only apply to styles and
  skins because instance form do not have an easy to use markup */
-.display-builder .db-form:has(.shoelace-tabs [active][data-target$="ui_styles"]) .db-search-instance,
-.display-builder .db-form:has(.shoelace-tabs [active][data-target$="ui_skins"]) .db-search-instance {
+.display-builder .db-form:has(.shoelace-tabs [active][data-target$="styles"]) .db-search-instance,
+.display-builder .db-form:has(.shoelace-tabs [active][data-target$="skins"]) .db-search-instance {
   display: block;
 }
 .db-search-instance {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
-.db-form-search-found .db-island-ui_styles .db-search-found,
-.db-form-search-found .db-island-ui_skins .db-search-found {
+.db-form-search-found .db-island-styles .db-search-found,
+.db-form-search-found .db-island-tokens .db-search-found {
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
   padding: 0 0.5rem 0.5rem 0.5rem;
   border: 1px solid var(--sl-color-success-600);
   background-color: var(--sl-color-success-200);
 }
-.db-form-search-found .db-island-ui_styles details > fieldset:not(.db-element-search-in),
-.db-form-search-found .db-island-ui_styles details > div:not(.db-element-search-in),
-.db-form-search-found .db-island-ui_skins details > fieldset:not(.db-element-search-in),
-.db-form-search-found .db-island-ui_skins details > div:not(.db-element-search-in) {
+.db-form-search-found .db-island-styles details > fieldset:not(.db-element-search-in),
+.db-form-search-found .db-island-styles details > div:not(.db-element-search-in),
+.db-form-search-found .db-island-tokens details > fieldset:not(.db-element-search-in),
+.db-form-search-found .db-island-tokens details > div:not(.db-element-search-in) {
   display: none;
 }
-.db-form-search-found .db-island-ui_styles .db-element-search-in,
-.db-form-search-found .db-island-ui_skins .db-element-search-in {
+.db-form-search-found .db-island-styles .db-element-search-in,
+.db-form-search-found .db-island-tokens .db-element-search-in {
   display: block;
 }
 

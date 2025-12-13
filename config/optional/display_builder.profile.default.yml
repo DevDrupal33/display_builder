@@ -84,10 +84,10 @@ islands:
   contextual_form:
     status: true
     weight: -10
-  ui_styles:
+  styles:
     status: true
     weight: -9
-  ui_skins:
+  tokens:
     status: false
     weight: -8
   visibility_conditions:

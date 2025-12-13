@@ -10,7 +10,7 @@ Display Builder is in active development, codebase can change heavily, be prepar
 
 ### Issue
 
-- When fork an issue, use a short branch meaningfull name with proper wording (no article, no concatenated words, ie: no 300000-mytitleislongandthisbran )
+- When fork an issue, use a short branch meaningful name with proper wording (no article, no concatenated words, ie: no 300000-my-title-is-long-and-this-break )
 - When a PR is created it **MUST** be set DRAFT immediately until the issue is in `Need review`
 
 ### Pull requests

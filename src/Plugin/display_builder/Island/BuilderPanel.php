@@ -363,7 +363,7 @@ class BuilderPanel extends IslandPluginBase {
       return $build;
     }
 
-    // If token is only markup, we don't have a wrapper, add it like ui_styles
+    // If token is only markup, we don't have a wrapper, add it like styles
     // so the placeholder can be styled.
     if (!isset($build['#type'])) {
       $build = [
@@ -374,7 +374,7 @@ class BuilderPanel extends IslandPluginBase {
       ];
     }
 
-    // If a style is applied, we have a wrapper from ui_styles with classes, to
+    // If a style is applied, we have a wrapper from styles with classes, to
     // avoid our placeholder classes to be replaced we need to wrap it.
     elseif (isset($build['#attributes'])) {
       $build = [

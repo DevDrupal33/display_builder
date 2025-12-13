@@ -201,8 +201,8 @@ class BuilderDataConverter {
       'selected' => $data['source']['component']['props']['attributes']['source']['styles']['selected'],
       'extra' => $data['source']['component']['props']['attributes']['source']['extra'],
     ];
-    $styles_2 = $data['third_party_settings']['ui_styles'] ?? [];
-    $data['third_party_settings']['ui_styles'] = NestedArray::mergeDeep($styles_1, $styles_2);
+    $styles_2 = $data['third_party_settings']['styles'] ?? [];
+    $data['third_party_settings']['styles'] = NestedArray::mergeDeep($styles_1, $styles_2);
     $data['source']['component']['props']['attributes'] = [];
 
     return $data;
@@ -257,13 +257,13 @@ class BuilderDataConverter {
     $styles = \array_unique(\array_merge($additional['ui_styles_wrapper'] ?? [], $additional['ui_styles'] ?? []));
 
     if ($styles) {
-      $source['third_party_settings']['ui_styles']['selected'] = $styles;
+      $source['third_party_settings']['styles']['selected'] = $styles;
     }
 
     $extra = \trim(($additional['ui_styles_wrapper_extra'] ?? '') . ' ' . ($additional['ui_styles_extra'] ?? ''));
 
     if ($extra) {
-      $source['third_party_settings']['ui_styles']['extra'] = $extra;
+      $source['third_party_settings']['styles']['extra'] = $extra;
     }
 
     return $source;

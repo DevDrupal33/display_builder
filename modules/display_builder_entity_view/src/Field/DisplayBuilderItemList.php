@@ -114,6 +114,10 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
     }
 
     $display = self::getEntityViewDisplay($entity_type_id, $entity->bundle(), $field_name);
+
+    if (!$display) {
+      return Url::fromRoute('entity.display_builder_instance.collection');
+    }
     $params = [
       $entity_type_id => $entity_id,
       'view_mode_name' => $display->getMode(),
