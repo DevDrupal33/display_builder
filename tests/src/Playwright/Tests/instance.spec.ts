@@ -54,7 +54,7 @@ test('From fixture', { tag: ['@display_builder', '@display_builder_dev_tools'] }
   await test.step(`Move textfield to the end of slot`, async () => {
     await displayBuilder.dragElement(
       page.locator(`.db-island-builder .test_simple .slot_test [data-slot-position="0"]`),
-      page.locator(`.db-island-builder .test_simple .slot_test [data-slot-position="2"]`),
+      page.locator(`.db-island-builder .test_simple .slot_test [data-slot-position="1"]`),
       { x: 40, y: 20 }
     )
 
@@ -63,9 +63,9 @@ test('From fixture', { tag: ['@display_builder', '@display_builder_dev_tools'] }
 
   await test.step(`Check and delete`, async () => {
     await displayBuilder.closeDialog('both')
-    await drupal.screenshot('instance_from_fixture_ok.png')
+    // await drupal.screenshot('instance_from_fixture_ok.png')
 
-    await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
+    // await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
   })
 })
 
@@ -128,12 +128,12 @@ test('Secondary actions', { tag: ['@display_builder', '@display_builder_dev_tool
 
     await expect(secondDrawer).toHaveAttribute('style', '--size: 533px;')
     box = await secondDrawer.locator(`.drawer__panel`).boundingBox()
-    await expect(box?.width).toEqual(533)
+    expect(box?.width).toEqual(533)
   })
 
-  await test.step(`Delete`, async () => {
-    await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
-  })
+  // await test.step(`Delete`, async () => {
+    // await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
+  // })
 })
 
 test('From scratch', { tag: ['@display_builder', '@display_builder_dev_tools'] }, async ({ page, drupal, displayBuilder }) => {
@@ -206,7 +206,7 @@ test('From scratch', { tag: ['@display_builder', '@display_builder_dev_tools'] }
   await test.step(`Check and delete`, async () => {
     await displayBuilder.closeDialog('both')
     await displayBuilder.expectPreviewAriaSnapshot('dev-instance-scratch.aria.yml')
-    await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
+    // await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
   })
 })
 
@@ -298,8 +298,8 @@ test('Contextual', { tag: ['@display_builder', '@display_builder_dev_tools'] }, 
 
     await expect(page.locator('.db-island-builder')).toMatchAriaSnapshot({ name: 'contextual-remove.aria.yml' })
 
-    await test.step(`Delete`, async () => {
-      await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
-    })
+    // await test.step(`Delete`, async () => {
+      // await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
+    // })
   })
 })

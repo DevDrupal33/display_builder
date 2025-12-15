@@ -23,7 +23,7 @@
             -
               source_id: textfield
               source:
-                value: '<p>This is a <b>Wysiwyg</b> test</p>'
+                value: 'This is a textfield test'
   third_party_settings:
     styles:
       selected:

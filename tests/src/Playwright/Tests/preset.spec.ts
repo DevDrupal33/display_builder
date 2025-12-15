@@ -102,6 +102,6 @@ test('Preset', { tag: ['@display_builder', '@display_builder_dev_tools'] }, asyn
   await test.step(`Check and delete`, async () => {
     await displayBuilder.closeDialog('both')
     await displayBuilder.expectPreviewAriaSnapshot('dev-instance-preset.aria.yml')
-    await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
+    // await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
   })
 })

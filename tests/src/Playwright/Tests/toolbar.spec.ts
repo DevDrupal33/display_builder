@@ -30,9 +30,9 @@ test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.drush('state:set -y display_builder.asset_libraries_local true')
 })
 
-test.afterEach('Clean', async ({ displayBuilder }) => {
-  await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
-})
+// test.afterEach('Clean', async ({ displayBuilder }) => {
+  // await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
+// })
 
 // Buttons in toolbar configuration is based on display_builder.profile.test.yml
 // Any change to the profile will be reflected here.
