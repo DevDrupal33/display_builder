@@ -185,7 +185,7 @@ final class InstanceListBuilder extends EntityListBuilder {
    */
   public function load() {
     $providers = $this->moduleHandler->invokeAll('display_builder_provider_info');
-    $entities = DisplayBuilderHelpers::guessInstancesList($providers, $this->entityTypeManager);
+    $entities = DisplayBuilderUiHelpers::guessInstancesList($providers, $this->entityTypeManager);
 
     // Apply filters from session and create missing instances if any.
     $entities = $this->filterEntities($entities);
