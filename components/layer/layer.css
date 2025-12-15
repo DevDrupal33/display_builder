@@ -50,6 +50,7 @@
   }
 
   .db-layer {
+    scroll-margin-top: var(--toolbar-height, 64px);
     position: relative;
     width: 100%;
     min-height: 1rem;

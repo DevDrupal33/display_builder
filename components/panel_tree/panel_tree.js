@@ -14,17 +14,27 @@
       elt.classList.remove('db-tree-selected');
     });
 
+    let target = null;
     builder
       .querySelectorAll(
         `.db-island-view:not(.db-island-tree) [data-node-id="${nodeId}"]`,
       )
       .forEach((elt) => {
         if (elt.dataset?.nodeTitle) {
+          target = elt;
           elt.classList.add('db-tree-selected');
         } else if (elt.dataset?.slotId === slotId) {
+          target = elt;
           elt.classList.add('db-tree-selected');
         }
       });
+
+    if (target) {
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
   }
 
   /**

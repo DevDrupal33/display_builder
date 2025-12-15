@@ -64,13 +64,11 @@ class TreePanel extends BuilderPanel {
         'data-db-id' => $builder_id,
         'data-node-title' => $this->t('Base container'),
         'data-db-root' => TRUE,
-        // Simulate dropzone as it's harder to wrap the component without
-        // loosing the panel tree features.
-        // 'class' => ['db-dropzone--root', 'db-dropzone'],.
+        // 'class' => ['db-dropzone--root', 'db-dropzone'],
       ],
     ];
 
-    return $this->htmxEvents->onRootDrop($build, $builder_id, $this->getPluginID());
+    return $build;
   }
 
   /**
