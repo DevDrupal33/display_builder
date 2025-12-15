@@ -25,8 +25,8 @@
     }
   }
 
-  /* Hide contextual panes when loading, mostly for onInstanceClick */
-  &.db-htmx-before-request .db-island-contextual {
+  /* Hide contextual panes when loading, can be on drag, onInstanceClick... */
+  &.db-htmx-before-request {
     opacity: var(--db-loading-opacity);
   }
 }

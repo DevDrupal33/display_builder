@@ -15,7 +15,7 @@
   --layer-pill-border: var(--sl-color-warning-300);
   --layer-pill-text: var(--sl-color-neutral-950);
   --layer-slot-title-color: var(--sl-color-warning-800);
-  --layer-dropzone-slot-min-height: 1rem;
+  --layer-dropzone-slot-min-height: 1.7rem;
 }
 
 /* When moving something inside the builder highlight the slots. */
@@ -30,9 +30,11 @@
     outline: 2px dashed var(--dropzone-color-target);
   }
 
-  .db-island-layers .db-layer--component:hover::part(base) {
-    border-color: var(--layer-component-border-color) !important;
-    background-color: var(--layer-base-container-bg-color) !important;
+  .db-island-layers {
+    .db-layer--component:hover::part(base) {
+      border-color: var(--layer-component-border-color) !important;
+      background-color: var(--layer-base-container-bg-color) !important;
+    }
   }
 }
 
@@ -169,6 +171,35 @@
           border-color: var(--layer-block-border-color-hover);
           background-color: var(--layer-block-bg-hover);
         }
+      }
+    }
+  }
+}
+
+.display-builder--highlight .db-island-layers {
+  .db-dropzone--root {
+    outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target-light) var(--dropzone-slot-outline-type) !important;
+    outline-offset: 0 !important;
+  }
+
+  [data-slot-id] {
+    padding: 0.2rem;
+  }
+
+  .db-dropzone[data-component-id][data-slot-id]:empty {
+    &::after {
+      min-height: var(--layer-dropzone-slot-min-height);
+      margin-left: 1rem;
+      content: " Empty slot ";
+      font-size: x-small;
+      font-style: italic;
+    }
+  }
+
+  .db-layer {
+    &.db-layer--component {
+      &::part(base) {
+        border-color: var(--layer-component-border-color-hover);
       }
     }
   }

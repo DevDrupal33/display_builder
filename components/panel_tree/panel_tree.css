@@ -1,3 +1,8 @@
+:root,
+.display-builder.sl-theme-dark {
+  --tree-block-border-color: var(--sl-color-primary-700);
+}
+
 .db-tree {
   --indent-size: var(--sl-spacing-2x-small);
 
@@ -22,7 +27,29 @@
 
 .display-builder {
   .db-tree-selected {
-    border-radius: 0.4rem;
+    border-radius: var(--sl-border-radius-small);
     outline: 0.4rem solid var(--sl-color-fuchsia-800) !important;
+  }
+
+  .db-island-tree {
+    padding-top: 0.5rem;
+    .db-dropzone {
+      display: inherit;
+    }
+
+    .db-tree__component {
+      &:hover {
+        &::part(base) {
+          cursor: move;
+          border-radius: var(--sl-border-radius-small);
+          outline: 2px dashed var(--tree-block-border-color);
+        }
+      }
+      &::part(children) {
+        margin-right: 0.25rem;
+        margin-bottom: 0.25rem;
+        margin-left: 0.25rem;
+      }
+    }
   }
 }

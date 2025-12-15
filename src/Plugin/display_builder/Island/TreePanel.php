@@ -53,13 +53,24 @@ class TreePanel extends BuilderPanel {
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $builder_id = (string) $builder->id();
 
-    return [
+    $build = [
       '#type' => 'component',
       '#component' => 'display_builder:panel_tree',
       '#slots' => [
         'items' => $this->digFromSlot($builder_id, $data),
       ],
+      '#attributes' => [
+        // Required for JavaScript @see components/dropzone/dropzone.js.
+        'data-db-id' => $builder_id,
+        'data-node-title' => $this->t('Base container'),
+        'data-db-root' => TRUE,
+        // Simulate dropzone as it's harder to wrap the component without
+        // loosing the panel tree features.
+        // 'class' => ['db-dropzone--root', 'db-dropzone'],.
+      ],
     ];
+
+    return $this->htmxEvents->onRootDrop($build, $builder_id, $this->getPluginID());
   }
 
   /**
@@ -140,6 +151,7 @@ class TreePanel extends BuilderPanel {
         'data-node-title' => $name,
         'data-slot-position' => $index,
         'data-menu-type' => 'component',
+        // 'class' => ['db-dropzone', 'db-tree__component'],
       ],
     ];
   }
@@ -171,6 +183,7 @@ class TreePanel extends BuilderPanel {
         'data-node-title' => $label['summary'],
         'data-slot-position' => $index,
         'data-menu-type' => 'block',
+        // 'class' => ['db-dropzone', 'db-tree__block'],
       ],
     ];
   }

@@ -33,6 +33,9 @@
         pull: true,
         put: true,
       },
+      scroll: true,
+      scrollSensitivity: 100,
+      scrollSpeed: 30,
       onStart() {
         dropzoneRoot
           .closest(`[id="${builderId}"]`)

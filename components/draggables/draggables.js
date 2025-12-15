@@ -44,6 +44,11 @@
         }
       },
       onStart() {
+        // Quick fix to hide preview in case it get stuck on visible.
+        const preview = document.querySelector('.db-preview');
+        if (preview) {
+          preview.style.display = 'none';
+        }
         draggableContainer
           .closest(`[id="${builderId}"]`)
           .classList.add('display-builder--onDrag');
