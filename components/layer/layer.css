@@ -1,21 +1,29 @@
 :root,
 .display-builder.sl-theme-dark {
   --layer-base-container-bg-color: var(--sl-color-neutral-50);
+  --layer-base-padding: 0.25rem;
+  --layer-base-border-width: 2px;
+  --layer-transition: 0.2s ease-in-out;
+  --layer-gap: 0.5rem;
+  --layer-pill-padding: 0.1rem 0.5rem;
   --layer-text-color-hover: var(--sl-color-primary-700);
   --layer-component-bg-color: var(--sl-color-neutral-50);
   --layer-component-bg-color-hover: var(--sl-color-orange-100);
   --layer-component-border-color: var(--sl-color-neutral-300);
   --layer-component-border-color-hover: var(--sl-color-purple-700);
-  --layer-block-bg: var(--sl-color-primary-100);
-  --layer-block-bg-hover: var(--sl-color-primary-200);
+  --layer-block-bg-color: var(--sl-color-primary-100);
+  --layer-block-bg-color-hover: var(--sl-color-primary-200);
   --layer-block-border-color: var(--sl-color-primary-700);
   --layer-block-border-color-hover: var(--sl-color-primary-700);
-  --layer-block-text: var(--sl-color-primary-800);
-  --layer-pill-bg: var(--sl-color-indigo-50);
-  --layer-pill-border: var(--sl-color-warning-300);
-  --layer-pill-text: var(--sl-color-neutral-950);
+  --layer-block-text-color: var(--sl-color-primary-800);
+  --layer-pill-bg-color: var(--sl-color-indigo-50);
+  --layer-pill-border-color: var(--sl-color-warning-300);
+  --layer-pill-text-color: var(--sl-color-neutral-950);
   --layer-slot-title-color: var(--sl-color-warning-800);
-  --layer-dropzone-slot-min-height: 1.7rem;
+}
+
+.display-builder--onMove .db-layer.db-dropzone--chosen + .db-layer {
+  border-top: 3px solid var(--layer-slot-title-color);
 }
 
 /* When moving something inside the builder highlight the slots. */
@@ -26,25 +34,54 @@
 
   .db-island-layers {
     [data-slot-id] {
+      border-radius: 0.1rem;
       outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
       outline-offset: 2px;
-      border-radius: 0.1rem;
     }
-    .db-layer--component:hover::part(base) {
-      border-color: var(--layer-component-border-color) !important;
-      background-color: var(--layer-base-container-bg-color) !important;
+
+    .db-layer.db-layer--component::part(base) {
+      border-style: solid;
+    }
+
+    .db-layer.db-layer--component:hover::part(base) {
+      border-color: var(--layer-component-border-color);
+      background-color: var(--layer-base-container-bg-color);
     }
   }
 
-  .db-dropzone--chosen {
-    margin: 0.5rem 0 0.5rem 0;
+  .db-layer.db-dropzone--chosen {
+    margin: var(--layer-gap) 0 var(--layer-gap) 0;
+    &.db-layer--block::part(base) {
+      background-color: var(--layer-block-bg-color-hover) !important;
+    }
+    &.db-layer--component::part(base) {
+      background-color: var(--layer-component-bg-color-hover) !important;
+    }
+  }
+
+  .db-layer.db-layer--block {
+    &::part(base) {
+      border-style: solid;
+    }
+  }
+
+  .db-layer {
+    .db-layer__info {
+      &.db-layer--block {
+        &:hover {
+          &::part(base) {
+            background-color: var(--layer-block-bg-color);
+          }
+        }
+      }
+    }
   }
 }
 
 .db-island-layers {
   .db-dropzone[data-component-id][data-slot-id]:empty {
     min-width: 0;
-    min-height: var(--layer-dropzone-slot-min-height);
+    min-height: 1.7rem;
   }
 
   .db-dropzone--root {
@@ -57,14 +94,15 @@
     position: relative;
     width: 100%;
     min-height: 1rem;
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 var(--layer-gap) 0;
     cursor: move;
     color: var(--db-text-color);
     font-size: 0.9rem;
 
     &::part(base) {
-      padding: 0.25rem;
-      border: 2px dashed transparent;
+      padding: var(--layer-base-padding);
+      transition: var(--layer-transition);
+      border: var(--layer-base-border-width) dashed transparent;
       border-radius: var(--sl-border-radius-small);
     }
 
@@ -112,12 +150,11 @@
       li {
         display: inline-block;
         margin-right: 0.125rem;
-        padding: 0.1rem 0.5rem;
-        color: var(--layer-pill-text);
-        border: 1px solid var(--layer-pill-border);
-        border-radius: 0.125rem;
+        padding: var(--layer-pill-padding);
+        color: var(--layer-pill-text-color);
+        border: 1px solid var(--layer-pill-border-color);
         border-radius: var(--sl-border-radius-pill);
-        background-color: var(--layer-pill-bg);
+        background-color: var(--layer-pill-bg-color);
       }
     }
 
@@ -135,12 +172,17 @@
       margin-top: 0.4375rem;
     }
 
-    &.db-layer--component {
+    &.db-layer--component,
+    &.db-layer--block {
       &::part(base) {
         padding: 0;
+      }
+    }
+
+    &.db-layer--component {
+      &::part(base) {
         border-color: var(--layer-component-border-color);
         background-color: var(--layer-component-bg-color);
-        transition: 0.2s ease-in-out;
       }
 
       &::part(body) {
@@ -156,26 +198,25 @@
     }
 
     &.db-layer--block {
-      margin-bottom: 0.5rem;
+      margin-bottom: var(--layer-gap);
       padding: 0;
       cursor: grab;
 
       &::part(body) {
-        padding: 0.2rem 0.5rem;
+        padding: 0.2rem var(--layer-gap);
       }
 
       &::part(base) {
         padding: 0;
-        color: var(--layer-block-text);
+        color: var(--layer-block-text-color);
         border-color: var(--layer-block-border-color);
-        background-color: var(--layer-block-bg);
-        transition: 0.2s ease-in-out;
+        background-color: var(--layer-block-bg-color);
       }
 
       &:hover {
         &::part(base) {
           border-color: var(--layer-block-border-color-hover);
-          background-color: var(--layer-block-bg-hover);
+          background-color: var(--layer-block-bg-color-hover);
         }
       }
     }
@@ -194,7 +235,7 @@
 
     .db-dropzone[data-component-id][data-slot-id]:empty {
       &::after {
-        min-height: var(--layer-dropzone-slot-min-height);
+        min-height: 1.7rem;
         margin-left: 1rem;
         content: " Empty slot ";
         font-size: x-small;

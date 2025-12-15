@@ -178,7 +178,10 @@ class ContextualMenu {
       item.setAttribute('data-node-id', instance.id);
       item.setAttribute('data-slot-id', slotData?.id ?? '__root__');
       item.setAttribute('data-slot-position', slotData?.position ?? 0);
-      item.setAttribute('data-slot-node-id', slotData?.nodeId ?? '__root__');
+      item.setAttribute(
+        'data-slot-node-id',
+        instance.parentId ?? slotData?.nodeId ?? '__root__',
+      );
       if (copyInstance?.id) {
         item.setAttribute('data-copy-instance-id', copyInstance.id);
       }
@@ -549,8 +552,8 @@ Drupal.displayBuilder.menuAlterHtmxEvents = (builder) => {
     let slotPosition = 0;
 
     if (event.target?.value === 'paste') {
-      parentId = event.target.dataset.slotNodeId;
-      nodeId = event.target.dataset.copyNodeId;
+      parentId = event.target.dataset.nodeId;
+      nodeId = event.target.dataset.copyInstanceId;
       slotId = event.target.dataset.slotId;
       slotPosition = event.target.dataset?.slotPosition ?? 0;
     }
