@@ -19,22 +19,25 @@
 }
 
 /* When moving something inside the builder highlight the slots. */
-.display-builder--onMove .db-island-layers [data-slot-id] {
-  /* padding: 1rem 1rem 0.5rem 1rem; */
-  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
-  outline-offset: var(--dropzone-slot-outline-offset);
-}
-
 .display-builder--onMove {
   .db-dropzone--root {
     outline: 2px dashed var(--dropzone-color-target);
   }
 
   .db-island-layers {
+    [data-slot-id] {
+      outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
+      outline-offset: 2px;
+      border-radius: 0.1rem;
+    }
     .db-layer--component:hover::part(base) {
       border-color: var(--layer-component-border-color) !important;
       background-color: var(--layer-base-container-bg-color) !important;
     }
+  }
+
+  .db-dropzone--chosen {
+    margin: 0.5rem 0 0.5rem 0;
   }
 }
 
@@ -74,7 +77,7 @@
       color: var(--layer-text-color-hover);
 
       &::part(base) {
-        box-shadow: var(--sl-shadow-large);
+        box-shadow: var(--sl-shadow-x-large);
       }
     }
 
@@ -137,6 +140,7 @@
         padding: 0;
         border-color: var(--layer-component-border-color);
         background-color: var(--layer-component-bg-color);
+        transition: 0.2s ease-in-out;
       }
 
       &::part(body) {
@@ -165,6 +169,7 @@
         color: var(--layer-block-text);
         border-color: var(--layer-block-border-color);
         background-color: var(--layer-block-bg);
+        transition: 0.2s ease-in-out;
       }
 
       &:hover {
@@ -177,30 +182,31 @@
   }
 }
 
-.display-builder--highlight .db-island-layers {
-  .db-dropzone--root {
-    outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target-light) var(--dropzone-slot-outline-type) !important;
-    outline-offset: 0 !important;
-  }
-
-  [data-slot-id] {
-    padding: 0.2rem;
-  }
-
-  .db-dropzone[data-component-id][data-slot-id]:empty {
-    &::after {
-      min-height: var(--layer-dropzone-slot-min-height);
-      margin-left: 1rem;
-      content: " Empty slot ";
-      font-size: x-small;
-      font-style: italic;
+.display-builder--highlight {
+  .db-island-layers {
+    .db-dropzone--root {
+      outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target-light) var(--dropzone-slot-outline-type) !important;
     }
-  }
 
-  .db-layer {
-    &.db-layer--component {
-      &::part(base) {
-        border-color: var(--layer-component-border-color-hover);
+    [data-slot-id] {
+      padding: 0.2rem;
+    }
+
+    .db-dropzone[data-component-id][data-slot-id]:empty {
+      &::after {
+        min-height: var(--layer-dropzone-slot-min-height);
+        margin-left: 1rem;
+        content: " Empty slot ";
+        font-size: x-small;
+        font-style: italic;
+      }
+    }
+
+    .db-layer {
+      &.db-layer--component {
+        &::part(base) {
+          border-color: var(--layer-component-border-color-hover);
+        }
       }
     }
   }
