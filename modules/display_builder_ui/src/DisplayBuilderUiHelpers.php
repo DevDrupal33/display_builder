@@ -41,20 +41,6 @@ class DisplayBuilderUiHelpers {
   }
 
   /**
-   * Determines if a given entity type is display builder relevant or not.
-   *
-   * @param \Drupal\Core\Entity\EntityTypeInterface $entityType
-   *   The entity type.
-   *
-   * @return bool
-   *   Whether this entity type is a display builder candidate or not.
-   */
-  public static function isDisplayBuilderEntityType(EntityTypeInterface $entityType): bool {
-    return $entityType->entityClassImplements(FieldableEntityInterface::class)
-      && $entityType->hasViewBuilderClass();
-  }
-
-  /**
    * Collect page layout instances.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
