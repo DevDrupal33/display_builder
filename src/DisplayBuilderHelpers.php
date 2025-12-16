@@ -7,7 +7,6 @@ namespace Drupal\display_builder;
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -232,4 +231,5 @@ class DisplayBuilderHelpers {
 
     return $dateFormatter->format($timestamp, 'short');
   }
+
 }

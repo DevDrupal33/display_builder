@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_ui;
 
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\display_builder\ConfigFormBuilderInterface;
 
 /**
