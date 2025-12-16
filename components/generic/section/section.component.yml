@@ -18,5 +18,4 @@ props:
         - header
         - footer
         - div
-        - p
       default: section
