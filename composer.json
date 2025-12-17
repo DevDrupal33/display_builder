@@ -14,6 +14,11 @@
         "drupal/ui_styles": "^1.19",
         "drupal/display_builder_dev_tools": "1.0.x-dev"
     },
+    "suggest": {
+        "drupal/ui_icons": "Provide Icons feature in Display builder",
+        "drupal/ui_styles": "Provide Styles features in Display builder",
+        "drupal/ui_skins": "Provide CSS tokens features in Display builder"
+    },
     "extra": {
         "patches": {
             "drupal/core": {

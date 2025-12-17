@@ -84,12 +84,6 @@ islands:
   contextual_form:
     status: true
     weight: -10
-  styles:
-    status: true
-    weight: -9
-  tokens:
-    status: false
-    weight: -8
   visibility_conditions:
     status: false
     weight: -7
@@ -105,10 +99,6 @@ islands:
   collaboration:
     status: false
     weight: -4
-  viewport:
-    exclude: {}
-    status: false
-    weight: -3
   back:
     status: true
     weight: -6
