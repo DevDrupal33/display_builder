@@ -1,11 +1,14 @@
 :root,
 .display-builder.sl-theme-dark {
-  --layer-base-container-bg-color: var(--sl-color-neutral-50);
+  --layer-base-container-bg-color: var(--sl-color-neutral-200);
   --layer-base-padding: 0.25rem;
   --layer-base-border-width: 2px;
   --layer-transition: 0.2s ease-in-out;
   --layer-gap: 0.5rem;
   --layer-pill-padding: 0.1rem 0.5rem;
+  --layer-border-size: 0.2rem;
+  --layer-border-type: solid;
+  --layer-border-radius: var(--sl-border-radius-medium);
   --layer-text-color-hover: var(--sl-color-primary-700);
   --layer-component-bg-color: var(--sl-color-neutral-50);
   --layer-component-bg-color-hover: var(--sl-color-orange-100);
@@ -22,21 +25,28 @@
   --layer-slot-title-color: var(--sl-color-warning-800);
 }
 
-.display-builder--onMove .db-layer.db-dropzone--chosen + .db-layer {
+/* Keep a top border test when drag */
+/* .display-builder--onMove:not(.display-builder--highlight) .db-layer.db-dropzone--chosen + .db-layer,
+.display-builder--onDrag:not(.display-builder--highlight) .db-layer.db-dropzone--chosen + .db-layer {
   border-top: 3px solid var(--layer-slot-title-color);
-}
+  padding-top: 0.2rem;
+} */
 
 /* When moving something inside the builder highlight the slots. */
-.display-builder--onMove {
+.display-builder--onMove,
+.display-builder--onDrag {
   .db-dropzone--root {
-    outline: 2px dashed var(--dropzone-color-target);
+    outline: var(--dropzone-slot-outline-width) var(--dropzone-slot-outline-type) var(--dropzone-color-target);
   }
 
   .db-island-layers {
     [data-slot-id] {
       border-radius: 0.1rem;
       outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
-      outline-offset: 2px;
+    }
+
+    [data-slot-id]:has(.db-layer) {
+      outline-width: var(--dropzone-slot-outline-width);
     }
 
     .db-layer.db-layer--component::part(base) {
@@ -79,7 +89,7 @@
 }
 
 .db-island-layers {
-  .db-dropzone[data-component-id][data-slot-id]:empty {
+  .db-dropzone[data-component-id][data-slot-id] {
     min-width: 0;
     min-height: 1.7rem;
   }
@@ -87,6 +97,15 @@
   .db-dropzone--root {
     padding: 1rem;
     background-color: var(--layer-base-container-bg-color);
+  }
+
+  [data-slot-id] {
+    margin: 0.2rem;
+    outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
+  }
+
+  [data-slot-id]:has(.db-layer) {
+    outline-width: 0;
   }
 
   .db-layer {
@@ -99,11 +118,14 @@
     color: var(--db-text-color);
     font-size: 0.9rem;
 
+    /* box-shadow: var(--sl-shadow-x-large); */
+
     &::part(base) {
       padding: var(--layer-base-padding);
       transition: var(--layer-transition);
-      border: var(--layer-base-border-width) dashed transparent;
-      border-radius: var(--sl-border-radius-small);
+      border: var(--layer-border-size) var(--layer-border-type) transparent;
+      border-radius: var(--layer-border-radius);
+      box-shadow: var(--sl-shadow-small);
     }
 
     &::part(header) {
@@ -191,8 +213,8 @@
 
       &:hover {
         &::part(base) {
-          border-color: var(--layer-component-border-color-hover);
-          background-color: var(--layer-component-bg-color-hover);
+          /* border-color: var(--layer-component-border-color-hover); */
+          /* background-color: var(--layer-component-bg-color-hover); */
         }
       }
     }
@@ -247,6 +269,105 @@
       &.db-layer--component {
         &::part(base) {
           border-color: var(--layer-component-border-color-hover);
+        }
+      }
+    }
+  }
+}
+
+/* Monochromatic Saturation Indigo-Violet Ramp */
+
+.db-island-layers .db-layer.db-layer--component:hover {
+  --layer-hover-bg: oklch(98% 0.01 260);
+  --layer-hover-border: oklch(94% 0.02 260);
+
+  &::part(base) {
+    border-color: var(--layer-hover-border) !important;
+    background-color: var(--layer-hover-bg) !important;
+  }
+
+  & & {
+    --layer-hover-bg: oklch(96% 0.02 260);
+    --layer-hover-border: oklch(90% 0.04 260);
+    & & {
+      --layer-hover-bg: oklch(94% 0.03 260);
+      --layer-hover-border: oklch(86% 0.06 260);
+      & & {
+        --layer-hover-bg: oklch(92% 0.04 260);
+        --layer-hover-border: oklch(82% 0.08 260);
+        & & {
+          --layer-hover-bg: oklch(90% 0.05 260);
+          --layer-hover-border: oklch(78% 0.1 260);
+          & & {
+            --layer-hover-bg: oklch(88% 0.06 260);
+            --layer-hover-border: oklch(74% 0.12 260);
+            & & {
+              --layer-hover-bg: oklch(86% 0.07 260);
+              --layer-hover-border: oklch(70% 0.14 260);
+              & & {
+                --layer-hover-bg: oklch(84% 0.08 260);
+                --layer-hover-border: oklch(65% 0.16 260);
+                & & {
+                  --layer-hover-bg: oklch(82% 0.09 260);
+                  --layer-hover-border: oklch(60% 0.18 260);
+                  & & {
+                    --layer-hover-bg: oklch(80% 0.1 260);
+                    --layer-hover-border: oklch(55% 0.2 260);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.display-builder.display-builder--onMove .db-island-layers,
+.display-builder.display-builder--onDrag .db-island-layers {
+  .db-layer.db-layer--component:has(.db-dropzone--chosen) {
+    --layer-bg: oklch(98% 0.01 260);
+    --layer-border: oklch(94% 0.02 260);
+
+    &::part(base) {
+      border-color: var(--layer-border) !important;
+      background-color: var(--layer-bg) !important;
+    }
+
+    & & {
+      --layer-bg: oklch(96% 0.02 260);
+      --layer-border: oklch(90% 0.04 260);
+      & & {
+        --layer-bg: oklch(94% 0.03 260);
+        --layer-border: oklch(86% 0.06 260);
+        & & {
+          --layer-bg: oklch(92% 0.04 260);
+          --layer-border: oklch(82% 0.08 260);
+          & & {
+            --layer-bg: oklch(90% 0.05 260);
+            --layer-border: oklch(78% 0.1 260);
+            & & {
+              --layer-bg: oklch(88% 0.06 260);
+              --layer-border: oklch(74% 0.12 260);
+              & & {
+                --layer-bg: oklch(86% 0.07 260);
+                --layer-border: oklch(70% 0.14 260);
+                & & {
+                  --layer-bg: oklch(84% 0.08 260);
+                  --layer-border: oklch(65% 0.16 260);
+                  & & {
+                    --layer-bg: oklch(82% 0.09 260);
+                    --layer-border: oklch(60% 0.18 260);
+                    & & {
+                      --layer-bg: oklch(80% 0.1 260);
+                      --layer-border: oklch(55% 0.2 260);
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }

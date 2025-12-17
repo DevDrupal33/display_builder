@@ -52,7 +52,7 @@ handle it instead of shoelace */
 
 /* Act on the dropzone root */
 
-/* Start when builder is empty, show root and label to help start */
+/* @todo Start when builder is empty, show root and label to help start */
 /* Same when start dragging to avoid non trigger of HTMX when the mouse is out of the dropzone. */
 .display-builder--onDrag .db-dropzone--root {
   /* width: 98%; */
