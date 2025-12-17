@@ -220,8 +220,16 @@ class LayersPanel extends BuilderPanel {
       return $build;
     }
 
-    foreach ($data['third_party_settings'] as $island_id => $settings) {
-      $island = $this->islandManager->createInstance($island_id, $settings);
+    foreach ($data['third_party_settings'] as $provider => $settings) {
+      // In Display Builder, third_party_settings providers can be:
+      // - an island plugin ID (our 'normal' way)
+      // - a Drupal module name (the Drupal way, found in displays imported and
+      // converted, not leveraged by us for now but we may do it later).
+      // So, let's check the plugin ID exists before running logic.
+      if (!$this->islandManager->hasDefinition($provider)) {
+        continue;
+      }
+      $island = $this->islandManager->createInstance($provider, $settings);
 
       if ($island instanceof ThirdPartySettingsInterface && $summary = $island->getSummary()) {
         $build['#slots']['info'] = \array_merge($build['#slots']['info'] ?? [], $summary);

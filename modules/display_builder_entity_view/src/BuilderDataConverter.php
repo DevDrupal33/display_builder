@@ -172,6 +172,15 @@ class BuilderDataConverter {
     $data['source']['component']['component_id'] = \str_replace('ui_patterns:', '', $section->getLayoutId());
 
     foreach ($section->getThirdPartyProviders() ?: [] as $provider_id) {
+      // In Layout builder, ThirdPartyProviders are Drupal modules. In Display
+      // Builder, they are Island plugins. So, 'ui_styles' become 'styles'. We
+      // are not calling the island 'ui_styles' in order to be ready when the
+      // API will land in Core. See https://www.drupal.org/i/3517033.
+      if ($provider_id === 'ui_styles') {
+        $data['third_party_settings']['styles'] = $section->getThirdPartySettings($provider_id);
+
+        continue;
+      }
       $data['third_party_settings'][$provider_id] = $section->getThirdPartySettings($provider_id);
     }
     $data = $this->moveUiStylesAttributesSource($data);
