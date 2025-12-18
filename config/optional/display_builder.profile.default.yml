@@ -84,6 +84,9 @@ islands:
   contextual_form:
     status: true
     weight: -10
+  styles:
+    status: true
+    weight: -9
   visibility_conditions:
     status: false
     weight: -7
