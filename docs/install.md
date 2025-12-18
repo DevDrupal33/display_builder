@@ -1,67 +1,92 @@
 # Installation
 
-⚠️ The **1.0.x** branch targets Drupal 11.3. No Drupal 10.x support planned for now.
+!!! warning "Drupal 11.3"
+  Display builder targets Drupal **11.3**. No Drupal 10.x support is planned unless sponsored.
 
-## Patches
+## Quick install new project
+
+To simply test Display Builder with Bootstrap.
+
+### Download and configure project
+
+```shell
+composer create-project drupal/recommended-project:11.3 display_builder_demo
+cd display_builder_demo
+composer config minimum-stability "alpha"
+composer config --json extra.merge-plugin '{ "include": ["web/modules/*/display_builder/composer.json"] }'
+composer config extra.enable-patching "true"
+composer require cweagans/composer-patches:^1 wikimedia/composer-merge-plugin:^2 drupal/display_builder:^1 drupal/ui_suite_bootstrap:^5 drupal/ui_icons:^1
+# For conveniency.
+composer require drush/drush
+```
+
+### Run and install
+
+Run and Install the website, for example with [DDEV](https://www.drupal.org/docs/getting-started/installing-drupal/install-drupal-using-ddev-for-local-development).
+
+Recommended PHP 8.3, install Drupal in Standard profile:
+
+```shell
+ddev drush -y si standard
+```
+
+### Enable modules
+
+Some minimum modules are required to properly use Display Builder with Bootstrap:
+
+* Display Builder
+* Display Builder for entity view
+* Display Builder for page layout
+* UI Patterns
+* UI Patterns Library
+* UI Patterns Field
+* UI Patterns Field Formatters
+* UI Styles
+
+Enable from Extend page or with drush:
+
+```shell
+ddev drush -y en display_builder_entity_view display_builder_page_layout ui_styles
+```
+
+### Enable theme
+
+Got to _Administration > Appearance_:
+
+* **Install and set as default** the UI Suite Bootstrap theme.
+* Uninstall Olivero theme
+
+### Create your first Page Layout
+
+Go to _Administration > Structure > Page Layouts_
+
+* Add a page Layout
+* Label: Default, Profile: Default
+* Save and click the operation "Build display"
+
+Once publish, your display will be used on all pages of the front of your site.
+
+### Create your first Entity display
+
+Go to _Administration > Structure > Content types_
+
+* In the Article line, choose the operation "Manage display"
+* Select Display builder Profile as "Default"
+* Save and click "Build the display"
+
+Once publish, your display will be used for all Articles.
+
+Check this documentation for more insight and usage of Display Builder!
+
+## Patches details
 
 Display Builder require specific dependencies, it's recommended to ease this step using [Composer Merge Plugin](https://github.com/wikimedia/composer-merge-plugin) with this configuration in your main composer file:
 
-```yaml
-{
-  # [...]
-  'config': { 'allow-plugins': {
-          # [...]
-          'wikimedia/composer-merge-plugin': true,
-        } },
-  'extra': {
-      # [...]
-      'merge-plugin':
-        { 'include': ['web/modules/*/display_builder/composer.json'] },
-    },
-}
-```
-
-Display Builder **could** require patches, always check and include what's in [composer.json](https://git.drupalcode.org/project/display_builder/-/blob/1.0.x/composer.json).
-
-It's recommended to ease this step using [Composer patches Plugin](https://github.com/cweagans/composer-patches) with this configuration in your main composer file:
-
-```yaml
-{ 'require': {
-      'cweagans/composer-patches': '^1.7',
-      # [...]
-    }, 'config': { 'allow-plugins': {
-          'cweagans/composer-patches': true,
-          # [...]
-        } }, 'extra': {
-      'enable-patching': true,
-      'patchLevel': { 'drupal/core': '-p2' },
-      # [...]
-      'patches':
-        {
-          'drupal/core':
-            {
-              '__ADD_ANY_DISPLAY_BUILDER_PATCH_CORE_HERE__': '__ADD_ANY_DISPLAY_BUILDER_PATCH_CORE_HERE__',
-            },
-        },
-    } }
-```
-
-## Configuration steps
-
-Before enabling `display_builder`, you **MUST**:
-
-- Activate your component-based theme as the default front theme (to allow some temporary demo fixtures to be loaded)
-
-With command-line:
-
 ```shell
-drush theme:enable my_theme
-drush -y config-set system.theme default my_theme
-drush -y en display_builder
+composer require cweagans/composer-patches:^1 wikimedia/composer-merge-plugin:^2
+composer config --json extra.merge-plugin '{ "include": ["web/modules/*/display_builder/composer.json"] }'
+composer config extra.enable-patching "true"
 ```
-
-Install as you would normally install a contributed Drupal module.
-See: [Installing Modules](https://www.drupal.org/docs/extending-drupal/installing-modules) for further information.
 
 ## Local libraries
 
