@@ -10,7 +10,4 @@ slots:
     title: End
 props:
   type: object
-  properties:
-    sticky:
-      title: Sticky
-      type: boolean
+  properties: {}
