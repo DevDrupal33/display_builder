@@ -24,7 +24,7 @@
                 "https://www.drupal.org/project/drupal/issues/3557014 PageDisplayVariant does not transmit cache metadata": "https://git.drupalcode.org/issue/drupal-3557014/-/commit/3b38aa264d9101548946a06c27dc23997de55fb4.patch"
             },
             "drupal/ui_patterns": {
-                "https://www.drupal.org/project/drupal/issues/3557682 Undefined array key variant_id in ComponentSource": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/463.patch"
+                "https://www.drupal.org/project/ui_patterns/issues/3557682 Undefined array key variant_id in ComponentSource": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/463.patch"
             }
         }
     }

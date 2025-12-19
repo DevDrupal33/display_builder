@@ -1,13 +1,13 @@
 /* Temporary fixes related to themes and plugins */
 
-/* Olivero fixes */
+/* Olivero fix for header z-index */
 :has(.display-builder):has(.site-header__fixable) {
   .site-header {
     z-index: 2;
   }
 }
 
-/* Olivero fix for fullscreen */
+/* Fix for fullscreen */
 .display-builder-is-fullscreen {
   #toolbar-administration {
     display: none;

@@ -16,7 +16,6 @@ composer config minimum-stability "alpha"
 composer config --json extra.merge-plugin '{ "include": ["web/modules/*/display_builder/composer.json"] }'
 composer config extra.enable-patching "true"
 composer require cweagans/composer-patches:^1 wikimedia/composer-merge-plugin:^2 drupal/display_builder:^1 drupal/ui_suite_bootstrap:^5 drupal/ui_icons:^1
-# For conveniency.
 composer require drush/drush
 ```
 

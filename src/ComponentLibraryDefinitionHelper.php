@@ -103,10 +103,16 @@ class ComponentLibraryDefinitionHelper {
    */
   private function prepareComponentData(SourceWithChoicesInterface $source, Component $component): ?array {
     $data = $source->getChoiceSettings($component->getPluginId());
+    $required = $component->metadata->schema['required'] ?? NULL;
+
+    if (!$required) {
+      return $data;
+    }
+
     $props = $component->metadata->schema['properties'] ?? [];
     $source_cache = [];
 
-    foreach ($component->metadata->schema['required'] ?? [] as $prop_id) {
+    foreach ($required as $prop_id) {
       $prop = $props[$prop_id];
 
       $default = self::getDefaultValue($prop);
@@ -139,6 +145,7 @@ class ComponentLibraryDefinitionHelper {
       if (!\in_array('widget', $tags, TRUE)) {
         return NULL;
       }
+
       $data['component']['props'][$prop_id] = [
         'source_id' => $default_source->getPluginId(),
         'source' => [
