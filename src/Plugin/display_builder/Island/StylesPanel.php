@@ -115,11 +115,7 @@ class StylesPanel extends IslandPluginBase implements IslandWithFormInterface, R
       $style = $this->stylesManager->getDefinition($style_id);
       $options = $style->getOptionsAsOptions();
       $option = $options[$option_key] ?? $option_key;
-      // Translate each summary item and cast to string for safe concatenation.
-      $item = (string) new TranslatableMarkup('@option @label', [
-        '@option' => $option,
-        '@label' => \strtolower((string) $style->getLabel()),
-      ]);
+      $item = \sprintf('%s %s', $option, \strtolower((string) $style->getLabel()));
       $items[] = [
         '#type' => 'html_tag',
         '#tag' => 'li',
