@@ -33,6 +33,25 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger, event, type) => {
   const secondDrawer = builder.querySelector('#db-second-drawer');
   if (!secondDrawer) return;
 
+  /**
+   * Toggle the open class on the trigger element(s).
+   *
+   * @param {string} triggerId
+   *   The trigger node ID.
+   * @param {boolean} forceRemove
+   *   Whether to force remove the open class. Defaults to false.
+   */
+  const toggleOpenClassOnClick = (triggerId, forceRemove = false) => {
+    const triggers = builder.querySelectorAll(`[data-node-id="${triggerId}"]`);
+    triggers.forEach((triggerElement) => {
+      if (secondDrawer.open && !forceRemove) {
+        triggerElement.classList.add('db-node-contextual-open');
+      } else {
+        triggerElement.classList.remove('db-node-contextual-open');
+      }
+    });
+  };
+
   // Handle 'close' type. Used when contextual menu > delete is used.
   if (type === 'close') {
     if (secondDrawer.open) {
@@ -67,16 +86,24 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger, event, type) => {
     const triggerId = trigger.dataset.nodeId || '';
     const triggerNodeId = secondDrawer.dataset?.triggerNodeId;
 
+    // First case is opening a closed drawer.
     if (!secondDrawer.open) {
       secondDrawer.label = trigger.dataset.nodeTitle;
       secondDrawer.setAttribute('data-trigger-node-id', triggerId);
       secondDrawer.show();
+      toggleOpenClassOnClick(triggerId);
+    // Second case is closing the drawer.
     } else if (triggerNodeId === triggerId) {
       secondDrawer.hide();
       secondDrawer.removeAttribute('data-trigger-node-id');
+      toggleOpenClassOnClick(triggerId);
+    // Third case is switch trigger while drawer is open.
     } else {
+      const previousTriggerId = secondDrawer.dataset?.triggerNodeId ?? null;
+      if (previousTriggerId) toggleOpenClassOnClick(previousTriggerId, true);
       secondDrawer.label = trigger.dataset.nodeTitle;
       secondDrawer.setAttribute('data-trigger-node-id', triggerId);
+      toggleOpenClassOnClick(triggerId);
     }
   }
 };
@@ -111,26 +138,34 @@ Drupal.displayBuilder.initDrawer = (builder) => {
     });
   };
 
-  // Shared resize handler for drawers
-  const handleResizeHandler = (drawer, handleResize) => {
-    const resizeHandler = drawer.querySelector('.shoelace-resize-handle');
-    if (!resizeHandler) return;
-    let isResizing = false;
-    resizeHandler.addEventListener('mousedown', (event) => {
-      isResizing = true;
-      document.body.style.cursor = 'ew-resize';
-      event.preventDefault();
-    });
-    document.addEventListener('mousemove', (event) => {
-      if (isResizing) handleResize(event);
-    });
-    document.addEventListener('mouseup', () => {
-      if (isResizing) {
-        isResizing = false;
-        document.body.style.cursor = '';
-      }
-    });
+  // // Shared resize handler for drawers
+  // const handleResizeHandler = (drawer, handleResize) => {
+  //   const resizeHandler = drawer.querySelector('.shoelace-resize-handle');
+  //   if (!resizeHandler) return;
+  //   let isResizing = false;
+  //   resizeHandler.addEventListener('mousedown', (event) => {
+  //     isResizing = true;
+  //     document.body.style.cursor = 'ew-resize';
+  //     event.preventDefault();
+  //   });
+  //   document.addEventListener('mousemove', (event) => {
+  //     if (isResizing) handleResize(event);
+  //   });
+  //   document.addEventListener('mouseup', () => {
+  //     if (isResizing) {
+  //       isResizing = false;
+  //       document.body.style.cursor = '';
+  //     }
+  //   });
+  // };
+
+  const getDrawerWidth = (drawer) => {
+    const size = getComputedStyle(drawer).getPropertyValue('--size').trim();
+    return size.endsWith('rem')
+      ? remToPx(parseFloat(size))
+      : parseFloat(size);
   };
+
   // First Drawer initialization
   function initFirstDrawer() {
     const firstDrawer = builder.querySelector(FIRST_DRAWER_ID);
@@ -150,27 +185,13 @@ Drupal.displayBuilder.initDrawer = (builder) => {
     );
     let activeFirstDrawerButton = null;
 
-    const getDrawerWidth = (drawer) => {
-      const size = getComputedStyle(drawer).getPropertyValue('--size').trim();
-      return size.endsWith('rem')
-        ? remToPx(parseFloat(size))
-        : parseFloat(size);
-    };
-
     const adjustMainMarginOnShow = () => {
       const drawerWidth = getDrawerWidth(firstDrawer) || 400;
-      if (builder.classList.contains('display-builder--fullscreen')) {
-        builder.querySelector('.display-builder__main').style.marginLeft =
-          `${drawerWidth}px`;
-      }
       firstDrawer.setAttribute('data-offset-left', `${drawerWidth}px`);
       Drupal.displace(true);
     };
 
     const resetMainMarginOnHide = () => {
-      if (builder.classList.contains('display-builder--fullscreen')) {
-        builder.querySelector('.display-builder__main').style.marginLeft = '0';
-      }
       firstDrawer.removeAttribute('data-offset-left');
       Drupal.displace(true);
     };
@@ -182,10 +203,7 @@ Drupal.displayBuilder.initDrawer = (builder) => {
       );
       firstDrawer.setAttribute('data-offset-left', `${startDrawerWidth}px`);
       Drupal.displace(true);
-      if (builder.classList.contains('display-builder--fullscreen')) {
-        builder.querySelector('.display-builder__main').style.marginLeft =
-          `${startDrawerWidth}px`;
-      }
+
       firstDrawer.style.setProperty('--size', `${startDrawerWidth}px`);
       Drupal.displayBuilder.LocalStorageManager.set(
         builder.id,
@@ -194,12 +212,30 @@ Drupal.displayBuilder.initDrawer = (builder) => {
       );
     };
 
-    handleResizeHandler(firstDrawer, handleResize);
+    // handleResizeHandler(firstDrawer, handleResize);
 
     const onHideResetActiveTrigger = (event) => {
       if (event.target?.id === 'db-first-drawer' && activeFirstDrawerButton) {
         activeFirstDrawerButton.variant = 'default';
         activeFirstDrawerButton = null;
+      }
+    };
+
+    /**
+     * Clear tree selection when first drawer is closed.
+     *
+     * @todo move this to panel_tree behavior as drawer plugin?
+     *
+     * @param {Object} event
+     *   The event associated.
+     */
+    const clearTreeSelection = (event) => {
+      if (event.target?.id === 'db-first-drawer') {
+        const treeIsland = builder.querySelector('.db-island-tree');
+        if (!treeIsland) return;
+        builder
+          .querySelectorAll('.db-tree-selected')
+          .forEach((elt) => elt.classList.remove('db-tree-selected'));
       }
     };
 
@@ -253,6 +289,7 @@ Drupal.displayBuilder.initDrawer = (builder) => {
     firstDrawer.addEventListener('sl-show', adjustMainMarginOnShow);
     firstDrawer.addEventListener('sl-hide', resetMainMarginOnHide);
     firstDrawer.addEventListener('sl-hide', onHideResetActiveTrigger);
+    firstDrawer.addEventListener('sl-hide', clearTreeSelection);
 
     return firstDrawer;
   }
@@ -262,20 +299,77 @@ Drupal.displayBuilder.initDrawer = (builder) => {
     const secondDrawer = builder.querySelector(SECOND_DRAWER_ID);
     if (!secondDrawer) return;
 
-    let endDrawerWidth = 400;
+    // let endDrawerWidth = 400;
 
-    const handleResize = (event) => {
-      endDrawerWidth = Math.max(
-        200,
-        Math.min(
-          window.innerWidth - event.clientX,
-          parseInt(window.innerWidth / 1.5, 10),
-        ),
-      );
-      secondDrawer.style.setProperty('--size', `${endDrawerWidth}px`);
+    let endDrawerWidth =
+      Drupal.displayBuilder.LocalStorageManager.get(
+        builder.id,
+        'endDrawerWidth',
+      ) || null;
+
+    /**
+     * Clear tree selection when first drawer is closed.
+     *
+     * @todo move this to panel_tree behavior as drawer plugin?
+     *
+     * @param {Object} event
+     *   The event associated.
+     */
+    const clearConfigSelection = (event) => {
+      if (event.target?.id === 'db-second-drawer') {
+        builder
+          .querySelectorAll('.db-node-contextual-open')
+          .forEach((elt) => elt.classList.remove('db-node-contextual-open'));
+      }
     };
 
-    handleResizeHandler(secondDrawer, handleResize);
+    // const handleResize = (event) => {
+    //   endDrawerWidth = Math.max(
+    //     200,
+    //     Math.min(
+    //       window.innerWidth - event.clientX,
+    //       parseInt(window.innerWidth / 1.5, 10),
+    //     ),
+    //   );
+    //   secondDrawer.style.setProperty('--size', `${endDrawerWidth}px`);
+    // };
+
+    // const handleResize = (event) => {
+    //   endDrawerWidth = Math.max(
+    //     200,
+    //     // Math.min(event.clientX, parseInt(window.innerWidth / 1.2, 10)),
+    //     Math.min(
+    //       window.innerWidth - event.clientX,
+    //       parseInt(window.innerWidth / 1.5, 10),
+    //     ),
+    //   );
+    //   secondDrawer.setAttribute('data-offset-right', `${endDrawerWidth}px`);
+    //   Drupal.displace(true);
+
+    //   secondDrawer.style.setProperty('--size', `${endDrawerWidth}px`);
+    //   Drupal.displayBuilder.LocalStorageManager.set(
+    //     builder.id,
+    //     'endDrawerWidth',
+    //     endDrawerWidth,
+    //   );
+    // };
+
+    // handleResizeHandler(secondDrawer, handleResize);
+
+    const adjustMainMarginOnShow = () => {
+      const drawerWidth = getDrawerWidth(secondDrawer) || 400;
+      secondDrawer.setAttribute('data-offset-right', `${drawerWidth}px`);
+      Drupal.displace(true);
+    };
+
+    const resetMainMarginOnHide = () => {
+      secondDrawer.removeAttribute('data-offset-right');
+      Drupal.displace(true);
+    };
+
+    secondDrawer.addEventListener('sl-show', adjustMainMarginOnShow);
+    secondDrawer.addEventListener('sl-hide', resetMainMarginOnHide);
+    secondDrawer.addEventListener('sl-hide', clearConfigSelection);
 
     return secondDrawer;
   }

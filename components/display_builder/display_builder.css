@@ -72,6 +72,7 @@
 
 body:has(.display-builder) .dialog-off-canvas-main-canvas {
   margin-inline-start: var(--drupal-displace-offset-left, 0);
+  margin-inline-end: var(--drupal-displace-offset-right, 0);
 }
 
 /* Fullscreen button toggle @see components/fullscreen_button. */
@@ -174,5 +175,11 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
 
   .db-preview-placeholder-lg {
     min-height: 20rem;
+  }
+
+  .db-node-contextual-open {
+    outline: 0.25rem dotted var(--sl-color-purple-700) !important;
+    outline-offset: 2px !important;
+    border-radius: 0.2rem !important;
   }
 }

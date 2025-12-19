@@ -1,9 +1,8 @@
 :root {
-  --preview-color-background: var(--sl-color-neutral-0);
-  --preview-color-border: var(--sl-color-neutral-200);
-  --preview-z-index: calc(var(--db-z-index, 501) + 3);
-  --preview-z-index-fullscreen: calc(var(--db-z-index-fullscreen, 1251) + 3);
+  --preview-z-index: calc(var(--db-z-index, 501) + 2);
+  --preview-z-index-fullscreen: calc(var(--db-z-index-fullscreen, 1251) + 2);
 }
+:root,
 .display-builder.sl-theme-dark {
   --preview-color-background: var(--sl-color-neutral-0);
   --preview-color-border: var(--sl-color-neutral-200);
