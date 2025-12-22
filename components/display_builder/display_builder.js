@@ -221,10 +221,14 @@
    *   The HTMX load event.
    */
   function triggerDrupalBehaviorsFromHtmxEvent(htmxLoadEvent) {
-    Drupal.attachBehaviors(
-      htmxLoadEvent.detail.elt?.parentElement.closest('.display-builder'),
-      drupalSettings,
-    );
+    const root =
+      htmxLoadEvent.detail.elt?.parentElement.closest('.display-builder');
+    if (!root) {
+      return;
+    }
+    Array.from(root.children).forEach(function (element) {
+      Drupal.attachBehaviors(element, drupalSettings);
+    });
   }
 
   // Trigger on HTMX out-of-band swaps and load events.
