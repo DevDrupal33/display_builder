@@ -122,17 +122,4 @@ interface IslandEventSubscriberInterface {
    */
   public function onPresetSave(string $instance_id): array;
 
-  /**
-   * Event triggered when a source is locked or unlocked.
-   *
-   * @param string $builder_id
-   *   The builder ID.
-   * @param string $instance_id
-   *   The instance ID.
-   *
-   * @return array
-   *   Returns a render array with out-of-band commands.
-   */
-  public function onLockSwitch(string $builder_id, string $instance_id): array;
-
 }

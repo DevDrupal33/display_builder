@@ -129,12 +129,11 @@ class LayersPanel extends BuilderPanel {
       $name = \sprintf('%s - %s', $name, $variant);
     }
 
-    $lock = $data['lock'] ?? FALSE;
     $build = [
       '#type' => 'component',
       '#component' => 'display_builder:layer',
       '#slots' => [
-        'title' => $name . ($lock ? ' 🔒' : ''),
+        'title' => $name,
         'children' => $slots,
       ],
       // Required for the context menu label.
@@ -145,8 +144,9 @@ class LayersPanel extends BuilderPanel {
     ];
     $build = $this->addThirdPartySettingsSummary($data, $build);
     $build = $this->addComponentSettingsSummary($data, $component, $build);
+    $build = $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, (string) $component['label'], $index);
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, (string) $component['label'], $index);
+    return $this->applyThirdPartySettingsToRenderable($build, $data, $builder_id);
   }
 
   /**
@@ -174,15 +174,9 @@ class LayersPanel extends BuilderPanel {
     // @see assets/js/contextual_menu.js
     $build['#attributes']['data-node-title'] = $label['summary'];
     $build['#attributes']['data-slot-position'] = $index;
+    $build = $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['summary'], $index);
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['summary'], $index);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onLockSwitch(string $builder_id, string $instance_id): array {
-    return $this->replaceInstance($builder_id, $instance_id);
+    return $this->applyThirdPartySettingsToRenderable($build, $data, $builder_id);
   }
 
   /**

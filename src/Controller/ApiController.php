@@ -288,21 +288,6 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function switchLock(Request $request, InstanceInterface $display_builder_instance, string $node_id): array {
-    $this->builder = $display_builder_instance;
-    $display_builder_instance->switchLock($node_id);
-    $display_builder_instance->save();
-
-    return $this->dispatchDisplayBuilderEvent(
-      DisplayBuilderEvents::ON_LOCK_SWITCH,
-      NULL,
-      $node_id,
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function paste(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $parent_id, string $slot_id, string $slot_position): array {
     $this->builder = $display_builder_instance;
     $dataToCopy = $display_builder_instance->get($node_id);
@@ -341,8 +326,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * {@inheritdoc}
    */
   public function delete(Request $request, InstanceInterface $display_builder_instance, string $node_id): array {
-    $current = $display_builder_instance->getCurrentState();
-    $parent_id = $display_builder_instance->getParentId($current, $node_id);
+    $parent_id = $display_builder_instance->getParentId($node_id);
     $display_builder_instance->remove($node_id);
     $display_builder_instance->save();
     $this->builder = $display_builder_instance;

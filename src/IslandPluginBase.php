@@ -257,13 +257,6 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * {@inheritdoc}
    */
-  public function onLockSwitch(string $builder_id, string $instance_id): array {
-    return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getConfiguration(): array {
     return \array_merge($this->defaultConfiguration(), $this->configuration);
   }

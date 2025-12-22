@@ -10,8 +10,10 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
+use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\SlotSourceProxy;
+use Drupal\display_builder\ThirdPartySettingsInterface;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_styles\Render\Element;
 use Masterminds\HTML5;
@@ -46,6 +48,11 @@ class BuilderPanel extends IslandPluginBase {
   protected ComponentElementBuilder $componentElementBuilder;
 
   /**
+   * Island plugins manager.
+   */
+  protected IslandPluginManagerInterface $islandManager;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
@@ -53,6 +60,7 @@ class BuilderPanel extends IslandPluginBase {
     $instance->renderer = $container->get('renderer');
     $instance->slotSourceProxy = $container->get('display_builder.slot_sources_proxy');
     $instance->componentElementBuilder = $container->get('ui_patterns.component_element_builder');
+    $instance->islandManager = $container->get('plugin.manager.db_island');
 
     return $instance;
   }
@@ -188,7 +196,48 @@ class BuilderPanel extends IslandPluginBase {
       $build = $this->wrapContent($build);
     }
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $component['label'], $index);
+    $build = $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $component['label'], $index);
+
+    return $this->applyThirdPartySettingsToRenderable($build, $data, $builder_id);
+  }
+
+  /**
+   * Alter renderable according to third_party_settings.
+   *
+   * @param array $build
+   *   A renderable array.
+   * @param array $data
+   *   The UI Patterns form state data of the tree node.
+   * @param string $instance_id
+   *   The instance entity ID.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function applyThirdPartySettingsToRenderable(array $build, array $data, string $instance_id) {
+    if (empty($data['third_party_settings'] ?? [])) {
+      return $build;
+    }
+    /** @var \Drupal\display_builder\InstanceInterface $instance */
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($instance_id);
+
+    foreach ($data['third_party_settings'] as $provider => $settings) {
+      // In Display Builder, third_party_settings providers can be:
+      // - an island plugin ID (our 'normal' way)
+      // - a Drupal module name (the Drupal way, found in displays imported and
+      // converted, not leveraged by us for now but we may do it later).
+      // So, let's check the plugin ID exists before running logic.
+      if (!$this->islandManager->hasDefinition($provider)) {
+        continue;
+      }
+      $island = $this->islandManager->createInstance($provider, $settings);
+
+      if ($island instanceof ThirdPartySettingsInterface) {
+        $build = $island->alterNodeRenderable($build, $settings, $data['node_id'], $instance);
+      }
+    }
+
+    return $build;
   }
 
   /**
@@ -286,7 +335,7 @@ class BuilderPanel extends IslandPluginBase {
 
     $build = $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label_info['summary'] ?? $label_info['label'] ?? '', $index);
 
-    return $build;
+    return $this->applyThirdPartySettingsToRenderable($build, $data, $builder_id);
   }
 
   /**

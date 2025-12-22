@@ -44,31 +44,6 @@ class HtmxEvents {
   }
 
   /**
-   * Lock or unlock on click.
-   *
-   * @param array $build
-   *   The render array.
-   * @param string $builder_id
-   *   The instance entity ID.
-   * @param string $node_id
-   *   The node id of the source.
-   *
-   * @return array
-   *   The render array.
-   */
-  public function onClickLock(array $build, string $builder_id, string $node_id): array {
-    $url = new Url(
-      'display_builder.api_lock',
-      [
-        'display_builder_instance' => $builder_id,
-        'node_id' => $node_id,
-      ]
-    );
-
-    return $this->setHtmxAttributes($build, $url, 'click consume', 'put', []);
-  }
-
-  /**
    * Save as preset on click.
    *
    * @param array $build
