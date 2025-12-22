@@ -63,25 +63,48 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger, event, type) => {
     return;
   }
 
+  /**
+   * Toggle the open class on the trigger element(s).
+   *
+   * @param {string} triggerId
+   *   The trigger node ID.
+   * @param {boolean} forceRemove
+   *   Whether to force remove the open class. Defaults to false.
+   */
+  const toggleOpenClassOnClick = (triggerId, forceRemove = false) => {
+    const triggers = builder.querySelectorAll(`[data-node-id="${triggerId}"]`);
+    triggers.forEach((triggerElement) => {
+      if (secondDrawer.open && !forceRemove) {
+        triggerElement.classList.add('db-node-contextual-open');
+      } else {
+        triggerElement.classList.remove('db-node-contextual-open');
+      }
+    });
+  };
+
   // Handle 'click' type. Main action, when something is clicked in the builder.
   if (type === 'click') {
     const triggerId = trigger.dataset.nodeId || '';
     const triggerNodeId = secondDrawer.dataset?.triggerNodeId;
 
+    // First case is opening a closed drawer.
     if (!secondDrawer.open) {
       secondDrawer.label = trigger.dataset.nodeTitle;
       secondDrawer.setAttribute('data-trigger-node-id', triggerId);
       secondDrawer.show();
       toggleOpenClassOnClick(triggerId);
-      // Second case is closing the drawer.
+    // Second case is closing the drawer.
     } else if (triggerNodeId === triggerId) {
       secondDrawer.hide();
       secondDrawer.removeAttribute('data-trigger-node-id');
       toggleOpenClassOnClick(triggerId);
-      // Third case is switch trigger while drawer is open.
+    // Third case is switch trigger while drawer is open.
     } else {
+      const previousTriggerId = secondDrawer.dataset?.triggerNodeId ?? null;
+      if (previousTriggerId) toggleOpenClassOnClick(previousTriggerId, true);
       secondDrawer.label = trigger.dataset.nodeTitle;
       secondDrawer.setAttribute('data-trigger-node-id', triggerId);
+      toggleOpenClassOnClick(triggerId);
     }
   }
 };
@@ -329,14 +352,10 @@ Drupal.displayBuilder.initDrawer = (builder) => {
       });
     }
 
-    const onFirstDrawerHide = () => {
-      resetMainMarginOnHide();
-      onHideResetActiveTrigger();
-      clearTreeSelection();
-    };
-
     firstDrawer.addEventListener('sl-show', adjustMainMarginOnShow);
-    firstDrawer.addEventListener('sl-hide', onFirstDrawerHide);
+    firstDrawer.addEventListener('sl-hide', resetMainMarginOnHide);
+    firstDrawer.addEventListener('sl-hide', onHideResetActiveTrigger);
+    firstDrawer.addEventListener('sl-hide', clearTreeSelection);
 
     return firstDrawer;
   }
@@ -358,6 +377,22 @@ Drupal.displayBuilder.initDrawer = (builder) => {
       ) || 400;
 
     secondDrawer.style.setProperty('--size', `${endDrawerWidth}px`);
+
+    /**
+     * Clear tree selection when first drawer is closed.
+     *
+     * @todo move this to panel_tree behavior as drawer plugin?
+     *
+     * @param {Object} event
+     *   The event associated.
+     */
+    const clearConfigSelection = (event) => {
+      if (event.target?.id === 'db-second-drawer') {
+        builder
+          .querySelectorAll('.db-node-contextual-open')
+          .forEach((elt) => elt.classList.remove('db-node-contextual-open'));
+      }
+    };
 
     /**
      * Handle resize event for the second drawer.
@@ -382,6 +417,8 @@ Drupal.displayBuilder.initDrawer = (builder) => {
     };
 
     handleResizeHandler(secondDrawer, handleResize);
+
+    secondDrawer.addEventListener('sl-hide', clearConfigSelection);
 
     return secondDrawer;
   }
