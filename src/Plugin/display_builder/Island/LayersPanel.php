@@ -126,7 +126,7 @@ class LayersPanel extends BuilderPanel {
     $variant = $this->getComponentVariantLabel($data, $component);
 
     if ($variant) {
-      $name .= ' - ' . $variant;
+      $name = \sprintf('%s - %s', $name, $variant);
     }
 
     $build = [
@@ -143,6 +143,7 @@ class LayersPanel extends BuilderPanel {
       ],
     ];
     $build = $this->addThirdPartySettingsSummary($data, $build);
+    $build = $this->addComponentSettingsSummary($data, $component, $build);
 
     return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, (string) $component['label'], $index);
   }
@@ -235,6 +236,70 @@ class LayersPanel extends BuilderPanel {
         $build['#slots']['info'] = \array_merge($build['#slots']['info'] ?? [], $summary);
       }
     }
+
+    return $build;
+  }
+
+  /**
+   * Add config settings summary to layer's info slot.
+   *
+   * @param array $data
+   *   The node data.
+   * @param array $component
+   *   The component definition.
+   * @param array $build
+   *   The layer component renderable array.
+   *
+   * @return array
+   *   The layer component renderable array.
+   */
+  private function addComponentSettingsSummary(array $data, array $component, array $build): array {
+    if (!isset($data['source_id']) || !isset($data['source']['component']['props']) || $data['source_id'] !== 'component') {
+      return $build;
+    }
+
+    $items = [];
+
+    foreach ($data['source']['component']['props'] as $source_id => $source) {
+      if (!isset($source['source']['value']) || $source['source']['value'] === '') {
+        continue;
+      }
+
+      $label = $component['props']['properties'][$source_id]['title'] ?? '';
+      $value = $source['source']['value'];
+
+      if (\is_array($value)) {
+        $value = \trim(\implode(', ', $value), ', ');
+      }
+      $item = \sprintf('%s %s', $label, $value);
+      $items[] = [
+        '#type' => 'html_tag',
+        '#tag' => 'li',
+        '#value' => $item,
+      ];
+    }
+
+    if (empty($items)) {
+      return $build;
+    }
+
+    $summary = [
+      [
+        '#type' => 'html_tag',
+        '#tag' => 'em',
+        '#value' => new TranslatableMarkup('Config'),
+      ],
+      [
+        '#type' => 'html_tag',
+        '#tag' => 'ul',
+        '#attributes' => [
+          'class' => ['summary'],
+        ],
+        0 => $items,
+      ],
+    ];
+
+    $build['#slots']['info'] = \array_merge($build['#slots']['info'] ?? [], $summary);
 
     return $build;
   }

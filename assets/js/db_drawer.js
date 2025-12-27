@@ -20,7 +20,6 @@ Drupal.displayBuilder = Drupal.displayBuilder || {};
  *   The builder.
  * @param {Object} trigger
  *   The trigger button element that was clicked.
- *   The event associatemad.
  * @param {Object} event
  *   The event associated.
  * @param {string} type
@@ -93,13 +92,13 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger, event, type) => {
       secondDrawer.setAttribute('data-trigger-node-id', triggerId);
       secondDrawer.show();
       toggleOpenClassOnClick(triggerId);
-    // Second case is closing the drawer.
     } else if (triggerNodeId === triggerId) {
+      // Second case is closing the drawer.
       secondDrawer.hide();
       secondDrawer.removeAttribute('data-trigger-node-id');
       toggleOpenClassOnClick(triggerId);
-    // Third case is switch trigger while drawer is open.
     } else {
+      // Third case is switch trigger while drawer is open.
       const previousTriggerId = secondDrawer.dataset?.triggerNodeId ?? null;
       if (previousTriggerId) toggleOpenClassOnClick(previousTriggerId, true);
       secondDrawer.label = trigger.dataset.nodeTitle;
