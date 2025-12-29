@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
@@ -92,6 +93,17 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
 
     if (empty($build)) {
       return $build;
+    }
+
+    if (self::isEmpty($build)) {
+      return [
+        '#type' => 'html_tag',
+        '#tag' => 'p',
+        '#value' => $this->t('No configuration required.'),
+        '#attributes' => [
+          'class' => ['description'],
+        ],
+      ];
     }
 
     $build = [
@@ -269,6 +281,40 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
     }
 
     return $build;
+  }
+
+  /**
+   * Indicates whether the given form array is empty.
+   *
+   * @param array $form
+   *   The form.
+   *
+   * @return bool
+   *   Whether the given element is empty.
+   */
+  private static function isEmpty(array $form) {
+    $keys = Element::children($form);
+
+    // Quick valid if a component. An empty component is a rare occurrence.
+    if (isset($keys['component'])) {
+      return FALSE;
+    }
+
+    return \array_diff(Element::children($form), [
+      'plugin_id',
+      'form_build_id',
+      'form_token',
+      'form_id',
+      // Exclude some core block with no configuration.
+      // @todo remove when we do not need the update button anymore.
+      'help_block',
+      'local_actions_block',
+      'node_syndicate_block',
+      'system_breadcrumb_block',
+      'system_clear_cache_block',
+      'system_messages_block',
+      'system_powered_by_block',
+    ]) === [];
   }
 
   /**
