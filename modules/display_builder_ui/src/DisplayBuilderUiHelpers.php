@@ -15,7 +15,7 @@ use Drupal\display_builder\ConfigFormBuilderInterface;
 class DisplayBuilderUiHelpers {
 
   /**
-   * Collect instances from definitions.
+   * Get instances from providers definitions.
    *
    * @param array $providers
    *   Providers information.
@@ -25,15 +25,41 @@ class DisplayBuilderUiHelpers {
    * @return array
    *   List of instances indexed by id.
    */
-  public static function guessInstancesList(array $providers, EntityTypeManagerInterface $entityTypeManager): array {
+  public static function getInstancesFromProviders(array $providers, EntityTypeManagerInterface $entityTypeManager): array {
     $instances = [];
 
-    $instances = \array_merge($instances, self::collectPageLayoutInstances($entityTypeManager));
-    $instances = \array_merge($instances, self::collectViewInstances($providers, $entityTypeManager));
-    $instances = \array_merge($instances, self::collectEntityViewInstances($providers, $entityTypeManager));
+    $instance_storage = $entityTypeManager->getStorage('display_builder_instance');
+    /** @var array<string, \Drupal\display_builder\InstanceInterface> $state_instances */
+    $state_instances = $instance_storage->loadMultiple();
 
-    // Attach the runtime instances when available.
-    $instances = self::attachLoadedInstances($instances, $entityTypeManager);
+    foreach ($providers as $provider_id => $provider) {
+      if ($provider['storage']) {
+        $storage = $entityTypeManager->getStorage($provider['storage']);
+        $entities = $storage->loadMultiple();
+
+        switch ($provider_id) {
+          case 'page_layout':
+            $instances = \array_merge($instances, self::collectPageLayoutInstances($entities, $state_instances));
+
+            break;
+
+          case 'entity_view':
+            $instances = \array_merge($instances, self::collectEntityViewInstances($entities, $state_instances, $providers, $entityTypeManager));
+
+            break;
+
+          case 'views':
+            $instances = \array_merge($instances, self::collectViewInstances($entities, $state_instances, $provider['prefix']));
+
+            break;
+
+          default:
+            $instances = \array_merge($instances, self::collectInstances($entities, $state_instances, $provider['prefix']));
+
+            break;
+        }
+      }
+    }
 
     return $instances;
   }
@@ -41,28 +67,59 @@ class DisplayBuilderUiHelpers {
   /**
    * Collect page layout instances.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   The entity type manager service.
+   * @param array<string, \Drupal\Core\Entity\EntityInterface> $entities
+   *   The entities that hold an instance.
+   * @param array<string, \Drupal\display_builder\InstanceInterface> $state_instances
+   *   The state instances.
+   * @param string $prefix
+   *   The provider prefix.
    *
    * @return array
    *   Array of instances indexed by instance id. Each item includes keys
-   *   'id', 'instance', 'context' and 'meta' (with 'page_layout').
+   *   'id', 'instance', 'context'.
    */
-  private static function collectPageLayoutInstances(EntityTypeManagerInterface $entityTypeManager): array {
+  private static function collectInstances(array $entities, array $state_instances, string $prefix): array {
     $instances = [];
-    $storage = $entityTypeManager->getStorage('page_layout');
-    $page_layouts = $storage->loadMultiple();
 
-    foreach ($page_layouts as $page_layout) {
+    foreach ($entities as $entity) {
+      /** @var \Drupal\display_builder\InstanceInterface $entity */
+      $instance_id = $entity->id ?? '';
+
+      if (!\str_starts_with($instance_id, $prefix)) {
+        continue;
+      }
+      $instances[$instance_id] = [
+        'id' => $instance_id,
+        'instance' => $state_instances[$instance_id] ?? NULL,
+        'context' => 'devel',
+      ];
+    }
+
+    return $instances;
+  }
+
+  /**
+   * Collect page layout instances.
+   *
+   * @param array<string, \Drupal\Core\Entity\EntityInterface> $entities
+   *   The entities that hold an instance.
+   * @param array<string, \Drupal\display_builder\InstanceInterface> $state_instances
+   *   The state instances.
+   *
+   * @return array
+   *   Array of instances indexed by instance id. Each item includes keys
+   *   'id', 'instance', 'context'.
+   */
+  private static function collectPageLayoutInstances(array $entities, array $state_instances): array {
+    $instances = [];
+
+    foreach ($entities as $page_layout) {
       /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $page_layout */
       $instance_id = $page_layout->getInstanceId();
       $instances[$instance_id] = [
         'id' => $instance_id,
-        'instance' => NULL,
+        'instance' => $state_instances[$instance_id] ?? NULL,
         'context' => 'page_layout',
-        'meta' => [
-          'page_layout' => $page_layout,
-        ],
       ];
     }
 
@@ -72,21 +129,21 @@ class DisplayBuilderUiHelpers {
   /**
    * Collect view instances.
    *
-   * @param array $providers
-   *   Providers information as returned by the module hook.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   The entity type manager service.
+   * @param array<string, \Drupal\Core\Entity\EntityInterface> $entities
+   *   The entities that hold an instance.
+   * @param array<string, \Drupal\display_builder\InstanceInterface> $state_instances
+   *   The state instances.
+   * @param string $prefix
+   *   The provider prefix.
    *
    * @return array
    *   Array of instances indexed by id. Each item contains 'id', 'instance',
-   *   'context' and 'meta' with 'view_id' and 'display_id'.
+   *   'context'.
    */
-  private static function collectViewInstances(array $providers, EntityTypeManagerInterface $entityTypeManager): array {
+  private static function collectViewInstances(array $entities, array $state_instances, string $prefix): array {
     $instances = [];
-    $storage = $entityTypeManager->getStorage('view');
-    $views = $storage->loadMultiple();
 
-    foreach ($views as $view) {
+    foreach ($entities as $view) {
       // @phpstan-ignore-next-line
       foreach ($view->display as $display_id => $display) {
         $profile = $display['display_options']['display_extenders']['display_builder']['profile'] ?? NULL;
@@ -94,15 +151,11 @@ class DisplayBuilderUiHelpers {
         if (!$profile) {
           continue;
         }
-        $instance_id = \sprintf('%s%s__%s', $providers['views']['prefix'], $view->id(), $display_id);
+        $instance_id = \sprintf('%s%s__%s', $prefix, $view->id(), $display_id);
         $instances[$instance_id] = [
           'id' => $instance_id,
-          'instance' => NULL,
+          'instance' => $state_instances[$instance_id] ?? NULL,
           'context' => 'view',
-          'meta' => [
-            'view_id' => $view->id(),
-            'display_id' => $display_id,
-          ],
         ];
       }
     }
@@ -113,6 +166,10 @@ class DisplayBuilderUiHelpers {
   /**
    * Collect entity view display and override instances.
    *
+   * @param array<string, \Drupal\Core\Entity\EntityInterface> $entities
+   *   The entities that hold an instance.
+   * @param array<string, \Drupal\display_builder\InstanceInterface> $state_instances
+   *   The state instances.
    * @param array $providers
    *   Providers information as returned by the module hook.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -120,31 +177,23 @@ class DisplayBuilderUiHelpers {
    *
    * @return array
    *   Array of instances indexed by id. Each item contains 'id', 'instance',
-   *   'context' and 'meta' with entity related data (type, bundle, display,
-   *   or override field data).
+   *   'context'.
    */
-  private static function collectEntityViewInstances(array $providers, EntityTypeManagerInterface $entityTypeManager): array {
+  private static function collectEntityViewInstances(array $entities, array $state_instances, array $providers, EntityTypeManagerInterface $entityTypeManager): array {
     $instances = [];
-    $storage = $entityTypeManager->getStorage('entity_view_display');
-    $displays = $storage->loadMultiple();
     $entity_storage = $entity_query = [];
 
-    foreach ($displays as $display_id => $display) {
+    foreach ($entities as $display_id => $display) {
+      /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display */
       $display_builder = $display->getThirdPartySettings('display_builder');
-      [$entity_type_id, $bundle, $entity_display] = \explode('.', $display_id);
 
       // Find simple entity display enabled.
       if (!empty($display_builder['profile'] ?? NULL)) {
         $instance_id = \sprintf('%s%s', $providers['entity_view']['prefix'], \str_replace('.', '__', $display_id));
         $instances[$instance_id] = [
           'id' => $instance_id,
-          'instance' => NULL,
+          'instance' => $state_instances[$instance_id] ?? NULL,
           'context' => 'entity_view',
-          'meta' => [
-            'entity_type_id' => $entity_type_id,
-            'bundle' => $bundle,
-            'entity_display' => $entity_display,
-          ],
         ];
       }
 
@@ -183,43 +232,8 @@ class DisplayBuilderUiHelpers {
             'id' => $instance_id,
             'instance' => NULL,
             'context' => 'entity_view_display',
-            'meta' => [
-              'type' => $type,
-              'id' => $id,
-              'field_name' => $field_name,
-              'entity_display' => $entity_display,
-            ],
           ];
         }
-      }
-    }
-
-    return $instances;
-  }
-
-  /**
-   * Attach the runtime (stored) Display Builder instances to a collection.
-   *
-   * This looks up `display_builder_instance` entities for the collected
-   * instance ids and sets the 'instance' key to the loaded entity where
-   * applicable.
-   *
-   * @param array $instances
-   *   Instances array as returned by the collector methods.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   The entity type manager service.
-   *
-   * @return array
-   *   The original instances array with the 'instance' key populated where a
-   *   runtime entity exists.
-   */
-  private static function attachLoadedInstances(array $instances, EntityTypeManagerInterface $entityTypeManager): array {
-    $instance_storage = $entityTypeManager->getStorage('display_builder_instance');
-    $loaded_instances = $instance_storage->loadMultiple(\array_keys($instances));
-
-    foreach (\array_keys($instances) as $instance_id) {
-      if (isset($loaded_instances[$instance_id])) {
-        $instances[$instance_id]['instance'] = $loaded_instances[$instance_id];
       }
     }
 

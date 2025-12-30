@@ -166,11 +166,13 @@ class DisplayBuilderEntityViewHook {
         'label' => new TranslatableMarkup('Entity view'),
         'class' => EntityViewDisplay::class,
         'prefix' => EntityViewDisplay::getPrefix(),
+        'storage' => 'entity_view_display',
       ],
       'entity_view_override' => [
         'label' => new TranslatableMarkup('Entity view override'),
         'class' => DisplayBuilderItemList::class,
         'prefix' => DisplayBuilderItemList::getPrefix(),
+        'storage' => NULL,
       ],
     ];
   }

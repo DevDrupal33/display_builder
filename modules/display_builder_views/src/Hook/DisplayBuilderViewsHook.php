@@ -58,6 +58,7 @@ class DisplayBuilderViewsHook {
         'label' => new TranslatableMarkup('Views'),
         'class' => DisplayExtender::class,
         'prefix' => DisplayExtender::getPrefix(),
+        'storage' => 'view',
       ],
     ];
   }

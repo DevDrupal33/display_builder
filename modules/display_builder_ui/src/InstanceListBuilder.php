@@ -30,6 +30,11 @@ final class InstanceListBuilder extends EntityListBuilder {
   protected $limit = 20;
 
   /**
+   * Cached list of display builder providers.
+   */
+  private array $providers = [];
+
+  /**
    * {@inheritdoc}
    */
   public function __construct(
@@ -42,6 +47,9 @@ final class InstanceListBuilder extends EntityListBuilder {
     private readonly RequestStack $requestStack,
   ) {
     parent::__construct($entity_type, $storage);
+
+    // Cache providers so we don't call invokeAll multiple times.
+    $this->providers = $this->moduleHandler()->invokeAll('display_builder_provider_info');
   }
 
   /**
@@ -121,8 +129,7 @@ final class InstanceListBuilder extends EntityListBuilder {
       '#weight' => -11,
     ];
 
-    $providers = $this->moduleHandler->invokeAll('display_builder_provider_info');
-    $build['filters'] = $this->formBuilder->getForm(InstanceListFilterForm::class, $providers);
+    $build['filters'] = $this->formBuilder->getForm(InstanceListFilterForm::class, $this->providers);
     $build['filters']['#weight'] = -10;
 
     $build['pager'] = [
@@ -146,9 +153,8 @@ final class InstanceListBuilder extends EntityListBuilder {
     $row['id']['class'] = ['hidden'];
 
     $type = '-';
-    $providers = $this->moduleHandler->invokeAll('display_builder_provider_info');
 
-    foreach ($providers as $provider) {
+    foreach ($this->providers as $provider) {
       if (\str_starts_with($instance_id, $provider['prefix'])) {
         $type = $provider['label'];
 
@@ -184,8 +190,7 @@ final class InstanceListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function load() {
-    $providers = $this->moduleHandler->invokeAll('display_builder_provider_info');
-    $entities = DisplayBuilderUiHelpers::guessInstancesList($providers, $this->entityTypeManager);
+    $entities = DisplayBuilderUiHelpers::getInstancesFromProviders($this->providers, $this->entityTypeManager);
 
     // Apply filters from session and create missing instances if any.
     $entities = $this->filterEntities($entities);

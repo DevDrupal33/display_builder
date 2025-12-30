@@ -21,26 +21,28 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
  *   An associative array of display builder providers, keyed by a unique
  *   machine name. Each provider is an associative array with the following
  *   keys:
- *   - label: A human-readable name for the provider.
+ *   - prefix: Must come from ::getPrefix(), used for UI.
+ *     @see \Drupal\display_builder\DisplayBuildableInterface::getPrefix()
  *   - class: The class implementing the DisplayBuildableInterface. Used to
  *     call static methods from the interface.
- *
+ *   - label: A human-readable name for the provider, used for UI.
  *     @see \Drupal\display_builder\DisplayBuildableInterface
- *   - prefix: Must come from ::getPrefix().
- *     @see \Drupal\display_builder\DisplayBuildableInterface::getPrefix()
+ *   - storage: Storage entity name, used for UI.
  */
 function hook_display_builder_provider_info(): array {
   return [
     'views' => [
-      // A human-readable name for the provider.
-      'label' => new TranslatableMarkup('Views'),
+      // Must come from ::getPrefix().
+      // @see \Drupal\display_builder\DisplayBuildableInterface::getPrefix()
+      'prefix' => 'my_provider_prefix_',
       // The class implementing the DisplayBuildableInterface.
       // Use to call static methods from the interface.
       // @see \Drupal\display_builder\DisplayBuildableInterface
       'class' => '\Drupal\my_module\MyProviderClass',
-      // Must come from ::getPrefix().
-      // @see \Drupal\display_builder\DisplayBuildableInterface::getPrefix()
-      'prefix' => 'my_provider_prefix_',
+      // A human-readable name for the provider, used for UI.
+      'label' => new TranslatableMarkup('Views'),
+      // Used to load instances in display builder UI.
+      'storage' => 'my_storage',
     ],
   ];
 }

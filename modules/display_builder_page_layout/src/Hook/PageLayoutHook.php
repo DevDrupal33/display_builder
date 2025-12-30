@@ -57,6 +57,7 @@ class PageLayoutHook {
         'label' => new TranslatableMarkup('Page layout'),
         'class' => PageLayout::class,
         'prefix' => PageLayout::getPrefix(),
+        'storage' => 'page_layout',
       ],
     ];
   }
