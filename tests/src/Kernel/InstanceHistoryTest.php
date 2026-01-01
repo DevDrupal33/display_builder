@@ -296,7 +296,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     // Restore to save.
     $instance->restore();
     self::assertSame($testData, $instance->getCurrentState());
-    self::assertSame('Back to saved data.', $instance->getCurrent()->log);
+    self::assertSame('Back to saved data.', $instance->getRevisionLogMessage());
   }
 
   /**
