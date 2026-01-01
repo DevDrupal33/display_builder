@@ -66,7 +66,10 @@ class TemplateOverride {
   public function suggestionsAlter(array &$suggestions, array $variables, string $hook): void {
     $key = '#' . $this::KEY;
 
-    if (!isset($variables['elements'][$key]) || empty($variables['elements'][$key])) {
+    if ((!isset($variables['elements'][$key]) || empty($variables['elements'][$key]))
+      // Block content.
+      && (!isset($variables['elements']['content'][$key]) || empty($variables['elements']['content'][$key]))
+    ) {
       return;
     }
 
@@ -106,6 +109,17 @@ class TemplateOverride {
         'type' => 'base_theme_engine',
       ];
     }
+
+    // Block special case.
+    $theme_registry['block__display_builder'] = [
+      'base hook' => 'block',
+      'path' => $templatePath,
+      'preprocess functions' => ['display_builder_entity_view_preprocess_entity'],
+      'render element' => 'elements',
+      'template' => 'entity',
+      'theme path' => $modulePath,
+      'type' => 'module',
+    ];
   }
 
 }
