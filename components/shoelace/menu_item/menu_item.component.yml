@@ -33,9 +33,3 @@ props:
     disabled:
       title: Disabled
       type: boolean
-    checked:
-      title: Checked
-      type: boolean
-    class:
-      title: Class
-      type: string
