@@ -6,14 +6,14 @@
 {% set attributes = closable ? attributes.setAttribute('closable', '') : attributes %}
 {% set attributes = duration ? attributes.setAttribute('duration', duration) : attributes %}
 
-{% if toast|default(false) and toast_stack_position %}
+{% if toast and toast_stack_position %}
   {% set toast_stack_styles = {
     'bottom-right': 'top: auto; left: auto; bottom: 0; right: 0;',
     'bottom-left': 'top: auto; left: 0; bottom: 0; right: auto;',
     'top-right': 'left: auto; right: 0;',
     'top-left': 'left: 0; right: auto;',
   } %}
-  {% if toast_stack_styles[toast_stack_position|default('bottom-right')] is defined %}
+  {% if toast_stack_styles[toast_stack_position|default('bottom-right')] %}
     <style>
       .sl-toast-stack {
         {{ toast_stack_styles[toast_stack_position|default('bottom-right')] }}
