@@ -53,8 +53,9 @@ test('Builder: Drag and move', { tag: ['@display_builder', '@display_builder_dev
       - button \"Click me\"
       - text: Test simple
       - 'heading \"label: none\" [level=5]'
-      - text: \"Textfield: I am a test textfield in a slot! I am a test textfield in a slot! Slot 1\"
+      - text: Textfield I am a test textfield in a slot! Slot 1
       - button \"Click me\"
+      - text: Base container
     `)
   })
 

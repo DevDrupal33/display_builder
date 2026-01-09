@@ -23,11 +23,9 @@ test('Layers: Drag and move', { tag: ['@display_builder', '@display_builder_dev_
     await displayBuilder.shoelaceReady()
     await displayBuilder.fullHighlight()
 
-    await page.getByRole('tab', { name: 'Layers' }).click()
-    await displayBuilder.htmxReady()
-
     const dropzoneRoot = page.locator('.db-dropzone--root').first()
 
+    // Perform drag operations in Builder tab first
     await displayBuilder.dragSimpleComponentsWithTextfield('I am a test textfield in a slot!')
 
     await displayBuilder.dragElementFromLibraryById(
@@ -47,17 +45,12 @@ test('Layers: Drag and move', { tag: ['@display_builder', '@display_builder_dev_
       page.locator(`.db-island-builder [data-slot-id="slot_1"]`).first(),
     )
 
-    await expect(page.locator(`.db-island-builder`)).toMatchAriaSnapshot(`
-      - text: Test simple
-      - 'heading \"label: none\" [level=5]'
-      - text: Textfield
-      - button \"Textfield\"
-      - text: Slot 1
-      - button \"Click me\"
-      - text: Test simple
-      - 'heading \"label: none\" [level=5]'
-      - text: \"Textfield: I am a test textfield in a slot in a Page Layout! I am a test textfield in a slot in a Page Layout! Slot 1\"
-      - button \"Click me\"
+    // Switch to Layers tab to verify the layer hierarchy
+    await page.getByRole('tab', { name: 'Layers' }).click()
+    await displayBuilder.htmxReady()
+
+    await expect(page.locator(`.db-island-layers`)).toMatchAriaSnapshot(`
+      - text: Test simple Slot 1 Textfield Test simple Slot 1 Textfield
     `)
   })
 
