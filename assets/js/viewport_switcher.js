@@ -23,7 +23,7 @@
   };
 
   /**
-   * Update main region width according to selected value.
+   * Update main region width and preview iframe according to selected value.
    *
    * @param {HTMLElement} breakpoint
    *   The ID of the Drupal breakpoint plugin.
@@ -46,6 +46,18 @@
     // max-width to avoid overflow when the breakpoint is wider than the
     // available space.
     wrapper.style.maxWidth = widthWithUnit;
+
+    // Also update preview iframe width for proper responsive preview.
+    const previewIframe = builder.querySelector('.db-preview-iframe');
+    if (previewIframe) {
+      if (breakpoint && mapping[breakpoint] !== '100%') {
+        previewIframe.style.width = widthWithUnit;
+        previewIframe.style.maxWidth = widthWithUnit;
+      } else {
+        previewIframe.style.width = '100%';
+        previewIframe.style.maxWidth = '100%';
+      }
+    }
   }
 
   /**

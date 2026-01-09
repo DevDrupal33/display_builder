@@ -303,7 +303,7 @@ export class Displaybuilder {
     await this.dragElementFromLibraryById(
       'Components',
       'test_simple',
-      this.page.locator(`.db-island-builder > div.db-dropzone`)
+      this.page.locator(`.db-island-builder .db-dropzone--root`)
     )
     const componentSimpleSlot = this.page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
     await this.dragElementFromLibraryById('Blocks', 'textfield', componentSimpleSlot)
@@ -342,14 +342,24 @@ export class Displaybuilder {
   /**
    * Test the preview tab with an Aria snapshot and go back to the builder.
    *
+   * The preview is now rendered in an iframe for theme isolation.
+   * This method navigates to the Preview tab and checks the iframe content.
+   *
    * @async
    * @param {string} snapshotName - The expected Aria snapshot string.
-   * @param {string} locatorClass - The locator parameter, default '.db-island-preview'.
+   * @param {string} locatorClass - The locator parameter, default '.display-builder-preview-content'.
    * @returns {Promise<void>}
    */
-  async expectPreviewAriaSnapshot(snapshotName: string, locatorClass: string = '.db-island-preview'): Promise<void> {
+  async expectPreviewAriaSnapshot(snapshotName: string, locatorClass: string = '.display-builder-preview-content'): Promise<void> {
     await this.page.getByRole('tab', { name: 'Preview' }).click()
-    await expect(this.page.locator(locatorClass)).toMatchAriaSnapshot({ name: snapshotName })
+    // Wait for iframe to be visible.
+    const iframe = this.page.locator('.db-preview-iframe')
+    await expect(iframe).toBeVisible({ timeout: 5000 })
+    // Get the iframe frame and check content.
+    const frame = iframe.contentFrame()
+    // Wait for the preview content container to exist (may be empty/hidden).
+    await expect(frame.locator(locatorClass)).toHaveCount(1, { timeout: 10000 })
+    await expect(frame.locator(locatorClass)).toMatchAriaSnapshot({ name: snapshotName, timeout: 10000 })
     await this.page.getByRole('tab', { name: 'Builder' }).click()
   }
 

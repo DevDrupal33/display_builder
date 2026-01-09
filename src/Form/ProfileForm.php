@@ -63,6 +63,16 @@ final class ProfileForm extends EntityForm {
       '#default_value' => $entity->get('description'),
     ];
 
+    // Backend theme selection.
+    $themes = $this->getAvailableThemes();
+    $form['backend_theme'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Backend theme'),
+      '#description' => $this->t('Theme used for the Display Builder admin UI (toolbar, sidebar). Leave empty to use the current admin theme.'),
+      '#options' => ['' => $this->t('- Use admin theme -')] + $themes,
+      '#default_value' => $entity->getBackendTheme() ?? '',
+    ];
+
     // Add user role access selection. Not available at creation because the
     // permissions are not set yet by ProfilePermissions.
     if (!$entity->isNew()) {
@@ -386,6 +396,28 @@ final class ProfileForm extends EntityForm {
    */
   protected function moduleExtensionList(): ModuleExtensionList {
     return $this->moduleExtensionList ??= \Drupal::service('extension.list.module'); // phpcs:ignore
+  }
+
+  /**
+   * Get available themes for selection.
+   *
+   * @return array
+   *   Array of theme names keyed by machine name.
+   */
+  protected function getAvailableThemes(): array {
+    /** @var \Drupal\Core\Extension\ThemeHandlerInterface $themeHandler */
+    $themeHandler = \Drupal::service('theme_handler'); // phpcs:ignore
+    $themes = [];
+
+    foreach ($themeHandler->listInfo() as $theme_name => $theme) {
+      if ($theme->status) {
+        $themes[$theme_name] = $theme->info['name'];
+      }
+    }
+
+    \asort($themes);
+
+    return $themes;
   }
 
 }

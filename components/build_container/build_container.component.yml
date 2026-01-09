@@ -1,0 +1,13 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: Build Container
+group: Display builder
+description: Internal container for the Display Builder build mode.
+libraryOverrides:
+  css:
+    component:
+      build_container.css: {}
+slots:
+  content:
+    title: Content
+    description: The builder content.
+

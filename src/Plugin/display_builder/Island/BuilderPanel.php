@@ -71,7 +71,9 @@ class BuilderPanel extends IslandPluginBase {
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $builder_id = (string) $builder->id();
-    $build = [
+
+    // Build the dropzone content.
+    $dropzone = [
       '#type' => 'component',
       '#component' => 'display_builder:dropzone',
       '#props' => [
@@ -88,7 +90,19 @@ class BuilderPanel extends IslandPluginBase {
       ],
     ];
 
-    return $this->htmxEvents->onRootDrop($build, $builder_id, $this->getPluginID());
+    $dropzone = $this->htmxEvents->onRootDrop($dropzone, $builder_id, $this->getPluginID());
+
+    // Wrap in build_container for CSS isolation via Shadow DOM.
+    return [
+      '#type' => 'component',
+      '#component' => 'display_builder:build_container',
+      '#slots' => [
+        'content' => $dropzone,
+      ],
+      '#attributes' => [
+        'data-db-build-container' => $builder_id,
+      ],
+    ];
   }
 
   /**

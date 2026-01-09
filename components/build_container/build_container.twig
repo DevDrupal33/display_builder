@@ -1,0 +1,14 @@
+{#
+/**
+ * @file
+ * Build Container component for CSS isolation.
+ *
+ * This component wraps the builder content with CSS isolation.
+ * Uses CSS containment and scoped styles instead of Shadow DOM
+ * to maintain Playwright test compatibility.
+ */
+#}
+<div class="db-build-container" {{ attributes }}>
+  {{ content }}
+</div>
+

@@ -15,6 +15,10 @@ display_builder.profile.*:
     debug:
       type: boolean
       label: 'Debug mode'
+    backend_theme:
+      type: string
+      label: 'Backend theme'
+      nullable: true
     islands:
       type: sequence
       label: 'Islands'

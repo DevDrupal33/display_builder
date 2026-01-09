@@ -1,0 +1,16 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: Preview iframe
+group: Display builder
+description: Internal iframe container for Display Builder preview.
+props:
+  type: object
+  properties:
+    src:
+      type: string
+      title: Source URL
+      description: The URL for the iframe content.
+    instance_id:
+      type: string
+      title: Instance ID
+      description: The Display Builder instance ID for reload events.
+

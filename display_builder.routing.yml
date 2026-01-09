@@ -241,3 +241,18 @@ display_builder.api_preset_preview:
     _role: 'authenticated'
   options:
     _htmx_route: true
+
+# Display Builder iframe preview route.
+# This route renders the instance content with the frontend theme
+# for embedding in an iframe in the Preview panel.
+display_builder.preview:
+  path: '/api/display-builder/{display_builder_instance}/preview'
+  methods: [GET]
+  defaults:
+    _controller: '\Drupal\display_builder\Controller\PreviewController::preview'
+  requirements:
+    _entity_access: 'display_builder_instance.view'
+  options:
+    parameters:
+      display_builder_instance:
+        type: 'entity:display_builder_instance'
