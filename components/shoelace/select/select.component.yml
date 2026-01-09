@@ -18,3 +18,13 @@ props:
     options:
       title: A Drupal Form API select option structure.
       type: object
+      properties:
+        group_label:
+          type: string
+        group:
+          type: object
+        properties:
+          option_value:
+            type: string
+          option_label:
+            type: string

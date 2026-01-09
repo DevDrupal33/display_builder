@@ -4,7 +4,7 @@
 
 <div{{ attributes.addClass('test_complex') }}>
   <div{{ test_attributes }}>
-    label: {{ label|default('none') }}, open: {{ open|default(false) ? 'true' : 'false' }}, duration: {{ duration|default(0) }}
+    label: {{ label|default('none') }}, open: {{ open ? 'true' : 'false' }}, duration: {{ duration|default(0) }}
     <div class="slot slot_1">
       Slot:1 {{ slot_1 }}
       <div class="slot sub_slot_1_1">
