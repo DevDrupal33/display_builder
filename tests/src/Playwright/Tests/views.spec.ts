@@ -162,7 +162,8 @@ test(
         view_footer: '[View] Footer',
         view_feed_icons: '[View] Feed_icons',
       }
-      await displayBuilder.expectBlocksAvailable(sources)
+      // Check that View blocks are available in the library (not yet in builder).
+      await displayBuilder.expectBlocksAvailable(sources, false)
     })
 
     await test.step(`Build the display`, async () => {

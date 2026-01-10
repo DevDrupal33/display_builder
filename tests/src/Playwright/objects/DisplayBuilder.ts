@@ -350,9 +350,9 @@ export class Displaybuilder {
     await this.page.waitForTimeout(500)
 
     // Wait for component to appear after drag and reload.
-    await expect(this.getBuildLocator('.test_simple')).toBeVisible({ timeout: 10000 })
+    await expect(this.getBuildLocator('.test_simple').first()).toBeVisible({ timeout: 10000 })
 
-    const componentSimpleSlot = this.getBuildLocator('.test_simple .slot_test [data-slot-id="slot_1"]')
+    const componentSimpleSlot = this.getBuildLocator('.test_simple .slot_test [data-slot-id="slot_1"]').first()
     await this.dragElementFromLibraryById('Blocks', 'textfield', componentSimpleSlot)
     await this.setElementValue(
       this.getBuildLocator('[data-node-type="textfield"]').first(),

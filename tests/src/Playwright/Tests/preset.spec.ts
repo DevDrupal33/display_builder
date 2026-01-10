@@ -27,21 +27,21 @@ test('Preset', { tag: ['@display_builder', '@display_builder_dev_tools'] }, asyn
     await displayBuilder.dragElementFromLibraryById(
       'Components',
       'test_simple',
-      page.locator('.db-dropzone--root').first()
+      displayBuilder.getBuildLocator('.db-dropzone--root').first()
     )
     await displayBuilder.dragElementFromLibraryById(
       'Blocks',
       'textfield',
-      page.locator('.db-dropzone--root').first()
+      displayBuilder.getBuildLocator('.db-dropzone--root').first()
     )
 
     await displayBuilder.dragElement(
-      page.locator(`[data-db-build-container] [data-node-type="textfield"]`),
-      page.locator(`[data-db-build-container] [data-slot-id="slot_1"]`)
+      displayBuilder.getBuildLocator('[data-node-type="textfield"]').first(),
+      displayBuilder.getBuildLocator('[data-slot-id="slot_1"]').first()
     )
 
     await displayBuilder.setElementValue(
-      page.locator(`[data-db-build-container] [data-node-type="textfield"]`),
+      displayBuilder.getBuildLocator('[data-node-type="textfield"]').first(),
       'I am a test textfield in a slot',
       [
         {
@@ -52,7 +52,7 @@ test('Preset', { tag: ['@display_builder', '@display_builder_dev_tools'] }, asyn
     )
 
     await displayBuilder.setElementValue(
-      page.locator(`[data-db-build-container] [data-node-title="Test simple"]`),
+      displayBuilder.getBuildLocator('[data-node-title="Test simple"]').first(),
       'I am a component with a textfield',
       [
         {
@@ -75,8 +75,8 @@ test('Preset', { tag: ['@display_builder', '@display_builder_dev_tools'] }, asyn
       await dialog.accept(`foo_${dbName}`)
     })
 
-    await page
-      .getByRole('heading', { name: 'label: I am a component with a textfield' })
+    // Target the heading specifically in the build container.
+    await displayBuilder.getBuildLocator('[data-node-title="Test simple"]').first()
       .click({ button: 'right', position: { x: 40, y: 10 } })
     await page.getByRole('menuitemcheckbox', { name: 'Save as preset' }).locator('slot').nth(1).click()
   })
@@ -95,7 +95,7 @@ test('Preset', { tag: ['@display_builder', '@display_builder_dev_tools'] }, asyn
     await displayBuilder.dragElementFromLibrary(
       'Presets',
       preset,
-      page.getByRole('heading', { name: 'label: I am a component with a textfield' })
+      displayBuilder.getBuildLocator('[data-node-title="Test simple"]').first()
     )
   })
 
