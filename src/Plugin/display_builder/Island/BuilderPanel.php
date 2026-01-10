@@ -70,75 +70,47 @@ class BuilderPanel extends IslandPluginBase {
 
   /**
    * {@inheritdoc}
+   *
+   * Build Container reloads itself via htmx:afterSettle in build_container.js.
+   * No server-side OOB swap needed.
    */
   public function onAttachToRoot(string $builder_id, string $instance_id): array {
-    return $this->reloadBuildContainer($builder_id);
+    return [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function onAttachToSlot(string $builder_id, string $instance_id, string $parent_id): array {
-    return $this->reloadBuildContainer($builder_id);
+    return [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function onMove(string $builder_id, string $instance_id): array {
-    return $this->reloadBuildContainer($builder_id);
+    return [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function onHistoryChange(string $builder_id): array {
-    return $this->reloadBuildContainer($builder_id);
+    return [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function onUpdate(string $builder_id, string $instance_id): array {
-    return $this->reloadBuildContainer($builder_id);
+    return [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function onDelete(string $builder_id, string $parent_id): array {
-    return $this->reloadBuildContainer($builder_id);
-  }
-
-  /**
-   * Returns markup that triggers a reload of the build container.
-   *
-   * The JavaScript listens for this element via MutationObserver and HTMX events.
-   * Uses OOB swap to inject the trigger into the Builder island.
-   *
-   * @param string $builder_id
-   *   The builder ID.
-   *
-   * @return array
-   *   A render array with a reload trigger element wrapped in OOB.
-   */
-  protected function reloadBuildContainer(string $builder_id): array {
-    $trigger = [
-      '#type' => 'html_tag',
-      '#tag' => 'span',
-      '#attributes' => [
-        'data-db-reload-trigger' => $builder_id,
-        'style' => 'display:none;',
-      ],
-    ];
-
-    // Wrap in OOB to insert into the Builder island.
-    // Using 'beforeend' to append rather than replacing content.
-    return $this->addOutOfBand(
-      $trigger,
-      '#' . $this->getHtmlId($builder_id),
-      'beforeend'
-    );
+    return [];
   }
 
 }

@@ -228,45 +228,6 @@
     }
   };
 
-  /**
-   * Set up listeners to detect when content changes and reload the build container.
-   *
-   * After any HTMX POST/PUT/DELETE request completes (which indicates a state change),
-   * we trigger a reload of all build containers.
-   */
-  function setupReloadTriggerListeners() {
-    console.log('[Build Container] Setting up reload trigger listeners...');
-
-    // Listen for HTMX afterSettle event - fires after all swaps are complete.
-    // This catches all state-changing requests (POST, PUT, DELETE).
-    document.body.addEventListener('htmx:afterSettle', (event) => {
-      const method = event.detail?.requestConfig?.verb?.toUpperCase();
-      const url = event.detail?.requestConfig?.path || '';
-
-      console.log('[Build Container] htmx:afterSettle event, method:', method, 'url:', url);
-
-      // Only reload after state-changing requests to the Display Builder API.
-      if (url.includes('/api/display-builder/') && ['POST', 'PUT', 'DELETE'].includes(method)) {
-        console.log('[Build Container] State change detected, reloading all build containers');
-        reloadAllBuildContainers();
-      }
-    });
-
-    // Also use MutationObserver for SSE-based updates.
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            checkForReloadTriggers(node);
-          }
-        });
-      });
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-    console.log('[Build Container] MutationObserver and HTMX listeners set up');
-  }
-
   // Debounce timer for reload operations.
   let reloadDebounceTimer = null;
 
@@ -291,61 +252,32 @@
   }
 
   /**
-   * Check for reload triggers within an element and its descendants.
+   * Set up HTMX listener to reload build containers after state changes.
    *
-   * @param {HTMLElement} element
-   *   The element to check.
+   * This is the single mechanism for reloading - triggered by htmx:afterSettle
+   * after any POST/PUT/DELETE request to the Display Builder API.
    */
-  function checkForReloadTriggers(element) {
-    if (!element) {
-      console.log('[Build Container] checkForReloadTriggers: no element');
-      return;
-    }
+  function setupHtmxReloadListener() {
+    console.log('[Build Container] Setting up HTMX reload listener...');
 
-    console.log('[Build Container] checkForReloadTriggers:', element.tagName, element.id || '', element.className || '');
+    // Listen for HTMX afterSettle event - fires after all swaps are complete.
+    // This catches all state-changing requests (POST, PUT, DELETE).
+    document.body.addEventListener('htmx:afterSettle', (event) => {
+      const method = event.detail?.requestConfig?.verb?.toUpperCase();
+      const url = event.detail?.requestConfig?.path || '';
 
-    // Check if the element itself is a reload trigger.
-    if (element.dataset?.dbReloadTrigger) {
-      console.log('[Build Container] Element IS a reload trigger!');
-      handleReloadTrigger(element);
-      return;
-    }
-
-    // Check for reload triggers within the element.
-    if (element.querySelectorAll) {
-      const triggers = element.querySelectorAll('[data-db-reload-trigger]');
-      console.log('[Build Container] Found', triggers.length, 'triggers within element');
-      triggers.forEach(handleReloadTrigger);
-    }
+      // Only reload after state-changing requests to the Display Builder API.
+      if (url.includes('/api/display-builder/') && ['POST', 'PUT', 'DELETE'].includes(method)) {
+        console.log('[Build Container] State change detected, reloading build containers');
+        reloadAllBuildContainers();
+      }
+    });
   }
 
-  /**
-   * Handle a reload trigger element.
-   *
-   * @param {HTMLElement} element
-   *   The element with data-db-reload-trigger attribute.
-   */
-  function handleReloadTrigger(element) {
-    const builderId = element.dataset.dbReloadTrigger;
-    if (!builderId) return;
-
-    // Avoid processing the same trigger multiple times.
-    if (element.dataset.dbReloadProcessed) return;
-    element.dataset.dbReloadProcessed = 'true';
-
-    console.log('[Build Container] Reload trigger detected for:', builderId);
-
-    // Remove the trigger element.
-    element.remove();
-
-    // Trigger the reload.
-    Drupal.displayBuilder.reloadBuildContainer(builderId);
-  }
-
-  // Set up listeners once DOM is ready.
+  // Set up listener once DOM is ready.
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupReloadTriggerListeners);
+    document.addEventListener('DOMContentLoaded', setupHtmxReloadListener);
   } else {
-    setupReloadTriggerListeners();
+    setupHtmxReloadListener();
   }
 })(Drupal, once);
