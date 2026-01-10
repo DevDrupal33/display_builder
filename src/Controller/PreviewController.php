@@ -88,9 +88,10 @@ class PreviewController extends ControllerBase {
    */
   protected function renderSources(array $sources, InstanceInterface $instance): array {
     $build = [];
+    $contexts = $instance->getContexts() ?? [];
 
     foreach ($sources as $index => $source) {
-      $rendered = $this->renderNode($source, $instance->getContexts());
+      $rendered = $this->renderNode($source, $contexts);
 
       if (!empty($rendered)) {
         $build[$index] = $rendered;
@@ -121,7 +122,9 @@ class PreviewController extends ControllerBase {
     $builder = \Drupal::service('ui_patterns.component_element_builder'); // @phpcs:ignore
 
     try {
-      $build = $builder->buildSource([], 'content', $contexts, $data, []) ?? [];
+      // buildSource signature: (array $element, string $slot_id, array $contexts, array $source, array $settings)
+      // The fifth argument $settings should contain the contexts configuration.
+      $build = $builder->buildSource([], 'content', [], $data, $contexts) ?? [];
 
       return $build['#slots']['content'][0] ?? [];
     }
