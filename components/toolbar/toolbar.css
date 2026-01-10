@@ -5,32 +5,20 @@
   --toolbar-color-background: var(--sl-color-neutral-0);
   --toolbar-z-index: calc(var(--db-z-index, 501) - 1);
   --toolbar-z-index-fullscreen: calc(var(--db-z-index-fullscreen, 1251) + 1);
-  /* Module core navigation compatibility */
   --toolbar-height: var(--admin-toolbar-top-bar-height, 64px);
 }
 
+/* ---------------------------------------------------------
+ * Base toolbar
+ * --------------------------------------------------------- */
 .db-toolbar {
   z-index: var(--toolbar-z-index);
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: var(--toolbar-height);
-  border: 1px solid var(--admin-toolbar-color-gray-100, var(--toolbar-color-border));
+  border: 1px solid var(--toolbar-color-border);
   background-color: var(--toolbar-color-background);
-
-  &.db-toolbar-is-sticky {
-    position: fixed;
-    left: var(--drupal-displace-offset-left, var(--admin-toolbar-sidebar-width, 0));
-    width: 100%;
-    padding-right: var(--drupal-displace-offset-left, var(--admin-toolbar-sidebar-width, 0));
-    border: 0 none;
-  }
-
-  sl-tooltip::part(body) {
-    color: var(--toolbar-color);
-    border: 1px solid var(--toolbar-color-border);
-    background-color: var(--toolbar-color-background);
-  }
 }
 
 /* If second drawer is open when sticky, keep toolbar buttons visible */
@@ -49,75 +37,237 @@
   margin-top: -1px; /* Optional: ensures it sits exactly where the content starts */
   background: transparent;
 }
-
-.display-builder {
-  container-type: inline-size;
-  container-name: toolbar;
+.db-toolbar-is-sticky {
+  position: fixed;
+  width: 100%;
 }
 
-.db-toolbar__middle .shoelace-tabs {
-  max-width: 100%;
-}
-
-.db-toolbar--sticky {
-  position: sticky;
-  top: 0;
+/* ---------------------------------------------------------
+ * Layout sections
+ * --------------------------------------------------------- */
+.db-toolbar__start,
+.db-toolbar__middle,
+.db-toolbar__end {
+  display: flex;
+  align-items: center;
+  padding: var(--sl-spacing-small);
+  gap: var(--sl-spacing-small);
 }
 
 .db-toolbar__middle {
-  height: var(--admin-toolbar-top-bar-height, 64px);
-  padding: 0;
+  flex: 1;
+  justify-content: center;
 }
 
-.db-toolbar__start,
-.db-toolbar__end {
-  box-sizing: border-box;
-  height: var(--admin-toolbar-top-bar-height, 64px);
-  padding: var(--sl-spacing-small) var(--sl-spacing-small);
-}
-
-.db-toolbar {
-  /* --drupal-displace-offset-top is used by toolbar, admin_toolbar & navigation */
-  top: var(--drupal-displace-offset-top, 0);
-  .db-keyboard-help {
-    padding-left: 0;
-    list-style: none;
-    code {
-      margin-right: 0.2rem;
-    }
-  }
-}
-
+/* ---------------------------------------------------------
+ * Fullscreen z-index
+ * --------------------------------------------------------- */
 .display-builder--fullscreen .db-toolbar {
   z-index: var(--toolbar-z-index-fullscreen);
-  top: 0;
-  &.db-toolbar-is-sticky {
-    left: 0;
-    padding-right: 1rem;
+}
+
+/* =========================================================
+ * RESPONSIVE BEHAVIOR (START + END)
+ * ========================================================= */
+
+/* ---------- Responsive (collapsed view) ---------- */
+/* =========================================================
+ * Vertical Dropdown Panels (START & END)
+ * ========================================================= */
+
+/* =========================================================
+ * Vertical Dropdown Panels (START & END)
+ * ========================================================= */
+
+html.no-touchevents:not(.display-builder-is-fullscreen) .db-toolbar__start,
+html.no-touchevents:not(.display-builder-is-fullscreen) .db-toolbar__end {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  background: var(--toolbar-color-background);
+  border: 1px solid var(--toolbar-color-border);
+  border-radius: 8px;
+  box-shadow: var(--sl-shadow-large);
+  padding: 8px;
+  z-index: 50;
+
+  /* 🔥 Vertical layout */
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 240px;
+}
+
+html.no-touchevents:not(.display-builder-is-fullscreen) .db-toolbar__start {
+  left: 12px;
+}
+html.no-touchevents:not(.display-builder-is-fullscreen) .db-toolbar__end {
+  right: 12px;
+}
+
+html.no-touchevents:not(.display-builder-is-fullscreen)
+  .db-toolbar__start--open,
+html.no-touchevents:not(.display-builder-is-fullscreen) .db-toolbar__end--open {
+  display: flex;
+  top: 70px;
+}
+
+/* -----------------------------------------------------
+   * Buttons inside dropdown
+   * ----------------------------------------------------- */
+html.no-touchevents:not(.display-builder-is-fullscreen)
+  .db-toolbar__start
+  sl-button,
+html.no-touchevents:not(.display-builder-is-fullscreen)
+  .db-toolbar__end
+  sl-button {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+html.no-touchevents:not(.display-builder-is-fullscreen)
+  .db-toolbar__start
+  sl-button::part(base),
+html.no-touchevents:not(.display-builder-is-fullscreen)
+  .db-toolbar__end
+  sl-button::part(base) {
+  width: 100%;
+  padding: 10px 12px;
+}
+
+/* -----------------------------------------------------
+   * Button groups stack nicely
+   * ----------------------------------------------------- */
+html.no-touchevents:not(.display-builder-is-fullscreen)
+  .db-toolbar__end
+  sl-button-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* -----------------------------------------------------
+   * Fluid select dropdown
+   * ----------------------------------------------------- */
+html.no-touchevents:not(.display-builder-is-fullscreen)
+  .db-toolbar__end
+  sl-select {
+  width: 100%;
+}
+
+html.no-touchevents:not(.display-builder-is-fullscreen)
+  .db-toolbar__end
+  sl-select::part(base) {
+  width: 100%;
+}
+
+/* -----------------------------------------------------
+   * Toggle buttons (⋯)
+   * ----------------------------------------------------- */
+html.no-touchevents:not(.display-builder-is-fullscreen)
+  .db-toolbar__start-toggle,
+html.no-touchevents:not(.display-builder-is-fullscreen)
+  .db-toolbar__end-toggle {
+  display: inline-flex;
+  margin: 0 15px;
+}
+
+@media (max-width: 1260px) {
+  .db-toolbar__start,
+  .db-toolbar__end {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    background: var(--toolbar-color-background);
+    border: 1px solid var(--toolbar-color-border);
+    border-radius: 8px;
+    box-shadow: var(--sl-shadow-large);
+    padding: 8px;
+    z-index: 50;
+
+    /* 🔥 Vertical layout */
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    min-width: 240px;
+  }
+
+  .db-toolbar__start {
+    left: 12px;
+  }
+
+  .db-toolbar__end {
+    right: 12px;
+  }
+
+  .db-toolbar__start--open,
+  .db-toolbar__end--open {
+    display: flex;
+    top: 70px;
+  }
+
+  /* -----------------------------------------------------
+   * Buttons inside dropdown
+   * ----------------------------------------------------- */
+  .db-toolbar__start sl-button,
+  .db-toolbar__end sl-button {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .db-toolbar__start sl-button::part(base),
+  .db-toolbar__end sl-button::part(base) {
+    width: 100%;
+    padding: 10px 12px;
+  }
+
+  /* -----------------------------------------------------
+   * Button groups stack nicely
+   * ----------------------------------------------------- */
+  .db-toolbar__end sl-button-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  /* -----------------------------------------------------
+   * Fluid select dropdown
+   * ----------------------------------------------------- */
+  .db-toolbar__end sl-select {
+    width: 100%;
+  }
+
+  .db-toolbar__end sl-select::part(base) {
+    width: 100%;
+  }
+
+  /* -----------------------------------------------------
+   * Toggle buttons (⋯)
+   * ----------------------------------------------------- */
+  .db-toolbar__start-toggle,
+  .db-toolbar__end-toggle {
+    display: inline-flex;
+    margin: 0 15px;
   }
 }
 
-.db-toolbar sl-tab-group {
-  /* Tabs must not be taller than the available space */
-  max-height: calc(var(--admin-toolbar-top-bar-height, 64px) - var(--admin-toolbar-space-12, 12px) * 2);
-}
-
-.db-toolbar sl-tab::part(base) {
-  height: var(--admin-toolbar-top-bar-height, 64px);
-  padding: var(--sl-spacing-small) var(--admin-toolbar-space-12, 12px);
-}
-@media (max-width: 1280px) {
-  .db-toolbar sl-tab::part(base) {
-    padding: var(--sl-spacing-small) var(--admin-toolbar-space-8, 8px);
+/* Desktop: no dropdown */
+@media (min-width: 1261px) {
+  .db-toolbar__start-toggle,
+  .db-toolbar__end-toggle {
+    display: none;
+  }
+  html.no-touchevents:not(.display-builder-is-fullscreen)
+    .db-toolbar__start-toggle,
+  html.no-touchevents:not(.display-builder-is-fullscreen)
+    .db-toolbar__end-toggle {
+    display: block !important;
   }
 }
 
-.db-toolbar__end > .db-island:not(:first-child, dialog, :empty) {
-  display: inline-block;
-  margin-left: var(--admin-toolbar-space-4, 4px);
-}
-@media (max-width: 1280px) {
-  .db-toolbar__end > .db-island:not(:first-child, dialog, :empty) {
-    margin-left: var(--admin-toolbar-space-4, 4px);
-  }
+main
+  .region.region--content.grid-full.layout--pass--content-medium
+  .block.block-system.block-system-main-block
+  > .block__content {
+  position: relative;
 }
