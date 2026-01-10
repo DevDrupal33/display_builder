@@ -107,6 +107,24 @@ preview:
     - core/drupal
     - core/internal.floating-ui
 
+# Build iframe library for cross-iframe drag and drop.
+build_iframe:
+  js:
+    ./assets/js/build_iframe.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+    - core/sortable
+
+# iframe bridge for parent-iframe communication.
+iframe_bridge:
+  js:
+    ./assets/js/iframe_bridge.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+
 contextual_menu:
   js:
     ./assets/js/contextual_menu.js: {}

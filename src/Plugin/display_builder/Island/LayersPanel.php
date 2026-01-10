@@ -23,7 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   type: IslandType::View,
   icon: 'layers',
 )]
-class LayersPanel extends BuilderPanel {
+class LayersPanel extends BuilderPanelBase {
 
   /**
    * Proxy for slot source operations.

@@ -242,6 +242,7 @@ display_builder.api_preset_preview:
   options:
     _htmx_route: true
 
+
 # Display Builder iframe preview route.
 # This route renders the instance content with the frontend theme
 # for embedding in an iframe in the Preview panel.
