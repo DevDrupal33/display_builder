@@ -9,11 +9,20 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Theme\ThemeNegotiatorInterface;
 
 /**
- * Theme negotiator for Display Builder preview routes.
+ * Theme negotiator for Display Builder frontend routes.
  *
- * Always uses the default frontend theme for preview rendering.
+ * Always uses the default frontend theme for preview and build rendering.
+ * This ensures components are rendered with the correct theme templates.
  */
 class PreviewThemeNegotiator implements ThemeNegotiatorInterface {
+
+  /**
+   * Routes that should use the frontend theme.
+   */
+  protected const FRONTEND_ROUTES = [
+    'display_builder.preview',
+    'display_builder.build',
+  ];
 
   /**
    * Constructs a PreviewThemeNegotiator.
@@ -35,15 +44,15 @@ class PreviewThemeNegotiator implements ThemeNegotiatorInterface {
       return FALSE;
     }
 
-    // Apply only to preview routes.
-    return $route_name === 'display_builder.preview';
+    // Apply to preview and build routes.
+    return \in_array($route_name, self::FRONTEND_ROUTES, TRUE);
   }
 
   /**
    * {@inheritdoc}
    */
   public function determineActiveTheme(RouteMatchInterface $route_match): ?string {
-    // Always use the default frontend theme for previews.
+    // Always use the default frontend theme.
     return $this->configFactory->get('system.theme')->get('default');
   }
 

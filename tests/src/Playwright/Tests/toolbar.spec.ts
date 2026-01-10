@@ -76,7 +76,7 @@ test('Toolbar buttons', { tag: ['@display_builder', '@display_builder_dev_tools'
 
   await test.step(`Undo / Redo / Clear`, async () => {
     // Test the undo/redo/clear buttons
-    const builderTextfield = page.locator(`.db-island-builder [data-node-type="textfield"]`)
+    const builderTextfield = page.locator(`[data-db-build-container] [data-node-type="textfield"]`)
     await expect(builderTextfield).toHaveCount(2)
 
     // Position required to avoid icon to intercept the click.
@@ -99,7 +99,7 @@ test('Toolbar buttons', { tag: ['@display_builder', '@display_builder_dev_tools'
   // This is helping next tests.
   await test.step(`Set some values for next tests`, async () => {
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
+      page.locator(`[data-db-build-container] [data-node-type="textfield"]`).first(),
       'I am first',
       [
         {
@@ -109,7 +109,7 @@ test('Toolbar buttons', { tag: ['@display_builder', '@display_builder_dev_tools'
       ]
     )
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-type="textfield"]`).nth(1),
+      page.locator(`[data-db-build-container] [data-node-type="textfield"]`).nth(1),
       'I am second',
       [
         {
@@ -235,7 +235,7 @@ test('Toolbar keyboard', { tag: ['@display_builder', '@display_builder_dev_tools
   })
 
   await test.step(`Keyboard Undo / Redo / Clear`, async () => {
-    const builderTextfield = page.locator(`.db-island-builder [data-node-type="textfield"]`)
+    const builderTextfield = page.locator(`[data-db-build-container] [data-node-type="textfield"]`)
 
     await displayBuilder.dragElementFromLibraryById('Blocks', 'textfield', page.locator('.db-dropzone--root').first())
     await displayBuilder.closeDialog()
@@ -260,7 +260,7 @@ test('Toolbar keyboard', { tag: ['@display_builder', '@display_builder_dev_tools
   // This is helping next tests.
   await test.step(`Set some values for next tests`, async () => {
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
+      page.locator(`[data-db-build-container] [data-node-type="textfield"]`).first(),
       'I am first',
       [
         {
@@ -270,7 +270,7 @@ test('Toolbar keyboard', { tag: ['@display_builder', '@display_builder_dev_tools
       ]
     )
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-type="textfield"]`).nth(1),
+      page.locator(`[data-db-build-container] [data-node-type="textfield"]`).nth(1),
       'I am second',
       [
         {

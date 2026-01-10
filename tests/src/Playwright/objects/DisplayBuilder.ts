@@ -10,6 +10,38 @@ export class Displaybuilder {
   }
 
   /**
+   * Gets the build content container.
+   *
+   * The build content is loaded via AJAX from the frontend theme.
+   * This method waits for the content to be ready and returns a locator
+   * that can search within it.
+   *
+   * @async
+   * @returns {Promise<Locator>} Locator for the build content container.
+   */
+  async getBuildShadowContent(): Promise<Locator> {
+    // Wait for the build container to be visible.
+    const buildContainer = this.page.locator('[data-db-build-container]').first()
+    await expect(buildContainer).toBeVisible({ timeout: 5000 })
+
+    // Wait for content to load (checking for root dropzone).
+    const buildContent = this.page.locator('[data-db-build-container] .db-dropzone--root').first()
+    await expect(buildContent).toBeVisible({ timeout: 10000 })
+
+    return buildContainer
+  }
+
+  /**
+   * Gets a locator within the builder's content container.
+   *
+   * @param {string} selector - CSS selector for element within the build container.
+   * @returns {Locator} Locator for the element.
+   */
+  getBuildLocator(selector: string): Locator {
+    return this.page.locator(`[data-db-build-container] ${selector}`)
+  }
+
+  /**
    * Toggles the sidebar first drawer in the Display Builder UI.
    *
    * @async
@@ -300,15 +332,30 @@ export class Displaybuilder {
    */
   async dragSimpleComponentsWithTextfield(textfieldTest: string = 'I am a test textfield in a slot!'): Promise<void> {
     await this.toggleSidebarView()
+
+    // Wait for build content to be loaded.
+    await this.getBuildShadowContent()
+
     await this.dragElementFromLibraryById(
       'Components',
       'test_simple',
-      this.page.locator(`.db-island-builder .db-dropzone--root`)
+      this.getBuildLocator('.db-dropzone--root')
     )
-    const componentSimpleSlot = this.page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
+
+    // Wait for SSE to reload the build content after drag.
+    // The htmxReady waits for HTMX operations to complete.
+    await this.htmxReady()
+
+    // Give the AJAX reload a moment to complete.
+    await this.page.waitForTimeout(500)
+
+    // Wait for component to appear after drag and reload.
+    await expect(this.getBuildLocator('.test_simple')).toBeVisible({ timeout: 10000 })
+
+    const componentSimpleSlot = this.getBuildLocator('.test_simple .slot_test [data-slot-id="slot_1"]')
     await this.dragElementFromLibraryById('Blocks', 'textfield', componentSimpleSlot)
     await this.setElementValue(
-      this.page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
+      this.getBuildLocator('[data-node-type="textfield"]').first(),
       textfieldTest,
       [
         {
@@ -334,7 +381,9 @@ export class Displaybuilder {
     for (const [ source, label ] of Object.entries(blocks)) {
       await expect(this.page.locator(`.db-island-block_library [hx-vals*="${source}"]`)).toHaveCount(1)
       if (builder) {
-        await expect(this.page.locator('.db-island-builder').getByRole('button', { name: label })).toHaveCount(1)
+        // Wait for Shadow DOM content to be loaded and check within it.
+        await this.getBuildShadowContent()
+        await expect(this.getBuildLocator(`[data-node-title="${label}"], button`).filter({ hasText: label })).toHaveCount(1, { timeout: 5000 })
       }
     }
   }

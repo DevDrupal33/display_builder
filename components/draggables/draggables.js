@@ -13,9 +13,6 @@
    * Sortable do not support nested, draggables must be flat to reduce the
    * init loop. With placeholder there is a preview of components.
    *
-   * For cross-iframe drag-and-drop, we use setData to pass source info
-   * that can be read by the build iframe's dropzones.
-   *
    * @param {HTMLElement} draggableContainer - The element containing draggable collections
    */
   function setDraggable(draggableContainer) {
@@ -34,19 +31,6 @@
       },
       animation: 150,
       sort: false,
-      // Set data for cross-iframe drag-and-drop.
-      setData(dataTransfer, dragEl) {
-        const sourceData = {
-          sourceId: dragEl.dataset.dbSourceId || dragEl.dataset.sourceId,
-          sourceType: dragEl.dataset.dbSourceType || 'component',
-          componentId: dragEl.dataset.dbComponentId || dragEl.dataset.componentId,
-          blockId: dragEl.dataset.dbBlockId || dragEl.dataset.blockId,
-          presetId: dragEl.dataset.dbPresetId || dragEl.dataset.presetId,
-          builderId,
-        };
-        dataTransfer.setData('text/plain', JSON.stringify(sourceData));
-        dataTransfer.setData('application/x-display-builder', JSON.stringify(sourceData));
-      },
       onUnchoose(event) {
         // If selected is dropped out of dropzone, it is the event.item that
         // stay in the draggable list. We do nothing to keep the preview on.

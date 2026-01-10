@@ -35,10 +35,10 @@ test('From fixture', { tag: ['@display_builder', '@display_builder_dev_tools'] }
 
   await test.step(`Build instance`, async () => {
     // Add a textfield in a slot and set a value
-    await displayBuilder.dragElementFromLibraryById('Blocks', 'textfield', page.locator('.db-island-builder [data-test="test_simple_slot"]'))
+    await displayBuilder.dragElementFromLibraryById('Blocks', 'textfield', page.locator('[data-db-build-container] [data-test="test_simple_slot"]'))
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
+      page.locator(`[data-db-build-container] [data-node-type="textfield"]`).first(),
       'Test fixture: I am a test textfield in a slot! ',
       [
         {
@@ -53,8 +53,8 @@ test('From fixture', { tag: ['@display_builder', '@display_builder_dev_tools'] }
 
   await test.step(`Move textfield to the end of slot`, async () => {
     await displayBuilder.dragElement(
-      page.locator(`.db-island-builder .test_simple .slot_test [data-slot-position="0"]`),
-      page.locator(`.db-island-builder .test_simple .slot_test [data-slot-position="1"]`),
+      page.locator(`[data-db-build-container] .test_simple .slot_test [data-slot-position="0"]`),
+      page.locator(`[data-db-build-container] .test_simple .slot_test [data-slot-position="1"]`),
       { x: 40, y: 20 }
     )
 
@@ -105,7 +105,7 @@ test('Secondary actions', { tag: ['@display_builder', '@display_builder_dev_tool
   })
 
   await test.step(`Drawer resize`, async () => {
-    await page.locator(`.db-island-builder [data-node-type="textfield"]`).first().click({ position: { x: 5, y: 10 } })
+    await page.locator(`[data-db-build-container] [data-node-type="textfield"]`).first().click({ position: { x: 5, y: 10 } })
     await displayBuilder.htmxReady()
 
     const firstDrawer = page.locator(`#${firstDrawerId}`)
@@ -150,7 +150,7 @@ test('From scratch', { tag: ['@display_builder', '@display_builder_dev_tools'] }
   await test.step(`Build instance`, async () => {
     await displayBuilder.fullHighlight()
 
-    const componentSimpleSlot = page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
+    const componentSimpleSlot = page.locator(`[data-db-build-container] .test_simple .slot_test [data-slot-id="slot_1"]`)
 
     // Drag element and set some values
     await displayBuilder.dragElementFromLibraryById(
@@ -162,7 +162,7 @@ test('From scratch', { tag: ['@display_builder', '@display_builder_dev_tools'] }
     await displayBuilder.dragElementFromLibraryById('Blocks', 'textfield', componentSimpleSlot.nth(1))
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
+      page.locator(`[data-db-build-container] [data-node-type="textfield"]`).first(),
       'I am a test textfield in a slot',
       [
         {
@@ -173,7 +173,7 @@ test('From scratch', { tag: ['@display_builder', '@display_builder_dev_tools'] }
     )
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title="Test simple"]`).first(),
+      page.locator(`[data-db-build-container] [data-node-title="Test simple"]`).first(),
       'First component',
       [
         {
@@ -188,7 +188,7 @@ test('From scratch', { tag: ['@display_builder', '@display_builder_dev_tools'] }
     )
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title="Test simple"]`).nth(1),
+      page.locator(`[data-db-build-container] [data-node-title="Test simple"]`).nth(1),
       'Second component with a textfield',
       [
         {
@@ -224,7 +224,7 @@ test('Contextual', { tag: ['@display_builder', '@display_builder_dev_tools'] }, 
   await test.step(`Build instance`, async () => {
     await displayBuilder.fullHighlight()
 
-    const componentSimpleSlot = page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
+    const componentSimpleSlot = page.locator(`[data-db-build-container] .test_simple .slot_test [data-slot-id="slot_1"]`)
 
     // Drag element and set some values
     await displayBuilder.dragElementFromLibraryById(
@@ -236,7 +236,7 @@ test('Contextual', { tag: ['@display_builder', '@display_builder_dev_tools'] }, 
     await displayBuilder.dragElementFromLibraryById('Blocks', 'textfield', componentSimpleSlot.nth(1))
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title="Test simple"]`).first(),
+      page.locator(`[data-db-build-container] [data-node-title="Test simple"]`).first(),
       'I am component',
       [
         {
@@ -251,7 +251,7 @@ test('Contextual', { tag: ['@display_builder', '@display_builder_dev_tools'] }, 
     )
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title="Test simple"]`).nth(1),
+      page.locator(`[data-db-build-container] [data-node-title="Test simple"]`).nth(1),
       'I am component inside component with a textfield',
       [
         {
@@ -266,7 +266,7 @@ test('Contextual', { tag: ['@display_builder', '@display_builder_dev_tools'] }, 
     )
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
+      page.locator(`[data-db-build-container] [data-node-type="textfield"]`).first(),
       'I am a test textfield in a slot',
       [
         {
@@ -278,7 +278,7 @@ test('Contextual', { tag: ['@display_builder', '@display_builder_dev_tools'] }, 
 
     await displayBuilder.closeDialog('both')
 
-    await expect(page.locator('.db-island-builder')).toMatchAriaSnapshot({ name: 'contextual.aria.yml' })
+    await expect(page.locator('[data-db-build-container] .db-dropzone--root')).toMatchAriaSnapshot({ name: 'contextual.aria.yml' })
 
     await page
       .getByRole('heading', { name: 'label: I am component inside component with a textfield' })
@@ -287,7 +287,7 @@ test('Contextual', { tag: ['@display_builder', '@display_builder_dev_tools'] }, 
     await page.getByRole('menuitemcheckbox', { name: 'Duplicate Test simple' }).locator('slot').nth(1).click()
     await displayBuilder.shoelaceReady()
 
-    await expect(page.locator('.db-island-builder')).toMatchAriaSnapshot({ name: 'contextual-duplicate.aria.yml' })
+    await expect(page.locator('[data-db-build-container] .db-dropzone--root')).toMatchAriaSnapshot({ name: 'contextual-duplicate.aria.yml' })
 
     await page
       .getByRole('heading', { name: 'label: I am component inside component with a textfield' }).nth(1)
@@ -296,7 +296,7 @@ test('Contextual', { tag: ['@display_builder', '@display_builder_dev_tools'] }, 
     await page.getByRole('menuitemcheckbox', { name: 'Remove' }).locator('slot').nth(1).click()
     await displayBuilder.shoelaceReady()
 
-    await expect(page.locator('.db-island-builder')).toMatchAriaSnapshot({ name: 'contextual-remove.aria.yml' })
+    await expect(page.locator('[data-db-build-container] .db-dropzone--root')).toMatchAriaSnapshot({ name: 'contextual-remove.aria.yml' })
 
     // await test.step(`Delete`, async () => {
       // await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)

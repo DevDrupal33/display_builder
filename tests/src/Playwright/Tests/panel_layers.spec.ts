@@ -41,8 +41,8 @@ test('Layers: Drag and move', { tag: ['@display_builder', '@display_builder_dev_
     )
 
     await displayBuilder.dragElement(
-      page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
-      page.locator(`.db-island-builder [data-slot-id="slot_1"]`).first(),
+      page.locator(`[data-db-build-container] [data-node-type="textfield"]`).first(),
+      page.locator(`[data-db-build-container] [data-slot-id="slot_1"]`).first(),
     )
 
     // Switch to Layers tab to verify the layer hierarchy

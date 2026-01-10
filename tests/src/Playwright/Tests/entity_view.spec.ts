@@ -78,7 +78,7 @@ test(
 
       // Instance form variant configuration
       await page
-        .locator(`.db-island-builder [data-test="test_simple"]`)
+        .locator(`[data-db-build-container] [data-test="test_simple"]`)
         .click({ position: {x: 5, y: 5} }) // Avoid click on the slot textfield.
       await displayBuilder.htmxReady()
 
@@ -122,7 +122,7 @@ test(
 
       // Ensure styles are applied
       // @todo ensure they are on preview or view
-      await expect(page.locator(`.db-island-builder [data-test="test_simple"]`)).toHaveClass(/test-style-1 foo bar test_simple/)
+      await expect(page.locator(`[data-db-build-container] [data-test="test_simple"]`)).toHaveClass(/test-style-1 foo bar test_simple/)
 
       await displayBuilder.closeDialog('both')
       await displayBuilder.publishDisplayBuilder()

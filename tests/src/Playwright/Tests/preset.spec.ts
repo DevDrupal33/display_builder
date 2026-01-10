@@ -36,12 +36,12 @@ test('Preset', { tag: ['@display_builder', '@display_builder_dev_tools'] }, asyn
     )
 
     await displayBuilder.dragElement(
-      page.locator(`.db-island-builder [data-node-type="textfield"]`),
-      page.locator(`.db-island-builder [data-slot-id="slot_1"]`)
+      page.locator(`[data-db-build-container] [data-node-type="textfield"]`),
+      page.locator(`[data-db-build-container] [data-slot-id="slot_1"]`)
     )
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-type="textfield"]`),
+      page.locator(`[data-db-build-container] [data-node-type="textfield"]`),
       'I am a test textfield in a slot',
       [
         {
@@ -52,7 +52,7 @@ test('Preset', { tag: ['@display_builder', '@display_builder_dev_tools'] }, asyn
     )
 
     await displayBuilder.setElementValue(
-      page.locator(`.db-island-builder [data-node-title="Test simple"]`),
+      page.locator(`[data-db-build-container] [data-node-title="Test simple"]`),
       'I am a component with a textfield',
       [
         {

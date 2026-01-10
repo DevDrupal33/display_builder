@@ -76,11 +76,11 @@ test(
       await displayBuilder.fullHighlight()
 
       // Verify the build container wrapper exists in the builder island (not layers)
-      const buildContainer = page.locator('.db-island-builder .db-build-container')
+      const buildContainer = page.locator('.db-build-container')
       await expect(buildContainer).toBeVisible()
 
       // Verify the dropzone is inside the build container
-      const dropzone = page.locator('.db-island-builder .db-build-container .db-dropzone--root')
+      const dropzone = page.locator('.db-build-container .db-dropzone--root')
       await expect(dropzone).toBeVisible()
     })
   }
