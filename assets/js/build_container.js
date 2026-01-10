@@ -13,6 +13,9 @@
 (function (Drupal, once) {
   'use strict';
 
+  // Track pending reloads to prevent duplicates.
+  const pendingReloads = new Map();
+
   /**
    * Initialize build containers.
    */
@@ -68,7 +71,11 @@
    *   The builder ID.
    */
   async function loadBuildContent(container, src, builderId) {
-    console.log('[Build Container] Fetching:', src);
+    // Generate a unique request ID to track this specific load.
+    const requestId = Date.now().toString();
+    pendingReloads.set(builderId, requestId);
+
+    console.log('[Build Container] Fetching:', src, 'requestId:', requestId);
 
     const response = await fetch(src, {
       headers: {
@@ -76,6 +83,12 @@
       },
       credentials: 'same-origin',
     });
+
+    // Check if this request is still the latest one.
+    if (pendingReloads.get(builderId) !== requestId) {
+      console.log('[Build Container] Request superseded, ignoring:', requestId);
+      return;
+    }
 
     console.log('[Build Container] Response status:', response.status);
 
@@ -95,6 +108,12 @@
     }
 
     const data = await response.json();
+
+    // Check again if this request is still the latest one (after parsing).
+    if (pendingReloads.get(builderId) !== requestId) {
+      console.log('[Build Container] Request superseded after parse, ignoring:', requestId);
+      return;
+    }
 
     console.log('[Build Container] API Response:', data);
     console.log('[Build Container] HTML length:', data.html?.length || 0);
@@ -248,16 +267,27 @@
     console.log('[Build Container] MutationObserver and HTMX listeners set up');
   }
 
+  // Debounce timer for reload operations.
+  let reloadDebounceTimer = null;
+
   /**
-   * Reload all build containers on the page.
+   * Reload all build containers on the page (debounced).
    */
   function reloadAllBuildContainers() {
-    const containers = document.querySelectorAll('[data-db-build-container]');
-    containers.forEach((container) => {
-      const builderId = container.dataset.dbBuildContainer;
-      console.log('[Build Container] Reloading container:', builderId);
-      Drupal.displayBuilder.reloadBuildContainer(builderId);
-    });
+    // Debounce rapid successive reload requests.
+    if (reloadDebounceTimer) {
+      clearTimeout(reloadDebounceTimer);
+    }
+
+    reloadDebounceTimer = setTimeout(() => {
+      reloadDebounceTimer = null;
+      const containers = document.querySelectorAll('[data-db-build-container]');
+      containers.forEach((container) => {
+        const builderId = container.dataset.dbBuildContainer;
+        console.log('[Build Container] Reloading container:', builderId);
+        Drupal.displayBuilder.reloadBuildContainer(builderId);
+      });
+    }, 100); // 100ms debounce
   }
 
   /**

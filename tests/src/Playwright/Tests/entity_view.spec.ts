@@ -122,7 +122,7 @@ test(
 
       // Ensure styles are applied
       // @todo ensure they are on preview or view
-      await expect(page.locator(`[data-db-build-container] [data-test="test_simple"]`)).toHaveClass(/test-style-1 foo bar test_simple/)
+      await expect(displayBuilder.getBuildLocator(`[data-test="test_simple"]`)).toHaveClass(/test-style-1 foo bar test_simple/)
 
       await displayBuilder.closeDialog('both')
       await displayBuilder.publishDisplayBuilder()

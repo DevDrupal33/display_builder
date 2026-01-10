@@ -23,7 +23,7 @@ test('Layers: Drag and move', { tag: ['@display_builder', '@display_builder_dev_
     await displayBuilder.shoelaceReady()
     await displayBuilder.fullHighlight()
 
-    const dropzoneRoot = page.locator('.db-dropzone--root').first()
+    const dropzoneRoot = displayBuilder.getBuildLocator('.db-dropzone--root')
 
     // Perform drag operations in Builder tab first
     await displayBuilder.dragSimpleComponentsWithTextfield('I am a test textfield in a slot!')
@@ -41,8 +41,8 @@ test('Layers: Drag and move', { tag: ['@display_builder', '@display_builder_dev_
     )
 
     await displayBuilder.dragElement(
-      page.locator(`[data-db-build-container] [data-node-type="textfield"]`).first(),
-      page.locator(`[data-db-build-container] [data-slot-id="slot_1"]`).first(),
+      displayBuilder.getBuildLocator(`[data-node-type="textfield"]`).first(),
+      displayBuilder.getBuildLocator(`[data-slot-id="slot_1"]`).first(),
     )
 
     // Switch to Layers tab to verify the layer hierarchy

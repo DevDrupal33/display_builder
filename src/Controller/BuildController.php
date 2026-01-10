@@ -7,9 +7,11 @@ namespace Drupal\display_builder\Controller;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Asset\AssetResolverInterface;
 use Drupal\Core\Asset\AttachedAssets;
+use Drupal\Core\Asset\LibraryDiscoveryInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\display_builder\HtmxEvents;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\RenderableBuilderTrait;
@@ -51,6 +53,10 @@ class BuildController extends ControllerBase {
    *   The component element builder.
    * @param \Drupal\display_builder\SlotSourceProxy $slotSourceProxy
    *   The slot source proxy.
+   * @param \Drupal\Core\Theme\ThemeManagerInterface $themeManager
+   *   The theme manager.
+   * @param \Drupal\Core\Asset\LibraryDiscoveryInterface $libraryDiscovery
+   *   The library discovery service.
    */
   public function __construct(
     #[Autowire(service: 'renderer')]
@@ -65,6 +71,10 @@ class BuildController extends ControllerBase {
     protected ComponentElementBuilder $componentElementBuilder,
     #[Autowire(service: 'display_builder.slot_sources_proxy')]
     protected SlotSourceProxy $slotSourceProxy,
+    #[Autowire(service: 'theme.manager')]
+    protected ThemeManagerInterface $themeManager,
+    #[Autowire(service: 'library.discovery')]
+    protected LibraryDiscoveryInterface $libraryDiscovery,
   ) {}
 
   /**
@@ -477,6 +487,9 @@ class BuildController extends ControllerBase {
   /**
    * Resolves attached assets to CSS and JS URLs.
    *
+   * Includes both the attached libraries from rendered content AND
+   * the global libraries from the active frontend theme.
+   *
    * @param array $attached
    *   The attached array from render.
    *
@@ -487,13 +500,20 @@ class BuildController extends ControllerBase {
     $css_urls = [];
     $js_urls = [];
 
-    if (empty($attached['library'])) {
+    // Start with libraries from rendered content.
+    $libraries = $attached['library'] ?? [];
+
+    // Add the active theme's libraries.
+    $theme_libraries = $this->getThemeLibraries();
+    $libraries = \array_merge($theme_libraries, $libraries);
+
+    if (empty($libraries)) {
       return ['css' => $css_urls, 'js' => $js_urls];
     }
 
-    // Create AttachedAssets object.
+    // Create AttachedAssets object with all libraries.
     $assets = new AttachedAssets();
-    $assets->setLibraries($attached['library']);
+    $assets->setLibraries(\array_unique($libraries));
 
     // Resolve CSS assets.
     $css_assets = $this->assetResolver->getCssAssets($assets, FALSE, \Drupal::languageManager()->getCurrentLanguage());
@@ -521,6 +541,64 @@ class BuildController extends ControllerBase {
     }
 
     return ['css' => $css_urls, 'js' => $js_urls];
+  }
+
+  /**
+   * Gets the libraries that should be loaded for the active theme.
+   *
+   * @return array
+   *   Array of library names (e.g., 'theme_name/global-styling').
+   */
+  protected function getThemeLibraries(): array {
+    $libraries = [];
+
+    // Get the active theme name.
+    $active_theme = $this->themeManager->getActiveTheme();
+    $theme_name = $active_theme->getName();
+
+    // Get all libraries defined by the theme.
+    $theme_libraries = $this->libraryDiscovery->getLibrariesByExtension($theme_name);
+
+    // Add commonly used global libraries.
+    // Most themes have 'global-styling' or 'global-scripts'.
+    $global_library_names = [
+      'global-styling',
+      'global-scripts',
+      'base',
+      'global',
+    ];
+
+    foreach ($global_library_names as $lib_name) {
+      if (isset($theme_libraries[$lib_name])) {
+        $libraries[] = $theme_name . '/' . $lib_name;
+      }
+    }
+
+    // Also check for libraries defined in the theme's .info.yml as 'libraries'.
+    // These are automatically attached to all pages using the theme.
+    $theme_info = $active_theme->getExtension();
+    if ($theme_info && method_exists($theme_info, 'info')) {
+      $info = $theme_info->info;
+      if (!empty($info['libraries'])) {
+        foreach ($info['libraries'] as $library) {
+          $libraries[] = $library;
+        }
+      }
+    }
+
+    // Add all libraries from the base themes as well.
+    foreach ($active_theme->getBaseThemeExtensions() as $base_theme) {
+      $base_theme_name = $base_theme->getName();
+      $base_libraries = $this->libraryDiscovery->getLibrariesByExtension($base_theme_name);
+
+      foreach ($global_library_names as $lib_name) {
+        if (isset($base_libraries[$lib_name])) {
+          $libraries[] = $base_theme_name . '/' . $lib_name;
+        }
+      }
+    }
+
+    return $libraries;
   }
 
   /**

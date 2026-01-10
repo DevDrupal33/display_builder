@@ -23,7 +23,7 @@ test('Builder: Drag and move', { tag: ['@display_builder', '@display_builder_dev
     await displayBuilder.shoelaceReady()
     await displayBuilder.fullHighlight()
 
-    const dropzoneRoot = page.locator('.db-dropzone--root').first()
+    const dropzoneRoot = displayBuilder.getBuildLocator('.db-dropzone--root')
 
     await displayBuilder.dragSimpleComponentsWithTextfield('I am a test textfield in a slot!')
 

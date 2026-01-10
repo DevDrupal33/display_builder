@@ -34,11 +34,16 @@ export class Displaybuilder {
   /**
    * Gets a locator within the builder's content container.
    *
+   * The build content is loaded via AJAX into a `.db-build-content` wrapper.
+   * This selector specifically targets that content to avoid matching
+   * elements from other islands (like LayersPanel) that may also have
+   * similar DOM structures.
+   *
    * @param {string} selector - CSS selector for element within the build container.
    * @returns {Locator} Locator for the element.
    */
   getBuildLocator(selector: string): Locator {
-    return this.page.locator(`[data-db-build-container] ${selector}`)
+    return this.page.locator(`[data-db-build-container] .db-build-content ${selector}`)
   }
 
   /**
