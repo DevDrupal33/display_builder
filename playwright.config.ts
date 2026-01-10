@@ -108,12 +108,12 @@ export default defineConfig({
    *
    * Comment for a local running server launched manually.
    */
-  webServer: {
-    name: 'PHP',
-    command: 'php -q -S localhost:8000 -t ../../../',
-    url: 'http://localhost:8000',
-    reuseExistingServer: !process.env.CI,
-    stdout: 'ignore',
-    stderr: 'pipe',
-  },
+  // webServer: {
+  //   name: 'PHP',
+  //   command: 'php -q -S localhost:8000 -t ../../../',
+  //   url: 'http://localhost:8000',
+  //   reuseExistingServer: !process.env.CI,
+  //   stdout: 'ignore',
+  //   stderr: 'pipe',
+  // },
 })
