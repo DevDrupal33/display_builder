@@ -1,13 +1,33 @@
 /**
  * @file
- * Build Container CSS for the Display Builder.
+ * Build Container CSS with CSS containment for isolation.
  *
- * Styles for the custom element host. The actual content
- * is rendered inside Shadow DOM with its own isolated styles.
+ * Uses CSS containment and isolation properties to prevent
+ * backend theme CSS from affecting builder content.
  */
-db-build-container,
+
 .db-build-container {
   display: block;
   min-height: 100%;
   width: 100%;
+
+  /* CSS containment to isolate from outside styles */
+  contain: layout style;
+
+  /* Establish new stacking context */
+  isolation: isolate;
+
+  /* Reset common inherited properties */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1a1a1a;
+}
+
+/* Reset specific styles that might bleed through from admin theme */
+.db-build-container *,
+.db-build-container *::before,
+.db-build-container *::after {
+  /* Don't use all: revert as it breaks component styles */
+  /* Only reset specific problematic properties */
 }

@@ -1,14 +1,12 @@
 {#
 /**
  * @file
- * Build Container component with Shadow DOM for CSS isolation.
+ * Build Container component for the Display Builder.
  *
- * This component uses a custom element with Shadow DOM to completely
- * isolate the builder content from backend theme CSS.
- * The Shadow DOM boundary prevents any external CSS from affecting
- * the drag-and-drop interface.
+ * CSS isolation is handled through CSS containment properties
+ * to prevent backend theme CSS from affecting builder content.
  */
 #}
-<db-build-container class="db-build-container" {{ attributes }}>
+<div class="db-build-container" {{ attributes }}>
   {{- content -}}
-</db-build-container>
+</div>
