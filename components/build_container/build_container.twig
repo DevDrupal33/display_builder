@@ -1,14 +1,14 @@
 {#
 /**
  * @file
- * Build Container component for CSS isolation.
+ * Build Container component with Shadow DOM for CSS isolation.
  *
- * This component wraps the builder content with CSS isolation.
- * Uses CSS containment and scoped styles instead of Shadow DOM
- * to maintain Playwright test compatibility.
+ * This component uses a custom element with Shadow DOM to completely
+ * isolate the builder content from backend theme CSS.
+ * The Shadow DOM boundary prevents any external CSS from affecting
+ * the drag-and-drop interface.
  */
 #}
-<div class="db-build-container" {{ attributes }}>
-  {{ content }}
-</div>
-
+<db-build-container class="db-build-container" {{ attributes }}>
+  {{- content -}}
+</db-build-container>

@@ -2,15 +2,12 @@
  * @file
  * Build Container CSS for the Display Builder.
  *
- * Uses CSS containment to isolate the builder area from
- * backend theme styles while maintaining Playwright compatibility.
+ * Styles for the custom element host. The actual content
+ * is rendered inside Shadow DOM with its own isolated styles.
  */
+db-build-container,
 .db-build-container {
   display: block;
-  /* CSS containment helps limit style recalculation */
-  contain: layout style;
-  /* Reset some common properties that might leak from themes */
-  font-size: inherit;
-  line-height: inherit;
+  min-height: 100%;
+  width: 100%;
 }
-
