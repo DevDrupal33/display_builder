@@ -35,12 +35,8 @@ export type DrupalSiteInstall = {
  *   installation).
  * - DRUPAL_TEST_SETUP_PROFILE: The installation profile to use
  *   (defaults to 'minimal' if not set).
- * - DRUPAL_TEST_SETUP_LANGCODE: The language code for the site  (optional).
+ * - DRUPAL_TEST_SETUP_LANGCODE: The language code for the site (optional).
  * - DRUPAL_TEST_SETUP_FILE: A setup file to pre-configure the site
- *   (optional).
- * - DRUPAL_TEST_WEBSERVER_USER: If set, commands will be run as this user
- *   using sudo (optional, useful for certain CI environments).
- * - DRUPAL_TEST_DRUSH_PREFIX: A prefix to use for Drush commands
  *   (optional).
  * - PLAYWRIGHT_SKIP_TEARDOWN: If set to 'true', the teardown step will be
  *   skipped (optional, useful for debugging).
@@ -51,11 +47,11 @@ export const drupalSite = base.extend<DrupalSiteInstall>({
     async ({}, use, workerInfo) => {
       if (process.env.DRUPAL_TEST_SKIP_INSTALL && process.env.DRUPAL_TEST_SKIP_INSTALL === 'true') {
         const withDrush = await hasDrush()
-        utils.debug('Drupal is installed, skip installation for tests')
+        utils.info('Drupal is installed, skip installation for tests')
         await use({
           userAgent: '',
           sitePath: '',
-          url: process.env.DRUPAL_TEST_BASE_URL ?? '',
+          url: process.env.DRUPAL_TEST_BASE_URL ?? '/',
           hasDrush: withDrush,
           teardown: async () => {
             return Promise.resolve('')
@@ -65,6 +61,7 @@ export const drupalSite = base.extend<DrupalSiteInstall>({
       }
 
       utils.debug('Install Drupal with test environment...')
+
       const setupFile = process.env.DRUPAL_TEST_SETUP_FILE ? `--setup-file "${process.env.DRUPAL_TEST_SETUP_FILE}"` : ''
       const installProfile = `--install-profile "${process.env.DRUPAL_TEST_SETUP_PROFILE || 'minimal'}"`
       const langcodeOption = process.env.DRUPAL_TEST_SETUP_LANGCODE

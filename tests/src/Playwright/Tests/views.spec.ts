@@ -30,69 +30,61 @@ test(
       await page.goto(config.viewsAddUrl)
       await page.getByLabel('View name').fill(`Test ${testName}`)
       await page.getByLabel('Create a page').check()
+
       await page.getByText('Save and edit').click()
       await drupal.expectMessage(`The view Test ${testName} has been saved.`)
       await drupal.ajaxReady()
 
-      const applyDialog = page.getByText('ApplyCancelRemove').getByRole('button', { name: 'Apply' })
-
       // Set areas to check the result.
       await page.getByRole('link', { name: 'Add header' }).click()
-      await drupal.ajaxReady()
+
       await page.getByRole('checkbox', { name: 'Update Text area' }).check()
       await page.getByRole('button', { name: 'Add and configure header' }).click()
       await page.getByRole('textbox', { name: 'Content' }).fill('This is a header views area')
       await page.getByRole('checkbox', { name: 'Display even if view has no' }).click()
-      await applyDialog.click()
-      await drupal.ajaxReady()
+      await page.getByRole('button', { name: 'Apply', exact: true }).click()
 
       await page.getByRole('link', { name: 'Add footer' }).click()
-      await drupal.ajaxReady()
+
       await page.getByRole('row', { name: 'Update Text area Text area' }).locator('div').click()
       await page.getByRole('checkbox', { name: 'Update Text area' }).check()
       await page.getByRole('button', { name: 'Add and configure footer' }).click()
       await page.getByRole('textbox', { name: 'Content' }).fill('This is a footer views test area')
       await page.getByRole('checkbox', { name: 'Display even if view has no' }).click()
-      await applyDialog.click()
-      await drupal.ajaxReady()
+      await page.getByRole('button', { name: 'Apply', exact: true }).click()
 
       await page.getByRole('link', { name: 'Add no results behavior' }).click()
-      await drupal.ajaxReady()
+
       await page.getByRole('checkbox', { name: 'Update Text area' }).check()
       await page.getByRole('button', { name: 'Add and configure no results' }).click()
       await page.getByRole('textbox', { name: 'Content' }).fill('This is the no results views area')
-      await applyDialog.click()
-      await drupal.ajaxReady()
+      await page.getByRole('button', { name: 'Apply', exact: true }).click()
 
       await page.getByRole('link', { name: 'Mini pager, 10 items' }).click()
-      await drupal.ajaxReady()
+
       await page.getByRole('spinbutton', { name: 'Items per page' }).fill("1")
-      await page.getByRole('button', { name: 'Apply' }).click()
-      await drupal.ajaxReady()
+      await page.getByRole('button', { name: 'Apply', exact: true }).click()
 
       await page.getByTitle('Specify whether this display').click()
-      await drupal.ajaxReady()
+
       await page.getByRole('checkbox', { name: 'Create more link' }).check()
-      await page.getByRole('button', { name: 'Apply' }).click()
-      await drupal.ajaxReady()
+      await page.getByRole('button', { name: 'Apply', exact: true }).click()
 
-      await page.getByRole('link', { name: 'Content: Published (= Yes)' }).click()
-      await drupal.ajaxReady()
+      await page.getByRole('link', { name: 'Content: Published' }).click()
+
       await page.getByRole('checkbox', { name: 'Expose this filter to visitors' }).check()
-      await applyDialog.click()
-      await drupal.ajaxReady()
+      await page.getByRole('button', { name: 'Apply', exact: true }).click()
 
-      await page.getByRole('link', { name: 'Content: Authored on (desc)' }).click()
-      await drupal.ajaxReady()
+      await page.getByRole('link', { name: 'Content: Authored on' }).click()
+
       await page.getByRole('checkbox', { name: 'Expose this sort to visitors' }).check()
-      await applyDialog.click()
-      await drupal.ajaxReady()
+      await page.getByRole('button', { name: 'Apply', exact: true }).nth(1).click()
 
       // Save the View.
       await page.getByRole('button', { name: 'Save' }).click()
       await drupal.expectMessage(`The view Test ${testName} has been saved.`)
 
-      // await page.getByRole('link', { name: 'View Page' }).click()
+      await page.getByRole('link', { name: 'View Page' }).click()
       // await expect(page.locator('.views-element-container')).toMatchAriaSnapshot({ name: 'view-view-no-db.aria.yml' })
     })
 

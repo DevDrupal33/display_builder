@@ -77,14 +77,15 @@ class Reporter {
   onBegin(config: FullConfig, suite: Suite) {
     if (config.projects.length) {
       const baseUrl = config.projects[0].use?.baseURL
-      this.info(`Running tests against ${baseUrl}`)
+      const logLevel = process.env.PLAYWRIGHT_DEBUG_LEVEL || 'debug'
+      this.info(`Running tests against: ${baseUrl}, log level: ${logLevel}`)
     } else {
       this.info('No test project configured.')
     }
   }
 
   onTestBegin(test: TestCase, result: TestResult) {
-    this.debug('Test about to run: %s', test.title)
+    this.debug(`Start test: ${test.title}`)
   }
 
   onError(e: { stack: any }) {
@@ -92,7 +93,7 @@ class Reporter {
   }
 
   onStepBegin(test: TestCase, status: TestResult, step: TestStep) {
-    this.silly(step.title)
+    this.debug(` - Step: ${step.title}`)
   }
 
   onStepEnd() {}

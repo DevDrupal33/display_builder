@@ -7,7 +7,7 @@ Tests are located in `tests/src/Playwright/Tests`.
 
 ## Requirements
 
-You must install `Drush` and `drupal/core-dev` in your project:
+You **MUST** install `Drush` and `drupal/core-dev` in your project:
 
 ```sh
 composer require drush/drush --dev
@@ -28,7 +28,7 @@ Copy `.env.dist` to `.env`. No need to change anything.
 
 Uncomment `webServer` in `playwright.config.ts`, then run:
 
-```sh
+```shell
 npm run test
 ```
 
@@ -42,26 +42,31 @@ for more details.
 
 Pull and run Playwright server from this folder:
 
-```sh
+```shell
 docker pull mcr.microsoft.com/playwright:v1.57.0-noble
-docker run --add-host=hostmachine:host-gateway -p 3000:3000 --rm --init -it --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.57.0-noble /bin/sh -c "npx -y playwright@1.57.0 run-server --port 3000 --host 0.0.0.0"
+docker run --add-host=hostmachine:host-gateway \
+    --rm --init -it \
+    -p 3000:3000 \
+    --workdir /home/pwuser \
+    --user pwuser \
+    mcr.microsoft.com/playwright:v1.57.0-noble /bin/sh -c "npx -y playwright@1.57.0 run-server --port 3000 --host 0.0.0.0"
 ```
 
 Launch a webserver on Drupal **root**, for example:
 
-```sh
+```shell
 php -S 0.0.0.0:8000
 ```
 
 Copy `.env.dist` to `.env`, adapt values for first case:
 
-```sh
+```shell
 DRUPAL_TEST_BASE_URL='http://localhost:8000/web'
 ```
 
 Run the test from this folder:
 
-```sh
+```shell
 PW_TEST_CONNECT_WS_ENDPOINT=ws://127.0.0.1:3000/ npx playwright test --project=firefox
 ```
 
@@ -73,14 +78,14 @@ Adapt the other variable for an installed Drupal with a database.
 
 If your system meets the [requirements](https://playwright.dev/docs/intro#system-requirements), you can install Playwright from this folder:
 
-```sh
+```shell
 npm install
 npx playwright install --with-deps
 ```
 
 **Fedora** is not officially supported by Playwright, but it can work. See this [issue](https://github.com/microsoft/playwright/issues/29559). As a workaround, install the following packages:
 
-```sh
+```shell
 sudo dnf install -y \
     libicu \
     libjpeg-turbo \
@@ -105,20 +110,17 @@ Tests are designed to run in **GitLab CI**, but they can also run locally with a
 
 Without a local server, with Drupal and Drush installed, you can quickly launch the example test by running:
 
-```sh
+```shell
 npm run test
 ```
 
-For local tests with installed Drupal you **MUST** enable `extension_discovery_scan_tests` in your **settings.php**.
-
-It is recommended to disable js aggregation until [#3529284](https://www.drupal.org/project/display_builder/issues/3529284) is resolved:
+For local tests with **INSTALLED** Drupal you **MUST** enable `extension_discovery_scan_tests` in your **settings.php**.
 
 ```php
 $settings['extension_discovery_scan_tests'] = TRUE;
-$config['system.performance']['js']['preprocess'] = FALSE;
 ```
 
-Modules that **MUST** be enabled:
+Modules that **MUST** be enabled for tests:
 
 - layout_builder
 - display_builder_test
@@ -145,25 +147,25 @@ npm run test
 Or test by tag with Firefox only:
 
 ```shell
-npx playwright test --project=firefox --grep "@my_module"
+npx playwright test --project=firefox --grep "@display_builder_min"
 ```
 
 Or a specific test:
 
 ```shell
-npx playwright test --project=firefox -g 'Example test'
+npx playwright test --project=firefox -g 'Page Layout'
 ```
 
 To see what's happening during a running test:
 
 ```shell
-npx playwright test --project=firefox -g 'Example test' --headed
+npx playwright test --project=firefox -g 'Page Layout' --headed
 ```
 
 Or run the test step by step:
 
 ```shell
-npx playwright test --project=firefox -g 'Example test' --ui
+npx playwright test --project=firefox -g 'Page Layout' --ui
 ```
 
 More information: [Playwright running and debugging tests](https://playwright.dev/docs/running-tests).

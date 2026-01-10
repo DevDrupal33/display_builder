@@ -62,7 +62,8 @@ export const execDrush = async (command: string, drupalSiteInstall: DrupalSiteIn
     cmdDrush = `${process.env.DRUPAL_TEST_DRUSH_PREFIX} drush -y ${command}`
   }
 
-  utils.debug(`Drush command: ${cmdDrush}`)
+  utils.debug(`${cmdDrush}`)
+
   try {
     const { stdout }: { stdout: string } = await execPromise(cmdDrush, { cwd: rootDir })
     return stdout.toString().trim()

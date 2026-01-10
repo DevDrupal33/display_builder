@@ -28,10 +28,10 @@ export default defineConfig({
     [ 'list' ],
     [ 'html', { host: '0.0.0.0', open: 'never' } ],
     [ 'junit', { outputFile: 'test-results/playwright.xml' } ],
-    [ './tests/src/Playwright/utilities/reporter.ts', { level: process.env.PLAYWRIGHT_DEBUG_LEVEL || 'info' } ],
+    [ './tests/src/Playwright/utilities/reporter.ts', { level: process.env?.PLAYWRIGHT_DEBUG_LEVEL || 'info' } ],
   ],
   /* https://playwright.dev/docs/test-timeouts */
-  timeout: process.env.DRUPAL_TEST_SKIP_INSTALL ? 180_000 : 240_000,
+  timeout: process.env?.DRUPAL_TEST_SKIP_INSTALL ? 180_000 : 240_000,
   /* Shared settings for all the projects below. @see https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -54,7 +54,7 @@ export default defineConfig({
     // Default timeout for each Playwright action in milliseconds, defaults to 0 (no timeout).
     // Quicker fail on local tests if skip install.
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-action-timeout
-    actionTimeout: process.env.CI ? 10_000 : process.env.DRUPAL_TEST_SKIP_INSTALL ? 2_000 : undefined,
+    actionTimeout: process.env.CI ? 10_000 : process.env.DRUPAL_TEST_SKIP_INSTALL ? 2_000 : 20_000,
     /* @see https://playwright.dev/docs/locators#locate-by-test-id */
     testIdAttribute: 'data-test',
   },
@@ -100,11 +100,20 @@ export default defineConfig({
     // },
   ],
 
-  /* Run your local dev server before starting the tests */
-  /* Comment for a local running server */
-  // webServer: {
-  //   command: 'php -S localhost:8000 -t ../../../',
-  //   url: 'http://localhost:8000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  /**
+   * Run your local dev server before starting the tests.
+   *
+   * Assume the module is in web/modules/contrib/_my_module_ so the Drupal root
+   * is 3 levels higher.
+   *
+   * Comment for a local running server launched manually.
+   */
+  webServer: {
+    name: 'PHP',
+    command: 'php -q -S localhost:8000 -t ../../../',
+    url: 'http://localhost:8000',
+    reuseExistingServer: !process.env.CI,
+    stdout: 'ignore',
+    stderr: 'pipe',
+  },
 })

@@ -22,7 +22,7 @@ test(
 
     // Create the page layout.
     await test.step(`Create page and set display`, async () => {
-      await page.goto(config.pageListUrl)
+      await page.goto(`${config.pageListUrl}`)
       await page.getByRole('link', { name: 'Add page layout' }).click()
       await page.getByLabel('Label').fill(name)
       await page.getByLabel('Profile', { exact: true }).selectOption('test')
