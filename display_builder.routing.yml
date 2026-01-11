@@ -241,3 +241,35 @@ display_builder.api_preset_preview:
     _role: 'authenticated'
   options:
     _htmx_route: true
+
+# Display Builder iframe preview route.
+# This route renders the instance content with the frontend theme
+# for embedding in an iframe in the Preview panel.
+display_builder.preview:
+  path: '/api/display-builder/{display_builder_instance}/preview'
+  methods: [GET]
+  defaults:
+    _controller: '\Drupal\display_builder\Controller\PreviewController::preview'
+  requirements:
+    _entity_access: 'display_builder_instance.view'
+  options:
+    parameters:
+      display_builder_instance:
+        type: 'entity:display_builder_instance'
+
+# Display Builder build route.
+# Returns JSON with HTML, CSS, and JS for Shadow DOM injection.
+# Rendered with frontend theme for correct markup.
+# Uses custom access checker since this route is called via subrequest
+# and the session-based entity access check doesn't work in subrequests.
+display_builder.build:
+  path: '/api/display-builder/{display_builder_instance}/build'
+  methods: [GET]
+  defaults:
+    _controller: '\Drupal\display_builder\Controller\BuildController::build'
+  requirements:
+    _access_display_builder_subrequest: 'TRUE'
+  options:
+    parameters:
+      display_builder_instance:
+        type: 'entity:display_builder_instance'

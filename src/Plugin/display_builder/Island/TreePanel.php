@@ -21,7 +21,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   type: IslandType::View,
   icon: 'bar-chart-steps',
 )]
-class TreePanel extends BuilderPanel {
+class TreePanel extends BuilderPanelBase {
 
   /**
    * Proxy for slot source operations.

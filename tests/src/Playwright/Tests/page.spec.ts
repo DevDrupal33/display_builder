@@ -61,7 +61,8 @@ test(
 
       // Test only the component and textfield as the urls from blocks account
       // change in ci.
-      await displayBuilder.expectPreviewAriaSnapshot('page.aria.yml', '.db-island-preview .test_simple ')
+      // Preview is now in iframe, use correct selector.
+      await displayBuilder.expectPreviewAriaSnapshot('page.aria.yml', '.display-builder-preview-content .test_simple')
     })
 
     await test.step(`View the result page`, async () => {

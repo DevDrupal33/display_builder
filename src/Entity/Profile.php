@@ -66,6 +66,7 @@ use Drupal\user\RoleInterface;
     'id',
     'label',
     'description',
+    'backend_theme',
     'islands',
     'weight',
   ],
@@ -91,6 +92,13 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
    * The display builder debug mode.
    */
   protected bool $debug = FALSE;
+
+  /**
+   * The backend theme for the Display Builder UI.
+   *
+   * If NULL, uses the current admin theme.
+   */
+  protected ?string $backend_theme = NULL;
 
   /**
    * The islands configuration for storage.
@@ -197,6 +205,13 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
    */
   public function isDebugModeActivated(): bool {
     return $this->debug;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getBackendTheme(): ?string {
+    return $this->backend_theme;
   }
 
 }

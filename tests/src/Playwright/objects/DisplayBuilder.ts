@@ -10,6 +10,48 @@ export class Displaybuilder {
   }
 
   /**
+   * Gets the build content container.
+   *
+   * The build content is rendered server-side with the frontend theme
+   * and has CSS injected for isolation. This method waits for the
+   * build content to be ready.
+   *
+   * @async
+   * @returns {Promise<Locator>} Locator for the build content container.
+   */
+  async getBuildContentContainer(): Promise<Locator> {
+    // Wait for the build container to be visible.
+    const buildContainer = this.page.locator('[data-db-build-container]').first()
+    await expect(buildContainer).toBeVisible({ timeout: 5000 })
+
+    // Wait for content to be styled (CSS injection complete).
+    const buildContent = buildContainer.locator('.db-build-content').first()
+    await expect(buildContent).toBeVisible({ timeout: 10000 })
+
+    // Wait for root dropzone to be visible inside the content.
+    const dropzone = buildContent.locator('.db-dropzone--root').first()
+    await expect(dropzone).toBeVisible({ timeout: 10000 })
+
+    return buildContainer
+  }
+
+  /**
+   * Gets a locator within the builder's content area.
+   *
+   * The build content uses CSS injection for theme isolation,
+   * but elements remain in the regular DOM (no Shadow DOM).
+   *
+   * @param {string} selector - CSS selector for element within the build container.
+   * @returns {Locator} Locator for the element inside the build content.
+   */
+  getBuildLocator(selector: string): Locator {
+    // Simple locator chain - no Shadow DOM piercing needed.
+    return this.page.locator('[data-db-build-container]')
+      .locator('.db-build-content')
+      .locator(selector)
+  }
+
+  /**
    * Toggles the sidebar first drawer in the Display Builder UI.
    *
    * @async
@@ -146,15 +188,23 @@ export class Displaybuilder {
     await element.click({ position: { x: 5, y: 10 } })
     await this.htmxReady()
 
+    // Wait for the form to load in the second drawer.
+    // The form is loaded via HTMX and may take some time.
+    await this.page.waitForTimeout(500)
+    await this.htmxReady()
+
     if (valuePath && Array.isArray(valuePath)) {
       for (const step of valuePath) {
         if (step.action === 'click') {
           await step.locator.click()
         } else if (step.action === 'fill') {
+          // Wait for the locator to be visible before filling.
+          await expect(step.locator).toBeVisible({ timeout: 10000 })
           await step.locator.fill(value)
         }
       }
     } else {
+      await expect(this.page.locator('#edit-value')).toBeVisible({ timeout: 10000 })
       await this.page.locator('#edit-value').fill(value)
     }
 
@@ -292,6 +342,30 @@ export class Displaybuilder {
   }
 
   /**
+   * Wait for the build container content to be updated after an HTMX operation.
+   *
+   * This waits for:
+   * 1. HTMX operations to complete
+   * 2. The build content to be updated
+   *
+   * @async
+   * @param {number} timeout - Maximum time to wait in milliseconds.
+   * @returns {Promise<void>}
+   */
+  async waitForBuildContentUpdate(timeout: number = 10000): Promise<void> {
+    await this.htmxReady()
+
+    // Wait a bit for any JavaScript processing.
+    await this.page.waitForTimeout(200)
+
+    // Re-verify the build content is visible.
+    const buildContent = this.page.locator('[data-db-build-container]')
+      .locator('.db-build-content')
+      .first()
+    await expect(buildContent).toBeVisible({ timeout })
+  }
+
+  /**
    * Drag test simple component with a textfield in the UI.
    *
    * @async
@@ -300,15 +374,30 @@ export class Displaybuilder {
    */
   async dragSimpleComponentsWithTextfield(textfieldTest: string = 'I am a test textfield in a slot!'): Promise<void> {
     await this.toggleSidebarView()
+
+    // Wait for build content to be loaded.
+    await this.getBuildContentContainer()
+
     await this.dragElementFromLibraryById(
       'Components',
       'test_simple',
-      this.page.locator(`.db-island-builder > div.db-dropzone`)
+      this.getBuildLocator('.db-dropzone--root')
     )
-    const componentSimpleSlot = this.page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
+
+    // Wait for content to update after drag.
+    await this.waitForBuildContentUpdate()
+
+    // Wait for component to appear after drag and reload.
+    await expect(this.getBuildLocator('.test_simple').first()).toBeVisible({ timeout: 15000 })
+
+    const componentSimpleSlot = this.getBuildLocator('.test_simple .slot_test [data-slot-id="slot_1"]').first()
     await this.dragElementFromLibraryById('Blocks', 'textfield', componentSimpleSlot)
+
+    // Wait for content to update after second drag.
+    await this.waitForBuildContentUpdate()
+
     await this.setElementValue(
-      this.page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
+      this.getBuildLocator('[data-node-type="textfield"]').first(),
       textfieldTest,
       [
         {
@@ -334,7 +423,9 @@ export class Displaybuilder {
     for (const [ source, label ] of Object.entries(blocks)) {
       await expect(this.page.locator(`.db-island-block_library [hx-vals*="${source}"]`)).toHaveCount(1)
       if (builder) {
-        await expect(this.page.locator('.db-island-builder').getByRole('button', { name: label })).toHaveCount(1)
+        // Wait for Shadow DOM content to be loaded and check within it.
+        await this.getBuildContentContainer()
+        await expect(this.getBuildLocator(`[data-node-title="${label}"], button`).filter({ hasText: label })).toHaveCount(1, { timeout: 5000 })
       }
     }
   }
@@ -342,14 +433,24 @@ export class Displaybuilder {
   /**
    * Test the preview tab with an Aria snapshot and go back to the builder.
    *
+   * The preview is now rendered in an iframe for theme isolation.
+   * This method navigates to the Preview tab and checks the iframe content.
+   *
    * @async
    * @param {string} snapshotName - The expected Aria snapshot string.
-   * @param {string} locatorClass - The locator parameter, default '.db-island-preview'.
+   * @param {string} locatorClass - The locator parameter, default '.display-builder-preview-content'.
    * @returns {Promise<void>}
    */
-  async expectPreviewAriaSnapshot(snapshotName: string, locatorClass: string = '.db-island-preview'): Promise<void> {
+  async expectPreviewAriaSnapshot(snapshotName: string, locatorClass: string = '.display-builder-preview-content'): Promise<void> {
     await this.page.getByRole('tab', { name: 'Preview' }).click()
-    await expect(this.page.locator(locatorClass)).toMatchAriaSnapshot({ name: snapshotName })
+    // Wait for iframe to be visible.
+    const iframe = this.page.locator('.db-preview-iframe')
+    await expect(iframe).toBeVisible({ timeout: 5000 })
+    // Get the iframe frame and check content.
+    const frame = iframe.contentFrame()
+    // Wait for the preview content container to exist (may be empty/hidden).
+    await expect(frame.locator(locatorClass)).toHaveCount(1, { timeout: 10000 })
+    await expect(frame.locator(locatorClass)).toMatchAriaSnapshot({ name: snapshotName, timeout: 10000 })
     await this.page.getByRole('tab', { name: 'Builder' }).click()
   }
 

@@ -45,14 +45,18 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
 
     /** @var \Drupal\display_builder\InstanceInterface $builder */
     $builder = $this->entityTypeManager()->getStorage('display_builder_instance')->load($builder_id);
+    if (!$builder) {
+      return [];
+    }
     $contexts = $builder->getContexts() ?? [];
+    $current = $builder->getCurrent();
     $islands_enabled_sorted = $this->getIslandsEnableSorted($contexts);
     $build = [
       '#type' => 'component',
       '#component' => 'display_builder:display_builder',
       '#props' => [
         'builder_id' => $builder_id,
-        'hash' => (string) $builder->getCurrent()->hash,
+        'hash' => $current ? (string) $current->hash : '',
       ],
       '#slots' => $this->buildSlots($builder, $islands_enabled_sorted),
       '#attached' => [

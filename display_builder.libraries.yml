@@ -14,9 +14,10 @@ _htmx_sse_cdn:
       type: external
       minified: true
 
+# Installed via: composer require npm-asset/htmx-ext-sse
 _htmx_sse_local:
   js:
-    /libraries/htmx-ext-sse/node_modules/htmx-ext-sse/dist/sse.min.js:
+    /libraries/htmx-ext-sse/dist/sse.min.js:
       minified: true
 
 shoelace:
@@ -51,15 +52,16 @@ _shoelace_cdn:
 
 # Only to be loaded as a display_builder/shoelace dependency.
 # The default value for pipeline jobs.
+# Installed via: composer require npm-asset/shoelace-style--shoelace
 _shoelace_local:
   css:
     theme:
-      /libraries/shoelace/node_modules/@shoelace-style/shoelace/cdn/themes/light.css:
+      /libraries/shoelace-style--shoelace/cdn/themes/light.css:
         {}
-      /libraries/shoelace/node_modules/@shoelace-style/shoelace/cdn/themes/dark.css:
+      /libraries/shoelace-style--shoelace/cdn/themes/dark.css:
         {}
   js:
-    /libraries/shoelace/node_modules/@shoelace-style/shoelace/cdn/shoelace.js:
+    /libraries/shoelace-style--shoelace/cdn/shoelace.js:
       attributes:
         type: module
 
@@ -150,3 +152,14 @@ _fix:
   css:
     theme:
       ./assets/css/_fix.css: {}
+
+# Build container with Shadow DOM for theme isolation.
+build_container:
+  js:
+    ./assets/js/build_container.js: {}
+  css:
+    component:
+      ./assets/css/build_container.css: {}
+  dependencies:
+    - core/drupal
+    - core/once

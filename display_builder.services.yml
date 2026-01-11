@@ -1,4 +1,7 @@
 services:
+  _defaults:
+    autowire: true
+
   display_builder.htmx_events:
     class: Drupal\display_builder\HtmxEvents
     arguments: []
@@ -28,3 +31,23 @@ services:
       - '@entity_type.manager'
     tags:
       - { name: 'event_subscriber' }
+
+  display_builder.theme_negotiator:
+    class: Drupal\display_builder\Theme\DisplayBuilderThemeNegotiator
+    arguments:
+      - '@entity_type.manager'
+      - '@config.factory'
+    tags:
+      - { name: theme_negotiator, priority: 100 }
+
+  display_builder.preview_theme_negotiator:
+    class: Drupal\display_builder\Theme\PreviewThemeNegotiator
+    arguments:
+      - '@config.factory'
+    tags:
+      - { name: theme_negotiator, priority: 200 }
+
+  display_builder.access_check.subrequest:
+    class: Drupal\display_builder\Access\SubrequestAccessCheck
+    tags:
+      - { name: access_check, applies_to: _access_display_builder_subrequest }

@@ -72,4 +72,12 @@ interface ProfileInterface extends ConfigEntityInterface {
    */
   public function isDebugModeActivated(): bool;
 
+  /**
+   * Gets the backend theme for the Display Builder UI.
+   *
+   * @return string|null
+   *   The theme name, or NULL to use the admin theme.
+   */
+  public function getBackendTheme(): ?string;
+
 }

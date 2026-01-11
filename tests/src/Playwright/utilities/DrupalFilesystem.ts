@@ -55,7 +55,25 @@ export const getComposerDir = async (): Promise<string | null> => {
  * @returns {Promise<string | null>} The vendor directory path or null if not found.
  */
 export const getVendorDir = async (): Promise<string | null> => {
+  // Allow overriding vendor directory via environment variable.
+  if (process.env.DRUPAL_TEST_VENDOR_DIR) {
+    return process.env.DRUPAL_TEST_VENDOR_DIR
+  }
+
   const composerRoot = await getComposerDir()
+
+  // First try common vendor locations without calling composer.
+  const commonVendorPaths = [
+    `${composerRoot}/vendor`,
+    `${composerRoot}/../vendor`,
+  ]
+  for (const vendorPath of commonVendorPaths) {
+    if (existsSync(`${vendorPath}/autoload.php`)) {
+      return path.resolve(vendorPath)
+    }
+  }
+
+  // Fall back to composer config if available.
   if (existsSync(`${composerRoot}/composer.json`)) {
     try {
       const { stdout }: { stdout: string } = await exec('composer config vendor-dir --no-interaction', {
@@ -63,6 +81,11 @@ export const getVendorDir = async (): Promise<string | null> => {
       })
       return path.resolve(`${composerRoot}/${stdout.toString().trim()}`)
     } catch (error) {
+      // If composer is not available, try default vendor location.
+      const defaultVendor = `${composerRoot}/vendor`
+      if (existsSync(`${defaultVendor}/autoload.php`)) {
+        return path.resolve(defaultVendor)
+      }
       throw new Error(`Could not locate vendor directory: ${error}`)
     }
   }
