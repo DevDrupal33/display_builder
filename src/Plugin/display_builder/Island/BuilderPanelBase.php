@@ -6,14 +6,13 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Render\RendererInterface;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\SlotSourceProxy;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_styles\Render\Element;
 use Masterminds\HTML5;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-
-use Drupal\display_builder\InstanceInterface;
 
 /**
  * Base class for builder panel plugins.
@@ -490,4 +489,3 @@ abstract class BuilderPanelBase extends IslandPluginBase {
   }
 
 }
-

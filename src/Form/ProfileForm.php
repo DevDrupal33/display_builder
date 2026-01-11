@@ -410,6 +410,7 @@ final class ProfileForm extends EntityForm {
     $themes = [];
 
     foreach ($themeHandler->listInfo() as $theme_name => $theme) {
+      // @phpstan-ignore property.notFound
       if ($theme->status) {
         $themes[$theme_name] = $theme->info['name'];
       }

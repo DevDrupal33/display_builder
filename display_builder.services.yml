@@ -1,4 +1,7 @@
 services:
+  _defaults:
+    autowire: true
+
   display_builder.htmx_events:
     class: Drupal\display_builder\HtmxEvents
     arguments: []
@@ -43,3 +46,8 @@ services:
       - '@config.factory'
     tags:
       - { name: theme_negotiator, priority: 200 }
+
+  display_builder.access_check.subrequest:
+    class: Drupal\display_builder\Access\SubrequestAccessCheck
+    tags:
+      - { name: access_check, applies_to: _access_display_builder_subrequest }

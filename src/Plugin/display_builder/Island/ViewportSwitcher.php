@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
-use Drupal\breakpoint\BreakpointManager;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ThemeExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\breakpoint\BreakpointManager;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandConfigurationFormInterface;

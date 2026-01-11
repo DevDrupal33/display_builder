@@ -68,7 +68,7 @@ class PreviewController extends ControllerBase {
     // Render as a bare HTML page with the frontend theme.
     $response = $this->bareHtmlPageRenderer->renderBarePage(
       $build,
-      $this->t('Preview'),
+      (string) $this->t('Preview'),
       'page',
     );
 
@@ -122,8 +122,9 @@ class PreviewController extends ControllerBase {
     $builder = \Drupal::service('ui_patterns.component_element_builder'); // @phpcs:ignore
 
     try {
-      // buildSource signature: (array $element, string $slot_id, array $contexts, array $source, array $settings)
-      // The fifth argument $settings should contain the contexts configuration.
+      // buildSource signature:
+      // (array $element, string $slot_id, array $contexts, array $source,
+      // array $settings). $settings should contain the contexts configuration.
       $build = $builder->buildSource([], 'content', [], $data, $contexts) ?? [];
 
       return $build['#slots']['content'][0] ?? [];
@@ -134,4 +135,3 @@ class PreviewController extends ControllerBase {
   }
 
 }
-

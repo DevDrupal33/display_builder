@@ -1,11 +1,35 @@
 /**
  * @file
  * Build container styles.
+ *
+ * CSS Isolation Strategy:
+ * 1. Frontend → Backend: Blocked by scoped CSS (selectors prefixed with .db-build-content)
+ * 2. Backend → Frontend: Blocked by 'all: revert' which resets inherited backend styles
  */
 
 .db-build-container {
   position: relative;
   min-height: 100px;
+}
+
+/**
+ * CSS Isolation boundary.
+ *
+ * 'all: revert' resets ALL CSS properties to browser defaults,
+ * effectively removing any backend theme styles that would otherwise
+ * be inherited or applied to the frontend content.
+ *
+ * This ensures the frontend theme renders exactly as it would on
+ * the actual frontend, without interference from the admin theme.
+ */
+.db-build-content {
+  all: revert;
+}
+
+.db-build-content *,
+.db-build-content *::before,
+.db-build-content *::after {
+  all: revert;
 }
 
 .db-build-container--loading {

@@ -9,14 +9,15 @@ use Drupal\Core\Asset\AssetResolverInterface;
 use Drupal\Core\Asset\AttachedAssets;
 use Drupal\Core\Asset\LibraryDiscoveryInterface;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\display_builder\HtmxEvents;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\RenderableBuilderTrait;
 use Drupal\display_builder\SlotSourceProxy;
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_styles\Render\Element;
 use Masterminds\HTML5;
@@ -57,6 +58,8 @@ class BuildController extends ControllerBase {
    *   The theme manager.
    * @param \Drupal\Core\Asset\LibraryDiscoveryInterface $libraryDiscovery
    *   The library discovery service.
+   * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
+   *   The language manager.
    */
   public function __construct(
     #[Autowire(service: 'renderer')]
@@ -75,7 +78,11 @@ class BuildController extends ControllerBase {
     protected ThemeManagerInterface $themeManager,
     #[Autowire(service: 'library.discovery')]
     protected LibraryDiscoveryInterface $libraryDiscovery,
-  ) {}
+    #[Autowire(service: 'language_manager')]
+    LanguageManagerInterface $languageManager,
+  ) {
+    $this->languageManager = $languageManager;
+  }
 
   /**
    * Returns the build content as JSON for Shadow DOM injection.
@@ -516,7 +523,7 @@ class BuildController extends ControllerBase {
     $assets->setLibraries(\array_unique($libraries));
 
     // Resolve CSS assets.
-    $css_assets = $this->assetResolver->getCssAssets($assets, FALSE, \Drupal::languageManager()->getCurrentLanguage());
+    $css_assets = $this->assetResolver->getCssAssets($assets, FALSE, $this->languageManager->getCurrentLanguage());
     foreach ($css_assets as $css_asset) {
       if (isset($css_asset['data']) && \is_string($css_asset['data'])) {
         // Normalize the path by resolving ../ segments.
@@ -526,13 +533,13 @@ class BuildController extends ControllerBase {
     }
 
     // Resolve JS assets.
-    [$js_assets_header, $js_assets_footer] = $this->assetResolver->getJsAssets($assets, FALSE, \Drupal::languageManager()->getCurrentLanguage());
+    [$js_assets_header, $js_assets_footer] = $this->assetResolver->getJsAssets($assets, FALSE, $this->languageManager->getCurrentLanguage());
     $all_js = \array_merge($js_assets_header, $js_assets_footer);
 
     foreach ($all_js as $js_asset) {
       if (isset($js_asset['data']) && \is_string($js_asset['data'])) {
         // Skip inline scripts.
-        if ($js_asset['type'] ?? '' === 'inline') {
+        if (($js_asset['type'] ?? '') === 'inline') {
           continue;
         }
         $path = $this->normalizePath($js_asset['data']);
@@ -627,4 +634,3 @@ class BuildController extends ControllerBase {
   }
 
 }
-

@@ -57,4 +57,3 @@ class PreviewThemeNegotiator implements ThemeNegotiatorInterface {
   }
 
 }
-

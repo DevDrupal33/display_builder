@@ -12,38 +12,43 @@ export class Displaybuilder {
   /**
    * Gets the build content container.
    *
-   * The build content is loaded via AJAX from the frontend theme.
-   * This method waits for the content to be ready and returns a locator
-   * that can search within it.
+   * The build content is rendered server-side with the frontend theme
+   * and has CSS injected for isolation. This method waits for the
+   * build content to be ready.
    *
    * @async
    * @returns {Promise<Locator>} Locator for the build content container.
    */
-  async getBuildShadowContent(): Promise<Locator> {
+  async getBuildContentContainer(): Promise<Locator> {
     // Wait for the build container to be visible.
     const buildContainer = this.page.locator('[data-db-build-container]').first()
     await expect(buildContainer).toBeVisible({ timeout: 5000 })
 
-    // Wait for content to load (checking for root dropzone).
-    const buildContent = this.page.locator('[data-db-build-container] .db-dropzone--root').first()
+    // Wait for content to be styled (CSS injection complete).
+    const buildContent = buildContainer.locator('.db-build-content').first()
     await expect(buildContent).toBeVisible({ timeout: 10000 })
+
+    // Wait for root dropzone to be visible inside the content.
+    const dropzone = buildContent.locator('.db-dropzone--root').first()
+    await expect(dropzone).toBeVisible({ timeout: 10000 })
 
     return buildContainer
   }
 
   /**
-   * Gets a locator within the builder's content container.
+   * Gets a locator within the builder's content area.
    *
-   * The build content is loaded via AJAX into a `.db-build-content` wrapper.
-   * This selector specifically targets that content to avoid matching
-   * elements from other islands (like LayersPanel) that may also have
-   * similar DOM structures.
+   * The build content uses CSS injection for theme isolation,
+   * but elements remain in the regular DOM (no Shadow DOM).
    *
    * @param {string} selector - CSS selector for element within the build container.
-   * @returns {Locator} Locator for the element.
+   * @returns {Locator} Locator for the element inside the build content.
    */
   getBuildLocator(selector: string): Locator {
-    return this.page.locator(`[data-db-build-container] .db-build-content ${selector}`)
+    // Simple locator chain - no Shadow DOM piercing needed.
+    return this.page.locator('[data-db-build-container]')
+      .locator('.db-build-content')
+      .locator(selector)
   }
 
   /**
@@ -183,15 +188,23 @@ export class Displaybuilder {
     await element.click({ position: { x: 5, y: 10 } })
     await this.htmxReady()
 
+    // Wait for the form to load in the second drawer.
+    // The form is loaded via HTMX and may take some time.
+    await this.page.waitForTimeout(500)
+    await this.htmxReady()
+
     if (valuePath && Array.isArray(valuePath)) {
       for (const step of valuePath) {
         if (step.action === 'click') {
           await step.locator.click()
         } else if (step.action === 'fill') {
+          // Wait for the locator to be visible before filling.
+          await expect(step.locator).toBeVisible({ timeout: 10000 })
           await step.locator.fill(value)
         }
       }
     } else {
+      await expect(this.page.locator('#edit-value')).toBeVisible({ timeout: 10000 })
       await this.page.locator('#edit-value').fill(value)
     }
 
@@ -329,6 +342,30 @@ export class Displaybuilder {
   }
 
   /**
+   * Wait for the build container content to be updated after an HTMX operation.
+   *
+   * This waits for:
+   * 1. HTMX operations to complete
+   * 2. The build content to be updated
+   *
+   * @async
+   * @param {number} timeout - Maximum time to wait in milliseconds.
+   * @returns {Promise<void>}
+   */
+  async waitForBuildContentUpdate(timeout: number = 10000): Promise<void> {
+    await this.htmxReady()
+
+    // Wait a bit for any JavaScript processing.
+    await this.page.waitForTimeout(200)
+
+    // Re-verify the build content is visible.
+    const buildContent = this.page.locator('[data-db-build-container]')
+      .locator('.db-build-content')
+      .first()
+    await expect(buildContent).toBeVisible({ timeout })
+  }
+
+  /**
    * Drag test simple component with a textfield in the UI.
    *
    * @async
@@ -339,7 +376,7 @@ export class Displaybuilder {
     await this.toggleSidebarView()
 
     // Wait for build content to be loaded.
-    await this.getBuildShadowContent()
+    await this.getBuildContentContainer()
 
     await this.dragElementFromLibraryById(
       'Components',
@@ -347,18 +384,18 @@ export class Displaybuilder {
       this.getBuildLocator('.db-dropzone--root')
     )
 
-    // Wait for SSE to reload the build content after drag.
-    // The htmxReady waits for HTMX operations to complete.
-    await this.htmxReady()
-
-    // Give the AJAX reload a moment to complete.
-    await this.page.waitForTimeout(500)
+    // Wait for content to update after drag.
+    await this.waitForBuildContentUpdate()
 
     // Wait for component to appear after drag and reload.
-    await expect(this.getBuildLocator('.test_simple').first()).toBeVisible({ timeout: 10000 })
+    await expect(this.getBuildLocator('.test_simple').first()).toBeVisible({ timeout: 15000 })
 
     const componentSimpleSlot = this.getBuildLocator('.test_simple .slot_test [data-slot-id="slot_1"]').first()
     await this.dragElementFromLibraryById('Blocks', 'textfield', componentSimpleSlot)
+
+    // Wait for content to update after second drag.
+    await this.waitForBuildContentUpdate()
+
     await this.setElementValue(
       this.getBuildLocator('[data-node-type="textfield"]').first(),
       textfieldTest,
@@ -387,7 +424,7 @@ export class Displaybuilder {
       await expect(this.page.locator(`.db-island-block_library [hx-vals*="${source}"]`)).toHaveCount(1)
       if (builder) {
         // Wait for Shadow DOM content to be loaded and check within it.
-        await this.getBuildShadowContent()
+        await this.getBuildContentContainer()
         await expect(this.getBuildLocator(`[data-node-title="${label}"], button`).filter({ hasText: label })).toHaveCount(1, { timeout: 5000 })
       }
     }

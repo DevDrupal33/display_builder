@@ -88,4 +88,3 @@ class DisplayBuilderThemeNegotiator implements ThemeNegotiatorInterface {
   }
 
 }
-
