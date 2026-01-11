@@ -235,7 +235,7 @@ class Instance extends EntityBase implements InstanceInterface {
 
     $parent_slot = \array_slice($path, \count($path) - 3, 1)[0];
 
-    if (($parent_id === $this->getParentId($root, $node_id)) && ($slot_id === $parent_slot)) {
+    if (($parent_id === $this->getParentId($node_id)) && ($slot_id === $parent_slot)) {
       // Moving to the same slot is tricky, because we don't want to remove a
       // sibling.
       $slot_path = \array_slice($path, 0, \count($path) - 1);
@@ -341,8 +341,8 @@ class Instance extends EntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function getParentId(array $root, string $node_id): string {
-    $path = $this->getPath($root, $node_id);
+  public function getParentId(string $node_id): string {
+    $path = $this->getPath($this->getCurrentState(), $node_id);
     $length = \count(['source', 'component', 'slots', '{slot_id}', 'sources', '{position}']);
     $parent_path = \array_slice($path, 0, \count($path) - $length);
 
@@ -404,7 +404,7 @@ class Instance extends EntityBase implements InstanceInterface {
     $root = $this->getCurrentState();
     $path = $this->getPath($root, $node_id);
     $data = NestedArray::getValue($root, $path);
-    $parent_id = $this->getParentId($root, $node_id);
+    $parent_id = $this->getParentId($node_id);
     $root = $this->doRemove($root, $node_id);
 
     $contexts = $this->getContexts() ?? [];

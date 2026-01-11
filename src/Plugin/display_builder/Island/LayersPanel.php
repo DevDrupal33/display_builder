@@ -144,8 +144,9 @@ class LayersPanel extends BuilderPanel {
     ];
     $build = $this->addThirdPartySettingsSummary($data, $build);
     $build = $this->addComponentSettingsSummary($data, $component, $build);
+    $build = $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, (string) $component['label'], $index);
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, (string) $component['label'], $index);
+    return $this->applyThirdPartySettingsToRenderable($build, $data, $builder_id);
   }
 
   /**
@@ -173,8 +174,9 @@ class LayersPanel extends BuilderPanel {
     // @see assets/js/contextual_menu.js
     $build['#attributes']['data-node-title'] = $label['summary'];
     $build['#attributes']['data-slot-position'] = $index;
+    $build = $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['summary'], $index);
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['summary'], $index);
+    return $this->applyThirdPartySettingsToRenderable($build, $data, $builder_id);
   }
 
   /**

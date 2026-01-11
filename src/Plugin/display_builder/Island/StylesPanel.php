@@ -7,6 +7,7 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
@@ -98,6 +99,13 @@ class StylesPanel extends IslandPluginBase implements IslandWithFormInterface, R
     $extra = $data['extra'] ?? '';
 
     return $this->stylesManager->addClasses($element, $selected, $extra);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function alterNodeRenderable(array $renderable, array $settings, string $node_id, InstanceInterface $instance): array {
+    return $renderable;
   }
 
   /**
