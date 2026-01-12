@@ -12,7 +12,10 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\SlotSourceProxy;
+use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
+use Drupal\ui_patterns\SourcePluginManager;
+use Drupal\ui_patterns\SourceWithChoicesInterface;
 use Drupal\ui_styles\Render\Element;
 use Masterminds\HTML5;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -47,6 +50,11 @@ class BuilderPanel extends IslandPluginBase {
   protected ComponentElementBuilder $componentElementBuilder;
 
   /**
+   * The UI Patterns source plugin manager.
+   */
+  protected SourcePluginManager $sourceManager;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
@@ -54,6 +62,7 @@ class BuilderPanel extends IslandPluginBase {
     $instance->renderer = $container->get('renderer');
     $instance->slotSourceProxy = $container->get('display_builder.slot_sources_proxy');
     $instance->componentElementBuilder = $container->get('ui_patterns.component_element_builder');
+    $instance->sourceManager = $container->get('plugin.manager.ui_patterns_source');
 
     return $instance;
   }
@@ -145,6 +154,8 @@ class BuilderPanel extends IslandPluginBase {
    *   Display Builder ID.
    * @param string $instance_id
    *   The instance ID.
+   * @param \Drupal\display_builder\SourceWithSlotsInterface $source
+   *   The source plugin.
    * @param array $data
    *   The UI Patterns form state data.
    * @param int $index
@@ -153,35 +164,33 @@ class BuilderPanel extends IslandPluginBase {
    * @return array|null
    *   A renderable array.
    */
-  protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
-    $component_id = $data['source']['component']['component_id'] ?? NULL;
+  protected function buildSingleComponent(string $builder_id, string $instance_id, SourceWithSlotsInterface $source, array $data, int $index = 0): ?array {
+    // @todo support more than SourceWithChoicesInterface.
+    $component_id = NULL;
+
+    if ($source instanceof SourceWithChoicesInterface) {
+      $component_id = $source->getChoice($data['source']);
+    }
     $instance_id = $instance_id ?: $data['node_id'];
 
-    if (!$instance_id && !$component_id) {
-      return NULL;
-    }
-
-    $component = $this->sdcManager->getDefinition($component_id);
-
-    if (!$component) {
+    if (!$instance_id || !$component_id) {
       return NULL;
     }
 
     $build = $this->renderSource($data);
     // Required for the context menu label.
     // @see assets/js/contextual_menu.js
-    $build['#attributes']['data-node-title'] = $component['label'];
+    $build['#attributes']['data-node-title'] = $source->label();
     $build['#attributes']['data-slot-position'] = $index;
 
-    foreach ($component['slots'] ?? [] as $slot_id => $definition) {
-      $build['#slots'][$slot_id] = $this->buildComponentSlot($builder_id, $slot_id, $definition, $data, $instance_id);
-      // Prevent the slot to be generated again.
-      unset($build['#ui_patterns']['slots'][$slot_id]);
+    foreach ($source->getSlotDefinitions() as $slot_id => $definition) {
+      $slot = $this->buildComponentSlot($builder_id, $source, $slot_id, $definition, $data, $instance_id);
+      $build = $source->setSlotRenderable($build, $slot_id, $slot);
     }
 
     if ($this->isEmpty($build)) {
       // Keep the placeholder if the component is not renderable.
-      $message = $component['name'] . ': ' . $this->t('Empty by default. Configure it to make it visible');
+      $message = $component_id . ': ' . $this->t('Empty by default. Configure it to make it visible');
       $build = $this->buildPlaceholder($message);
     }
 
@@ -189,7 +198,7 @@ class BuilderPanel extends IslandPluginBase {
       $build = $this->wrapContent($build);
     }
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $component['label'], $index);
+    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $source->label(), $index);
   }
 
   /**
@@ -311,15 +320,17 @@ class BuilderPanel extends IslandPluginBase {
 
     $build = [];
 
-    if (isset($data['source_id']) && $data['source_id'] === 'component') {
-      $build = $this->buildSingleComponent($builder_id, $instance_id, $data);
+    $source = $this->sourceManager->createInstance($data['source_id'], $data['source']);
+
+    if ($source instanceof SourceWithSlotsInterface) {
+      $build = $this->buildSingleComponent($builder_id, $instance_id, $source, $data);
     }
     else {
       $build = $this->buildSingleBlock($builder_id, $instance_id, $data);
     }
 
     return $this->makeOutOfBand(
-      $build,
+      $build ?? [],
       $parent_selector,
       'outerHTML'
     );
@@ -408,8 +419,10 @@ class BuilderPanel extends IslandPluginBase {
         continue;
       }
 
-      if ($source['source_id'] === 'component') {
-        $component = $this->buildSingleComponent($builder_id, '', $source, $index);
+      $source_plugin = $this->sourceManager->createInstance($source['source_id'], $source['source'] ?? []);
+
+      if ($source_plugin instanceof SourceWithSlotsInterface) {
+        $component = $this->buildSingleComponent($builder_id, '', $source_plugin, $source, $index);
 
         if ($component) {
           $renderable[$index] = $component;
@@ -465,6 +478,8 @@ class BuilderPanel extends IslandPluginBase {
    *
    * @param string $builder_id
    *   The builder ID.
+   * @param \Drupal\display_builder\SourceWithSlotsInterface $source
+   *   The source plugin.
    * @param string $slot_id
    *   The slot ID.
    * @param array $definition
@@ -477,7 +492,7 @@ class BuilderPanel extends IslandPluginBase {
    * @return array
    *   A renderable array for the slot.
    */
-  private function buildComponentSlot(string $builder_id, string $slot_id, array $definition, array $data, string $instance_id): array {
+  private function buildComponentSlot(string $builder_id, SourceWithSlotsInterface $source, string $slot_id, array $definition, array $data, string $instance_id): array {
     $dropzone = [
       '#type' => 'component',
       '#component' => 'display_builder:dropzone',
@@ -496,8 +511,8 @@ class BuilderPanel extends IslandPluginBase {
       ],
     ];
 
-    if (isset($data['source']['component']['slots'][$slot_id]['sources'])) {
-      $sources = $data['source']['component']['slots'][$slot_id]['sources'];
+    if (isset($source->getSlotValues()[$slot_id])) {
+      $sources = $source->getSlotValues()[$slot_id];
       $dropzone['#slots']['content'] = $this->digFromSlot($builder_id, $sources);
     }
 

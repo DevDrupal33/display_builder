@@ -9,6 +9,7 @@ use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\SlotSourceProxy;
+use Drupal\display_builder\SourceWithSlotsInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -75,7 +76,7 @@ class TreePanel extends BuilderPanel {
   /**
    * {@inheritdoc}
    */
-  protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): array {
+  protected function buildSingleComponent(string $builder_id, string $instance_id, SourceWithSlotsInterface $source, array $data, int $index = 0): array {
     $component_id = $data['source']['component']['component_id'] ?? NULL;
     $instance_id = $instance_id ?: $data['node_id'];
 
