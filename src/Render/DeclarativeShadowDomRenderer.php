@@ -16,6 +16,7 @@ use Drupal\Core\State\StateInterface;
 use Drupal\Core\Theme\ActiveTheme;
 use Drupal\Core\Theme\ThemeInitializationInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Content renderer for declarative shadow dom.
@@ -35,6 +36,7 @@ class DeclarativeShadowDomRenderer {
     private AssetResolverInterface $assetResolver,
     private LanguageManagerInterface $languageManager,
     private StateInterface $state,
+    private RequestStack $request,
   ) {}
 
   /**
@@ -46,16 +48,11 @@ class DeclarativeShadowDomRenderer {
    *   The render array of slotted content (outside the shadow tree).
    * @param bool $admin
    *   True to render with admin theme, False to render with front theme.
-   * @param bool $htmx
-   *   HTMX is removing templates with shadowroot before swap. So we need to
-   *   print a 'normal' template and add the shadowroot with javascript.
-   *   We hope it is a temporary situation.
-   *   See display_builder/declarative_shadow_dom asset library.
    *
    * @return array
    *   The rendered content.
    */
-  public function render(array $content, array $slotted, bool $admin = FALSE, $htmx = FALSE): array {
+  public function render(array $content, array $slotted, bool $admin = FALSE): array {
     // Set the theme to render with.
     $current_theme = $this->themeManager->getActiveTheme();
     $theme_name = $this->configFactory->get('system.theme')->get($admin ? 'admin' : 'default');
@@ -67,7 +64,8 @@ class DeclarativeShadowDomRenderer {
     // main render pipeline. To replace placeholders now, we use
     // RendererInterface::renderRoot() instead of RendererInterface::render().
     $render_context = new RenderContext();
-    $content = $this->renderer->executeInRenderContext($render_context, function () use ($content, $slotted, $htmx) {
+    $content = $this->renderer->executeInRenderContext($render_context, function () use ($content, $slotted) {
+      $htmx = $this->request->getCurrentRequest()->headers->has('HX-Request');
       // We don't care about the return value (which is just $html['#markup']),
       // but about the resulting render array.
       // @todo Simplify this when https://www.drupal.org/node/2495001 lands.

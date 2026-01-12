@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
-use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Url;
 
 /**
@@ -26,22 +25,6 @@ trait HtmxTrait {
    *   The wrapped renderable array.
    */
   protected function addOutOfBand(array $renderable, string $target_selector, string $swap): array {
-    if ($this instanceof PluginInspectionInterface) {
-      $definition = (array) $this->getPluginDefinition();
-
-      // Render some islands with the front theme, loading the expected
-      // templates and executing the expected hooks.
-      if (($definition['theme'] ?? '') === 'front') {
-        $renderer = \Drupal::service('display_builder.declarative_shadow_dom_renderer');
-        $renderable = $renderer->render($renderable, [], FALSE, TRUE);
-      }
-      // Same for admin theme.
-      elseif (($definition['theme'] ?? '') === 'admin') {
-        $renderer = \Drupal::service('display_builder.declarative_shadow_dom_renderer');
-        $renderable = $renderer->render($renderable, [], TRUE, TRUE);
-      }
-    }
-
     return [
       '#type' => 'html_tag',
       '#tag' => 'div',

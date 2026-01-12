@@ -22,7 +22,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   description: new TranslatableMarkup('Manage hierarchical layer view of elements without preview.'),
   type: IslandType::View,
   icon: 'layers',
-  theme: '',
 )]
 class LayersPanel extends BuilderPanel {
 

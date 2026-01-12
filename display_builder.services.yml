@@ -41,3 +41,4 @@ services:
       - '@asset.resolver'
       - '@language_manager'
       - '@state'
+      - '@request_stack'

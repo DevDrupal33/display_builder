@@ -8,6 +8,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\display_builder\Render\DeclarativeShadowDomRenderer;
 use Drupal\display_builder\RenderableBuilderTrait;
 use Drupal\ui_patterns_library\StoryPluginManager;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -32,6 +33,8 @@ class ApiPreviewController extends ControllerBase {
     #[Autowire(service: 'plugin.manager.sdc')]
     private ComponentPluginManager $componentManager,
     private RendererInterface $renderer,
+    #[Autowire(service: 'display_builder.declarative_shadow_dom_renderer')]
+    private DeclarativeShadowDomRenderer $dsdRenderer,
   ) {
     $this->presetConfigStorage = $this->entityTypeManager()->getStorage('pattern_preset');
   }
@@ -47,8 +50,9 @@ class ApiPreviewController extends ControllerBase {
    */
   public function getBlockPreview(string $block_id): HtmlResponse {
     $build = $this->generateBlock($block_id);
-
+    $build = $this->dsdRenderer->render($build, [], FALSE);
     $html = $this->renderer->renderRoot($build);
+
     $response = new HtmlResponse();
     $response->setContent($html);
 
@@ -70,7 +74,7 @@ class ApiPreviewController extends ControllerBase {
     $data = $preset->getSources([], FALSE);
 
     $build = $this->renderSource($data);
-
+    $build = $this->dsdRenderer->render($build, [], FALSE);
     $html = $this->renderer->renderRoot($build);
     $response = new HtmlResponse();
     $response->setContent($html);
@@ -110,7 +114,7 @@ class ApiPreviewController extends ControllerBase {
         $build = $this->generateStory($component_id, $variant_id, $story);
       }
     }
-
+    $build = $this->dsdRenderer->render($build, [], FALSE);
     $html = $this->renderer->renderRoot($build);
     $response = new HtmlResponse();
     $response->setContent($html);

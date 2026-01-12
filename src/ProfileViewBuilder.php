@@ -8,7 +8,6 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityViewBuilder;
 use Drupal\Core\Security\TrustedCallbackInterface;
-use Drupal\display_builder\Render\DeclarativeShadowDomRenderer;
 
 /**
  * View builder handler for display builder profiles.
@@ -26,11 +25,6 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    * The display builder island plugin manager.
    */
   private IslandPluginManagerInterface $islandPluginManager;
-
-  /**
-   * The declarative shadow DOM renderer.
-   */
-  private DeclarativeShadowDomRenderer $declarativeShadowDomRenderer;
 
   /**
    * The entity we are building the view for.
@@ -267,23 +261,10 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         \sprintf('db-island-%s', $island->getPluginId()),
       ]);
 
-      $build = $island->build($builder, $data);
-      $definition = (array) $island->getPluginDefinition();
-
-      // Render some islands with the front theme, loading the expected
-      // templates and executing the expected hooks.
-      if (($definition['theme'] ?? '') === 'front') {
-        $build = $this->declarativeShadowDomRenderer()->render($build, [], FALSE);
-      }
-      // Same for admin theme.
-      elseif (($definition['theme'] ?? '') === 'admin') {
-        $build = $this->declarativeShadowDomRenderer()->render($build, [], TRUE);
-      }
-
       $panes[$island_id] = [
         '#type' => 'html_tag',
         '#tag' => $tag,
-        'children' => $build,
+        'children' => $island->build($builder, $data),
         '#attributes' => [
           // `id` attribute is used by HTMX OOB swap.
           'id' => $island->getHtmlId((string) $builder->id()),
@@ -458,20 +439,6 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     }
 
     return $this->islandPluginManager;
-  }
-
-  /**
-   * Gets the declarative shadow DOM renderer.
-   *
-   * @return \Drupal\display_builder\Render\DeclarativeShadowDomRenderer
-   *   The declarative shadow DOM renderer.
-   */
-  private function declarativeShadowDomRenderer(): DeclarativeShadowDomRenderer {
-    if (!isset($this->declarativeShadowDomRenderer)) {
-      $this->declarativeShadowDomRenderer = \Drupal::service('display_builder.declarative_shadow_dom_renderer');
-    }
-
-    return $this->declarativeShadowDomRenderer;
   }
 
 }
