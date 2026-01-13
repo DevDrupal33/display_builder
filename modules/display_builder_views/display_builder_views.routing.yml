@@ -8,7 +8,6 @@ display_builder_views.views.manage:
     _permission: 'administer views'
     _module_dependencies: views_ui
   options:
-    _admin_route: false
     _display_builder_route: true
     parameters:
       view:

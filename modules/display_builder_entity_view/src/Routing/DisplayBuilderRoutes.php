@@ -120,7 +120,6 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
     $requirements['_field_ui_view_mode_access'] = 'administer ' . $entity_type_id . ' display';
 
     $options = $entity_route->getOptions();
-    $options['_admin_route'] = FALSE;
 
     // @todo add the display builder access check
     // $requirements['_display_builder_access'] = 'view';

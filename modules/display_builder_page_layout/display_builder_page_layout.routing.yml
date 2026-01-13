@@ -33,7 +33,7 @@ entity.page_layout.display_builder:
     parameters:
       page_layout:
         type: 'entity:page_layout'
-    _admin_route: false
+    _admin_route: true
     _display_builder_route: true
 
 entity.page_layout.delete_form:

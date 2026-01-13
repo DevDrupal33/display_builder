@@ -10,6 +10,7 @@ use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
+use Drupal\display_builder\Render\DeclarativeShadowDomRenderer;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -32,11 +33,17 @@ class PreviewPanel extends IslandPluginBase {
   protected ComponentElementBuilder $componentElementBuilder;
 
   /**
+   * Declarative Shadow DOM renderer.
+   */
+  protected DeclarativeShadowDomRenderer $dsdRenderer;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->componentElementBuilder = $container->get('ui_patterns.component_element_builder');
+    $instance->dsdRenderer = $container->get('display_builder.declarative_shadow_dom_renderer');
 
     return $instance;
   }
@@ -67,7 +74,7 @@ class PreviewPanel extends IslandPluginBase {
       $returned[] = $build['#slots']['content'][0] ?? [];
     }
 
-    return $returned;
+    return $this->dsdRenderer->render($returned, [], FALSE);
   }
 
   /**

@@ -48,20 +48,19 @@ class PageVariantSubscriber implements EventSubscriberInterface {
     $route = $event->getRouteMatch()->getRouteObject();
     $options = $route->getOptions();
 
-    // In admin pages, we want the page.html.twig from the admin theme.
-    // For now we don't build pages for Admin routes, but this will be possible
-    // in the future.
-    if ($options['_admin_route'] ?? FALSE) {
-      return;
-    }
-
     // When we use Display Builder to build the full page, we don't want to have
     // neither the theme's page.html.twig nor the page managed by Display
     // Builder. We want a simple blank page.
     // Example: entity.page_layout.display_builder.
     if ($options['_display_builder_route'] ?? FALSE) {
-      $event->setPluginId('simple_page');
+      // $event->setPluginId('simple_page');
+      return;
+    }
 
+    // In admin pages, we want the page.html.twig from the admin theme.
+    // For now we don't build pages for Admin routes, but this will be possible
+    // in the future.
+    if ($options['_admin_route'] ?? FALSE) {
       return;
     }
 
