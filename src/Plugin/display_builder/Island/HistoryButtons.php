@@ -19,6 +19,7 @@ use Drupal\display_builder\IslandType;
   label: new TranslatableMarkup('History'),
   description: new TranslatableMarkup('Undo and redo changes.'),
   type: IslandType::Button,
+  default_region: 'end',
 )]
 class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
 

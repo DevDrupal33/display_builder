@@ -97,12 +97,6 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     $menu_islands = $islands_enabled_sorted[IslandType::Menu->value] ?? [];
     $view_islands = $islands_enabled_sorted[IslandType::View->value] ?? [];
 
-    $buttons = [];
-
-    if (!empty($button_islands)) {
-      $buttons = $this->buildPanes($builder, $button_islands, [], [], 'span');
-    }
-
     if (!empty($menu_islands)) {
       $menu_islands = $this->buildMenuWrapper($builder, $menu_islands);
     }
@@ -137,10 +131,44 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
       'view_sidebar' => $view_sidebar,
       'view_main_tabs' => $view_islands_data['view_main_tabs'],
       'view_main' => $view_main,
-      'buttons' => $buttons,
+      'start_buttons' => $this->buildButtons($builder, $button_islands, 'start'),
+      'end_buttons' => $this->buildButtons($builder, $button_islands),
       'contextual_islands' => $contextual_islands,
       'menu_islands' => $menu_islands,
     ];
+  }
+
+  /**
+   * Build buttons for a region.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   The builder instance.
+   * @param \Drupal\display_builder\IslandInterface[] $buttonIslands
+   *   The button islands.
+   * @param string $region
+   *   The button region.
+   *
+   * @return array
+   *   The buttons.
+   */
+  private function buildButtons(InstanceInterface $builder, array $buttonIslands, string $region = 'end'): array {
+    $islands = [];
+
+    foreach ($buttonIslands as $island) {
+      $islandRegion = $island->getConfiguration()['region'] ?? 'end';
+
+      if ($islandRegion === $region) {
+        $islands[] = $island;
+      }
+    }
+
+    $buttons = [];
+
+    if (!empty($islands)) {
+      $buttons = $this->buildPanes($builder, $islands, [], [], 'span');
+    }
+
+    return $buttons;
   }
 
   /**

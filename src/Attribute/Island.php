@@ -32,6 +32,8 @@ final class Island extends AttributeBase {
    *   (Optional) The deriver class.
    * @param \Drupal\display_builder\IslandType|null $type
    *   (Optional) The island type from enumeration.
+   * @param string|null $default_region
+   *   (Optional) The island default region, if applicable.
    * @param string|null $icon
    *   (Optional) Icon for this island.
    * @param string $theme
@@ -46,6 +48,7 @@ final class Island extends AttributeBase {
     public readonly ?TranslatableMarkup $description = NULL,
     public readonly ?string $deriver = NULL,
     public readonly ?IslandType $type = NULL,
+    public readonly ?string $default_region = NULL,
     public readonly ?string $icon = NULL,
     public readonly string $theme = 'default',
     public readonly array $modules = [],

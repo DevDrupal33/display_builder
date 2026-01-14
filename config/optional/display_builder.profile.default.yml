@@ -7,6 +7,8 @@ description: 'With sensible configuration, for the common usage.'
 debug: false
 islands:
   component_library:
+    status: true
+    weight: -10
     exclude: {}
     exclude_id: ''
     component_status:
@@ -17,14 +19,12 @@ islands:
     show_grouped: true
     show_variants: true
     show_mosaic: true
-    status: true
-    weight: -10
   block_library:
+    status: true
+    weight: -9
     exclude:
       htmx: htmx
       shortcut: shortcut
-    status: true
-    weight: -9
   preset_library:
     status: true
     weight: -8
@@ -55,6 +55,7 @@ islands:
   history:
     status: true
     weight: -9
+    region: end
     undo:
       value: icon_label
     redo:
@@ -64,6 +65,7 @@ islands:
   state:
     status: true
     weight: -10
+    region: end
     publish:
       value: label
     restore:
@@ -73,6 +75,7 @@ islands:
   controls:
     status: true
     weight: -8
+    region: end
     highlight:
       value: icon
     fullscreen:
@@ -102,9 +105,11 @@ islands:
   collaboration:
     status: false
     weight: -4
+    region: end
   back:
     status: true
     weight: -6
+    region: end
     back:
       value: icon
 weight: 0
