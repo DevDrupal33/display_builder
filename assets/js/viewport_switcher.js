@@ -57,7 +57,9 @@
    * @listens shoelace:sl-change
    */
   function setupViewPortSwitcher(builder) {
-    const selectors = builder.querySelectorAll('.db-island-viewport sl-select');
+    const selectors = document.querySelectorAll(
+      '.db-island-viewport sl-select',
+    );
     if (selectors.length > 0) {
       selectors.forEach((selector) => {
         if (!selector.dataset?.points) return;
@@ -71,7 +73,7 @@
       });
     }
 
-    const menu = builder.querySelector('.viewport-menu');
+    const menu = document.querySelector('.viewport-menu');
     if (!menu || !menu.dataset?.points) return;
     menu.addEventListener('sl-select', (event) => {
       const { item } = event.detail;

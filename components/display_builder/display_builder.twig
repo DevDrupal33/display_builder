@@ -43,19 +43,6 @@
     },
   }, with_context: false) }}
 
-  {% set start %}
-    <sl-button-group label="{{ 'Sidebar buttons'|t }}">
-      {{ view_sidebar_buttons }}
-    </sl-button-group>
-  {% endset %}
-
-  {{ include('display_builder:toolbar', {
-      sticky: true,
-      start: start,
-      middle: view_main_tabs,
-      end: buttons,
-    }, with_context: false) }}
-
   <div class="display-builder__main">
     <span id="message-{{ builder_id }}"></span>
     {{ view_main }}

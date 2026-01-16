@@ -1,0 +1,72 @@
+/*
+ * Fixes related to navigation/css/base/admin-reset-styles.css
+ */
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) {
+  *:not(:where(svg, svg *)) sl-icon {
+    display: inline-block;
+    vertical-align: middle;
+    all: revert-layer;
+  }
+  sl-tab:focus,
+  sl-button:focus {
+    /* Remove green border on focused elements */
+    outline: none;
+  }
+}
+
+/*
+ * Adapt shoelace components to the toolbar
+ */
+.top-bar__content {
+  /* Design tokens mapping between Drupal and Shoelace */
+  --sl-font-sans: var(--admin-toolbar-font-family);
+}
+
+:is(#extra-specificity-hack, [data-drupal-admin-styles])
+  .top-bar__context
+  sl-tab-group {
+  /* This is the main issue: tabs must not be taller than the available space */
+  max-height: calc(
+    var(--admin-toolbar-top-bar-height, 64px) -
+      var(--admin-toolbar-space-12, 12px) * 2
+  );
+}
+
+.top-bar__context sl-tab::part(base) {
+  padding: 0 var(--sl-spacing-large);
+  line-height: calc(
+    var(--admin-toolbar-top-bar-height, 64px) -
+      var(--admin-toolbar-space-12, 12px) * 2
+  );
+}
+@media (max-width: 1280px) {
+  .top-bar__context sl-tab::part(base) {
+    padding: 0 var(--sl-spacing-medium);
+  }
+}
+
+:is(#extra-specificity-hack, [data-drupal-admin-styles])
+  .top-bar__actions
+  > .db-island:not(:first-child, dialog, :empty) {
+  display: inline-block;
+  margin-left: var(--admin-toolbar-space-16, 16px);
+}
+@media (max-width: 1280px) {
+  :is(#extra-specificity-hack, [data-drupal-admin-styles])
+    .top-bar__actions
+    > .db-island:not(:first-child, dialog, :empty) {
+    margin-left: var(--admin-toolbar-space-8, 8px);
+  }
+}
+
+.top-bar__tools sl-button,
+.top-bar__actions sl-button {
+  cursor: pointer;
+}
+
+/* Keyboard shortcut */
+.top-bar__actions code {
+  color: var(--sl-color-danger-400);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+}

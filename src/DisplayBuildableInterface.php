@@ -7,6 +7,7 @@ namespace Drupal\display_builder;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
  * Interface for entities or plugins natively embedding a display builder.
@@ -47,6 +48,19 @@ interface DisplayBuildableInterface {
    *   A Drupal URL object.
    */
   public function getBuilderUrl(): Url;
+
+  /**
+   * Create a display buildable from route.
+   *
+   * @param string $route
+   *   The route name.
+   * @param \Symfony\Component\HttpFoundation\ParameterBag $params
+   *   The parameters of the route we check.
+   *
+   * @return \Drupal\display_builder\DisplayBuildableInterface
+   *   An implementation of the interface.
+   */
+  public static function createFromRoute(string $route, ParameterBag $params): ?DisplayBuildableInterface;
 
   /**
    * Get display builder instance URL from an instance ID.

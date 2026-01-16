@@ -161,10 +161,13 @@
     attach(context) {
       once('shoelaceTabs', '.shoelace-tabs', context).forEach(
         (tabsComponent) => {
-          const builderId = tabsComponent.closest('.display-builder').id;
-          addSwitchingMechanism(builderId, tabsComponent);
-          // Restore tabs state from local storage
-          restoreTabsState(builderId, tabsComponent);
+          const displayBuilder = document.querySelector('.display-builder');
+          if (displayBuilder !== null) {
+            const builderId = displayBuilder.id;
+            addSwitchingMechanism(builderId, tabsComponent);
+            // Restore tabs state from local storage
+            restoreTabsState(builderId, tabsComponent);
+          }
         },
       );
 
@@ -179,7 +182,7 @@
           '.display-builder .shoelace-tabs--contextual',
         );
         Array.from(tabsComponents).forEach((tabsComponent) => {
-          const builderId = tabsComponent.closest('.display-builder').id;
+          const builderId = document.querySelector('.display-builder').id;
           hideEmptyTabs(builderId, tabsComponent);
           restoreTabsState(builderId, tabsComponent);
         });

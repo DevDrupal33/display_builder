@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityViewBuilder;
 use Drupal\Core\Security\TrustedCallbackInterface;
+use Drupal\navigation\TopBarRegion;
 
 /**
  * View builder handler for display builder profiles.
@@ -30,6 +31,13 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    * The entity we are building the view for.
    */
   private ProfileInterface $entity;
+
+  /**
+   * Store the built toolbar.
+   *
+   * @todo maybe need to be keyed depending on instance ID and contexts.
+   */
+  private array $toolbar;
 
   /**
    * {@inheritdoc}
@@ -78,6 +86,62 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
   }
 
   /**
+   * Builds and returns the renderable array for the top bar items.
+   *
+   * Keyed by top bar region.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The display builder instance.
+   * @param array $contexts
+   *   (Optional) An array of context to pass to the display builder.
+   *
+   * @return array
+   *   A renderable array representing the top bar element.
+   *
+   * @todo avoid multiple calls to other internal build methods.
+   */
+  public function buildToolbar(InstanceInterface $instance, array $contexts = []): array {
+    if (isset($this->toolbar)) {
+      return $this->toolbar;
+    }
+
+    $builder_data = $instance->getCurrentState();
+    $islands = $this->getIslandsEnableSorted($contexts);
+    $button_islands = $islands[IslandType::Button->value] ?? [];
+    $view_islands = $islands[IslandType::View->value] ?? [];
+
+    $buttons = [];
+    $sidebar_buttons = [];
+
+    if (!empty($button_islands)) {
+      $buttons = $this->buildPanes($instance, $button_islands, $builder_data, [], 'span');
+    }
+
+    $view_islands_data = $this->prepareViewIslands($instance, $view_islands);
+
+    if (!empty($view_islands_data['view_sidebar_buttons'])) {
+      $sidebar_buttons = [
+        '#type' => 'component',
+        '#component' => 'display_builder:button_group',
+        '#slots' => [
+          'buttons' => $view_islands_data['view_sidebar_buttons'],
+        ],
+        '#attributes' => [
+          'label' => $this->t('Sidebar buttons'),
+        ],
+      ];
+    }
+
+    $this->toolbar = [
+      TopBarRegion::Tools->value => $sidebar_buttons,
+      TopBarRegion::Context->value => $view_islands_data['view_main_tabs'],
+      TopBarRegion::Actions->value => $buttons,
+    ];
+
+    return $this->toolbar;
+  }
+
+  /**
    * Builds and returns the value of each slot.
    *
    * @param \Drupal\display_builder\InstanceInterface $builder
@@ -91,17 +155,10 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
   private function buildSlots(InstanceInterface $builder, array $islands_enabled_sorted): array {
     $builder_data = $builder->getCurrentState();
 
-    $button_islands = $islands_enabled_sorted[IslandType::Button->value] ?? [];
     $library_islands = $islands_enabled_sorted[IslandType::Library->value] ?? [];
     $contextual_islands = $islands_enabled_sorted[IslandType::Contextual->value] ?? [];
     $menu_islands = $islands_enabled_sorted[IslandType::Menu->value] ?? [];
     $view_islands = $islands_enabled_sorted[IslandType::View->value] ?? [];
-
-    $buttons = [];
-
-    if (!empty($button_islands)) {
-      $buttons = $this->buildPanes($builder, $button_islands, [], [], 'span');
-    }
 
     if (!empty($menu_islands)) {
       $menu_islands = $this->buildMenuWrapper($builder, $menu_islands);
@@ -133,11 +190,8 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     }
 
     return [
-      'view_sidebar_buttons' => $view_islands_data['view_sidebar_buttons'],
       'view_sidebar' => $view_sidebar,
-      'view_main_tabs' => $view_islands_data['view_main_tabs'],
       'view_main' => $view_main,
-      'buttons' => $buttons,
       'contextual_islands' => $contextual_islands,
       'menu_islands' => $menu_islands,
     ];

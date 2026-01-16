@@ -23,6 +23,7 @@ use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
  * Defines an item list class for layout section fields.
@@ -126,6 +127,54 @@ final class DisplayBuilderItemList extends MapFieldItemList implements DisplayBu
     $route_name = \sprintf('entity.%s.display_builder.%s', $entity_type_id, $display->getMode());
 
     return Url::fromRoute($route_name, $params);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function createFromRoute(string $route, ParameterBag $params): ?DisplayBuildableInterface {
+    $entity_type = $params->get('entity_type_id');
+    $view_mode = $params->get('view_mode_name');
+
+    if (!$entity_type || !$view_mode) {
+      return NULL;
+    }
+
+    if ($route !== "entity.{$entity_type}.display_builder.{$view_mode}") {
+      return NULL;
+    }
+
+    $entity = $params->get($entity_type);
+    // Some entity type, like `user`, have no proper bundles.
+    $bundle = $entity->bundle() ?? $entity_type;
+
+    /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface[] $displays */
+    $displays = \Drupal::entityTypeManager()->getStorage('entity_view_display')->loadByProperties([
+      'targetEntityType' => $entity_type,
+    ]);
+
+    foreach ($displays as $display) {
+      if ($display->getTargetBundle() !== $bundle) {
+        continue;
+      }
+
+      if (!($display instanceof DisplayBuilderOverridableInterface)) {
+        continue;
+      }
+
+      if ($field = $display->getDisplayBuilderOverrideField()) {
+        $field = \Drupal::service('plugin.manager.field.field_type')->createFieldItemList($entity, $field);
+      }
+
+      if ($field instanceof DisplayBuildableInterface) {
+        /** @var \Drupal\display_builder\DisplayBuildableInterface $field */
+        $field = $field;
+
+        return $field;
+      }
+    }
+
+    return NULL;
   }
 
   /**

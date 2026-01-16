@@ -24,7 +24,7 @@
     attach(context) {
       once('dbKeyboardGlobal', '.display-builder', context).forEach(
         (builder) => {
-          const keyboardKeys = builder.querySelectorAll('[data-keyboard-key]');
+          const keyboardKeys = document.querySelectorAll('[data-keyboard-key]');
           if (!keyboardKeys) return;
 
           const keyboardMapping = {};
@@ -38,7 +38,7 @@
               `<code>${elt.dataset.keyboardKey}</code> ${elt.dataset?.keyboardHelp ?? ''}`;
           });
 
-          builder.addEventListener('sl-show', (event) => {
+          document.addEventListener('sl-show', (event) => {
             if (!event.target.querySelector('[data-island-action="help"]'))
               return;
 
