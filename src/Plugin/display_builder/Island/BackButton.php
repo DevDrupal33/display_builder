@@ -66,11 +66,10 @@ class BackButton extends IslandPluginToolbarButtonConfigurationBase {
    *   The url of the instance.
    */
   private static function findParentDisplayFromId(string $instance_id): ?Url {
-    // phpcs:ignore-next-line Drupal.DeprecatedFunctions.GlobalFunction
-    $providers = \Drupal::moduleHandler()->invokeAll('display_builder_provider_info');
+    $providers = \Drupal::service('plugin.manager.display_buildable')->getDefinitions();
 
     foreach ($providers as $provider) {
-      if (\str_starts_with($instance_id, $provider['prefix'])) {
+      if (\str_starts_with($instance_id, $provider['instance_prefix'])) {
         return $provider['class']::getDisplayUrlFromInstanceId($instance_id);
       }
     }

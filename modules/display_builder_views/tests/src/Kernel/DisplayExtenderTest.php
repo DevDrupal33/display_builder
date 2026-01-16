@@ -6,6 +6,8 @@ namespace Drupal\Tests\display_builder_views\Kernel;
 
 use Drupal\Core\Form\FormState;
 use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\DisplayBuildablePluginManager;
+use Drupal\display_builder_views\Plugin\DisplayBuildable\ViewDisplay;
 use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\views\Entity\View;
@@ -21,6 +23,11 @@ use PHPUnit\Framework\Attributes\Group;
 #[CoversClass(DisplayExtender::class)]
 #[Group('display_builder')]
 final class DisplayExtenderTest extends KernelTestBase {
+
+  /**
+   * The display buildable manager.
+   */
+  protected DisplayBuildablePluginManager $displayBuildableManager;
 
   /**
    * {@inheritdoc}
@@ -45,6 +52,7 @@ final class DisplayExtenderTest extends KernelTestBase {
     $this->installEntitySchema('display_builder_profile');
     $this->installEntitySchema('display_builder_instance');
     $this->installConfig(['system', 'views', 'display_builder', 'display_builder_views', 'ui_patterns']);
+    $this->displayBuildableManager = $this->container->get('plugin.manager.display_buildable');
   }
 
   /**
@@ -105,15 +113,17 @@ final class DisplayExtenderTest extends KernelTestBase {
     self::assertArrayHasKey('display_builder', $options);
 
     // Test getInstanceId.
-    $instance_id = $plugin->getInstanceId();
-    self::assertStringStartsWith(DisplayExtender::getPrefix(), $instance_id);
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('view_display', ['extender' => $plugin]);
+    $instance_id = $buildable->getInstanceId();
+    self::assertStringStartsWith(ViewDisplay::getPrefix(), $instance_id);
 
     // Test static checkInstanceId and getUrlFromInstanceId.
-    $id = \sprintf('%stest_view__default', DisplayExtender::getPrefix());
-    $parsed = DisplayExtender::checkInstanceId($id);
+    $id = \sprintf('%stest_view__default', ViewDisplay::getPrefix());
+    $parsed = ViewDisplay::checkInstanceId($id);
     self::assertSame(['view' => 'test_view', 'display' => 'default'], $parsed);
 
-    $url = DisplayExtender::getUrlFromInstanceId($id);
+    $url = ViewDisplay::getUrlFromInstanceId($id);
     self::assertStringContainsString('/admin/structure/views/view/test_view/display-builder/default', $url->toString());
   }
 

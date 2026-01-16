@@ -6,13 +6,12 @@ namespace Drupal\display_builder_entity_view\Entity;
 
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay as CoreLayoutBuilderEntityViewDisplay;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
-use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\SourcePluginManager;
 
 /**
@@ -43,19 +42,14 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
   protected ComponentElementBuilder $componentElementBuilder;
 
   /**
-   * The sample entity generator.
-   */
-  protected SampleEntityGeneratorInterface $sampleEntityGenerator;
-
-  /**
-   * The list of modules.
-   */
-  protected ModuleExtensionList $modules;
-
-  /**
    * The data converter from Manage Display and Layout Builder.
    */
   protected BuilderDataConverter $dataConverter;
+
+  /**
+   * The loaded display builder instance.
+   */
+  protected DisplayBuildablePluginManager $displayBuildableManager;
 
   /**
    * The loaded display builder instance.
@@ -76,9 +70,8 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
     $this->sourcePluginManager = \Drupal::service('plugin.manager.ui_patterns_source');
     $this->entityTypeManager = \Drupal::service('entity_type.manager');
     $this->componentElementBuilder = \Drupal::service('ui_patterns.component_element_builder');
-    $this->sampleEntityGenerator = \Drupal::service('ui_patterns.sample_entity_generator');
-    $this->modules = \Drupal::service('extension.list.module');
     $this->dataConverter = \Drupal::service('display_builder_entity_view.builder_data_converter');
+    $this->displayBuildableManager = \Drupal::service('plugin.manager.display_buildable');
   }
 
   /**
@@ -88,7 +81,7 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
     // If the update is made from Layout Builder, convert the data and copy
     // to Display Builder's third party settings storage.
     if (isset($this->form_id) && $this->form_id === 'entity_view_display_layout_builder_form') {
-      if ($this->getProfile()) {
+      if ($this->displayBuildable()->getProfile()) {
         $this->importFromLayoutBuilder();
       }
     }
@@ -108,15 +101,11 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
   }
 
   /**
-   * Initial import from existing data.
+   * {@inheritdoc}
    *
-   * @return array
-   *   List of UI Patterns sources.
-   *
-   * @see EntityViewDisplayTrait::initInstanceIfMissing()
-   * @see EntityViewDisplay::initialImport()
+   * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface
    */
-  protected function initialImport(): array {
+  public function initialImport(): array {
     if ($this->getThirdPartySetting('layout_builder', 'enabled')) {
       $sections = $this->getThirdPartySetting('layout_builder', 'sections', []);
 
@@ -139,7 +128,7 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
    * @see LayoutBuilderEntityViewDisplay::preSave()
    */
   protected function importFromLayoutBuilder(): void {
-    if (!$this->getInstanceId()) {
+    if (!$this->displayBuildable()->getInstanceId()) {
       return;
     }
     $sections = $this->getThirdPartySetting('layout_builder', 'sections');
@@ -148,7 +137,7 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
     /** @var \Drupal\display_builder\InstanceStorage $storage */
     $storage = $this->entityTypeManager->getStorage('display_builder_instance');
     /** @var \Drupal\display_builder\InstanceInterface $instance */
-    $instance = $storage->load($this->getInstanceId());
+    $instance = $storage->load($this->displayBuildable()->getInstanceId());
     $instance->setNewPresent($sources, 'Import from Layout Builder');
     $instance->save();
   }

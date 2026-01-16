@@ -10,6 +10,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
 
@@ -89,7 +90,7 @@ trait EntityViewDisplayFormTrait {
       '#title' => $this->t('Display builder'),
       '#weight' => -11,
       '#attributes' => ['class' => ['button']],
-      '#url' => $this->entity->getBuilderUrl(),
+      '#url' => $this->displayBuildable()->getBuilderUrl(),
       '#access' => $is_display_builder_enabled,
     ];
 
@@ -104,7 +105,7 @@ trait EntityViewDisplayFormTrait {
       '#weight' => 1,
     ];
 
-    $form['display_builder_wrapper'][ConfigFormBuilderInterface::PROFILE_PROPERTY] = $this->configFormBuilder->build($this->entity, FALSE);
+    $form['display_builder_wrapper'][ConfigFormBuilderInterface::PROFILE_PROPERTY] = $this->configFormBuilder->build($this->displayBuildable(), FALSE);
 
     /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $entity */
     $entity = $this->getEntity();
@@ -181,7 +182,7 @@ trait EntityViewDisplayFormTrait {
       ],
     ];
 
-    if (!$this->configFormBuilder->isAllowed($entity)) {
+    if (!$this->configFormBuilder->isAllowed($this->displayBuildable())) {
       $form[ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY]['#disabled'] = TRUE;
       unset($form[ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY]['#description']);
       $form[ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY]['#disabled'] = TRUE;
@@ -318,6 +319,19 @@ trait EntityViewDisplayFormTrait {
     }
 
     parent::copyFormValuesToEntity($entity, $form, $form_state);
+  }
+
+  /**
+   * Gets the display buildable manager.
+   *
+   * @return \Drupal\display_builder\DisplayBuildableInterface
+   *   The manager for display buildable.
+   */
+  protected function displayBuildable(): DisplayBuildableInterface {
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $this->getEntity()]);
+
+    return $buildable;
   }
 
 }

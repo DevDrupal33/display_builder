@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Menu\LocalTaskManager;
 use Drupal\Core\Routing\RouteBuilderInterface;
 use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\field_ui\Form\EntityViewDisplayEditForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -37,6 +38,11 @@ final class EntityViewDisplayForm extends EntityViewDisplayEditForm {
   protected RouteBuilderInterface $routeBuilder;
 
   /**
+   * The loaded display builder instance.
+   */
+  protected DisplayBuildablePluginManager $displayBuildableManager;
+
+  /**
    * The entity being used by this form.
    *
    * @var \Drupal\display_builder_entity_view\Entity\EntityViewDisplay
@@ -52,6 +58,7 @@ final class EntityViewDisplayForm extends EntityViewDisplayEditForm {
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->localTaskManager = $container->get('plugin.manager.menu.local_task');
     $instance->routeBuilder = $container->get('router.builder');
+    $instance->displayBuildableManager = $container->get('plugin.manager.display_buildable');
 
     return $instance;
   }

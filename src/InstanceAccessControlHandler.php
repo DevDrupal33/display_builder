@@ -8,6 +8,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
@@ -16,10 +17,22 @@ use Drupal\Core\Session\AccountInterface;
 final class InstanceAccessControlHandler extends EntityAccessControlHandler {
 
   /**
+   * The display buildable manager.
+   */
+  protected DisplayBuildablePluginManager $displayBuildableManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(EntityTypeInterface $entity_type) {
+    parent::__construct($entity_type);
+    $this->displayBuildableManager = \Drupal::service('plugin.manager.display_buildable');
+  }
+
+  /**
    * {@inheritdoc}
    */
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account): AccessResultInterface {
-    // dump(get_class($entity));
     /** @var \Drupal\display_builder\InstanceInterface $entity */
     // 1. Profile-related access.
     $profile_result = $this->checkProfileAccess($entity, $account);
@@ -66,12 +79,10 @@ final class InstanceAccessControlHandler extends EntityAccessControlHandler {
    */
   private function checkBuildableAccess(InstanceInterface $instance, AccountInterface $account): AccessResultInterface {
     $instance_id = (string) $instance->id();
-    // "Providers" are implementations of
-    // \Drupal\display_builder\DisplayBuildableInterface.
-    $providers = $this->moduleHandler->invokeAll('display_builder_provider_info');
+    $providers = $this->displayBuildableManager->getDefinitions();
 
     foreach ($providers as $provider) {
-      if (\str_starts_with($instance_id, $provider['prefix'])) {
+      if (\str_starts_with($instance_id, $provider['instance_prefix'])) {
         return $provider['class']::checkAccess($instance_id, $account);
       }
     }

@@ -3,5 +3,6 @@ services:
     class: Drupal\display_builder_views\EventSubscriber\DisplayBuilderSubscriber
     arguments:
       - '@entity_type.manager'
+      - '@plugin.manager.display_buildable'
     tags:
       - { name: 'event_subscriber' }

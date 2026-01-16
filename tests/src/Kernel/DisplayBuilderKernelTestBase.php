@@ -21,7 +21,7 @@ abstract class DisplayBuilderKernelTestBase extends KernelTestBase {
   /**
    * Init mock buildable for tests.
    *
-   * @param string $profile_id
+   * @param string|null $profile_id
    *   The display builder profile ID.
    * @param string|null $instance_id
    *   The display builder instance ID.
@@ -29,8 +29,10 @@ abstract class DisplayBuilderKernelTestBase extends KernelTestBase {
    * @return \Drupal\display_builder\DisplayBuildableInterface
    *   The display buildable we are checking the form for.
    */
-  protected function createDisplayBuilderBuildable(?string $profile_id = NULL, ?string $instance_id = NULL): DisplayBuildableInterface {
-    return new DisplayBuildableMock($profile_id, $instance_id ?? $this->randomMachineName());
+  protected function createDisplayBuilderBuildable(?string $profile_id, ?string $instance_id = NULL): DisplayBuildableInterface {
+    $manager = \Drupal::service('plugin.manager.display_buildable');
+
+    return $manager->createInstance('mock', ['profile_id' => $profile_id, 'instance_id' => $instance_id]);
   }
 
   /**

@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Menu\LocalTaskManager;
 use Drupal\Core\Routing\RouteBuilderInterface;
 use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\layout_builder\Form\LayoutBuilderEntityViewDisplayForm as CoreLayoutBuilderEntityViewDisplayForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -44,6 +45,11 @@ final class LayoutBuilderEntityViewDisplayForm extends CoreLayoutBuilderEntityVi
   protected RouteBuilderInterface $routeBuilder;
 
   /**
+   * The loaded display builder instance.
+   */
+  protected DisplayBuildablePluginManager $displayBuildableManager;
+
+  /**
    * {@inheritDoc}
    */
   public static function create(ContainerInterface $container): static {
@@ -52,6 +58,7 @@ final class LayoutBuilderEntityViewDisplayForm extends CoreLayoutBuilderEntityVi
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->localTaskManager = $container->get('plugin.manager.menu.local_task');
     $instance->routeBuilder = $container->get('router.builder');
+    $instance->displayBuildableManager = $container->get('plugin.manager.display_buildable');
 
     return $instance;
   }

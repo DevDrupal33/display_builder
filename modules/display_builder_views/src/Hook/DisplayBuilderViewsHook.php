@@ -8,7 +8,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
+use Drupal\display_builder_views\Plugin\DisplayBuildable\ViewDisplay;
 
 /**
  * Hook implementations for the display_builder_views module.
@@ -31,36 +31,18 @@ class DisplayBuilderViewsHook {
 
     $id = (string) $entity->id();
 
-    if (\str_starts_with($id, DisplayExtender::getPrefix())) {
+    if (\str_starts_with($id, ViewDisplay::getPrefix())) {
       $operations['build'] = [
         'title' => new TranslatableMarkup('Build display'),
-        'url' => DisplayExtender::getUrlFromInstanceId($id),
+        'url' => ViewDisplay::getUrlFromInstanceId($id),
         'weight' => -1,
       ];
       $operations['edit'] = [
         'title' => new TranslatableMarkup('Edit view'),
-        'url' => DisplayExtender::getDisplayUrlFromInstanceId($id),
+        'url' => ViewDisplay::getDisplayUrlFromInstanceId($id),
         'weight' => 10,
       ];
     }
-  }
-
-  /**
-   * Implements hook_display_builder_provider_info().
-   *
-   * @return array
-   *   An associative array of display builder providers.
-   */
-  #[Hook('display_builder_provider_info')]
-  public function displayBuilderProviderInfo(): array {
-    return [
-      'views' => [
-        'label' => new TranslatableMarkup('Views'),
-        'class' => DisplayExtender::class,
-        'prefix' => DisplayExtender::getPrefix(),
-        'storage' => 'view',
-      ],
-    ];
   }
 
 }

@@ -18,7 +18,7 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\Plugin\display_builder\Island\ContextualFormPanel;
 use Drupal\display_builder\RenderableBuilderTrait;
-use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
+use Drupal\display_builder_entity_view\Plugin\DisplayBuildable\EntityViewOverride;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -401,7 +401,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * {@inheritdoc}
    */
   public function revert(Request $request, InstanceInterface $display_builder_instance): array {
-    $instanceInfos = DisplayBuilderItemList::checkInstanceId((string) $display_builder_instance->id());
+    $instanceInfos = EntityViewOverride::checkInstanceId((string) $display_builder_instance->id());
 
     if (isset($instanceInfos['entity_type_id'], $instanceInfos['entity_id'], $instanceInfos['field_name'])) {
       // Do not get the profile entity ID from Instance context because the

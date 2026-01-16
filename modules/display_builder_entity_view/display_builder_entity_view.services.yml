@@ -16,6 +16,7 @@ services:
     class: Drupal\display_builder_entity_view\EventSubscriber\DisplayBuilderSubscriber
     arguments:
       - '@entity_type.manager'
+      - '@plugin.manager.display_buildable'
     tags:
       - { name: event_subscriber }
   display_builder_entity_view.builder_data_converter:
