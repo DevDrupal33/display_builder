@@ -19,6 +19,7 @@ use Drupal\display_builder\IslandType;
   label: new TranslatableMarkup('Controls'),
   description: new TranslatableMarkup('Control the building experience.'),
   type: IslandType::Button,
+  default_region: 'end',
 )]
 class ControlsButtons extends IslandPluginToolbarButtonConfigurationBase {
 

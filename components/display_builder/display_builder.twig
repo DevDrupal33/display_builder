@@ -47,13 +47,14 @@
     <sl-button-group label="{{ 'Sidebar buttons'|t }}">
       {{ view_sidebar_buttons }}
     </sl-button-group>
+    {{ start_buttons }}
   {% endset %}
 
   {{ include('display_builder:toolbar', {
       sticky: true,
       start: start,
       middle: view_main_tabs,
-      end: buttons,
+      end: end_buttons,
     }, with_context: false) }}
 
   <div class="display-builder__main">

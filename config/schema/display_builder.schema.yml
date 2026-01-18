@@ -24,7 +24,7 @@ display_builder.profile.*:
       type: weight
       label: Weight
 
-display_builder.islands.*:
+display_builder.islands:
   type: mapping
   label: 'Island configuration'
   mapping:
@@ -38,15 +38,12 @@ display_builder.islands.*:
       type: machine_name
       label: Region
 
+display_builder.islands.*:
+  type: display_builder.islands
+
 display_builder.islands.state:
-  type: mapping
+  type: display_builder.islands
   mapping:
-    status:
-      type: boolean
-      label: Enabled
-    weight:
-      type: weight
-      label: Weight
     publish:
       type: display_builder.toolbar.button
     restore:
@@ -55,14 +52,8 @@ display_builder.islands.state:
       type: display_builder.toolbar.button
 
 display_builder.islands.history:
-  type: mapping
+  type: display_builder.islands
   mapping:
-    status:
-      type: boolean
-      label: Enabled
-    weight:
-      type: weight
-      label: Weight
     undo:
       type: display_builder.toolbar.button
     redo:
@@ -71,14 +62,8 @@ display_builder.islands.history:
       type: display_builder.toolbar.button
 
 display_builder.islands.controls:
-  type: mapping
+  type: display_builder.islands
   mapping:
-    status:
-      type: boolean
-      label: Enabled
-    weight:
-      type: weight
-      label: Weight
     highlight:
       type: display_builder.toolbar.button
     fullscreen:
@@ -89,7 +74,7 @@ display_builder.islands.controls:
       type: display_builder.toolbar.button
 
 display_builder.islands.component_library:
-  type: mapping
+  type: display_builder.islands
   mapping:
     exclude:
       type: sequence
@@ -109,15 +94,9 @@ display_builder.islands.component_library:
       type: boolean
     show_mosaic:
       type: boolean
-    status:
-      type: boolean
-      label: Enabled
-    weight:
-      type: weight
-      label: Weight
 
 display_builder.islands.block_library:
-  type: mapping
+  type: display_builder.islands
   mapping:
     exclude:
       type: sequence
@@ -127,29 +106,17 @@ display_builder.islands.block_library:
       type: sequence
       sequence:
         type: string
-    status:
-      type: boolean
-      label: Enabled
-    weight:
-      type: weight
-      label: Weight
 
 display_builder.islands.collaboration:
-  type: mapping
+  type: display_builder.islands
   mapping:
     image_field:
       type: machine_name
     image_style:
       type: machine_name
-    status:
-      type: boolean
-      label: Enabled
-    weight:
-      type: weight
-      label: Weight
 
 display_builder.islands.viewport:
-  type: mapping
+  type: display_builder.islands
   mapping:
     exclude:
       type: sequence
@@ -158,22 +125,10 @@ display_builder.islands.viewport:
     format:
       type: string
       label: Format
-    status:
-      type: boolean
-      label: Enabled
-    weight:
-      type: weight
-      label: Weight
 
 display_builder.islands.back:
-  type: mapping
+  type: display_builder.islands
   mapping:
-    status:
-      type: boolean
-      label: Enabled
-    weight:
-      type: weight
-      label: Weight
     back:
       type: display_builder.toolbar.button
 

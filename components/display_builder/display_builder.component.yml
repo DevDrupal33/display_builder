@@ -10,8 +10,10 @@ slots:
     title: View main tabs
   view_main:
     title: View main
-  buttons:
-    title: Action buttons
+  start_buttons:
+    title: Action buttons (start)
+  end_buttons:
+    title: Action buttons (end)
   contextual_islands:
     title: Contextual islands
   menu_islands:

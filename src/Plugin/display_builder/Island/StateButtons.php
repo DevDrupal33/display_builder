@@ -23,6 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('State'),
   description: new TranslatableMarkup('Publish and reset the display.'),
   type: IslandType::Button,
+  default_region: 'end',
 )]
 class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
 
