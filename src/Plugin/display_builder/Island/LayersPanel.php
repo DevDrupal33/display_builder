@@ -262,28 +262,37 @@ class LayersPanel extends BuilderPanel {
     $items = [];
 
     foreach ($data['source']['component']['props'] as $source_id => $source) {
-      if (!isset($source['source']['value']) || $source['source']['value'] === '') {
+      $raw = $source['source']['value'] ?? NULL;
+
+      if ($raw === NULL || $raw === '') {
         continue;
       }
 
       $label = $component['props']['properties'][$source_id]['title'] ?? '';
-      $value = $source['source']['value'];
+      $value = $raw;
 
-      if (\is_array($value) && self::is_not_nested($value)) {
-        $value = \trim(\implode(', ', $value), ', ');
-      }
-      elseif (\is_array($value) && isset($value['icon_id'])) {
-        $value = $value['icon_id'];
+      if (\is_array($value)) {
+        if (self::is_not_nested($value)) {
+          $value = \trim(\implode(', ', $value), ', ');
+        }
+        elseif (isset($value['icon_id'])) {
+          $value = $value['icon_id'];
+        }
+        else {
+          // Skip complex nested arrays we don't know how to summarize.
+          continue;
+        }
       }
 
-      if (\is_string($value)) {
-        $item = \sprintf('%s %s', $label, $value);
-        $items[] = [
-          '#type' => 'html_tag',
-          '#tag' => 'li',
-          '#value' => $item,
-        ];
+      if (!\is_string($value)) {
+        continue;
       }
+
+      $items[] = [
+        '#type' => 'html_tag',
+        '#tag' => 'li',
+        '#value' => \sprintf('%s %s', $label, $value),
+      ];
     }
 
     if (empty($items)) {
