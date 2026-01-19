@@ -78,6 +78,7 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
     // Remove configuration if it matches the defaults.
     $visibility = new ConditionPluginCollection($this->conditionManager);
     $conditions = $form_state->get('conditions');
+
     foreach ($conditions as $condition_id => $condition) {
       $condition->submitConfigurationForm($form[$condition_id], SubformState::createForSubform($form[$condition_id], $form, $form_state));
       $visibility->set($condition_id, $condition);
