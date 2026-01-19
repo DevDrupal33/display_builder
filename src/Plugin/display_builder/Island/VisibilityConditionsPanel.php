@@ -8,6 +8,7 @@ use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Executable\ExecutableManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
+use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\IslandPluginBase;
@@ -18,7 +19,7 @@ use Drupal\display_builder\RenderableAltererInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Skins island plugin implementation.
+ * Visibility conditions island plugin implementation.
  */
 #[Island(
   id: 'visibility_conditions',
@@ -37,11 +38,17 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
   protected ExecutableManagerInterface $conditionManager;
 
   /**
+   * The context repository.
+   */
+  protected ContextRepositoryInterface $contextRepository;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->conditionManager = $container->get('plugin.manager.condition');
+    $instance->contextRepository = $container->get('context.repository');
 
     return $instance;
   }
@@ -56,6 +63,10 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
     $instance = $data['instance'] ?? [];
     $conditions = $this->conditionManager->getDefinitions();
     unset($conditions['response_status']);
+
+    // Gather all available contexts.
+    $gathered_contexts = $form_state->getTemporaryValue('gathered_contexts') ?? [];
+    $form_state->setTemporaryValue('gathered_contexts', $gathered_contexts + $this->contextRepository->getAvailableContexts());
 
     foreach ($conditions as $condition_id => $definition) {
       if (\str_starts_with($condition_id, 'entity_bundle:')) {
@@ -100,10 +111,22 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
    * {@inheritdoc}
    */
   public function alterElement(array $element, array $data = []): array {
+    $available_contexts = $this->contextRepository->getAvailableContexts();
+
     foreach (\array_keys($data) as $condition_id) {
-      /** @var \Drupal\Core\Condition\ConditionInterface $condition */
+      /** @var \Drupal\Component\Plugin\ContextAwarePluginInterface $condition */
       $condition = $this->conditionManager->createInstance($condition_id, $data[$condition_id] ?? []);
 
+      // Apply context mapping.
+      $context_mapping = $condition->getContextMapping();
+
+      foreach ($context_mapping as $key => $value) {
+        if (isset($available_contexts[$value])) {
+          $condition->setContextValue($key, $available_contexts[$value]->getContextValue());
+        }
+      }
+
+      /** @var \Drupal\Core\Executable\ExecutableInterface $condition */
       if (!$this->conditionManager->execute($condition)) {
         return [];
       }

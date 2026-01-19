@@ -56,6 +56,7 @@ use Drupal\ui_patterns\SourcePluginManager;
     'edit-form' => '/admin/structure/page-layout/{page_layout}',
     'display-builder' => '/admin/structure/page-layout/{page_layout}/builder',
     'delete-form' => '/admin/structure/page-layout/{page_layout}/delete',
+    'duplicate-form' => '/admin/structure/page-layout/{page_layout}/duplicate',
   ],
   admin_permission: 'administer page_layout',
   label_count: [
@@ -74,9 +75,17 @@ use Drupal\ui_patterns\SourcePluginManager;
 final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
 
   /**
-   * The example ID.
+   * The ID of the page layout entity.
+   *
+   * This property's type was changed from `string` to `?string` (nullable)
+   * to support the entity duplication process. The original non-nullable type
+   * would cause a fatal error, as a new, duplicated entity does not have an
+   * ID until it is saved.
+   *
+   * @var string|null
+   *   The unique identifier for the page layout.
    */
-  protected string $id;
+  protected ?string $id;
 
   /**
    * The example label.
