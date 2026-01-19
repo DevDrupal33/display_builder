@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
+use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Executable\ExecutableManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\SubformState;
 use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
@@ -88,6 +90,20 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state): void {
+    // Remove configuration if it matches the defaults.
+    $visibility = new ConditionPluginCollection($this->conditionManager);
+    $conditions = $form_state->get('conditions');
+
+    foreach ($conditions as $condition_id => $condition) {
+      $condition->submitConfigurationForm($form[$condition_id], SubformState::createForSubform($form[$condition_id], $form, $form_state));
+      $visibility->set($condition_id, $condition);
+      $form_state->unsetValue($condition_id);
+    }
+
+    foreach ($visibility->getConfiguration() as $condition_id => $configuration) {
+      $form_state->setValue($condition_id, $configuration);
+    }
+
     // Those two lines are necessary to prevent the form from being rebuilt.
     // if rebuilt, the form state values will have both the computed ones
     // and the raw ones (wrapper key and values).
