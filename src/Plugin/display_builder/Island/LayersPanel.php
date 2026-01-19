@@ -269,15 +269,21 @@ class LayersPanel extends BuilderPanel {
       $label = $component['props']['properties'][$source_id]['title'] ?? '';
       $value = $source['source']['value'];
 
-      if (\is_array($value)) {
+      if (\is_array($value) && self::is_not_nested($value)) {
         $value = \trim(\implode(', ', $value), ', ');
       }
-      $item = \sprintf('%s %s', $label, $value);
-      $items[] = [
-        '#type' => 'html_tag',
-        '#tag' => 'li',
-        '#value' => $item,
-      ];
+      elseif (\is_array($value) && isset($value['icon_id'])) {
+        $value = $value['icon_id'];
+      }
+
+      if (\is_string($value)) {
+        $item = \sprintf('%s %s', $label, $value);
+        $items[] = [
+          '#type' => 'html_tag',
+          '#tag' => 'li',
+          '#value' => $item,
+        ];
+      }
     }
 
     if (empty($items)) {
@@ -303,6 +309,25 @@ class LayersPanel extends BuilderPanel {
     $build['#slots']['info'] = \array_merge($build['#slots']['info'] ?? [], $summary);
 
     return $build;
+  }
+
+  /**
+   * Helper to ensure we can implode an array.
+   *
+   * @param array $value
+   *   The value to test.
+   *
+   * @return bool
+   *   The array is nested or not.
+   */
+  private static function is_not_nested(array $value): bool {
+    foreach ($value as $element) {
+      if (\is_array($element)) {
+        return FALSE;
+      }
+    }
+
+    return TRUE;
   }
 
 }
