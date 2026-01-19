@@ -67,9 +67,13 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
     $form_state->setTemporaryValue('gathered_contexts', $gathered_contexts + $this->contextRepository->getAvailableContexts());
 
     foreach ($conditions as $condition_id => $definition) {
+      if ($condition_id === 'current_theme') {
+        continue;
+      }
       if (\str_starts_with($condition_id, 'entity_bundle:')) {
         continue;
       }
+
       /** @var \Drupal\Core\Condition\ConditionInterface $condition */
       $condition = $this->conditionManager->createInstance($condition_id, $instance[$condition_id] ?? []);
       $form_state->set(['conditions', $condition_id], $condition);
