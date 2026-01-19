@@ -104,6 +104,14 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
       'url' => $page_layout->getBuilderUrl(),
     ];
 
+    if ($entity->hasLinkTemplate('duplicate-form')) {
+      $operations['duplicate'] = [
+        'title' => $this->t('Duplicate'),
+        'weight' => 15,
+        'url' => $entity->toUrl('duplicate-form'),
+      ];
+    }
+
     return $operations;
   }
 
