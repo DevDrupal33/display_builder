@@ -262,22 +262,11 @@ class LayersPanel extends BuilderPanel {
     $items = [];
 
     foreach ($data['source']['component']['props'] as $source_id => $source) {
-      if (!isset($source['source']['value']) || $source['source']['value'] === '') {
-        continue;
-      }
+      $item = self::buildComponentSettingItem($source, $component, $source_id);
 
-      $label = $component['props']['properties'][$source_id]['title'] ?? '';
-      $value = $source['source']['value'];
-
-      if (\is_array($value)) {
-        $value = \trim(\implode(', ', $value), ', ');
+      if ($item !== NULL) {
+        $items[] = $item;
       }
-      $item = \sprintf('%s %s', $label, $value);
-      $items[] = [
-        '#type' => 'html_tag',
-        '#tag' => 'li',
-        '#value' => $item,
-      ];
     }
 
     if (empty($items)) {
@@ -303,6 +292,72 @@ class LayersPanel extends BuilderPanel {
     $build['#slots']['info'] = \array_merge($build['#slots']['info'] ?? [], $summary);
 
     return $build;
+  }
+
+  /**
+   * Build a human-readable component setting item for the summary.
+   *
+   * @param array $source
+   *   The source array for the component property.
+   * @param array $component
+   *   The component definition.
+   * @param string $source_id
+   *   The source id of the property.
+   *
+   * @return array|null
+   *   A renderable list item or NULL if no summary could be built.
+   */
+  private static function buildComponentSettingItem(array $source, array $component, string $source_id): ?array {
+    $raw = $source['source']['value'] ?? NULL;
+
+    if ($raw === NULL || $raw === '') {
+      return NULL;
+    }
+
+    $label = $component['props']['properties'][$source_id]['title'] ?? '';
+    $value = $raw;
+
+    if (\is_array($value)) {
+      if (self::isNotNested($value)) {
+        $value = \trim(\implode(', ', $value), ', ');
+      }
+      elseif (isset($value['icon_id'])) {
+        $value = $value['icon_id'];
+      }
+      else {
+        // Skip complex nested arrays we don't know how to summarize.
+        return NULL;
+      }
+    }
+
+    if (!\is_string($value)) {
+      return NULL;
+    }
+
+    return [
+      '#type' => 'html_tag',
+      '#tag' => 'li',
+      '#value' => \sprintf('%s %s', $label, $value),
+    ];
+  }
+
+  /**
+   * Helper to ensure we can implode an array.
+   *
+   * @param array $value
+   *   The value to test.
+   *
+   * @return bool
+   *   The array is nested or not.
+   */
+  private static function isNotNested(array $value): bool {
+    foreach ($value as $element) {
+      if (\is_array($element)) {
+        return FALSE;
+      }
+    }
+
+    return TRUE;
   }
 
 }

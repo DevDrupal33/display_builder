@@ -22,6 +22,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
  *   machine name. Each provider is an associative array with the following
  *   keys:
  *   - prefix: Must come from ::getPrefix(), used for UI.
+ *
  *     @see \Drupal\display_builder\DisplayBuildableInterface::getPrefix()
  *   - class: The class implementing the DisplayBuildableInterface. Used to
  *     call static methods from the interface.
