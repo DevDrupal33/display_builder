@@ -72,6 +72,7 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
       if ($condition_id === 'current_theme') {
         continue;
       }
+
       if (\str_starts_with($condition_id, 'entity_bundle:')) {
         continue;
       }
