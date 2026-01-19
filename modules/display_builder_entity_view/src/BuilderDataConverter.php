@@ -79,7 +79,7 @@ class BuilderDataConverter {
 
         continue;
       }
-      $sources = \array_merge($sources, $this->convertLayout($section));
+      $sources[] = $this->convertLayout($section);
     }
 
     return $sources;
@@ -220,28 +220,40 @@ class BuilderDataConverter {
   /**
    * Convert regular layout plugin.
    *
-   * We don't really convert the layout here, we extract the blocks and put
-   * them as a flat list where the layout is.
-   *
-   * @todo better layout support https://www.drupal.org/project/display_builder/issues/3531521
-   *
    * @param \Drupal\layout_builder\Section $section
    *   A single layout builder section.
    *
    * @return array
-   *   A list of UI Patterns source.
+   *   A single UI Patterns source.
    */
   protected function convertLayout(Section $section): array {
-    $sources = [];
+    $slots = [];
     $components = $section->getComponents();
 
     foreach ($components as $component) {
       $source = $this->convertLayoutBuilderComponent($component);
-      $source = $this->extractUiStylesData($component, $source);
-      $sources[] = $source;
+
+      if ($source) {
+        $source = $this->extractUiStylesData($component, $source);
+        $slots[$component->getRegion()][] = $source;
+      }
     }
 
-    return $sources;
+    $data = [
+      'source_id' => 'layout',
+      'source' => [
+        'layout_id' => $section->getLayoutId(),
+        'settings' => $section->getLayoutSettings(),
+      ],
+    ];
+
+    // @todo third_party_settings
+    // @todo moveUiStylesAttributesSource
+    if ($slots) {
+      $data['source']['regions'] = $slots;
+    }
+
+    return $data;
   }
 
   /**

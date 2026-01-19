@@ -209,7 +209,7 @@ class ComponentLibraryDefinitionHelper {
    *   NULL if no default value found.
    */
   private static function getDefaultValue(array $prop): mixed {
-    // First, we try to get teh default value or the first example.
+    // First, we try to get the default value or the first example.
     $default = $prop['default'] ?? $prop['examples'][0] ?? NULL;
 
     if ($default !== NULL) {

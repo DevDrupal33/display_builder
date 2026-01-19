@@ -19,9 +19,11 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\InstanceStorage;
 use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder\SlotSourceProxy;
+use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\display_builder_ui\InstanceListBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
+use Drupal\ui_patterns\SourcePluginManager;
 
 /**
  * Defines the display builder instance entity class.
@@ -128,6 +130,11 @@ class Instance extends EntityBase implements InstanceInterface {
    * Current user.
    */
   protected AccountInterface $currentUser;
+
+  /**
+   * Source plugin manager.
+   */
+  protected SourcePluginManager $sourceManager;
 
   /**
    * {@inheritdoc}
@@ -707,6 +714,13 @@ class Instance extends EntityBase implements InstanceInterface {
   }
 
   /**
+   * Slot source proxy.
+   */
+  private function sourceManager(): SourcePluginManager {
+    return $this->sourceManager ??= \Drupal::service('plugin.manager.ui_patterns_source');
+  }
+
+  /**
    * Refresh contexts after loaded from storage.
    *
    * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
@@ -815,22 +829,16 @@ class Instance extends EntityBase implements InstanceInterface {
       return $data;
     }
 
-    // Let's continue the exploration.
-    if ($data['source_id'] !== 'component') {
+    $source = $this->sourceManager()->createInstance($data['source_id'], ['settings' => $data['source']]);
+
+    if (!($source instanceof SourceWithSlotsInterface)) {
       return $data;
     }
 
-    if (!isset($data['source']['component']['slots'])) {
-      return $data;
-    }
-
-    foreach ($data['source']['component']['slots'] as $slot_id => $slot) {
-      if (!isset($slot['sources'])) {
-        continue;
-      }
-      $slot_path = \array_merge($path, ['source', 'component', 'slots', $slot_id, 'sources']);
-      $slot['sources'] = $this->buildIndexFromSlot($slot_path, $slot['sources']);
-      $data['source']['component']['slots'][$slot_id] = $slot;
+    foreach ($source->getSlotValues() as $slot_id => $slot) {
+      $slot_path = \array_merge($path, ['source'], $source::getSlotPath($slot_id));
+      $slot = $this->buildIndexFromSlot($slot_path, $slot);
+      $data['source'] = $source->setSlotValue($data['source'], $slot_id, $slot);
     }
 
     return $data;
@@ -874,10 +882,15 @@ class Instance extends EntityBase implements InstanceInterface {
    */
   private function doAttachToSlot(array $root, string $parent_id, string $slot_id, int $position, array $data): array {
     $parent_path = $this->getPath($root, $parent_id);
-    $slot_path = \array_merge($parent_path, ['source', 'component', 'slots', $slot_id, 'sources']);
-    $slot = NestedArray::getValue($root, $slot_path) ?? [];
-    \array_splice($slot, $position, 0, [$data]);
-    NestedArray::setValue($root, $slot_path, $slot);
+    $parent_data = $this->get($parent_id);
+    $source = $this->sourceManager()->createInstance($parent_data['source_id'], ['settings' => $parent_data['source']]);
+
+    if ($source instanceof SourceWithSlotsInterface) {
+      $slot_path = \array_merge($parent_path, ['source'], $source::getSlotPath($slot_id));
+      $slot = NestedArray::getValue($root, $slot_path) ?? [];
+      \array_splice($slot, $position, 0, [$data]);
+      NestedArray::setValue($root, $slot_path, $slot);
+    }
 
     return $root;
   }
