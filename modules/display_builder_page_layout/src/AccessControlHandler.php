@@ -112,11 +112,6 @@ class AccessControlHandler extends EntityAccessControlHandler implements EntityH
       return parent::checkAccess($entity, $operation, $account);
     }
 
-    // Require permission to administer page layouts.
-    if (!$account->hasPermission('administer page_layout')) {
-      return AccessResult::forbidden()->cachePerPermissions();
-    }
-
     // Don't grant access to disabled page layouts.
     if (!$entity->status() || empty($entity->getSources())) {
       return AccessResult::forbidden()->addCacheableDependency($entity);
