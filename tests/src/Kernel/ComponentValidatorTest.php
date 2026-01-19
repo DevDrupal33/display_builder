@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\Tests\sdc_devel\Kernel\SdcDevelComponentKernelTestBase;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
-use PHPUnit\Framework\Attributes\CoversNothing;
 
 /**
  * Validate components with SDC Devel.
