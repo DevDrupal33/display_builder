@@ -39,8 +39,6 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
     'extra_field',
     // No Wysiwyg from our UI until #3561474 is fixed.
     'wysiwyg',
-    // No Token from our UI until #3562086 is fixed.
-    'token',
   ];
 
   private const HIDE_PROVIDER = ['ui_patterns_blocks'];
