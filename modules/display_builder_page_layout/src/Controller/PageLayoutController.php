@@ -57,6 +57,7 @@ class PageLayoutController extends IntegrationControllerBase {
   public function duplicate(PageLayoutInterface $page_layout) {
     $duplicate = $page_layout->createDuplicate();
     $duplicate->set('label', $this->t('Duplicate of @label', ['@label' => $page_layout->label()]));
+
     return $this->entityFormBuilder()->getForm($duplicate, 'add');
   }
 
