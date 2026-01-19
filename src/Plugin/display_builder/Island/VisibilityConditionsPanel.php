@@ -98,17 +98,19 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
     $available_contexts = $this->contextRepository->getAvailableContexts();
 
     foreach (\array_keys($data) as $condition_id) {
-      /** @var \Drupal\Core\Condition\ConditionInterface $condition */
+      /** @var \Drupal\Component\Plugin\ContextAwarePluginInterface $condition */
       $condition = $this->conditionManager->createInstance($condition_id, $data[$condition_id] ?? []);
 
       // Apply context mapping.
       $context_mapping = $condition->getContextMapping();
+
       foreach ($context_mapping as $key => $value) {
         if (isset($available_contexts[$value])) {
           $condition->setContextValue($key, $available_contexts[$value]->getContextValue());
         }
       }
 
+      /** @var \Drupal\Core\Executable\ExecutableInterface $condition */
       if (!$this->conditionManager->execute($condition)) {
         return [];
       }
