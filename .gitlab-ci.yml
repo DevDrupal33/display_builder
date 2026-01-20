@@ -137,19 +137,22 @@ cspell:
   script:
     - php --version
     - vendor/bin/phpmd --version
-    - sed -i "s#/builds/project/display_builder#${CI_PROJECT_DIR}#g" ${_WEB_ROOT}/modules/custom/${CI_PROJECT_NAME}/.phpmd.baseline.xml
-    - vendor/bin/phpmd
-        $_WEB_ROOT/modules/custom/$CI_PROJECT_NAME
-        gitlab
-        $_WEB_ROOT/modules/custom/$CI_PROJECT_NAME/.phpmd.xml
-        --exclude 'tests/*,**/tests/*'
-        --baseline-file $_WEB_ROOT/modules/custom/$CI_PROJECT_NAME/.phpmd.baseline.xml > phpmd-quality-report.json || true
-    - vendor/bin/phpmd
-        $_WEB_ROOT/modules/custom/$CI_PROJECT_NAME
-        text
-        $_WEB_ROOT/modules/custom/$CI_PROJECT_NAME/.phpmd.xml
-        --exclude 'tests/*,**/tests/*'
-        --baseline-file $_WEB_ROOT/modules/custom/$CI_PROJECT_NAME/.phpmd.baseline.xml
+    - |
+      BASELINE_FILE="${_WEB_ROOT}/modules/custom/${CI_PROJECT_NAME}/.phpmd.baseline.xml"
+      PHPMD_CONFIG="${_WEB_ROOT}/modules/custom/${CI_PROJECT_NAME}/.phpmd.xml"
+      if [ -f "$BASELINE_FILE" ]; then
+        sed -i "s#/builds/project/display_builder#${CI_PROJECT_DIR}#g" "$BASELINE_FILE"
+      fi
+      if [ -f "$PHPMD_CONFIG" ]; then
+        BASELINE_ARG=""
+        if [ -f "$BASELINE_FILE" ]; then
+          BASELINE_ARG="--baseline-file $BASELINE_FILE"
+        fi
+        vendor/bin/phpmd "${_WEB_ROOT}/modules/custom/${CI_PROJECT_NAME}" gitlab "$PHPMD_CONFIG" --exclude 'tests/*,**/tests/*' $BASELINE_ARG > phpmd-quality-report.json || true
+        vendor/bin/phpmd "${_WEB_ROOT}/modules/custom/${CI_PROJECT_NAME}" text "$PHPMD_CONFIG" --exclude 'tests/*,**/tests/*' $BASELINE_ARG
+      else
+        echo "[Notice] File .phpmd.xml not found at ${PHPMD_CONFIG}, skipping phpmd."
+      fi
   allow_failure: false
   artifacts:
     expose_as: phpmd
