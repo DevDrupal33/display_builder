@@ -46,15 +46,16 @@ test('Builder: Drag and move', { tag: ['@display_builder', '@display_builder_dev
 
     await expect(page.locator(`.db-island-builder`)).toMatchAriaSnapshot(`
       - text: Test simple
-      - 'heading \"label: none\" [level=5]'
+      - 'heading "label: none" [level=5]'
       - text: Textfield
-      - button \"Textfield\"
+      - button "Textfield"
       - text: Slot 1
-      - button \"Click me\"
+      - button "Click me"
       - text: Test simple
-      - 'heading \"label: none\" [level=5]'
-      - text: \"Textfield: I am a test textfield in a slot! I am a test textfield in a slot! Slot 1\"
-      - button \"Click me\"
+      - 'heading "label: none" [level=5]'
+      - text: "Textfield: I am a test textfield... I am a test textfield in a slot! Slot 1"
+      - button "Click me"
+      - text: Base container
     `)
   })
 

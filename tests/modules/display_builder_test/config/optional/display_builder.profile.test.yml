@@ -4,7 +4,6 @@ dependencies: {}
 id: test
 label: Test
 description: 'Testing Display builder config.'
-debug: false
 islands:
   library:
     status: true
@@ -30,114 +29,94 @@ islands:
     status: true
     weight: -5
     region: main
-  index_debug:
-    status: false
-    weight: -4
-    region: main
-  state_debug:
-    status: false
-    weight: -3
-    region: main
-  test_island_view:
-    status: false
-    weight: -2
-    region: main
-  viewport:
-    exclude: {}
-    format: compact
-    status: true
-    weight: -7
   collaboration:
     status: false
     weight: -5
+    region: end
+  viewport:
+    status: true
+    weight: -9
+    region: start
+    exclude: {}
+    format: compact
   back:
     status: true
     weight: -6
-    back:
-      value: icon
+    region: end
   controls:
     status: true
-    weight: -8
-    highlight:
-      value: icon
-    fullscreen:
-      value: icon
-    theme:
-      value: icon
-    help:
-      value: icon
+    weight: -10
+    region: start
   history:
     status: true
-    weight: -9
+    weight: -7
+    region: end
     undo:
       value: icon_label
     redo:
       value: icon_label
     clear:
-      value: icon_label
+      value: icon
   state:
     status: true
-    weight: -10
-    publish:
-      value: label
-    restore:
-      value: icon
-    revert:
-      value: icon
-  test_island_button:
+    weight: -8
+    region: end
+  operation:
     status: false
-    weight: -2
-  contextual_form:
-    status: true
-    weight: -10
-  tokens:
+    weight: -4
+    region: end
+  reset_button:
+    status: false
+    weight: -3
+    region: end
+  visibility_conditions:
     status: true
     weight: -8
+  tokens:
+    status: false
+    weight: -7
   styles:
     status: true
     weight: -9
-  visibility_conditions:
-    status: false
-    weight: -7
-  test_island_contextual:
-    status: false
-    weight: -6
-  block_library:
-    exclude:
-      devel: devel
-      htmx: htmx
-      shortcut: shortcut
-    status: true
-    weight: -9
-  component_library:
-    exclude: {}
-    exclude_id: ''
-    component_status:
-      experimental: experimental
-      deprecated: deprecated
-      obsolete: obsolete
-    include_no_ui: true
-    show_grouped: true
-    show_variants: true
-    show_mosaic: true
+  contextual_form:
     status: true
     weight: -10
   preset_library:
     status: true
     weight: -8
-  test_island_library:
-    status: false
-    weight: -7
+  block_library:
+    status: true
+    weight: -9
+  component_library:
+    status: true
+    weight: -10
   menu:
     status: true
     weight: -10
-  menu_delete:
-    status: true
-    weight: -8
   menu_preset:
     status: true
+    weight: -8
+  menu_styles:
+    status: true
     weight: -9
+  menu_delete:
+    status: true
+    weight: -7
+  test_island_view:
+    status: false
+    weight: 0
+    region: null
+  test_island_button:
+    status: false
+    weight: 0
+    region: null
+  test_island_contextual:
+    status: false
+    weight: 0
+  test_island_library:
+    status: false
+    weight: 0
   test_island_menu:
     status: false
-    weight: -6
+    weight: 0
 weight: 0

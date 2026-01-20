@@ -1,2 +1,4 @@
 - 'heading "label: I am a test" [level=2]'
+- text: I am a test textfield in a slot in an Entity view!
 - button "Click me"
+- 'button "Extra field: Links"'

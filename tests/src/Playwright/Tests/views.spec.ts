@@ -33,7 +33,6 @@ test(
 
       await page.getByText('Save and edit').click()
       await drupal.expectMessage(`The view Test ${testName} has been saved.`)
-      await drupal.ajaxReady()
 
       // Set areas to check the result.
       await page.getByRole('link', { name: 'Add header' }).click()
@@ -73,11 +72,13 @@ test(
       await page.getByRole('link', { name: 'Content: Published' }).click()
 
       await page.getByRole('checkbox', { name: 'Expose this filter to visitors' }).check()
-      await page.getByRole('button', { name: 'Apply', exact: true }).click()
 
+      await expect(page.getByText('Filter identifier')).toBeVisible()
+      await page.getByRole('button', { name: 'Apply', exact: true }).click()
       await page.getByRole('link', { name: 'Content: Authored on' }).click()
 
       await page.getByRole('checkbox', { name: 'Expose this sort to visitors' }).check()
+      await expect(page.getByText('Sort field identifier')).toBeVisible()
       await page.getByRole('button', { name: 'Apply', exact: true }).nth(1).click()
 
       // Save the View.
@@ -85,7 +86,7 @@ test(
       await drupal.expectMessage(`The view Test ${testName} has been saved.`)
 
       await page.getByRole('link', { name: 'View Page' }).click()
-      // await expect(page.locator('.views-element-container')).toMatchAriaSnapshot({ name: 'view-view-no-db.aria.yml' })
+      await expect(page.locator('.views-element-container')).toMatchAriaSnapshot({ name: 'view-view-no-db.aria.yml' })
     })
 
     await test.step(`Set view display`, async () => {

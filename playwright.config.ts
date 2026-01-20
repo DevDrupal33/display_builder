@@ -25,7 +25,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. @see https://playwright.dev/docs/test-reporters */
   reporter: [
-    [ 'list' ],
+    [ 'list', { printSteps: true } ],
     [ 'html', { host: '0.0.0.0', open: 'never' } ],
     [ 'junit', { outputFile: 'test-results/playwright.xml' } ],
     [ './tests/src/Playwright/utilities/reporter.ts', { level: process.env?.PLAYWRIGHT_DEBUG_LEVEL || 'info' } ],
@@ -75,7 +75,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         deviceScaleFactor: 1,
-        viewport: { width: 2560, height: 1440 }
+        viewport: { width: 1920, height: 1080 }
       },
       dependencies: [ 'setup' ],
     },
@@ -84,7 +84,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Firefox'],
         deviceScaleFactor: 1,
-        viewport: { width: 2560, height: 1440 },
+        viewport: { width: 1920, height: 1080 },
       },
       dependencies: [ 'setup' ],
     },

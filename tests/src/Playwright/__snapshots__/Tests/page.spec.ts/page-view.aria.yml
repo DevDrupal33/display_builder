@@ -1,2 +1,3 @@
 - 'heading "label: none" [level=5]'
 - text: I am a test textfield in a slot in a Page Layout!
+- button "Click me"

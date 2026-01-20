@@ -33,14 +33,14 @@ ddev drush -y si standard
 
 Some minimum modules are required to properly use Display Builder with Bootstrap:
 
-* Display Builder
-* Display Builder for entity view
-* Display Builder for page layout
-* UI Patterns
-* UI Patterns Library
-* UI Patterns Field
-* UI Patterns Field Formatters
-* UI Styles
+- Display Builder
+- Display Builder for entity view
+- Display Builder for page layout
+- UI Patterns
+- UI Patterns Library
+- UI Patterns Field
+- UI Patterns Field Formatters
+- UI Styles
 
 Enable from Extend page or with drush:
 
@@ -52,16 +52,16 @@ ddev drush -y en display_builder_entity_view display_builder_page_layout ui_styl
 
 Got to _Administration > Appearance_:
 
-* **Install and set as default** the UI Suite Bootstrap theme.
-* Uninstall Olivero theme
+- **Install and set as default** the UI Suite Bootstrap theme.
+- Uninstall Olivero theme
 
 ### Create your first Page Layout
 
 Go to _Administration > Structure > Page Layouts_
 
-* Add a page Layout
-* Label: Default, Profile: Default
-* Save and click the operation "Build display"
+- Add a page Layout
+- Label: Default, Profile: Default
+- Save and click the operation "Build display"
 
 Once publish, your display will be used on all pages of the front of your site.
 
@@ -69,9 +69,9 @@ Once publish, your display will be used on all pages of the front of your site.
 
 Go to _Administration > Structure > Content types_
 
-* In the Article line, choose the operation "Manage display"
-* Select Display builder Profile as "Default"
-* Save and click "Build the display"
+- In the Article line, choose the operation "Manage display"
+- Select Display builder Profile as "Default"
+- Save and click "Build the display"
 
 Once publish, your display will be used for all Articles.
 

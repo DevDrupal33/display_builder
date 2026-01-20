@@ -1,3 +1,4 @@
 - 'tooltip "label: Bar Foo Click me"':
   - 'heading "label: Bar" [level=5]'
+  - text: ""
   - button "Click me"
