@@ -1,5 +1,6 @@
 {% set builder_id = builder_id|default('display-builder-' ~ random()) %}
 {% set attributes = attributes.setAttribute('id', builder_id).addClass('display-builder') %}
+{% set variant = variant|default('full') %}
 
 <section{{ attributes }}>
   {% set first_drawer_content %}
@@ -14,6 +15,7 @@
     </span>
   {% endset %}
 
+  {% if variant == 'full' %}
   {{ include('display_builder:drawer', {
     id: 'db-first-drawer',
     content: first_drawer_content,
@@ -23,6 +25,7 @@
       class: 'db-background',
     },
   }, with_context: false) }}
+  {% endif %}
 
   {% set second_drawer_content %}
     <div class="shoelace-resize-handle"></div>
@@ -31,6 +34,7 @@
     </span>
   {% endset %}
 
+  {% if variant == 'full' %}
   {{ include('display_builder:drawer', {
     id: 'db-second-drawer',
     label: 'Settings'|t,
@@ -42,6 +46,7 @@
       class: 'db-background',
     },
   }, with_context: false) }}
+  {% endif %}
 
   {% set start %}
     <sl-button-group label="{{ 'Sidebar buttons'|t }}">
@@ -50,12 +55,14 @@
     {{ start_buttons }}
   {% endset %}
 
+  {% if variant == 'full' %}
   {{ include('display_builder:toolbar', {
       sticky: true,
       start: start,
       middle: view_main_tabs,
       end: end_buttons,
     }, with_context: false) }}
+  {% endif %}
 
   <div class="display-builder__main">
     <span id="message-{{ builder_id }}"></span>

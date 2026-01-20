@@ -72,4 +72,19 @@ interface ProfileInterface extends ConfigEntityInterface {
    */
   public function isDebugModeActivated(): bool;
 
+  /**
+   * Build a single island inside a minimal display builder.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   The display builder instance.
+   * @param string $island_id
+   *   The island ID.
+   *
+   * @return array
+   *   A renderable array representing the content of the display builder.
+   *
+   * @see \Drupal\display_builder\DisplayBuilderViewBuilder
+   */
+  public function buildSingleIsland(InstanceInterface $builder, string $island_id): array;
+
 }
