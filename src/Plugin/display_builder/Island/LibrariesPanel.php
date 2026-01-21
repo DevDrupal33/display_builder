@@ -29,7 +29,8 @@ class LibrariesPanel extends IslandPluginBase {
    */
   public static function keyboardShortcuts(): array {
     return [
-      'l' => t('Show the libraries'),
+      'key' => 'l',
+      'help' => t('Show the libraries'),
     ];
   }
 

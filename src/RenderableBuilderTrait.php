@@ -252,6 +252,7 @@ trait RenderableBuilderTrait {
 
     if ($keyboard) {
       $button['#attributes']['data-keyboard-key'] = \key($keyboard);
+      $button['#attributes']['aria-keyshortcuts'] = $button['#attributes']['data-keyboard-key'];
       $button['#attributes']['data-keyboard-help'] = \reset($keyboard) ?? '';
     }
 

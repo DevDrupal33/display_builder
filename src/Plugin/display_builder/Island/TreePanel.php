@@ -44,7 +44,8 @@ class TreePanel extends BuilderPanel {
    */
   public static function keyboardShortcuts(): array {
     return [
-      't' => t('Show the tree'),
+      'key' => 't',
+      'help' => t('Show the tree'),
     ];
   }
 

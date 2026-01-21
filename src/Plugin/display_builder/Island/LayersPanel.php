@@ -52,7 +52,8 @@ class LayersPanel extends BuilderPanel {
    */
   public static function keyboardShortcuts(): array {
     return [
-      'y' => t('Show the layer'),
+      'key' => 'y',
+      'help' => t('Show the layer'),
     ];
   }
 

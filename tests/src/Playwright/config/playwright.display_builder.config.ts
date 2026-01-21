@@ -2,8 +2,6 @@
  * Display Builder tests configuration.
  */
 export default {
-  keyboardTimeout: 400, // Because keyboard.js has a 300 ms highlight of the clicked button.
-
   dbList: 'admin/structure/display-builder/instances',
 
   viewsDbList: 'admin/structure/views/display-builder',

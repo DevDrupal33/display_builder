@@ -47,7 +47,8 @@ class LogsPanel extends IslandPluginBase {
    */
   public static function keyboardShortcuts(): array {
     return [
-      'o' => t('Show the logs'),
+      'key' => 'o',
+      'help' => t('Show the logs'),
     ];
   }
 

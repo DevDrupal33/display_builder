@@ -208,16 +208,16 @@ test(
       await displayBuilder.createDisplayBuilderFromUi(dbName)
     })
 
-    // // Test highlight and fullscreen before any further tests to not conflict with
-    // // highlight or fullscreen switch in the test to make it easier for position
-    // // and error snapshot.
-    // await test.step(`Highlight`, async () => {
-    //   await testToggleFeature(page, '.display-builder--highlight', key.highlight)
-    // })
+    // Test highlight and fullscreen before any further tests to not conflict with
+    // highlight or fullscreen switch in the test to make it easier for position
+    // and error snapshot.
+    await test.step(`Highlight`, async () => {
+      await testToggleFeature(page, '.display-builder--highlight', key.highlight)
+    })
 
-    // await test.step(`Fullscreen`, async () => {
-    //   await testToggleFeature(page, '.display-builder--fullscreen', key.fullscreen)
-    // })
+    await test.step(`Fullscreen`, async () => {
+      await testToggleFeature(page, '.display-builder--fullscreen', key.fullscreen)
+    })
 
     await test.step(`Minimal build instance`, async () => {
       await displayBuilder.dragElementFromLibraryById('Blocks', 'textfield', page.locator('.db-dropzone--root').first())
@@ -232,16 +232,13 @@ test(
       await displayBuilder.closeDialog()
       await expect(builderTextfield).toHaveCount(3)
       await displayBuilder.keyboardShortcut(key.undo)
-      await displayBuilder.htmxReady()
-      await displayBuilder.shoelaceReady()
+
       await expect(builderTextfield).toHaveCount(2)
       await displayBuilder.keyboardShortcut(key.redo)
-      await displayBuilder.htmxReady()
-      await displayBuilder.shoelaceReady()
+
       await expect(builderTextfield).toHaveCount(3)
       await displayBuilder.keyboardShortcut(key.clear)
-      await displayBuilder.htmxReady()
-      await displayBuilder.shoelaceReady()
+
       await expect(builderTextfield).toHaveCount(3)
       await expect(page.locator('[data-island-action="undo"]')).toBeVisible()
       await expect(page.locator('[data-island-action="redo"]')).toBeVisible()
@@ -300,10 +297,8 @@ test(
       const isOn = page.locator(isOnLocator)
 
       await displayBuilder.keyboardShortcut(keyShortcut)
-      await displayBuilder.shoelaceReady()
       await expect(isOn).toBeVisible()
       await displayBuilder.keyboardShortcut(keyShortcut)
-      await displayBuilder.shoelaceReady()
       await expect(isOn).not.toBeVisible()
     }
 

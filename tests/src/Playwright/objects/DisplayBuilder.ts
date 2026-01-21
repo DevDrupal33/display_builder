@@ -363,8 +363,6 @@ export class Displaybuilder {
    */
   async keyboardShortcut(key: string): Promise<void> {
     await this.page.keyboard.press(key)
-    await this.page.waitForTimeout(config.keyboardTimeout)
-    await this.htmxReady()
   }
 
   /**

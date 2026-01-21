@@ -103,7 +103,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
 
     if (!empty($library_islands)) {
       $library_islands = [
-        $this->buildBuilderTabs($builder, $library_islands, TRUE),
+        $this->buildDynamicTabs($builder, $library_islands, TRUE),
         $this->buildPanes($builder, $library_islands, $builder_data),
       ];
     }
@@ -210,7 +210,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     }
 
     if (!empty($view_main_tabs)) {
-      $view_main_tabs = $this->buildBuilderTabs($builder, $view_main_tabs, FALSE);
+      $view_main_tabs = $this->buildDynamicTabs($builder, $view_main_tabs);
     }
 
     $builder_data = $builder->getCurrentState();
@@ -256,7 +256,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         'id' => \sprintf('%s-contextual', $builder->id()),
         'class' => ['db-form'],
       ],
-      'tabs' => $this->buildBuilderTabs($builder, $contextual_islands),
+      'tabs' => $this->buildDynamicTabs($builder, $contextual_islands, FALSE),
       'filter' => $filter,
       'panes' => $this->buildPanes($builder, $contextual_islands, $builder->getCurrentState()),
     ];
@@ -338,8 +338,9 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
       ];
 
       if ($keyboard = $island::keyboardShortcuts()) {
-        $build[$island_id]['#attributes']['data-keyboard-key'] = \key($keyboard);
-        $build[$island_id]['#attributes']['data-keyboard-help'] = \reset($keyboard);
+        $build[$island_id]['#attributes']['data-keyboard-key'] = $keyboard['key'] ?? '';
+        $build[$island_id]['#attributes']['data-keyboard-help'] = $keyboard['help'] ?? '';
+        $build[$island_id]['#attributes']['aria-keyshortcuts'] = $keyboard['key'] ?? '';
       }
     }
 
@@ -354,25 +355,26 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    * @param \Drupal\display_builder\IslandInterface[] $islands
    *   The islands to build tabs for.
    * @param bool $contextual
-   *   (Optional) Whether the tabs are contextual.
+   *   (Optional) Is the tabs contextual? See component for details. Default no.
    *
    * @return array
    *   The tabs render array.
    */
-  private function buildBuilderTabs(InstanceInterface $builder, array $islands, bool $contextual = FALSE): array {
+  private function buildDynamicTabs(InstanceInterface $builder, array $islands, bool $contextual = FALSE): array {
     // Global id is based on last island.
     $id = '';
     $tabs = [];
 
     foreach ($islands as $island) {
       $id = $island_id = $island->getHtmlId((string) $builder->id());
-
       $attributes = [];
 
       if ($keyboard = $island::keyboardShortcuts()) {
-        $attributes['data-keyboard-key'] = \key($keyboard);
-        $attributes['data-keyboard-help'] = \reset($keyboard);
+        $attributes['data-keyboard-key'] = $keyboard['key'] ?? '';
+        $attributes['data-keyboard-help'] = $keyboard['help'] ?? '';
+        $attributes['aria-keyshortcuts'] = $keyboard['key'] ?? '';
       }
+
       $tabs[] = [
         'title' => $island->label(),
         'url' => '#' . $island_id,

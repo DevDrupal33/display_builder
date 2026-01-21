@@ -63,7 +63,8 @@ class BuilderPanel extends IslandPluginBase {
    */
   public static function keyboardShortcuts(): array {
     return [
-      'b' => t('Show the builder'),
+      'key' => 'b',
+      'help' => t('Show the builder'),
     ];
   }
 
