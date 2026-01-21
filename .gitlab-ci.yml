@@ -6,12 +6,16 @@ include:
       - "/includes/include.drupalci.variables.yml"
       - "/includes/include.drupalci.workflows.yml"
 
-# @todo remove when 11.3 is stable in CI.
-composer:
-  variables:
-    DRUPAL_CORE: $CORE_NEXT_MINOR
-
 variables:
+  # Enable contributors to disable PHPMD tests.
+  SKIP_PHPMD: 0
+  # Enable contributors to disable e2e tests.
+  SKIP_E2E_TESTS: 0
+
+  PLAYWRIGHT_DEBUG_LEVEL: info
+  PLAYWRIGHT_TEST_PROJECT: firefox
+  PLAYWRIGHT_TEST_TAG: display_builder_min
+
   # Needed to allow this to run locally.
   # https://project.pages.drupalcode.org/gitlab_templates/info/test-locally/
   DRUPALORG_CI_SERVER_URL: https://git.drupalcode.org
@@ -178,8 +182,8 @@ phpmd:
 ### Playwright tests in ci. ###
 
 # Basic Playwright rules.
-.skip-playwright-rule: &skip-playwright-rule
-  if: '$SKIP_PLAYWRIGHT == "1"'
+.skip-e2e-tests-rule: &skip-e2e-tests-rule
+  if: '$SKIP_E2E_TESTS == "1"'
   when: never
 
 .playwright-tests-exist-rule: &playwright-tests-exist-rule
@@ -190,34 +194,17 @@ phpmd:
     when: on_success
 
 .playwright-base:
+  # @see https://github.com/devdrupal33/display_builder_test
+  image: ghcr.io/devdrupal33/display_builder_test:main
   extends: .test-variables
   stage: test
   services:
     - !reference [.with-database]
-  # @todo have a full tests on all browsers on a release.
-  # parallel: 3
-  # parallel:
-  #   matrix:
-  #     - PROJECT: ['chromium', 'firefox', 'webkit']
-  #       SHARD: ['1/10', '2/10', '3/10', '4/10', '5/10', '6/10', '7/10', '8/10', '9/10', '10/10']
   rules:
-    - *skip-playwright-rule
+    - *skip-e2e-tests-rule
     - *playwright-tests-exist-rule
     - *manual-rule
-  cache:
-    key: cache-$CI_JOB_NAME-$CI_COMMIT_REF_SLUG
-    fallback_keys:
-      - cache-$CI_JOB_NAME-$CI_DEFAULT_BRANCH
-      - cache-$CI_JOB_NAME-default
-    paths:
-      - ${CI_PROJECT_DIR}/$_WEB_ROOT/libraries
-      - ${CI_PROJECT_DIR}/node_modules
-      - ${CI_PROJECT_DIR}/pw-browsers
   variables:
-    # @todo remove when 11.3 is stable in CI.
-    OPT_IN_TEST_CURRENT: 0
-    OPT_IN_TEST_NEXT_MINOR: 1
-    PHP_VERSION: $CORE_PHP_NEXT
     # Standard variables for Playwright. Mostly similar to NightwatchJS tests.
     # This is required for the job to work.
     DRUPAL_TEST_BASE_URL: "${SIMPLETEST_BASE_URL}"
@@ -226,8 +213,8 @@ phpmd:
     DRUPAL_TEST_WEBSERVER_USER: www-data
     # Specific Playwright job rules.
     PLAYWRIGHT_SKIP_TEARDOWN: true
-    PLAYWRIGHT_DEBUG_LEVEL: info
-    PLAYWRIGHT_BROWSERS_PATH: ${CI_PROJECT_DIR}/pw-browsers
+    # From the Docker image
+    PLAYWRIGHT_BROWSERS_PATH: /var/www/pw-browsers
   before_script:
     - !reference [.check-composer-end-code]
     - !reference [.setup-webserver]
@@ -237,6 +224,7 @@ phpmd:
     - !reference [.show-environment-variables]
     - !reference [.show-context]
     # Install local shoelace and htmx sse libraries for tests.
+    - echo -e "\e[0Ksection_start:`date +%s`:lib_install[collapsed=true]\r\e[0KNPM lib install..."
     - if [ ! -f ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/shoelace/node_modules/@shoelace-style/shoelace/cdn/shoelace.js ]; then
         mkdir -p ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/shoelace;
         cd ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/shoelace && npm init -y && npm install @shoelace-style/shoelace;
@@ -247,21 +235,32 @@ phpmd:
         cd ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/htmx-ext-sse && npm init -y && npm install htmx-ext-sse;
         cd ${CI_PROJECT_DIR};
       fi
-    - mkdir -p ./web/sites/simpletest ./web/sites/default/files ./playwright-report ./test-results ./logs
-    - chmod -R 777 ./web/sites/simpletest ./web/sites/default ./web/sites/default/files ./playwright-report ./test-results ./logs
-    # Install playwright and what's needed.
-    - npm install
-    - npx playwright --version
+    - echo -e "\e[0Ksection_end:`date +%s`:lib_install\r\e[0K"
+    # Install playwright and packages, already cached in the image.
     - echo -e "\e[0Ksection_start:`date +%s`:playwright_install[collapsed=true]\r\e[0KPlaywright install..."
-    - PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH} npx playwright install --with-deps
+    - npm install
+    - npx playwright install
     - echo -e "\e[0Ksection_end:`date +%s`:playwright_install\r\e[0K"
   script:
-    # @todo for now running only minimum tests with firefox
-    - PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH} npx playwright test --project=${PLAYWRIGHT_TEST_PROJECT} --grep @${PLAYWRIGHT_TEST_TAG}
+    - npx playwright install --list
+    - npx playwright test --project=${PLAYWRIGHT_TEST_PROJECT} --grep @${PLAYWRIGHT_TEST_TAG}
   after_script:
     - mkdir -p $CI_PROJECT_DIR/logs
     - cp -R /var/log/apache2 $CI_PROJECT_DIR/logs/apache2
     - cp -R /var/log/supervisor $CI_PROJECT_DIR/logs/supervisor
+    - |
+      cat > ${CI_PROJECT_DIR}/test-results/links.json << EOF
+      {
+        "playwright": [
+          {
+            "external_link": {
+              "label": "Playwright test report",
+              "url": "https://${CI_PROJECT_NAMESPACE}.${CI_PAGES_DOMAIN}/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/playwright-report/index.html"
+            }
+          }
+        ]
+      }
+      EOF
   artifacts:
     expose_as: 'Playwright Test Reports'
     when: always
@@ -273,6 +272,7 @@ phpmd:
     reports:
       junit:
         - test-results/playwright.xml
+      annotations: test-results/links.json
 
 playwright (all):
   extends: .playwright-base
@@ -287,5 +287,5 @@ playwright (min):
   extends: .playwright-base
   allow_failure: false
   variables:
-    PLAYWRIGHT_TEST_PROJECT: firefox
+    PLAYWRIGHT_TEST_PROJECT: "*"
     PLAYWRIGHT_TEST_TAG: display_builder_min

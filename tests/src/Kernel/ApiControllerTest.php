@@ -12,6 +12,7 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -21,6 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
  */
 #[CoversClass(ApiController::class)]
 #[Group('display_builder')]
+#[RunTestsInSeparateProcesses]
 final class ApiControllerTest extends KernelTestBase {
 
   /**
@@ -29,6 +31,7 @@ final class ApiControllerTest extends KernelTestBase {
   protected static $modules = [
     'system',
     'user',
+    'path_alias',
     'ui_patterns',
     'ui_styles',
     'ui_skins',
@@ -54,6 +57,7 @@ final class ApiControllerTest extends KernelTestBase {
     parent::setUp();
 
     $this->installEntitySchema('user');
+    $this->installEntitySchema('path_alias');
     $this->installEntitySchema('display_builder_profile');
     $this->installEntitySchema('display_builder_instance');
     $this->installConfig(['system', 'display_builder', 'ui_patterns', 'display_builder_test']);

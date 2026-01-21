@@ -8,6 +8,7 @@ use Drupal\display_builder\Entity\PatternPreset;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the PatternPreset entity.
@@ -16,6 +17,7 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[CoversClass(PatternPreset::class)]
 #[Group('display_builder')]
+#[RunTestsInSeparateProcesses]
 final class PatternPresetTest extends KernelTestBase {
 
   /**

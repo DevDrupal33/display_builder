@@ -10,6 +10,7 @@ use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\HistoryStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the history functionality of the Instance entity.
@@ -18,6 +19,7 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[CoversClass(Instance::class)]
 #[Group('display_builder')]
+#[RunTestsInSeparateProcesses]
 final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
   /**

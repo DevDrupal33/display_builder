@@ -23,17 +23,14 @@ test(
       // Go to the content entity and create the display.
       await page.goto(config.contentTypesAdd)
       await page.getByLabel('Name', { exact: true }).fill(`Test ${testName}`)
-      await page.getByText('Save and manage fields').click()
-      await page.getByRole('link', { name: 'Create a new field' }).click()
-      await expect(page.getByRole('dialog')).toBeVisible()
-      await page.locator('.add-field-container > a').nth(1).click()
-      await expect(page.getByRole('textbox', { name: 'Label' })).toBeVisible()
-      await page.getByRole('textbox', { name: 'Label' }).fill(`Body ${name}`)
-      await page.getByRole('radio', { name: 'Text (formatted, long)' }).click()
-      await page.getByRole('button', { name: 'Continue' }).click()
-      await page.getByRole('button', { name: 'Save' }).click()
-      await expect(page.getByRole('dialog')).toBeHidden()
-      await drupal.expectMessage('Saved')
+      await page.getByText('Save', { exact: true }).click()
+      await drupal.expectMessage(`The content type Test ${testName} has been added.`)
+
+      // Create the format to avoid a config error on field create.
+      await drupal.drush(`config:set -y --input-format=yaml filter.format.none ? "{status: true, format: 'none', name: 'none'}"`)
+      await drupal.drush(
+        `field:create -y node ${name} --field-name=field_test_body_${testName} --field-label="Body" --field-type=text_long --field-widget=text_textarea --is-required=0 --cardinality=1`
+      )
 
       await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
       // Save the fields for copy in the builder.
@@ -158,17 +155,14 @@ test(
       // Go to the content entity and create the display.
       await page.goto(config.contentTypesAdd)
       await page.getByLabel('Name', { exact: true }).fill(`Test ${testName}`)
-      await page.getByText('Save and manage fields').click()
-      await page.getByRole('link', { name: 'Create a new field' }).click()
-      await expect(page.getByRole('dialog')).toBeVisible()
-      await page.locator('.add-field-container > a').nth(1).click()
-      await expect(page.getByRole('textbox', { name: 'Label' })).toBeVisible()
-      await page.getByRole('textbox', { name: 'Label' }).fill(`Body ${name}`)
-      await page.getByRole('radio', { name: 'Text (formatted, long)' }).click()
-      await page.getByRole('button', { name: 'Continue' }).click()
-      await page.getByRole('button', { name: 'Save' }).click()
-      await expect(page.getByRole('dialog')).toBeHidden()
-      await drupal.expectMessage('Saved')
+      await page.getByText('Save', { exact: true }).click()
+      await drupal.expectMessage(`The content type Test ${testName} has been added.`)
+
+      // Create the format to avoid a config error on field create.
+      await drupal.drush(`config:set -y --input-format=yaml filter.format.none ? "{status: true, format: 'none', name: 'none'}"`)
+      await drupal.drush(
+        `field:create -y node ${name} --field-name=field_test_body_${testName} --field-label="Body" --field-type=text_long --field-widget=text_textarea --is-required=0 --cardinality=1`
+      )
 
       await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
       // Save the fields for copy in the builder.

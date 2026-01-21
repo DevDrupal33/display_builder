@@ -8,6 +8,7 @@ use Drupal\display_builder\Entity\Instance;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test some mechanisms $renderable = of the BuilderPanel plugin.
@@ -16,6 +17,7 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[CoversClass('\Drupal\display_builder\Plugin\display_builder\Island\BuilderPanel')]
 #[Group('display_builder')]
+#[RunTestsInSeparateProcesses]
 final class BuilderPanelTest extends KernelTestBase {
 
   /**

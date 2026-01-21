@@ -19,19 +19,24 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   // @todo set retry when tests are stabilized.
-  // retries: process.env.CI ? 2 : 0,
-  retries: 0,
+  retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. @see https://playwright.dev/docs/test-reporters */
-  reporter: [
-    [ 'list', { printSteps: true } ],
-    [ 'html', { host: '0.0.0.0', open: 'never' } ],
-    [ 'junit', { outputFile: 'test-results/playwright.xml' } ],
-    [ './tests/src/Playwright/utilities/reporter.ts', { level: process.env?.PLAYWRIGHT_DEBUG_LEVEL || 'info' } ],
-  ],
+  reporter: process.env.CI
+    ? [
+      ['dot'],
+      ['html', { open: 'never' }],
+      ['junit', { outputFile: 'test-results/playwright.xml' }],
+      ['./tests/src/Playwright/utilities/reporter.ts', { level: process.env?.PLAYWRIGHT_DEBUG_LEVEL || 'info' }],
+    ]
+    : [
+      ['list', { printSteps: true }],
+      ['html'],
+      ['./tests/src/Playwright/utilities/reporter.ts', { level: process.env?.PLAYWRIGHT_DEBUG_LEVEL || 'info' }],
+    ],
   /* https://playwright.dev/docs/test-timeouts */
-  timeout: process.env?.DRUPAL_TEST_SKIP_INSTALL ? 180_000 : 240_000,
+  timeout: process.env?.DRUPAL_TEST_SKIP_INSTALL ? 120_000 : 180_000,
   /* Shared settings for all the projects below. @see https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -54,7 +59,7 @@ export default defineConfig({
     // Default timeout for each Playwright action in milliseconds, defaults to 0 (no timeout).
     // Quicker fail on local tests if skip install.
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-action-timeout
-    actionTimeout: process.env.CI ? 10_000 : process.env.DRUPAL_TEST_SKIP_INSTALL ? 2_000 : 20_000,
+    actionTimeout: process.env.CI ? 10_000 : process.env.DRUPAL_TEST_SKIP_INSTALL ? 4_000 : 20_000,
     /* @see https://playwright.dev/docs/locators#locate-by-test-id */
     testIdAttribute: 'data-test',
   },
@@ -77,7 +82,7 @@ export default defineConfig({
         deviceScaleFactor: 1,
         viewport: { width: 1920, height: 1080 }
       },
-      dependencies: [ 'setup' ],
+      dependencies: ['setup'],
     },
     {
       name: 'firefox',
@@ -86,18 +91,8 @@ export default defineConfig({
         deviceScaleFactor: 1,
         viewport: { width: 1920, height: 1080 },
       },
-      dependencies: [ 'setup' ],
+      dependencies: ['setup'],
     },
-    // Enable on compatible env.
-    // {
-    //   name: 'webkit',
-    //   use: {
-    //     ...devices['Desktop Safari'],
-    //     deviceScaleFactor: 1,
-    //     viewport: { width: 1920, height: 1080 },
-    //   },
-    //   dependencies: [ 'setup' ],
-    // },
   ],
 
   /**

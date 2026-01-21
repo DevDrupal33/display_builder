@@ -10,6 +10,7 @@ use Drupal\Tests\user\Traits\UserCreationTrait;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the ConfigFormBuilder class.
@@ -18,6 +19,7 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[CoversClass(ConfigFormBuilder::class)]
 #[Group('display_builder')]
+#[RunTestsInSeparateProcesses]
 final class ConfigFormBuilderTest extends DisplayBuilderKernelTestBase {
 
   use UserCreationTrait;

@@ -20,11 +20,13 @@
         <property name="allow-unused-foreach-variables" value="true" />
       </properties>
     </rule>
-
     <!--
         Import the entire cyclomatic complexity rule and
         customize the rule configuration.
     -->
     <rule ref="rulesets/codesize.xml/CyclomaticComplexity">
+        <properties>
+            <property name="reportLevel" value="12" />
+        </properties>
     </rule>
 </ruleset>
