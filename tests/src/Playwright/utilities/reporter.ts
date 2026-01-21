@@ -40,7 +40,7 @@ interface ReporterProps {
 class Reporter {
   private logger: ReturnType<typeof createLogger>
 
-  constructor(props: ReporterProps) {
+  constructor (props: ReporterProps) {
     this.logger = createLogger({
       level: props?.level || 'info',
       transports: [ new _transports.Console() ],
@@ -54,27 +54,27 @@ class Reporter {
     globalThis.console.error = this.error.bind(this)
   }
 
-  silly(message: any, ...meta: any[]) {
+  silly (message: any, ...meta: any[]) {
     this.logger.silly(message, ...meta)
   }
 
-  debug(message: any, ...meta: any[]) {
+  debug (message: any, ...meta: any[]) {
     this.logger.debug(message, ...meta)
   }
 
-  info(message: any, ...meta: any[]) {
+  info (message: any, ...meta: any[]) {
     this.logger.info(message, ...meta)
   }
 
-  warn(message: any, ...meta: any[]) {
+  warn (message: any, ...meta: any[]) {
     this.logger.warn(message, ...meta)
   }
 
-  error(message: any, ...meta: any[]) {
+  error (message: any, ...meta: any[]) {
     this.logger.error(message, ...meta)
   }
 
-  onBegin(config: FullConfig, suite: Suite) {
+  onBegin (config: FullConfig, suite: Suite) {
     if (config.projects.length) {
       const baseUrl = config.projects[0].use?.baseURL
       const logLevel = process.env.PLAYWRIGHT_DEBUG_LEVEL || 'debug'
@@ -84,36 +84,36 @@ class Reporter {
     }
   }
 
-  onTestBegin(test: TestCase, result: TestResult) {
+  onTestBegin (test: TestCase, result: TestResult) {
     this.debug(`Start test: ${test.title}`)
   }
 
-  onError(e: { stack: any }) {
+  onError (e: { stack: any }) {
     this.error(e.stack)
   }
 
-  onStepBegin(test: TestCase, status: TestResult, step: TestStep) {
+  onStepBegin (test: TestCase, status: TestResult, step: TestStep) {
     this.debug(` - Step: ${step.title}`)
   }
 
-  onStepEnd() {}
+  onStepEnd () {}
 
-  onTestEnd(test: TestCase, result: TestResult) {
+  onTestEnd (test: TestCase, result: TestResult) {
     this.info(
       'Test %s: %s%s',
       result.status,
       test.title,
-      result.status === 'failed' && result.error ? `\n${result.error.stack}` : ''
+      result.status === 'failed' && result.error ? `\n${result.error.stack}` : '',
     )
   }
 
-  onEnd(result: FullResult) {}
+  onEnd (result: FullResult) {}
 
-  onStdOut(data: any) {
+  onStdOut (data: any) {
     this.silly(data)
   }
 
-  onStdErr(data: any) {
+  onStdErr (data: any) {
     this.silly(data)
   }
 }

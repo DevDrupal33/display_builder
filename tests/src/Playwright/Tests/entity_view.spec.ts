@@ -4,13 +4,13 @@ import * as utils from '../utilities/utils'
 import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
-  await drupal.installModules(['display_builder_entity_view'])
+  await drupal.installModules([ 'display_builder_entity_view' ])
   await drupal.drush('state:set -y display_builder.asset_libraries_local true')
 })
 
 test(
   'Entity view',
-  { tag: ['@display_builder', '@display_builder_entity_view', '@display_builder_min'] },
+  { tag: [ '@display_builder', '@display_builder_entity_view', '@display_builder_min' ] },
   async ({ page, drupal, displayBuilder }) => {
     const testName = utils.createRandomString()
     const name = `test_${testName}`
@@ -27,9 +27,11 @@ test(
       await drupal.expectMessage(`The content type Test ${testName} has been added.`)
 
       // Create the format to avoid a config error on field create.
-      await drupal.drush(`config:set -y --input-format=yaml filter.format.none ? "{status: true, format: 'none', name: 'none'}"`)
       await drupal.drush(
-        `field:create -y node ${name} --field-name=field_test_body_${testName} --field-label="Body" --field-type=text_long --field-widget=text_textarea --is-required=0 --cardinality=1`
+        `config:set -y --input-format=yaml filter.format.none ? "{status: true, format: 'none', name: 'none'}"`,
+      )
+      await drupal.drush(
+        `field:create -y node ${name} --field-name=field_test_body_${testName} --field-label="Body" --field-type=text_long --field-widget=text_textarea --is-required=0 --cardinality=1`,
       )
 
       await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
@@ -74,22 +76,16 @@ test(
       await displayBuilder.closeDialog('second')
 
       // Instance form variant configuration
-      await page
-        .locator(`.db-island-builder [data-test="test_simple"]`)
-        .click({ position: {x: 5, y: 5} }) // Avoid click on the slot textfield.
+      await page.locator(`.db-island-builder [data-test="test_simple"]`).click({ position: { x: 5, y: 5 } }) // Avoid click on the slot textfield.
       await displayBuilder.htmxReady()
 
       // Apply multiple config
       await page.getByRole('button', { name: 'Label' }).click()
-      await page
-        .locator(`input[name='component[props][label][source][value]']`)
-        .fill('I am a test')
+      await page.locator(`input[name='component[props][label][source][value]']`).fill('I am a test')
       await displayBuilder.htmxReady()
 
       await page.getByRole('button', { name: 'Tag' }).click()
-      await page
-        .locator(`input[name='component[props][tag][source][value]']`)
-        .fill('h2')
+      await page.locator(`input[name='component[props][tag][source][value]']`).fill('h2')
       await displayBuilder.htmxReady()
 
       // Click somewhere for htmx submit
@@ -100,18 +96,13 @@ test(
       await page.getByRole('tab', { name: 'Styles', exact: true }).click()
 
       await page.getByRole('button', { name: 'Style category 1' }).click()
-      await page
-        .getByRole('group', { name: 'Test style 1' })
-        .getByLabel('- None -')
-        .click()
+      await page.getByRole('group', { name: 'Test style 1' }).getByLabel('- None -').click()
       const styleOption = page.locator(`input[value="test-style-1"]`)
       await styleOption.click()
       await displayBuilder.htmxReady()
 
       // Apply style extra class.
-      await page
-        .locator(`input[name='styles[wrapper][_ui_styles_extra]']`)
-        .fill('foo bar')
+      await page.locator(`input[name='styles[wrapper][_ui_styles_extra]']`).fill('foo bar')
 
       // Click somewhere for htmx submit
       await page.getByRole('tab', { name: 'Builder' }).click()
@@ -119,7 +110,9 @@ test(
 
       // Ensure styles are applied
       // @todo ensure they are on preview or view
-      await expect(page.locator(`.db-island-builder [data-test="test_simple"]`)).toHaveClass(/test-style-1 foo bar test_simple/)
+      await expect(page.locator(`.db-island-builder [data-test="test_simple"]`)).toHaveClass(
+        /test-style-1 foo bar test_simple/,
+      )
 
       await displayBuilder.closeDialog('both')
       await displayBuilder.publishDisplayBuilder()
@@ -137,12 +130,12 @@ test(
       // await page.goto(config.dbList)
       // await expect(page.locator(`tr.${config.entityPrefix}node__${name}__default`)).toBeVisible()
     })
-  }
+  },
 )
 
 test(
   'Entity view override',
-  { tag: ['@display_builder', '@display_builder_entity_view', '@display_builder_min'] },
+  { tag: [ '@display_builder', '@display_builder_entity_view', '@display_builder_min' ] },
   async ({ page, drupal, displayBuilder }) => {
     const testName = utils.createRandomString()
     const name = `test_${testName}`
@@ -159,9 +152,11 @@ test(
       await drupal.expectMessage(`The content type Test ${testName} has been added.`)
 
       // Create the format to avoid a config error on field create.
-      await drupal.drush(`config:set -y --input-format=yaml filter.format.none ? "{status: true, format: 'none', name: 'none'}"`)
       await drupal.drush(
-        `field:create -y node ${name} --field-name=field_test_body_${testName} --field-label="Body" --field-type=text_long --field-widget=text_textarea --is-required=0 --cardinality=1`
+        `config:set -y --input-format=yaml filter.format.none ? "{status: true, format: 'none', name: 'none'}"`,
+      )
+      await drupal.drush(
+        `field:create -y node ${name} --field-name=field_test_body_${testName} --field-label="Body" --field-type=text_long --field-widget=text_textarea --is-required=0 --cardinality=1`,
       )
 
       await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
@@ -192,7 +187,7 @@ test(
     await test.step(`Create override`, async () => {
       // Create a field ui patterns for sources, hide it and select a profile.
       await drupal.drush(
-        `field:create -y node ${name} --field-name=field_test_sources_${testName} --field-label="UIP Sources" --field-type=ui_patterns_source --field-widget=ui_patterns_source --is-required=0 --cardinality=-1`
+        `field:create -y node ${name} --field-name=field_test_sources_${testName} --field-label="UIP Sources" --field-type=ui_patterns_source --field-widget=ui_patterns_source --is-required=0 --cardinality=-1`,
       )
       await page.goto(config.contentTypesFormDisplay.replace('{content_type}', name))
       await page.getByRole('button', { name: 'Show row weights' }).click()
@@ -215,7 +210,9 @@ test(
       await page.getByRole('link', { name: 'Default display' }).click()
       await displayBuilder.shoelaceReady()
       // Basic common drag component and textfield.
-      await displayBuilder.dragSimpleComponentsWithTextfield('I am a test textfield in a slot in an Entity view override!')
+      await displayBuilder.dragSimpleComponentsWithTextfield(
+        'I am a test textfield in a slot in an Entity view override!',
+      )
 
       // Check result on preview and on view entity page.
       await displayBuilder.closeDialog('both')
@@ -224,5 +221,5 @@ test(
       await page.getByRole('link', { name: 'View' }).click()
       await expect(page.locator('.block-system-main-block')).toMatchAriaSnapshot({ name: 'entity-override.aria.yml' })
     })
-  }
+  },
 )

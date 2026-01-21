@@ -56,7 +56,7 @@ export const execDrush = async (command: string, drupalSiteInstall: DrupalSiteIn
 
   let cmdDrush = `HTTP_USER_AGENT=${drupalSiteInstall.userAgent} ${path.relative(
     rootDir,
-    vendorDir
+    vendorDir,
   )}/bin/drush ${command} -y --uri=${drupalSiteInstall.url}`
   if (process.env.DRUPAL_TEST_DRUSH_PREFIX) {
     cmdDrush = `${process.env.DRUPAL_TEST_DRUSH_PREFIX} drush -y ${command}`

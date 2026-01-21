@@ -4,13 +4,13 @@ import * as utils from '../utilities/utils'
 import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
-  await drupal.installModules(['display_builder_page_layout'])
+  await drupal.installModules([ 'display_builder_page_layout' ])
   await drupal.drush('state:set -y display_builder.asset_libraries_local true')
 })
 
 test(
   'Page Layout',
-  { tag: ['@display_builder', '@display_builder_page_layout', '@display_builder_min'] },
+  { tag: [ '@display_builder', '@display_builder_page_layout', '@display_builder_min' ] },
   async ({ page, drupal, displayBuilder }) => {
     const testName = utils.createRandomString()
     const name = `test_${testName}`
@@ -77,5 +77,5 @@ test(
       // await page.goto(config.dbList)
       // await expect(page.locator(`tr.${config.pagePrefix}${name}`)).toBeVisible()
     })
-  }
+  },
 )

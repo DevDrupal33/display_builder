@@ -13,7 +13,7 @@
  * @returns {string}
  *   The random string.
  */
-export function createRandomString(length: number = 8): string {
+export function createRandomString (length: number = 8): string {
   let result = ''
   const characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
   const charactersLength = characters.length
@@ -31,7 +31,7 @@ export function createRandomString(length: number = 8): string {
  * @param {string} message
  *   The message to log.
  */
-export function debug(message: string): void {
+export function debug (message: string): void {
   const logMap = {
     error: 0,
     warn: 1,
@@ -39,7 +39,7 @@ export function debug(message: string): void {
     http: 3,
     verbose: 4,
     debug: 5,
-    silly: 6
+    silly: 6,
   }
   const level = logMap[process.env?.PLAYWRIGHT_DEBUG_LEVEL || 'info']
   if (level >= 4) {
@@ -53,7 +53,7 @@ export function debug(message: string): void {
  * @param {string} message
  *   The message to log.
  */
-export function info(message: string): void {
+export function info (message: string): void {
   const logMap = {
     error: 0,
     warn: 1,
@@ -61,7 +61,7 @@ export function info(message: string): void {
     http: 3,
     verbose: 4,
     debug: 5,
-    silly: 6
+    silly: 6,
   }
   const level = logMap[process.env?.PLAYWRIGHT_DEBUG_LEVEL || 'info']
   if (level >= 2 && level <= 3) {

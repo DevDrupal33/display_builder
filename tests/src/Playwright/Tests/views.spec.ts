@@ -4,7 +4,7 @@ import * as utils from '../utilities/utils'
 import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
-  await drupal.installModules(['views', 'views_ui', 'display_builder_views', 'display_builder_views_test'])
+  await drupal.installModules([ 'views', 'views_ui', 'display_builder_views', 'display_builder_views_test' ])
   await drupal.drush('state:set -y display_builder.asset_libraries_local true')
   // Disable preview to avoid ajax refresh.
   await drupal.drush('config:set -y views.settings ui.show.preview_information false')
@@ -13,7 +13,7 @@ test.beforeEach('Setup', async ({ drupal }) => {
 
 test(
   'Views',
-  { tag: ['@display_builder', '@display_builder_views', '@display_builder_min'] },
+  { tag: [ '@display_builder', '@display_builder_views', '@display_builder_min' ] },
   async ({ page, drupal, displayBuilder }) => {
     const testName = utils.createRandomString()
     const name = `test_${testName}`
@@ -61,7 +61,7 @@ test(
 
       await page.getByRole('link', { name: 'Mini pager, 10 items' }).click()
 
-      await page.getByRole('spinbutton', { name: 'Items per page' }).fill("1")
+      await page.getByRole('spinbutton', { name: 'Items per page' }).fill('1')
       await page.getByRole('button', { name: 'Apply', exact: true }).click()
 
       await page.getByTitle('Specify whether this display').click()
@@ -201,5 +201,5 @@ test(
       await expect(page.getByRole('heading', { name: `Test ${testName}` })).toBeVisible()
       await expect(page.getByText('I am a test textfield in a views')).not.toBeVisible()
     })
-  }
+  },
 )

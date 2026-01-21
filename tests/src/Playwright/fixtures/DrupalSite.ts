@@ -72,7 +72,7 @@ export const drupalSite = base.extend<DrupalSiteInstall>({
           ? `--db-url "${process.env.DRUPAL_TEST_DB_URL}"`
           : ''
       const stdout = await exec(
-        `php ./core/scripts/test-site.php install ${setupFile} ${installProfile} ${langcodeOption} --base-url ${process.env.DRUPAL_TEST_BASE_URL} ${dbOption} --json`
+        `php ./core/scripts/test-site.php install ${setupFile} ${installProfile} ${langcodeOption} --base-url ${process.env.DRUPAL_TEST_BASE_URL} ${dbOption} --json`,
       )
 
       const installData = JSON.parse(stdout.toString())
@@ -90,7 +90,7 @@ export const drupalSite = base.extend<DrupalSiteInstall>({
             return Promise.resolve('')
           }
           return await exec(
-            `php core/scripts/test-site.php tear-down --no-interaction --db-url ${process.env.DRUPAL_TEST_DB_URL}-${workerInfo.workerIndex} ${installData.db_prefix}`
+            `php core/scripts/test-site.php tear-down --no-interaction --db-url ${process.env.DRUPAL_TEST_DB_URL}-${workerInfo.workerIndex} ${installData.db_prefix}`,
           )
         },
       })

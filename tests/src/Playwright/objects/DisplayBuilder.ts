@@ -298,17 +298,18 @@ export class Displaybuilder {
    * @param {string} textfieldTest - Text for the textfield.
    * @returns {Promise<void>}
    */
-  async dragSimpleComponentsWithTextfield(textfieldTest: string = 'I am a test textfield in a slot!'): Promise<void> {
-    await this.toggleSidebarView()
+  async dragSimpleComponentsWithTextfield(textfieldTest: string = 'I am a textfield!', panel_locator: string|null = '.db-island-builder'): Promise<void> {
+    // await this.toggleSidebarView()
     await this.dragElementFromLibraryById(
       'Components',
       'test_simple',
-      this.page.locator(`.db-island-builder > div.db-dropzone`)
+      this.page.locator(`${panel_locator} > div.db-dropzone`).first()
     )
-    const componentSimpleSlot = this.page.locator(`.db-island-builder .test_simple .slot_test [data-slot-id="slot_1"]`)
+    const componentSimpleSlot = this.page.locator(`${panel_locator} [data-slot-id="slot_1"]`).first()
+
     await this.dragElementFromLibraryById('Blocks', 'textfield', componentSimpleSlot)
     await this.setElementValue(
-      this.page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
+      this.page.locator(`${panel_locator} [data-node-type="textfield"]`).first(),
       textfieldTest,
       [
         {

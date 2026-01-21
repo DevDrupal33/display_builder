@@ -52,6 +52,7 @@ export default defineConfig({
       mode: 'only-on-failure',
       fullPage: true,
     },
+    video: 'retain-on-failure',
     launchOptions: {
       // For --headed test, add some slow time.
       slowMo: 200,
@@ -92,6 +93,15 @@ export default defineConfig({
         viewport: { width: 1920, height: 1080 },
       },
       dependencies: ['setup'],
+    },
+    {
+      name: 'webkit',
+      use: {
+        ...devices['Desktop Safari'],
+        deviceScaleFactor: 1,
+        viewport: { width: 1920, height: 1080 }
+      },
+      dependencies: [ 'setup' ],
     },
   ],
 

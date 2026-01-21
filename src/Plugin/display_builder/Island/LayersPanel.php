@@ -175,6 +175,12 @@ class LayersPanel extends BuilderPanel {
     $build['#attributes']['data-node-title'] = $label['summary'];
     $build['#attributes']['data-slot-position'] = $index;
 
+    // Add data-node-type for easier identification of block types in JS, CSS or
+    // tests.
+    if (isset($data['source_id'])) {
+      $build['#attributes']['data-node-type'] = $data['source_id'];
+    }
+
     return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['summary'], $index);
   }
 

@@ -34,7 +34,7 @@ export class Drupal {
   readonly page: Page
   readonly drupalSite: DrupalSite
 
-  constructor({ page, drupalSite }: { page: Page; drupalSite: DrupalSite }) {
+  constructor ({ page, drupalSite }: { page: Page; drupalSite: DrupalSite }) {
     this.page = page
     this.drupalSite = drupalSite
   }
@@ -42,7 +42,7 @@ export class Drupal {
   /**
    * Sets the cookie which determines which simpletest multisite to use.
    */
-  async setTestCookie(): Promise<void> {
+  async setTestCookie (): Promise<void> {
     const context = this.page.context()
     const simpletestCookie = {
       name: 'SIMPLETEST_USER_AGENT',
@@ -61,7 +61,7 @@ export class Drupal {
   /**
    * Gets drupalSettings from the browser window object.
    */
-  async getDrupalSettings() {
+  async getDrupalSettings () {
     // Wait for the page to finish loading JavaScript
     // cspell:ignore domcontentloaded
     await this.page.waitForLoadState('domcontentloaded')
@@ -73,33 +73,33 @@ export class Drupal {
     })
   }
 
-  hasDrush(): boolean {
+  hasDrush (): boolean {
     return this.drupalSite.hasDrush
   }
 
-  disableDrush(): void {
+  disableDrush (): void {
     this.drupalSite.hasDrush = true
   }
 
-  enableDrush(): void {
+  enableDrush (): void {
     this.drupalSite.hasDrush = false
   }
 
-  setDrush(enabled: boolean): void {
+  setDrush (enabled: boolean): void {
     this.drupalSite.hasDrush = enabled
   }
 
-  async drush(command: string): Promise<string> {
+  async drush (command: string): Promise<string> {
     return await execDrush(command, this.drupalSite)
   }
 
-  async setupTestSite(): Promise<void> {
+  async setupTestSite (): Promise<void> {
     const moduleDir = await getModuleDir()
     await this.enableTestExtensions()
     await this.writeBaseUrl()
   }
 
-  async loginAsAdmin(): Promise<void> {
+  async loginAsAdmin (): Promise<void> {
     // First see if we are already logged in.
     await this.page.goto(`${this.drupalSite.url}/${config.logInUrl}`)
     const title = this.page.locator('h1')
@@ -131,11 +131,11 @@ export class Drupal {
     }
   }
 
-  async login(
+  async login (
     { username, password }: { username: string; password?: string } = {
       username: this.drupalSite.username,
       password: this.drupalSite.password,
-    }
+    },
   ): Promise<void> {
     if (!this.drupalSite.hasDrush && !password) {
       throw new Error('Password is required when drush is not available.')
@@ -153,7 +153,7 @@ export class Drupal {
     await expect(page.locator('h1')).toHaveText(username)
   }
 
-  async logout(): Promise<void> {
+  async logout (): Promise<void> {
     await this.page.goto(`${this.drupalSite.url}/${config.logOutUrl}/confirm`)
     await this.page.getByRole('button', { name: 'Log out' }).click()
     let cookies = await this.page.context().cookies()
@@ -161,7 +161,7 @@ export class Drupal {
     expect(cookies).toHaveLength(0)
   }
 
-  async isLoggedIn(): Promise<boolean> {
+  async isLoggedIn (): Promise<boolean> {
     const userId = await this.getUserId()
     return userId > 0
   }
@@ -169,7 +169,7 @@ export class Drupal {
   /**
    * Gets the uid of the currently logged in user.
    */
-  async getUserId(): Promise<number> {
+  async getUserId (): Promise<number> {
     const drupalSettings = await this.getDrupalSettings()
     if (drupalSettings && drupalSettings.user && drupalSettings.user.uid) {
       return parseInt(drupalSettings.user.uid, 10)
@@ -177,7 +177,7 @@ export class Drupal {
     return 0
   }
 
-  async createRole({ name }: { name: string }): Promise<void> {
+  async createRole ({ name }: { name: string }): Promise<void> {
     if (this.drupalSite.hasDrush) {
       await this.drush(`role:create ${name}`)
     } else {
@@ -190,7 +190,7 @@ export class Drupal {
     }
   }
 
-  async addPermissions({ role, permissions }: { role: string; permissions: string[] }): Promise<void> {
+  async addPermissions ({ role, permissions }: { role: string; permissions: string[] }): Promise<void> {
     if (this.drupalSite.hasDrush) {
       await this.drush(`role:perm:add ${role} '${permissions.join(',')}'`)
     } else {
@@ -199,7 +199,7 @@ export class Drupal {
       for (const permission of permissions) {
         await page
           .locator(
-            `[data-drupal-selector="edit-${this.normalizeAttribute(role)}-${this.normalizeAttribute(permission)}"]`
+            `[data-drupal-selector="edit-${this.normalizeAttribute(role)}-${this.normalizeAttribute(permission)}"]`,
           )
           .check()
       }
@@ -208,7 +208,7 @@ export class Drupal {
     }
   }
 
-  async createUser({
+  async createUser ({
     username,
     password,
     email,
@@ -250,7 +250,7 @@ export class Drupal {
     }
   }
 
-  async createAdminUserLogin(role: string = 'test', permissions: Array<string> = []): Promise<void> {
+  async createAdminUserLogin (role: string = 'test', permissions: Array<string> = []): Promise<void> {
     const user = {
       username: 'test_admin',
       password: 'test_admin',
@@ -264,89 +264,78 @@ export class Drupal {
     await this.login(user)
   }
 
-  async installModules(modules: string[]): Promise<void> {
+  async installModules (modules: string[]): Promise<void> {
     if (this.drupalSite.hasDrush) {
       await this.drush(`pm:enable ${modules.join(' ')}`)
     } else {
-      await this.page.goto(config.modules);
+      await this.page.goto(config.modules)
       for (const module of modules) {
-        await this.page
-          .locator(`input[name="modules[${module}][enable]"]`)
-          .check();
+        await this.page.locator(`input[name="modules[${module}][enable]"]`).check()
       }
-      await this.page.locator('[data-drupal-selector="edit-submit"]').click();
-      if (
-        await this.page
-          .locator('[data-drupal-selector="system-modules-confirm-form"]')
-          .count()
-      ) {
-        await this.page.locator('[data-drupal-selector="edit-submit"]').click();
+      await this.page.locator('[data-drupal-selector="edit-submit"]').click()
+      if (await this.page.locator('[data-drupal-selector="system-modules-confirm-form"]').count()) {
+        await this.page.locator('[data-drupal-selector="edit-submit"]').click()
       }
       for (const module of modules) {
-        const checkbox = this.page.locator(
-          `input[name="modules[${module}][enable]"]`,
-        );
-        expect(checkbox).toBeTruthy();
-        await expect(checkbox).toBeDisabled();
+        const checkbox = this.page.locator(`input[name="modules[${module}][enable]"]`)
+        expect(checkbox).toBeTruthy()
+        await expect(checkbox).toBeDisabled()
       }
     }
   }
 
-  async enableTestExtensions() {
+  async enableTestExtensions () {
     const settingsFile = nodePath.resolve(getRootDir(), `${this.drupalSite.sitePath}/settings.php`)
     fs.chmodSync(settingsFile, 0o775)
     return await exec(`echo '$settings["extension_discovery_scan_tests"] = TRUE;' >> ${settingsFile}`)
   }
 
-  async writeBaseUrl() {
+  async writeBaseUrl () {
     // \Drupal\Core\StreamWrapper\PublicStream::baseUrl needs a base-url set,
     // otherwise it will default to $GLOBALS['base_url']. When a recipe is being
     // run via core/scripts/drupal, that defaults to core/scripts/drupal.
     const settingsFile = nodePath.resolve(getRootDir(), `${this.drupalSite.sitePath}/settings.php`)
     fs.chmodSync(settingsFile, 0o775)
     return await exec(
-      `echo '$settings["file_public_base_url"] = "${this.drupalSite.url}/${this.drupalSite.sitePath}/files";' >> ${settingsFile}`
+      `echo '$settings["file_public_base_url"] = "${this.drupalSite.url}/${this.drupalSite.sitePath}/files";' >> ${settingsFile}`,
     )
   }
 
-  async getSettings() {
+  async getSettings () {
     const value = await this.page.evaluate(() => {
       return window.drupalSettings
     })
     return value
   }
 
-  async ajaxReady(): Promise<void> {
+  async ajaxReady (): Promise<void> {
     await expect(this.page.locator('.ajax-progress, .ajax-progress--throbber, .ajax-progress--message')).toHaveCount(0)
   }
 
-  async expectMessage(text: string): Promise<void> {
-  
+  async expectMessage (text: string): Promise<void> {
     // The status box needs a moment to appear.
     const message = this.page.getByRole('contentinfo', { name: 'Status message' })
     expect(await message.textContent()).toContain(text)
   }
 
-  async clearCache(): Promise<void> {
+  async clearCache (): Promise<void> {
     await this.page.goto(config.performance)
     await this.page.locator('input[data-drupal-selector="edit-clear"]').click()
     await expect(this.page.locator('//*[@data-drupal-messages]')).toContainText('Caches cleared')
   }
 
-  async setPreprocessing({ css, javascript }: { css?: boolean; javascript?: boolean }): Promise<void> {
+  async setPreprocessing ({ css, javascript }: { css?: boolean; javascript?: boolean }): Promise<void> {
     if (this.drupalSite.hasDrush) {
-        if (css === true) {
-          await this.drush(`config:set system.performance css.preprocess 1`)
-        }
-        else {
-          await this.drush(`config:set system.performance css.preprocess 0`)
-        }
-        if (javascript === true) {
-          await this.drush(`config:set system.performance js.preprocess 1`)
-        }
-        else {
-          await this.drush(`config:set system.performance js.preprocess 0`)
-        }
+      if (css === true) {
+        await this.drush(`config:set system.performance css.preprocess 1`)
+      } else {
+        await this.drush(`config:set system.performance css.preprocess 0`)
+      }
+      if (javascript === true) {
+        await this.drush(`config:set system.performance js.preprocess 1`)
+      } else {
+        await this.drush(`config:set system.performance js.preprocess 0`)
+      }
     } else {
       const cssCheckbox =
         'form[data-drupal-selector="system-performance-settings"] [data-drupal-selector="edit-preprocess-css"]'
@@ -403,7 +392,7 @@ export class Drupal {
    * // Input text into the third CKEditor instance (index 2)
    * await inputTextIntoCKEditor(page, 'Hello, third editor!', 2);
    */
-  async inputTextIntoCKEditor(text: string, instanceNumber: number = 0): Promise<void> {
+  async inputTextIntoCKEditor (text: string, instanceNumber: number = 0): Promise<void> {
     // Wait for the text areas to appear.
     await this.page.waitForSelector('.ck-editor__editable')
 
@@ -446,7 +435,7 @@ export class Drupal {
       {
         inputText: text,
         editorIndex: instanceNumber,
-      }
+      },
     )
   }
 
@@ -461,7 +450,7 @@ export class Drupal {
    * @throws {Error} Throws an error if the screenshot cannot be taken or saved.
    * @returns {Promise<void>}
    */
-  async screenshot(fileName: string, fullPage: boolean = true): Promise<void> {
+  async screenshot (fileName: string, fullPage: boolean = true): Promise<void> {
     let path: string
     if (process.env.CI && process.env.CI === 'true') {
       path = `${getRootDir()}/../test-results/${fileName}`
@@ -471,7 +460,7 @@ export class Drupal {
     await this.page.screenshot({ path, fullPage })
   }
 
-  normalizeAttribute(attribute: string): string {
+  normalizeAttribute (attribute: string): string {
     return attribute.replaceAll(' ', '-').replaceAll('_', '-')
   }
 }
