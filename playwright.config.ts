@@ -94,15 +94,15 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
-    {
-      name: 'webkit',
-      use: {
-        ...devices['Desktop Safari'],
-        deviceScaleFactor: 1,
-        viewport: { width: 1920, height: 1080 }
-      },
-      dependencies: [ 'setup' ],
-    },
+    // {
+    //   name: 'webkit',
+    //   use: {
+    //     ...devices['Desktop Safari'],
+    //     deviceScaleFactor: 1,
+    //     viewport: { width: 1920, height: 1080 }
+    //   },
+    //   dependencies: [ 'setup' ],
+    // },
   ],
 
   /**
