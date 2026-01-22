@@ -1,11 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
 import dotenv from 'dotenv'
 import path from 'path'
+
 dotenv.config({ path: path.resolve(__dirname, '.env'), quiet: true })
 
 /**
@@ -94,31 +91,15 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
-    // {
-    //   name: 'webkit',
-    //   use: {
-    //     ...devices['Desktop Safari'],
-    //     deviceScaleFactor: 1,
-    //     viewport: { width: 1920, height: 1080 }
-    //   },
-    //   dependencies: [ 'setup' ],
-    // },
+    // Not working on Fedora and fail on ci for now, only for local Docker or Ubuntu.
+    {
+      name: 'webkit',
+      use: {
+        ...devices['Desktop Safari'],
+        deviceScaleFactor: 1,
+        viewport: { width: 1920, height: 1080 }
+      },
+      dependencies: [ 'setup' ],
+    },
   ],
-
-  /**
-   * Run your local dev server before starting the tests.
-   *
-   * Assume the module is in web/modules/contrib/_my_module_ so the Drupal root
-   * is 3 levels higher.
-   *
-   * Comment for a local running server launched manually.
-   */
-  // webServer: {
-  //   name: 'PHP',
-  //   command: 'php -q -S localhost:8000 -t ../../../',
-  //   url: 'http://localhost:8000',
-  //   reuseExistingServer: !process.env.CI,
-  //   stdout: 'ignore',
-  //   stderr: 'pipe',
-  // },
 })

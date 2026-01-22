@@ -17,7 +17,7 @@ export class Displaybuilder {
    * @returns {Promise<void>}
    */
   async toggleSidebarView(targetId: string = 'library'): Promise<void> {
-    const sidebarFirst = this.page.locator('#db-first-drawer')
+    const sidebarFirst = this.page.locator(config.startDrawerID)
     const toolbarButton = this.page.locator(`[data-target="${targetId}"]`)
 
     if (await sidebarFirst.isVisible()) {
@@ -36,7 +36,7 @@ export class Displaybuilder {
    * @returns {Promise<void>}
    */
   async openLibrariesTab(name: string = 'Blocks'): Promise<void> {
-    const sidebarFirst = this.page.locator('#db-first-drawer')
+    const sidebarFirst = this.page.locator(config.startDrawerID)
     if (await sidebarFirst.isHidden()) {
       await this.toggleSidebarView()
     }
@@ -47,11 +47,13 @@ export class Displaybuilder {
   }
 
   /**
-   * Move a component in the builder, library must be open.
+   * Drag an element from the library into a target by the element's id.
    *
    * @async
-   * @param {Locator} element - The element to drag to the target.
-   * @param {Locator} target - The target where the component must be dragged.
+   * @param {string} type - The library tab/category to open (defaults to "Components").
+   * @param {string} id - The identifier used to find the library element via its `hx-vals` attribute.
+   * @param {Locator} target - Playwright Locator representing the drop target.
+   * @param {any} targetPosition - Optional offset within the target to drop to (e.g. `{ x: 20, y: 10 }`).
    * @returns {Promise<void>}
    */
   async dragElementFromLibraryById(

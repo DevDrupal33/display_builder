@@ -23,4 +23,7 @@ export default {
 
   keyFullscreen: 'Shift+F',
   keyHighlight: 'Shift+H',
+
+  startDrawerID: '#db-first-drawer',
+  endDrawerID: '#db-second-drawer',
 }

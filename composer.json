@@ -2,11 +2,28 @@
     "name": "drupal/display_builder",
     "description": "Display Builder",
     "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Jean Valverde (mogtofu33)",
+            "homepage": "https://www.drupal.org/u/mogtofu33",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Pierre Dureau (pdureau)",
+            "homepage": "https://www.drupal.org/u/pdureau",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Mikael Meulle (just_like_good_vibes)",
+            "homepage": "https://www.drupal.org/u/just_like_good_vibes",
+            "role": "Maintainer"
+        }
+    ],
     "type": "drupal-module",
     "require": {
         "php": ">=8.3",
         "drupal/core": "^11.3",
-        "drupal/ui_patterns": "^2.0.14",
+        "drupal/ui_patterns": "2.0.x-dev",
         "drupal/ui_styles": "^1.19"
     },
     "require-dev": {
@@ -22,7 +39,7 @@
     "extra": {
         "patches": {
             "drupal/core": {
-                "https://www.drupal.org/project/drupal/issues/3557014 PageDisplayVariant does not transmit cache metadata": "https://git.drupalcode.org/issue/drupal-3557014/-/commit/3b38aa264d9101548946a06c27dc23997de55fb4.patch"
+                "https://www.drupal.org/i/3557014 PageDisplayVariant does not transmit cache metadata": "https://git.drupalcode.org/issue/drupal-3557014/-/commit/3b38aa264d9101548946a06c27dc23997de55fb4.patch"
             }
         }
     },

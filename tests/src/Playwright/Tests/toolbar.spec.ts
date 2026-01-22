@@ -140,7 +140,7 @@ test(
 
     await test.step(`Libraries`, async () => {
       const btn = page.getByRole('button', { name: 'Libraries' })
-      await testToggleFeature(page, btn, '#db-first-drawer')
+      await testToggleFeature(page, btn, config.startDrawerID)
     })
 
     await test.step(`Tree`, async () => {
@@ -273,7 +273,7 @@ test(
     })
 
     await test.step(`Libraries`, async () => {
-      await testToggleFeature(page, '#db-first-drawer', key.libraries)
+      await testToggleFeature(page, config.startDrawerID, key.libraries)
     })
 
     await test.step(`Tree`, async () => {

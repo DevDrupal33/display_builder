@@ -1,92 +1,49 @@
-# Tests e2e
+# Playwright end-to-end tests (E2E)
 
-End-to-end (E2E) tests in Drupal with [Playwright](https://playwright.dev/docs/intro).  
-Playwright enables reliable end-to-end testing for modern web apps.
+End-to-end tests for this module use [Playwright](https://playwright.dev). Tests are under `tests/src/Playwright`.
 
-Tests are located in `tests/src/Playwright/Tests`.
+This document provides a short Quickstart, examples for local/Docker usage and troubleshooting tips.
 
-## Requirements
+- [Prerequisites](#prerequisites)
+- [Display Builder tests group](#display-builder-tests-group)
+- [Quickstart — run a single test locally](#quickstart--run-a-single-test-locally)
+- [Docker: remote Playwright server](#docker-remote-playwright-server)
+- [Reporting \& debugging](#reporting--debugging)
+- [Troubleshooting (common issues)](#troubleshooting-common-issues)
+- [Where to look in this repo](#where-to-look-in-this-repo)
+- [Fast debug checklist](#fast-debug-checklist)
 
-You **MUST** install `Drush` and `drupal/core-dev` in your project:
+## Prerequisites
 
-```sh
+- Composer dev dependencies (run from repository root):
+
+```bash
 composer require drush/drush --dev
 composer require drupal/core-dev:^11.3 -W --dev
 ```
 
-## Quick Start
+- Node and package manager (node >= 20, npm or Yarn). From the module folder install JS deps:
 
-If your system match [requirements](https://playwright.dev/docs/intro#system-requirements),
-you can install Playwright run from this module folder:
-
-```shell
+```bash
+cd web/modules/custom/display_builder
 npm install
+# or: yarn install
+```
+
+- Install Playwright browsers (recommended with system deps):
+
+```bash
 npx playwright install --with-deps
 ```
 
-Copy `.env.dist` to `.env`. No need to change anything.
+See the [Playwright installation docs](https://playwright.dev/docs/installation) for more details.
 
-Uncomment `webServer` in `playwright.config.ts`, then run:
+Notes:
 
-```shell
-npm run test
-```
-
-### Run Example Test Locally with Docker
-
-If you don't want or cannot install Playwright locally, you can run Playwright
-server in a Docker container.
-
-See [Playwright Docker documentation](https://playwright.dev/docs/docker#remote-connection)
-for more details.
-
-Pull and run Playwright server from this folder:
+- On some Linux distributions (e.g. [Fedora support](https://github.com/microsoft/playwright/issues/29559)) you may need extra system packages before installing browsers. See the [Playwright installation docs](https://playwright.dev/docs/installation#system-dependencies) for distro-specific packages. As a workaround on **Fedora**, install the following packages:
 
 ```shell
-docker pull mcr.microsoft.com/playwright:v1.57.0-noble
-docker run --add-host=hostmachine:host-gateway \
-    --rm --init -it \
-    -p 3000:3000 \
-    --workdir /home/pwuser \
-    --user pwuser \
-    mcr.microsoft.com/playwright:v1.57.0-noble /bin/sh -c "npx -y playwright@1.57.0 run-server --port 3000 --host 0.0.0.0"
-```
-
-Launch a webserver on Drupal **root**, for example:
-
-```shell
-php -S 0.0.0.0:8000
-```
-
-Copy `.env.dist` to `.env`, adapt values for first case:
-
-```shell
-DRUPAL_TEST_BASE_URL='http://localhost:8000/web'
-```
-
-Run the test from this folder:
-
-```shell
-PW_TEST_CONNECT_WS_ENDPOINT=ws://127.0.0.1:3000/ npx playwright test --project=firefox
-```
-
-Adapt the other variable for an installed Drupal with a database.
-
-### Run Tests Locally
-
-#### Local Installation
-
-If your system meets the [requirements](https://playwright.dev/docs/intro#system-requirements), you can install Playwright from this folder:
-
-```shell
-npm install
-npx playwright install --with-deps
-```
-
-**Fedora** is not officially supported by Playwright, but it can work. See this [issue](https://github.com/microsoft/playwright/issues/29559). As a workaround, install the following packages:
-
-```shell
-sudo dnf install -y \
+dnf install \
     libicu \
     libjpeg-turbo \
     libwebp \
@@ -95,39 +52,65 @@ sudo dnf install -y \
     libffi
 ```
 
-Then run the install without dependencies:
+Playwright will throw an error on install but tests will work except for Webkit.
 
-```shell
-npm install
-npx playwright install
+## Display Builder tests group
+
+We ship tests without needs of **display_builder_dev_tools** module with tag `@display_builder_min`.  
+These tests are used as our default ci tests.
+
+Tests with dependency on **display_builder_dev_tools** are tagged `@display_builder` and are to be run locally.
+
+## Quickstart — run a single test locally
+
+- Copy env and adjust if needed:
+
+```bash
+cd web/modules/custom/display_builder
+cp .env.dist .env
 ```
 
-Even if you see some **error** messages, tests should now work on **Fedora**.
+- Run the minimal tests group:
 
-#### Local Tests
-
-Tests are designed to run in **GitLab CI**, but they can also run locally with a running Drupal instance, with or without Drupal installed.
-
-Without a local server, with Drupal and Drush installed, you can quickly launch the example test by running:
-
-```shell
-npm run test
+```bash
+npx playwright test -c playwright.local.config.ts --project=firefox -g '@display_builder_min'
+# or use npm script
+npm run test-min
 ```
 
-For local tests with **INSTALLED** Drupal you **MUST** enable `extension_discovery_scan_tests` in your **settings.php**.
+If you need to run a single test file or grep-style selection:
+
+```bash
+npx playwright test <the_test_file_without_extension_spec_ts> -c playwright.local.config.ts --project=firefox
+npx playwright test -c playwright.local.config.ts --project=firefox -g 'Page Layout'
+```
+
+Use `--headed` or `--ui` while debugging:
+
+```bash
+npx playwright test -c playwright.local.config.ts --project=firefox -g 'Page Layout' --headed
+npx playwright test -c playwright.local.config.ts --project=firefox -g 'Page Layout' --ui
+```
+
+More information on [Playwright running and debugging tests](https://playwright.dev/docs/running-tests).
+
+Important env/settings notes:
+
+- `DRUPAL_TEST_BASE_URL` must point to your site base, e.g. `http://localhost:8000/web`. A Webserver will launch automatically with `playwright.local.config.ts`.
+- `DRUPAL_TEST_SKIP_INSTALL` allow a more specific behavior by having an installed Drupal with a running stack.
+- For tests run against an installed Drupal, enable in `settings.php`:
 
 ```php
 $settings['extension_discovery_scan_tests'] = TRUE;
 ```
 
-Modules that **MUST** be enabled for tests:
-
-- layout_builder
-- display_builder_test
-- display_builder_ui
-- display_builder_entity_view
-- display_builder_page_layout
-- display_builder_dev_tools (external module, must be installed separately)
+- Modules that **MUST** be enabled for tests:
+  - layout_builder
+  - display_builder_test
+  - display_builder_ui
+  - display_builder_entity_view
+  - display_builder_page_layout
+  - display_builder_dev_tools (for `@display_builder` tests)
 
 Theme **MUST** be `display_builder_theme_test` by default, unless test is
 specific for a theme.
@@ -136,36 +119,72 @@ Copy and adapt the `.env.dist` file as `.env` to set your environment.
 
 There are different cases for running tests with a full installation or on a running Drupal instance to avoid the install step.
 
-_Note_: WebKit tests cannot be run in a non-MacOS environment.
+## Docker: remote Playwright server
 
-Commands to run the tests with Firefox only:
+When you cannot install native browsers, run a Playwright server in Docker and connect to it. See the [Playwright remote browsers docs](https://playwright.dev/docs/remote-browsers).
 
-```shell
-npm run test
+- Run Playwright server container:
+
+```bash
+docker pull mcr.microsoft.com/playwright:v1.57.0-noble
+docker run --add-host=hostmachine:host-gateway --rm -it -p 3000:3000 \
+    --workdir /home/pwuser --user pwuser \
+    mcr.microsoft.com/playwright:v1.57.0-noble \
+    /bin/sh -c "npx -y playwright@1.57.0 run-server --port 3000 --host 0.0.0.0"
 ```
 
-Or test by tag with Firefox only:
+- Run Webserver from Drupal root:
 
-```shell
-npx playwright test --project=firefox --grep "@display_builder_min"
+```bash
+php -S 0.0.0.0:8000 -t web/
 ```
 
-Or a specific test:
+- Launch tests pointing to the remote WS endpoint:
 
-```shell
-npx playwright test --project=firefox -g 'Page Layout'
+```bash
+PW_TEST_CONNECT_WS_ENDPOINT=ws://127.0.0.1:3000/ \
+DRUPAL_TEST_BASE_URL='http://localhost:8000' \
+    npx playwright test --project=firefox -g '@display_builder_min'
 ```
 
-To see what's happening during a running test:
+Or check our commands in npm script:
 
-```shell
-npx playwright test --project=firefox -g 'Page Layout' --headed
+```bash
+# In one terminal, launch PHP server
+npm run serve-php
+# In an other terminal, launch Playwright server
+npm run serve
+# In an other terminal, launch the tests
+npm run test-docker
 ```
 
-Or run the test step by step:
+Tips:
 
-```shell
-npx playwright test --project=firefox -g 'Page Layout' --ui
-```
+- Ensure ports and host mappings allow the test runner to reach the Docker container.
+- If you use `--add-host=hostmachine:host-gateway` you may need to use that hostname in the container to reach the host.
 
-More information: [Playwright running and debugging tests](https://playwright.dev/docs/running-tests).
+## Reporting & debugging
+
+- The config already collects traces/screenshots/videos on failures per `playwright.config.ts`.
+- To open the HTML report locally after a run, open `web/modules/custom/display_builder/playwright-report/index.html`.
+- To collect a trace for a failing test, re-run with `--trace on` or rely on `trace: 'on-first-retry'` from the config. View traces with the [Playwright trace viewer](https://playwright.dev/docs/trace-viewer).
+
+## Troubleshooting (common issues)
+
+- Playwright browser install fails: install system dependencies for your distro or use the Docker image.
+- WebKit tests: WebKit is unreliable or unsupported on many Linux CI images — skip or use Chromium/Firefox in CI.
+- Docker WS connection: ensure `PW_TEST_CONNECT_WS_ENDPOINT` points to the container and firewall rules allow the connection.
+- Failing Drupal tests: verify required modules are enabled (layout_builder and display_builder test modules), the test theme is active (`display_builder_theme_test`), and `extension_discovery_scan_tests` is enabled when running against an installed site.
+- Timeouts: `DRUPAL_TEST_SKIP_INSTALL` toggles shorter timeouts in `playwright.config.ts` — unset it for full install flows.
+
+## Where to look in this repo
+
+- `package.json` for test scripts: [web/modules/custom/display_builder/package.json](web/modules/custom/display_builder/package.json)
+- Local Playwright config: [web/modules/custom/display_builder/playwright.local.config.ts](web/modules/custom/display_builder/playwright.local.config.ts)
+- Main Playwright config: [web/modules/custom/display_builder/playwright.config.ts](web/modules/custom/display_builder/playwright.config.ts)
+
+## Fast debug checklist
+
+- Run a single failing spec with `--headed` and `--ui`.
+- Re-run with `--trace` or open the trace in the [Playwright trace viewer](https://playwright.dev/docs/trace-viewer).
+- Check `playwright-report` for screenshots/videos.

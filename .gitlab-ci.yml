@@ -7,19 +7,21 @@ include:
       - "/includes/include.drupalci.workflows.yml"
 
 variables:
-  # Enable contributors to disable PHPMD tests.
-  SKIP_PHPMD: 0
-  # Enable contributors to disable e2e tests.
-  SKIP_E2E_TESTS: 0
-
-  PLAYWRIGHT_DEBUG_LEVEL: info
-  PLAYWRIGHT_TEST_PROJECT: firefox
-  PLAYWRIGHT_TEST_TAG: display_builder_min
-
-  # Needed to allow this to run locally.
-  # https://project.pages.drupalcode.org/gitlab_templates/info/test-locally/
-  DRUPALORG_CI_SERVER_URL: https://git.drupalcode.org
-  PHPUNIT_FAIL_ON_PHPUNIT_DEPRECATION: 0
+  SKIP_PHPMD:
+    value: '0'
+    description: 'Set to 1 to skip the PHPMD CI job'
+  SKIP_E2E_TESTS:
+    value: '0'
+    description: 'Set to 1 to skip the E2E tests CI job'
+  PLAYWRIGHT_DEBUG_LEVEL:
+    value: 'info'
+    description: 'E2E tests verbosity level. Can be: error, warn, info, http, verbose, debug, silly.'
+  PLAYWRIGHT_TEST_PROJECT:
+    value: 'firefox'
+    description: 'Set to a comma-separated list of project.'
+  PLAYWRIGHT_TEST_TAG:
+    value: 'display_builder_min'
+    description: "The tag to use for E2E tests. Defaults to 'display_builder_min'."
 
 .manual-rule: &manual-rule
   - when: manual
@@ -243,7 +245,12 @@ phpmd:
     - echo -e "\e[0Ksection_end:`date +%s`:playwright_install\r\e[0K"
   script:
     - npx playwright install --list
-    - npx playwright test --project=${PLAYWRIGHT_TEST_PROJECT} --grep @${PLAYWRIGHT_TEST_TAG}
+    - |
+      _PROJECT_FLAGS=""
+      for p in $(echo "${PLAYWRIGHT_TEST_PROJECT}" | tr ',' ' '); do
+        _PROJECT_FLAGS="${_PROJECT_FLAGS} --project ${p}"
+      done
+      npx playwright test ${_PROJECT_FLAGS} --grep @${PLAYWRIGHT_TEST_TAG}
   after_script:
     - mkdir -p $CI_PROJECT_DIR/logs
     - cp -R /var/log/apache2 $CI_PROJECT_DIR/logs/apache2
@@ -287,5 +294,5 @@ playwright (min):
   extends: .playwright-base
   allow_failure: false
   variables:
-    PLAYWRIGHT_TEST_PROJECT: "*"
+    PLAYWRIGHT_TEST_PROJECT: firefox, chromium
     PLAYWRIGHT_TEST_TAG: display_builder_min

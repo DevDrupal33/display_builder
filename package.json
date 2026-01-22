@@ -10,16 +10,16 @@
     "url": "git@git.drupal.org:project/display_builder.git"
   },
   "scripts": {
-    "test": "npx playwright test --project=firefox --fully-parallel --grep @display_builder",
-    "test-min": "npx playwright test --project=firefox --fully-parallel --grep @display_builder_min",
-    "test-dev": "npx playwright test --project=firefox --fully-parallel --grep @display_builder_dev_tools",
-    "test-ui": "npx playwright test --project=firefox --ui",
-    "test-debug": "npx playwright test --debug",
+    "serve": "docker run --add-host=hostmachine:host-gateway --rm -it -p 3000:3000 --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.57.0-noble /bin/sh -c 'npx -y playwright@1.57.0 run-server --port 3000 --host 0.0.0.0'",
+    "serve-php": "php -S 0.0.0.0:8000 -t ../../../",
+    "test-docker": "PW_TEST_CONNECT_WS_ENDPOINT=ws://127.0.0.1:3000/ npx playwright test --project firefox -g @display_builder",
+    "test": "npx playwright test --config playwright.local.config.ts --project firefox -g @display_builder",
+    "test-min": "npx playwright test --config playwright.local.config.ts --project firefox -g @display_builder_min",
     "test-clean": "rm -rf playwright-report; rm -rf test-results;"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
-    "@types/node": "^24.10.6",
+    "@types/node": "^24.10.9",
     "dotenv": "^17.2.3",
     "winston": "^3.19.0"
   },
