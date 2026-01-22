@@ -6,9 +6,9 @@ This document provides a short Quickstart, examples for local/Docker usage and t
 
 - [Prerequisites](#prerequisites)
 - [Display Builder tests group](#display-builder-tests-group)
-- [Quickstart — run a single test locally](#quickstart--run-a-single-test-locally)
+- [Quickstart](#quickstart)
 - [Docker: remote Playwright server](#docker-remote-playwright-server)
-- [Reporting \& debugging](#reporting--debugging)
+- [Reporting and debugging](#reporting-and-debugging)
 - [Troubleshooting (common issues)](#troubleshooting-common-issues)
 - [Where to look in this repo](#where-to-look-in-this-repo)
 - [Fast debug checklist](#fast-debug-checklist)
@@ -61,7 +61,7 @@ These tests are used as our default ci tests.
 
 Tests with dependency on **display_builder_dev_tools** are tagged `@display_builder` and are to be run locally.
 
-## Quickstart — run a single test locally
+## Quickstart
 
 - Copy env and adjust if needed:
 
@@ -163,7 +163,7 @@ Tips:
 - Ensure ports and host mappings allow the test runner to reach the Docker container.
 - If you use `--add-host=hostmachine:host-gateway` you may need to use that hostname in the container to reach the host.
 
-## Reporting & debugging
+## Reporting and debugging
 
 - The config already collects traces/screenshots/videos on failures per `playwright.config.ts`.
 - To open the HTML report locally after a run, open `web/modules/custom/display_builder/playwright-report/index.html`.
@@ -179,9 +179,9 @@ Tips:
 
 ## Where to look in this repo
 
-- `package.json` for test scripts: [web/modules/custom/display_builder/package.json](web/modules/custom/display_builder/package.json)
-- Local Playwright config: [web/modules/custom/display_builder/playwright.local.config.ts](web/modules/custom/display_builder/playwright.local.config.ts)
-- Main Playwright config: [web/modules/custom/display_builder/playwright.config.ts](web/modules/custom/display_builder/playwright.config.ts)
+- `package.json` for test scripts
+- Local Playwright config: `playwright.local.config.ts`
+- Main Playwright config: `playwright.config.ts`
 
 ## Fast debug checklist
 

@@ -42,7 +42,7 @@ You need `ui_patterns_ui` module enabled to have access to `/admin/structure/dis
 
 ![Presets management](images/presets-mgmt.webp)
 
-> 🚧 2025-07-01: Group is not used in `Patterns Library` panel yet. [#3534217](https://www.drupal.org/project/display_builder/issues/3534217)
+> 🚧 2025-07-01: Group is not used in `Patterns Library` panel yet. [#3534217](https://www.drupal.org/i/3534217)
 
 ## Under the hood
 

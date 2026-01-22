@@ -80,4 +80,4 @@ This is doable with Display Builder by creating different Display builder profil
 
 Layout Builder Lock allows administrators to lock sections of a default layout so users can't perform certain actions when overriding the layout for an individual entity.
 
-This feature is planned for [#3551232](www.drupal.org/project/display_builder/issues/3551232)
+This feature is planned for [#3551232](https://www.drupal.org/i/3551232)

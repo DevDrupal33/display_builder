@@ -24,9 +24,9 @@ When an Display Builder override is initialized, there are 4 possible sources of
 - Field settings default value: the first, not because we want but because it seems Field API is forcing it. It may be the opportunity to challenge that.
 - Existing Layout Builder override (only for default display): priority because we keep existing content
 - Display Builder entity view display configuration: the most usual and expected situation. the scope of this ticket
-- Existing Layout builder configuration (if we do [#3540048: Allow override of displays not build with display builder](https://www.drupal.org/project/display_builder/issues/3540048))
+- Existing Layout builder configuration (if we do [#3540048: Allow override of displays not build with display builder](https://www.drupal.org/i/3540048))
 
-> 🚧 2025-08-26: Not ready yet See: [#3542859](https://www.drupal.org/project/display_builder/issues/3542859)
+> 🚧 2025-08-26: Not ready yet See: [#3542859](https://www.drupal.org/i/3542859)
 
 ## Migration process
 
@@ -39,7 +39,7 @@ Layout builder sections:
 | SDC component (UI Patterns) | ✅ SDC component                                                                                |
 | Other layouts               | ❌ No proper conversion, we extract the blocks and put them as a flat list where the layout is. |
 
-> 🚧 2025-11-11: We may add layout plugin support. See: [#3531521](https://www.drupal.org/project/display_builder/issues/3531521)
+> 🚧 2025-11-11: We may add layout plugin support. See: [#3531521](https://www.drupal.org/i/3531521)
 
 | Section's other data | Migrated as              |
 | -------------------- | ------------------------ |
@@ -68,6 +68,6 @@ So, the modules adding third-party settings and executing those hooks will still
 Examples of such modules:
 
 - [Fences](https://www.drupal.org/project/fences)
-- [Field Formatter Range](www.drupal.org/project/field_formatter_range)
+- [Field Formatter Range](https://www.drupal.org/project/field_formatter_range)
 
-> 🚧 2025-08-26: This may change. See: [#3534619](https://www.drupal.org/project/display_builder/issues/3534619)
+> 🚧 2025-08-26: This may change. See: [#3534619](https://www.drupal.org/i/3534619)

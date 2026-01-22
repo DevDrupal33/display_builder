@@ -43,9 +43,9 @@ View Title source is also available for string prop:
 
 ![Views title](images/views-title.webp)
 
-> 🚧 2025-08-26: Previews are not working yet. See [#3542796](https://www.drupal.org/project/display_builder/issues/3542796)
+> 🚧 2025-08-26: Previews are not working yet. See [#3542796](https://www.drupal.org/i/3542796)
 
-> 🚧 2025-08-26: We are not able to configure the sources directly from Display Builder yet. See [#3533043](https://www.drupal.org/project/display_builder/issues/3533043)
+> 🚧 2025-08-26: We are not able to configure the sources directly from Display Builder yet. See [#3533043](https://www.drupal.org/i/3533043)
 
 ## Under the hood
 

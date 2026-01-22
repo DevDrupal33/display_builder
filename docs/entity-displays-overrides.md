@@ -22,7 +22,7 @@ It is better, but not mandatory, to chose unlimited number of value in field sto
 
 ![field storage](images/field-storage.webp)
 
-> 🚧 2025-11-05: Field cardinality has an impact on content storage but it is not visible yet on Display Builder UI. See [#3544026](https://www.drupal.org/project/display_builder/issues/3544026)
+> 🚧 2025-11-05: Field cardinality has an impact on content storage but it is not visible yet on Display Builder UI. See [#3544026](https://www.drupal.org/i/3544026)
 
 Most of the time, you will want to remove the field from the content form:
 

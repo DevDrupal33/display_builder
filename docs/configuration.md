@@ -52,7 +52,7 @@ View panels have an extra feature, they can be moved between 2 different regions
 
 ![Islands configuration](images/config-2.webp)
 
-> 🚧 2025-11-05: This mechanism may be made generic. See [#3555920](https://www.drupal.org/project/display_builder/issues/3555920)
+> 🚧 2025-11-05: This mechanism may be made generic. See [#3555920](https://www.drupal.org/i/3555920)
 
 ## Access & permissions
 
