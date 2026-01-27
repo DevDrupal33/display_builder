@@ -27,6 +27,9 @@ $config->setFinder($finder);
 $rules = [];
 $rules = $config->getRules();
 
+// Deprecated rule.
+unset($rules['visibility_required']);
+
 $local_rules = [
   'declare_strict_types' => true,
   'blank_line_after_opening_tag' => true,
@@ -42,6 +45,7 @@ $local_rules = [
   '@PHP8x3Migration' => true,
   '@PHP8x4Migration' => false,
   'native_function_invocation' => ['include' => ['@internal'], 'scope' => 'all', 'strict' => true],
+  'modifier_keywords' => ['elements' => ['const', 'method', 'property']]
 ];
 
 $rules = \array_merge($rules, $local_rules);
