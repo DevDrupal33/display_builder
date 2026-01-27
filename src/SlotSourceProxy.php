@@ -23,11 +23,13 @@ class SlotSourceProxy {
    *   The data to processed.
    * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
    *   (Optional) The contexts, keyed by context name.
+   * @param bool $label_only
+   *   (Optional) Return label only and no summary. Default: false.
    *
    * @return array{label: string, summary: string}
    *   Array with keys 'label' and 'summary'.
    */
-  public function getLabelWithSummary(array $data, array $contexts = []): array {
+  public function getLabelWithSummary(array $data, array $contexts = [], bool $label_only = FALSE): array {
     /** @var \Drupal\ui_patterns\SourcePluginManager $sourceManager */
     $sourceManager = $this->sourceManager;
     $source = $sourceManager->getSource($data['node_id'] ?? '', [], $data, $contexts);
@@ -39,6 +41,13 @@ class SlotSourceProxy {
       ];
     }
     $label = (string) $source->label(TRUE);
+
+    if ($label_only) {
+      return [
+        'label' => $label,
+        'summary' => '',
+      ];
+    }
 
     $summary = $source->settingsSummary();
     $labelSummary = $label;

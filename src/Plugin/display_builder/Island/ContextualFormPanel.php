@@ -13,7 +13,7 @@ use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
 use Drupal\display_builder\IslandWithFormTrait;
-use Drupal\ui_patterns\PropTypePluginManager;
+use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -33,11 +33,6 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
   use IslandWithFormTrait;
 
   /**
-   * The prop type plugin manager.
-   */
-  protected PropTypePluginManager $propTypeManager;
-
-  /**
    * The UI Patterns source plugin manager.
    */
   protected SourcePluginManager $sourceManager;
@@ -47,7 +42,6 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->propTypeManager = $container->get('plugin.manager.ui_patterns_prop_type');
     $instance->sourceManager = $container->get('plugin.manager.ui_patterns_source');
 
     return $instance;
@@ -69,16 +63,16 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
 
       $this->alterFormValues($form_state);
       $source = $this->sourceManager->getSource($this->data['node_id'], [], $this->data, $contexts);
-      $form = $source ? $source->settingsForm([], $form_state) : [];
+
+      if ($source instanceof SourceWithSlotsInterface) {
+        $form = $source->settingsFormPropsOnly([], $form_state);
+      }
+      else {
+        $form = $source ? $source->settingsForm([], $form_state) : [];
+      }
 
       if ($this->isMultipleItemsSlotSource($this->data['source'])) {
         $form = $this->removeItemSelector($form);
-      }
-
-      $component_id = ($this->data['source_id'] === 'component') ? $this->data['source']['component']['component_id'] ?? NULL : NULL;
-
-      if ($component_id && ($this->data['source_id'] === 'component')) {
-        $this->alterFormForComponent($form, $component_id);
       }
     }
     catch (\Exception) {
@@ -204,83 +198,6 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
         $this->data['source'] = $values;
       }
     }
-  }
-
-  /**
-   * Alter the form in a case of a component.
-   *
-   * @param array $form
-   *   The form.
-   * @param string|null $component_id
-   *   The component ID.
-   */
-  protected function alterFormForComponent(array &$form, ?string $component_id): void {
-    if (!$component_id) {
-      return;
-    }
-
-    if (!isset($form['component']['component_id'])) {
-      $form['component']['component_id'] = [
-        '#type' => 'hidden',
-        '#value' => $component_id,
-      ];
-    }
-    $form['component']['#render_slots'] = FALSE;
-    $form['component']['#component_id'] = $component_id;
-
-    $form = \array_merge(
-      ['info' => $this->getComponentMetadata($component_id)],
-      $form
-    );
-  }
-
-  /**
-   * Get component metadata.
-   *
-   * @param string $component_id
-   *   The component ID.
-   *
-   * @return array
-   *   A renderable array.
-   */
-  protected function getComponentMetadata(string $component_id): array {
-    $component = $this->sdcManager->find($component_id);
-    $build = [];
-
-    if ($description = $component->metadata->description) {
-      $description = [
-        [
-          '#type' => 'html_tag',
-          '#tag' => 'p',
-          '#value' => $description,
-          '#attributes' => [
-            'class' => ['description'],
-          ],
-        ],
-        [
-          '#type' => 'html_tag',
-          '#tag' => 'sl-button',
-          '#value' => new TranslatableMarkup('Hide description'),
-          '#attributes' => [
-            'size' => 'small',
-            'variant' => 'default',
-            'class' => ['db-description-toggle'],
-          ],
-        ],
-      ];
-      $build[] = [
-        '#type' => 'html_tag',
-        '#tag' => 'div',
-        'content' => $description,
-        '#attributes' => [
-          // Important for description toggle.
-          // @see assets/js/form_description.js
-          'class' => ['db-instance-description'],
-        ],
-      ];
-    }
-
-    return $build;
   }
 
   /**

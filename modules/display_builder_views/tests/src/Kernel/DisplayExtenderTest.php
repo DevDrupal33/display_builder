@@ -33,6 +33,7 @@ final class DisplayExtenderTest extends KernelTestBase {
     'display_builder',
     'display_builder_views',
     'ui_patterns',
+    'ui_patterns_views',
   ];
 
   /**

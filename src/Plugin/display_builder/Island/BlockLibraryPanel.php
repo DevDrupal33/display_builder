@@ -14,6 +14,7 @@ use Drupal\display_builder\IslandConfigurationFormInterface;
 use Drupal\display_builder\IslandConfigurationFormTrait;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
+use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\ui_patterns\SourceWithChoicesInterface;
@@ -46,7 +47,7 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
   /**
    * The sources.
    */
-  protected ?array $sources = NULL;
+  protected array $sources = [];
 
   /**
    * The module list extension service.
@@ -190,7 +191,7 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
    *   An array of sources.
    */
   private function getSources(): array {
-    if ($this->sources !== NULL) {
+    if (!empty($this->sources)) {
       return $this->sources;
     }
 
@@ -198,6 +199,11 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
     $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager->getSlotPropType()]];
 
     foreach ($definitions as $source_id => $definition) {
+      // A block is a source for slots but without slots.
+      if (\is_a($definition['class'], SourceWithSlotsInterface::class, TRUE)) {
+        continue;
+      }
+
       if (\in_array($source_id, self::HIDE_SOURCE, TRUE)) {
         continue;
       }

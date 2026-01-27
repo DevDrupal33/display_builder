@@ -10,7 +10,9 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\SlotSourceProxy;
+use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\display_builder\ThirdPartySettingsInterface;
+use Drupal\ui_patterns\SourceWithChoicesInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -77,23 +79,24 @@ class LayersPanel extends BuilderPanel {
   /**
    * {@inheritdoc}
    */
-  protected function buildSingleComponent(string $builder_id, string $instance_id, array $data, int $index = 0): array {
-    $component_id = $data['source']['component']['component_id'] ?? NULL;
-    $instance_id = $instance_id ?: $data['node_id'];
+  protected function buildSingleComponent(string $builder_id, string $instance_id, SourceWithSlotsInterface $source, array $data, int $index = 0): ?array {
+    $component_id = NULL;
+    $label = $source->label();
 
-    if (!$instance_id && !$component_id) {
-      return [];
+    if ($source instanceof SourceWithChoicesInterface) {
+      $component_id = $source->getChoice($data['source']);
+      $label = $this->slotSourceProxy->getLabelWithSummary($data, [])['label'];
     }
 
-    $component = $this->sdcManager->getDefinition($component_id);
+    $instance_id = $instance_id ?: $data['node_id'];
 
-    if (!$component) {
-      return [];
+    if (!$instance_id || !$component_id) {
+      return NULL;
     }
 
     $slots = [];
 
-    foreach ($component['slots'] ?? [] as $slot_id => $definition) {
+    foreach ($source->getSlotDefinitions() as $slot_id => $definition) {
       $dropzone = [
         '#type' => 'component',
         '#component' => 'display_builder:dropzone',
@@ -108,12 +111,11 @@ class LayersPanel extends BuilderPanel {
           // @see assets/js/contextual_menu.js
           'data-slot-id' => $slot_id,
           'data-slot-title' => $definition['title'],
-          'data-node-title' => $component['label'],
+          'data-node-title' => $label,
         ],
       ];
 
-      if (isset($data['source']['component']['slots'][$slot_id]['sources'])) {
-        $sources = $data['source']['component']['slots'][$slot_id]['sources'];
+      if ($sources = $source->getSlotValue($slot_id)) {
         $dropzone['#slots']['content'] = $this->digFromSlot($builder_id, $sources);
       }
       $dropzone = $this->htmxEvents->onSlotDrop($dropzone, $builder_id, $this->getPluginID(), $instance_id, $slot_id);
@@ -124,30 +126,24 @@ class LayersPanel extends BuilderPanel {
         $dropzone,
       ];
     }
-    $name = $component['name'];
-    $variant = $this->getComponentVariantLabel($data, $component);
-
-    if ($variant) {
-      $name = \sprintf('%s - %s', $name, $variant);
-    }
 
     $build = [
       '#type' => 'component',
       '#component' => 'display_builder:layer',
       '#slots' => [
-        'title' => $name,
+        'title' => $label,
         'children' => $slots,
       ],
       // Required for the context menu label.
       // @see assets/js/contextual_menu.js
       '#attributes' => [
-        'data-node-title' => $name,
+        'data-node-title' => $label,
       ],
     ];
     $build = $this->addThirdPartySettingsSummary($data, $build);
-    $build = $this->addComponentSettingsSummary($data, $component, $build);
+    $build = $this->addComponentSettingsSummary($source, $build);
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, (string) $component['label'], $index);
+    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $source->label(), $index);
   }
 
   /**
@@ -183,34 +179,6 @@ class LayersPanel extends BuilderPanel {
     }
 
     return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['summary'], $index);
-  }
-
-  /**
-   * Get the label for a component variant.
-   *
-   * @param array $data
-   *   The component data array.
-   * @param array $definition
-   *   The component definition array.
-   *
-   * @return string
-   *   The variant label or empty string if no variant is set.
-   */
-  private function getComponentVariantLabel(array $data, array $definition): string {
-    if (!isset($data['source']['component']['variant_id'])) {
-      return '';
-    }
-
-    if ($data['source']['component']['variant_id']['source_id'] !== 'select') {
-      return '';
-    }
-    $variant_id = $data['source']['component']['variant_id']['source']['value'] ?? '';
-
-    if (empty($variant_id)) {
-      return '';
-    }
-
-    return $definition['variants'][$variant_id]['title'] ?? '';
   }
 
   /**
@@ -251,28 +219,24 @@ class LayersPanel extends BuilderPanel {
   /**
    * Add config settings summary to layer's info slot.
    *
-   * @param array $data
-   *   The node data.
-   * @param array $component
-   *   The component definition.
+   * @param \Drupal\display_builder\SourceWithSlotsInterface $source
+   *   The source plugin.
    * @param array $build
    *   The layer component renderable array.
    *
    * @return array
    *   The layer component renderable array.
    */
-  private function addComponentSettingsSummary(array $data, array $component, array $build): array {
-    if (!isset($data['source_id']) || !isset($data['source']['component']['props']) || $data['source_id'] !== 'component') {
-      return $build;
-    }
-
+  private function addComponentSettingsSummary(SourceWithSlotsInterface $source, array $build): array {
     $items = [];
 
-    foreach ($data['source']['component']['props'] as $source_id => $source) {
-      $item = self::buildComponentSettingItem($source, $component, $source_id);
-
+    foreach ($source->settingsSummary() as $item) {
       if ($item !== NULL) {
-        $items[] = $item;
+        $items[] = [
+          '#type' => 'html_tag',
+          '#tag' => 'li',
+          '#value' => $item,
+        ];
       }
     }
 
@@ -299,72 +263,6 @@ class LayersPanel extends BuilderPanel {
     $build['#slots']['info'] = \array_merge($build['#slots']['info'] ?? [], $summary);
 
     return $build;
-  }
-
-  /**
-   * Build a human-readable component setting item for the summary.
-   *
-   * @param array $source
-   *   The source array for the component property.
-   * @param array $component
-   *   The component definition.
-   * @param string $source_id
-   *   The source id of the property.
-   *
-   * @return array|null
-   *   A renderable list item or NULL if no summary could be built.
-   */
-  private static function buildComponentSettingItem(array $source, array $component, string $source_id): ?array {
-    $raw = $source['source']['value'] ?? NULL;
-
-    if ($raw === NULL || $raw === '') {
-      return NULL;
-    }
-
-    $label = $component['props']['properties'][$source_id]['title'] ?? '';
-    $value = $raw;
-
-    if (\is_array($value)) {
-      if (self::isNotNested($value)) {
-        $value = \trim(\implode(', ', $value), ', ');
-      }
-      elseif (isset($value['icon_id'])) {
-        $value = $value['icon_id'];
-      }
-      else {
-        // Skip complex nested arrays we don't know how to summarize.
-        return NULL;
-      }
-    }
-
-    if (!\is_string($value)) {
-      return NULL;
-    }
-
-    return [
-      '#type' => 'html_tag',
-      '#tag' => 'li',
-      '#value' => \sprintf('%s %s', $label, $value),
-    ];
-  }
-
-  /**
-   * Helper to ensure we can implode an array.
-   *
-   * @param array $value
-   *   The value to test.
-   *
-   * @return bool
-   *   The array is nested or not.
-   */
-  private static function isNotNested(array $value): bool {
-    foreach ($value as $element) {
-      if (\is_array($element)) {
-        return FALSE;
-      }
-    }
-
-    return TRUE;
   }
 
 }

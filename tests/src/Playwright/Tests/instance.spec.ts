@@ -191,7 +191,7 @@ test(
       )
 
       await displayBuilder.setElementValue(
-        page.locator(`.db-island-builder [data-node-title="Test simple"]`).first(),
+        page.locator(`.db-island-builder [data-test="test_simple"]`).first(),
         'First component',
         [
           {
@@ -206,7 +206,7 @@ test(
       )
 
       await displayBuilder.setElementValue(
-        page.locator(`.db-island-builder [data-node-title="Test simple"]`).nth(1),
+        page.locator(`.db-island-builder [data-test="test_simple"]`).nth(1),
         'Second component with a textfield',
         [
           {
@@ -258,7 +258,7 @@ test(
       await displayBuilder.dragElementFromLibraryById('Blocks', 'textfield', componentSimpleSlot.nth(1))
 
       await displayBuilder.setElementValue(
-        page.locator(`.db-island-builder [data-node-title="Test simple"]`).first(),
+        page.locator(`.db-island-builder [data-test="test_simple"]`).first(),
         'I am component',
         [
           {
@@ -273,7 +273,7 @@ test(
       )
 
       await displayBuilder.setElementValue(
-        page.locator(`.db-island-builder [data-node-title="Test simple"]`).nth(1),
+        page.locator(`.db-island-builder [data-test="test_simple"]`).nth(1),
         'I am component inside component with a textfield',
         [
           {

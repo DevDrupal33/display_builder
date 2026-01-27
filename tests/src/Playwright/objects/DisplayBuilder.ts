@@ -271,7 +271,7 @@ export class Displaybuilder {
     }
     await this.page.getByRole('button', { name: 'Save' }).click()
 
-    await this.shoelaceReady()
+    await expect(this.page.getByRole('heading', { name: 'Display Builder instance devel' })).toBeVisible()
   }
 
   /**

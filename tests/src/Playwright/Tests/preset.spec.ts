@@ -51,7 +51,7 @@ test(
       )
 
       await displayBuilder.setElementValue(
-        page.locator(`.db-island-builder [data-node-title="Test simple"]`),
+        page.locator(`.db-island-builder [data-test="test_simple"]`),
         'I am a component with a textfield',
         [
           {

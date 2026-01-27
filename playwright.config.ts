@@ -15,8 +15,7 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  // @todo set retry when tests are stabilized.
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. @see https://playwright.dev/docs/test-reporters */
@@ -50,10 +49,6 @@ export default defineConfig({
       fullPage: true,
     },
     video: 'retain-on-failure',
-    launchOptions: {
-      // For --headed test, add some slow time.
-      slowMo: 200,
-    },
     // Default timeout for each Playwright action in milliseconds, defaults to 0 (no timeout).
     // Quicker fail on local tests if skip install.
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-action-timeout

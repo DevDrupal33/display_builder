@@ -151,11 +151,11 @@ Or check our commands in npm script:
 
 ```bash
 # In one terminal, launch PHP server
-npm run serve-php
+npm run docker-serve-php
 # In an other terminal, launch Playwright server
-npm run serve
+npm run docker-serve-pw
 # In an other terminal, launch the tests
-npm run test-docker
+npm run docker-test
 ```
 
 Tips:

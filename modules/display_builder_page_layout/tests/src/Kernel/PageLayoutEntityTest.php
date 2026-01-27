@@ -50,6 +50,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
       ]);
     $this->config('system.theme')->set('default', 'display_builder_theme_test')->save();
 
+    $this->installEntitySchema('user');
     $this->installConfig(['display_builder']);
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');

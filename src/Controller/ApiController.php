@@ -18,7 +18,10 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\Plugin\display_builder\Island\ContextualFormPanel;
 use Drupal\display_builder\RenderableBuilderTrait;
+use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
+use Drupal\ui_patterns\SourcePluginBase;
+use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -39,6 +42,8 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     protected SharedTempStoreFactory $sharedTempStoreFactory,
     protected SessionInterface $session,
     private IslandPluginManagerInterface $islandPluginManager,
+    #[Autowire(service: 'plugin.manager.ui_patterns_source')]
+    private SourcePluginManager $sourceManager,
   ) {
     parent::__construct($eventDispatcher, $renderer, $time, $sharedTempStoreFactory, $session);
   }
@@ -212,10 +217,20 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       return $this->responseMessageError((string) $display_builder_instance->id(), $e->getMessage(), []);
     }
 
-    if (isset($node['source']['component']['slots'], $data['source']['component'])
-      && ($data['source']['component']['component_id'] === $node['source']['component']['component_id'])) {
-      // We keep the slots.
-      $data['source']['component']['slots'] = $node['source']['component']['slots'];
+    $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager->getSlotPropType()]];
+    $source = $this->sourceManager->createInstance(
+      $node['source_id'],
+      SourcePluginBase::buildConfiguration('slot', $slot_definition, $node, [])
+    );
+
+    if ($source instanceof SourceWithSlotsInterface) {
+      // We keep the slots values (which are not sent by the contextual form)
+      // instead of removing them.
+      $slots = $source->getSlotValues();
+
+      foreach ($slots as $slot_id => $slot) {
+        $data['source'] = $source->setSlotValue($data['source'], $slot_id, $slot);
+      }
     }
 
     $display_builder_instance->setSource($node_id, $node['source_id'], $data['source']);
@@ -352,7 +367,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $label = $request->headers->get('hx-prompt', $label) ?: $label;
     // In HTTP headers, only ASCII is guaranteed to work but historically,
     // HTTP has allowed header values with the ISO-8859-1 charset.
-    $label = mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
+    $label = \mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
     $preset = $preset_storage->create([
       'id' => \uniqid(),
       'label' => $label,

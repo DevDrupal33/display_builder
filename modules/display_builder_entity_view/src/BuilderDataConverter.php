@@ -79,7 +79,7 @@ class BuilderDataConverter {
 
         continue;
       }
-      $sources = \array_merge($sources, $this->convertLayout($section));
+      $sources[] = $this->convertLayout($section);
     }
 
     return $sources;
@@ -171,6 +171,28 @@ class BuilderDataConverter {
     // Sometimes, this value is null, so let's override it.
     $data['source']['component']['component_id'] = \str_replace('ui_patterns:', '', $section->getLayoutId());
 
+    $data = $this->extractThirdPartySettings($data, $section);
+    $data = $this->moveUiStylesAttributesSource($data);
+
+    if ($slots) {
+      $data['source']['component']['slots'] = $slots;
+    }
+
+    return $data;
+  }
+
+  /**
+   * Extract third party settings.
+   *
+   * @param array $data
+   *   A single UI Patterns source.
+   * @param \Drupal\layout_builder\Section $section
+   *   A single layout builder section.
+   *
+   * @return array
+   *   A single UI Patterns source.
+   */
+  protected function extractThirdPartySettings(array $data, Section $section): array {
     foreach ($section->getThirdPartyProviders() ?: [] as $provider_id) {
       // In Layout builder, ThirdPartyProviders are Drupal modules. In Display
       // Builder, they are Island plugins. So, 'ui_styles' become 'styles'. We
@@ -182,11 +204,6 @@ class BuilderDataConverter {
         continue;
       }
       $data['third_party_settings'][$provider_id] = $section->getThirdPartySettings($provider_id);
-    }
-    $data = $this->moveUiStylesAttributesSource($data);
-
-    if ($slots) {
-      $data['source']['component']['slots'] = $slots;
     }
 
     return $data;
@@ -220,28 +237,41 @@ class BuilderDataConverter {
   /**
    * Convert regular layout plugin.
    *
-   * We don't really convert the layout here, we extract the blocks and put
-   * them as a flat list where the layout is.
-   *
-   * @todo better layout support https://www.drupal.org/project/display_builder/issues/3531521
-   *
    * @param \Drupal\layout_builder\Section $section
    *   A single layout builder section.
    *
    * @return array
-   *   A list of UI Patterns source.
+   *   A single UI Patterns source.
    */
   protected function convertLayout(Section $section): array {
-    $sources = [];
+    $slots = [];
     $components = $section->getComponents();
 
     foreach ($components as $component) {
       $source = $this->convertLayoutBuilderComponent($component);
       $source = $this->extractUiStylesData($component, $source);
-      $sources[] = $source;
+
+      if ($source) {
+        $source = $this->extractUiStylesData($component, $source);
+        $slots[$component->getRegion()][] = $source;
+      }
     }
 
-    return $sources;
+    $data = [
+      'source_id' => 'layout',
+      'source' => [
+        'layout_id' => $section->getLayoutId(),
+        'settings' => $section->getLayoutSettings(),
+      ],
+    ];
+
+    if ($slots) {
+      $data['source']['regions'] = $slots;
+    }
+
+    $data = $this->extractThirdPartySettings($data, $section);
+
+    return $data;
   }
 
   /**

@@ -71,4 +71,15 @@ class UiPatternsHooks {
     ];
   }
 
+  /**
+   * Implements hook_ui_patterns_source_info_alter().
+   *
+   * @param array $definitions
+   *   An array of all the existing plugin definitions, passed by reference.
+   */
+  #[Hook('ui_patterns_source_info_alter')]
+  public function sourceInfoAlter(array &$definitions): void {
+    $definitions['component']['class'] = 'Drupal\display_builder\Plugin\UiPatterns\Source\ComponentSource';
+  }
+
 }
