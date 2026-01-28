@@ -178,7 +178,13 @@ class ApiPreviewController extends ControllerBase {
    * @todo Remove when https://www.drupal.org/project/ui_patterns/issues/3414774 is merged
    */
   private function generateComponent(string $component_id): array {
-    $definition = $this->componentManager->getDefinition($component_id);
+    try {
+      $definition = $this->componentManager->getDefinition($component_id);
+    }
+    catch (\Throwable $th) {
+      return [];
+    }
+
     $html = [
       '#type' => 'component',
       '#component' => $component_id,

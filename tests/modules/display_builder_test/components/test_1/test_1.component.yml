@@ -1,0 +1,11 @@
+name: Test 1
+description: 'Used for testing Display Builder.'
+slots:
+  slot_1:
+    title: Slot 1
+props:
+  type: object
+  properties:
+    prop_string:
+      title: Title
+      type: string
