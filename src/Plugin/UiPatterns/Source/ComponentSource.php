@@ -37,7 +37,13 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
     if (!$component_id) {
       return [];
     }
-    $definition = $this->componentManager->getDefinition($component_id);
+
+    try {
+      $definition = $this->componentManager->getDefinition($component_id);
+    }
+    catch (\Throwable $th) {
+      return [];
+    }
 
     return $definition['slots'] ?? [];
   }
@@ -48,10 +54,9 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
   public function getSlotValues(): array {
     $slots = [];
 
-    // Remove this weird 'sources' level.
     foreach ($this->settings['component']['slots'] ?? [] as $slot_id => $slot) {
       if (isset($slot['sources'])) {
-        $slots[$slot_id] = $slot['sources'];
+        $slots[$slot_id] = $this->getSlotValue($slot_id);
       }
     }
 
@@ -98,26 +103,36 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
   public function settingsSummary(): array {
     $data = $this->getSetting('component');
 
-    if (!isset($data['props'])) {
+    if (empty($data['props'])) {
       return [];
     }
+
+    $componentId = $data['component_id'];
+
+    try {
+      $component = $this->componentManager->getDefinition($componentId);
+    }
+    catch (\Throwable $th) {
+      return [];
+    }
+
+    if (!$component) {
+      return [];
+    }
+
     $items = [];
+    $propertyConfigs = $component['props']['properties'] ?? [];
 
-    $component_id = $data['component_id'];
-    $component = $this->componentManager->getDefinition($component_id);
+    foreach ($data['props'] as $sourceId => $sourceConfig) {
+      $summaryItem = $this->processProperty(
+        $sourceConfig,
+        $propertyConfigs[$sourceId] ?? NULL,
+        $sourceId
+      );
 
-    foreach ($data['props'] as $source_id => $source) {
-      if (!isset($source['source']['value']) || $source['source']['value'] === '') {
-        continue;
+      if ($summaryItem) {
+        $items[] = $summaryItem;
       }
-
-      $label = $component['props']['properties'][$source_id]['title'] ?? '';
-      $value = $source['source']['value'];
-
-      if (\is_array($value)) {
-        $value = \trim(\implode(', ', $value), ', ');
-      }
-      $items[] = \sprintf('%s %s', $label, $value);
     }
 
     return $items;
@@ -197,6 +212,114 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
     }
 
     return $build;
+  }
+
+  /**
+   * Processes a property configuration to generate a summary string.
+   *
+   * @param array $sourceConfig
+   *   The source configuration array.
+   * @param array|null $propertyConfig
+   *   The property configuration array or NULL if not available.
+   * @param string $sourceId
+   *   The source identifier.
+   *
+   * @return string|null
+   *   The formatted summary string or NULL if no value is available.
+   */
+  private function processProperty(array $sourceConfig, ?array $propertyConfig, string $sourceId): ?string {
+    if ($this->isUiStyleAttribute($sourceConfig)) {
+      return $this->formatUiStyleSummary($sourceConfig, $propertyConfig);
+    }
+
+    return $this->processStandardProperty($sourceConfig, $propertyConfig, $sourceId);
+  }
+
+  /**
+   * Checks if the source configuration is for UI style attributes.
+   *
+   * @param array $sourceConfig
+   *   The source configuration array.
+   *
+   * @return bool
+   *   TRUE if it's a UI style attribute configuration, FALSE otherwise.
+   */
+  private function isUiStyleAttribute(array $sourceConfig): bool {
+    return ($sourceConfig['source_id'] ?? NULL) === 'ui_styles_attributes'
+          && isset($sourceConfig['source']['styles']['selected']);
+  }
+
+  /**
+   * Formats a UI style summary string.
+   *
+   * @param array $sourceConfig
+   *   The source configuration array.
+   * @param array|null $propertyConfig
+   *   The property configuration array or NULL if not available.
+   *
+   * @return string|null
+   *   The formatted style summary or NULL if no styles are selected.
+   */
+  private function formatUiStyleSummary(array $sourceConfig, ?array $propertyConfig): ?string {
+    $selectedStyles = $sourceConfig['source']['styles']['selected'];
+
+    if (empty($selectedStyles)) {
+      return NULL;
+    }
+
+    $mainLabel = $propertyConfig['title'] ?? '';
+    $firstStyle = \array_key_first($selectedStyles);
+
+    return $firstStyle ? \sprintf('%s - %s', $mainLabel, $firstStyle) : NULL;
+  }
+
+  /**
+   * Processes a standard property configuration to generate a summary string.
+   *
+   * @param array $sourceConfig
+   *   The source configuration array.
+   * @param array|null $propertyConfig
+   *   The property configuration array or NULL if not available.
+   * @param string $sourceId
+   *   The source identifier.
+   *
+   * @return string|null
+   *   The formatted summary string or NULL if no value is available.
+   */
+  private function processStandardProperty(array $sourceConfig, ?array $propertyConfig, string $sourceId): ?string {
+    if (!isset($sourceConfig['source']['value'])) {
+      return NULL;
+    }
+
+    $value = $sourceConfig['source']['value'];
+    $processedValue = $this->normalizeValue($value);
+
+    if ($processedValue === NULL) {
+      return NULL;
+    }
+
+    $label = $propertyConfig['title'] ?? $sourceId;
+
+    return \sprintf('%s: %s', $label, $processedValue);
+  }
+
+  /**
+   * Normalizes a value to a string representation.
+   *
+   * @param mixed $value
+   *   The value to normalize (array or string).
+   *
+   * @return string|null
+   *   The normalized string value or NULL if empty/invalid.
+   */
+  private function normalizeValue($value): ?string {
+    if (\is_array($value)) {
+      $filtered = \array_filter($value);
+
+      return empty($filtered) ? NULL : \implode(', ', $filtered);
+    }
+
+    return \is_string($value) && $value !== '' ? $value : NULL;
   }
 
 }
