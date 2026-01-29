@@ -26,7 +26,7 @@
   }
 
   /* Hide contextual panes when loading, can be on drag, onInstanceClick... */
-  &.db-htmx-before-request {
+  &.db-htmx-before-request .shoelace-drawer::part(body) {
     opacity: var(--db-loading-opacity);
   }
 }

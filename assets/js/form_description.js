@@ -20,7 +20,7 @@
     attach(context) {
       once('dbInstanceDescription', '.db-description-toggle', context).forEach(
         (button) => {
-          const container = button.closest('.db-instance-description');
+          const container = button.closest('.db-island-contextual_form');
           const state = Drupal.displayBuilder.LocalStorageManager.get(
             'displayBuilder',
             'description',

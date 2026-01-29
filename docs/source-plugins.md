@@ -4,7 +4,7 @@ Source plugins are managed by UI Patterns 2. See [UI Patterns 2 documentation](h
 
 ## Source plugin for slots
 
-A source plugin targeting`slot` prop type:
+A source plugin targeting `slot` prop type:
 
 ```php
 namespace Drupal\my_module\Plugin\UiPatterns\Source;
@@ -14,11 +14,11 @@ use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\SourcePluginBase;
 
 #[Source(
-  id: 'wysiwyg',
+  id: 'my_source',
   label: new TranslatableMarkup('My slot source'),
   prop_types: ['slot']
 )]
-class WysiwygWidget extends SourcePluginBase {
+class MySource extends SourcePluginBase {
 }
 ```
 

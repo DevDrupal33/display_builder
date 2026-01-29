@@ -203,11 +203,6 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
         '#type' => 'html_tag',
         '#tag' => 'div',
         'content' => $description,
-        '#attributes' => [
-          // Important for description toggle.
-          // @see assets/js/form_description.js
-          'class' => ['db-instance-description'],
-        ],
       ];
     }
 
@@ -292,7 +287,7 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
     }
 
     $value = $sourceConfig['source']['value'];
-    $processedValue = $this->normalizeValue($value);
+    $processedValue = self::normalizeValue($value);
 
     if ($processedValue === NULL) {
       return NULL;
@@ -312,14 +307,48 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
    * @return string|null
    *   The normalized string value or NULL if empty/invalid.
    */
-  private function normalizeValue($value): ?string {
+  private static function normalizeValue($value): ?string {
     if (\is_array($value)) {
-      $filtered = \array_filter($value);
+      $str = self::flattenArrayToString($value);
 
-      return empty($filtered) ? NULL : \implode(', ', $filtered);
+      return $str !== '' ? $str : NULL;
     }
 
     return \is_string($value) && $value !== '' ? $value : NULL;
+  }
+
+  /**
+   * Utility to stringify a nested array.
+   *
+   * @param array $array
+   *   The $array to normalize (array or string).
+   *
+   * @return string
+   *   The flatten string.
+   */
+  private static function flattenArrayToString(array $array): string {
+    $result = [];
+
+    foreach ($array as $key => $value) {
+      if (\is_array($value)) {
+        if (\is_int($key)) {
+          $result[] = self::flattenArrayToString($value);
+        }
+        else {
+          $result[] = $key . ': {' . self::flattenArrayToString($value) . '}';
+        }
+      }
+      else {
+        if (\is_int($key)) {
+          $result[] = (string) $value;
+        }
+        else {
+          $result[] = "{$key}: {$value}";
+        }
+      }
+    }
+
+    return \implode(', ', $result);
   }
 
 }

@@ -53,6 +53,8 @@
   }
 
   .db-description-hide {
+    [id$="--description"],
+    .form-label,
     .description {
       display: none;
     }

@@ -691,7 +691,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     string|TranslatableMarkup $message,
     array $debug,
   ): array {
-    return $this->buildError($display_builder_instance_id, $message, \print_r($debug, TRUE), NULL, TRUE);
+    return $this->buildError($display_builder_instance_id, $message, !empty($debug) ? \print_r($debug, TRUE) : '', NULL, TRUE);
   }
 
   /**

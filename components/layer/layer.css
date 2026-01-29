@@ -22,7 +22,7 @@
   --layer-pill-bg-color: var(--sl-color-indigo-50);
   --layer-pill-border-color: var(--sl-color-warning-300);
   --layer-pill-text-color: var(--sl-color-neutral-950);
-  --layer-slot-title-color: var(--sl-color-warning-800);
+  --layer-slot-title-color: var(--sl-color-warning-700);
 }
 
 /* Keep a top border test when drag */
@@ -91,7 +91,7 @@
 .db-island-layers {
   .db-dropzone[data-component-id][data-slot-id] {
     min-width: 0;
-    min-height: 1.7rem;
+    min-height: 2rem;
   }
 
   .db-dropzone--root {
@@ -210,13 +210,6 @@
       &::part(body) {
         padding: 0.5rem 1rem 0.5rem 0.5rem;
       }
-
-      &:hover {
-        &::part(base) {
-          /* border-color: var(--layer-component-border-color-hover); */
-          /* background-color: var(--layer-component-bg-color-hover); */
-        }
-      }
     }
 
     &.db-layer--block {
@@ -277,13 +270,13 @@
 
 /* Monochromatic Saturation Indigo-Violet Ramp */
 
-.db-island-layers .db-layer.db-layer--component:hover {
+.display-builder:not(.sl-theme-dark) .db-island-layers .db-layer.db-layer--component:hover {
   --layer-hover-bg: oklch(98% 0.01 260);
   --layer-hover-border: oklch(94% 0.02 260);
 
   &::part(base) {
-    border-color: var(--layer-hover-border) !important;
-    background-color: var(--layer-hover-bg) !important;
+    border-color: var(--layer-hover-border);
+    background-color: var(--layer-hover-bg);
   }
 
   & & {
@@ -324,15 +317,62 @@
   }
 }
 
-.display-builder.display-builder--onMove .db-island-layers,
-.display-builder.display-builder--onDrag .db-island-layers {
+.display-builder.sl-theme-dark .db-island-layers .db-layer.db-layer--component:hover {
+  --layer-hover-bg: oklch(25% 0.04 260);
+  --layer-hover-border: oklch(35% 0.08 260);
+
+  &::part(base) {
+    border-color: var(--layer-hover-border);
+    background-color: var(--layer-hover-bg);
+  }
+
+  & & {
+    --layer-hover-bg: oklch(28% 0.05 260);
+    --layer-hover-border: oklch(38% 0.09 260);
+    & & {
+      --layer-hover-bg: oklch(31% 0.06 260);
+      --layer-hover-border: oklch(41% 0.1 260);
+      & & {
+        --layer-hover-bg: oklch(34% 0.07 260);
+        --layer-hover-border: oklch(44% 0.11 260);
+        & & {
+          --layer-hover-bg: oklch(37% 0.08 260);
+          --layer-hover-border: oklch(47% 0.12 260);
+          & & {
+            --layer-hover-bg: oklch(40% 0.09 260);
+            --layer-hover-border: oklch(50% 0.13 260);
+            & & {
+              --layer-hover-bg: oklch(43% 0.1 260);
+              --layer-hover-border: oklch(53% 0.14 260);
+              & & {
+                --layer-hover-bg: oklch(46% 0.11 260);
+                --layer-hover-border: oklch(56% 0.15 260);
+                & & {
+                  --layer-hover-bg: oklch(49% 0.12 260);
+                  --layer-hover-border: oklch(59% 0.16 260);
+                  & & {
+                    --layer-hover-bg: oklch(52% 0.13 260);
+                    --layer-hover-border: oklch(62% 0.17 260);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.display-builder.display-builder--onMove:not(.sl-theme-dark) .db-island-layers,
+.display-builder.display-builder--onDrag:not(.sl-theme-dark) .db-island-layers {
   .db-layer.db-layer--component:has(.db-dropzone--chosen) {
     --layer-bg: oklch(98% 0.01 260);
     --layer-border: oklch(94% 0.02 260);
 
     &::part(base) {
-      border-color: var(--layer-border) !important;
-      background-color: var(--layer-bg) !important;
+      border-color: var(--layer-border);
+      background-color: var(--layer-bg);
     }
 
     & & {
@@ -362,6 +402,56 @@
                     & & {
                       --layer-bg: oklch(80% 0.1 260);
                       --layer-border: oklch(55% 0.2 260);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.display-builder.sl-theme-dark.display-builder--onMove .db-island-layers,
+.display-builder.sl-theme-dark.display-builder--onDrag .db-island-layers {
+  .db-layer.db-layer--component:has(.db-dropzone--chosen) {
+    --layer-hover-bg: oklch(25% 0.04 260);
+    --layer-hover-border: oklch(35% 0.08 260);
+
+    &::part(base) {
+      border-color: var(--layer-border);
+      background-color: var(--layer-bg);
+    }
+
+    & & {
+      --layer-hover-bg: oklch(28% 0.05 260);
+      --layer-hover-border: oklch(38% 0.09 260);
+      & & {
+        --layer-hover-bg: oklch(31% 0.06 260);
+        --layer-hover-border: oklch(41% 0.1 260);
+        & & {
+          --layer-hover-bg: oklch(34% 0.07 260);
+          --layer-hover-border: oklch(44% 0.11 260);
+          & & {
+            --layer-hover-bg: oklch(37% 0.08 260);
+            --layer-hover-border: oklch(47% 0.12 260);
+            & & {
+              --layer-hover-bg: oklch(40% 0.09 260);
+              --layer-hover-border: oklch(50% 0.13 260);
+              & & {
+                --layer-hover-bg: oklch(43% 0.1 260);
+                --layer-hover-border: oklch(53% 0.14 260);
+                & & {
+                  --layer-hover-bg: oklch(46% 0.11 260);
+                  --layer-hover-border: oklch(56% 0.15 260);
+                  & & {
+                    --layer-hover-bg: oklch(49% 0.12 260);
+                    --layer-hover-border: oklch(59% 0.16 260);
+                    & & {
+                      --layer-hover-bg: oklch(52% 0.13 260);
+                      --layer-hover-border: oklch(62% 0.17 260);
                     }
                   }
                 }

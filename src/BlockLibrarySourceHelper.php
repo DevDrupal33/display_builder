@@ -170,6 +170,10 @@ class BlockLibrarySourceHelper {
       return $group;
     }
 
+    if (isset($source_definition['metadata']['group'])) {
+      return (string) $source_definition['metadata']['group'];
+    }
+
     switch ($provider) {
       case 'display_builder_page_layout':
         $group = (string) new TranslatableMarkup('Page');

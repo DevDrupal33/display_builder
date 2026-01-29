@@ -1,3 +1,4 @@
+/* cspell:ignore zindex */
 :root {
   /* Global background color */
   --db-background-color: var(--sl-color-neutral-0);
@@ -90,6 +91,23 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
   background-color: var(--db-background-color);
 }
 
+/* Available tokens modal on fullscreen */
+.display-builder-is-fullscreen .modal {
+  --bs-modal-zindex: calc(var(--db-z-index-fullscreen) + 3);
+}
+
+body:has(.db-htmx-before-request):has(.display-builder--fullscreen) {
+  > * {
+    opacity: var(--db-loading-opacity);
+  }
+}
+
+body:has(.db-htmx-before-request):not(.display-builder--fullscreen) {
+  .display-builder > * {
+    opacity: var(--db-loading-opacity);
+  }
+}
+
 .display-builder {
   /* Avoid clipping before the web components are attached, without hiding
   the declarative shadow dom of db-isolate */
@@ -107,10 +125,6 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
   /* @see assets/js/display_builder.js */
   &.db-htmx-before-request {
     pointer-events: none;
-
-    > * {
-      opacity: var(--db-loading-opacity);
-    }
   }
 
   .db-background,
@@ -139,7 +153,10 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
     transition: max-width 0.3s ease;
 
     .db-message {
-      margin: 1rem 0 0 0;
+      margin: 1rem;
+      &::part(base) {
+        z-index: calc(var(--db-z-index-fullscreen) + 3);
+      }
     }
   }
 
