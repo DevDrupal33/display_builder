@@ -30,7 +30,9 @@ class UiPatternsHooks {
    */
   #[Hook('ui_patterns_source_value_alter')]
   public function sourceValueAlter(mixed &$build, SourceInterface $source, array &$source_configuration): void {
-    if (!isset($source_configuration['third_party_settings'])) {
+    if (empty($source_configuration['third_party_settings'])) {
+      // Sometimes, third_party_settings are stored as an empty string instead
+      // of an empty array.
       return;
     }
 
