@@ -137,7 +137,7 @@ final class PatternPresetTest extends KernelTestBase {
     $patternPreset->save();
 
     $loaded = PatternPreset::load('test_preset_summary');
-    self::assertSame('Token', $loaded->getSummary());
+    self::assertSame('Token: foo bar', $loaded->getSummary());
   }
 
   /**
