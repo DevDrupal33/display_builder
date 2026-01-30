@@ -338,7 +338,7 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
           $result[] = $key . ': {' . self::flattenArrayToString($value) . '}';
         }
       }
-      else {
+      elseif (!empty($value)) {
         if (\is_int($key)) {
           $result[] = (string) $value;
         }
