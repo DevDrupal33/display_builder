@@ -1,7 +1,7 @@
 # Installation
 
 !!!warning "Drupal 11.3"
-    Display builder targets Drupal **11.3**. No Drupal 10.x support is planned unless sponsored.
+  Display builder targets Drupal **11.3**. No Drupal 10.x support is planned unless sponsored.
 
 ## Quick install new project
 
