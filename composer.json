@@ -39,7 +39,8 @@
     "extra": {
         "patches": {
             "drupal/core": {
-                "https://www.drupal.org/i/3557014 PageDisplayVariant does not transmit cache metadata": "https://git.drupalcode.org/issue/drupal-3557014/-/commit/3b38aa264d9101548946a06c27dc23997de55fb4.patch"
+                "https://www.drupal.org/i/3557014 PageDisplayVariant does not transmit cache metadata": "https://git.drupalcode.org/issue/drupal-3557014/-/commit/3b38aa264d9101548946a06c27dc23997de55fb4.patch",
+                "https://www.drupal.org/i/3042467 Support entities that are neither content nor config entities": "https://git.drupalcode.org/project/drupal/-/merge_requests/3548.patch"
             }
         }
     },

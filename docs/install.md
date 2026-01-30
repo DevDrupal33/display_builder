@@ -1,7 +1,7 @@
 # Installation
 
-!!! warning "Drupal 11.3"
-  Display builder targets Drupal **11.3**. No Drupal 10.x support is planned unless sponsored.
+!!!warning "Drupal 11.3"
+    Display builder targets Drupal **11.3**. No Drupal 10.x support is planned unless sponsored.
 
 ## Quick install new project
 
@@ -95,15 +95,15 @@ and HTMX [sse extension](https://htmx.org/extensions/sse/).
 By default libraries are loaded with CDN, but you can switch to local copies with drush:
 
 ```shell
-$ drush state:set display_builder.asset_libraries_local true
-$ drush cache:rebuild
+drush state:set display_builder.asset_libraries_local true
+drush cache:rebuild
 ```
 
 And switch back to CDN mode with drush:
 
 ```shell
-$ drush state:delete display_builder.asset_libraries_local
-$ drush cache:rebuild
+drush state:delete display_builder.asset_libraries_local
+drush cache:rebuild
 ```
 
 Currently asset.packagist provide a version of Shoelace with Lit dependencies.
