@@ -160,7 +160,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     return $this->dispatchDisplayBuilderEvent(
       DisplayBuilderEvents::ON_ACTIVE,
-      $display_builder_instance->get($node_id),
+      $display_builder_instance->getNode($node_id),
     );
   }
 
@@ -178,7 +178,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     }
 
     // Load the node to properly alter the form data into config data.
-    $node = $display_builder_instance->get($node_id);
+    $node = $display_builder_instance->getNode($node_id);
 
     if (isset($body['source']['form_build_id'])) {
       unset($body['source']['form_build_id'], $body['source']['form_token'], $body['source']['form_id']);
@@ -260,7 +260,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     $islandDefinition = $this->islandPluginManager->getDefinition($island_id);
     // Load the instance to properly alter the form data into config data.
-    $node = $display_builder_instance->get($node_id);
+    $node = $display_builder_instance->getNode($node_id);
     unset($body['form_build_id'], $body['form_token'], $body['form_id']);
 
     $form_state = new FormState();
@@ -305,7 +305,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    */
   public function paste(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $parent_id, string $slot_id, string $slot_position): array {
     $this->builder = $display_builder_instance;
-    $dataToCopy = $display_builder_instance->get($node_id);
+    $dataToCopy = $display_builder_instance->getNode($node_id);
 
     // Keep flag for move or attach to root.
     $is_paste_root = FALSE;
@@ -360,7 +360,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    */
   public function saveAsPreset(Request $request, InstanceInterface $display_builder_instance, string $node_id): array {
     $label = (string) $this->t('New preset');
-    $data = $display_builder_instance->get($node_id);
+    $data = $display_builder_instance->getNode($node_id);
     self::cleanNodeId($data);
 
     $preset_storage = $this->entityTypeManager()->getStorage('pattern_preset');

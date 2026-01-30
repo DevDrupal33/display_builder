@@ -409,10 +409,10 @@ trait EntityViewDisplayTrait {
       $instance = $this->getInstance();
       $profile_id = (string) $profile->id();
 
-      if ($instance->getProfile()->id() !== $profile_id) {
+      if ($instance && ($instance->getProfile()->id() !== $profile_id)) {
         $instance->setProfile($profile_id);
-        $instance->save();
       }
+      $instance->save();
     }
 
     // Do also overrides.

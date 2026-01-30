@@ -322,7 +322,7 @@ class BuilderPanel extends IslandPluginBase {
     // parameters instead of loading again.
     /** @var \Drupal\display_builder\InstanceInterface $builder */
     $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
-    $data = $builder->get($instance_id);
+    $data = $builder->getNode($instance_id);
     $build = [];
     $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager->getSlotPropType()]];
 

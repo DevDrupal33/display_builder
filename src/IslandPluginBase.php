@@ -364,7 +364,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
       $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($instance_id);
       $this->builder = $builder;
     }
-    $data = $this->builder->get($node_id);
+    $data = $this->builder->getNode($node_id);
 
     return $this->addOutOfBand(
       $this->build($this->builder, $data),

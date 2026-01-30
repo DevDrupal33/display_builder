@@ -7,7 +7,6 @@ namespace Drupal\display_builder\Entity;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Attribute\EntityType;
-use Drupal\Core\Entity\EntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
@@ -53,7 +52,7 @@ use Drupal\ui_patterns\SourcePluginManager;
     'plural' => '@count instances',
   ],
 )]
-class Instance extends EntityBase implements InstanceInterface {
+class Instance extends ContentEntityBase implements InstanceInterface {
 
   private const MAX_HISTORY = 10;
 
@@ -260,7 +259,7 @@ class Instance extends EntityBase implements InstanceInterface {
 
     // Get friendly label to display in log instead of ids.
     $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts());
-    $labelWithSummaryParent = $this->slotSourceProxy()->getLabelWithSummary($this->get($parent_id));
+    $labelWithSummaryParent = $this->slotSourceProxy()->getLabelWithSummary($this->getNode($parent_id));
 
     $log = new FormattableMarkup("%node @thingy has been moved to %parent's @slot_id", [
       '%node' => $labelWithSummary['summary'],
@@ -322,7 +321,7 @@ class Instance extends EntityBase implements InstanceInterface {
 
     // Get friendly label to display in log instead of ids.
     $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts() ?? []);
-    $labelWithSummaryParent = $this->slotSourceProxy()->getLabelWithSummary($this->get($parent_id));
+    $labelWithSummaryParent = $this->slotSourceProxy()->getLabelWithSummary($this->getNode($parent_id));
 
     $log = new FormattableMarkup("%node @source_id has been attached to %parent's @slot_id", [
       '%node' => $labelWithSummary['summary'],
@@ -338,7 +337,7 @@ class Instance extends EntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function get(string $node_id): array {
+  public function getNode(string $node_id): array {
     $root = $this->getCurrentState();
     $path = $this->getPath($root, $node_id);
     $value = NestedArray::getValue($root, $path);
@@ -419,7 +418,7 @@ class Instance extends EntityBase implements InstanceInterface {
 
     // Get friendly label to display in log instead of ids.
     $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $contexts);
-    $labelWithSummaryParent = empty($parent_id) ? ['summary' => 'root'] : $this->slotSourceProxy()->getLabelWithSummary($this->get($parent_id), $contexts);
+    $labelWithSummaryParent = empty($parent_id) ? ['summary' => 'root'] : $this->slotSourceProxy()->getLabelWithSummary($this->getNode($parent_id), $contexts);
 
     $log = new FormattableMarkup('%node has been removed from %parent', [
       '%node' => $labelWithSummary['summary'],
@@ -887,7 +886,7 @@ class Instance extends EntityBase implements InstanceInterface {
    */
   private function doAttachToSlot(array $root, string $parent_id, string $slot_id, int $position, array $data): array {
     $parent_path = $this->getPath($root, $parent_id);
-    $parent_data = $this->get($parent_id);
+    $parent_data = $this->getNode($parent_id);
     $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager()->getSlotPropType()]];
     $source = $this->sourceManager()->createInstance(
       $parent_data['source_id'],

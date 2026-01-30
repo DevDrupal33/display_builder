@@ -104,7 +104,7 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
    * @return array
    *   The node data.
    */
-  public function get(string $node_id): array;
+  public function getNode(string $node_id): array;
 
   /**
    * Get the parent id of an node.

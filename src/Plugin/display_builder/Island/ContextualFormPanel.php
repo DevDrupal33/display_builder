@@ -149,7 +149,7 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
     // parameters instead of loading again.
     /** @var \Drupal\display_builder\InstanceInterface $builder */
     $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
-    $data = $builder->get($instance_id);
+    $data = $builder->getNode($instance_id);
 
     return $this->reloadWithLocalData($builder_id, $data);
   }
