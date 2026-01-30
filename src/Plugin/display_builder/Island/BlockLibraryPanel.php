@@ -207,9 +207,18 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
       if (\in_array($source_id, self::HIDE_SOURCE, TRUE)) {
         continue;
       }
-      $source = $this->sourceManager->createInstance($source_id,
-        SourcePluginBase::buildConfiguration('slot', $slot_definition, ['source' => []], $this->configuration['contexts'] ?? [])
-      );
+
+      try {
+        $source = $this->sourceManager->createInstance($source_id,
+          SourcePluginBase::buildConfiguration('slot', $slot_definition, ['source' => []], $this->configuration['contexts'] ?? [])
+        );
+      }
+      catch (\Throwable $e) {
+        $this->logger->error('Invalid source found: %message', ['%message' => $e->getMessage()]);
+
+        continue;
+      }
+
       $this->sources[$source_id] = [
         'definition' => $definition,
         'source' => $source,

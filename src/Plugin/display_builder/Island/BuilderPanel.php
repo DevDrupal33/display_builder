@@ -325,10 +325,18 @@ class BuilderPanel extends IslandPluginBase {
     $data = $builder->get($instance_id);
     $build = [];
     $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager->getSlotPropType()]];
-    $source = $this->sourceManager->createInstance(
-      $data['source_id'],
-      SourcePluginBase::buildConfiguration('slot', $slot_definition, $data, $this->configuration['contexts'] ?? [])
-    );
+
+    try {
+      $source = $this->sourceManager->createInstance(
+        $data['source_id'],
+        SourcePluginBase::buildConfiguration('slot', $slot_definition, $data, $this->configuration['contexts'] ?? [])
+      );
+    }
+    catch (\Throwable $e) {
+      $this->logger->error('Invalid source found: %message', ['%message' => $e->getMessage()]);
+
+      return [];
+    }
 
     if ($source instanceof SourceWithSlotsInterface) {
       $build = $this->buildSingleComponent($builder_id, $instance_id, $source, $data);
@@ -428,10 +436,17 @@ class BuilderPanel extends IslandPluginBase {
         continue;
       }
 
-      $source_plugin = $this->sourceManager->createInstance(
-        $source['source_id'],
-        SourcePluginBase::buildConfiguration('slot', $slot_definition, $source, $this->configuration['contexts'] ?? [])
-      );
+      try {
+        $source_plugin = $this->sourceManager->createInstance(
+          $source['source_id'],
+          SourcePluginBase::buildConfiguration('slot', $slot_definition, $source, $this->configuration['contexts'] ?? [])
+        );
+      }
+      catch (\Throwable $e) {
+        $this->logger->error('Invalid source found: %message', ['%message' => $e->getMessage()]);
+
+        continue;
+      }
 
       if ($source_plugin instanceof SourceWithSlotsInterface) {
         $component = $this->buildSingleComponent($builder_id, '', $source_plugin, $source, $index);

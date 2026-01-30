@@ -13,6 +13,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\ui_patterns\SourcePluginManager;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -65,6 +66,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
     protected HtmxEvents $htmxEvents,
     protected EntityTypeManagerInterface $entityTypeManager,
     protected SourcePluginManager $sourceManager,
+    protected LoggerInterface $logger,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->data = $configuration;
@@ -83,6 +85,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
       $container->get('display_builder.htmx_events'),
       $container->get('entity_type.manager'),
       $container->get('plugin.manager.ui_patterns_source'),
+      $container->get('logger.factory')->get('display_builder')
     );
   }
 
