@@ -23,13 +23,13 @@
     "require": {
         "php": ">=8.3",
         "drupal/core": "^11.3",
-        "drupal/ui_patterns": "2.0.x-dev",
-        "drupal/ui_styles": "^1.19"
+        "drupal/ui_patterns": "2.0.x-dev"
     },
     "require-dev": {
         "drupal/sdc_devel": "^1.0.2",
         "drupal/ui_icons": "^1.1",
         "drupal/ui_skins": "^1.1",
+        "drupal/ui_styles": "^1.19",
         "drupal/display_builder_dev_tools": "1.0.x-dev"
     },
     "suggest": {

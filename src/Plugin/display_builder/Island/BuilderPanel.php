@@ -17,7 +17,6 @@ use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\ui_patterns\SourceWithChoicesInterface;
-use Drupal\ui_styles\Render\Element;
 use Masterminds\HTML5;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -277,7 +276,7 @@ class BuilderPanel extends IslandPluginBase {
       // configuration.
       $build['#attributes']['class'][] = 'db-background';
     }
-    elseif (!Element::isAcceptingAttributes($build) || $this->hasMultipleRoot($build)) {
+    elseif (!$this->useAttributesVariable($build) || $this->hasMultipleRoot($build)) {
       $build = [
         '#type' => 'html_tag',
         '#tag' => 'div',

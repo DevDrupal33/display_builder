@@ -4,7 +4,7 @@ import * as utils from '../utilities/utils'
 import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
-  await drupal.installModules([ 'display_builder_entity_view' ])
+  await drupal.installModules([ 'display_builder_entity_view', 'ui_styles' ])
   await drupal.drush('state:set -y display_builder.asset_libraries_local true')
 })
 
