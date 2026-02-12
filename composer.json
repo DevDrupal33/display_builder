@@ -38,9 +38,6 @@
     },
     "extra": {
         "patches": {
-            "drupal/core": {
-                "https://www.drupal.org/i/3557014 PageDisplayVariant does not transmit cache metadata": "https://git.drupalcode.org/issue/drupal-3557014/-/commit/3b38aa264d9101548946a06c27dc23997de55fb4.patch"
-            },
             "drupal/ui_patterns": {
                 "3563204 settingsSummary fix": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/476.patch",
                 "3570294 throw error on missing component instead of fatal": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/478.patch"
