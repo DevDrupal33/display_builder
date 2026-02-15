@@ -39,8 +39,8 @@
     "extra": {
         "patches": {
             "drupal/ui_patterns": {
-                "3563204 settingsSummary fix": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/476.patch",
-                "3570294 throw error on missing component instead of fatal": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/478.patch"
+                "https://www.drupal.org/i/3563204 textfield settingsSummary fix": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/476.patch",
+                "https://www.drupal.org/i/3570294 throw error on missing component instead of fatal": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/478.patch"
             }
         }
     },
