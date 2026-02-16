@@ -106,6 +106,24 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
+   * Test the getRoles() method.
+   */
+  public function testGetRoles(): void {
+    $profile = self::createDisplayBuilderProfile('role_test');
+
+    // Create a role with the permission.
+    $role = Role::create([
+      'id' => 'test_role',
+      'label' => 'Test Role',
+      'permissions' => ['use display builder role_test'],
+    ]);
+    $role->save();
+
+    $roles = $profile->getRoles();
+    self::assertContains('Test Role', $roles);
+  }
+
+  /**
    * Tests islands management.
    */
   public function testIslandConfiguration(): void {
@@ -182,24 +200,6 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
     $updated = Profile::load('test_islands');
     $enabledIslands = $updated->getEnabledIslands();
     self::assertArrayHasKey($islandId, $enabledIslands);
-  }
-
-  /**
-   * Test the getRoles() method.
-   */
-  public function testGetRoles(): void {
-    $profile = self::createDisplayBuilderProfile('role_test');
-
-    // Create a role with the permission.
-    $role = Role::create([
-      'id' => 'test_role',
-      'label' => 'Test Role',
-      'permissions' => ['use display builder role_test'],
-    ]);
-    $role->save();
-
-    $roles = $profile->getRoles();
-    self::assertContains('Test Role', $roles);
   }
 
   /**

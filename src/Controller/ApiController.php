@@ -19,7 +19,7 @@ use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\Plugin\display_builder\Island\ContextualFormPanel;
 use Drupal\display_builder\RenderableBuilderTrait;
 use Drupal\display_builder\SourceWithSlotsInterface;
-use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
+use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
 use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -367,7 +367,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $label = $request->headers->get('hx-prompt', $label) ?: $label;
     // In HTTP headers, only ASCII is guaranteed to work but historically,
     // HTTP has allowed header values with the ISO-8859-1 charset.
-    $label = mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
+    $label = \mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
     $preset = $preset_storage->create([
       'id' => \uniqid(),
       'label' => $label,
@@ -416,7 +416,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * {@inheritdoc}
    */
   public function revert(Request $request, InstanceInterface $display_builder_instance): array {
-    $instanceInfos = DisplayBuilderItemList::checkInstanceId((string) $display_builder_instance->id());
+    $instanceInfos = EntityViewOverride::checkInstanceId((string) $display_builder_instance->id());
 
     if (isset($instanceInfos['entity_type_id'], $instanceInfos['entity_id'], $instanceInfos['field_name'])) {
       // Do not get the profile entity ID from Instance context because the

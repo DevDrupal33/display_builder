@@ -25,6 +25,11 @@ use PHPUnit\Framework\MockObject\MockObject;
 final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
 
   /**
+   * The service under test.
+   */
+  private ComponentLibraryDefinitionHelper $helper;
+
+  /**
    * The SDC manager mock.
    */
   private MockObject $sdcManager;
@@ -33,11 +38,6 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
    * The source manager mock.
    */
   private MockObject $sourceManager;
-
-  /**
-   * The service under test.
-   */
-  private ComponentLibraryDefinitionHelper $helper;
 
   /**
    * {@inheritdoc}
@@ -53,6 +53,149 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
     $container = new ContainerBuilder();
     $container->set('string_translation', $this->getStringTranslationStub());
     \Drupal::setContainer($container);
+  }
+
+  /**
+   * Test excluding components by ID.
+   */
+  public function testExcludeById(): void {
+    $definitions = [
+      'test:one' => ['id' => 'test:one', 'machineName' => 'one', 'name' => 'One', 'provider' => 'test', 'category' => 'Test Category', 'template' => 'component.twig'],
+      'test:two' => ['id' => 'test:two', 'machineName' => 'two', 'name' => 'Two', 'provider' => 'test', 'category' => 'Test Category', 'template' => 'component.twig'],
+    ];
+
+    $this->sdcManager->method('getNegotiatedSortedDefinitions')->willReturn($definitions);
+
+    $sourceMock = $this->createMock(SourceWithChoicesInterface::class);
+    $sourceMock->method('getChoiceSettings')->willReturn(['component' => ['props' => []]]);
+    $this->sourceManager->method('createInstance')->with('component')->willReturn($sourceMock);
+
+    $this->sdcManager->method('find')->with('test:two')->willReturn($this->createComponent('test:two', $definitions['test:two']));
+
+    $configuration = [
+      'exclude_id' => 'test:one',
+      'exclude' => [],
+      'component_status' => [],
+      'include_no_ui' => FALSE,
+    ];
+
+    $result = $this->helper->getDefinitions($configuration);
+
+    self::assertCount(1, $result['filtered']);
+    self::assertArrayHasKey('test:two', $result['filtered']);
+  }
+
+  /**
+   * Test filtering by status.
+   */
+  public function testFilterByStatus(): void {
+    $definitions = [
+      'test:one' => ['id' => 'test:one', 'machineName' => 'one', 'name' => 'One', 'provider' => 'test', 'category' => 'Test Category', 'status' => 'deprecated', 'template' => 'component.twig'],
+      'test:two' => ['id' => 'test:two', 'machineName' => 'two', 'name' => 'Two', 'provider' => 'test', 'category' => 'Test Category', 'status' => 'experimental', 'template' => 'component.twig'],
+      'test:three' => ['id' => 'test:three', 'machineName' => 'three', 'name' => 'Three', 'provider' => 'test', 'category' => 'Test Category', 'status' => 'stable', 'template' => 'component.twig'],
+      'test:four' => ['id' => 'test:four', 'machineName' => 'four', 'name' => 'Four', 'provider' => 'test', 'category' => 'Test Category', 'template' => 'component.twig'],
+    ];
+
+    $this->sdcManager->method('getNegotiatedSortedDefinitions')->willReturn($definitions);
+
+    $sourceMock = $this->createMock(SourceWithChoicesInterface::class);
+    $sourceMock->method('getChoiceSettings')->willReturn(['component' => ['props' => []]]);
+    $this->sourceManager->method('createInstance')->with('component')->willReturn($sourceMock);
+
+    $componentMap = [
+      ['test:two', $this->createComponent('test:two', $definitions['test:two'])],
+      ['test:three', $this->createComponent('test:three', $definitions['test:three'])],
+      ['test:four', $this->createComponent('test:four', $definitions['test:four'])],
+    ];
+    $this->sdcManager->method('find')->willReturnMap($componentMap);
+
+    $configuration = [
+      'exclude' => [],
+      'component_status' => ['experimental'],
+      'include_no_ui' => FALSE,
+    ];
+
+    $result = $this->helper->getDefinitions($configuration);
+
+    self::assertCount(3, $result['filtered']);
+    self::assertArrayHasKey('test:two', $result['filtered']);
+    self::assertArrayHasKey('test:three', $result['filtered']);
+    self::assertArrayHasKey('test:four', $result['filtered']);
+  }
+
+  /**
+   * Test including noUi components.
+   */
+  public function testIncludeNoUi(): void {
+    $definitions = [
+      'test:one' => ['id' => 'test:one', 'machineName' => 'one', 'name' => 'One', 'provider' => 'test', 'category' => 'Test Category', 'noUi' => TRUE, 'template' => 'component.twig'],
+      'test:two' => ['id' => 'test:two', 'machineName' => 'two', 'name' => 'Two', 'provider' => 'test', 'category' => 'Test Category', 'template' => 'component.twig'],
+    ];
+
+    $this->sdcManager->method('getNegotiatedSortedDefinitions')->willReturn($definitions);
+
+    $sourceMock = $this->createMock(SourceWithChoicesInterface::class);
+    $sourceMock->method('getChoiceSettings')->willReturn(['component' => ['props' => []]]);
+    $this->sourceManager->method('createInstance')->with('component')->willReturn($sourceMock);
+
+    $componentMap = [
+      ['test:one', $this->createComponent('test:one', $definitions['test:one'])],
+      ['test:two', $this->createComponent('test:two', $definitions['test:two'])],
+    ];
+    $this->sdcManager->method('find')->willReturnMap($componentMap);
+
+    $configuration = [
+      'exclude' => [],
+      'component_status' => [],
+      'include_no_ui' => TRUE,
+    ];
+
+    $result = $this->helper->getDefinitions($configuration);
+
+    self::assertCount(2, $result['filtered']);
+  }
+
+  /**
+   * Test that a component with a required prop without a default is skipped.
+   */
+  public function testRequiredPropWithoutDefault(): void {
+    $definitions = [
+      'test:one' => [
+        'id' => 'test:one',
+        'machineName' => 'one',
+        'name' => 'One',
+        'provider' => 'test',
+        'category' => 'Test Category',
+        'template' => 'component.twig',
+        'props' => [
+          'required' => ['title'],
+          'properties' => [
+            'title' => [
+              'type' => 'string',
+              'ui_patterns' => (object) ['type_definition' => NULL],
+            ],
+          ],
+        ],
+      ],
+    ];
+
+    $this->sdcManager->method('getNegotiatedSortedDefinitions')->willReturn($definitions);
+
+    $sourceMock = $this->createMock(SourceWithChoicesInterface::class);
+    $sourceMock->method('getChoiceSettings')->willReturn(['component' => ['props' => []]]);
+    $this->sourceManager->method('createInstance')->with('component')->willReturn($sourceMock);
+
+    $this->sdcManager->method('find')->with('test:one')->willReturn($this->createComponent('test:one', $definitions['test:one']));
+
+    $configuration = [
+      'exclude' => [],
+      'component_status' => [],
+      'include_no_ui' => FALSE,
+    ];
+
+    $result = $this->helper->getDefinitions($configuration);
+
+    self::assertCount(0, $result['filtered']);
   }
 
   /**
@@ -103,149 +246,6 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
     self::assertArrayHasKey('test:one', $result['sources']);
     self::assertArrayHasKey('test:two', $result['sources']);
     self::assertArrayHasKey('test:six', $result['sources']);
-  }
-
-  /**
-   * Test excluding components by ID.
-   */
-  public function testExcludeById(): void {
-    $definitions = [
-      'test:one' => ['id' => 'test:one', 'machineName' => 'one', 'name' => 'One', 'provider' => 'test', 'category' => 'Test Category', 'template' => 'component.twig'],
-      'test:two' => ['id' => 'test:two', 'machineName' => 'two', 'name' => 'Two', 'provider' => 'test', 'category' => 'Test Category', 'template' => 'component.twig'],
-    ];
-
-    $this->sdcManager->method('getNegotiatedSortedDefinitions')->willReturn($definitions);
-
-    $sourceMock = $this->createMock(SourceWithChoicesInterface::class);
-    $sourceMock->method('getChoiceSettings')->willReturn(['component' => ['props' => []]]);
-    $this->sourceManager->method('createInstance')->with('component')->willReturn($sourceMock);
-
-    $this->sdcManager->method('find')->with('test:two')->willReturn($this->createComponent('test:two', $definitions['test:two']));
-
-    $configuration = [
-      'exclude_id' => 'test:one',
-      'exclude' => [],
-      'component_status' => [],
-      'include_no_ui' => FALSE,
-    ];
-
-    $result = $this->helper->getDefinitions($configuration);
-
-    self::assertCount(1, $result['filtered']);
-    self::assertArrayHasKey('test:two', $result['filtered']);
-  }
-
-  /**
-   * Test including noUi components.
-   */
-  public function testIncludeNoUi(): void {
-    $definitions = [
-      'test:one' => ['id' => 'test:one', 'machineName' => 'one', 'name' => 'One', 'provider' => 'test', 'category' => 'Test Category', 'noUi' => TRUE, 'template' => 'component.twig'],
-      'test:two' => ['id' => 'test:two', 'machineName' => 'two', 'name' => 'Two', 'provider' => 'test', 'category' => 'Test Category', 'template' => 'component.twig'],
-    ];
-
-    $this->sdcManager->method('getNegotiatedSortedDefinitions')->willReturn($definitions);
-
-    $sourceMock = $this->createMock(SourceWithChoicesInterface::class);
-    $sourceMock->method('getChoiceSettings')->willReturn(['component' => ['props' => []]]);
-    $this->sourceManager->method('createInstance')->with('component')->willReturn($sourceMock);
-
-    $componentMap = [
-      ['test:one', $this->createComponent('test:one', $definitions['test:one'])],
-      ['test:two', $this->createComponent('test:two', $definitions['test:two'])],
-    ];
-    $this->sdcManager->method('find')->willReturnMap($componentMap);
-
-    $configuration = [
-      'exclude' => [],
-      'component_status' => [],
-      'include_no_ui' => TRUE,
-    ];
-
-    $result = $this->helper->getDefinitions($configuration);
-
-    self::assertCount(2, $result['filtered']);
-  }
-
-  /**
-   * Test filtering by status.
-   */
-  public function testFilterByStatus(): void {
-    $definitions = [
-      'test:one' => ['id' => 'test:one', 'machineName' => 'one', 'name' => 'One', 'provider' => 'test', 'category' => 'Test Category', 'status' => 'deprecated', 'template' => 'component.twig'],
-      'test:two' => ['id' => 'test:two', 'machineName' => 'two', 'name' => 'Two', 'provider' => 'test', 'category' => 'Test Category', 'status' => 'experimental', 'template' => 'component.twig'],
-      'test:three' => ['id' => 'test:three', 'machineName' => 'three', 'name' => 'Three', 'provider' => 'test', 'category' => 'Test Category', 'status' => 'stable', 'template' => 'component.twig'],
-      'test:four' => ['id' => 'test:four', 'machineName' => 'four', 'name' => 'Four', 'provider' => 'test', 'category' => 'Test Category', 'template' => 'component.twig'],
-    ];
-
-    $this->sdcManager->method('getNegotiatedSortedDefinitions')->willReturn($definitions);
-
-    $sourceMock = $this->createMock(SourceWithChoicesInterface::class);
-    $sourceMock->method('getChoiceSettings')->willReturn(['component' => ['props' => []]]);
-    $this->sourceManager->method('createInstance')->with('component')->willReturn($sourceMock);
-
-    $componentMap = [
-      ['test:two', $this->createComponent('test:two', $definitions['test:two'])],
-      ['test:three', $this->createComponent('test:three', $definitions['test:three'])],
-      ['test:four', $this->createComponent('test:four', $definitions['test:four'])],
-    ];
-    $this->sdcManager->method('find')->willReturnMap($componentMap);
-
-    $configuration = [
-      'exclude' => [],
-      'component_status' => ['experimental'],
-      'include_no_ui' => FALSE,
-    ];
-
-    $result = $this->helper->getDefinitions($configuration);
-
-    self::assertCount(3, $result['filtered']);
-    self::assertArrayHasKey('test:two', $result['filtered']);
-    self::assertArrayHasKey('test:three', $result['filtered']);
-    self::assertArrayHasKey('test:four', $result['filtered']);
-  }
-
-  /**
-   * Test that a component with a required prop without a default is skipped.
-   */
-  public function testRequiredPropWithoutDefault(): void {
-    $definitions = [
-      'test:one' => [
-        'id' => 'test:one',
-        'machineName' => 'one',
-        'name' => 'One',
-        'provider' => 'test',
-        'category' => 'Test Category',
-        'template' => 'component.twig',
-        'props' => [
-          'required' => ['title'],
-          'properties' => [
-            'title' => [
-              'type' => 'string',
-              'ui_patterns' => (object) ['type_definition' => NULL],
-            ],
-          ],
-        ],
-      ],
-    ];
-
-    $this->sdcManager->method('getNegotiatedSortedDefinitions')->willReturn($definitions);
-
-    $sourceMock = $this->createMock(SourceWithChoicesInterface::class);
-    $sourceMock->method('getChoiceSettings')->willReturn(['component' => ['props' => []]]);
-    $this->sourceManager->method('createInstance')->with('component')->willReturn($sourceMock);
-
-    $this->sdcManager->method('find')->with('test:one')->willReturn($this->createComponent('test:one', $definitions['test:one']));
-
-    $configuration = [
-      'exclude' => [],
-      'component_status' => [],
-      'include_no_ui' => FALSE,
-    ];
-
-    $result = $this->helper->getDefinitions($configuration);
-
-    self::assertCount(0, $result['filtered']);
   }
 
   /**

@@ -36,7 +36,10 @@ class PageLayoutController extends IntegrationControllerBase {
    *   The display builder renderable.
    */
   public function getBuilder(PageLayoutInterface $page_layout): array {
-    return $this->renderBuilder($page_layout);
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $page_layout]);
+
+    return $this->renderBuilder($buildable);
   }
 
   /**

@@ -10,14 +10,15 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay;
-use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
 use Drupal\display_builder_entity_view\Form\EntityViewDisplayForm;
 use Drupal\display_builder_entity_view\Form\LayoutBuilderEntityViewDisplayForm;
+use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityView;
+use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
 
 /**
  * Hook implementations for display_builder_entity_view.
@@ -28,17 +29,6 @@ class DisplayBuilderEntityViewHook {
     protected ModuleHandlerInterface $moduleHandler,
     protected EntityTypeManagerInterface $entityTypeManager,
   ) {}
-
-  /**
-   * Implements hook_entity_field_type_alter().
-   *
-   * @param array $info
-   *   The field types to alter.
-   */
-  #[Hook('field_info_alter')]
-  public function fieldInfoAlter(array &$info): void {
-    $info['ui_patterns_source']['list_class'] = DisplayBuilderItemList::class;
-  }
 
   /**
    * Implements hook_entity_type_alter().
@@ -77,27 +67,27 @@ class DisplayBuilderEntityViewHook {
 
     $id = (string) $entity->id();
 
-    if (\str_starts_with($id, EntityViewDisplay::getPrefix())) {
+    if (\str_starts_with($id, EntityView::getPrefix())) {
       $operations['build'] = [
         'title' => new TranslatableMarkup('Build display'),
-        'url' => EntityViewDisplay::getUrlFromInstanceId($id),
+        'url' => EntityView::getUrlFromInstanceId($id),
         'weight' => -1,
       ];
       $operations['edit'] = [
         'title' => new TranslatableMarkup('Edit display'),
-        'url' => EntityViewDisplay::getDisplayUrlFromInstanceId($id),
+        'url' => EntityView::getDisplayUrlFromInstanceId($id),
         'weight' => 10,
       ];
     }
-    elseif (\str_starts_with($id, DisplayBuilderItemList::getPrefix())) {
+    elseif (\str_starts_with($id, EntityViewOverride::getPrefix())) {
       $operations['build'] = [
         'title' => new TranslatableMarkup('Build display'),
-        'url' => DisplayBuilderItemList::getUrlFromInstanceId($id),
+        'url' => EntityViewOverride::getUrlFromInstanceId($id),
         'weight' => -1,
       ];
       $operations['edit'] = [
         'title' => new TranslatableMarkup('Edit display'),
-        'url' => DisplayBuilderItemList::getUrlFromInstanceId($id),
+        'url' => EntityViewOverride::getUrlFromInstanceId($id),
         'weight' => 10,
       ];
     }
@@ -134,11 +124,11 @@ class DisplayBuilderEntityViewHook {
       if (!$display->getDisplayBuilderOverrideField()) {
         continue;
       }
-      $field_name = $display->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY);
+      $field_name = $display->getThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY);
 
-      // Instance id same as in DisplayBuilderItemList.
-      $instance_id = \sprintf('%s%s__%s__%s',
-        DisplayBuilderItemList::getPrefix(),
+      $instance_id = \sprintf(
+        '%s%s__%s__%s',
+        EntityViewOverride::getPrefix(),
         $entity_type_id,
         $entity->id(),
         $field_name,
@@ -151,30 +141,6 @@ class DisplayBuilderEntityViewHook {
       }
       $storage->delete([$instance]);
     }
-  }
-
-  /**
-   * Implements hook_display_builder_provider_info().
-   *
-   * @return array
-   *   An associative array of display builder providers.
-   */
-  #[Hook('display_builder_provider_info')]
-  public function displayBuilderProviderInfo(): array {
-    return [
-      'entity_view' => [
-        'label' => new TranslatableMarkup('Entity view'),
-        'class' => EntityViewDisplay::class,
-        'prefix' => EntityViewDisplay::getPrefix(),
-        'storage' => 'entity_view_display',
-      ],
-      'entity_view_override' => [
-        'label' => new TranslatableMarkup('Entity view override'),
-        'class' => DisplayBuilderItemList::class,
-        'prefix' => DisplayBuilderItemList::getPrefix(),
-        'storage' => NULL,
-      ],
-    ];
   }
 
 }

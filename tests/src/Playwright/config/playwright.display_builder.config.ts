@@ -18,8 +18,8 @@ export default {
   entityPrefix: 'entity_view__',
   // DisplayExtender::getPrefix()
   viewsPrefix: 'views__',
-  // MockEntity::getPrefix()
-  develPrefix: 'devel__',
+  // StandaloneEntity::getPrefix()
+  develPrefix: 'standalone__',
 
   keyFullscreen: 'Shift+F',
   keyHighlight: 'Shift+H',

@@ -9,7 +9,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
 
@@ -30,34 +30,34 @@ trait EntityViewDisplayFormTrait {
     parent::submitForm($form, $form_state);
 
     // @todo we should have always a fallback.
-    $display_builder_config = $form_state->getValue([ConfigFormBuilderInterface::PROFILE_PROPERTY]) ?? 'default';
+    $display_builder_config = $form_state->getValue([DisplayBuildableInterface::PROFILE_PROPERTY]) ?? 'default';
 
     // Empty means disabled.
     if (empty($display_builder_config)) {
-      $this->entity->unsetThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY);
+      $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY);
     }
     else {
-      $this->entity->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY, $display_builder_config);
+      $this->entity->setThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY, $display_builder_config);
     }
 
-    $display_builder_override = $form_state->getValue([ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY]) ?? '';
+    $display_builder_override = $form_state->getValue([DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY]) ?? '';
 
     // Empty means disabled.
     if (empty($display_builder_override)) {
-      $this->entity->unsetThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY);
+      $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY);
     }
     else {
-      $this->entity->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY, $display_builder_override);
+      $this->entity->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY, $display_builder_override);
     }
 
-    $display_builder_override_profile = $form_state->getValue([ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY]) ?? '';
+    $display_builder_override_profile = $form_state->getValue([DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY]) ?? '';
 
     // Empty means disabled.
     if (empty($display_builder_override_profile)) {
-      $this->entity->unsetThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY);
+      $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY);
     }
     else {
-      $this->entity->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY, $display_builder_override_profile);
+      $this->entity->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY, $display_builder_override_profile);
     }
 
     $this->entity->save();
@@ -89,7 +89,7 @@ trait EntityViewDisplayFormTrait {
       '#title' => $this->t('Display builder'),
       '#weight' => -11,
       '#attributes' => ['class' => ['button']],
-      '#url' => $this->entity->getBuilderUrl(),
+      '#url' => $this->displayBuildable()->getBuilderUrl(),
       '#access' => $is_display_builder_enabled,
     ];
 
@@ -104,13 +104,13 @@ trait EntityViewDisplayFormTrait {
       '#weight' => 1,
     ];
 
-    $form['display_builder_wrapper'][ConfigFormBuilderInterface::PROFILE_PROPERTY] = $this->configFormBuilder->build($this->entity, FALSE);
+    $form['display_builder_wrapper'][DisplayBuildableInterface::PROFILE_PROPERTY] = $this->displayBuildable()->buildInstanceForm(FALSE);
 
     /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $entity */
     $entity = $this->getEntity();
 
     if ($entity instanceof DisplayBuilderOverridableInterface) {
-      $form['display_builder_wrapper'][ConfigFormBuilderInterface::PROFILE_PROPERTY]['override_form'] = $this->buildOverridesForm($entity);
+      $form['display_builder_wrapper'][DisplayBuildableInterface::PROFILE_PROPERTY]['override_form'] = $this->buildOverridesForm($entity);
     }
 
     return $form;
@@ -159,7 +159,7 @@ trait EntityViewDisplayFormTrait {
     /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface $overridable */
     $overridable = $entity;
     $form = [];
-    $form[ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY] = [
+    $form[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY] = [
       '#type' => 'select',
       '#title' => $this->t('Select a field to override this display per content'),
       '#options' => $options,
@@ -168,23 +168,23 @@ trait EntityViewDisplayFormTrait {
       '#description' => $description,
     ];
 
-    $form[ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY] = [
+    $form[DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY] = [
       '#type' => 'select',
       '#title' => $this->t('Override profile'),
       '#description' => $this->t('The profile used for content overrides.'),
-      '#options' => $this->configFormBuilder->getAllowedProfiles(),
+      '#options' => $this->displayBuildable()->getAllowedProfiles(),
       '#default_value' => $overridable->getDisplayBuilderOverrideProfile()?->id(),
       '#states' => [
         'invisible' => [
-          ':input[name="' . ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY . '"]' => ['filled' => FALSE],
+          ':input[name="' . DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY . '"]' => ['filled' => FALSE],
         ],
       ],
     ];
 
-    if (!$this->configFormBuilder->isAllowed($entity)) {
-      $form[ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY]['#disabled'] = TRUE;
-      unset($form[ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY]['#description']);
-      $form[ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY]['#disabled'] = TRUE;
+    if (!$this->displayBuildable()->isAllowed()) {
+      $form[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY]['#disabled'] = TRUE;
+      unset($form[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY]['#description']);
+      $form[DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY]['#disabled'] = TRUE;
     }
 
     return $form;
@@ -318,6 +318,19 @@ trait EntityViewDisplayFormTrait {
     }
 
     parent::copyFormValuesToEntity($entity, $form, $form_state);
+  }
+
+  /**
+   * Gets the display buildable manager.
+   *
+   * @return \Drupal\display_builder\DisplayBuildableInterface
+   *   The manager for display buildable.
+   */
+  protected function displayBuildable(): DisplayBuildableInterface {
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $this->getEntity()]);
+
+    return $buildable;
   }
 
 }

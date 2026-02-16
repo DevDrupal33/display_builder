@@ -63,30 +63,6 @@ class TestIslandView extends IslandPluginBase implements IslandConfigurationForm
   }
 
   /**
-   * Validate the Island configuration.
-   *
-   * @param array $form
-   *   The form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The form state.
-   */
-  public function validateConfigurationForm(array &$form, FormStateInterface $form_state): void {
-    // Be sure to remove unchecked from values.
-    $form_state->setValue('string_array', \array_filter($form_state->getValue('string_array')));
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function defaultConfiguration(): array {
-    return [
-      'string_value' => '',
-      'bool_value' => 0,
-      'string_array' => [],
-    ] + parent::defaultConfiguration();
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function configurationSummary(): array {
@@ -106,6 +82,30 @@ class TestIslandView extends IslandPluginBase implements IslandConfigurationForm
     }
 
     return $summary;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration(): array {
+    return [
+      'string_value' => '',
+      'bool_value' => 0,
+      'string_array' => [],
+    ] + parent::defaultConfiguration();
+  }
+
+  /**
+   * Validate the Island configuration.
+   *
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state): void {
+    // Be sure to remove unchecked from values.
+    $form_state->setValue('string_array', \array_filter($form_state->getValue('string_array')));
   }
 
 }

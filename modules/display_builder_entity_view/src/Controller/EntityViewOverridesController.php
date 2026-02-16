@@ -7,6 +7,7 @@ namespace Drupal\display_builder_entity_view\Controller;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Entity\Display\EntityDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
@@ -14,7 +15,6 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Controller\IntegrationControllerBase;
-use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Symfony\Component\HttpFoundation\Response;
@@ -72,10 +72,12 @@ final class EntityViewOverridesController extends IntegrationControllerBase {
     /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $entity_display */
     $entity_display = $this->getEntityViewDisplay($entity_type_id, $entity->bundle(), $view_mode);
     \assert($entity_display instanceof DisplayBuilderOverridableInterface);
-    /** @var \Drupal\display_builder\DisplayBuildableInterface $with_display_builder */
+    /** @var \Drupal\Core\Field\FieldItemListInterface $with_display_builder */
     $with_display_builder = $entity->get($entity_display->getDisplayBuilderOverrideField());
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('entity_view_override', ['field' => $with_display_builder]);
 
-    return $this->renderBuilder($with_display_builder);
+    return $this->renderBuilder($buildable);
   }
 
   /**
@@ -189,13 +191,12 @@ final class EntityViewOverridesController extends IntegrationControllerBase {
    * @param string $view_mode
    *   View mode of the display.
    *
-   * @return \Drupal\display_builder\DisplayBuildableInterface|null
+   * @return \Drupal\Core\Entity\Display\EntityDisplayInterface|null
    *   The corresponding entity view display.
    */
-  protected function getEntityViewDisplay(string $entity_type_id, string $bundle, string $view_mode): ?DisplayBuildableInterface {
+  protected function getEntityViewDisplay(string $entity_type_id, string $bundle, string $view_mode): ?EntityDisplayInterface {
     $display_id = \sprintf('%s.%s.%s', $entity_type_id, $bundle, $view_mode);
-
-    /** @var \Drupal\display_builder\DisplayBuildableInterface|null $display */
+    /** @var \Drupal\Core\Entity\Display\EntityDisplayInterface|null $display */
     $display = $this->entityTypeManager()->getStorage('entity_view_display')
       ->load($display_id);
 

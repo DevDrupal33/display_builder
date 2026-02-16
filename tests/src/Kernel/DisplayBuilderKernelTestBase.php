@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\display_builder\Kernel;
 
-use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\Entity\Profile;
 use Drupal\display_builder\InstanceInterface;
@@ -17,21 +16,6 @@ use Drupal\KernelTests\KernelTestBase;
  * @internal
  */
 abstract class DisplayBuilderKernelTestBase extends KernelTestBase {
-
-  /**
-   * Init mock buildable for tests.
-   *
-   * @param string $profile_id
-   *   The display builder profile ID.
-   * @param string|null $instance_id
-   *   The display builder instance ID.
-   *
-   * @return \Drupal\display_builder\DisplayBuildableInterface
-   *   The display buildable we are checking the form for.
-   */
-  protected function createDisplayBuilderBuildable(?string $profile_id = NULL, ?string $instance_id = NULL): DisplayBuildableInterface {
-    return new DisplayBuildableMock($profile_id, $instance_id ?? $this->randomMachineName());
-  }
 
   /**
    * Init a test instance with optional id and profile.

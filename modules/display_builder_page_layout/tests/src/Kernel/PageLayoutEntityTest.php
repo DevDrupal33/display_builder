@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder_page_layout\Kernel;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\DisplayBuildableInterface;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -39,6 +40,11 @@ final class PageLayoutEntityTest extends KernelTestBase {
   protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
+   * The display buildable manager.
+   */
+  protected DisplayBuildablePluginManager $displayBuildableManager;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
@@ -54,6 +60,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
     $this->installConfig(['display_builder']);
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
+    $this->displayBuildableManager = $this->container->get('plugin.manager.display_buildable');
   }
 
   /**
@@ -66,33 +73,37 @@ final class PageLayoutEntityTest extends KernelTestBase {
       'id' => 'test_layout',
       'label' => 'Test Layout',
       'weight' => 1,
-      ConfigFormBuilderInterface::PROFILE_PROPERTY => 'test',
-      ConfigFormBuilderInterface::SOURCES_PROPERTY => [],
+      DisplayBuildableInterface::PROFILE_PROPERTY => 'test',
+      DisplayBuildableInterface::SOURCES_PROPERTY => [],
       'conditions' => [],
     ]);
     $entity->setStatus(TRUE)->save();
-    $entity->initInstanceIfMissing();
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $entity]);
+    $buildable->initInstanceIfMissing();
 
-    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($entity->getInstanceId());
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($buildable->getInstanceId());
     self::assertNotNull($instance, 'PageLayout instance loaded.');
 
     // Load the entity.
     $loaded = PageLayout::load('test_layout');
     self::assertNotNull($loaded, 'PageLayout entity loaded.');
     self::assertSame('Test Layout', $loaded->label());
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $loaded]);
 
     // Test getInstanceId().
-    $id = \sprintf('%s%s', PageLayout::getPrefix(), 'test_layout');
-    self::assertSame($id, $loaded->getInstanceId());
+    $id = \sprintf('%s%s', $buildable::getPrefix(), 'test_layout');
+    self::assertSame($id, $buildable->getInstanceId());
 
-    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($loaded->getInstanceId());
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($buildable->getInstanceId());
     self::assertNotNull($instance);
 
     // Delete the entity.
     $entity->delete();
     self::assertNull(PageLayout::load('test_layout'), 'Entity deleted.');
 
-    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($loaded->getInstanceId());
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($buildable->getInstanceId());
     self::assertNull($instance);
   }
 
@@ -105,12 +116,14 @@ final class PageLayoutEntityTest extends KernelTestBase {
       'id' => 'edit_layout',
       'label' => 'Original Label',
       'weight' => 5,
-      ConfigFormBuilderInterface::PROFILE_PROPERTY => 'test',
-      ConfigFormBuilderInterface::SOURCES_PROPERTY => [],
+      DisplayBuildableInterface::PROFILE_PROPERTY => 'test',
+      DisplayBuildableInterface::SOURCES_PROPERTY => [],
       'conditions' => [],
     ]);
     $entity->setStatus(TRUE)->save();
-    $entity->initInstanceIfMissing();
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $entity]);
+    $buildable->initInstanceIfMissing();
 
     // Load and edit the entity.
     $loaded = PageLayout::load('edit_layout');

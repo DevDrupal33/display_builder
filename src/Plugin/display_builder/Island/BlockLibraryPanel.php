@@ -209,7 +209,8 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
       }
 
       try {
-        $source = $this->sourceManager->createInstance($source_id,
+        $source = $this->sourceManager->createInstance(
+          $source_id,
           SourcePluginBase::buildConfiguration('slot', $slot_definition, ['source' => []], $this->configuration['contexts'] ?? [])
         );
       }

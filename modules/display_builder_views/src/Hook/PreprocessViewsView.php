@@ -9,6 +9,7 @@ use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -21,6 +22,8 @@ class PreprocessViewsView {
     protected EntityTypeManagerInterface $entityTypeManager,
     #[Autowire('@ui_patterns.component_element_builder')]
     protected ComponentElementBuilder $componentElementBuilder,
+    #[Autowire('@plugin.manager.display_buildable')]
+    private DisplayBuildablePluginManager $displayBuildableManager,
   ) {}
 
   /**
@@ -39,10 +42,12 @@ class PreprocessViewsView {
     }
 
     $extender = $extenders['display_builder'];
-    $sources = $extender->getSources();
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('view_display', ['extender' => $extender]);
+    $sources = $buildable->getSources();
 
     // We fallback on normal View if Display Builder is empty or disabled!
-    if (empty($sources) || !$extender->getProfile()) {
+    if (empty($sources) || !$buildable->getProfile()) {
       return;
     }
 

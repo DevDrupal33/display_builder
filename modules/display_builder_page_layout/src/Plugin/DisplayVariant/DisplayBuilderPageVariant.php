@@ -14,6 +14,7 @@ use Drupal\Core\Extension\ExtensionList;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\Registry;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -63,6 +64,11 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
    */
   protected ExtensionList $modules;
 
+  /**
+   * The display buildable plugin manager.
+   */
+  private DisplayBuildablePluginManager $displayBuildableManager;
+
   public function __construct(
     array $configuration,
     $plugin_id,
@@ -71,12 +77,14 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
     EntityTypeManagerInterface $entity_type_manager,
     Registry $theme_registry,
     ExtensionList $modules,
+    DisplayBuildablePluginManager $display_buildable_manager,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->componentElementBuilder = $component_element_builder;
     $this->entityTypeManager = $entity_type_manager;
     $this->themeRegistry = $theme_registry;
     $this->modules = $modules;
+    $this->displayBuildableManager = $display_buildable_manager;
   }
 
   /**
@@ -91,6 +99,7 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
       $container->get('entity_type.manager'),
       $container->get('theme.registry'),
       $container->get('extension.list.module'),
+      $container->get('plugin.manager.display_buildable'),
     );
   }
 
@@ -129,7 +138,9 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
     }
 
     $sources = $page_layout->getSources();
-    $instance_id = $page_layout->getInstanceId();
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $page_layout]);
+    $instance_id = $buildable->getInstanceId();
     $this->replaceTitleAndContent($sources, $this->title, $this->mainContent);
 
     /** @var \Drupal\display_builder\InstanceInterface $instance */
@@ -179,7 +190,7 @@ class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryP
    * {@inheritdoc}
    */
   public function setTitle($title): self {
-    $this->title = $title;
+    $this->title = $title ?? '';
 
     return $this;
   }

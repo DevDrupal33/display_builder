@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Drupal\display_builder_views\EventSubscriber;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
-use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
+use Drupal\display_builder_views\Plugin\display_builder\Buildable\ViewDisplay;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -17,6 +18,7 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
   public function __construct(
     private EntityTypeManagerInterface $entityTypeManager,
+    private DisplayBuildablePluginManager $displayBuildableManager,
   ) {}
 
   /**
@@ -40,7 +42,7 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     /** @var \Drupal\display_builder\InstanceInterface $instance */
     $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
 
-    if (!$instance->hasSaveContextsRequirement(DisplayExtender::getContextRequirement(), $contexts)) {
+    if (!$instance->hasSaveContextsRequirement(ViewDisplay::getContextRequirement(), $contexts)) {
       return;
     }
 
@@ -50,16 +52,18 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     if (!$view) {
       return;
     }
-    $display_id = DisplayExtender::checkInstanceId($builder_id)['display'];
+    $display_id = ViewDisplay::checkInstanceId($builder_id)['display'];
     $view->getExecutable()->setDisplay($display_id);
     $extenders = $view->getExecutable()->getDisplay()->getExtenders();
 
     if (!isset($extenders['display_builder'])) {
       return;
     }
-    /** @var \Drupal\display_builder\DisplayBuildableInterface $extender */
+    /** @var \Drupal\views\Plugin\views\PluginBase $extender */
     $extender = $extenders['display_builder'];
-    $extender->saveSources();
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('view_display', ['extender' => $extender]);
+    $buildable->saveSources();
   }
 
 }

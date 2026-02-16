@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_entity_view\Entity;
 
-use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
@@ -13,14 +11,10 @@ use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
-use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Url;
-use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\ProfileInterface;
-use Drupal\display_builder_entity_view\Field\DisplayBuilderItemList;
-use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
+use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
 
 /**
  * Common methods for entity view display.
@@ -38,13 +32,13 @@ trait EntityViewDisplayTrait {
   public function calculateDependencies(): self {
     parent::calculateDependencies();
 
-    if (!$this->getInstanceId()) {
+    if (!$this->displayBuildable()->getInstanceId()) {
       // If there is no instance ID, we cannot calculate dependencies.
       return $this;
     }
 
     /** @var \Drupal\display_builder\InstanceInterface $instance */
-    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($this->getInstanceId());
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($this->displayBuildable()->getInstanceId());
 
     if (!$instance) {
       return $this;
@@ -55,7 +49,7 @@ trait EntityViewDisplayTrait {
       return $this;
     }
 
-    foreach ($this->getSources() as $source_data) {
+    foreach ($this->displayBuildable()->getSources() as $source_data) {
       /** @var \Drupal\ui_patterns\SourceInterface $source */
       $source = $this->sourcePluginManager->getSource('', [], $source_data, $contexts);
       $this->addDependencies($source->calculateDependencies());
@@ -70,7 +64,7 @@ trait EntityViewDisplayTrait {
    * @return bool
    *   The display builder is enabled if there is a Display Builder entity.
    *
-   * @see \Drupal\display_builder_entity_view\DisplayBuilderEnabledInterface
+   * @see \Drupal\display_builder_entity_view\DisplayBuilderEntityDisplayInterface
    */
   public function isDisplayBuilderEnabled(): bool {
     // Display Builder must not be enabled for the '_custom' view mode that is
@@ -79,7 +73,7 @@ trait EntityViewDisplayTrait {
       return FALSE;
     }
 
-    return (bool) $this->getProfile();
+    return (bool) $this->displayBuildable()->getProfile();
   }
 
   /**
@@ -108,7 +102,7 @@ trait EntityViewDisplayTrait {
 
     $contexts = $instance->getContexts();
 
-    foreach ($this->getSources() as $source_data) {
+    foreach ($this->displayBuildable()->getSources() as $source_data) {
       /** @var \Drupal\ui_patterns\SourceInterface $source */
       $source = $this->sourcePluginManager->getSource('', [], $source_data, $contexts);
       $source_dependencies = $source->calculateDependencies();
@@ -126,99 +120,6 @@ trait EntityViewDisplayTrait {
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public static function getPrefix(): string {
-    return 'entity_view__';
-  }
-
-  /**
-   * Returns the context requirement for this entity view display.
-   *
-   * This is used to ensure that the entity context is available when building
-   * the display builder.
-   *
-   * @return string
-   *   The context requirement string.
-   *
-   * @see \Drupal\display_builder\DisplayBuildableInterface
-   */
-  public static function getContextRequirement(): string {
-    return 'entity';
-  }
-
-  /**
-   * {@inheritdoc}
-   *
-   * @see \Drupal\display_builder\DisplayBuildableInterface
-   */
-  public static function checkInstanceId(string $instance_id): ?array {
-    if (!\str_starts_with($instance_id, EntityViewDisplay::getPrefix())) {
-      return NULL;
-    }
-    [, $entity, $bundle, $view_mode] = \explode('__', $instance_id);
-
-    return [
-      'entity' => $entity,
-      'bundle' => $bundle,
-      'view_mode' => $view_mode,
-    ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getBuilderUrl(): Url {
-    $fieldable_entity_type = $this->entityTypeManager->getDefinition($this->getTargetEntityTypeId());
-    $bundle_parameter_key = $fieldable_entity_type->getBundleEntityType() ?: 'bundle';
-    $parameters = [
-      $bundle_parameter_key => $this->getTargetBundle(),
-      'view_mode_name' => $this->getMode(),
-    ];
-    $route_name = \sprintf('display_builder_entity_view.%s', $this->getTargetEntityTypeId());
-
-    return Url::fromRoute($route_name, $parameters);
-  }
-
-  /**
-   * Returns the URL for the display builder from an instance id.
-   *
-   * @param string $instance_id
-   *   The builder instance ID.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   *
-   * @return \Drupal\Core\Url
-   *   The url of the instance.
-   *
-   * @see \Drupal\display_builder\DisplayBuildableInterface
-   */
-  public static function getUrlFromInstanceId(string $instance_id): Url {
-    $params = self::getUrlParamsFromInstanceId($instance_id);
-    $route_name = \sprintf('display_builder_entity_view.%s', $params['entity']);
-
-    return Url::fromRoute($route_name, $params);
-  }
-
-  /**
-   * Returns the URL for the display builder from an instance id.
-   *
-   * @param string $instance_id
-   *   The builder instance ID.
-   *
-   * @return \Drupal\Core\Url
-   *   The url of the instance.
-   *
-   * @see Drupal\display_builder\DisplayBuildableInterface
-   */
-  public static function getDisplayUrlFromInstanceId(string $instance_id): Url {
-    $params = self::getUrlParamsFromInstanceId($instance_id);
-    $route_name = \sprintf('entity.entity_view_display.%s.view_mode', $params['entity']);
-
-    return Url::fromRoute($route_name, $params);
-  }
-
-  /**
    * Returns the field name used to store overridden displays.
    *
    * @return string|null
@@ -227,7 +128,7 @@ trait EntityViewDisplayTrait {
    * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
    */
   public function getDisplayBuilderOverrideField(): ?string {
-    return $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_FIELD_PROPERTY);
+    return $this->getThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY);
   }
 
   /**
@@ -239,7 +140,7 @@ trait EntityViewDisplayTrait {
    * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
    */
   public function getDisplayBuilderOverrideProfile(): ?ProfileInterface {
-    $display_builder_id = $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::OVERRIDE_PROFILE_PROPERTY);
+    $display_builder_id = $this->getThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY);
 
     if ($display_builder_id === NULL) {
       return NULL;
@@ -262,136 +163,6 @@ trait EntityViewDisplayTrait {
   }
 
   /**
-   * Returns the display builder instance.
-   *
-   * @return \Drupal\display_builder\ProfileInterface|null
-   *   The display builder instance, or NULL if not set.
-   *
-   * @see \Drupal\display_builder\DisplayBuildableInterface
-   */
-  public function getProfile(): ?ProfileInterface {
-    $display_builder_id = $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::PROFILE_PROPERTY);
-
-    if ($display_builder_id === NULL) {
-      return NULL;
-    }
-
-    return $this->loadDisplayBuilder($display_builder_id);
-  }
-
-  /**
-   * Returns the instance ID for the display builder.
-   *
-   * @return string|null
-   *   The instance ID for the display builder, or NULL if the entity is new.
-   *
-   * @see \Drupal\display_builder\DisplayBuildableInterface
-   */
-  public function getInstanceId(): ?string {
-    // Usually an entity is new if no ID exists for it yet.
-    if ($this->isNew()) {
-      return NULL;
-    }
-
-    return \sprintf('%s%s', EntityViewDisplay::getPrefix(), \str_replace('.', '__', $this->id));
-  }
-
-  /**
-   * Checks access.
-   *
-   * @param string $instance_id
-   *   Instance entity ID.
-   * @param \Drupal\Core\Session\AccountInterface $account
-   *   The user session for which to check access.
-   *
-   * @return \Drupal\Core\Access\AccessResultInterface
-   *   The access result.
-   *
-   * @see \Drupal\display_builder\InstanceAccessControlHandler
-   */
-  public static function checkAccess(string $instance_id, AccountInterface $account): AccessResultInterface {
-    $params = self::getUrlParamsFromInstanceId($instance_id);
-    $permission = 'administer ' . $params['entity'] . ' display';
-
-    return $account->hasPermission($permission) ? AccessResult::allowed() : AccessResult::forbidden();
-  }
-
-  /**
-   * Initializes the display builder instance if it is missing.
-   *
-   * @see \Drupal\display_builder\DisplayBuildableInterface
-   */
-  public function initInstanceIfMissing(): void {
-    /** @var \Drupal\display_builder\InstanceStorage $storage */
-    $storage = $this->entityTypeManager->getStorage('display_builder_instance');
-
-    /** @var \Drupal\display_builder\InstanceInterface $instance */
-    $instance = $storage->load($this->getInstanceId());
-
-    if (!$instance) {
-      $instance = $storage->createFromImplementation($this);
-      $instance->save();
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInitialSources(): array {
-    // Get the sources stored in config.
-    $sources = $this->getSources();
-
-    if (empty($sources)) {
-      // initialImport() has two implementations:
-      // - EntityViewDisplay::initialImport()
-      // - LayoutBuilderEntityViewDisplay::initialImport()
-      $sources = $this->initialImport();
-    }
-
-    return $sources;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInitialContext(): array {
-    $entity_type_id = $this->getTargetEntityTypeId();
-    $bundle = $this->getTargetBundle();
-    $view_mode = $this->getMode();
-    $sampleEntity = $this->sampleEntityGenerator->get($entity_type_id, $bundle);
-    $contexts = [
-      'entity' => EntityContext::fromEntity($sampleEntity),
-      'bundle' => new Context(ContextDefinition::create('string'), $bundle),
-      'view_mode' => new Context(ContextDefinition::create('string'), $view_mode),
-    ];
-
-    return RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
-  }
-
-  /**
-   * Returns the sources of the display builder.
-   *
-   * @return array
-   *   The sources of the display builder.
-   *
-   * @see \Drupal\display_builder\DisplayBuildableInterface
-   */
-  public function getSources(): array {
-    return $this->getThirdPartySetting('display_builder', ConfigFormBuilderInterface::SOURCES_PROPERTY, []);
-  }
-
-  /**
-   * Saves the sources of the display builder.
-   *
-   * @see \Drupal\display_builder\DisplayBuildableInterface
-   */
-  public function saveSources(): void {
-    $data = $this->getInstance()->getCurrentState();
-    $this->setThirdPartySetting('display_builder', ConfigFormBuilderInterface::SOURCES_PROPERTY, $data);
-    $this->save();
-  }
-
-  /**
    * Post-save operations for the display builder.
    *
    * @param \Drupal\Core\Entity\EntityStorageInterface $storage
@@ -402,8 +173,8 @@ trait EntityViewDisplayTrait {
    * @see \Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE): void {
-    if ($profile = $this->getProfile()) {
-      $this->initInstanceIfMissing();
+    if ($profile = $this->displayBuildable()->getProfile()) {
+      $this->displayBuildable()->initInstanceIfMissing();
 
       // Save the profile in the instance if changed.
       $instance = $this->getInstance();
@@ -481,13 +252,14 @@ trait EntityViewDisplayTrait {
       if ($this->isDisplayBuilderOverridable()) {
         $display_builder_field = $this->getDisplayBuilderOverrideField();
         $overridden_field = $entity->get($display_builder_field);
-        \assert($overridden_field instanceof DisplayBuildableInterface);
-        $sources = $overridden_field->getSources();
+        /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+        $buildable = $this->displayBuildableManager->createInstance('entity_view_override', ['field' => $overridden_field]);
+        $sources = $buildable->getSources();
       }
 
       // If the overridden field is empty fallback to the entity view.
       if (\count($sources) === 0) {
-        $sources = $this->getSources();
+        $sources = $this->displayBuildable()->getSources();
       }
 
       // @see entity.html.twig
@@ -498,7 +270,7 @@ trait EntityViewDisplayTrait {
   }
 
   /**
-   * Chef if the instance is overriding this display.
+   * Check if the instance is overriding this display.
    *
    * @param \Drupal\display_builder\InstanceInterface $instance
    *   A list of display builder instances.
@@ -507,7 +279,7 @@ trait EntityViewDisplayTrait {
    *   Is the instance overriding this display?
    */
   protected function isOverrideOfCurrentDisplay(InstanceInterface $instance): bool {
-    $parts = DisplayBuilderItemList::checkInstanceId((string) $instance->id());
+    $parts = EntityViewOverride::checkInstanceId((string) $instance->id());
 
     if (!$parts) {
       return FALSE;
@@ -560,11 +332,25 @@ trait EntityViewDisplayTrait {
    *   A display builder instance.
    */
   protected function getInstance(): ?InstanceInterface {
+    $instance_id = $this->displayBuildable()->getInstanceId();
     /** @var \Drupal\display_builder\InstanceInterface|null $instance */
-    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($this->getInstanceId());
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($instance_id);
     $this->instance = $instance;
 
     return $this->instance;
+  }
+
+  /**
+   * Gets the display buildable manager.
+   *
+   * @return \Drupal\display_builder\DisplayBuildableInterface
+   *   The manager for display buildable.
+   */
+  protected function displayBuildable(): DisplayBuildableInterface {
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $this]);
+
+    return $buildable;
   }
 
   /**
@@ -615,27 +401,6 @@ trait EntityViewDisplayTrait {
     $cacheability->applyTo($build);
 
     return $build;
-  }
-
-  /**
-   * Returns the URL for the display builder from an instance id.
-   *
-   * @param string $instance_id
-   *   The builder instance ID.
-   *
-   * @return array
-   *   The url parameters for this instance id.
-   */
-  private static function getUrlParamsFromInstanceId(string $instance_id): array {
-    [, $entity, $bundle, $view_mode] = \explode('__', $instance_id);
-    $fieldable_entity_type = \Drupal::service('entity_type.manager')->getDefinition($entity);
-    $bundle_parameter_key = $fieldable_entity_type->getBundleEntityType() ?: 'bundle';
-
-    return [
-      $bundle_parameter_key => $bundle,
-      'view_mode_name' => $view_mode,
-      'entity' => $entity,
-    ];
   }
 
 }

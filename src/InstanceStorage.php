@@ -7,7 +7,6 @@ namespace Drupal\display_builder;
 use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageBase;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
@@ -17,21 +16,21 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Base class for content entity storage handlers.
  */
-class InstanceStorage extends EntityStorageBase implements EntityStorageInterface {
-
-  private const STORAGE_PREFIX = 'display_builder_';
+class InstanceStorage extends EntityStorageBase implements InstanceStorageInterface {
 
   private const STORAGE_INDEX = 'display_builder_index';
 
-  /**
-   * State API.
-   */
-  protected StateInterface $state;
+  private const STORAGE_PREFIX = 'display_builder_';
 
   /**
    * Current user.
    */
   protected AccountInterface $currentUser;
+
+  /**
+   * State API.
+   */
+  protected StateInterface $state;
 
   /**
    * {@inheritdoc}
@@ -45,7 +44,7 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
   /**
    * {@inheritdoc}
    */
-  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type): self {
     return new static(
       $entity_type,
       $container->get('entity.memory_cache'),
@@ -90,7 +89,7 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
   /**
    * {@inheritdoc}
    */
-  public function loadUnchanged($id) {
+  public function loadUnchanged($id): EntityInterface|null {
     $this->state->resetCache();
 
     return parent::loadUnchanged($id);
@@ -99,25 +98,21 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
   /**
    * {@inheritdoc}
    */
-  protected function has($id, EntityInterface $entity) {
-    if ($entity->isNew()) {
-      return FALSE;
+  protected function doDelete($entities): void {
+    foreach ($entities as $entity) {
+      $id = (string) $entity->id();
+      $display_builder_list = $this->state->get(self::STORAGE_INDEX, []);
+      unset($display_builder_list[$id]);
+
+      $this->state->set(self::STORAGE_INDEX, $display_builder_list);
+      $this->state->delete(self::STORAGE_PREFIX . $id);
     }
-
-    return (bool) $this->state->get(self::STORAGE_PREFIX . $id, NULL);
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getQueryServiceName() {
-    return 'entity.query.null';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function doLoadMultiple(?array $ids = NULL) {
+  protected function doLoadMultiple(?array $ids = NULL): array {
     $entities = [];
 
     if ($ids === NULL) {
@@ -154,15 +149,19 @@ class InstanceStorage extends EntityStorageBase implements EntityStorageInterfac
   /**
    * {@inheritdoc}
    */
-  protected function doDelete($entities): void {
-    foreach ($entities as $entity) {
-      $id = (string) $entity->id();
-      $display_builder_list = $this->state->get(self::STORAGE_INDEX, []);
-      unset($display_builder_list[$id]);
+  protected function getQueryServiceName(): string {
+    return 'entity.query.null';
+  }
 
-      $this->state->set(self::STORAGE_INDEX, $display_builder_list);
-      $this->state->delete(self::STORAGE_PREFIX . $id);
+  /**
+   * {@inheritdoc}
+   */
+  protected function has($id, EntityInterface $entity): bool {
+    if ($entity->isNew()) {
+      return FALSE;
     }
+
+    return (bool) $this->state->get(self::STORAGE_PREFIX . $id, NULL);
   }
 
 }

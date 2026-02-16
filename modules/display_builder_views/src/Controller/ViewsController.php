@@ -55,10 +55,12 @@ class ViewsController extends IntegrationControllerBase {
     if (!isset($extenders['display_builder'])) {
       return [];
     }
-    /** @var \Drupal\display_builder\DisplayBuildableInterface $extender */
+    /** @var \Drupal\views\Plugin\views\PluginBase $extender */
     $extender = $extenders['display_builder'];
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('view_display', ['extender' => $extender]);
 
-    return $this->renderBuilder($extender);
+    return $this->renderBuilder($buildable);
   }
 
 }

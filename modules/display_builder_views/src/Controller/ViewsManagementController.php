@@ -7,9 +7,9 @@ namespace Drupal\display_builder_views\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Url;
-use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
-use Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender;
+use Drupal\display_builder_views\Plugin\display_builder\Buildable\ViewDisplay;
 
 /**
  * Returns responses for Display Builder ui routes.
@@ -43,7 +43,7 @@ class ViewsManagementController extends ControllerBase {
     $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
 
     foreach (\array_keys($storage->loadMultiple()) as $builder_id) {
-      if (!DisplayExtender::checkInstanceId($builder_id)) {
+      if (!ViewDisplay::checkInstanceId($builder_id)) {
         continue;
       }
       $build['display_builder_table']['#rows'][$builder_id] = $this->buildRow($builder_id);
@@ -63,8 +63,8 @@ class ViewsManagementController extends ControllerBase {
    *   A table row.
    */
   protected function buildRow(string $builder_id): array {
-    $view_id = DisplayExtender::checkInstanceId($builder_id)['view'];
-    $display_id = DisplayExtender::checkInstanceId($builder_id)['display'];
+    $view_id = ViewDisplay::checkInstanceId($builder_id)['view'];
+    $display_id = ViewDisplay::checkInstanceId($builder_id)['display'];
     $view = $this->entityTypeManager()->getStorage('view')->load($view_id);
 
     if (!$view) {
@@ -90,7 +90,7 @@ class ViewsManagementController extends ControllerBase {
 
     $row['profile_id'] = [
       'data-profile-id' => \sprintf('profile_%s', $view_id),
-      'data' => $view->getDisplay($display_id)['display_options']['display_extenders']['display_builder'][ConfigFormBuilderInterface::PROFILE_PROPERTY] ?? '?',
+      'data' => $view->getDisplay($display_id)['display_options']['display_extenders']['display_builder'][DisplayBuildableInterface::PROFILE_PROPERTY] ?? '?',
     ];
     $row['updated']['data'] = $builder['present']->time ? DisplayBuilderHelpers::formatTime($this->dateFormatter, (int) $builder['present']->time) : '-';
 
@@ -121,7 +121,7 @@ class ViewsManagementController extends ControllerBase {
     return [
       'manage' => [
         'title' => $this->t('Build display'),
-        'url' => DisplayExtender::getUrlFromInstanceId($builder_id),
+        'url' => ViewDisplay::getUrlFromInstanceId($builder_id),
         'attributes' => [
           'data-link-builder' => $builder_id,
         ],

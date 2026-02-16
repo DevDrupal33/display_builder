@@ -4,21 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_views\Plugin\views\display_extender;
 
-use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\Context\EntityContext;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\Registry;
-use Drupal\Core\Url;
-use Drupal\display_builder\ConfigFormBuilderInterface;
 use Drupal\display_builder\DisplayBuildableInterface;
-use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\ProfileInterface;
-use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\views\Attribute\ViewsDisplayExtender;
 use Drupal\views\Plugin\views\display_extender\DisplayExtenderPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -34,14 +25,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   help: new TranslatableMarkup('Use display builder as output for this view.'),
   no_ui: FALSE,
 )]
-final class DisplayExtender extends DisplayExtenderPluginBase implements DisplayBuildableInterface {
-
-  /**
-   * The config form builder for Display Builder.
-   *
-   * @var \Drupal\display_builder\ConfigFormBuilderInterface
-   */
-  protected $configFormBuilder;
+final class DisplayExtender extends DisplayExtenderPluginBase {
 
   /**
    * The entity type interface.
@@ -70,19 +54,11 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements Display
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): self {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->configFormBuilder = $container->get('display_builder.config_form_builder');
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->themeRegistry = $container->get('theme.registry');
     $instance->modules = $container->get('extension.list.module');
 
     return $instance;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getPrefix(): string {
-    return 'views__';
   }
 
   /**
@@ -94,7 +70,7 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements Display
     }
 
     $form['#title'] .= $this->t('Display Builder');
-    $form[ConfigFormBuilderInterface::PROFILE_PROPERTY] = $this->configFormBuilder->build($this, FALSE);
+    $form[DisplayBuildableInterface::PROFILE_PROPERTY] = $this->displayBuildable()->buildInstanceForm(FALSE);
   }
 
   /**
@@ -106,8 +82,9 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements Display
     }
 
     // @todo we should have always a fallback.
-    $profile_id = $form_state->getValue(ConfigFormBuilderInterface::PROFILE_PROPERTY, 'default');
-    $this->options[ConfigFormBuilderInterface::PROFILE_PROPERTY] = $profile_id;
+    $profile_id = $form_state->getValue(DisplayBuildableInterface::PROFILE_PROPERTY, 'default');
+    $this->options[DisplayBuildableInterface::PROFILE_PROPERTY] = $profile_id;
+    $buildable = $this->displayBuildable();
 
     if (empty($profile_id)) {
       // If no Display Builder selected, we delete the related instance.
@@ -120,12 +97,12 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements Display
       return;
     }
 
-    $this->initInstanceIfMissing();
+    $buildable->initInstanceIfMissing();
 
     // Save the profile in the instance if changed.
     $instance = $this->getInstance();
 
-    if ($instance && $instance->getProfile()->id() !== $profile_id) {
+    if ($instance && $buildable->getProfile()->id() !== $profile_id) {
       $instance->setProfile($profile_id);
       $instance->save();
     }
@@ -135,6 +112,8 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements Display
    * {@inheritdoc}
    */
   public function optionsSummary(&$categories, &$options): void {
+    $buildable = $this->displayBuildable();
+
     if (!$this->isApplicable()) {
       return;
     }
@@ -143,7 +122,7 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements Display
       'category' => 'other',
       'title' => $this->t('Display Builder'),
       'desc' => $this->t('Use display builder as output for this view.'),
-      'value' => $this->getProfile()?->label() ?? $this->t('Disabled'),
+      'value' => $buildable->getProfile()?->label() ?? $this->t('Disabled'),
     ];
   }
 
@@ -151,7 +130,9 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements Display
    * {@inheritdoc}
    */
   public function preExecute(): void {
-    if (!$this->getProfile()) {
+    $buildable = $this->displayBuildable();
+
+    if (!$buildable->getProfile()) {
       return;
     }
     // We alter the registry here instead of implementing
@@ -162,175 +143,6 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements Display
     $suggestion = \implode('__', ['views_view', $view->id(), $view->getDisplay()->getPluginId()]);
     $entry = $this->buildThemeRegistryEntry();
     $this->themeRegistry->getRuntime()->set($suggestion, $entry);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getContextRequirement(): string {
-    // @see \Drupal\ui_patterns_views\Plugin\UiPatterns\Source\ViewRowsSource.
-    return 'views:style';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getBuilderUrl(): Url {
-    $params = [
-      'view' => $this->view->id(),
-      'display' => $this->view->current_display,
-    ];
-
-    return Url::fromRoute('display_builder_views.views.manage', $params);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function checkInstanceId(string $instance_id): ?array {
-    if (!\str_starts_with($instance_id, DisplayExtender::getPrefix())) {
-      return NULL;
-    }
-    [, $view, $display] = \explode('__', $instance_id);
-
-    return [
-      'view' => $view,
-      'display' => $display,
-    ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getUrlFromInstanceId(string $instance_id): Url {
-    $params = self::checkInstanceId($instance_id);
-
-    if (!$params) {
-      // Fallback to the list of instances.
-      return Url::fromRoute('entity.display_builder_instance.collection');
-    }
-
-    return Url::fromRoute('display_builder_views.views.manage', $params);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getDisplayUrlFromInstanceId(string $instance_id): Url {
-    $params = self::checkInstanceId($instance_id);
-
-    if (!$params) {
-      // Fallback to the list of instances.
-      return Url::fromRoute('entity.display_builder_instance.collection');
-    }
-
-    return Url::fromRoute('entity.view.edit_form', $params);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getProfile(): ?ProfileInterface {
-    if (!isset($this->options[ConfigFormBuilderInterface::PROFILE_PROPERTY])) {
-      return NULL;
-    }
-    $display_builder_id = $this->options[ConfigFormBuilderInterface::PROFILE_PROPERTY];
-
-    if (empty($display_builder_id)) {
-      return NULL;
-    }
-    $storage = $this->entityTypeManager->getStorage('display_builder_profile');
-
-    /** @var \Drupal\display_builder\ProfileInterface $display_builder */
-    $display_builder = $storage->load($display_builder_id);
-
-    return $display_builder;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInstanceId(): ?string {
-    if (!$this->view) {
-      return NULL;
-    }
-
-    return \sprintf('%s%s__%s', self::getPrefix(), $this->view->id(), $this->view->current_display);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function checkAccess(string $instance_id, AccountInterface $account): AccessResultInterface {
-    return $account->hasPermission('administer views') ? AccessResult::allowed() : AccessResult::forbidden();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function initInstanceIfMissing(): void {
-    /** @var \Drupal\display_builder\InstanceStorage $storage */
-    $storage = $this->entityTypeManager->getStorage('display_builder_instance');
-
-    /** @var \Drupal\display_builder\InstanceInterface $instance */
-    $instance = $storage->load($this->getInstanceId());
-
-    if (!$instance) {
-      $instance = $storage->createFromImplementation($this);
-      $instance->save();
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInitialSources(): array {
-    // Get the sources stored in config.
-    $sources = $this->getSources();
-
-    if (empty($sources)) {
-      // Fallback to a fixture mimicking the standard view layout.
-      $sources = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_views', 'default_view');
-    }
-
-    return $sources;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInitialContext(): array {
-    $contexts = [];
-    // Mark for usage with views.
-    $contexts = RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
-    // Add view entity that we need in our sources or even UI Patterns Views
-    // sources.
-    $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($this->view->storage);
-
-    return $contexts;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getSources(): array {
-    return $this->options[ConfigFormBuilderInterface::SOURCES_PROPERTY] ?? [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function saveSources(): void {
-    $sources = $this->getInstance()->getCurrentState();
-    $displays = $this->view->storage->get('display');
-    $display_id = $this->view->current_display;
-    // It is risky to alter a View like that. We need to be careful to not
-    // break the storage integrity, but we didn't find a better way.
-    $displays[$display_id]['display_options']['display_extenders']['display_builder']['sources'] = $sources;
-    $this->view->storage->set('display', $displays);
-    $this->view->storage->save();
-    // @todo Test if we still need to invalidate the cache manually here.
-    $this->view->storage->invalidateCaches();
   }
 
   /**
@@ -346,6 +158,27 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements Display
     $entry['path'] = $this->modules->getPath('display_builder_views') . '/templates';
 
     return $entry;
+  }
+
+  /**
+   * Gets the Display Builder instance.
+   *
+   * @return \Drupal\display_builder\InstanceInterface|null
+   *   A display builder instance.
+   */
+  protected function getInstance(): ?InstanceInterface {
+    if (!$this->displayBuildable()->getInstanceId()) {
+      return NULL;
+    }
+
+    if (!isset($this->instance)) {
+      $instance_id = $this->displayBuildable()->getInstanceId();
+      /** @var \Drupal\display_builder\InstanceInterface|null $instance */
+      $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($instance_id);
+      $this->instance = $instance;
+    }
+
+    return $this->instance;
   }
 
   /**
@@ -383,19 +216,18 @@ final class DisplayExtender extends DisplayExtenderPluginBase implements Display
   }
 
   /**
-   * Gets the Display Builder instance.
+   * Gets the display buildable manager.
    *
-   * @return \Drupal\display_builder\InstanceInterface|null
-   *   A display builder instance entity.
+   * @return \Drupal\display_builder\DisplayBuildableInterface
+   *   The manager for display buildable.
    */
-  private function getInstance(): ?InstanceInterface {
-    if (!isset($this->instance)) {
-      /** @var \Drupal\display_builder\InstanceInterface|null $instance */
-      $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($this->getInstanceId());
-      $this->instance = $instance;
-    }
+  private function displayBuildable(): DisplayBuildableInterface {
+    /** @var \Drupal\display_builder\DisplayBuildablePluginManager $manager */
+    $manager = \Drupal::service('plugin.manager.display_buildable');
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $manager->createInstance('view_display', ['extender' => $this]);
 
-    return $this->instance;
+    return $buildable;
   }
 
 }

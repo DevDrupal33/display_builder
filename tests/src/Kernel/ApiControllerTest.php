@@ -26,6 +26,16 @@ use Symfony\Component\HttpFoundation\Request;
 final class ApiControllerTest extends KernelTestBase {
 
   /**
+   * The controller to test.
+   */
+  protected ApiController $controller;
+
+  /**
+   * The builder instance entity.
+   */
+  protected InstanceInterface $instance;
+
+  /**
    * {@inheritdoc}
    */
   protected static $modules = [
@@ -39,16 +49,6 @@ final class ApiControllerTest extends KernelTestBase {
     'display_builder',
     'display_builder_test',
   ];
-
-  /**
-   * The controller to test.
-   */
-  protected ApiController $controller;
-
-  /**
-   * The builder instance entity.
-   */
-  protected InstanceInterface $instance;
 
   /**
    * {@inheritdoc}

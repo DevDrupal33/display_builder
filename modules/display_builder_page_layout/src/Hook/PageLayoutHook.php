@@ -8,7 +8,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder_page_layout\Entity\PageLayout;
+use Drupal\display_builder_page_layout\Plugin\display_builder\Buildable\PageLayout;
 
 /**
  * Hook implementations for the display_builder_page_layout module.
@@ -42,24 +42,6 @@ class PageLayoutHook {
         'weight' => 10,
       ];
     }
-  }
-
-  /**
-   * Implements hook_display_builder_provider_info().
-   *
-   * @return array
-   *   An associative array of display builder providers.
-   */
-  #[Hook('display_builder_provider_info')]
-  public function displayBuilderProviderInfo(): array {
-    return [
-      'page_layout' => [
-        'label' => new TranslatableMarkup('Page layout'),
-        'class' => PageLayout::class,
-        'prefix' => PageLayout::getPrefix(),
-        'storage' => 'page_layout',
-      ],
-    ];
   }
 
 }

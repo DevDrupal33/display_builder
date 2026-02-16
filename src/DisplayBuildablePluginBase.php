@@ -4,36 +4,159 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
+use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
+use Drupal\display_builder\Attribute\DisplayBuildable;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Config form builder.
+ * Base class for display_buildable plugins.
  */
-class ConfigFormBuilder implements ConfigFormBuilderInterface {
+abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayBuildableInterface {
 
-  use StringTranslationTrait;
+  /**
+   * The entity type manager.
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
 
-  public function __construct(
-    protected EntityTypeManagerInterface $entityTypeManager,
-    protected AccountProxyInterface $currentUser,
-    protected readonly ModuleHandlerInterface $moduleHandler,
-  ) {}
+  /**
+   * The loaded display builder instance.
+   */
+  protected ?InstanceInterface $instance;
+
+  /**
+   * Current user.
+   */
+  protected AccountProxyInterface $currentUser;
+
+  /**
+   * Module handler.
+   */
+  protected ModuleHandlerInterface $moduleHandler;
 
   /**
    * {@inheritdoc}
    */
-  public function build(DisplayBuildableInterface $buildable, bool $mandatory = TRUE): array {
-    $profile = $buildable->getProfile();
-    $allowed = $this->isAllowed($buildable);
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = new static($configuration, $plugin_id, $plugin_definition);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->currentUser = $container->get('current_user');
+    $instance->moduleHandler = $container->get('module_handler');
+
+    return $instance;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getPrefix(): string {
+    $reflection = new \ReflectionClass(static::class);
+    $attribute = $reflection->getAttributes(DisplayBuildable::class);
+
+    return $attribute[0]->newInstance()->instance_prefix;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function label(): string {
+    // Cast the label to a string since it is a TranslatableMarkup object.
+    $definition = $this->pluginDefinition;
+
+    return (string) ($definition instanceof PluginDefinitionInterface ? $definition->id() : ($definition['label'] ?? ''));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function initInstanceIfMissing(): void {
+    /** @var \Drupal\display_builder\InstanceInterface $instance */
+    $instance = $this->getInstance();
+
+    if (!$instance) {
+      /** @var \Drupal\display_builder\InstanceStorageInterface $storage */
+      $storage = $this->entityTypeManager->getStorage('display_builder_instance');
+      $instance = $storage->createFromImplementation($this);
+      $instance->save();
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getInstance(): ?InstanceInterface {
+    if (isset($this->instance)) {
+      return $this->instance;
+    }
+
+    if ($this->getInstanceId() === NULL) {
+      return NULL;
+    }
+
+    $storage = $this->entityTypeManager->getStorage('display_builder_instance');
+    /** @var \Drupal\display_builder\InstanceInterface|null $instance */
+    $instance = $storage->load($this->getInstanceId());
+
+    if (!$instance) {
+      return NULL;
+    }
+
+    $this->instance = $instance;
+
+    return $this->instance;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getInstanceId(): ?string {
+    // Plugins will override this method.
+    if (!isset($this->instance)) {
+      return NULL;
+    }
+
+    return (string) $this->instance->id();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getProfile(): ?ProfileInterface {
+    // Plugins will override this method.
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getBuilderUrl(): Url {
+    // Plugins will override this method.
+    return Url::fromRoute('<front>');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getContextRequirement(): string {
+    // Plugins will override this method.
+    return '';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildInstanceForm(bool $mandatory = TRUE): array {
+    $profile = $this->getProfile();
+    $allowed = $this->isAllowed();
 
     if (!$allowed && !$profile) {
       return [
-        ConfigFormBuilderInterface::PROFILE_PROPERTY => [
+        self::PROFILE_PROPERTY => [
           '#markup' => $this->t('You are not allowed to use Display Builder.'),
         ],
       ];
@@ -41,17 +164,17 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
 
     if (!$allowed && $profile) {
       return [
-        ConfigFormBuilderInterface::PROFILE_PROPERTY => $this->buildDisabledSelect($profile),
+        self::PROFILE_PROPERTY => $this->buildDisabledSelect($profile),
       ];
     }
 
     $form = [
-      ConfigFormBuilderInterface::PROFILE_PROPERTY => $this->buildSelect($profile, $mandatory),
+      self::PROFILE_PROPERTY => $this->buildSelect($profile, $mandatory),
     ];
 
     // Add the builder link to edit.
-    if ($buildable->getInstanceId() && $profile) {
-      $form['link'] = $this->buildLink($buildable);
+    if ($this->getInstanceId() && $profile) {
+      $form['link'] = $this->buildLink();
     }
 
     return $form;
@@ -61,7 +184,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
    * {@inheritdoc}
    */
   public function getAllowedProfiles(?AccountInterface $account = NULL): array {
-    $account = $account ?? $this->currentUser;
+    $account ??= $this->currentUser;
     $options = [];
     $storage = $this->entityTypeManager->getStorage('display_builder_profile');
     $entity_ids = $storage->getQuery()->accessCheck(TRUE)->sort('weight', 'ASC')->execute();
@@ -71,8 +194,9 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
     // Entity query doesn't execute access control handlers for config
     // entities. So we need to do an extra check here.
     foreach ($display_builders as $entity_id => $entity) {
-      // We don't execute $entity->access() to not catch 'administer display
-      // builder profile' permission. See ProfileAccessControlHandler.
+      // We don't execute $entity->access() to not catch admin permission
+      // 'administer display builder profile'.
+      // @see ProfileAccessControlHandler.
       // Administrators can use any profile, but it is better to only propose
       // them the ones related to their permissions.
       if ($account->hasPermission($entity->getPermissionName())) {
@@ -86,13 +210,13 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
   /**
    * {@inheritdoc}
    */
-  public function isAllowed(DisplayBuildableInterface $buildable, ?AccountInterface $account = NULL): bool {
+  public function isAllowed(?AccountInterface $account = NULL): bool {
     $options = $this->getAllowedProfiles($account);
 
     if (empty($options)) {
       return FALSE;
     }
-    $profile = $buildable->getProfile();
+    $profile = $this->getProfile();
 
     if (!$profile) {
       return TRUE;
@@ -155,13 +279,10 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
   /**
    * Build link to Display Builder.
    *
-   * @param \Drupal\display_builder\DisplayBuildableInterface $buildable
-   *   An entity allowing the use of Display Builder.
-   *
    * @return array
    *   A renderable array.
    */
-  protected function buildLink(DisplayBuildableInterface $buildable): array {
+  protected function buildLink(): array {
     return [
       '#type' => 'html_tag',
       '#tag' => 'p',
@@ -171,7 +292,7 @@ class ConfigFormBuilder implements ConfigFormBuilderInterface {
       'content' => [
         '#type' => 'link',
         '#title' => $this->t('Build the display'),
-        '#url' => $buildable->getBuilderUrl(),
+        '#url' => $this->getBuilderUrl(),
         '#attributes' => [
           'class' => ['button', 'button--small'],
         ],

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder_page_layout\Kernel;
 
 use Drupal\display_builder\InstanceAccessControlHandler;
-use Drupal\display_builder_page_layout\Entity\PageLayout;
+use Drupal\display_builder_page_layout\Plugin\display_builder\Buildable\PageLayout;
 use Drupal\Tests\display_builder\Kernel\AccessControlTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;

@@ -125,12 +125,12 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
     // When $configuration is updated from ProfileIslandPluginForm,
     // 'weight', 'status' and 'region' properties are missing but they must not
     // be reset.
-    $configuration['weight'] = $configuration['weight'] ?? $this->islands[$island_id]['weight'] ?? 0;
-    $configuration['status'] = $configuration['status'] ?? $this->islands[$island_id]['status'] ?? FALSE;
+    $configuration['weight'] ??= $this->islands[$island_id]['weight'] ?? 0;
+    $configuration['status'] ??= $this->islands[$island_id]['status'] ?? FALSE;
 
     // Only View islands have regions.
     if (isset($this->islands[$island_id]['region'])) {
-      $configuration['region'] = $configuration['region'] ?? $this->islands[$island_id]['region'];
+      $configuration['region'] ??= $this->islands[$island_id]['region'];
     }
 
     $this->islands[$island_id] = $configuration;

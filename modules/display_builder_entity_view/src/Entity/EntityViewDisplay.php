@@ -6,11 +6,10 @@ namespace Drupal\display_builder_entity_view\Entity;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay as CoreEntityViewDisplay;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleExtensionList;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
-use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\SourcePluginManager;
 
 /**
@@ -32,6 +31,11 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
   protected SourcePluginManager $sourcePluginManager;
 
   /**
+   * The loaded display builder instance.
+   */
+  protected ?InstanceInterface $instance;
+
+  /**
    * The entity type manager.
    */
   protected EntityTypeManagerInterface $entityTypeManager;
@@ -42,24 +46,14 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
   protected ComponentElementBuilder $componentElementBuilder;
 
   /**
-   * The sample entity generator.
-   */
-  protected SampleEntityGeneratorInterface $sampleEntityGenerator;
-
-  /**
-   * The list of modules.
-   */
-  protected ModuleExtensionList $modules;
-
-  /**
    * The data converter from Manage Display and Layout Builder.
    */
   protected BuilderDataConverter $dataConverter;
 
   /**
-   * The loaded display builder instance.
+   * The display buildable plugin manager.
    */
-  protected ?InstanceInterface $instance;
+  protected DisplayBuildablePluginManager $displayBuildableManager;
 
   /**
    * Constructs the EntityViewDisplay.
@@ -74,9 +68,8 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
     $this->sourcePluginManager = \Drupal::service('plugin.manager.ui_patterns_source');
     $this->entityTypeManager = \Drupal::service('entity_type.manager');
     $this->componentElementBuilder = \Drupal::service('ui_patterns.component_element_builder');
-    $this->sampleEntityGenerator = \Drupal::service('ui_patterns.sample_entity_generator');
-    $this->modules = \Drupal::service('extension.list.module');
     $this->dataConverter = \Drupal::service('display_builder_entity_view.builder_data_converter');
+    $this->displayBuildableManager = \Drupal::service('plugin.manager.display_buildable');
   }
 
   /**
@@ -135,10 +128,9 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
    * @return array
    *   List of UI Patterns sources.
    *
-   * @see EntityViewDisplayTrait::initInstanceIfMissing()
-   * @see LayoutBuilderEntityViewDisplay::initialImport()
+   * @see EntityView::initInstanceIfMissing()
    */
-  protected function initialImport(): array {
+  public function initialImport(): array {
     return $this->dataConverter->convertFromManageDisplay($this->getTargetEntityTypeId(), $this->getTargetBundle(), $this->content);
   }
 

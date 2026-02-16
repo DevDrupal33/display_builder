@@ -13,6 +13,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Pager\PagerManagerInterface;
 use Drupal\Core\Utility\TableSort;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder_ui\Form\InstanceListFilterForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -40,38 +41,18 @@ final class InstanceListBuilder extends EntityListBuilder {
   public function __construct(
     protected EntityTypeInterface $entity_type,
     EntityStorageInterface $storage,
-    private readonly EntityTypeManagerInterface $entityTypeManager,
     private readonly DateFormatterInterface $dateFormatter,
     private readonly FormBuilderInterface $formBuilder,
     private readonly PagerManagerInterface $pagerManager,
     private readonly RequestStack $requestStack,
+    private readonly EntityTypeManagerInterface $entityTypeManager,
+    private DisplayBuildablePluginManager $displayBuildableManager,
+    private EntityStorageInterface $instanceStorage,
   ) {
     parent::__construct($entity_type, $storage);
 
     // Cache providers so we don't call invokeAll multiple times.
-    $this->providers = $this->moduleHandler()->invokeAll('display_builder_provider_info');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type): self {
-    return new self(
-      $entity_type,
-      $container->get('entity_type.manager')->getStorage($entity_type->id()),
-      $container->get('entity_type.manager'),
-      $container->get('date.formatter'),
-      $container->get('form_builder'),
-      $container->get('pager.manager'),
-      $container->get('request_stack'),
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getFormId(): string {
-    return 'display_builder_instance_list_builder';
+    $this->providers = $this->displayBuildableManager->getDefinitions();
   }
 
   /**
@@ -112,37 +93,6 @@ final class InstanceListBuilder extends EntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function render(): array {
-    $build = parent::render();
-
-    $build['#attached']['library'][] = 'display_builder_ui/instance_list';
-
-    $info = $this->t('Instances are versions of displays (entity views, page layouts, views...) currently under work.');
-    $info .= '<br>';
-    $info .= $this->t('They are created automatically from the displays and saved in the display configuration.');
-
-    $build['notice'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'p',
-      '#value' => $info,
-      '#attributes' => ['class' => ['description']],
-      '#weight' => -11,
-    ];
-
-    $build['filters'] = $this->formBuilder->getForm(InstanceListFilterForm::class, $this->providers);
-    $build['filters']['#weight'] = -10;
-
-    $build['pager'] = [
-      '#type' => 'pager',
-      '#weight' => 100,
-    ];
-
-    return $build;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function buildRow(EntityInterface $instance): array {
     /** @var \Drupal\display_builder\InstanceInterface $instance */
     $instance_id = (string) $instance->id();
@@ -155,7 +105,7 @@ final class InstanceListBuilder extends EntityListBuilder {
     $type = '-';
 
     foreach ($this->providers as $provider) {
-      if (\str_starts_with($instance_id, $provider['prefix'])) {
+      if (\str_starts_with($instance_id, $provider['instance_prefix'])) {
         $type = $provider['label'];
 
         break;
@@ -189,24 +139,25 @@ final class InstanceListBuilder extends EntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function load() {
-    $entities = DisplayBuilderUiHelpers::getInstancesFromProviders($this->providers, $this->entityTypeManager);
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type): self {
+    return new self(
+      $entity_type,
+      $container->get('entity_type.manager')->getStorage($entity_type->id()),
+      $container->get('date.formatter'),
+      $container->get('form_builder'),
+      $container->get('pager.manager'),
+      $container->get('request_stack'),
+      $container->get('entity_type.manager'),
+      $container->get('plugin.manager.display_buildable'),
+      $container->get('entity_type.manager')->getStorage('display_builder_instance'),
+    );
+  }
 
-    // Apply filters from session and create missing instances if any.
-    $entities = $this->filterEntities($entities);
-
-    // Build headers & request once.
-    $headers = $this->buildHeader();
-    $request = $this->requestStack->getCurrentRequest() ?? \Drupal::request();
-    $order = TableSort::getOrder($headers, $request);
-    $direction = TableSort::getSort($headers, $request);
-    $sortKey = $order['sql'] ?? 'updated';
-
-    // Sort using a dedicated helper.
-    $this->sortEntities($entities, $sortKey, $direction);
-
-    // Apply pager and return the page slice.
-    return $this->applyPager($entities);
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormId(): string {
+    return 'display_builder_instance_list_builder';
   }
 
   /**
@@ -230,56 +181,63 @@ final class InstanceListBuilder extends EntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  protected function getEntityIds(): array {
-    // To avoid implementing EntityStorageInterface::getQuery().
-    return \array_keys($this->getStorage()->loadMultiple());
+  public function load(): array {
+    $entities = $this->getInstancesFromProviders();
+
+    // Apply filters from session and create missing instances if any.
+    $entities = $this->filterEntities($entities);
+
+    // Build headers & request once.
+    $headers = $this->buildHeader();
+    $request = $this->requestStack->getCurrentRequest() ?? \Drupal::request();
+    $order = TableSort::getOrder($headers, $request);
+    $direction = TableSort::getSort($headers, $request);
+    $sortKey = $order['sql'] ?? 'updated';
+
+    // Sort using a dedicated helper.
+    $this->sortEntities($entities, $sortKey, $direction);
+
+    // Apply pager and return the page slice.
+    return $this->applyPager($entities);
   }
 
   /**
-   * Sort the entities array in place according to provided sort key/direction.
-   *
-   * @param array $entities
-   *   Entities to sort (passed by reference).
-   * @param string $sortKey
-   *   The SQL sort key from TableSort.
-   * @param string|int $direction
-   *   Sort direction value.
+   * {@inheritdoc}
    */
-  private function sortEntities(array &$entities, string $sortKey, $direction): void {
-    // Factor to invert comparison when descending.
-    $factor = ($direction === TableSort::DESC) ? -1 : 1;
+  public function render(): array {
+    $build = parent::render();
 
-    switch ($sortKey) {
-      case 'updated':
-        \usort($entities, static function ($a, $b) use ($factor) {
-          $aTime = (int) ($a->present->time ?? 0);
-          $bTime = (int) ($b->present->time ?? 0);
+    $build['#attached']['library'][] = 'display_builder_ui/instance_list';
 
-          // Default comparator is ascending, multiply by factor to handle desc.
-          return $factor * ($aTime <=> $bTime);
-        });
+    $info = $this->t('Instances are versions of displays (entity views, page layouts, views...) currently under work.');
+    $info .= '<br>';
+    $info .= $this->t('They are created automatically from the displays and saved in the display configuration.');
 
-        break;
+    $build['notice'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'p',
+      '#value' => $info,
+      '#attributes' => ['class' => ['description']],
+      '#weight' => -11,
+    ];
 
-      case 'name':
-        \usort($entities, static function ($a, $b) use ($factor) {
-          $aName = self::extractEntityName((string) $a->id());
-          $bName = self::extractEntityName((string) $b->id());
+    $build['filters'] = $this->formBuilder->getForm(InstanceListFilterForm::class, $this->providers);
+    $build['filters']['#weight'] = -10;
 
-          // Use case-insensitive string comparison.
-          return $factor * \strcasecmp($aName, $bName);
-        });
+    $build['pager'] = [
+      '#type' => 'pager',
+      '#weight' => 100,
+    ];
 
-        break;
+    return $build;
+  }
 
-      default:
-        // Unknown sort: fallback to updated desc behavior for predictability.
-        \usort($entities, static function ($a, $b) {
-          return (int) ($b->present->time ?? 0) <=> (int) ($a->present->time ?? 0);
-        });
-
-        break;
-    }
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEntityIds(): array {
+    // To avoid implementing EntityStorageInterface::getQuery().
+    return \array_keys($this->getStorage()->loadMultiple());
   }
 
   /**
@@ -356,12 +314,81 @@ final class InstanceListBuilder extends EntityListBuilder {
       }
 
       if (!$entity['instance']) {
-        $entity['instance'] = $this->getStorage()->create(['id' => $entity['id'], 'label' => $entity['id']]);
+        $entity['instance'] = $this->instanceStorage->create(['id' => $entity['id'], 'label' => $entity['id']]);
       }
       $result[] = $entity['instance'];
     }
 
     return $result;
+  }
+
+  /**
+   * Get instances from providers definitions.
+   *
+   * @return array
+   *   List of instances indexed by id.
+   */
+  private function getInstancesFromProviders(): array {
+    $instances = [];
+
+    foreach ($this->providers as $provider_id => $provider) {
+      foreach ($provider['class']::collectInstances($this->instanceStorage, $this->entityTypeManager) as $instance_id => $instance) {
+        $instances[$instance_id] = [
+          'id' => $instance_id,
+          'instance' => $instance,
+          'context' => $provider_id,
+        ];
+      }
+    }
+
+    return $instances;
+  }
+
+  /**
+   * Sort the entities array in place according to provided sort key/direction.
+   *
+   * @param array $entities
+   *   Entities to sort (passed by reference).
+   * @param string $sortKey
+   *   The SQL sort key from TableSort.
+   * @param string|int $direction
+   *   Sort direction value.
+   */
+  private function sortEntities(array &$entities, string $sortKey, $direction): void {
+    // Factor to invert comparison when descending.
+    $factor = ($direction === TableSort::DESC) ? -1 : 1;
+
+    switch ($sortKey) {
+      case 'updated':
+        \usort($entities, static function ($a, $b) use ($factor) {
+          $aTime = (int) ($a->present->time ?? 0);
+          $bTime = (int) ($b->present->time ?? 0);
+
+          // Default comparator is ascending, multiply by factor to handle desc.
+          return $factor * ($aTime <=> $bTime);
+        });
+
+        break;
+
+      case 'name':
+        \usort($entities, static function ($a, $b) use ($factor) {
+          $aName = self::extractEntityName((string) $a->id());
+          $bName = self::extractEntityName((string) $b->id());
+
+          // Use case-insensitive string comparison.
+          return $factor * \strcasecmp($aName, $bName);
+        });
+
+        break;
+
+      default:
+        // Unknown sort: fallback to updated desc behavior for predictability.
+        \usort($entities, static function ($a, $b) {
+          return (int) ($b->present->time ?? 0) <=> (int) ($a->present->time ?? 0);
+        });
+
+        break;
+    }
   }
 
 }

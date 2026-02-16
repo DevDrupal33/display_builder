@@ -6,9 +6,10 @@ namespace Drupal\display_builder_page_layout\EventSubscriber;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\CachedDiscoveryClearerInterface;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
-use Drupal\display_builder_page_layout\Entity\PageLayout;
+use Drupal\display_builder_page_layout\Plugin\display_builder\Buildable\PageLayout;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -19,6 +20,7 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
   public function __construct(
     private CachedDiscoveryClearerInterface $pluginCacheClearer,
     private EntityTypeManagerInterface $entityTypeManager,
+    private DisplayBuildablePluginManager $displayBuildableManager,
   ) {}
 
   /**
@@ -63,7 +65,9 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     }
     /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $page_layout */
     $page_layout = $this->entityTypeManager->getStorage('page_layout')->load($page_layout_id);
-    $page_layout->saveSources();
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $page_layout]);
+    $buildable->saveSources();
     // Clearing plugin cache seems enough to get the new layout.
     // @todo It looks very costly. Check if it is still needed.
     $this->pluginCacheClearer->clearCachedDefinitions();

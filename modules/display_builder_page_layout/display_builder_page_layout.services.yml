@@ -11,5 +11,6 @@ services:
     arguments:
       - '@plugin.cache_clearer'
       - '@entity_type.manager'
+      - '@plugin.manager.display_buildable'
     tags:
       - { name: 'event_subscriber' }

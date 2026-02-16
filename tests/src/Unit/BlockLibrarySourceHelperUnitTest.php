@@ -35,6 +35,106 @@ final class BlockLibrarySourceHelperUnitTest extends UnitTestCase {
   }
 
   /**
+   * Test getGroupedChoices with choices and exclude.
+   */
+  public function testGetGroupedChoicesBlockChoicesAndExclude(): void {
+    $mockSource = $this->createMockSourceWithChoices();
+
+    $choices = [
+      'test_1' => [
+        'label' => 'Test 1',
+        'provider' => 'included_provider',
+        'original_id' => 'test_1',
+        'group' => 'Group A',
+      ],
+      'test_2' => [
+        'label' => 'Test 2',
+        'provider' => 'included_provider',
+        'original_id' => 'test_2',
+        'group' => 'Group B',
+      ],
+      'test_excluded' => [
+        'label' => 'Test excluded',
+        'provider' => 'excluded_provider',
+        'original_id' => 'test_excluded',
+        'group' => 'Group Excluded',
+      ],
+      'test_fallback_source_label' => [
+        'label' => 'Test fallback',
+        'provider' => 'included_provider',
+        'original_id' => 'test_fallback_source_label',
+      ],
+    ];
+
+    $sources = [
+      'test_choices' => [
+        'definition' => [
+          'id' => 'block',
+          'label' => 'Test source',
+          'description' => 'Test description',
+        ],
+        'source' => $mockSource,
+        'choices' => $choices,
+      ],
+      'test_no_choices' => [
+        'definition' => [
+          'id' => 'block',
+          'label' => 'Test source',
+          'description' => 'Test description',
+        ],
+        'source' => $mockSource,
+      ],
+    ];
+
+    // Prepare the result expected.
+    $expected_choices = [];
+
+    foreach ($choices as $choice_id => $choice) {
+      $expected_choices[$choice_id] = [
+        'label' => (string) $choice['label'],
+        'data' => [
+          'source_id' => 'test_choices',
+          'source' => $this->createMockSourceWithChoices()->getChoiceSettings($choice_id),
+        ],
+        'group' => $choice['group'] ?? 'Others',
+        'keywords' => \sprintf('block %s Test description %s', $choice['label'], $choice_id),
+        'preview' => Url::fromRoute('display_builder.api_block_preview', ['block_id' => $choice_id]),
+      ];
+    }
+
+    $expected = [
+      'Others' => [
+        'label' => 'Others',
+        'choices' => [
+          $expected_choices['test_fallback_source_label'],
+          // The no choices is part of others.
+          [
+            'label' => 'Test source',
+            'data' => [
+              'source_id' => 'test_no_choices',
+            ],
+            'group' => 'Others',
+            'keywords' => 'block Test source Test description',
+            'preview' => FALSE,
+          ],
+        ],
+      ],
+      'Group A' => [
+        'label' => 'Group A',
+        'choices' => [$expected_choices['test_1']],
+      ],
+      'Group B' => [
+        'label' => 'Group B',
+        'choices' => [$expected_choices['test_2']],
+      ],
+    ];
+
+    $result = BlockLibrarySourceHelper::getGroupedChoices($sources, ['excluded_provider']);
+
+    self::assertEquals($expected, $result);
+  }
+
+  /**
    * Test getGroupedChoices with no choices.
    */
   public function testGetGroupedChoicesBlockNoChoices(): void {
@@ -141,106 +241,6 @@ final class BlockLibrarySourceHelperUnitTest extends UnitTestCase {
 
     $result = BlockLibrarySourceHelper::getGroupedChoices($sources);
     self::assertSame($expected, $result);
-  }
-
-  /**
-   * Test getGroupedChoices with choices and exclude.
-   */
-  public function testGetGroupedChoicesBlockChoicesAndExclude(): void {
-    $mockSource = $this->createMockSourceWithChoices();
-
-    $choices = [
-      'test_1' => [
-        'label' => 'Test 1',
-        'provider' => 'included_provider',
-        'original_id' => 'test_1',
-        'group' => 'Group A',
-      ],
-      'test_2' => [
-        'label' => 'Test 2',
-        'provider' => 'included_provider',
-        'original_id' => 'test_2',
-        'group' => 'Group B',
-      ],
-      'test_excluded' => [
-        'label' => 'Test excluded',
-        'provider' => 'excluded_provider',
-        'original_id' => 'test_excluded',
-        'group' => 'Group Excluded',
-      ],
-      'test_fallback_source_label' => [
-        'label' => 'Test fallback',
-        'provider' => 'included_provider',
-        'original_id' => 'test_fallback_source_label',
-      ],
-    ];
-
-    $sources = [
-      'test_choices' => [
-        'definition' => [
-          'id' => 'block',
-          'label' => 'Test source',
-          'description' => 'Test description',
-        ],
-        'source' => $mockSource,
-        'choices' => $choices,
-      ],
-      'test_no_choices' => [
-        'definition' => [
-          'id' => 'block',
-          'label' => 'Test source',
-          'description' => 'Test description',
-        ],
-        'source' => $mockSource,
-      ],
-    ];
-
-    // Prepare the result expected.
-    $expected_choices = [];
-
-    foreach ($choices as $choice_id => $choice) {
-      $expected_choices[$choice_id] = [
-        'label' => (string) $choice['label'],
-        'data' => [
-          'source_id' => 'test_choices',
-          'source' => $this->createMockSourceWithChoices()->getChoiceSettings($choice_id),
-        ],
-        'group' => $choice['group'] ?? 'Others',
-        'keywords' => \sprintf('block %s Test description %s', $choice['label'], $choice_id),
-        'preview' => Url::fromRoute('display_builder.api_block_preview', ['block_id' => $choice_id]),
-      ];
-    }
-
-    $expected = [
-      'Others' => [
-        'label' => 'Others',
-        'choices' => [
-          $expected_choices['test_fallback_source_label'],
-          // The no choices is part of others.
-          [
-            'label' => 'Test source',
-            'data' => [
-              'source_id' => 'test_no_choices',
-            ],
-            'group' => 'Others',
-            'keywords' => 'block Test source Test description',
-            'preview' => FALSE,
-          ],
-        ],
-      ],
-      'Group A' => [
-        'label' => 'Group A',
-        'choices' => [$expected_choices['test_1']],
-      ],
-      'Group B' => [
-        'label' => 'Group B',
-        'choices' => [$expected_choices['test_2']],
-      ],
-    ];
-
-    $result = BlockLibrarySourceHelper::getGroupedChoices($sources, ['excluded_provider']);
-
-    self::assertEquals($expected, $result);
   }
 
   /**

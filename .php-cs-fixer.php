@@ -41,6 +41,7 @@ $local_rules = [
   'new_expression_parentheses' => ['use_parentheses' => true],
   'php_unit_data_provider_method_order' => true,
   'method_argument_space' => ['on_multiline' => 'ensure_fully_multiline'],
+  // 'ordered_class_elements' => ['sort_algorithm' => 'alpha', 'case_sensitive' => false],
   'ordered_class_elements' => ['case_sensitive' => false],
   '@PHP8x3Migration' => true,
   '@PHP8x4Migration' => false,

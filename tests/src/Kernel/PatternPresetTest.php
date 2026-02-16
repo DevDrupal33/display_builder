@@ -45,6 +45,74 @@ final class PatternPresetTest extends KernelTestBase {
   }
 
   /**
+   * Tests the getContexts method.
+   */
+  public function testGetContextsEmpty(): void {
+    $sources = [
+      'source_id' => 'wysiwyg',
+      'source' => [
+        'value' => [
+          'value' => 'foo bar',
+          'format' => 'plain_text',
+        ],
+      ],
+    ];
+    $patternPreset = PatternPreset::create([
+      'id' => 'test_preset_contexts',
+      'sources' => $sources,
+    ]);
+    $patternPreset->save();
+
+    $loaded = PatternPreset::load('test_preset_contexts');
+    $contexts = $loaded->getContexts();
+    self::assertEmpty($contexts);
+  }
+
+  /**
+   * Tests the getSources method.
+   */
+  public function testGetSources(): void {
+    $sources = [
+      'source_id' => 'token',
+      'source' => ['value' => 'foo bar'],
+    ];
+    $patternPreset = PatternPreset::create([
+      'id' => 'test_preset_sources',
+      'sources' => [$sources],
+    ]);
+    $patternPreset->save();
+
+    $loaded = PatternPreset::load('test_preset_sources');
+    $loadedSources = $loaded->getSources();
+
+    // getSources adds a node_id.
+    self::assertArrayHasKey('node_id', $loadedSources);
+    self::assertNotEmpty($loadedSources['node_id']);
+
+    // Remove it for comparison.
+    unset($loadedSources['node_id']);
+    self::assertSame($sources, $loadedSources);
+  }
+
+  /**
+   * Tests the getSummary method.
+   */
+  public function testGetSummary(): void {
+    $patternPreset = PatternPreset::create([
+      'id' => 'test_preset_summary',
+      'label' => 'Test Preset Summary',
+      'sources' => [
+        'source_id' => 'token',
+        'source' => ['value' => 'foo bar'],
+      ],
+    ]);
+    $patternPreset->save();
+
+    $loaded = PatternPreset::load('test_preset_summary');
+    self::assertSame('Token: foo bar', $loaded->getSummary());
+  }
+
+  /**
    * Tests creating and editing a PatternPreset entity.
    */
   public function testPatternPresetCrud(): void {
@@ -94,74 +162,6 @@ final class PatternPresetTest extends KernelTestBase {
     $updated->delete();
     $deleted = PatternPreset::load('test_preset');
     self::assertNull($deleted);
-  }
-
-  /**
-   * Tests the getSources method.
-   */
-  public function testGetSources(): void {
-    $sources = [
-      'source_id' => 'token',
-      'source' => ['value' => 'foo bar'],
-    ];
-    $patternPreset = PatternPreset::create([
-      'id' => 'test_preset_sources',
-      'sources' => [$sources],
-    ]);
-    $patternPreset->save();
-
-    $loaded = PatternPreset::load('test_preset_sources');
-    $loadedSources = $loaded->getSources();
-
-    // getSources adds a node_id.
-    self::assertArrayHasKey('node_id', $loadedSources);
-    self::assertNotEmpty($loadedSources['node_id']);
-
-    // Remove it for comparison.
-    unset($loadedSources['node_id']);
-    self::assertSame($sources, $loadedSources);
-  }
-
-  /**
-   * Tests the getSummary method.
-   */
-  public function testGetSummary(): void {
-    $patternPreset = PatternPreset::create([
-      'id' => 'test_preset_summary',
-      'label' => 'Test Preset Summary',
-      'sources' => [
-        'source_id' => 'token',
-        'source' => ['value' => 'foo bar'],
-      ],
-    ]);
-    $patternPreset->save();
-
-    $loaded = PatternPreset::load('test_preset_summary');
-    self::assertSame('Token: foo bar', $loaded->getSummary());
-  }
-
-  /**
-   * Tests the getContexts method.
-   */
-  public function testGetContextsEmpty(): void {
-    $sources = [
-      'source_id' => 'wysiwyg',
-      'source' => [
-        'value' => [
-          'value' => 'foo bar',
-          'format' => 'plain_text',
-        ],
-      ],
-    ];
-    $patternPreset = PatternPreset::create([
-      'id' => 'test_preset_contexts',
-      'sources' => $sources,
-    ]);
-    $patternPreset->save();
-
-    $loaded = PatternPreset::load('test_preset_contexts');
-    $contexts = $loaded->getContexts();
-    self::assertEmpty($contexts);
   }
 
 }

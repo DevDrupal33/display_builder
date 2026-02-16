@@ -139,7 +139,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function isNew() {
+  public function isNew(): bool {
     // We don't support enforceIsNew property because we have no practical
     // use of it and because it seems to break the invalidation of
     // ::getCacheTags().

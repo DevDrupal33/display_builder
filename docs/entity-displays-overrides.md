@@ -58,8 +58,10 @@ The "Save" button store the display in the content field. The "Restore" button l
 
 Display Builder data is stored as content field provided by `ui_patterns_field` module, where every field item has those properties:
 
+- `node_id`: The ID of the node in the source tree
 - `source_id`: the source plugin ID
 - `source`: the source plugin config
+- `third_party_settings`: extra configuration, prefixed by module or island plugin ID
 
 The entity view display config entity has additional `override_field` and `override_profile` properties for the field name storing the data and the related display builder profile:
 

@@ -11,7 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
-use Drupal\display_builder\ConfigFormBuilderInterface;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -23,11 +23,12 @@ final class PageLayoutForm extends EntityForm {
   use AutowireTrait;
 
   public function __construct(
-    private readonly ConfigFormBuilderInterface $configFormBuilder,
     private readonly ContextRepositoryInterface $contextRepository,
     #[Autowire(service: 'plugin.manager.condition')]
     private readonly ExecutableManagerInterface $conditionManager,
     private readonly LanguageManagerInterface $languageManager,
+    #[Autowire(service: 'plugin.manager.display_buildable')]
+    private readonly DisplayBuildablePluginManager $displayBuildableManager,
   ) {}
 
   /**
@@ -63,7 +64,9 @@ final class PageLayoutForm extends EntityForm {
       '#disabled' => !$entity->isNew(),
     ];
 
-    $form = \array_merge($form, $this->configFormBuilder->build($entity));
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $entity]);
+    $form = \array_merge($form, $buildable->buildInstanceForm());
 
     $form['conditions'] = $this->buildConditionsForm([], $form_state);
     $form['status'] = [
@@ -108,7 +111,10 @@ final class PageLayoutForm extends EntityForm {
     /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $page_layout */
     $page_layout = $this->entity;
 
-    if ($page_layout->isNew() && !$this->configFormBuilder->isAllowed($page_layout)) {
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $page_layout]);
+
+    if ($page_layout->isNew() && !$buildable->isAllowed()) {
       $form['submit']['#disabled'] = TRUE;
     }
 

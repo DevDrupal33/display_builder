@@ -18,29 +18,19 @@ abstract class AccessControlTestBase extends DisplayBuilderKernelTestBase {
   use UserCreationTrait;
 
   /**
-   * The admin Display Builder profiles permission.
-   */
-  public string $adminPermission = 'administer display builder profile';
-
-  /**
    * The access control handler name.
    */
   public string $accessControlHandler = 'display_builder_instance';
 
   /**
+   * The admin Display Builder profiles permission.
+   */
+  public string $adminPermission = 'administer display builder profile';
+
+  /**
    * The access control handler for Instances.
    */
   protected EntityAccessControlHandlerInterface $accessControl;
-
-  /**
-   * The user permissions service.
-   */
-  protected PermissionHandlerInterface $userPermissions;
-
-  /**
-   * The use Display Builder profile permission pattern for sprintf.
-   */
-  protected string $useDisplayBuilderPermission = 'use display builder %s';
 
   /**
    * {@inheritdoc}
@@ -52,6 +42,16 @@ abstract class AccessControlTestBase extends DisplayBuilderKernelTestBase {
     'display_builder',
     'display_builder_ui',
   ];
+
+  /**
+   * The use Display Builder profile permission pattern for sprintf.
+   */
+  protected string $useDisplayBuilderPermission = 'use display builder %s';
+
+  /**
+   * The user permissions service.
+   */
+  protected PermissionHandlerInterface $userPermissions;
 
   /**
    * {@inheritdoc}

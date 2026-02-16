@@ -97,11 +97,14 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
   public function getDefaultOperations(EntityInterface $entity): array {
     /** @var \Drupal\display_builder_page_layout\PageLayoutInterface @page_layout */
     $page_layout = $entity;
+    $manager = \Drupal::service('plugin.manager.display_buildable');
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $manager->createInstance('page_layout', ['entity' => $page_layout]);
     $operations = parent::getDefaultOperations($entity);
     $operations[] = [
       'title' => new TranslatableMarkup('Build display'),
       'weight' => -10,
-      'url' => $page_layout->getBuilderUrl(),
+      'url' => $buildable->getBuilderUrl(),
     ];
 
     if ($entity->hasLinkTemplate('duplicate-form')) {
