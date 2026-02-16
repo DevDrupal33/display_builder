@@ -262,7 +262,7 @@ phpmd:
           {
             "external_link": {
               "label": "Playwright test report",
-              "url": "https://issue.pages.drupalcode.org/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/playwright-report/index.html"
+              "url": "https://project.pages.drupalcode.org/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/playwright-report/index.html"
             }
           }
         ]
