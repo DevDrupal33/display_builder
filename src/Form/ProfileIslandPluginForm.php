@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Form;
 
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -13,13 +14,14 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\display_builder\Entity\Profile;
 use Drupal\display_builder\IslandInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Display builder plugin form.
  */
 final class ProfileIslandPluginForm extends EntityForm {
+
+  use AutowireTrait;
 
   /**
    * The route parameter for the island plugin.
@@ -49,15 +51,6 @@ final class ProfileIslandPluginForm extends EntityForm {
     $island = \Drupal::service('plugin.manager.db_island')->createInstance($island_id, []);
 
     return $island->label();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container): ProfileIslandPluginForm {
-    return new self(
-      $container->get('plugin.manager.db_island')
-    );
   }
 
   /**

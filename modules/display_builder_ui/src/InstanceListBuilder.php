@@ -211,7 +211,7 @@ final class InstanceListBuilder extends EntityListBuilder {
 
     $info = $this->t('Instances are versions of displays (entity views, page layouts, views...) currently under work.');
     $info .= '<br>';
-    $info .= $this->t('They are created automatically from the displays and saved in the display configuration.');
+    $info .= $this->t('They are created automatically from the displays and saved in the configuration when published.');
 
     $build['notice'] = [
       '#type' => 'html_tag',

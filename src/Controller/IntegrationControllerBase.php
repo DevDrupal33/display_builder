@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginManager;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -16,21 +16,14 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 abstract class IntegrationControllerBase extends ControllerBase {
 
+  use AutowireTrait;
+
   /**
    * {@inheritdoc}
    */
   public function __construct(
     protected DisplayBuildablePluginManager $displayBuildableManager,
   ) {}
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('plugin.manager.display_buildable'),
-    );
-  }
 
   /**
    * Render a Display Builder profile entity view.

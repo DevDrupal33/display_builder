@@ -70,23 +70,27 @@ final class DisplayBuildablePluginTest extends DisplayBuilderKernelTestBase {
   public function testBuildInstanceForm(array $data, array $expect): void {
     // Create profiles.
     $profiles = [];
+
     foreach ($data['profiles'] as $id) {
       $profiles[$id] = self::createDisplayBuilderProfile($id, ['label' => $id]);
     }
 
     // Create user with permissions.
     $permissions = [];
+
     if ($data['admin_permission']) {
       $permissions[] = 'administer display builder profile';
     }
+
     foreach ($data['profile_permissions'] as $id) {
-      $permissions[] = sprintf($this->useDisplayBuilderPermission, $id);
+      $permissions[] = \sprintf($this->useDisplayBuilderPermission, $id);
     }
 
     $this->setUpCurrentUser([], $permissions);
 
     // Setup plugin.
     $plugin = TestDisplayBuildablePlugin::create($this->container, [], 'test', []);
+
     if (isset($data['current_profile'])) {
       $plugin->profile = $profiles[$data['current_profile']];
     }
@@ -125,12 +129,15 @@ final class DisplayBuildablePluginTest extends DisplayBuilderKernelTestBase {
       if (isset($expect['description_contains'])) {
         // Description can be string or array (if admin link is added).
         $desc = $element['#description'];
-        if (is_array($desc)) {
+
+        if (\is_array($desc)) {
           $desc_text = '';
+
           foreach ($desc as $part) {
             if (isset($part['#markup'])) {
               $desc_text .= $part['#markup'];
             }
+
             if (isset($part['#title'])) {
               $desc_text .= $part['#title'];
             }

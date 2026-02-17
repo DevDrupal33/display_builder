@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides dynamic permissions of the display_builder module.
  */
 class ProfilePermissions implements ContainerInjectionInterface {
 
+  use AutowireTrait;
   use StringTranslationTrait;
 
   /**
@@ -31,13 +32,6 @@ class ProfilePermissions implements ContainerInjectionInterface {
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager) {
     $this->entityTypeManager = $entity_type_manager;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container): ProfilePermissions {
-    return new static($container->get('entity_type.manager'));
   }
 
   /**

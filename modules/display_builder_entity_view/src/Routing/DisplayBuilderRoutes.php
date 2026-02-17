@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder_entity_view\Routing;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -12,7 +13,6 @@ use Drupal\Core\Routing\RouteBuildEvent;
 use Drupal\Core\Routing\RoutingEvents;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder_entity_view\Controller\EntityViewController;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -25,6 +25,8 @@ use Symfony\Component\Routing\RouteCollection;
  */
 final class DisplayBuilderRoutes implements EventSubscriberInterface {
 
+  use AutowireTrait;
+
   /**
    * {@inheritdoc}
    */
@@ -32,16 +34,6 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
     private EntityTypeManagerInterface $entityTypeManager,
     private ModuleHandlerInterface $module_handler,
   ) {}
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container): static {
-    return new self(
-      $container->get('entity_type.manager'),
-      $container->get('module_handler'),
-    );
-  }
 
   /**
    * {@inheritdoc}

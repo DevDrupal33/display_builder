@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_entity_view\Routing;
 
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteBuildEvent;
 use Drupal\Core\Routing\RoutingEvents;
 use Drupal\display_builder_entity_view\Controller\EntityViewOverridesController;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -22,21 +22,14 @@ use Symfony\Component\Routing\RouteCollection;
  */
 final class OverridesRoutes implements EventSubscriberInterface {
 
+  use AutowireTrait;
+
   /**
    * {@inheritdoc}
    */
   public function __construct(
     private EntityTypeManagerInterface $entityTypeManager,
   ) {}
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container): static {
-    return new self(
-      $container->get('entity_type.manager'),
-    );
-  }
 
   /**
    * {@inheritdoc}

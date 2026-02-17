@@ -21,7 +21,12 @@ class EntityOverrideViewLocalTask extends DeriverBase implements ContainerDerive
 
   use StringTranslationTrait;
 
-  public function __construct(protected RouteProviderInterface $routeProvider, protected ComponentPluginManager $componentPluginManager, protected EntityTypeManagerInterface $entityTypeManager, TranslationInterface $stringTranslation) {
+  public function __construct(
+    protected RouteProviderInterface $routeProvider,
+    protected ComponentPluginManager $componentPluginManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    TranslationInterface $stringTranslation,
+  ) {
     $this->setStringTranslation($stringTranslation);
   }
 
