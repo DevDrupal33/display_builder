@@ -80,7 +80,7 @@ class LayersPanel extends BuilderPanel {
    * {@inheritdoc}
    */
   protected function buildSingleComponent(string $builder_id, string $instance_id, SourceWithSlotsInterface $source, array $data, int $index = 0): ?array {
-    $component_id = NULL;
+    $component_id = $source->getPluginID();
     $label = $source->label();
 
     if ($source instanceof SourceWithChoicesInterface) {

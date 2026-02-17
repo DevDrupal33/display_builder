@@ -40,3 +40,7 @@ ui_patterns_source.main_page_content:
 ui_patterns_source.page_title:
   type: ignore
   label: 'Source: Page title'
+
+ui_patterns_source.page_layout:
+  type: ignore
+  label: 'Source: Page layout'

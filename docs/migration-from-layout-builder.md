@@ -34,12 +34,10 @@ Layout Builder is made of sections (a flat list of layout plugins, one layout pe
 
 Layout builder sections:
 
-| Section's layout plugins    | Migrated as                                                                                     |
-| --------------------------- | ----------------------------------------------------------------------------------------------- |
-| SDC component (UI Patterns) | ✅ SDC component                                                                                |
-| Other layouts               | ❌ No proper conversion, we extract the blocks and put them as a flat list where the layout is. |
-
-> 🚧 2025-11-11: We may add layout plugin support. See: [#3531521](https://www.drupal.org/i/3531521)
+| Section's layout plugins    | Migrated as       |
+| --------------------------- | ----------------- |
+| SDC component (UI Patterns) | ✅ SDC component  |
+| Other layouts               | ✅ Layout plugins |
 
 | Section's other data | Migrated as              |
 | -------------------- | ------------------------ |

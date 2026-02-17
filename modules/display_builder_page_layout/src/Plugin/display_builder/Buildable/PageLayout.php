@@ -12,9 +12,9 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildablePluginBase;
-use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\InstanceStorageInterface;
 use Drupal\display_builder\ProfileInterface;
+use Drupal\display_builder_page_layout\BuilderDataConverter;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 
@@ -118,8 +118,9 @@ final class PageLayout extends DisplayBuildablePluginBase {
     $sources = $this->getSources();
 
     if (empty($sources)) {
-      // Fallback to a fixture mimicking the standard page layout.
-      $sources = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_page_layout', 'default_page_layout');
+      $sources = $this->converter()->convertPage();
+      // Sources root is always a list of source data structures.
+      $sources = \array_is_list($sources) ? $sources : [$sources];
     }
 
     return $sources;
@@ -185,6 +186,16 @@ final class PageLayout extends DisplayBuildablePluginBase {
     }
 
     return \sprintf('%s%s', self::getPrefix(), $this->entity->id());
+  }
+
+  /**
+   * Gets the builder data converter.
+   *
+   * @return \Drupal\display_builder_page_layout\BuilderDataConverter
+   *   The converter service.
+   */
+  private function converter(): BuilderDataConverter {
+    return \Drupal::service('display_builder_page_layout.builder_data_converter');
   }
 
 }

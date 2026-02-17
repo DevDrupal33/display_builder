@@ -29,6 +29,7 @@ final class InstancePageLayoutAccessControlTest extends AccessControlTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
+    'block',
     'system',
     'user',
     'ui_patterns',

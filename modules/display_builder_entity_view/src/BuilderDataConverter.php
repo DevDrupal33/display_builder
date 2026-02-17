@@ -13,7 +13,7 @@ use Drupal\layout_builder\Section;
 use Drupal\layout_builder\SectionComponent;
 
 /**
- * Converter data between Layout Builder and Display Builder.
+ * Convert data between Layout Builder and Display Builder.
  */
 class BuilderDataConverter {
 

@@ -45,14 +45,14 @@ Configuration happens in a modal:
 
 ![Islands modal](images/config-modal.webp)
 
-View panels have an extra feature, they can be moved between 2 different regions:
+Some islands can be moved between 2 different regions. For example, View Panels can be:
 
 - tabbed in the center of the toolbar
 - or as buttons in the start of the toolbar
 
-![Islands configuration](images/config-2.webp)
+And Toolbar Buttons can be moved from one side to the other of the toolbar.
 
-> 🚧 2025-11-05: This mechanism may be made generic. See [#3555920](https://www.drupal.org/i/3555920)
+![Islands configuration](images/config-2.webp)
 
 ## Access & permissions
 

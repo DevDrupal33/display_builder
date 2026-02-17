@@ -14,3 +14,11 @@ services:
       - '@plugin.manager.display_buildable'
     tags:
       - { name: 'event_subscriber' }
+
+  display_builder_page_layout.builder_data_converter:
+    class: Drupal\display_builder_page_layout\BuilderDataConverter
+    arguments:
+      - '@block.repository'
+      - '@theme.manager'
+      - '@theme.initialization'
+      - '@config.factory'

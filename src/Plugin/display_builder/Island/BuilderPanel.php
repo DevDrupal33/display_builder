@@ -166,8 +166,7 @@ class BuilderPanel extends IslandPluginBase {
    *   A renderable array.
    */
   protected function buildSingleComponent(string $builder_id, string $instance_id, SourceWithSlotsInterface $source, array $data, int $index = 0): ?array {
-    // @todo support more than SourceWithChoicesInterface.
-    $component_id = NULL;
+    $component_id = $source->getPluginID();
     $label = $source->label();
 
     if ($source instanceof SourceWithChoicesInterface) {

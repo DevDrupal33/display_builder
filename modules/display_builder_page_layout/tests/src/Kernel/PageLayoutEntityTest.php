@@ -25,6 +25,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
+    'block',
     'system',
     'user',
     'display_builder',
