@@ -262,6 +262,8 @@ trait EntityViewDisplayTrait {
         $sources = $this->displayBuildable()->getSources();
       }
 
+      // We clear the display because we only want our renderable.
+      $build_list[$id] = [];
       // @see entity.html.twig
       $build_list[$id]['content'] = $this->buildSources($entity, $sources);
     }
