@@ -42,7 +42,7 @@ You need `ui_patterns_ui` module enabled to have access to `/admin/structure/dis
 
 ![Presets management](images/presets-mgmt.webp)
 
-> 🚧 2025-07-01: Group is not used in `Patterns Library` panel yet. [#3534217](https://www.drupal.org/i/3534217)
+From there, you can also change the group assigned by default, to organize the pattern preset panel as you wish.
 
 ## Under the hood
 
@@ -50,8 +50,8 @@ Pattern presets are config entities:
 
 - `id`: Entity ID
 - `label`: The human-readable name of the entity.
-- `description` and `group`: metadata, editable only from the admin UI
-- `theme`: the active theme when the pattern preset was created
+- `description`: metadata, editable only from the admin UI
+- `group`: automatically generated, editable from the admin UI.
 - `sources`: a UI Patterns 2 sources tree
 
 Example:
@@ -60,8 +60,7 @@ Example:
 id: 68679ab4e1797
 label: 'My button with a title'
 description: ''
-group: ''
-theme: usb_sub
+group: 'Colored buttons'
 sources: [...]
 ```
 

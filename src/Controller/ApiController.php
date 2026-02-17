@@ -372,7 +372,6 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       'id' => \uniqid(),
       'label' => $label,
       'status' => TRUE,
-      'group' => '',
       'description' => '',
       'sources' => $data,
     ]);

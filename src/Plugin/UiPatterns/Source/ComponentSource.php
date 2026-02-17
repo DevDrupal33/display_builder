@@ -166,6 +166,26 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
   }
 
   /**
+   * Get the group name for this source plugin.
+   *
+   * This method will be implemented in Drupal\ui_patterns\SourceInterface.
+   *
+   * @return string
+   *   The name of the group.
+   */
+  public function getGroup(): string {
+    $component_id = $this->settings['component']['component_id'] ?? '';
+
+    if (!$component_id) {
+      return '';
+    }
+
+    $definition = $this->componentManager->getDefinition($component_id);
+
+    return $definition['group'] ?? '';
+  }
+
+  /**
    * Get component metadata.
    *
    * @param string $component_id

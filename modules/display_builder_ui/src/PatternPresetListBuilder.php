@@ -80,7 +80,8 @@ final class PatternPresetListBuilder extends DraggableListBuilder {
     /** @var \Drupal\display_builder\PatternPresetInterface $entity */
     $row = [];
     $row['label'] = $entity->label();
-    $row['group']['data']['#plain_text'] = $entity->getGroup();
+
+    $row['group']['data']['#plain_text'] = $entity->getGroup() ?? $this->t('Others');
     $row['description']['data']['#plain_text'] = $entity->get('description') ?: $entity->getSummary();
 
     if ($entity->getContexts()) {

@@ -7,6 +7,7 @@ namespace Drupal\Tests\display_builder\Kernel;
 use Drupal\display_builder\Entity\PatternPreset;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -30,6 +31,7 @@ final class PatternPresetTest extends KernelTestBase {
     'ui_patterns',
     'display_builder',
     'display_builder_test',
+    'node',
   ];
 
   /**
@@ -37,11 +39,12 @@ final class PatternPresetTest extends KernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->installConfig(['system', 'display_builder', 'ui_patterns', 'display_builder_test']);
+    $this->installConfig(['system', 'display_builder', 'ui_patterns', 'display_builder_test', 'node']);
     $this->installEntitySchema('user');
     $this->installEntitySchema('display_builder_profile');
     $this->installEntitySchema('pattern_preset');
     $this->installEntitySchema('filter_format');
+    $this->installEntitySchema('node');
   }
 
   /**
@@ -113,10 +116,78 @@ final class PatternPresetTest extends KernelTestBase {
   }
 
   /**
+   * Tests the getGroup method.
+   *
+   * @param array $data
+   *   The data to create the preset.
+   * @param string|null $expected
+   *   The expected group.
+   */
+  #[DataProvider('providerGetGroup')]
+  public function testGetGroup(array $data, ?string $expected): void {
+    $preset = PatternPreset::create($data);
+    $preset->save();
+
+    $loaded = PatternPreset::load($data['id']);
+    self::assertSame($expected, $loaded->getGroup());
+  }
+
+  /**
+   * Data provider for testGetGroup().
+   *
+   * @return iterable
+   *   The data to test.
+   */
+  public static function providerGetGroup(): iterable {
+    yield 'preset empty no group' => [
+      'data' => [
+        'id' => 'test_preset_group_empty',
+        'label' => 'Test Preset',
+        'sources' => [],
+      ],
+      'expected' => NULL,
+    ];
+
+    yield 'preset with group' => [
+      'data' => [
+        'id' => 'test_preset_group_manual_empty',
+        'label' => 'Test Preset',
+        'group' => 'Foo',
+        'sources' => [],
+      ],
+      'expected' => 'Foo',
+    ];
+
+    yield 'preset with group and source' => [
+      'data' => [
+        'id' => 'test_preset_group_manual',
+        'label' => 'Test Preset',
+        'group' => 'Foo',
+        'sources' => [
+          'source_id' => 'test_group_source',
+          'source' => [],
+        ],
+      ],
+      'expected' => 'Foo',
+    ];
+
+    yield 'preset without group and source' => [
+      'data' => [
+        'id' => 'test_preset_group_source',
+        'label' => 'Test Preset',
+        'sources' => [
+          'source_id' => 'test_group_source',
+          'source' => [],
+        ],
+      ],
+      'expected' => 'Test Source Group',
+    ];
+  }
+
+  /**
    * Tests creating and editing a PatternPreset entity.
    */
   public function testPatternPresetCrud(): void {
-    // Create a new pattern preset entity.
     $patternPreset = PatternPreset::create([
       'id' => 'test_preset',
       'label' => 'Test Preset',

@@ -58,6 +58,7 @@ final class PatternPresetForm extends EntityForm {
     $form['sources'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Sources'),
+      '#description' => $this->t('It is not recommended to manually edit a Pattern as an invalid format can lead to an error on all display.'),
       '#default_value' => Yaml::encode($entity->get('sources') ?? []),
       '#rows' => 16,
     ];

@@ -81,7 +81,7 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
   /**
    * The preset group.
    */
-  protected string $group = '';
+  protected ?string $group = NULL;
 
   /**
    * The preset sources.
@@ -108,8 +108,29 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
   /**
    * {@inheritdoc}
    */
-  public function getGroup(): string {
-    return $this->group;
+  public function getGroup(): ?string {
+    if (isset($this->group) && !empty($this->group)) {
+      return $this->group;
+    }
+
+    if (isset($this->sources['source'], $this->sources['source_id'])) {
+      $configuration = [
+        'settings' => $this->sources['source'] ?? [],
+      ];
+      /** @var \Drupal\ui_patterns\SourceInterface $source */
+      $source = $this->sourcePluginManager()->createInstance($this->sources['source_id'], $configuration);
+
+      // We check if the UI Patterns source plugin has a getGroup() method.
+      // At the moment, this method is not part of SourceInterface but is
+      // anticipated for a future update to the UI Patterns API.
+      // Using method_exists() ensures compatibility in the meantime.
+      if (\method_exists($source, 'getGroup')) {
+        $this->group = (string) $source->getGroup();
+      }
+      $this->save();
+    }
+
+    return !empty($this->group) ? $this->group : NULL;
   }
 
   /**
@@ -155,7 +176,15 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
       return [];
     }
 
-    return $this->getContextFromSource($this->sources['source_id'], $this->sources['source']);
+    // In case of malformed json we don't want to fail, just ignore.
+    try {
+      $contexts = $this->getContextFromSource($this->sources['source_id'], $this->sources['source']);
+
+      return $contexts;
+    }
+    catch (\Throwable $th) {
+      return [];
+    }
   }
 
   /**

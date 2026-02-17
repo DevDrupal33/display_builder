@@ -14,10 +14,10 @@ interface PatternPresetInterface extends ConfigEntityInterface {
   /**
    * Get the preset group.
    *
-   * @return string
-   *   The group
+   * @return string|null
+   *   The group name of the preset or null if not set.
    */
-  public function getGroup(): string;
+  public function getGroup(): ?string;
 
   /**
    * Return the ready to use sources.
@@ -41,7 +41,7 @@ interface PatternPresetInterface extends ConfigEntityInterface {
    * The summary of a preset is the summary of its root source.
    *
    * @return string
-   *   The summary
+   *   The summary of the preset.
    */
   public function getSummary(): string;
 

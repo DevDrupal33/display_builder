@@ -58,6 +58,45 @@ class BlockLibrarySourceHelper {
   }
 
   /**
+   * Sorts the grouped choices based on arbitrary weight.
+   *
+   * @param array $categories
+   *   The categories to sort, passed by reference.
+   */
+  public static function sortGroupedChoices(array &$categories): void {
+    // Public for reuse by PresetLibraryPanel.
+    $category_weight = [
+      // Different builder contexts.
+      (string) new TranslatableMarkup('Page') => 1,
+      (string) new TranslatableMarkup('Views') => 1,
+      (string) new TranslatableMarkup('Fields') => 1,
+      (string) new TranslatableMarkup('Referenced entities') => 2,
+      // Global categories.
+      (string) new TranslatableMarkup('Menus') => 3,
+      (string) new TranslatableMarkup('System') => 3,
+      (string) new TranslatableMarkup('User') => 3,
+      (string) new TranslatableMarkup('Utilities') => 3,
+      (string) new TranslatableMarkup('Forms') => 4,
+      (string) new TranslatableMarkup('Lists (Views)') => 5,
+      (string) new TranslatableMarkup('Others') => 6,
+      (string) new TranslatableMarkup('Dev tools') => 99,
+    ];
+
+    // Sort categories by predefined weight, then by natural string comparison
+    // of labels.
+    \uasort($categories, static function ($a, $b) use ($category_weight) {
+      $weight_a = $category_weight[$a['label']] ?? 98;
+      $weight_b = $category_weight[$b['label']] ?? 98;
+
+      if ($weight_a === $weight_b) {
+        return \strnatcmp($a['label'], $b['label']);
+      }
+
+      return $weight_a <=> $weight_b;
+    });
+  }
+
+  /**
    * Get the choices from all sources.
    *
    * @param array $sources
@@ -246,44 +285,6 @@ class BlockLibrarySourceHelper {
     }
 
     return $group;
-  }
-
-  /**
-   * Sorts the grouped choices based on arbitrary weight.
-   *
-   * @param array $categories
-   *   The categories to sort, passed by reference.
-   */
-  private static function sortGroupedChoices(array &$categories): void {
-    $category_weight = [
-      // Different builder contexts.
-      (string) new TranslatableMarkup('Page') => 1,
-      (string) new TranslatableMarkup('Views') => 1,
-      (string) new TranslatableMarkup('Fields') => 1,
-      (string) new TranslatableMarkup('Referenced entities') => 2,
-      // Global categories.
-      (string) new TranslatableMarkup('Menus') => 3,
-      (string) new TranslatableMarkup('System') => 3,
-      (string) new TranslatableMarkup('User') => 3,
-      (string) new TranslatableMarkup('Utilities') => 3,
-      (string) new TranslatableMarkup('Forms') => 4,
-      (string) new TranslatableMarkup('Lists (Views)') => 5,
-      (string) new TranslatableMarkup('Others') => 6,
-      (string) new TranslatableMarkup('Dev tools') => 99,
-    ];
-
-    // Sort categories by predefined weight, then by natural string comparison
-    // of labels.
-    \uasort($categories, static function ($a, $b) use ($category_weight) {
-      $weight_a = $category_weight[$a['label']] ?? 98;
-      $weight_b = $category_weight[$b['label']] ?? 98;
-
-      if ($weight_a === $weight_b) {
-        return \strnatcmp($a['label'], $b['label']);
-      }
-
-      return $weight_a <=> $weight_b;
-    });
   }
 
 }
