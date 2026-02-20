@@ -109,15 +109,13 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
   /**
    * Get the parent id of an node.
    *
-   * @param array $root
-   *   The root data.
    * @param string $node_id
    *   The node ID of the source.
    *
    * @return string
-   *   The parent id or empty.
+   *   The parent node id. Empty if the node is at the root level.
    */
-  public function getParentId(array $root, string $node_id): string;
+  public function getParentId(string $node_id): string;
 
   /**
    * Set the source for a tree node.
@@ -221,13 +219,10 @@ interface InstanceInterface extends EntityInterface, HistoryInterface {
   /**
    * Get the path index.
    *
-   * @param array $root
-   *   (Optional) The root state.
-   *
    * @return array
    *   The path index.
    */
-  public function getPathIndex(array $root = []): array;
+  public function getPathIndex(): array;
 
   /**
    * Restore to the last saved state.

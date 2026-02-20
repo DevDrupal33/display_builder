@@ -299,7 +299,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     self::assertNotEmpty($pathIndex);
     // Check that the path index contains at least one entry.
     self::assertNotEmpty(\array_keys($pathIndex));
-    self::assertSame(['component'], \reset($pathIndex));
+    self::assertSame(['component'], \reset($pathIndex)['path']);
 
     self::assertIsInt($instance->present->hash);
     self::assertSame('Test', $instance->present->log);

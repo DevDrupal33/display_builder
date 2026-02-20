@@ -59,6 +59,7 @@ class PreviewPanel extends IslandPluginBase {
     if (empty($data)) {
       return [];
     }
+
     // Replace preview for empty block until #3561447.
     $this->alterPreviewPlaceholder($data);
 

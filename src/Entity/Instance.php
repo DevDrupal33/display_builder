@@ -106,8 +106,13 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   /**
    * Path index.
    *
-   * A mapping where each key is an slot source node ID and each value is
-   * the path where this source is located in the data state.
+   * A mapping where each key is an slot source node ID and each value has
+   * two properties:
+   * - path: the path
+   * - parent: the node ID of the parent. This is necessary because not every
+   *   SourceWithSlotsInterface implementations has the same "deepness". For
+   *   example, ComponentSource has 4 levels (component, slots, slot_id,
+   *   'sources), LayoutSource has 2 levels (regions, slot_id), etc.
    */
   protected array $pathIndex = [];
 
@@ -173,7 +178,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       return;
     }
 
-    $indexed = $this->buildIndexFromSlot([], $this->present->data ?? []);
+    $indexed = $this->buildIndexFromSlot([], $this->present->data ?? [], NULL);
     $hash = self::getUniqId($indexed);
     $this->present = new HistoryStep(
       $indexed,
@@ -206,7 +211,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function moveToRoot(string $node_id, int $position): bool {
     $root = $this->getCurrentState();
-    $path = $this->getPath($root, $node_id);
+    $path = $this->getPath($node_id);
     $data = NestedArray::getValue($root, $path);
 
     if (empty($data) || !isset($data['source_id'])) {
@@ -233,7 +238,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function moveToSlot(string $node_id, string $parent_id, string $slot_id, int $position): bool {
     $root = $this->getCurrentState();
-    $path = $this->getPath($root, $node_id);
+    $path = $this->getPath($node_id);
     $data = NestedArray::getValue($root, $path);
 
     if (empty($data) || !isset($data['source_id'])) {
@@ -242,7 +247,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
 
     $parent_slot = \array_slice($path, \count($path) - 3, 1)[0];
 
-    if (($parent_id === $this->getParentId($root, $node_id)) && ($slot_id === $parent_slot)) {
+    if (($parent_id === $this->getParentId($node_id)) && ($slot_id === $parent_slot)) {
       // Moving to the same slot is tricky, because we don't want to remove a
       // sibling.
       $slot_path = \array_slice($path, 0, \count($path) - 1);
@@ -339,7 +344,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function getNode(string $node_id): array {
     $root = $this->getCurrentState();
-    $path = $this->getPath($root, $node_id);
+    $path = $this->getPath($node_id);
     $value = NestedArray::getValue($root, $path);
 
     return $value ?? [];
@@ -348,12 +353,8 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function getParentId(array $root, string $node_id): string {
-    $path = $this->getPath($root, $node_id);
-    $length = \count(['source', 'component', 'slots', '{slot_id}', 'sources', '{position}']);
-    $parent_path = \array_slice($path, 0, \count($path) - $length);
-
-    return $this->getNodeId($parent_path);
+  public function getParentId(string $node_id): string {
+    return $this->pathIndex[$node_id]['parent'] ?? '';
   }
 
   /**
@@ -361,7 +362,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function setSource(string $node_id, string $source_id, array $data): void {
     $root = $this->getCurrentState();
-    $path = $this->getPath($root, $node_id);
+    $path = $this->getPath($node_id);
     $existing_data = NestedArray::getValue($root, $path) ?? [];
 
     if (!isset($existing_data['node_id']) || ($existing_data['node_id'] !== $node_id)) {
@@ -385,7 +386,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function setThirdPartySettings(string $node_id, string $island_id, array $data): void {
     $root = $this->getCurrentState();
-    $path = $this->getPath($root, $node_id);
+    $path = $this->getPath($node_id);
     $existing_data = NestedArray::getValue($root, $path);
 
     if (!isset($existing_data['third_party_settings'])) {
@@ -409,9 +410,9 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function remove(string $node_id): void {
     $root = $this->getCurrentState();
-    $path = $this->getPath($root, $node_id);
+    $path = $this->getPath($node_id);
     $data = NestedArray::getValue($root, $path);
-    $parent_id = $this->getParentId($root, $node_id);
+    $parent_id = $this->getParentId($node_id);
     $root = $this->doRemove($root, $node_id);
 
     $contexts = $this->getContexts() ?? [];
@@ -438,7 +439,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function setSave(array $save_data): void {
-    $indexed = $this->buildIndexFromSlot([], $save_data);
+    $indexed = $this->buildIndexFromSlot([], $save_data, NULL);
     $hash = self::getUniqId($indexed);
     $this->save = new HistoryStep($indexed, $hash, NULL, \time(), NULL);
   }
@@ -606,17 +607,12 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function getPathIndex(array $root = []): array {
-    if (empty($root)) {
-      // When called from the outside, root is not already retrieved.
-      // When called from an other method, it is better to pass an already
-      // retrieved root, for performance.
-      $root = $this->getCurrentState();
-    }
+  public function getPathIndex(): array {
     // It may be slow to rebuild the index every time we request it. But it is
     // very difficult to maintain an index synchronized with the state storage
     // history.
-    $this->buildIndexFromSlot([], $root);
+    $root = $this->getCurrentState();
+    $this->buildIndexFromSlot([], $root, NULL);
 
     return $this->pathIndex ?? [];
   }
@@ -678,15 +674,17 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * @param array $path
    *   The path to the slot.
    * @param array $data
-   *   (Optional) The slot data.
+   *   The slot data.
+   * @param ?string $parent
+   *   The node ID of the parent.
    *
    * @return array
    *   The slot data with the index updated.
    */
-  private function buildIndexFromSlot(array $path, array $data = []): array {
+  private function buildIndexFromSlot(array $path, array $data, ?string $parent): array {
     foreach ($data as $index => $source) {
       $source_path = \array_merge($path, [$index]);
-      $data[$index] = $this->buildIndexFromSource($source_path, $source);
+      $data[$index] = $this->buildIndexFromSource($source_path, $source, $parent);
     }
 
     return $data;
@@ -788,42 +786,27 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   }
 
   /**
-   * Get the source nod ID from a path.
-   *
-   * @todo may be slow.
-   *
-   * @param array $path
-   *   The path to the slot.
-   */
-  private function getNodeId(array $path): string {
-    $index = $this->getPathIndex();
-
-    foreach ($index as $node_id => $node_path) {
-      if ($path === $node_path) {
-        return $node_id;
-      }
-    }
-
-    return '';
-  }
-
-  /**
    * Add path to index and add node ID to source.
    *
    * @param array $path
    *   The path to the slot.
    * @param array $data
-   *   (Optional) The slot data.
+   *   The slot data.
+   * @param ?string $parent
+   *   The node ID of the parent.
    *
    * @return array
    *   The slot data with the index updated.
    */
-  private function buildIndexFromSource(array $path, array $data = []): array {
+  private function buildIndexFromSource(array $path, array $data, ?string $parent): array {
     // First job: Add missing node_id keys.
-    $node_id = $data['node_id'] ?? \uniqid();
+    $node_id = empty($data['node_id']) ? \uniqid() : $data['node_id'];
     $data['node_id'] = $node_id;
     // Second job: Save the path to the index.
-    $this->pathIndex[$node_id] = $path;
+    $this->pathIndex[$node_id] = [
+      'path' => $path,
+      'parent' => $parent,
+    ];
 
     if (!isset($data['source_id'])) {
       return $data;
@@ -841,7 +824,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
 
     foreach ($source->getSlotValues() as $slot_id => $slot) {
       $slot_path = \array_merge($path, ['source'], $source::getSlotPath($slot_id));
-      $slot = $this->buildIndexFromSlot($slot_path, $slot);
+      $slot = $this->buildIndexFromSlot($slot_path, $slot, $node_id);
       $data['source'] = $source->setSlotValue($data['source'], $slot_id, $slot);
     }
 
@@ -885,7 +868,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    *   The updated root state
    */
   private function doAttachToSlot(array $root, string $parent_id, string $slot_id, int $position, array $data): array {
-    $parent_path = $this->getPath($root, $parent_id);
+    $parent_path = $this->getPath($parent_id);
     $parent_data = $this->getNode($parent_id);
     $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager()->getSlotPropType()]];
     $source = $this->sourceManager()->createInstance(
@@ -915,7 +898,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    *   The updated root state
    */
   private function doRemove(array $root, string $node_id): array {
-    $path = $this->getPath($root, $node_id);
+    $path = $this->getPath($node_id);
     NestedArray::unsetValue($root, $path);
     // To avoid non consecutive array keys, we rebuild the value list.
     $slot_path = \array_slice($path, 0, \count($path) - 1);
@@ -928,16 +911,14 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   /**
    * Get the path to an source.
    *
-   * @param array $root
-   *   The root state.
    * @param string $node_id
    *   The node id of the source.
    *
    * @return array
    *   The path, one array item by level.
    */
-  private function getPath(array $root, string $node_id): array {
-    return $this->getPathIndex($root)[$node_id] ?? [];
+  private function getPath(string $node_id): array {
+    return $this->pathIndex[$node_id]['path'] ?? [];
   }
 
 }
