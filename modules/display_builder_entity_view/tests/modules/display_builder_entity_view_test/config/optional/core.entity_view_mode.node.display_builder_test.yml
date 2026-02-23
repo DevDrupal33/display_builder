@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.display_builder_test
+label: display_builder_test
+description: null
+targetEntityType: node
+cache: true

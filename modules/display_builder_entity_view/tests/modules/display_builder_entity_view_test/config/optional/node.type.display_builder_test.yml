@@ -1,0 +1,7 @@
+langcode: en
+status: true
+name: display_builder_test
+type: display_builder_test
+new_revision: false
+preview_mode: 1
+display_submitted: false

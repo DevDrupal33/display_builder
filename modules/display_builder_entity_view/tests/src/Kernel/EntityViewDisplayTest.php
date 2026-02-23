@@ -25,6 +25,7 @@ use PHPUnit\Framework\Attributes\Group;
 #[CoversClass(EntityViewDisplay::class)]
 #[CoversClass(EntityViewDisplayTrait::class)]
 #[Group('display_builder')]
+#[Group('display_builder_entity_view')]
 final class EntityViewDisplayTest extends EntityKernelTestBase {
 
   /**

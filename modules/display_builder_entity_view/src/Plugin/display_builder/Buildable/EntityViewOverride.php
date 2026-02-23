@@ -26,6 +26,7 @@ use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\InstanceStorageInterface;
 use Drupal\display_builder\ProfileInterface;
+use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
@@ -44,6 +45,11 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
    * The time service.
    */
   protected ?TimeInterface $time;
+
+  /**
+   * The data converter from Manage Display and Layout Builder.
+   */
+  protected BuilderDataConverter $dataConverter;
 
   /**
    * The field items where the override is stored.
@@ -214,14 +220,34 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
   public function getInitialSources(): array {
     $sources = $this->getSources();
 
-    if (\count($sources) === 0) {
-      \assert(\is_string($this->field->getName()));
-      /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-      $buildable = $this->displayBuildableManager()->createInstance('entity_view', ['entity' => $this->display]);
+    // 1. Keep the existing override value if existing.
+    if (\count($sources) > 0) {
+      return $sources;
+    }
 
-      if ($buildable->getProfile() !== NULL) {
-        $sources = $buildable->getSources();
+    // 2. Convert the Layout Builder Override if exists.
+    // There is always a single Layout Builder override per bundle: `default`.
+    // There could be many Display Builder overrides per bundle, one for each
+    // display, so we need to check.
+    if ($this->display->getMode() === 'default') {
+      $entity = $this->field->getEntity();
+      // @see: use Drupal\layout_builder\Plugin\SectionStorage\OverridesSectionStorage::$FIELD_NAME
+      $field_name = 'layout_builder__layout';
+
+      if ($entity->hasField($field_name) && !$entity->get($field_name)->isEmpty()) {
+        $content = $entity->get($field_name)->first()->getValue();
+
+        return $this->dataConverter()->convertFromLayoutBuilder($content);
       }
+    }
+
+    // 3. Copy entity view display value.
+    \assert(\is_string($this->field->getName()));
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager()->createInstance('entity_view', ['entity' => $this->display]);
+
+    if ($buildable->getProfile() !== NULL) {
+      $sources = $buildable->getSources();
     }
 
     return $sources;
@@ -392,6 +418,16 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
    */
   protected function displayBuildableManager(): DisplayBuildablePluginManager {
     return $this->displayBuildableManager ??= \Drupal::service('plugin.manager.display_buildable');
+  }
+
+  /**
+   * Get the data converter from Manage Display and Layout Builder.
+   *
+   * @return \Drupal\display_builder_entity_view\BuilderDataConverter
+   *   The converter.
+   */
+  protected function dataConverter(): BuilderDataConverter {
+    return $this->dataConverter ??= \Drupal::service('display_builder_entity_view.builder_data_converter');
   }
 
   /**

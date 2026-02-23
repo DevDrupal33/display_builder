@@ -19,14 +19,18 @@ So, it is possible to undo each of them. We can have both tool installed at the 
 
 ## Migration of the override content field
 
-When an Display Builder override is initialized, there are 4 possible sources of data and we load the first in this order of priority:
+When an Display Builder override is initialized, there are 2 possible sources of data for initial import.
 
-- Field settings default value: the first, not because we want but because it seems Field API is forcing it. It may be the opportunity to challenge that.
-- Existing Layout Builder override (only for default display): priority because we keep existing content
-- Display Builder entity view display configuration: the most usual and expected situation. the scope of this ticket
-- Existing Layout builder configuration (if we do [#3540048: Allow override of displays not build with display builder](https://www.drupal.org/i/3540048))
+The import priority is not the same as the display priority:
 
-> 🚧 2025-08-26: Not ready yet See: [#3542859](https://www.drupal.org/i/3542859)
+|                 | For display              | For import in DB override                                                     |
+| --------------- | ------------------------ | ----------------------------------------------------------------------------- |
+| Higher priority | Display Builder override |
+| P2              | Display Builder config   | Layout Builder override (available only for default display)                  |
+| P3              | Layout Builder override  | Display Builder config                                                        |
+| Lower priority  | Layout Builder config    | (Not applicable) (🚧 [but this may change](https://www.drupal.org/i/3540048)) |
+
+> 🚧 2026-02-09: for display, what about Field settings default value?
 
 ## Migration process
 

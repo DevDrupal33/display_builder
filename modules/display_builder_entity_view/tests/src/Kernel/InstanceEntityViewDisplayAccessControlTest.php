@@ -19,6 +19,7 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[CoversClass(InstanceAccessControlHandler::class)]
 #[Group('display_builder')]
+#[Group('display_builder_entity_view')]
 final class InstanceEntityViewDisplayAccessControlTest extends AccessControlTestBase {
 
   /**
