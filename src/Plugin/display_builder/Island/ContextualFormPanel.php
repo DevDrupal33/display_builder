@@ -26,7 +26,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Contextual form'),
   description: new TranslatableMarkup('Configure the active component or block.'),
   type: IslandType::Contextual,
-  theme: 'admin',
 )]
 class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInterface {
 

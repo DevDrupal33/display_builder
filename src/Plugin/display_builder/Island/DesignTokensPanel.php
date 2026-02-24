@@ -26,7 +26,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Design tokens (CSS variables)'),
   description: new TranslatableMarkup('Override CSS variables for the active component or block.'),
   type: IslandType::Contextual,
-  theme: 'admin',
   modules: ['ui_skins'],
 )]
 class DesignTokensPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {
