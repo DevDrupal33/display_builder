@@ -159,10 +159,10 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
   /**
    * {@inheritdoc}
    */
-  public function setSlotValue(array $data, string $slot_id, array $slot): array {
-    $data['regions'][$slot_id] = $slot;
+  public function setSlotValue(string $slot_id, array $slot): array {
+    $this->configuration['settings']['regions'][$slot_id] = $slot;
 
-    return $data;
+    return $this->configuration['settings'];
   }
 
   /**

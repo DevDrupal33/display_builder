@@ -118,6 +118,12 @@ class LayoutSource extends SourcePluginBase implements SourceWithChoicesInterfac
       foreach ($region as $source) {
         $content = $this->componentElementBuilder->buildSource([], 'content', [], $source, $this->configuration['contexts'] ?? []) ?? [];
         $content = $content['#slots']['content'][0] ?? [];
+
+        // An empty render array is enough to cancel the rendering of the full
+        // layout plugins, so let's remove them from the renderable.
+        if (empty($content)) {
+          continue;
+        }
         $regions[$region_id][] = $content;
       }
     }
@@ -283,10 +289,10 @@ class LayoutSource extends SourcePluginBase implements SourceWithChoicesInterfac
   /**
    * {@inheritdoc}
    */
-  public function setSlotValue(array $data, string $slot_id, array $slot): array {
-    $data['regions'][$slot_id] = $slot;
+  public function setSlotValue(string $slot_id, array $slot): array {
+    $this->configuration['settings']['regions'][$slot_id] = $slot;
 
-    return $data;
+    return $this->configuration['settings'];
   }
 
   /**

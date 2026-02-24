@@ -218,18 +218,23 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     }
 
     $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager->getSlotPropType()]];
-    $source = $this->sourceManager->createInstance(
+    $current_source = $this->sourceManager->createInstance(
       $node['source_id'],
       SourcePluginBase::buildConfiguration('slot', $slot_definition, $node, [])
     );
 
-    if ($source instanceof SourceWithSlotsInterface) {
+    if ($current_source instanceof SourceWithSlotsInterface) {
+      /** @var \Drupal\display_builder\SourceWithSlotsInterface $new_source */
+      $new_source = $this->sourceManager->createInstance(
+        $node['source_id'],
+        SourcePluginBase::buildConfiguration('slot', $slot_definition, $data, [])
+      );
       // We keep the slots values (which are not sent by the contextual form)
       // instead of removing them.
-      $slots = $source->getSlotValues();
+      $slots = $current_source->getSlotValues();
 
       foreach ($slots as $slot_id => $slot) {
-        $data['source'] = $source->setSlotValue($data['source'], $slot_id, $slot);
+        $data['source'] = $new_source->setSlotValue($slot_id, $slot);
       }
     }
 

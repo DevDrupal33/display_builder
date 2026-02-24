@@ -55,8 +55,6 @@ interface SourceWithSlotsInterface extends SourceInterface {
   /**
    * Set slot values.
    *
-   * @param array $data
-   *   Source data.
    * @param string $slot_id
    *   ID of the slot to update.
    * @param array $slot
@@ -65,7 +63,7 @@ interface SourceWithSlotsInterface extends SourceInterface {
    * @return array
    *   The updated source data.
    */
-  public function setSlotValue(array $data, string $slot_id, array $slot): array;
+  public function setSlotValue(string $slot_id, array $slot): array;
 
   /**
    * Set slot renderable.

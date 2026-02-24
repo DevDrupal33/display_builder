@@ -7,6 +7,7 @@ namespace Drupal\Tests\display_builder\Kernel;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\display_builder\Plugin\UiPatterns\Source\ComponentSource;
+use Drupal\display_builder\SourceWithSlotsInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
@@ -23,11 +24,6 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
 
   /**
-   * The test component configuration base.
-   */
-  protected array $configuration;
-
-  /**
    * {@inheritdoc}
    */
   protected static $modules = [
@@ -40,7 +36,12 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
   ];
 
   /**
-   * The source plugin manager.
+   * The test source.
+   */
+  protected SourceWithSlotsInterface $source;
+
+  /**
+   * The plugin source manager.
    */
   protected PluginManagerInterface $sourceManager;
 
@@ -54,30 +55,7 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
 
     $this->sourceManager = $this->container->get('plugin.manager.ui_patterns_source');
 
-    $this->configuration = [
-      'settings' => [
-        'component' => [
-          'component_id' => 'display_builder_test:test_1',
-        ],
-      ],
-    ];
-  }
-
-  /**
-   * Test the ComponentSource::getChoice() method.
-   */
-  public function testGetChoice(): void {
-    $source = $this->sourceManager->createInstance('component', $this->configuration);
-
-    self::assertSame('display_builder_test:test_1', $source->getChoice(['component' => ['component_id' => 'display_builder_test:test_1']]));
-    self::assertSame('fallback', $source->getChoice(['component_id' => 'fallback']));
-  }
-
-  /**
-   * Test the ComponentSource::getSlotDefinitions() method.
-   */
-  public function testGetSlotDefinitions(): void {
-    $configuration = [
+    $this->source = $this->sourceManager->createInstance('component', [
       'settings' => [
         'component' => [
           'component_id' => 'display_builder_test:test_1',
@@ -91,71 +69,76 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
           ],
         ],
       ],
-    ];
-
-    $source = $this->sourceManager->createInstance('component', $configuration);
-
-    $defs = $source->getSlotDefinitions();
-    self::assertIsArray($defs);
+    ]);
   }
 
   /**
-   * Test the ComponentSource::getSlotPath() method.
+   * Test the getChoice() method.
+   */
+  public function testGetChoice(): void {
+    $expected = $this->source->getChoice([
+      'component' => [
+        'component_id' => 'display_builder_test:test_1',
+      ],
+    ]);
+    self::assertSame($expected, 'display_builder_test:test_1');
+
+    $expected = $this->source->getChoice([
+      'component_id' => 'fallback',
+    ]);
+    self::assertSame($expected, 'fallback');
+
+    $expected = $this->source->getChoice([]);
+    self::assertSame($expected, '');
+  }
+
+  /**
+   * Test the getSlotDefinitions() method.
+   */
+  public function testGetSlotDefinitions(): void {
+    $defs = $this->source->getSlotDefinitions();
+    self::assertIsArray($defs);
+    self::assertArrayHasKey('slot_1', $defs);
+  }
+
+  /**
+   * Test the getSlotPath() method.
    */
   public function testGetSlotPath(): void {
     self::assertSame(['component', 'slots', 'my_slot', 'sources'], ComponentSource::getSlotPath('my_slot'));
   }
 
   /**
-   * Test the ComponentSource::getSlotValues() method.
+   * Test the getSlotValues() method.
    */
   public function testGetSlotValues(): void {
-    $configuration = [
-      'settings' => [
-        'component' => [
-          'component_id' => 'display_builder_test:test_1',
-          'slots' => [
-            'slot_1' => [
-              'sources' => [
-                'source_id' => 'textfield',
-                'source' => ['value' => 'Hello'],
-              ],
-            ],
-          ],
-        ],
-      ],
-    ];
+    $values = $this->source->getSlotValues();
 
-    $source = $this->sourceManager->createInstance('component', $configuration);
-
-    $values = $source->getSlotValues();
     self::assertArrayHasKey('slot_1', $values);
-    self::assertSame($configuration['settings']['component']['slots']['slot_1']['sources'], $values['slot_1']);
 
     // getSlotValue() for missing slot returns empty array.
-    self::assertSame([], $source->getSlotValue('non_existing'));
+    self::assertSame([], $this->source->getSlotValue('non_existing'));
   }
 
   /**
-   * Test the ComponentSource::setSlotRenderable() method.
+   * Test the setSlotRenderable() method.
    */
   public function testSetSlotRenderable(): void {
-    $source = $this->sourceManager->createInstance('component', $this->configuration);
     $build = ['#ui_patterns' => ['slots' => ['slot_1' => ['x']]]];
-    $build = $source->setSlotRenderable($build, 'slot_1', ['renderable']);
+    $build = $this->source->setSlotRenderable($build, 'slot_1', ['renderable']);
+
     self::assertArrayHasKey('#slots', $build);
     self::assertArrayHasKey('slot_1', $build['#slots']);
     self::assertArrayNotHasKey('slot_1', $build['#ui_patterns']['slots'] ?? []);
   }
 
   /**
-   * Test the ComponentSource::setSlotValue() method.
+   * Test the setSlotValue() method.
    */
   public function testSetSlotValue(): void {
-    $source = $this->sourceManager->createInstance('component', $this->configuration);
-
     $data = [];
-    $data = $source->setSlotValue($data, 'slot_1', ['one', 'two']);
+    $data = $this->source->setSlotValue('slot_1', ['one', 'two']);
+
     self::assertArrayHasKey('component', $data);
     self::assertArrayHasKey('slots', $data['component']);
     self::assertSame(['one', 'two'], $data['component']['slots']['slot_1']['sources']);
@@ -165,28 +148,12 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
    * Test the InstanceAccessControlHandler::settingsFormPropsOnly() method.
    */
   public function testSettingsFormPropsOnly(): void {
-    $configuration = [
-      'settings' => [
-        'component' => [
-          'component_id' => 'display_builder_test:test_1',
-          'slots' => [
-            'slot_1' => [
-              'sources' => [
-                'source_id' => 'textfield',
-                'source' => ['value' => 'Hello'],
-              ],
-            ],
-          ],
-        ],
-      ],
-    ];
-
-    $source = $this->sourceManager->createInstance('component', $configuration);
     // settingsFormPropsOnly() returns the built form; ensure keys are present
     // and '#render_slots' gets set to FALSE when a component_id exists.
     $form = [];
     $form_state = new FormState();
-    $built = $source->settingsFormPropsOnly($form, $form_state);
+    $built = $this->source->settingsFormPropsOnly($form, $form_state);
+
     self::assertIsArray($built);
     self::assertArrayHasKey('component', $built);
   }

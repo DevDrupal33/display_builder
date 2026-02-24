@@ -73,10 +73,10 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
   /**
    * {@inheritdoc}
    */
-  public function setSlotValue(array $data, string $slot_id, array $slot): array {
-    $data['component']['slots'][$slot_id]['sources'] = $slot;
+  public function setSlotValue(string $slot_id, array $slot): array {
+    $this->settings['component']['slots'][$slot_id]['sources'] = $slot;
 
-    return $data;
+    return $this->settings;
   }
 
   /**

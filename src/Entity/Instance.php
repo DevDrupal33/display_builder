@@ -825,7 +825,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     foreach ($source->getSlotValues() as $slot_id => $slot) {
       $slot_path = \array_merge($path, ['source'], $source::getSlotPath($slot_id));
       $slot = $this->buildIndexFromSlot($slot_path, $slot, $node_id);
-      $data['source'] = $source->setSlotValue($data['source'], $slot_id, $slot);
+      $data['source'] = $source->setSlotValue($slot_id, $slot);
     }
 
     return $data;
