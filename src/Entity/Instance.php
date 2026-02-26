@@ -22,6 +22,7 @@ use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\display_builder_ui\InstanceListBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
+use Drupal\ui_patterns\SourceInterface;
 use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\ui_patterns\SourcePluginManager;
 
@@ -245,15 +246,10 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       return FALSE;
     }
 
-    $parent_slot = \array_slice($path, \count($path) - 3, 1)[0];
-
-    if (($parent_id === $this->getParentId($node_id)) && ($slot_id === $parent_slot)) {
+    if ($this->isNodeAlreadyInSlot($parent_id, $slot_id, $node_id)) {
       // Moving to the same slot is tricky, because we don't want to remove a
       // sibling.
-      $slot_path = \array_slice($path, 0, \count($path) - 1);
-      $slot = NestedArray::getValue($root, $slot_path);
-      $slot = $this->changeSourcePositionInSlot($slot, $node_id, $position);
-      NestedArray::setValue($root, $slot_path, $slot);
+      $root = $this->doMoveToSameSlot($root, $node_id, $parent_id, $slot_id, $position);
     }
     else {
       // Moving to a different slot is easier, we can first delete the previous
@@ -276,6 +272,36 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     $this->setNewPresent($root, $log);
 
     return TRUE;
+  }
+
+  /**
+   * Is the node already in the slot?
+   *
+   * @param string $parent_id
+   *   The node id of the parent.
+   * @param string $slot_id
+   *   The parent slot.
+   * @param string $node_id
+   *   The node id of the source.
+   */
+  public function isNodeAlreadyInSlot(string $parent_id, string $slot_id, string $node_id): bool {
+    if ($parent_id !== $this->getParentId($node_id)) {
+      return FALSE;
+    }
+    $parent_data = $this->getNode($parent_id);
+    $parent = $this->getSlotSourcePlugin($parent_data);
+
+    if (!($parent instanceof SourceWithSlotsInterface)) {
+      return FALSE;
+    }
+
+    foreach ($parent->getSlotValue($slot_id) as $source_data) {
+      if ($source_data['node_id'] === $node_id) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
   }
 
   /**
@@ -354,7 +380,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function getParentId(string $node_id): string {
-    return $this->pathIndex[$node_id]['parent'] ?? '';
+    return $this->getPathIndex()[$node_id]['parent'] ?? '';
   }
 
   /**
@@ -612,9 +638,10 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     // very difficult to maintain an index synchronized with the state storage
     // history.
     $root = $this->getCurrentState();
+    $this->pathIndex = [];
     $this->buildIndexFromSlot([], $root, NULL);
 
-    return $this->pathIndex ?? [];
+    return $this->pathIndex;
   }
 
   /**
@@ -682,6 +709,9 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    *   The slot data with the index updated.
    */
   private function buildIndexFromSlot(array $path, array $data, ?string $parent): array {
+    // To avoid non consecutive array keys, we rebuild the value list.
+    $data = \array_values($data);
+
     foreach ($data as $index => $source) {
       $source_path = \array_merge($path, [$index]);
       $data[$index] = $this->buildIndexFromSource($source_path, $source, $parent);
@@ -812,11 +842,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       return $data;
     }
 
-    $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager()->getSlotPropType()]];
-    $source = $this->sourceManager()->createInstance(
-      $data['source_id'],
-      SourcePluginBase::buildConfiguration('slot', $slot_definition, $data, [])
-    );
+    $source = $this->getSlotSourcePlugin($data);
 
     if (!($source instanceof SourceWithSlotsInterface)) {
       return $data;
@@ -855,6 +881,36 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    *
    * @param array $root
    *   The root state.
+   * @param string $node_id
+   *   The ID of the parent node.
+   * @param string $parent_id
+   *   The ID of the parent node.
+   * @param string $slot_id
+   *   The ID of the slot where to insert the data.
+   * @param int $position
+   *   The position where to insert the data.
+   *
+   * @return array
+   *   The updated root state
+   */
+  private function doMoveToSameSlot(array $root, string $node_id, string $parent_id, string $slot_id, int $position): array {
+    $parent_data = $this->getNode($parent_id);
+    $source = $this->getSlotSourcePlugin($parent_data);
+
+    if ($source instanceof SourceWithSlotsInterface) {
+      $slot = $source->getSlotValue($slot_id);
+      $slot = $this->changeSourcePositionInSlot($slot, $node_id, $position);
+      $root = $this->doUpdateSlotValue($root, $parent_id, $source, $slot_id, $slot);
+    }
+
+    return $root;
+  }
+
+  /**
+   * Internal atomic change of the root state.
+   *
+   * @param array $root
+   *   The root state.
    * @param string $parent_id
    *   The ID of the parent node.
    * @param string $slot_id
@@ -868,20 +924,38 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    *   The updated root state
    */
   private function doAttachToSlot(array $root, string $parent_id, string $slot_id, int $position, array $data): array {
-    $parent_path = $this->getPath($parent_id);
     $parent_data = $this->getNode($parent_id);
-    $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager()->getSlotPropType()]];
-    $source = $this->sourceManager()->createInstance(
-      $parent_data['source_id'],
-      SourcePluginBase::buildConfiguration('slot', $slot_definition, $parent_data, [])
-    );
+    $source = $this->getSlotSourcePlugin($parent_data);
 
     if ($source instanceof SourceWithSlotsInterface) {
-      $slot_path = \array_merge($parent_path, ['source'], $source::getSlotPath($slot_id));
-      $slot = NestedArray::getValue($root, $slot_path) ?? [];
+      $slot = $source->getSlotValue($slot_id);
       \array_splice($slot, $position, 0, [$data]);
-      NestedArray::setValue($root, $slot_path, $slot);
+      $root = $this->doUpdateSlotValue($root, $parent_id, $source, $slot_id, $slot);
     }
+
+    return $root;
+  }
+
+  /**
+   * Internal atomic change of the root state.
+   *
+   * @param array $root
+   *   The root state.
+   * @param string $node_id
+   *   The ID of the node.
+   * @param \Drupal\display_builder\SourceWithSlotsInterface $source
+   *   The source plugin.
+   * @param string $slot_id
+   *   The ID of the slot where to insert the data.
+   * @param array $slot_data
+   *   The slot data to replace.
+   *
+   * @return array
+   *   The updated root state
+   */
+  private function doUpdateSlotValue(array $root, string $node_id, SourceWithSlotsInterface $source, string $slot_id, array $slot_data): array {
+    $path = \array_merge($this->getPath($node_id), ['source'], $source::getSlotPath($slot_id));
+    NestedArray::setValue($root, $path, $slot_data);
 
     return $root;
   }
@@ -900,10 +974,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   private function doRemove(array $root, string $node_id): array {
     $path = $this->getPath($node_id);
     NestedArray::unsetValue($root, $path);
-    // To avoid non consecutive array keys, we rebuild the value list.
-    $slot_path = \array_slice($path, 0, \count($path) - 1);
-    $slot = NestedArray::getValue($root, $slot_path);
-    NestedArray::setValue($root, $slot_path, \array_values($slot));
 
     return $root;
   }
@@ -918,7 +988,27 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    *   The path, one array item by level.
    */
   private function getPath(string $node_id): array {
-    return $this->pathIndex[$node_id]['path'] ?? [];
+    return $this->getPathIndex()[$node_id]['path'] ?? [];
+  }
+
+  /**
+   * Get slot source plugin.
+   *
+   * @param array $data
+   *   The node data from the tree.
+   *
+   * @return \Drupal\ui_patterns\SourceInterface
+   *   The instantiated plugin.
+   */
+  private function getSlotSourcePlugin(array $data): SourceInterface {
+    $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager()->getSlotPropType()]];
+    /** @var \Drupal\ui_patterns\SourceInterface $source */
+    $source = $this->sourceManager()->createInstance(
+      $data['source_id'],
+      SourcePluginBase::buildConfiguration('slot', $slot_definition, $data, [])
+    );
+
+    return $source;
   }
 
 }

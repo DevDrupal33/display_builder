@@ -284,7 +284,8 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $instance = $this->createDisplayBuilderInstance();
 
     // Set initial present state.
-    $testData = ['component' => ['id' => 'test_component']];
+    // Root level must be an array list because it is a collection of sources.
+    $testData = [['component' => ['id' => 'test_component']]];
     $time = \time();
     $instance->present = new HistoryStep($testData, 123, 'Test', $time, 3);
 
@@ -299,7 +300,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     self::assertNotEmpty($pathIndex);
     // Check that the path index contains at least one entry.
     self::assertNotEmpty(\array_keys($pathIndex));
-    self::assertSame(['component'], \reset($pathIndex)['path']);
+    self::assertSame([0], \reset($pathIndex)['path']);
 
     self::assertIsInt($instance->present->hash);
     self::assertSame('Test', $instance->present->log);
@@ -409,7 +410,8 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testSetSave(): void {
     $instance = $this->createDisplayBuilderInstance();
-    $testData = ['component' => ['id' => 'test_component']];
+    // Root level must be an array list because it is a collection of sources.
+    $testData = [['component' => ['id' => 'test_component']]];
 
     // Initially no save.
     self::assertFalse($instance->hasSave());
@@ -422,8 +424,8 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     self::assertNotNull($instance->save);
     self::assertInstanceOf(HistoryStep::class, $instance->save);
 
-    self::assertArrayHasKey('node_id', $instance->save->data['component']);
-    self::assertSame($testData['component']['id'], $instance->save->data['component']['id']);
+    self::assertArrayHasKey('node_id', $instance->save->data[0]);
+    self::assertSame($testData[0]['component']['id'], $instance->save->data[0]['component']['id']);
 
     self::assertNull($instance->save->log);
     self::assertIsInt($instance->save->hash);
