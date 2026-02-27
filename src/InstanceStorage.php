@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\ContentEntityStorageBase;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityStorageBase;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\display_builder\Entity\Instance;
@@ -16,7 +21,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Base class for content entity storage handlers.
  */
-class InstanceStorage extends EntityStorageBase implements InstanceStorageInterface {
+class InstanceStorage extends ContentEntityStorageBase implements InstanceStorageInterface {
 
   private const STORAGE_INDEX = 'display_builder_index';
 
@@ -35,10 +40,18 @@ class InstanceStorage extends EntityStorageBase implements InstanceStorageInterf
   /**
    * {@inheritdoc}
    */
-  public function __construct(EntityTypeInterface $entity_type, MemoryCacheInterface $memory_cache, StateInterface $state, AccountInterface $current_user) {
+  public function __construct(
+    EntityTypeInterface $entity_type,
+    EntityFieldManagerInterface $entity_field_manager,
+    CacheBackendInterface $cache,
+    MemoryCacheInterface $memory_cache,
+    EntityTypeBundleInfoInterface $entity_type_bundle_info,
+    StateInterface $state,
+    AccountInterface $current_user,
+  ) {
     $this->state = $state;
     $this->currentUser = $current_user;
-    parent::__construct($entity_type, $memory_cache);
+    parent::__construct($entity_type, $entity_field_manager, $cache, $memory_cache, $entity_type_bundle_info);
   }
 
   /**
@@ -47,7 +60,10 @@ class InstanceStorage extends EntityStorageBase implements InstanceStorageInterf
   public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type): self {
     return new static(
       $entity_type,
+      $container->get('entity_field.manager'),
+      $container->get('cache.entity'),
       $container->get('entity.memory_cache'),
+      $container->get('entity_type.bundle.info'),
       $container->get('state'),
       $container->get('current_user')
     );
@@ -93,6 +109,13 @@ class InstanceStorage extends EntityStorageBase implements InstanceStorageInterf
     $this->state->resetCache();
 
     return parent::loadUnchanged($id);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function countFieldData($storage_definition, $as_bool = FALSE) {
+    return $as_bool ? FALSE : 0;
   }
 
   /**
@@ -162,6 +185,47 @@ class InstanceStorage extends EntityStorageBase implements InstanceStorageInterf
     }
 
     return (bool) $this->state->get(self::STORAGE_PREFIX . $id, NULL);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function purgeFieldItems(ContentEntityInterface $entity, FieldDefinitionInterface $field_definition): void {}
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function readFieldItemsToPurge(FieldDefinitionInterface $field_definition, mixed $batch_size): array {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function doLoadMultipleRevisionsFieldItems(mixed $revision_ids): array {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function doDeleteFieldItems(mixed $entities): void {}
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function doDeleteRevisionFieldItems(ContentEntityInterface $revision): void {}
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function doSaveFieldItems(ContentEntityInterface $entity, array $names = []): void {}
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function doPreSave(EntityInterface $entity): int|string|null {
+    return $entity->id();
   }
 
 }

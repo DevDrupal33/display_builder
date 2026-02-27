@@ -35,7 +35,6 @@ abstract class DisplayBuilderKernelTestBase extends KernelTestBase {
     }
     $instance = Instance::create([
       'id' => $instance_id ?? $this->randomMachineName(),
-      'label' => 'Test Instance',
       'profileId' => $profile_id,
     ]);
 

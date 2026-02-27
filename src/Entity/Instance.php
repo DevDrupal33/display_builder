@@ -6,7 +6,8 @@ namespace Drupal\display_builder\Entity;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Entity\Attribute\EntityType;
+use Drupal\Core\Entity\Attribute\ContentEntityType;
+use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
@@ -29,14 +30,15 @@ use Drupal\ui_patterns\SourcePluginManager;
 /**
  * Defines the display builder instance entity class.
  */
-#[EntityType(
+#[ContentEntityType(
   id: 'display_builder_instance',
   label: new TranslatableMarkup('Display Builder instance'),
   label_collection: new TranslatableMarkup('Display builder instances'),
   label_singular: new TranslatableMarkup('display builder instance'),
   label_plural: new TranslatableMarkup('display builder instances'),
   entity_keys: [
-    'label' => 'id',
+    'id' => 'id',
+    'label' => 'label',
   ],
   handlers: [
     'access' => InstanceAccessControlHandler::class,
@@ -59,18 +61,49 @@ class Instance extends ContentEntityBase implements InstanceInterface {
 
   /**
    * Entity ID.
+   *
+   * Public because injected by ContentEntityStorageBase::initFieldValues().
    */
-  protected string $id;
+  public string $id;
 
   /**
    * Entity label.
+   *
+   * Public because injected by ContentEntityStorageBase::initFieldValues().
    */
-  protected string $label;
+  public string $label;
 
   /**
    * Display Builder profile ID.
+   *
+   * Public because injected by ContentEntityStorageBase::initFieldValues().
    */
-  protected string $profileId = '';
+  public string $profileId = '';
+
+  /**
+   * Present step.
+   */
+  public ?HistoryStep $present = NULL;
+
+  /**
+   * Current user.
+   */
+  public AccountInterface $currentUser;
+
+  /**
+   * Saved step.
+   */
+  public ?HistoryStep $save = NULL;
+
+  /**
+   * Contexts.
+   *
+   * Public because injected by ContentEntityStorageBase::initFieldValues().
+   *
+   * @var \Drupal\Core\Plugin\Context\ContextInterface[]
+   *   An array of contexts, keyed by context name.
+   */
+  public array $contexts = [];
 
   /**
    * Past steps.
@@ -80,29 +113,11 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   protected array $past = [];
 
   /**
-   * Present step.
-   */
-  protected ?HistoryStep $present = NULL;
-
-  /**
    * Future steps.
    *
    * @var \Drupal\display_builder\HistoryStep[]
    */
   protected array $future = [];
-
-  /**
-   * Contexts.
-   *
-   * @var \Drupal\Core\Plugin\Context\ContextInterface[]
-   *   An array of contexts, keyed by context name.
-   */
-  protected array $contexts = [];
-
-  /**
-   * Saved step.
-   */
-  protected ?HistoryStep $save = NULL;
 
   /**
    * Path index.
@@ -133,11 +148,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   protected SlotSourceProxy $slotSourceProxy;
 
   /**
-   * Current user.
-   */
-  protected AccountInterface $currentUser;
-
-  /**
    * Source plugin manager.
    */
   protected SourcePluginManager $sourceManager;
@@ -154,12 +164,36 @@ class Instance extends ContentEntityBase implements InstanceInterface {
 
   /**
    * {@inheritdoc}
+   */
+  public function id() {
+    return $this->id ?? '';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function label() {
+    // Extract a human readable name from an instance id.
+    // Example: "provider__my_display" -> "My display".
+    $parts = \explode('__', (string) $this->id());
+
+    if (\count($parts) > 1) {
+      \array_shift($parts);
+
+      return \ucfirst(\implode(' ', \str_replace('_', ' ', $parts)));
+    }
+
+    return (string) $this->id();
+  }
+
+  /**
+   * {@inheritdoc}
    *
    * @see \Drupal\Core\Entity\EntityInterface
    */
   public function toArray(): array {
     return [
-      'id' => $this->id,
+      'id' => $this->id(),
       'profileId' => $this->profileId,
       'contexts' => $this->contexts,
       'past' => $this->past,

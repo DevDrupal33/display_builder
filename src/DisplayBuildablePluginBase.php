@@ -250,6 +250,9 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
     if ($profile) {
       $select['#default_value'] = (string) $profile->id();
     }
+    elseif (isset($select['#options']['default'])) {
+      $select['#default_value'] = 'default';
+    }
 
     if ($mandatory) {
       $select['#required'] = TRUE;

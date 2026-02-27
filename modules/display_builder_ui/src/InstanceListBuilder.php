@@ -116,7 +116,7 @@ final class InstanceListBuilder extends EntityListBuilder {
     $row['context']['data'] = $type;
     $row['context']['class'] = ['priority-medium'];
 
-    $row['name']['data'] = self::extractEntityName($instance_id);
+    $row['name']['data'] = $instance->label();
     $row['name']['class'] = ['priority-medium'];
 
     $row['profile']['data'] = $instance->getProfile()?->label() ?? '';
@@ -266,29 +266,6 @@ final class InstanceListBuilder extends EntityListBuilder {
   }
 
   /**
-   * Extract a human readable name from an instance id.
-   *
-   * Example: "provider__my_display" -> "My display"
-   *
-   * @param string $instance_id
-   *   The instance id.
-   *
-   * @return string
-   *   The extracted display name.
-   */
-  private static function extractEntityName(string $instance_id): string {
-    $parts = \explode('__', $instance_id);
-
-    if (\count($parts) > 1) {
-      \array_shift($parts);
-
-      return \ucfirst(\implode(' ', $parts));
-    }
-
-    return $instance_id;
-  }
-
-  /**
    * Filter the loaded entities according to GET filters.
    *
    * @param array $entities
@@ -372,8 +349,8 @@ final class InstanceListBuilder extends EntityListBuilder {
 
       case 'name':
         \usort($entities, static function ($a, $b) use ($factor) {
-          $aName = self::extractEntityName((string) $a->id());
-          $bName = self::extractEntityName((string) $b->id());
+          $aName = $a->label();
+          $bName = $b->label();
 
           // Use case-insensitive string comparison.
           return $factor * \strcasecmp($aName, $bName);

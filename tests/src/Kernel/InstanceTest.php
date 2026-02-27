@@ -57,8 +57,10 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
    * Test the ::label() method.
    */
   public function testLabel(): void {
-    $instance = $this->createDisplayBuilderInstance(NULL, 'test_id');
-    self::assertSame('test_id', $instance->label());
+    $instance = $this->createDisplayBuilderInstance(NULL, 'foo__test_instance');
+    self::assertSame('Test instance', $instance->label());
+    $instance = $this->createDisplayBuilderInstance(NULL, 'no_provider');
+    self::assertSame('no_provider', $instance->label());
   }
 
   /**
@@ -68,14 +70,12 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
     $instance = Instance::create([
       'label' => 'Test Instance',
     ]);
-    // It should be new if ID is not set.
     self::assertTrue($instance->isNew());
 
     $instance = Instance::create([
-      'id' => 'test_id',
+      'id' => 'foo__test',
+      'label' => 'Test Instance',
     ]);
-    // Once ID is set, isNew() returns false because it's implemented as
-    // return !$this->id();
     self::assertFalse($instance->isNew());
   }
 

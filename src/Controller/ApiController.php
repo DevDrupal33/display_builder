@@ -371,7 +371,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $label = $request->headers->get('hx-prompt', $label) ?: $label;
     // In HTTP headers, only ASCII is guaranteed to work but historically,
     // HTTP has allowed header values with the ISO-8859-1 charset.
-    $label = \mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
+    $label = mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
     $preset = $preset_storage->create([
       'id' => \uniqid(),
       'label' => $label,
