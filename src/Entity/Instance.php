@@ -640,9 +640,12 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     $steps = \array_merge($this->past, [$this->present], $this->future);
 
     foreach ($steps as $step) {
-      $user_id = $step->user ?? NULL;
+      if ($step === NULL) {
+        continue;
+      }
+      $user_id = $step->user;
 
-      if ($user_id && ($users[$user_id] ?? $step->time > 0)) {
+      if ($user_id !== NULL && (!isset($users[$user_id]) || $step->time > $users[$user_id])) {
         $users[$user_id] = $step->time;
       }
     }

@@ -179,6 +179,57 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
       self::assertGreaterThan(0, $timestamp);
       self::assertIsInt($timestamp);
     }
+
+    // Test with anonymous user (ID 0).
+    $instance2 = $this->createDisplayBuilderInstance();
+    // Default kernel user is anonymous (ID 0).
+    $instance2->setNewPresent($state1, 'State 1');
+    $users2 = $instance2->getUsers();
+    self::assertArrayHasKey(0, $users2, 'Anonymous user (ID 0) should be included in getUsers()');
+  }
+
+  /**
+   * Test history management: past, present, future, and save.
+   */
+  public function testHistory(): void {
+    $instance = $this->createDisplayBuilderInstance();
+    $state1 = [['source_id' => 'attributes', 'source' => []]];
+    $state2 = [['source_id' => 'textfield', 'source' => []]];
+
+    // 1. Initial state.
+    self::assertNull($instance->getCurrent());
+    self::assertSame(0, $instance->getCountPast());
+    self::assertSame(0, $instance->getCountFuture());
+
+    // 2. First action.
+    $instance->setNewPresent($state1, 'Step 1');
+    self::assertSame(1, $instance->getCountPast());
+    self::assertSame(0, $instance->getCountFuture());
+
+    // 3. Second action.
+    $instance->setNewPresent($state2, 'Step 2');
+    self::assertSame(2, $instance->getCountPast());
+
+    // 4. Test Undo.
+    $instance->undo();
+    self::assertSame($state1, $instance->getCurrentState());
+    self::assertSame(1, $instance->getCountPast());
+    self::assertSame(1, $instance->getCountFuture());
+
+    // 5. Test Redo.
+    $instance->redo();
+    self::assertSame($state2, $instance->getCurrentState());
+    self::assertSame(2, $instance->getCountPast());
+    self::assertSame(0, $instance->getCountFuture());
+
+    // 6. Test Save and Restore.
+    $instance->setSave($state1);
+    self::assertTrue($instance->hasSave());
+    self::assertFalse($instance->saveIsCurrent());
+
+    $instance->restore();
+    self::assertTrue($instance->saveIsCurrent());
+    self::assertCount(1, $instance->getCurrentState());
   }
 
   /**

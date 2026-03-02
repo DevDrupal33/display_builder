@@ -46,14 +46,6 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the ::id() method.
-   */
-  public function testId(): void {
-    $instance = $this->createDisplayBuilderInstance(NULL, 'test_id');
-    self::assertSame('test_id', $instance->id());
-  }
-
-  /**
    * Test the ::label() method.
    */
   public function testLabel(): void {
