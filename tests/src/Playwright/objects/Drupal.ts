@@ -99,6 +99,12 @@ export class Drupal {
     await this.writeBaseUrl()
   }
 
+  async loginAsAdminDrush (): Promise<void> {
+    utils.debug('Login with Drush...')
+    const logInUrl = await this.drush(`user:login --uid=1 --no-browser`)
+    await this.page.goto(logInUrl)
+  }
+
   async loginAsAdmin (): Promise<void> {
     // First see if we are already logged in.
     await this.page.goto(`${this.drupalSite.url}/${config.logInUrl}`)
@@ -118,7 +124,7 @@ export class Drupal {
         throw new Error('Drush is not available for local tests! Please install.')
       }
       utils.debug('Login with Drush...')
-      logInUrl = await this.drush(`user:login --uid=1`)
+      logInUrl = await this.drush(`user:login --uid=1 --no-browser`)
     } else {
       utils.debug('Login with test-site.php...')
       const stdout = await exec(`php core/scripts/test-site.php user-login 1 --site-path ${this.drupalSite.sitePath}`)

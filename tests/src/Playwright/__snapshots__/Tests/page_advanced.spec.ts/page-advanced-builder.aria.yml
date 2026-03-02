@@ -1,0 +1,28 @@
+- text: Test simple
+- 'heading "label: none" [level=5]'
+- text: "Textfield: I am Test in a slot! I am Test in a slot! Slot 1"
+- button "Click me"
+- text: Test simple
+- 'heading "label: none" [level=5]'
+- text: Slot 1
+- button "Click me"
+- text: Page layout (from active theme) [Page] Title
+- button "[Page] Title"
+- text: "Block: Tabs"
+- 'button "Block: Tabs"'
+- text: "Header Block: Tabs"
+- 'button "Block: Tabs"'
+- text: "Pre-content Block: Breadcrumbs"
+- navigation "Breadcrumb":
+  - heading "Breadcrumb" [level=2]
+  - list:
+    - listitem:
+      - link "Home":
+        - /url: /
+- text: "Breadcrumb Block: Messages"
+- 'button "Block: Messages"'
+- text: "Highlighted Help Block: Primary admin actions"
+- 'button "Block: Primary admin actions"'
+- text: "[Page] Main content"
+- button "[Page] Main content"
+- text: Content Base container

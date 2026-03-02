@@ -1,6 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test'
-
 import config from '../playwright.config.loader'
+import { Drupal } from './Drupal'
 
 export class Displaybuilder {
   readonly page: Page
@@ -402,4 +402,40 @@ export class Displaybuilder {
     await this.highlight()
     await this.fullscreen()
   }
+
+  /**
+   * Create a Page Layout Display builder from UI.
+   *
+   * @async
+   * @param {Drupal} drupal - The Drupal object.
+   * @param {string} id - The id of the Display Buider.
+   */
+  async ceatePageLayoutDisplayBuilder(drupal: Drupal, id: string): Promise<void> {
+    const cmd = `php:eval "Drupal\\display_builder_page_layout\\Entity\\PageLayout::create(['id' => 'test_${id}', 'label' => 'Test ${id}', Drupal\\display_builder\\DisplayBuildableInterface::PROFILE_PROPERTY => 'default'])->save();"`
+
+    await drupal.drush(cmd)
+  }
+
+  /**
+   * Create a Page Layout Display builder from UI.
+   *
+   * @async
+   * @param {string} id - The id of the Display Buider.
+   */
+  async ceatePageLayoutDisplayBuilderFromUi(id: string): Promise<void> {
+    const name = `test_${id}`
+
+    await this.page.goto(`${config.pageAddUrl}`)
+
+    await this.page.getByLabel('Label').fill(name)
+    await this.page.getByLabel('Profile', { exact: true }).selectOption('test')
+    // Fill page condition.
+    await this.page.getByRole('link', { name: 'Pages' }).click()
+    await this.page.getByRole('textbox', { name: 'Pages' }).fill(`/test-${id}`)
+    await this.page.getByRole('button', { name: 'Save' }).click()
+
+    // Check conditions summary.
+    await expect(this.page.getByText(`On the following pages: /test-${id}`)).toBeVisible()
+  }
+
 }

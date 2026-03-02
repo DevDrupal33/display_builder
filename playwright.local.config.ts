@@ -18,17 +18,17 @@ export default defineConfig({
 
     trace: 'on',
     screenshot: {
-      mode: 'on',
+      mode: 'only-on-failure',
       fullPage: true,
     },
-    video: 'on',
+    video: 'retain-on-failure',
 
     launchOptions: {
       // For --headed test, add some slow time.
       slowMo: 100,
     },
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-action-timeout
-    actionTimeout: 30_000,
+    actionTimeout: 7_000,
     testIdAttribute: 'data-test',
   },
   webServer: {

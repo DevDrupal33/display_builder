@@ -8,9 +8,9 @@ export default {
 
   pageListUrl: 'admin/structure/page-layout',
   pageAddUrl: 'admin/structure/page-layout/add',
+  pageViewUrl: 'admin/structure/page-layout/{instance_id}/builder',
 
   devAddInstance: 'admin/structure/display-builder/instance/add',
-  devViewInstance: 'admin/structure/display-builder/instance/{instance_id}',
 
   // PageLayout::getPrefix()
   pagePrefix: 'page_layout__',
