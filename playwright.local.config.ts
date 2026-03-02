@@ -9,10 +9,8 @@ export default defineConfig({
   retries: 0,
   timeout: 240_000,
   reporter: [
-    // ['dot'],
-    // ['list', { printSteps: true }],
+    ['list', { printSteps: true }],
     ['html'],
-    // ['./tests/src/Playwright/utilities/reporter.ts', { level: process.env?.PLAYWRIGHT_DEBUG_LEVEL || 'info' }],
   ],
   use: {
     baseURL: `${process.env.DRUPAL_TEST_BASE_URL}/`,
@@ -27,7 +25,7 @@ export default defineConfig({
 
     launchOptions: {
       // For --headed test, add some slow time.
-      slowMo: 300,
+      slowMo: 100,
     },
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-action-timeout
     actionTimeout: 30_000,

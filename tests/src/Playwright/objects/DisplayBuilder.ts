@@ -113,6 +113,9 @@ export class Displaybuilder {
     await expect(target).toBeVisible()
     await expect(element).toBeVisible()
 
+    await element.scrollIntoViewIfNeeded()
+    await target.scrollIntoViewIfNeeded()
+
     // Js step by step drag.
     // await component.hover({ position: { x: 10, y: 10 } })
     // await expect(page.locator('.display-builder')).toContainClass('display-builder--onDrag')

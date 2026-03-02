@@ -10,6 +10,7 @@ use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -154,6 +155,43 @@ class Instance extends ContentEntityBase implements InstanceInterface {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo remove once we manage proper revisions and translations.
+   */
+  public function __construct(array $values, mixed $entity_type, mixed $bundle = FALSE, mixed $translations = []) {
+    $this->entityTypeId = $entity_type;
+    $this->entityKeys['bundle'] = $bundle ?: $this->entityTypeId;
+
+    foreach ($values as $key => $value) {
+      if (!$value) {
+        continue;
+      }
+
+      if (\property_exists($this, $key)) {
+        $this->$key = $value;
+      }
+      $values[$key] = [
+        LanguageInterface::LANGCODE_DEFAULT => $value,
+      ];
+    }
+
+    $this->values = $values;
+    $this->translations = [
+      LanguageInterface::LANGCODE_DEFAULT => [
+        'entity' => $this,
+        'status' => TRUE,
+      ],
+    ];
+
+    $this->langcodeKey = '';
+    $this->defaultLangcodeKey = '';
+    $this->setDefaultLangcode();
+
+    unset($translations);
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function isNew(): bool {
     // We don't support enforceIsNew property because we have no practical
@@ -164,9 +202,12 @@ class Instance extends ContentEntityBase implements InstanceInterface {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo some case require non empty id, like devel load. Remove once we
+   * manage proper revisions and translations.
    */
   public function id() {
-    return $this->id ?? '';
+    return $this->id ?? '_none';
   }
 
   /**

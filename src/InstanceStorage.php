@@ -144,7 +144,8 @@ class InstanceStorage extends ContentEntityStorageBase implements InstanceStorag
 
     foreach ($ids as $id) {
       if ($data = $this->state->get(self::STORAGE_PREFIX . $id, NULL)) {
-        $entities[$id] = Instance::create($data);
+        // @todo update once we manage proper revisions and translations.
+        $entities[$id] = new Instance($data, 'display_builder_instance');
       }
     }
 

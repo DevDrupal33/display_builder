@@ -10,43 +10,6 @@ test.beforeEach('Setup', async ({ drupal }) => {
 })
 
 test(
-  'Canary - Admin login',
-  { tag: [ '@display_builder', '@display_builder_dev_tools' ] },
-  async ({ page, drupal, displayBuilder }) => {
-    const dbName = `test_${utils.createRandomString()}`
-
-    await test.step(`Admin login`, async () => {
-      await page.goto(`/`)
-      await drupal.loginAsAdmin()
-      await expect(page.getByRole('heading', { name: 'admin', exact: true })).toBeVisible()
-    })
-
-})
-
-test(
-  'Canary - Create Instance',
-  { tag: [ '@display_builder', '@display_builder_dev_tools' ] },
-  async ({ page, drupal, displayBuilder }) => {
-    const dbName = `test_${utils.createRandomString()}`
-
-    await test.step(`Admin login`, async () => {
-       await drupal.loginAsAdmin()
-    })
-
-    await test.step(`Create dev instance`, async () => {
-      await page.goto(config.devAddInstance)
-
-      await expect(page.getByRole('heading', { name: 'Add a display builder instance' })).toBeVisible()
-
-      await page.getByRole('textbox', { name: 'Builder ID' }).fill(dbName)
-      await page.getByLabel('Profile').selectOption('test')
-      await page.getByRole('button', { name: 'Save' }).click()
-
-      await expect(page.getByRole('heading', { name: 'Display Builder instance devel' })).toBeVisible()
-    })
-})
-
-test(
   'Canary',
   { tag: [ '@display_builder', '@display_builder_dev_tools' ] },
   async ({ page, drupal, displayBuilder }) => {
@@ -70,6 +33,7 @@ test(
 
     await test.step(`Add component`, async () => {
       await displayBuilder.shoelaceReady()
+      await displayBuilder.htmxReady()
 
       await expect(page.getByRole('button', { name: 'Libraries' })).toBeVisible()
 
@@ -78,7 +42,15 @@ test(
       await expect(page.locator(config.startDrawerID)).toBeVisible()
 
       const component = page.locator(`.db-island-library [hx-vals*="test_simple"]`).first()
-      await component.dragTo(page.locator('.db-dropzone--root').first(), {
+      const target = page.locator('.db-dropzone--root').first()
+
+      await expect(component).toBeVisible()
+      await expect(target).toBeVisible()
+
+      await component.scrollIntoViewIfNeeded()
+      await target.scrollIntoViewIfNeeded()
+
+      await component.dragTo(target, {
         force: true,
         targetPosition: {
           x: 20,

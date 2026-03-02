@@ -2,7 +2,7 @@
   "name": "drupal_playwright_test",
   "license": "LGPL-3.0-or-later",
   "description": "Tests e2e for Drupal. See tests/src/Playwright/tests",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "main": "index.js",
   "repository": {
@@ -19,9 +19,9 @@
     "docker-test": "PW_TEST_CONNECT_WS_ENDPOINT=ws://127.0.0.1:3000/ npx playwright test --project firefox -g @display_builder"
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
-    "@types/node": "^24.10.9",
-    "dotenv": "^17.2.3",
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^24.11.0",
+    "dotenv": "^17.3.1",
     "winston": "^3.19.0"
   },
   "packageManager": "yarn@4.9.1"

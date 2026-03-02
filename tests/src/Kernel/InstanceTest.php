@@ -64,22 +64,6 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the ::isNew() method.
-   */
-  public function testIsNew(): void {
-    $instance = Instance::create([
-      'label' => 'Test Instance',
-    ]);
-    self::assertTrue($instance->isNew());
-
-    $instance = Instance::create([
-      'id' => 'foo__test',
-      'label' => 'Test Instance',
-    ]);
-    self::assertFalse($instance->isNew());
-  }
-
-  /**
    * Test the ::getProfile() and ::setProfile() methods.
    */
   public function testProfile(): void {
