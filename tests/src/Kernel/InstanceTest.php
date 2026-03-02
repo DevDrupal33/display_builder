@@ -173,34 +173,6 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test isNodeAlreadyInSlot.
-   */
-  public function testIsNodeAlreadyInSlot(): void {
-    $instance = $this->createDisplayBuilderInstance();
-    $comp_data = [
-      'component' => [
-        'component_id' => 'display_builder_test:test_1',
-      ],
-    ];
-    $node_id_parent = $instance->attachToRoot(0, 'component', $comp_data);
-    $node_id_child = $instance->attachToSlot($node_id_parent, 'slot_1', 0, 'test_group_source', ['value' => 'child']);
-
-    // Case 1: Node is in the slot.
-    self::assertTrue($instance->isNodeAlreadyInSlot($node_id_parent, 'slot_1', $node_id_child));
-
-    // Case 2: Node is NOT in a different slot (even if parent is correct).
-    self::assertFalse($instance->isNodeAlreadyInSlot($node_id_parent, 'non_existent_slot', $node_id_child));
-
-    // Case 3: Incorrect parent ID.
-    self::assertFalse($instance->isNodeAlreadyInSlot('wrong_parent', 'slot_1', $node_id_child));
-
-    // Case 4: Parent node exists but doesn't support slots (test_group_source).
-    $node_id_no_slots = $instance->attachToRoot(1, 'test_group_source', ['value' => 'no_slots']);
-    // Try to check if something is in a "slot" of a plugin that has no slots.
-    self::assertFalse($instance->isNodeAlreadyInSlot($node_id_no_slots, 'slot_1', $node_id_child));
-  }
-
-  /**
    * Test moveToSlot.
    */
   public function testMoveToSlot(): void {

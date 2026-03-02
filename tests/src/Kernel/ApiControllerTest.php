@@ -75,7 +75,7 @@ final class ApiControllerTest extends KernelTestBase {
   }
 
   /**
-   * Test the attachToRoot() method.
+   * Test the ::attachToRoot() method.
    */
   public function testAttachToRoot(): void {
     $url = Url::fromRoute('display_builder.api_root_attach', [
@@ -92,7 +92,7 @@ final class ApiControllerTest extends KernelTestBase {
   }
 
   /**
-   * Tests saveAsPreset() with non ASCII characters in entity label.
+   * Tests the ::saveAsPreset() with non ASCII characters in entity label.
    */
   public function testLabelEncoding(): void {
     $node_id = $this->instance->attachToRoot(0, 'token', []);

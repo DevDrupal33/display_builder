@@ -59,7 +59,7 @@ final class DisplayBuildablePluginTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the buildInstanceForm() method.
+   * Test the ::buildInstanceForm() method.
    *
    * @param array $data
    *   The data setup for the test.

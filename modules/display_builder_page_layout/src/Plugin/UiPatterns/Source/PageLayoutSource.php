@@ -62,7 +62,7 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
     array $configuration,
     $plugin_id,
     $plugin_definition,
-  ) {
+  ): static {
     $instance = new static(
       $configuration,
       $plugin_id,
@@ -190,8 +190,14 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
 
   /**
    * Wraps system_region_list().
+   *
+   * @param string $theme
+   *   The machine name of the theme.
+   *
+   * @return array
+   *   An array of region names and their human readable labels.
    */
-  protected function systemRegionList(string $theme): array {
+  private function systemRegionList(string $theme): array {
     return system_region_list($theme, REGIONS_VISIBLE);
   }
 

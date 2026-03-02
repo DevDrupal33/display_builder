@@ -68,7 +68,7 @@ class LayoutSource extends SourcePluginBase implements SourceWithChoicesInterfac
     array $configuration,
     $plugin_id,
     $plugin_definition,
-  ) {
+  ): static {
     $instance = new static(
       $configuration,
       $plugin_id,
@@ -220,6 +220,7 @@ class LayoutSource extends SourcePluginBase implements SourceWithChoicesInterfac
   public function calculateDependencies(): array {
     $dependencies = parent::calculateDependencies();
     $layout = $this->getLayout();
+    $provider = [];
 
     // 1. Dependency of plugin.manager.core.layout.
     $provider['module'][] = 'layout_discovery';

@@ -42,7 +42,7 @@ final class BuilderPanelTest extends KernelTestBase {
   }
 
   /**
-   * Test the buildSingleBlock() method.
+   * Test the ::buildSingleBlock() method.
    */
   public function testBuildSingleBlock(): void {
     $instance = Instance::create([

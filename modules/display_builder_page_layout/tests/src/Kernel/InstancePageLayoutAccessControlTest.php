@@ -39,7 +39,7 @@ final class InstancePageLayoutAccessControlTest extends AccessControlTestBase {
   ];
 
   /**
-   * Test the InstanceAccessControlHandler::access() method.
+   * Test the ::access() method.
    *
    * @param array<string, mixed> $data
    *   The data setup for the test.

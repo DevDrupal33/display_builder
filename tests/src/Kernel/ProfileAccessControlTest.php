@@ -26,7 +26,7 @@ final class ProfileAccessControlTest extends AccessControlTestBase {
   public string $accessControlHandler = 'display_builder_profile';
 
   /**
-   * Test the ProfileAccessControlHandler::access() method.
+   * Test the ::access() method.
    *
    * @param array<string, mixed> $data
    *   The data setup for the test.

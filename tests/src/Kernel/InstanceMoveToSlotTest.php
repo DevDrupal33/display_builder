@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * Tests the history functionality of the Instance entity.
+ * Tests the ::moveToSlot() method with specific cases.
  *
  * @internal
  */
@@ -43,7 +43,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the ::moveToSlot() method.
+   * Test the move to empty slot of same component.
    */
   public function testMoveToEmptySlotOfSameComponent(): void {
     $instance = $this->createDisplayBuilderInstance();
@@ -68,7 +68,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the ::moveToSlot() method.
+   * Test the move to busy slot of same component.
    */
   public function testMoveToBusySlotOfSameComponent(): void {
     $instance = $this->createDisplayBuilderInstance();
@@ -106,7 +106,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the ::moveToSlot() method.
+   * Test the move within the same slot of same component.
    */
   public function testMoveToSameSlotOfSameComponent(): void {
     $instance = $this->createDisplayBuilderInstance();
@@ -156,7 +156,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the ::moveToSlot() method.
+   * Test the move from layout to component.
    */
   public function testMoveFromLayoutToComponent(): void {
     $instance = $this->createDisplayBuilderInstance();
@@ -181,7 +181,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the ::moveToSlot() method.
+   * Test the move to same region of same layout.
    */
   public function testMoveToSameRegionOfSameLayout(): void {
     $instance = $this->createDisplayBuilderInstance();
@@ -234,7 +234,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the ::moveToSlot() method.
+   * Test the move from component to empty layout region.
    */
   public function testMoveFromComponentToEmptyLayoutRegion(): void {
     $instance = $this->createDisplayBuilderInstance();
@@ -258,7 +258,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the ::moveToSlot() method.
+   * Test the move from component to nested layout empty region.
    */
   public function testMoveFromComponentToNestedLayoutEmptyRegion(): void {
     $instance = $this->createDisplayBuilderInstance();
@@ -291,7 +291,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the ::moveToSlot() method.
+   * Test the move from component to busy layout region.
    */
   public function testMoveFromComponentToBusyLayoutRegion(): void {
     $instance = $this->createDisplayBuilderInstance();
@@ -341,22 +341,50 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
 
   /**
    * Get component slot value without using Instance methods.
+   *
+   * @param array $component
+   *   The component data.
+   * @param string $slot_id
+   *   The slot id.
+   *
+   * @return array
+   *   The slot value.
    */
-  protected function getComponentSlot(array $component, string $slot_id): array {
+  private function getComponentSlot(array $component, string $slot_id): array {
     return $component['source']['component']['slots'][$slot_id]['sources'];
   }
 
   /**
    * Get layout region value without using Instance methods.
+   *
+   * @param array $component
+   *   The component data.
+   * @param string $slot_id
+   *   The slot id.
+   *
+   * @return array
+   *   The slot in region.
    */
-  protected function getLayoutRegion(array $component, string $slot_id): array {
+  private function getLayoutRegion(array $component, string $slot_id): array {
     return $component['source']['regions'][$slot_id];
   }
 
   /**
    * Get the initial data tree for tests.
+   *
+   * @param array $slot_1
+   *   The sources for slot 1 of the upper component.
+   * @param array $slot_2
+   *   The sources for slot 2 of the upper component.
+   * @param array $slot_3
+   *   The sources for the content region of the inner layout.
+   * @param array $slot_4
+   *   The sources for slot 1 of the upper component.
+   *
+   * @return array
+   *   The initial data tree.
    */
-  protected function getInitialDataTree(array $slot_1 = [], array $slot_2 = [], array $slot_3 = [], array $slot_4 = []): array {
+  private function getInitialDataTree(array $slot_1 = [], array $slot_2 = [], array $slot_3 = [], array $slot_4 = []): array {
     return [
       [
         'node_id' => 'upper_layout',

@@ -106,7 +106,7 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the getRoles() method.
+   * Test the ::getRoles() method.
    */
   public function testGetRoles(): void {
     $profile = self::createDisplayBuilderProfile('role_test');
@@ -124,7 +124,7 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Tests islands management.
+   * Tests islands management, ::getIslandConfiguration() ::setIslandConfiguration().
    */
   public function testIslandConfiguration(): void {
     $islandId = 'test_island_view';
@@ -203,7 +203,7 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the toUrl() method.
+   * Test the ::toUrl() method.
    */
   public function testToUrlEditPluginForm(): void {
     $profile = self::createDisplayBuilderProfile('url_test');

@@ -348,7 +348,7 @@ final class BlockLibrarySourceHelperUnitTest extends UnitTestCase {
    * @return \Drupal\ui_patterns\SourceWithChoicesInterface
    *   The mock source.
    */
-  private function createMockSourceWithChoices(array $choiceSettingsMap = []) {
+  private function createMockSourceWithChoices(array $choiceSettingsMap = []): SourceWithChoicesInterface {
     $mock = $this->getMockBuilder(SourceWithChoicesInterface::class)
       ->onlyMethods(['getChoices', 'getChoiceSettings', 'getChoice'])
       ->getMock();

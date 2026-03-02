@@ -199,7 +199,7 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
   }
 
   /**
-   * Test the getDefinitions method with a simple configuration.
+   * Test the ::getDefinitions() method with a simple configuration.
    */
   public function testSimpleGetDefinitions(): void {
     $definitions = [
@@ -250,6 +250,14 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
 
   /**
    * Helper to create a mock component.
+   *
+   * @param string $id
+   *   The component ID.
+   * @param array<string, mixed> $definition
+   *   The component definition.
+   *
+   * @return \Drupal\ui_patterns\ComponentPlugin
+   *   The component plugin instance.
    */
   private function createComponent(string $id, array $definition): ComponentPlugin {
     $definition['path'] = 'tests/fixtures/' . $id;

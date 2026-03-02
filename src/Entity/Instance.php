@@ -350,36 +350,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   }
 
   /**
-   * Is the node already in the slot?
-   *
-   * @param string $parent_id
-   *   The node id of the parent.
-   * @param string $slot_id
-   *   The parent slot.
-   * @param string $node_id
-   *   The node id of the source.
-   */
-  public function isNodeAlreadyInSlot(string $parent_id, string $slot_id, string $node_id): bool {
-    if ($parent_id !== $this->getParentId($node_id)) {
-      return FALSE;
-    }
-    $parent_data = $this->getNode($parent_id);
-    $parent = $this->getSlotSourcePlugin($parent_data);
-
-    if (!($parent instanceof SourceWithSlotsInterface)) {
-      return FALSE;
-    }
-
-    foreach ($parent->getSlotValue($slot_id) as $source_data) {
-      if ($source_data['node_id'] === $node_id) {
-        return TRUE;
-      }
-    }
-
-    return FALSE;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function attachToRoot(int $position, string $source_id, array $data, array $third_party_settings = []): string {
@@ -771,6 +741,36 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public static function getUniqId(array $data): int {
     return \crc32((string) \serialize($data));
+  }
+
+  /**
+   * Is the node already in the slot?
+   *
+   * @param string $parent_id
+   *   The node id of the parent.
+   * @param string $slot_id
+   *   The parent slot.
+   * @param string $node_id
+   *   The node id of the source.
+   */
+  private function isNodeAlreadyInSlot(string $parent_id, string $slot_id, string $node_id): bool {
+    if ($parent_id !== $this->getParentId($node_id)) {
+      return FALSE;
+    }
+    $parent_data = $this->getNode($parent_id);
+    $parent = $this->getSlotSourcePlugin($parent_data);
+
+    if (!($parent instanceof SourceWithSlotsInterface)) {
+      return FALSE;
+    }
+
+    foreach ($parent->getSlotValue($slot_id) as $source_data) {
+      if ($source_data['node_id'] === $node_id) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
   }
 
   /**

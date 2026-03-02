@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * Test the ComponentSource plugin.
+ * Test the ::ComponentSource plugin.
  *
  * @internal
  */
@@ -73,7 +73,7 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the getChoice() method.
+   * Test the ::getChoice() method.
    */
   public function testGetChoice(): void {
     $expected = $this->source->getChoice([
@@ -93,7 +93,7 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the getSlotDefinitions() method.
+   * Test the ::getSlotDefinitions() method.
    */
   public function testGetSlotDefinitions(): void {
     $defs = $this->source->getSlotDefinitions();
@@ -102,14 +102,14 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the getSlotPath() method.
+   * Test the ::getSlotPath() method.
    */
   public function testGetSlotPath(): void {
     self::assertSame(['component', 'slots', 'my_slot', 'sources'], ComponentSource::getSlotPath('my_slot'));
   }
 
   /**
-   * Test the getSlotValues() method.
+   * Test the ::getSlotValues() method.
    */
   public function testGetSlotValues(): void {
     $values = $this->source->getSlotValues();
@@ -121,7 +121,7 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the setSlotRenderable() method.
+   * Test the ::setSlotRenderable() method.
    */
   public function testSetSlotRenderable(): void {
     $build = ['#ui_patterns' => ['slots' => ['slot_1' => ['x']]]];
@@ -133,7 +133,7 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the setSlotValue() method.
+   * Test the ::setSlotValue() method.
    */
   public function testSetSlotValue(): void {
     $data = [];
@@ -145,7 +145,7 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the InstanceAccessControlHandler::settingsFormPropsOnly() method.
+   * Test the ::settingsFormPropsOnly() method.
    */
   public function testSettingsFormPropsOnly(): void {
     // settingsFormPropsOnly() returns the built form; ensure keys are present
@@ -159,7 +159,7 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the settingsSummary() method.
+   * Test the ::settingsSummary() method.
    *
    * @param array<string, mixed> $settings
    *   The source settings.

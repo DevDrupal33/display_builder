@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * Test the LayoutSource plugin.
+ * Test the ::LayoutSource plugin.
  *
  * @internal
  */
@@ -83,7 +83,7 @@ final class LayoutSourceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the getChoice() method.
+   * Test the ::getChoice() method.
    */
   public function testGetChoice(): void {
     self::assertSame('my_layout', $this->source->getChoice(['layout_id' => 'my_layout']));
@@ -91,7 +91,7 @@ final class LayoutSourceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the getChoices() method.
+   * Test the ::getChoices() method.
    */
   public function testGetChoices(): void {
     $choices = $this->source->getChoices();
@@ -104,7 +104,7 @@ final class LayoutSourceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the getSlotDefinitions() method.
+   * Test the ::getSlotDefinitions() method.
    */
   public function testGetSlotDefinitions(): void {
     $settings = ['layout_id' => $this->layoutDefinition->id()];
@@ -124,14 +124,14 @@ final class LayoutSourceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the getSlotPath() method.
+   * Test the ::getSlotPath() method.
    */
   public function testGetSlotPath(): void {
     self::assertSame(['regions', 'my_slot'], LayoutSource::getSlotPath('my_slot'));
   }
 
   /**
-   * Test the getSlotValues() method.
+   * Test the ::getSlotValues() method.
    */
   public function testGetSlotValues(): void {
     $settings = ['layout_id' => $this->layoutDefinition->id(), 'regions' => ['top' => ['foo']]];
@@ -146,7 +146,7 @@ final class LayoutSourceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the settingsFormPropsOnly() method.
+   * Test the ::settingsFormPropsOnly() method.
    */
   public function testSettingsFormPropsOnly(): void {
     $settings = ['layout_id' => $this->layoutDefinition->id()];
@@ -165,7 +165,7 @@ final class LayoutSourceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the setSlotValue() method.
+   * Test the ::setSlotValue() method.
    */
   public function testSetSlotValue(): void {
     $slot_source = [
@@ -183,7 +183,7 @@ final class LayoutSourceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the calculateDependencies() method.
+   * Test the ::calculateDependencies() method.
    */
   public function testCalculateDependencies(): void {
     $slot_source = [
