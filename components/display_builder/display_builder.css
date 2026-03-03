@@ -94,6 +94,16 @@ body:has(.display-builder) .dialog-off-canvas-main-canvas {
 /* Available tokens modal on fullscreen */
 .display-builder-is-fullscreen .modal {
   --bs-modal-zindex: calc(var(--db-z-index-fullscreen) + 3);
+  --bs-backdrop-zindex: calc(var(--db-z-index-fullscreen) + 2);
+}
+
+/* Drupal dialog (token browser, etc.) on fullscreen */
+.display-builder-is-fullscreen .ui-widget-overlay {
+  z-index: calc(var(--db-z-index-fullscreen) + 2) !important;
+}
+
+.display-builder-is-fullscreen .ui-dialog {
+  z-index: calc(var(--db-z-index-fullscreen) + 3) !important;
 }
 
 body:has(.db-htmx-before-request):has(.display-builder--fullscreen) {
