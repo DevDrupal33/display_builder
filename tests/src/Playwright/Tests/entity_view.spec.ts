@@ -117,7 +117,15 @@ test(
       await displayBuilder.closeDialog('both')
       await displayBuilder.publishDisplayBuilder()
 
-      await displayBuilder.expectPreviewAriaSnapshot('entity.aria.yml')
+      await expect(page.locator('.db-island-builder')).toMatchAriaSnapshot(`
+        - text: Test simple
+        - 'heading "label: I am a test" [level=2]'
+        - text: "Textfield: I am a test textfield... I am a test textfield in a slot in an Entity view! Slot 1"
+        - button "Click me"
+        - text: "Extra field: Links"
+        - 'button "Extra field: Links"'
+        - text: "Field: Body"
+      `)
     })
 
     await test.step(`Disable the display`, async () => {

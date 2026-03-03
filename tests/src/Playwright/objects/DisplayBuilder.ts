@@ -426,7 +426,7 @@ export class Displaybuilder {
    * Create a Page Layout Display builder from UI.
    *
    * @async
-   * @param {string} id - The id of the Display Buider.
+   * @param {string} id - The id of the Display Builder.
    */
   async createPageLayoutDisplayBuilderFromUi(id: string): Promise<void> {
     const name = `test_${id}`

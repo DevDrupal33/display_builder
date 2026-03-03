@@ -124,7 +124,7 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Tests islands management, ::getIslandConfiguration() ::setIslandConfiguration().
+   * Tests the ::getIslandConfiguration() and ::setIslandConfiguration().
    */
   public function testIslandConfiguration(): void {
     $islandId = 'test_island_view';

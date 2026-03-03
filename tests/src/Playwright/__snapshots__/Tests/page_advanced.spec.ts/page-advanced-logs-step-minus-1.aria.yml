@@ -7,50 +7,50 @@
       - columnheader "User"
       - columnheader "Message"
   - rowgroup:
-    - row /-3 3:\d+ Initialization of the display builder\./:
+    - row /-3 \d+:\d+ Initialization of the display builder\./:
       - cell "-3"
       - cell
-      - cell /3:\d+/
+      - cell /\d+:\d+/
       - cell
       - cell "Initialization of the display builder."
-    - row /-2 3:\d+ admin Test simple component has been attached to root/:
+    - row /-2 \d+:\d+ admin Test simple component has been attached to root/:
       - cell "-2"
       - cell
-      - cell /3:\d+/
+      - cell /\d+:\d+/
       - cell "admin"
       - cell "Test simple component has been attached to root":
         - emphasis: Test simple
         - text: ""
-    - row /-1 3:\d+ admin Textfield textfield has been attached to Test simple's slot_1/:
+    - row /-1 \d+:\d+ admin Textfield textfield has been attached to Test simple's slot_1/:
       - cell "-1"
       - cell
-      - cell /3:\d+/
+      - cell /\d+:\d+/
       - cell "admin"
       - cell "Textfield textfield has been attached to Test simple's slot_1":
         - emphasis: Textfield
         - text: ""
         - emphasis: Test simple
         - text: ""
-    - 'row /0 3:\d+ admin Textfield: I am Test in a slot! has been updated/':
+    - 'row /0 \d+:\d+ admin Textfield: I am Test in a slot! has been updated/':
       - cell "0"
       - cell
-      - cell /3:\d+/
+      - cell /\d+:\d+/
       - cell "admin"
       - 'cell "Textfield: I am Test in a slot! has been updated"':
         - emphasis: "Textfield: I am Test in a slot!"
         - text: ""
-    - row /1 3:\d+ admin Test simple component has been attached to root/:
+    - row /1 \d+:\d+ admin Test simple component has been attached to root/:
       - cell "1"
       - cell
-      - cell /3:\d+/
+      - cell /\d+:\d+/
       - cell "admin"
       - cell "Test simple component has been attached to root":
         - emphasis: Test simple
         - text: ""
-    - 'row /2 3:\d+ admin Textfield: I am Test in a slot! textfield has been moved to Test simple''s slot_1/':
+    - 'row /2 \d+:\d+ admin Textfield: I am Test in a slot! textfield has been moved to Test simple''s slot_1/':
       - cell "2"
       - cell
-      - cell /3:\d+/
+      - cell /\d+:\d+/
       - cell "admin"
       - 'cell "Textfield: I am Test in a slot! textfield has been moved to Test simple''s slot_1"':
         - emphasis: "Textfield: I am Test in a slot!"
