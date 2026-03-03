@@ -15,7 +15,7 @@ test(
     const id = utils.createRandomString()
 
     await test.step(`Create Page Layout and login with Drush (fast)`, async () => {
-      await displayBuilder.ceatePageLayoutDisplayBuilder(drupal, id)
+      await displayBuilder.createPageLayoutDisplayBuilder(drupal, id)
       await drupal.loginAsAdminDrush()
       await page.goto(`${config.pageViewUrl.replace('{instance_id}', `test_${id}`)}`)
     })

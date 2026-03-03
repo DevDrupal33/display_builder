@@ -408,12 +408,18 @@ export class Displaybuilder {
    *
    * @async
    * @param {Drupal} drupal - The Drupal object.
-   * @param {string} id - The id of the Display Buider.
+   * @param {string} id - The id of the Display Builder.
    */
-  async ceatePageLayoutDisplayBuilder(drupal: Drupal, id: string): Promise<void> {
-    const cmd = `php:eval "Drupal\\display_builder_page_layout\\Entity\\PageLayout::create(['id' => 'test_${id}', 'label' => 'Test ${id}', Drupal\\display_builder\\DisplayBuildableInterface::PROFILE_PROPERTY => 'default'])->save();"`
+  async createPageLayoutDisplayBuilder(drupal: Drupal, id: string): Promise<void> {
+    const cmd = `
+      php:eval "Drupal\\display_builder_page_layout\\Entity\\PageLayout::create([
+        'id'   => 'test_${id}',
+        'label'=> 'Test ${id}',
+        Drupal\\display_builder\\DisplayBuildableInterface::PROFILE_PROPERTY => 'default',
+      ])->save();"
+  `.trim();
 
-    await drupal.drush(cmd)
+    await drupal.drush(cmd);
   }
 
   /**
@@ -422,7 +428,7 @@ export class Displaybuilder {
    * @async
    * @param {string} id - The id of the Display Buider.
    */
-  async ceatePageLayoutDisplayBuilderFromUi(id: string): Promise<void> {
+  async createPageLayoutDisplayBuilderFromUi(id: string): Promise<void> {
     const name = `test_${id}`
 
     await this.page.goto(`${config.pageAddUrl}`)
