@@ -15,7 +15,6 @@ use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\DisplayBuilderHelpers;
-use Drupal\display_builder\InstanceStorageInterface;
 use Drupal\display_builder\ProfileInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\views\Plugin\views\PluginBase;
@@ -136,35 +135,6 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getInitialSources(): array {
-    // Get the sources stored in config.
-    $sources = $this->getSources();
-
-    if (empty($sources)) {
-      // Fallback to a fixture mimicking the standard view layout.
-      $sources = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_views', 'default_view');
-    }
-
-    return $sources;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInitialContext(): array {
-    $contexts = [];
-    // Mark for usage with views.
-    $contexts = RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
-    // Add view entity that we need in our sources or even UI Patterns Views
-    // sources.
-    $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($this->extender->view->storage);
-
-    return $contexts;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getSources(): array {
     return $this->extender->options[DisplayBuildableInterface::SOURCES_PROPERTY] ?? [];
   }
@@ -198,7 +168,7 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public static function collectInstances(InstanceStorageInterface $instanceStorage, ?EntityTypeManagerInterface $entityTypeManager = NULL): array {
+  public static function collectInstances(?EntityTypeManagerInterface $entityTypeManager = NULL): array {
     $entityTypeManager = \Drupal::service('entity_type.manager');
     $storage = $entityTypeManager->getStorage('view');
     $instance_storage = $entityTypeManager->getStorage('display_builder_instance');
@@ -221,6 +191,47 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
     }
 
     return $instances;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getInitializationMessage(): TranslatableMarkup {
+    if ($this->initialDataSource === 'fixture') {
+      return $this->t('Initialization from default configuration.');
+    }
+
+    return $this->t('Initialization from existing View configuration.');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getInitialSources(): array {
+    // Get the sources stored in config.
+    $sources = $this->getSources();
+
+    if (empty($sources)) {
+      // Fallback to a fixture mimicking the standard view layout.
+      $sources = DisplayBuilderHelpers::getFixtureDataFromExtension('display_builder_views', 'default_view');
+      $this->initialDataSource = 'fixture';
+    }
+
+    return $sources;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getInitialContext(): array {
+    $contexts = [];
+    // Mark for usage with views.
+    $contexts = RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
+    // Add view entity that we need in our sources or even UI Patterns Views
+    // sources.
+    $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($this->extender->view->storage);
+
+    return $contexts;
   }
 
 }

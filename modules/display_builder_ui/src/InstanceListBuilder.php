@@ -309,7 +309,7 @@ final class InstanceListBuilder extends EntityListBuilder {
     $instances = [];
 
     foreach ($this->providers as $provider_id => $provider) {
-      foreach ($provider['class']::collectInstances($this->instanceStorage, $this->entityTypeManager) as $instance_id => $instance) {
+      foreach ($provider['class']::collectInstances($this->entityTypeManager) as $instance_id => $instance) {
         $instances[$instance_id] = [
           'id' => $instance_id,
           'instance' => $instance,

@@ -12,7 +12,6 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildablePluginBase;
-use Drupal\display_builder\InstanceStorageInterface;
 use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder_page_layout\BuilderDataConverter;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
@@ -114,31 +113,6 @@ final class PageLayout extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getInitialSources(): array {
-    $sources = $this->getSources();
-
-    if (empty($sources)) {
-      $sources = $this->converter()->convertPage();
-      // Sources root is always a list of source data structures.
-      $sources = \array_is_list($sources) ? $sources : [$sources];
-    }
-
-    return $sources;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInitialContext(): array {
-    $contexts = [];
-    $contexts = RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
-
-    return $contexts;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getSources(): array {
     return $this->entity->getSources();
   }
@@ -154,7 +128,7 @@ final class PageLayout extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public static function collectInstances(InstanceStorageInterface $instanceStorage, ?EntityTypeManagerInterface $entityTypeManager = NULL): array {
+  public static function collectInstances(?EntityTypeManagerInterface $entityTypeManager = NULL): array {
     $entityTypeManager = \Drupal::service('entity_type.manager');
     $instance_storage = $entityTypeManager->getStorage('display_builder_instance');
     $instances = [];
@@ -186,6 +160,43 @@ final class PageLayout extends DisplayBuildablePluginBase {
     }
 
     return \sprintf('%s%s', self::getPrefix(), $this->entity->id());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getInitializationMessage(): TranslatableMarkup {
+    if ($this->initialDataSource === 'theme') {
+      return $this->t('Import from Block Layout configuration.');
+    }
+
+    return $this->t('Initialization from existing Page Layout configuration.');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getInitialSources(): array {
+    $sources = $this->getSources();
+
+    if (empty($sources)) {
+      $sources = $this->converter()->convertPage();
+      // Sources root is always a list of source data structures.
+      $sources = \array_is_list($sources) ? $sources : [$sources];
+      $this->initialDataSource = 'theme';
+    }
+
+    return $sources;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getInitialContext(): array {
+    $contexts = [];
+    $contexts = RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
+
+    return $contexts;
   }
 
   /**

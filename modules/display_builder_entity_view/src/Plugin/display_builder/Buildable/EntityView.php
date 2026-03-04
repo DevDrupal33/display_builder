@@ -17,7 +17,6 @@ use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
-use Drupal\display_builder\InstanceStorageInterface;
 use Drupal\display_builder\ProfileInterface;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
@@ -148,42 +147,6 @@ final class EntityView extends DisplayBuildablePluginBase {
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function getInitialSources(): array {
-    // Get the sources stored in config.
-    $sources = $this->getSources();
-
-    if (empty($sources)) {
-      // initialImport() has two implementations:
-      // - EntityViewDisplay::initialImport()
-      // - LayoutBuilderEntityViewDisplay::initialImport()
-      /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $display */
-      $display = $this->entity;
-      $sources = $display->initialImport();
-    }
-
-    return $sources;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInitialContext(): array {
-    $entity_type_id = $this->entity->getTargetEntityTypeId();
-    $bundle = $this->entity->getTargetBundle();
-    $view_mode = $this->entity->getMode();
-    $sampleEntity = $this->sampleEntityGenerator->get($entity_type_id, $bundle);
-    $contexts = [
-      'entity' => EntityContext::fromEntity($sampleEntity),
-      'bundle' => new Context(ContextDefinition::create('string'), $bundle),
-      'view_mode' => new Context(ContextDefinition::create('string'), $view_mode),
-    ];
-
-    return RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
-  }
-
-  /**
    * Returns the sources of the display builder.
    *
    * @return array
@@ -221,7 +184,7 @@ final class EntityView extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public static function collectInstances(InstanceStorageInterface $instanceStorage, ?EntityTypeManagerInterface $entityTypeManager = NULL): array {
+  public static function collectInstances(?EntityTypeManagerInterface $entityTypeManager = NULL): array {
     $instances = [];
     $entityTypeManager = \Drupal::service('entity_type.manager');
     $storage = $entityTypeManager->getStorage('entity_view_display');
@@ -241,6 +204,54 @@ final class EntityView extends DisplayBuildablePluginBase {
     }
 
     return $instances;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getInitialSources(): array {
+    // Get the sources stored in config.
+    $sources = $this->getSources();
+
+    if (empty($sources)) {
+      // initialImport() has two implementations:
+      // - EntityViewDisplay::initialImport()
+      // - LayoutBuilderEntityViewDisplay::initialImport()
+      /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $display */
+      $display = $this->entity;
+      $sources = $display->initialImport();
+      $this->initialDataSource = 'import';
+    }
+
+    return $sources;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getInitializationMessage(): TranslatableMarkup {
+    if ($this->initialDataSource === 'import') {
+      return $this->t('Import from Layout Builder or Manage Display configuration.');
+    }
+
+    return $this->t('Initialization from existing Entity View Display configuration.');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getInitialContext(): array {
+    $entity_type_id = $this->entity->getTargetEntityTypeId();
+    $bundle = $this->entity->getTargetBundle();
+    $view_mode = $this->entity->getMode();
+    $sampleEntity = $this->sampleEntityGenerator->get($entity_type_id, $bundle);
+    $contexts = [
+      'entity' => EntityContext::fromEntity($sampleEntity),
+      'bundle' => new Context(ContextDefinition::create('string'), $bundle),
+      'view_mode' => new Context(ContextDefinition::create('string'), $view_mode),
+    ];
+
+    return RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
   }
 
   /**

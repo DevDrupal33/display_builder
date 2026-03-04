@@ -11,7 +11,6 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
-use Drupal\display_builder\InstanceStorageInterface;
 use Drupal\display_builder\ProfileInterface;
 use Drupal\Tests\user\Traits\UserCreationTrait;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -314,20 +313,6 @@ class TestDisplayBuildablePlugin extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getInitialContext(): array {
-    return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInitialSources(): array {
-    return $this->getSources();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function saveSources(): void {}
 
   /**
@@ -365,7 +350,7 @@ class TestDisplayBuildablePlugin extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public static function collectInstances(InstanceStorageInterface $instanceStorage, ?EntityTypeManagerInterface $entityTypeManager = NULL): array {
+  public static function collectInstances(?EntityTypeManagerInterface $entityTypeManager = NULL): array {
     return [];
   }
 

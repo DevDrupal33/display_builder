@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\DisplayBuildable;
+use Drupal\display_builder\Entity\Instance;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -38,6 +41,13 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
    * Module handler.
    */
   protected ModuleHandlerInterface $moduleHandler;
+
+  /**
+   * A tiny hint to remember where the initial data comes from.
+   *
+   * See ::getInitialSources() and ::getInitializationMessage().
+   */
+  protected string $initialDataSource = '';
 
   /**
    * {@inheritdoc}
@@ -79,9 +89,7 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
     $instance = $this->getInstance();
 
     if (!$instance) {
-      /** @var \Drupal\display_builder\InstanceStorageInterface $storage */
-      $storage = $this->entityTypeManager->getStorage('display_builder_instance');
-      $instance = $storage->createFromImplementation($this);
+      $instance = $this->createDisplayBuilderInstance();
       $instance->save();
     }
   }
@@ -223,6 +231,73 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
     }
 
     return isset($options[(string) $profile->id()]);
+  }
+
+  /**
+   * Create a display builder instance.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface
+   *   The entity.
+   */
+  protected function createDisplayBuilderInstance(): EntityInterface {
+    $data = $this->getInitialSources();
+    $present = new HistoryStep(
+      $data,
+      Instance::getUniqId($data),
+      $this->getInitializationMessage(),
+      \time(),
+      (int) $this->currentUser->id(),
+    );
+    $data = [
+      'id' => $this->getInstanceId(),
+      'profileId' => $this->getProfile()->id(),
+      'contexts' => $this->getInitialContext(),
+      'present' => $present,
+    ];
+
+    $storage = $this->entityTypeManager->getStorage('display_builder_instance');
+    /** @var \Drupal\display_builder\InstanceInterface $instance */
+    $instance = $storage->create($data);
+
+    // If we get the data directly from config or content, the data is
+    // considered as already saved.
+    // If we convert it from other tools, or import it from other places, the
+    // user needs to save it themselves after retrieval.
+    if ($this->getSources()) {
+      $instance->setSave($this->getSources());
+    }
+
+    return $instance;
+  }
+
+  /**
+   * Get the message to put in the first log step.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The log message.
+   */
+  protected function getInitializationMessage(): TranslatableMarkup {
+    return $this->t('Initialization of the display builder.');
+  }
+
+  /**
+   * Initialize contexts for this implementation.
+   *
+   * @return array<\Drupal\Core\Plugin\Context\ContextInterface>
+   *   The contexts.
+   */
+  protected function getInitialContext(): array {
+    return [];
+  }
+
+  /**
+   * Initialize sources for this implementation.
+   *
+   * @return array
+   *   The data.
+   */
+  protected function getInitialSources(): array {
+    return $this->getSources();
   }
 
   /**

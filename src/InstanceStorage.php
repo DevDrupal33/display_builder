@@ -21,7 +21,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Base class for content entity storage handlers.
  */
-class InstanceStorage extends ContentEntityStorageBase implements InstanceStorageInterface {
+class InstanceStorage extends ContentEntityStorageBase {
 
   private const STORAGE_INDEX = 'display_builder_index';
 
@@ -67,39 +67,6 @@ class InstanceStorage extends ContentEntityStorageBase implements InstanceStorag
       $container->get('state'),
       $container->get('current_user')
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function createFromImplementation(DisplayBuildableInterface $implementation): EntityInterface {
-    $data = $implementation->getInitialSources();
-    $present = new HistoryStep(
-      $data,
-      Instance::getUniqId($data),
-      'Initialization of the display builder.',
-      \time(),
-      (int) $this->currentUser->id(),
-    );
-    $data = [
-      'id' => $implementation->getInstanceId(),
-      'profileId' => $implementation->getProfile()->id(),
-      'contexts' => $implementation->getInitialContext(),
-      'present' => $present,
-    ];
-
-    /** @var \Drupal\display_builder\InstanceInterface $instance */
-    $instance = $this->create($data);
-
-    // If we get the data directly from config or content, the data is
-    // considered as already saved.
-    // If we convert it from other tools, or import it from other places, the
-    // user needs to save it themselves after retrieval.
-    if ($implementation->getSources()) {
-      $instance->setSave($implementation->getSources());
-    }
-
-    return $instance;
   }
 
   /**

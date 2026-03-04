@@ -7,12 +7,12 @@
       - columnheader "User"
       - columnheader "Message"
   - rowgroup:
-    - row /-3 \d+:\d+ Initialization of the display builder\./:
+    - row /-3 \d+:\d+ Import from Block Layout configuration\./:
       - cell "-3"
       - cell
       - cell /\d+:\d+/
       - cell
-      - cell "Initialization of the display builder."
+      - cell "Import from Block Layout configuration."
     - row /-2 \d+:\d+ admin Test simple component has been attached to root/:
       - cell "-2"
       - cell

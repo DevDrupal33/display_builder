@@ -24,7 +24,6 @@ use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\DisplayBuildablePluginManager;
-use Drupal\display_builder\InstanceStorageInterface;
 use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
@@ -201,79 +200,6 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function initInstanceIfMissing(): void {
-    /** @var \Drupal\display_builder\InstanceStorage $storage */
-    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
-
-    /** @var \Drupal\display_builder\InstanceInterface $instance */
-    $instance = $storage->load($this->getInstanceId());
-
-    if (!$instance) {
-      $instance = $storage->createFromImplementation($this);
-      $instance->save();
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInitialSources(): array {
-    $sources = $this->getSources();
-
-    // 1. Keep the existing override value if existing.
-    if (\count($sources) > 0) {
-      return $sources;
-    }
-
-    // 2. Convert the Layout Builder Override if exists.
-    // There is always a single Layout Builder override per bundle: `default`.
-    // There could be many Display Builder overrides per bundle, one for each
-    // display, so we need to check.
-    if ($this->display->getMode() === 'default') {
-      $entity = $this->field->getEntity();
-      // @see: use Drupal\layout_builder\Plugin\SectionStorage\OverridesSectionStorage::$FIELD_NAME
-      $field_name = 'layout_builder__layout';
-
-      if ($entity->hasField($field_name) && !$entity->get($field_name)->isEmpty()) {
-        $content = $entity->get($field_name)->first()->getValue();
-
-        return $this->dataConverter()->convertFromLayoutBuilder($content);
-      }
-    }
-
-    // 3. Copy entity view display value.
-    \assert(\is_string($this->field->getName()));
-    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $this->displayBuildableManager()->createInstance('entity_view', ['entity' => $this->display]);
-
-    if ($buildable->getProfile() !== NULL) {
-      $sources = $buildable->getSources();
-    }
-
-    return $sources;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInitialContext(): array {
-    $entity = $this->field->getEntity();
-    $bundle = $entity->bundle();
-    \assert(\is_string($this->field->getName()));
-
-    $view_mode = $this->display->getMode();
-    $contexts = [
-      'entity' => EntityContext::fromEntity($entity),
-      'bundle' => new Context(ContextDefinition::create('string'), $bundle),
-      'view_mode' => new Context(ContextDefinition::create('string'), $view_mode),
-    ];
-
-    return RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getInstanceId(): ?string {
     // Usually an entity is new if no ID exists for it yet.
     if ($this->field->getEntity()->isNew()) {
@@ -317,7 +243,7 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public static function collectInstances(InstanceStorageInterface $instanceStorage, ?EntityTypeManagerInterface $entityTypeManager = NULL): array {
+  public static function collectInstances(?EntityTypeManagerInterface $entityTypeManager = NULL): array {
     $instances = [];
     $entityTypeManager = \Drupal::service('entity_type.manager');
     $storage = $entityTypeManager->getStorage('entity_view_display');
@@ -344,6 +270,80 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
     }
 
     return $instances;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getInitializationMessage(): TranslatableMarkup {
+    if ($this->initialDataSource === 'display_builder') {
+      return $this->t('Copy from Entity View Display configuration.');
+    }
+
+    if ($this->initialDataSource === 'layout_builder_override') {
+      return $this->t('Import from Layout Builder override.');
+    }
+
+    return $this->t('Initialization from existing content.');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getInitialSources(): array {
+    $sources = $this->getSources();
+
+    // 1. Keep the existing override value if existing.
+    if (\count($sources) > 0) {
+      return $sources;
+    }
+
+    // 2. Convert the Layout Builder Override if exists.
+    // There is always a single Layout Builder override per bundle: `default`.
+    // There could be many Display Builder overrides per bundle, one for each
+    // display, so we need to check.
+    if ($this->display->getMode() === 'default') {
+      $entity = $this->field->getEntity();
+      // @see: use Drupal\layout_builder\Plugin\SectionStorage\OverridesSectionStorage::$FIELD_NAME
+      $field_name = 'layout_builder__layout';
+
+      if ($entity->hasField($field_name) && !$entity->get($field_name)->isEmpty()) {
+        $content = $entity->get($field_name)->first()->getValue();
+        $this->initialDataSource = 'layout_builder_override';
+
+        return $this->dataConverter()->convertFromLayoutBuilder($content);
+      }
+    }
+
+    // 3. Copy entity view display value.
+    \assert(\is_string($this->field->getName()));
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager()->createInstance('entity_view', ['entity' => $this->display]);
+
+    if ($buildable->getProfile() !== NULL) {
+      $sources = $buildable->getSources();
+    }
+    $this->initialDataSource = 'display_builder';
+
+    return $sources;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getInitialContext(): array {
+    $entity = $this->field->getEntity();
+    $bundle = $entity->bundle();
+    \assert(\is_string($this->field->getName()));
+
+    $view_mode = $this->display->getMode();
+    $contexts = [
+      'entity' => EntityContext::fromEntity($entity),
+      'bundle' => new Context(ContextDefinition::create('string'), $bundle),
+      'view_mode' => new Context(ContextDefinition::create('string'), $view_mode),
+    ];
+
+    return RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
   }
 
   /**

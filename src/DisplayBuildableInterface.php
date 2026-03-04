@@ -77,15 +77,13 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface {
    * Null values are returned so the caller can decide to create the missing
    * Instance entities.
    *
-   * @param \Drupal\display_builder\InstanceStorageInterface $instanceStorage
-   *   The Display Builder instance storage.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface|null $entityTypeManager
    *   (Optional) The entity type manager service or null.
    *
    * @return array
    *   A associative array of Instance entities or null values.
    */
-  public static function collectInstances(InstanceStorageInterface $instanceStorage, ?EntityTypeManagerInterface $entityTypeManager = NULL): array;
+  public static function collectInstances(?EntityTypeManagerInterface $entityTypeManager = NULL): array;
 
   /**
    * Get profiles allowed for the user.
@@ -124,22 +122,6 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface {
    *   A Drupal URL object.
    */
   public static function getDisplayUrlFromInstanceId(string $instance_id): Url;
-
-  /**
-   * Initialize contexts for this implementation.
-   *
-   * @return array<\Drupal\Core\Plugin\Context\ContextInterface>
-   *   The contexts.
-   */
-  public function getInitialContext(): array;
-
-  /**
-   * Initialize sources for this implementation.
-   *
-   * @return array
-   *   The data.
-   */
-  public function getInitialSources(): array;
 
   /**
    * Gets the Display Builder instance.
