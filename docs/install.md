@@ -12,10 +12,10 @@ To simply test Display Builder with Bootstrap.
 ```shell
 composer create-project drupal/recommended-project:11.3 display_builder_demo
 cd display_builder_demo
-composer config minimum-stability "alpha"
-composer config --json extra.merge-plugin '{ "include": ["web/modules/*/display_builder/composer.json"] }'
+composer config minimum-stability "dev"
+composer config --json extra.merge-plugin '{ "include": ["web/modules/*/display_builder/composer.json"], "merge-extra": true }'
 composer config extra.enable-patching "true"
-composer require cweagans/composer-patches:^1 wikimedia/composer-merge-plugin:^2 drupal/display_builder:^1 drupal/ui_suite_bootstrap:^5 drupal/ui_icons:^1
+composer require cweagans/composer-patches:^2 wikimedia/composer-merge-plugin:^2 drupal/display_builder:^1 drupal/ui_suite_bootstrap:^5 drupal/ui_icons:^1
 composer require drush/drush
 ```
 
@@ -82,8 +82,8 @@ Check this documentation for more insight and usage of Display Builder!
 Display Builder require specific dependencies, it's recommended to ease this step using [Composer Merge Plugin](https://github.com/wikimedia/composer-merge-plugin) with this configuration in your main composer file:
 
 ```shell
-composer require cweagans/composer-patches:^1 wikimedia/composer-merge-plugin:^2
-composer config --json extra.merge-plugin '{ "include": ["web/modules/*/display_builder/composer.json"] }'
+composer require cweagans/composer-patches:^2 wikimedia/composer-merge-plugin:^2
+composer config --json extra.merge-plugin '{ "include": ["web/modules/*/display_builder/composer.json"], "merge-extra": true }'
 composer config extra.enable-patching "true"
 ```
 

@@ -158,7 +158,7 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
   /**
    * {@inheritdoc}
    */
-  public function buildInstanceForm(bool $mandatory = TRUE): array {
+  public function buildInstanceForm(bool $mandatory = TRUE, ?TranslatableMarkup $title = NULL, bool $link = TRUE): array {
     $profile = $this->getProfile();
     $allowed = $this->isAllowed();
 
@@ -177,11 +177,11 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
     }
 
     $form = [
-      self::PROFILE_PROPERTY => $this->buildSelect($profile, $mandatory),
+      self::PROFILE_PROPERTY => $this->buildSelect($profile, $mandatory, $title),
     ];
 
     // Add the builder link to edit.
-    if ($this->getInstanceId() && $profile) {
+    if ($this->getInstanceId() && $profile && $link) {
       $form['link'] = $this->buildLink();
     }
 
@@ -303,21 +303,23 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
   /**
    * Build profile select when user is allowed to select one.
    *
-   * @param ?ProfileInterface $profile
+   * @param \Drupal\display_builder\ProfileInterface|null $profile
    *   Display Builder profile (or not)
    * @param bool $mandatory
-   *   (Optional). Is it mandatory to use Display Builder? (for example, in
+   *   (Optional) Is it mandatory to use Display Builder? (for example, in
    *   Page Layouts or in Entity View display Overrides). If not mandatory,
    *   the Display Builder is activated only if a Display Builder config entity
    *   is selected.
+   * @param \Drupal\Core\StringTranslation\TranslatableMarkup|null $title
+   *   (Optional) The Select title, default to 'Profile'.
    *
    * @return array
    *   A renderable form array.
    */
-  protected function buildSelect(?ProfileInterface $profile, bool $mandatory): array {
+  protected function buildSelect(?ProfileInterface $profile, bool $mandatory = TRUE, ?TranslatableMarkup $title = NULL): array {
     $select = [
       '#type' => 'select',
-      '#title' => $this->t('Profile'),
+      '#title' => $title ?? $this->t('Profile'),
       '#description' => $this->t('The profile defines the features available in the builder.'),
       '#options' => $this->getAllowedProfiles(),
     ];
@@ -325,7 +327,7 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
     if ($profile) {
       $select['#default_value'] = (string) $profile->id();
     }
-    elseif (isset($select['#options']['default'])) {
+    elseif (isset($select['#options']['default']) && $mandatory) {
       $select['#default_value'] = 'default';
     }
 
@@ -381,7 +383,7 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
   /**
    * Build disabled profile select when user is not allowed to select one.
    *
-   * @param ProfileInterface $profile
+   * @param \Drupal\display_builder\ProfileInterface $profile
    *   Display Builder profile (or not)
    *
    * @return array

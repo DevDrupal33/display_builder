@@ -8,15 +8,20 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Common methods for entity view display form.
  */
 trait EntityViewDisplayFormTrait {
+
+  use StringTranslationTrait;
 
   /**
    * Form submission handler.
@@ -29,35 +34,39 @@ trait EntityViewDisplayFormTrait {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     parent::submitForm($form, $form_state);
 
-    // @todo we should have always a fallback.
-    $display_builder_config = $form_state->getValue([DisplayBuildableInterface::PROFILE_PROPERTY]) ?? 'default';
+    $profile = $form_state->getValue(DisplayBuildableInterface::PROFILE_PROPERTY, '');
+    $override_status = (bool) $form_state->getValue('override_status', FALSE);
 
-    // Empty means disabled.
-    if (empty($display_builder_config)) {
+    // Empty means disable main and override.
+    if (empty($profile)) {
       $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY);
-    }
-    else {
-      $this->entity->setThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY, $display_builder_config);
-    }
-
-    $display_builder_override = $form_state->getValue([DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY]) ?? '';
-
-    // Empty means disabled.
-    if (empty($display_builder_override)) {
       $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY);
-    }
-    else {
-      $this->entity->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY, $display_builder_override);
-    }
-
-    $display_builder_override_profile = $form_state->getValue([DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY]) ?? '';
-
-    // Empty means disabled.
-    if (empty($display_builder_override_profile)) {
       $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY);
     }
     else {
-      $this->entity->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY, $display_builder_override_profile);
+      $this->entity->setThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY, $profile);
+    }
+
+    if ($override_status) {
+      $profile_override = $form_state->getValue(DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY, NULL);
+
+      if ($profile_override) {
+        $this->entity->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY, $profile_override);
+      }
+
+      $override_field = $form_state->getValue(DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY, NULL);
+
+      if (!$override_field) {
+        $field_name = $this->createOverrideField();
+      }
+      else {
+        $field_name = $override_field;
+      }
+      $this->entity->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY, $field_name);
+    }
+    else {
+      $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY);
+      $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY);
     }
 
     $this->entity->save();
@@ -104,7 +113,8 @@ trait EntityViewDisplayFormTrait {
       '#weight' => 1,
     ];
 
-    $form['display_builder_wrapper'][DisplayBuildableInterface::PROFILE_PROPERTY] = $this->displayBuildable()->buildInstanceForm(FALSE);
+    $title = new TranslatableMarkup('Enable with profile');
+    $form['display_builder_wrapper'][DisplayBuildableInterface::PROFILE_PROPERTY] = $this->displayBuildable()->buildInstanceForm(FALSE, $title, FALSE);
 
     /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $entity */
     $entity = $this->getEntity();
@@ -126,65 +136,66 @@ trait EntityViewDisplayFormTrait {
    *   The renderable form array.
    */
   protected function buildOverridesForm(DisplayBuilderEntityDisplayInterface|DisplayBuilderOverridableInterface $entity): array {
-    $entity_type_id = $entity->getTargetEntityTypeId();
-    $options = $this->getSourceFieldAsOptions();
-    $target_entity_type_id = $this->entityTypeManager->getDefinition($entity_type_id)->getBundleEntityType();
-    $description = [
-      '#title' => $this->t('Add a UI Patterns Source field'),
-      '#type' => 'link',
-      '#attributes' => [
-        'data-dialog-type' => 'modal',
-        'data-dialog-options' => \json_encode([
-          'title' => 'Add field: Source (UI Patterns)',
-          'width' => '800',
-        ]),
-        'class' => ['use-ajax'],
-      ],
-      '#url' => Url::fromRoute("field_ui.field_storage_config_add_sub_{$entity_type_id}", [
-        $target_entity_type_id => $entity->getTargetBundle(),
-        'display_as_group' => 'Group',
-        'selected_field_type' => 'ui_patterns_source',
-      ]),
-      '#suffix' => '.',
-    ];
-
-    if (empty($options)) {
-      $description = [
-        [
-          '#plain_text' => $this->t('No eligible field found.') . ' ',
-        ],
-        $description,
-      ];
-    }
     /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface $overridable */
     $overridable = $entity;
-    $form = [];
-    $form[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY] = [
-      '#type' => 'select',
-      '#title' => $this->t('Select a field to override this display per content'),
-      '#options' => $options,
-      '#empty_option' => $this->t('- Disabled -'),
-      '#default_value' => $overridable->getDisplayBuilderOverrideField(),
-      '#description' => $description,
-    ];
 
-    $form[DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY] = [
-      '#type' => 'select',
-      '#title' => $this->t('Override profile'),
-      '#description' => $this->t('The profile used for content overrides.'),
-      '#options' => $this->displayBuildable()->getAllowedProfiles(),
-      '#default_value' => $overridable->getDisplayBuilderOverrideProfile()?->id(),
-      '#states' => [
-        'invisible' => [
-          ':input[name="' . DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY . '"]' => ['filled' => FALSE],
+    $options = $this->getSourceFieldAsOptions();
+    $overrideFieldIsSet = $overridable->getDisplayBuilderOverrideField();
+
+    $form = [
+      'override' => [
+        '#type' => 'container',
+        '#title' => $this->t('Content Override'),
+        '#states' => [
+          'visible' => [
+            ':input[name="profile"]' => ['!value' => ''],
+          ],
         ],
       ],
     ];
 
+    $form['override']['override_status'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable content overrides'),
+      '#description' => $this->t('Each content will have the option to define a custom display.'),
+      '#default_value' => $overrideFieldIsSet ? TRUE : FALSE,
+    ];
+
+    $form['override']['settings'] = [
+      '#type' => 'container',
+      '#title' => $this->t('Content Override'),
+      '#states' => [
+        'visible' => [
+          ':input[name="override_status"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
+    $form['override']['settings'][DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY] = [
+      '#type' => 'select',
+      '#title' => $this->t('Override profile'),
+      '#description' => $this->t('The profile used for content overrides. Can be changed at any time.'),
+      '#options' => $this->displayBuildable()->getAllowedProfiles(),
+      '#default_value' => $overridable->getDisplayBuilderOverrideProfile()?->id() ?? 'default',
+    ];
+
+    // If (!empty($options) && !$overrideFieldIsSet) {.
+    if (!empty($options)) {
+      $form['override']['settings'][DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY] = [
+        '#type' => 'select',
+        '#title' => $this->t('Select a field to override this display per content'),
+        '#description' => $this->t('This field will store the Display created for each content.'),
+        '#options' => $options,
+        // '#empty_option' => $this->t('- Create new field automatically -'),
+        '#default_value' => $overrideFieldIsSet,
+        '#disabled' => $overrideFieldIsSet ? TRUE : FALSE,
+      ];
+    }
+
     if (!$this->displayBuildable()->isAllowed()) {
-      $form[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY]['#disabled'] = TRUE;
-      unset($form[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY]['#description']);
-      $form[DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY]['#disabled'] = TRUE;
+      $form['override']['override_status']['#disabled'] = TRUE;
+      $form['override']['settings'][DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY]['#disabled'] = TRUE;
+      $form['override']['settings'][DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY]['#disabled'] = TRUE;
     }
 
     return $form;
@@ -228,23 +239,27 @@ trait EntityViewDisplayFormTrait {
   protected function getSourceFieldAsOptions(): array {
     /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $display */
     $display = $this->getEntity();
-    $field_definitions = $this->entityFieldManager->getFieldDefinitions(
-      $display->getTargetEntityTypeId(),
-      $display->getTargetBundle(),
-    );
     $fields = [];
+    // Load field storage definitions.
+    $field_storage_definitions = $this->entityFieldManager->getFieldStorageDefinitions(
+      $display->getTargetEntityTypeId(),
+    );
 
     if ($display instanceof DisplayBuilderOverridableInterface
       && $display instanceof EntityViewDisplayInterface
     ) {
       $already_mapped = $this->getAlreadyMappedFields($display);
 
-      foreach ($field_definitions as $field_name => $field_definition) {
-        if ($field_definition->getType() === 'ui_patterns_source'
-          && !\in_array($field_name, $already_mapped, TRUE)
-        ) {
-          $fields[$field_name] = $field_definition->getLabel();
+      foreach ($field_storage_definitions as $field_name => $field_definition) {
+        if ($field_definition->getType() !== 'ui_patterns_source') {
+          continue;
         }
+
+        if (\in_array($field_name, $already_mapped, TRUE)) {
+          continue;
+        }
+        $field = FieldConfig::loadByName($this->entity->getTargetEntityTypeId(), $this->entity->getTargetBundle(), $field_name);
+        $fields[$field_name] = $field ? $field->label() : $field_name;
       }
     }
 
@@ -331,6 +346,46 @@ trait EntityViewDisplayFormTrait {
     $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $this->getEntity()]);
 
     return $buildable;
+  }
+
+  /**
+   * Create a field based on a name.
+   *
+   * @param string $field_name
+   *   The field name, field prefix will be added. Default 'display_builder'.
+   */
+  private function createOverrideField(string $field_name = 'display_builder'): string {
+    // Add the field prefix to the field name.
+    $field_name = $this->configFactory->get('field_ui.settings')->get('field_prefix') . $field_name;
+
+    $field_storage = FieldStorageConfig::loadByName($this->entity->getTargetEntityTypeId(), $field_name);
+
+    if (!$field_storage) {
+      $field_storage = FieldStorageConfig::create([
+        'field_name' => $field_name,
+        'entity_type' => $this->entity->getTargetEntityTypeId(),
+        'type' => 'ui_patterns_source',
+        'locked' => TRUE,
+      ]);
+      $field_storage->setTranslatable(TRUE);
+      $field_storage->setCardinality(-1);
+      $field_storage->save();
+    }
+
+    $field_definition = FieldConfig::loadByName($this->entity->getTargetEntityTypeId(), $this->entity->getTargetBundle(), $field_name);
+
+    if (!$field_definition) {
+      $field_definition = FieldConfig::create([
+        'field_storage' => $field_storage,
+        'bundle' => $this->entity->getTargetBundle(),
+        'field_name' => $field_name,
+        'label' => $this->t('Display builder (Sources)'),
+      ]);
+      $field_definition->setTranslatable(TRUE);
+      $field_definition->save();
+    }
+
+    return $field_name;
   }
 
 }

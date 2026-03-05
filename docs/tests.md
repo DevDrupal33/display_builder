@@ -126,11 +126,11 @@ When you cannot install native browsers, run a Playwright server in Docker and c
 - Run Playwright server container:
 
 ```bash
-docker pull mcr.microsoft.com/playwright:v1.57.0-noble
+docker pull mcr.microsoft.com/playwright:v1.58.2-noble
 docker run --add-host=hostmachine:host-gateway --rm -it -p 3000:3000 \
     --workdir /home/pwuser --user pwuser \
-    mcr.microsoft.com/playwright:v1.57.0-noble \
-    /bin/sh -c "npx -y playwright@1.57.0 run-server --port 3000 --host 0.0.0.0"
+    mcr.microsoft.com/playwright:v1.58.2-noble \
+    /bin/sh -c "npx -y playwright@1.58.2 run-server --port 3000 --host 0.0.0.0"
 ```
 
 - Run Webserver from Drupal root:

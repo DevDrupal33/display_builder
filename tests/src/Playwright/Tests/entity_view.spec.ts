@@ -16,36 +16,23 @@ test(
     const name = `test_${testName}`
 
     await test.step(`Admin login`, async () => {
-      await drupal.loginAsAdmin()
+      await drupal.loginAsAdminDrush()
     })
 
     await test.step(`Create entity type and set display`, async () => {
-      // Go to the content entity and create the display.
-      await page.goto(config.contentTypesAdd)
-      await page.getByLabel('Name', { exact: true }).fill(`Test ${testName}`)
-      await page.getByText('Save', { exact: true }).click()
-      await drupal.expectMessage(`The content type Test ${testName} has been added.`)
-
-      // Create the format to avoid a config error on field create.
-      await drupal.drush(
-        `config:set -y --input-format=yaml filter.format.none ? "{status: true, format: 'none', name: 'none'}"`,
-      )
-      await drupal.drush(
-        `field:create -y node ${name} --field-name=field_test_body_${testName} --field-label="Body" --field-type=text_long --field-widget=text_textarea --is-required=0 --cardinality=1`,
-      )
+      await drupal.createContentType(name, testName)
 
       await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
-      // Save the fields for copy in the builder.
       await expect(page.locator('main').getByRole('button', { name: 'Display builder' })).toBeVisible()
 
       // Enable the Display builder for default display
-      await page.getByLabel('Profile', { exact: true }).selectOption('Test')
+      await page.getByLabel('Enable with profile', { exact: true }).selectOption('Test')
       await page.getByRole('button', { name: 'Save' }).click()
       await drupal.expectMessage('Your settings have been saved.')
     })
 
     await test.step(`Check the display`, async () => {
-      await page.getByRole('link', { name: 'Build the display' }).click()
+      await page.getByRole('link', { name: 'Display builder', exact: true }).click()
       await displayBuilder.shoelaceReady()
 
       // Enable highlight to ease drag.
@@ -131,7 +118,7 @@ test(
     await test.step(`Disable the display`, async () => {
       // Disable the display builder.
       await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
-      await page.getByLabel('Profile', { exact: true }).selectOption('- Disabled -')
+      await page.getByLabel('Enable with profile', { exact: true }).selectOption('- Disabled -')
       await page.getByRole('button', { name: 'Save' }).click()
 
       // @todo Check it is not deleted (should it be?)
@@ -149,69 +136,34 @@ test(
     const name = `test_${testName}`
 
     await test.step(`Admin login`, async () => {
-      await drupal.loginAsAdmin()
+      await drupal.loginAsAdminDrush()
     })
 
     await test.step(`Create entity type and set display`, async () => {
-      // Go to the content entity and create the display.
-      await page.goto(config.contentTypesAdd)
-      await page.getByLabel('Name', { exact: true }).fill(`Test ${testName}`)
-      await page.getByText('Save', { exact: true }).click()
-      await drupal.expectMessage(`The content type Test ${testName} has been added.`)
-
-      // Create the format to avoid a config error on field create.
-      await drupal.drush(
-        `config:set -y --input-format=yaml filter.format.none ? "{status: true, format: 'none', name: 'none'}"`,
-      )
-      await drupal.drush(
-        `field:create -y node ${name} --field-name=field_test_body_${testName} --field-label="Body" --field-type=text_long --field-widget=text_textarea --is-required=0 --cardinality=1`,
-      )
+      await drupal.createContentType(name, testName)
 
       await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
-      // Save the fields for copy in the builder.
       await expect(page.locator('main').getByRole('button', { name: 'Display builder' })).toBeVisible()
 
       // Enable the Display builder for default display
-      await page.getByLabel('Profile', { exact: true }).selectOption('Test')
+      await page.getByLabel('Enable with profile', { exact: true }).selectOption('Test')
       await page.getByRole('button', { name: 'Save' }).click()
       await drupal.expectMessage('Your settings have been saved.')
     })
 
-    await test.step(`Check the display`, async () => {
-      await page.getByRole('link', { name: 'Build the display' }).click()
-      await displayBuilder.shoelaceReady()
+    await test.step(`Enable override`, async () => {
+      await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
+      await page
+        .getByRole('checkbox', { name: 'Enable content overrides' }).click()
 
-      // Enable highlight to ease drag.
-      await displayBuilder.fullHighlight()
-
-      // Test the proper blocks are available for Entity view context.
-      // @todo test more fields in sources list.
-      const sources = {
-        entity_link: '[Entity] Link',
-      }
-      await displayBuilder.expectBlocksAvailable(sources, false)
+      await expect(page.getByLabel('Override profile')).toBeVisible()
+      await page.getByRole('button', { name: 'Save' }).click()
+      await drupal.expectMessage('Your settings have been saved.')
     })
 
     await test.step(`Create override`, async () => {
-      // Create a field ui patterns for sources, hide it and select a profile.
-      await drupal.drush(
-        `field:create -y node ${name} --field-name=field_test_sources_${testName} --field-label="UIP Sources" --field-type=ui_patterns_source --field-widget=ui_patterns_source --is-required=0 --cardinality=-1`,
-      )
-      await page.goto(config.contentTypesFormDisplay.replace('{content_type}', name))
-      await page.getByRole('button', { name: 'Show row weights' }).click()
-      await page.getByLabel('Region for UIP Sources').selectOption('Disabled')
-      await page.getByRole('button', { name: 'Save', exact: true }).click()
-
-      await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
-      await page
-        .getByLabel('Select a field to override this display per content')
-        .selectOption({ value: `field_test_sources_${testName}` })
-      await page.getByLabel('Override profile').selectOption('Test')
-      await page.getByRole('button', { name: 'Save', exact: true }).click()
-
       await page.goto(config.contentTypeAdd.replace('{bundle}', name))
       await page.getByRole('textbox', { name: 'Title *' }).fill(`Test content for ${name}`)
-      // await page.getByLabel('body').fill('This is a <b>test</b>!')
       await page.getByRole('button', { name: 'Save' }).click()
       await drupal.expectMessage('has been created.')
 

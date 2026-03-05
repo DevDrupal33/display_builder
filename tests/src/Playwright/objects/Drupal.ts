@@ -290,6 +290,36 @@ export class Drupal {
     }
   }
 
+  async createContentType (bundle: string, name: string): Promise<void> {
+    if (this.drupalSite.hasDrush) {
+      const cmd = `php:eval "Drupal\\node\\Entity\\NodeType::create([
+          'type' => '${bundle}',
+          'name' => 'Test ${name}',
+        ])->save();"`.trim();
+      await this.drush(cmd);
+      await this.createBodyField(bundle, name)
+    } else {
+      await this.page.goto(config.contentTypesAdd)
+      await this.page.getByLabel('Name', { exact: true }).fill(`Test ${name}`)
+      await this.page.getByText('Save', { exact: true }).click()
+      await this.expectMessage(`The content type Test ${name} has been added.`)
+    }
+  }
+
+  async createBodyField (bundle: string, name: string): Promise<void> {
+    if (this.drupalSite.hasDrush) {
+      // Create the format to avoid a config error on field create.
+      await this.drush(
+        `config:set -y --input-format=yaml filter.format.none ? "{status: true, format: 'none', name: 'none'}"`
+      )
+      await this.drush(
+        `field:create -y node ${bundle} --field-name=field_test_${name} --field-label="Body" --field-type=text_long --field-widget=text_textarea --is-required=0 --cardinality=1`
+      )
+    } else {
+      throw new Error('Field creation without Drush is not supported!')
+    }
+  }
+
   async enableTestExtensions () {
     const settingsFile = nodePath.resolve(getRootDir(), `${this.drupalSite.sitePath}/settings.php`)
     fs.chmodSync(settingsFile, 0o775)

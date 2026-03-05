@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder_entity_view\Functional;
 
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\Tests\BrowserTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -99,26 +97,11 @@ final class LayoutBuilderOverrideMigrationTest extends BrowserTestBase {
 
     $this->assertSession()->pageTextContains('Layout builder OVERRIDE config: NEW');
 
-    // Create The Display Builder override for the same node.
-    // Create the UI Patterns field for storage.
-    $field_storage = FieldStorageConfig::create([
-      'entity_type' => 'node',
-      'field_name' => 'ui_patterns_test_sources',
-      'type' => 'ui_patterns_source',
-      'locked' => TRUE,
-    ]);
-    $field_storage->save();
-    FieldConfig::create([
-      'field_storage' => $field_storage,
-      'bundle' => 'display_builder_test',
-      'label' => 'Display Builder override sources',
-    ])->save();
-
     // Enable Display Builder override.
     $this->drupalGet('admin/structure/types/manage/display_builder_test/display');
     $edit = [
       'profile' => self::PROFILE_ID,
-      'override_field' => 'ui_patterns_test_sources',
+      'override_status' => 1,
       'override_profile' => self::PROFILE_ID,
     ];
     $this->submitForm($edit, 'Save');

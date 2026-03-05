@@ -8,6 +8,7 @@ use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 
 /**
@@ -35,15 +36,19 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface {
    * Build form for integration with Display Builder.
    *
    * @param bool $mandatory
-   *   (Optional). Is it mandatory to use Display Builder? (for example, in
+   *   (Optional) Is it mandatory to use Display Builder? (for example, in
    *   Page Layouts or in Entity View display Overrides). If not mandatory,
    *   the Display Builder is activated only if a Display Builder config entity
    *   is selected.
+   * @param \Drupal\Core\StringTranslation\TranslatableMarkup|null $title
+   *   (Optional) The Select title, default to 'Profile'.
+   * @param bool $link
+   *   (Optional) Display link to build the display.
    *
    * @return array
    *   A form renderable array.
    */
-  public function buildInstanceForm(bool $mandatory = TRUE): array;
+  public function buildInstanceForm(bool $mandatory = TRUE, ?TranslatableMarkup $title = NULL, bool $link = TRUE): array;
 
   /**
    * Checks access for an instance for a user account.

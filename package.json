@@ -10,13 +10,17 @@
     "url": "git@git.drupal.org:project/display_builder.git"
   },
   "scripts": {
-    "test": "npx playwright test --config playwright.local.config.ts --project firefox -g @display_builder",
-    "test-min": "npx playwright test --config playwright.local.config.ts --project firefox -g @display_builder_min",
-    "test-dev": "npx playwright test --config playwright.local.config.ts --project firefox -g @display_builder_dev_tools",
-    "test-clean": "rm -rf playwright-report; rm -rf test-results;",
-    "docker-serve-pw": "docker run --add-host=hostmachine:host-gateway --rm -it -p 3000:3000 --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.57.0-noble /bin/sh -c 'npx -y playwright@1.57.0 run-server --port 3000 --host 0.0.0.0'",
-    "docker-serve-php": "php -S 0.0.0.0:8000 -t ../../../",
-    "docker-test": "PW_TEST_CONNECT_WS_ENDPOINT=ws://127.0.0.1:3000/ npx playwright test --project firefox -g @display_builder"
+    "pw": "npx playwright test --config=playwright.local.config.ts --project=firefox",
+    "test": "npm run pw -- -g @display_builder",
+    "test:failed": "npm run pw -- -g @display_builder --last-failed",
+    "test:min": "npm run pw -- -g @display_builder_min",
+    "test:min:failed": "npm run pw -- -g @display_builder_min --last-failed",
+    "test:dev": "npm run pw -- -g @display_builder_dev_tools",
+    "test:dev:failed": "npm run pw -- -g @display_builder_dev_tools --last-failed",
+    "test:headed": "npm run pw -- --headed -g @display_builder",
+    "test:ui": "npm run pw -- --ui -g @display_builder",
+    "test:debug": "PWDEBUG=1 npm run pw -- -g @display_builder",
+    "test-clean": "rm -rf playwright-report test-results"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
