@@ -23,7 +23,7 @@
     "require": {
         "php": ">=8.3",
         "drupal/core": "^11.3",
-        "drupal/ui_patterns": "2.0.x-dev"
+        "drupal/ui_patterns": "^2.0.15"
     },
     "require-dev": {
         "drupal/sdc_devel": "^1.0.2",
@@ -33,13 +33,13 @@
         "drupal/display_builder_dev_tools": "1.0.x-dev"
     },
     "suggest": {
+        "drupal/ui_styles": "Provide Styles features in Display builder",
         "drupal/ui_icons": "Provide Icons feature in Display builder",
         "drupal/ui_skins": "Provide CSS tokens features in Display builder"
     },
     "extra": {
         "patches": {
             "drupal/ui_patterns": {
-                "https://www.drupal.org/i/3563204 textfield settingsSummary fix": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/476.patch",
                 "https://www.drupal.org/i/3570294 throw error on missing component instead of fatal": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/478.patch"
             }
         }
