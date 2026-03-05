@@ -537,13 +537,14 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * @see \Drupal\display_builder\HistoryInterface
    */
   public function undo(): void {
-    $past = $this->past ?? [];
+    $past = \array_filter($this->past ?? []);
 
     if (empty($past)) {
       return;
     }
 
     $present = $this->present;
+
     // Remove the last element from the past.
     $last = \array_pop($past);
     $this->past = $past;
@@ -559,7 +560,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * @see \Drupal\display_builder\HistoryInterface
    */
   public function redo(): void {
-    $future = $this->future ?? [];
+    $future = \array_filter($this->future ?? []);
 
     if (empty($future)) {
       return;
@@ -590,7 +591,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * @see \Drupal\display_builder\HistoryInterface
    */
   public function getCountPast(): int {
-    return \count($this->past);
+    return \count(\array_filter($this->past));
   }
 
   /**
@@ -599,7 +600,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * @see \Drupal\display_builder\HistoryInterface
    */
   public function getCountFuture(): int {
-    return \count($this->future);
+    return \count(\array_filter($this->future));
   }
 
   /**

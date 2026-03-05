@@ -82,7 +82,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Verify we have history.
     self::assertNotNull($instance->getCurrent());
-    self::assertSame(1, $instance->getCountPast());
+    self::assertSame(0, $instance->getCountPast());
     self::assertSame(1, $instance->getCountFuture());
 
     // Clear history.
@@ -203,23 +203,23 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // 2. First action.
     $instance->setNewPresent($state1, 'Step 1');
-    self::assertSame(1, $instance->getCountPast());
+    self::assertSame(0, $instance->getCountPast());
     self::assertSame(0, $instance->getCountFuture());
 
     // 3. Second action.
     $instance->setNewPresent($state2, 'Step 2');
-    self::assertSame(2, $instance->getCountPast());
+    self::assertSame(1, $instance->getCountPast());
 
     // 4. Test Undo.
     $instance->undo();
     self::assertSame($state1, $instance->getCurrentState());
-    self::assertSame(1, $instance->getCountPast());
+    self::assertSame(0, $instance->getCountPast());
     self::assertSame(1, $instance->getCountFuture());
 
     // 5. Test Redo.
     $instance->redo();
     self::assertSame($state2, $instance->getCurrentState());
-    self::assertSame(2, $instance->getCountPast());
+    self::assertSame(1, $instance->getCountPast());
     self::assertSame(0, $instance->getCountFuture());
 
     // 6. Test Save and Restore.
@@ -321,11 +321,11 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Since getPast() doesn't exist in HistoryInterface, we can't directly test
     // the array, instead, we'll test the count which is available.
-    self::assertSame(5, $instance->getCountPast());
+    self::assertSame(4, $instance->getCountPast());
 
     // Test that past count decreases during undo.
     $instance->undo();
-    self::assertSame(4, $instance->getCountPast());
+    self::assertSame(3, $instance->getCountPast());
   }
 
   /**
@@ -382,13 +382,13 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     // Redo once.
     $instance->redo();
     self::assertSame($state2, $instance->getCurrentState());
-    self::assertSame(2, $instance->getCountPast());
+    self::assertSame(1, $instance->getCountPast());
     self::assertSame(1, $instance->getCountFuture());
 
     // Redo again.
     $instance->redo();
     self::assertSame($state3, $instance->getCurrentState());
-    self::assertSame(3, $instance->getCountPast());
+    self::assertSame(2, $instance->getCountPast());
     self::assertSame(0, $instance->getCountFuture());
 
     // Try to redo when at end.
@@ -452,7 +452,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Verify current state.
     self::assertSame($testData, $instance->getCurrentState());
-    self::assertSame(1, $instance->getCountPast());
+    self::assertSame(0, $instance->getCountPast());
     self::assertSame(0, $instance->getCountFuture());
   }
 
@@ -501,31 +501,24 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Verify we're at state 3.
     self::assertSame($state3, $instance->getCurrentState());
-    self::assertSame(3, $instance->getCountPast());
+    self::assertSame(2, $instance->getCountPast());
     self::assertSame(0, $instance->getCountFuture());
 
     // Undo once.
     $instance->undo();
     self::assertSame($state2, $instance->getCurrentState());
-    self::assertSame(2, $instance->getCountPast());
+    self::assertSame(1, $instance->getCountPast());
     self::assertSame(1, $instance->getCountFuture());
 
-    // Undo again.
+    // Undo again, to beginning.
     $instance->undo();
     self::assertSame($state1, $instance->getCurrentState());
-    self::assertSame(1, $instance->getCountPast());
-    self::assertSame(2, $instance->getCountFuture());
-
-    // Undo to beginning.
-    $instance->undo();
-    self::assertNull($instance->getCurrent());
-    self::assertEmpty($instance->getCurrentState());
     self::assertSame(0, $instance->getCountPast());
-    self::assertSame(3, $instance->getCountFuture());
+    self::assertSame(2, $instance->getCountFuture());
 
     // Try to undo when at beginning.
     $instance->undo();
-    self::assertNull($instance->getCurrent());
+    self::assertSame($state1, $instance->getCurrentState());
   }
 
 }
