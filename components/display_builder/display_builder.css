@@ -165,8 +165,13 @@ body:has(.db-htmx-before-request):not(.display-builder--fullscreen) {
     .db-message {
       margin: 1rem;
       &::part(base) {
-        z-index: calc(var(--db-z-index-fullscreen) + 3);
+        z-index: calc(var(--db-z-index) + 3);
       }
+    }
+  }
+  &.display-builder--fullscreen {
+    .display-builder__main .db-message::part(base) {
+      z-index: calc(var(--db-z-index-fullscreen) + 3);
     }
   }
 
@@ -208,4 +213,8 @@ body:has(.db-htmx-before-request):not(.display-builder--fullscreen) {
     outline: 0.25rem dotted var(--sl-color-purple-700) !important;
     outline-offset: 2px !important;
   }
+}
+
+.db-menu {
+  display: none;
 }

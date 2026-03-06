@@ -175,7 +175,8 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
     $source = $this->sourceManager->createInstance('component', $configuration);
 
     $summary = $source->settingsSummary();
-    self::assertSame($expectedSummary, $summary);
+    $summary = \array_map(static fn ($item) => (string) $item, $summary);
+    self::assertEquals($expectedSummary, $summary);
   }
 
   /**
@@ -193,6 +194,70 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
         ],
       ],
       'expectedSummary' => [],
+    ];
+
+    yield 'no props and no variant_id' => [
+      'settings' => [
+        'component' => [
+          'component_id' => 'display_builder_test:test_variant',
+        ],
+      ],
+      'expectedSummary' => [],
+    ];
+
+    yield 'no props and default variant_id' => [
+      'settings' => [
+        'component' => [
+          'component_id' => 'display_builder_test:test_variant',
+          'variant_id' => [
+            'source' => [
+              'value' => 'default',
+            ],
+          ],
+        ],
+      ],
+      'expectedSummary' => [],
+    ];
+
+    yield 'no props and variant_id' => [
+      'settings' => [
+        'component' => [
+          'component_id' => 'display_builder_test:test_variant',
+          'variant_id' => [
+            'source' => [
+              'value' => 'primary',
+            ],
+          ],
+        ],
+      ],
+      'expectedSummary' => [
+        'Variant: Primary',
+      ],
+    ];
+
+    yield 'standard property and variant_id' => [
+      'settings' => [
+        'component' => [
+          'component_id' => 'display_builder_test:test_variant',
+          'variant_id' => [
+            'source' => [
+              'value' => 'primary',
+            ],
+          ],
+          'props' => [
+            'prop_string' => [
+              'source_id' => 'textfield',
+              'source' => [
+                'value' => 'Hello World',
+              ],
+            ],
+          ],
+        ],
+      ],
+      'expectedSummary' => [
+        'Variant: Primary',
+        'Title: Hello World',
+      ],
     ];
 
     yield 'standard property' => [

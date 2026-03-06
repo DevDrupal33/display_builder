@@ -67,8 +67,12 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
       if (!$display_builder_instance->moveToRoot($node_id, $position)) {
         $message = $this->t('[attachToRoot] moveToRoot failed with invalid data');
+        $debug = [
+          'request' => $request->request->all(),
+          'instance' => $display_builder_instance->toArray(),
+        ];
 
-        return $this->responseMessageError((string) $display_builder_instance->id(), $message, $request->request->all());
+        return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
       }
 
       $is_move = TRUE;
@@ -80,8 +84,12 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     }
     else {
       $message = '[attachToRoot] Missing content (source_id, node_id or preset_id)';
+      $debug = [
+        'request' => $request->request->all(),
+        'instance' => $display_builder_instance->toArray(),
+      ];
 
-      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $request->request->all());
+      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
     }
     $display_builder_instance->save();
 
@@ -116,9 +124,15 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       $node_id = (string) $request->request->get('node_id');
 
       if (!$display_builder_instance->moveToSlot($node_id, $parent_id, $slot, $position)) {
-        $message = $this->t('[attachToRoot] moveToRoot failed with invalid data');
+        $message = $this->t('[attachToSlot] moveToSlot failed with invalid data');
+        $debug = [
+          'node_id' => $node_id,
+          'slot' => $slot,
+          'request' => $request->request->all(),
+          'instance' => $display_builder_instance->toArray(),
+        ];
 
-        return $this->responseMessageError((string) $display_builder_instance->id(), $message, $request->request->all());
+        return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
       }
 
       $is_move = TRUE;
@@ -134,6 +148,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         'node_id' => $node_id,
         'slot' => $slot,
         'request' => $request->request->all(),
+        'instance' => $display_builder_instance->toArray(),
       ];
 
       return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
@@ -173,8 +188,14 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     if (!isset($body['form_id'])) {
       $message = $this->t('[update] Missing payload!');
+      $debug = [
+        'node_id' => $node_id,
+        'request' => $request->request->all(),
+        'body' => $body,
+        'instance' => $display_builder_instance->toArray(),
+      ];
 
-      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $body);
+      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
     }
 
     // Load the node to properly alter the form data into config data.
@@ -214,7 +235,15 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       throw $e;
     }
     catch (\Exception $e) {
-      return $this->responseMessageError((string) $display_builder_instance->id(), $e->getMessage(), []);
+      $debug = [
+        'node_id' => $node_id,
+        'request' => $request->request->all(),
+        'form' => $form_state->getValues(),
+        'body' => $body,
+        'instance' => $display_builder_instance->toArray(),
+      ];
+
+      return $this->responseMessageError((string) $display_builder_instance->id(), $e->getMessage(), $debug);
     }
 
     $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager->getSlotPropType()]];
@@ -259,8 +288,15 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     if (!isset($body['form_id'])) {
       $message = $this->t('[thirdPartySettingsUpdate] Missing payload!');
+      $debug = [
+        'node_id' => $node_id,
+        'island_id' => $island_id,
+        'request' => $request->request->all(),
+        'body' => $body,
+        'instance' => $display_builder_instance->toArray(),
+      ];
 
-      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $body);
+      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
     }
 
     $islandDefinition = $this->islandPluginManager->getDefinition($island_id);
@@ -317,8 +353,11 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     if (isset($dataToCopy['source_id'], $dataToCopy['source'])) {
       $source_id = $dataToCopy['source_id'];
-      $data = $dataToCopy['source'];
+      // Use reference to ensure modifications by recursiveRefreshNodeId
+      // persist.
+      $data = &$dataToCopy['source'];
 
+      // Refresh nested node_ids.
       self::recursiveRefreshNodeId($data);
 
       // If no parent we are on root.
@@ -526,8 +565,14 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     if (!isset($data['source_id']) || !isset($data['source'])) {
       $message = $this->t('[attachToRoot] Missing preset source_id data');
+      $debug = [
+        'preset_id' => $preset_id,
+        'position' => $position,
+        'data' => $data,
+        'instance' => $display_builder_instance->toArray(),
+      ];
 
-      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $data);
+      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
     }
     $node_id = $display_builder_instance->attachToRoot($position, $data['source_id'], $data['source']);
 
@@ -572,8 +617,16 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     if (!isset($data['source_id']) || !isset($data['source'])) {
       $message = $this->t('[attachToSlot] Missing preset source_id data');
+      $debug = [
+        'preset_id' => $preset_id,
+        'parent_id' => $parent_id,
+        'slot' => $slot,
+        'position' => $position,
+        'data' => $data,
+        'instance' => $display_builder_instance->toArray(),
+      ];
 
-      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $data);
+      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
     }
     $node_id = $display_builder_instance->attachToSlot($parent_id, $slot, $position, $data['source_id'], $data['source']);
 
@@ -684,7 +737,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $message
    *   The error message.
    * @param array $debug
-   *   The debug code.
+   *   The debug code related to the error.
    *
    * @return array
    *   A renderable array.
@@ -694,7 +747,17 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     string|TranslatableMarkup $message,
     array $debug,
   ): array {
-    return $this->buildError($display_builder_instance_id, $message, !empty($debug) ? \print_r($debug, TRUE) : '', NULL, TRUE);
+    // Reduce verbosity.
+    unset($debug['request']['ajax_page_state']['libraries'], $debug['instance']['contexts'], $debug['instance']['past'], $debug['instance']['future'], $debug['instance']['save']);
+
+    $this->getLogger('display_builder')->error('@message <pre>@debug</pre>', [
+      '@message' => $message,
+      '@debug' => \print_r($debug, TRUE),
+    ]);
+
+    $message = new TranslatableMarkup('Error: @error, check logs for more details.', ['@error' => $message]);
+
+    return $this->buildError($display_builder_instance_id, $message, TRUE);
   }
 
   /**
@@ -705,7 +768,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    */
   private static function recursiveRefreshNodeId(array &$array): void {
     if (isset($array['node_id'])) {
-      $array['node_id'] = \uniqid();
+      $array['node_id'] = \bin2hex(\random_bytes(8));
     }
 
     foreach ($array as &$value) {

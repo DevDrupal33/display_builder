@@ -20,8 +20,6 @@ variants:
 slots:
   content:
     title: Content
-  debug:
-    title: Debug code, wrapper with pre
 props:
   type: object
   properties:

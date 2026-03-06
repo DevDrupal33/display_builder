@@ -19,17 +19,15 @@ trait RenderableBuilderTrait {
    *   The builder id.
    * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $message
    *   The message to display.
-   * @param string|null $debug
-   *   (Optional) Debug information to print.
-   * @param int|null $duration
-   *   (Optional) Alert duration before closing.
    * @param bool $global
    *   (Optional) Try to use the default builder message placeholder.
+   * @param int|null $duration
+   *   (Optional) Alert duration before closing.
    *
    * @return array
    *   The input render array.
    */
-  public function buildError(string $builder_id, string|TranslatableMarkup $message, ?string $debug = NULL, ?int $duration = NULL, bool $global = FALSE): array {
+  public function buildError(string $builder_id, string|TranslatableMarkup $message, bool $global = FALSE, ?int $duration = NULL): array {
     $build = [
       '#type' => 'component',
       '#component' => 'display_builder:alert',
@@ -46,10 +44,6 @@ trait RenderableBuilderTrait {
         'class' => 'db-message',
       ],
     ];
-
-    if ($debug) {
-      $build['#slots']['debug'] = $debug;
-    }
 
     if ($duration) {
       $build['#props']['duration'] = $duration;

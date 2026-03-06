@@ -1,7 +1,6 @@
 name: Default
 slots:
   content: 'A simple alert. Check it out!'
-  debug: 'I am a debug code. $array = [];'
 props:
   open: true
   closable: true

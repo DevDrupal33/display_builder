@@ -175,9 +175,15 @@ class BuilderPanel extends IslandPluginBase {
       $label = $label['label'] ?? $source->label();
     }
 
-    $instance_id = $instance_id ?: $data['node_id'];
+    $instance_id = $instance_id ?: $data['node_id'] ?? NULL;
 
     if (!$instance_id || !$component_id) {
+      $params = [
+        '@instance_id' => $instance_id ?? 'NULL',
+        '@component_id' => $component_id,
+      ];
+      $this->logger->error('[BuilderPanel::buildSingleComponent] missing component ID: @component_id or instance ID: @instance_id. <pre>' . \print_r($data, TRUE) . '</pre>', $params);
+
       return NULL;
     }
 
@@ -221,7 +227,7 @@ class BuilderPanel extends IslandPluginBase {
    *   A renderable array.
    */
   protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
-    $instance_id = $instance_id ?: $data['node_id'];
+    $instance_id = $instance_id ?: $data['node_id'] ?? NULL;
 
     if (!$instance_id) {
       return NULL;

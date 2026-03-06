@@ -103,37 +103,25 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
   public function settingsSummary(): array {
     $data = $this->getSetting('component');
 
-    if (empty($data['props'])) {
+    if (empty($data) || !isset($data['component_id'])) {
       return [];
     }
 
-    $componentId = $data['component_id'];
+    if (empty($data['props']) && empty($data['variant_id'])) {
+      return [];
+    }
 
     try {
-      $component = $this->componentManager->getDefinition($componentId);
+      $component = $this->componentManager->getDefinition($data['component_id']);
     }
     catch (\Throwable $th) {
       return [];
     }
 
-    if (!$component) {
-      return [];
-    }
+    $variant = $this->buildVariantSummary($component, $data);
+    $props = $this->buildPropsSummary($component, $data);
 
-    $items = [];
-    $propertyConfigs = $component['props']['properties'] ?? [];
-
-    foreach ($data['props'] as $sourceId => $sourceConfig) {
-      $summaryItem = $this->processProperty(
-        $sourceConfig,
-        $propertyConfigs[$sourceId] ?? NULL,
-        $sourceId
-      );
-
-      if ($summaryItem) {
-        $items[] = $summaryItem;
-      }
-    }
+    $items = \array_merge($variant, $props);
 
     return $items;
   }
@@ -227,6 +215,67 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
     }
 
     return $build;
+  }
+
+  /**
+   * Builds variant summary items.
+   *
+   * @param array $component
+   *   The component definition.
+   * @param array $data
+   *   The component data.
+   *
+   * @return array
+   *   Summary items for variants.
+   */
+  private function buildVariantSummary(array $component, array $data): array {
+    if (!isset($data['variant_id']['source']['value'])
+        || $data['variant_id']['source']['value'] === 'default') {
+      return [];
+    }
+
+    $variantValue = $data['variant_id']['source']['value'];
+    $variantLabel = $component['variants'][$variantValue]['title'] ?? $variantValue;
+
+    if (empty($variantLabel)) {
+      return [];
+    }
+
+    return [new TranslatableMarkup('Variant: @variant', ['@variant' => $variantLabel])];
+  }
+
+  /**
+   * Builds props summary items.
+   *
+   * @param array $component
+   *   The component definition.
+   * @param array $data
+   *   The component data.
+   *
+   * @return array
+   *   Summary items for props.
+   */
+  private function buildPropsSummary(array $component, array $data): array {
+    if (empty($data['props'])) {
+      return [];
+    }
+
+    $items = [];
+    $propertyConfigs = $component['props']['properties'] ?? [];
+
+    foreach ($data['props'] as $sourceId => $sourceConfig) {
+      $summaryItem = $this->processProperty(
+        $sourceConfig,
+        $propertyConfigs[$sourceId] ?? NULL,
+        $sourceId
+      );
+
+      if ($summaryItem) {
+        $items[] = $summaryItem;
+      }
+    }
+
+    return $items;
   }
 
   /**

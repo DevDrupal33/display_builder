@@ -231,6 +231,7 @@ class HtmxEvents {
     $attributes = [
       'tabindex' => '0',
       'data-node-id' => $node_id,
+      'hx-vals' => \json_encode(['node_id' => $node_id]),
       'hx-on:click' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event, "click")', $builder_id),
     ];
 

@@ -241,13 +241,19 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
    */
   protected function createDisplayBuilderInstance(): EntityInterface {
     $data = $this->getInitialSources();
+
+    $tree = new SourceTree($data);
+    $data = $tree->getTree();
+    $hash = Instance::getUniqId($data);
+
     $present = new HistoryStep(
       $data,
-      Instance::getUniqId($data),
+      $hash,
       $this->getInitializationMessage(),
       \time(),
       (int) $this->currentUser->id(),
     );
+
     $data = [
       'id' => $this->getInstanceId(),
       'profileId' => $this->getProfile()->id(),

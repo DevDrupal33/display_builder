@@ -91,6 +91,12 @@ class LayersPanel extends BuilderPanel {
     $instance_id = $instance_id ?: $data['node_id'];
 
     if (!$instance_id || !$component_id) {
+      $params = [
+        '@instance_id' => $instance_id ?? 'NULL',
+        '@component_id' => $component_id,
+      ];
+      $this->logger->error('[LayersPanel::buildSingleComponent] missing component ID: @component_id or instance ID: @instance_id. <pre>' . \print_r($data, TRUE) . '</pre>', $params);
+
       return NULL;
     }
 
@@ -163,7 +169,14 @@ class LayersPanel extends BuilderPanel {
         'title' => $label['summary'],
       ],
     ];
-    $instance_id = $instance_id ?: $data['node_id'];
+
+    $instance_id = $instance_id ?: $data['node_id'] ?? NULL;
+
+    if (!$instance_id) {
+      $this->logger->error('[LayersPanel::buildSingleBlock] missing instance ID. <pre>' . \print_r($data, TRUE) . '</pre>');
+
+      return $build;
+    }
 
     $build = $this->addThirdPartySettingsSummary($data, $build);
 
