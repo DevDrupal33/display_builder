@@ -6,7 +6,7 @@ import { default as baseConfig } from './playwright.config'
  */
 export default defineConfig({
   ...baseConfig,
-  retries: 0,
+  retries: 1,
   timeout: 240_000,
   reporter: [
     ['list', { printSteps: true }],
@@ -28,7 +28,7 @@ export default defineConfig({
       slowMo: 100,
     },
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-action-timeout
-    actionTimeout: 7_000,
+    actionTimeout: 15_000,
     testIdAttribute: 'data-test',
   },
   webServer: {

@@ -41,14 +41,8 @@ interface HistoryInterface {
    *   (Optional) The log message.
    * @param bool $check_hash
    *   (Optional) Should check hash to avoid duplicates. Default to TRUE.
-   * @param bool $index
-   *   (Optional) Should index the new present. Default to TRUE.
-   *   If FALSE, the new present will not be indexed and will not be available
-   *   in the history. This is useful when you want to set a new present without
-   *   affecting the history, for example when you want to set the initial
-   *   state.
    */
-  public function setNewPresent(array $state, FormattableMarkup|string $log_message = '', bool $check_hash = TRUE, bool $index = TRUE): void;
+  public function setNewPresent(array $state, FormattableMarkup|string $log_message = '', bool $check_hash = TRUE): void;
 
   /**
    * Get number of past logs.
@@ -80,13 +74,5 @@ interface HistoryInterface {
    * Reset history to the current state.
    */
   public function clear(): void;
-
-  /**
-   * Check if history is new (empty).
-   *
-   * @return bool
-   *   TRUE if history is new.
-   */
-  public function isHistoryNew(): bool;
 
 }
