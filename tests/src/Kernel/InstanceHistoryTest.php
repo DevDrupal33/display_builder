@@ -48,8 +48,8 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function restore(): void {
     $instance = $this->createDisplayBuilderInstance();
-    $testData = ['component' => ['id' => 'test_component']];
-    $modifiedData = ['component' => ['id' => 'modified_component']];
+    $testData = [['source_id' => 'component', 'node_id' => '1']];
+    $modifiedData = [['source_id' => 'component', 'node_id' => '2']];
 
     // Set save data.
     $instance->setSave($testData);
@@ -71,8 +71,8 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $instance = $this->createDisplayBuilderInstance();
 
     // Create some history.
-    $state1 = ['component' => ['id' => 'state1']];
-    $state2 = ['component' => ['id' => 'state2']];
+    $state1 = [['source_id' => 'state1', 'node_id' => '1']];
+    $state2 = [['source_id' => 'state2', 'node_id' => '2']];
 
     $instance->setNewPresent($state1, 'State 1');
     $instance->setNewPresent($state2, 'State 2');
@@ -105,7 +105,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Create multiple states.
     for ($i = 1; $i <= 3; ++$i) {
-      $state = ['component' => ['id' => 'state' . $i]];
+      $state = [['source_id' => 'state' . $i, 'node_id' => (string) $i]];
       $instance->setNewPresent($state, "State {$i}");
     }
 
@@ -126,10 +126,10 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    * Test the ::getUniqId() method.
    */
   public function testGetUniqId(): void {
-    $data1 = ['component' => ['id' => 'test1']];
-    $data2 = ['component' => ['id' => 'test2']];
+    $data1 = [['source_id' => 'test1', 'node_id' => '1']];
+    $data2 = [['source_id' => 'test2', 'node_id' => '2']];
     // Same as data1.
-    $data3 = ['component' => ['id' => 'test1']];
+    $data3 = [['source_id' => 'test1', 'node_id' => '1']];
 
     // Test that identical data produces same hash.
     $hash1 = Instance::getUniqId($data1);
@@ -152,9 +152,9 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $instance = $this->createDisplayBuilderInstance();
 
     // Create states with different users.
-    $state1 = ['component' => ['id' => 'state1']];
-    $state2 = ['component' => ['id' => 'state2']];
-    $state3 = ['component' => ['id' => 'state3']];
+    $state1 = [['source_id' => 'state1', 'node_id' => '1']];
+    $state2 = [['source_id' => 'state2', 'node_id' => '2']];
+    $state3 = [['source_id' => 'state3', 'node_id' => '3']];
 
     // Mock current user to return different IDs.
     $mockCurrentUser = $this->prophesize(AccountInterface::class);
@@ -193,8 +193,8 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testHistory(): void {
     $instance = $this->createDisplayBuilderInstance();
-    $state1 = [['source_id' => 'attributes', 'source' => []]];
-    $state2 = [['source_id' => 'textfield', 'source' => []]];
+    $state1 = [['source_id' => 'token', 'node_id' => '1', 'source' => []]];
+    $state2 = [['source_id' => 'textfield', 'node_id' => '2', 'source' => []]];
 
     // 1. Initial state.
     self::assertNull($instance->getCurrent());
@@ -237,7 +237,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testHashDuplicateDetection(): void {
     $instance = $this->createDisplayBuilderInstance();
-    $testData = ['component' => ['id' => 'test_component']];
+    $testData = [['source_id' => 'component', 'node_id' => '1']];
 
     // Set initial state.
     $instance->setNewPresent($testData, 'First state');
@@ -248,7 +248,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     self::assertSame($initialPastCount, $instance->getCountPast(), 'Duplicate state should be ignored');
 
     // Set different data - should be added.
-    $differentData = ['component' => ['id' => 'different_component']];
+    $differentData = [['source_id' => 'different_component', 'node_id' => '2']];
     $instance->setNewPresent($differentData, 'Different state', TRUE);
     self::assertGreaterThan($initialPastCount, $instance->getCountPast(), 'Different state should be added');
   }
@@ -258,7 +258,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testHashDuplicateDetectionDisabled(): void {
     $instance = $this->createDisplayBuilderInstance();
-    $testData = ['component' => ['id' => 'test_component']];
+    $testData = [['source_id' => 'component', 'node_id' => '1']];
 
     // Set initial state.
     $instance->setNewPresent($testData, 'First state');
@@ -277,7 +277,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Create more states than MAX_HISTORY (10)
     for ($i = 1; $i <= 15; ++$i) {
-      $state = ['component' => ['id' => 'state' . $i]];
+      $state = [['source_id' => 'state' . $i, 'node_id' => (string) $i]];
       $instance->setNewPresent($state, "State {$i}");
       $instance->setNewPresent($state, "State {$i}");
     }
@@ -315,7 +315,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Create multiple states.
     for ($i = 1; $i <= 5; ++$i) {
-      $state = ['component' => ['id' => 'state' . $i]];
+      $state = [['source_id' => 'state' . $i, 'node_id' => (string) $i]];
       $instance->setNewPresent($state, "State {$i}");
     }
 
@@ -336,7 +336,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Set initial present state.
     // Root level must be an array list because it is a collection of sources.
-    $testData = [['component' => ['id' => 'test_component']]];
+    $testData = [['source_id' => 'component', 'node_id' => '1', 'source' => []]];
     $time = \time();
     $instance->present = new HistoryStep($testData, 123, 'Test', $time, 3);
 
@@ -347,11 +347,11 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     // Verify that path index was built.
     $pathIndex = $instance->getPathIndex();
     // The path index should contain entries for the components in the data
-    // Since we're using test_component, it should have a node_id.
+    // Since we're using test_1, it should have a node_id.
     self::assertNotEmpty($pathIndex);
     // Check that the path index contains at least one entry.
     self::assertNotEmpty(\array_keys($pathIndex));
-    self::assertSame([0], \reset($pathIndex)['path']);
+    self::assertSame([0], $pathIndex['1']['path']);
 
     self::assertIsInt($instance->present->hash);
     self::assertSame('Test', $instance->present->log);
@@ -366,9 +366,9 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $instance = $this->createDisplayBuilderInstance();
 
     // Create multiple states.
-    $state1 = ['component' => ['id' => 'state1']];
-    $state2 = ['component' => ['id' => 'state2']];
-    $state3 = ['component' => ['id' => 'state3']];
+    $state1 = [['source_id' => 'state1', 'node_id' => '1']];
+    $state2 = [['source_id' => 'state2', 'node_id' => '2']];
+    $state3 = [['source_id' => 'state3', 'node_id' => '3']];
 
     $instance->setNewPresent($state1, 'State 1');
     $instance->setNewPresent($state2, 'State 2');
@@ -401,7 +401,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testSaveIsCurrent(): void {
     $instance = $this->createDisplayBuilderInstance();
-    $testData = ['component' => ['id' => 'test_component']];
+    $testData = [['source_id' => 'component', 'node_id' => '1', 'source' => []]];
 
     // Initially Save match init, so is true.
     self::assertTrue($instance->saveIsCurrent());
@@ -411,7 +411,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     self::assertFalse($instance->saveIsCurrent());
 
     // Modify state - should no longer be current.
-    $modifiedData = ['component' => ['id' => 'modified_component']];
+    $modifiedData = [['source_id' => 'component', 'node_id' => '2', 'source' => []]];
     $instance->setNewPresent($modifiedData, 'Modified state');
 
     // Note: There may be edge cases where saveIsCurrent returns unexpected
@@ -436,7 +436,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testSetNewPresent(): void {
     $instance = $this->createDisplayBuilderInstance();
-    $testData = ['component' => ['id' => 'test_component']];
+    $testData = [['source_id' => 'component', 'node_id' => '1', 'source' => []]];
 
     // Set initial state.
     $instance->setNewPresent($testData, 'Initial state');
@@ -462,7 +462,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
   public function testSetSave(): void {
     $instance = $this->createDisplayBuilderInstance();
     // Root level must be an array list because it is a collection of sources.
-    $testData = [['component' => ['id' => 'test_component']]];
+    $testData = [['source_id' => 'component', 'node_id' => '1', 'source' => []]];
 
     // Initially no save.
     self::assertFalse($instance->hasSave());
@@ -476,7 +476,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     self::assertInstanceOf(HistoryStep::class, $instance->save);
 
     self::assertArrayHasKey('node_id', $instance->save->data[0]);
-    self::assertSame($testData[0]['component']['id'], $instance->save->data[0]['component']['id']);
+    self::assertSame('1', $instance->save->data[0]['node_id']);
 
     self::assertNull($instance->save->log);
     self::assertIsInt($instance->save->hash);
@@ -491,9 +491,9 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $instance = $this->createDisplayBuilderInstance();
 
     // Create multiple states.
-    $state1 = ['component' => ['id' => 'state1']];
-    $state2 = ['component' => ['id' => 'state2']];
-    $state3 = ['component' => ['id' => 'state3']];
+    $state1 = [['source_id' => 'state1', 'node_id' => '1']];
+    $state2 = [['source_id' => 'state2', 'node_id' => '2']];
+    $state3 = [['source_id' => 'state3', 'node_id' => '3']];
 
     $instance->setNewPresent($state1, 'State 1');
     $instance->setNewPresent($state2, 'State 2');
