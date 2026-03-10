@@ -10,16 +10,13 @@
     "url": "git@git.drupal.org:project/display_builder.git"
   },
   "scripts": {
-    "pw": "npx playwright test --config=playwright.local.config.ts --project=firefox",
+    "pw": "npx playwright test -c playwright.local.config.ts --project=chromium",
     "test": "npm run pw -- -g @display_builder",
     "test:failed": "npm run pw -- -g @display_builder --last-failed",
-    "test:min": "npm run pw -- -g @display_builder_min",
-    "test:min:failed": "npm run pw -- -g @display_builder_min --last-failed",
-    "test:dev": "npm run pw -- -g @display_builder_dev_tools",
-    "test:dev:failed": "npm run pw -- -g @display_builder_dev_tools --last-failed",
     "test:headed": "npm run pw -- --headed -g @display_builder",
     "test:ui": "npm run pw -- --ui -g @display_builder",
     "test:debug": "PWDEBUG=1 npm run pw -- -g @display_builder",
+    "test:update": "npm run pw -- --update-snapshots=all --update-source-method=overwrite -g @display_builder",
     "test-clean": "rm -rf playwright-report test-results"
   },
   "devDependencies": {

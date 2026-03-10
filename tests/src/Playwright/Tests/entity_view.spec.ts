@@ -4,29 +4,30 @@ import * as utils from '../utilities/utils'
 import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
-  await drupal.installModules([ 'display_builder_entity_view', 'ui_styles' ])
-  await drupal.drush('state:set -y display_builder.asset_libraries_local true')
+  await drupal.installModules([ 'field_ui', 'node', 'display_builder_entity_view', 'display_builder_entity_view_test', 'display_builder_entity_view_override_test' ])
 })
 
 test(
   'Entity view',
-  { tag: [ '@display_builder', '@display_builder_entity_view', '@display_builder_min' ] },
+  { tag: [ '@display_builder', '@display_builder_entity_view' ] },
   async ({ page, drupal, displayBuilder }) => {
-    const testName = utils.createRandomString()
-    const name = `test_${testName}`
+    const id = utils.createRandomString()
+    const name = `test_${id}`
 
-    await test.step(`Admin login`, async () => {
-      await drupal.loginAsAdminDrush()
+    await test.step(`Create User and login`, async () => {
+      await displayBuilder.createUserAndLogin(drupal, ['db_test_entity'])
     })
 
-    await test.step(`Create entity type and set display`, async () => {
-      await drupal.createContentType(name, testName)
+    await test.step(`Create entity type`, async () => {
+      await drupal.createContentType(name, id)
+    })
 
+    await test.step(`Enable display`, async () => {
       await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
       await expect(page.locator('main').getByRole('button', { name: 'Display builder' })).toBeVisible()
 
       // Enable the Display builder for default display
-      await page.getByLabel('Enable with profile', { exact: true }).selectOption('Test')
+      await page.getByLabel('Enable with profile', { exact: true }).selectOption('Test profile')
       await page.getByRole('button', { name: 'Save' }).click()
       await drupal.expectMessage('Your settings have been saved.')
     })
@@ -104,14 +105,11 @@ test(
       await displayBuilder.closeDialog('both')
       await displayBuilder.publishDisplayBuilder()
 
-      await expect(page.locator('.db-island-builder')).toMatchAriaSnapshot(`
+      await expect(page.locator('.db-island-builder .test_simple')).toMatchAriaSnapshot(`
         - text: Test simple
         - 'heading "label: I am a test" [level=2]'
         - text: "Textfield: I am a test textfield... I am a test textfield in a slot in an Entity view! Slot 1"
         - button "Click me"
-        - text: "Extra field: Links"
-        - 'button "Extra field: Links"'
-        - text: "Field: Body"
       `)
     })
 
@@ -130,23 +128,26 @@ test(
 
 test(
   'Entity view override',
-  { tag: [ '@display_builder', '@display_builder_entity_view', '@display_builder_min' ] },
+  { tag: [ '@display_builder', '@display_builder_entity_view' ] },
   async ({ page, drupal, displayBuilder }) => {
-    const testName = utils.createRandomString()
-    const name = `test_${testName}`
+    const id = utils.createRandomString()
+    const name = `test_${id}`
 
-    await test.step(`Admin login`, async () => {
-      await drupal.loginAsAdminDrush()
+    await test.step(`Create entity type`, async () => {
+      await drupal.createContentType(name, id)
+    })
+
+    await test.step(`Create User and login`, async () => {
+      await displayBuilder.createUserAndLogin(drupal, ['db_test_entity'])
+      await drupal.addPermissions({role: 'db_test_entity', permissions: [`create ${name} content`, `edit own ${name} content`]})
     })
 
     await test.step(`Create entity type and set display`, async () => {
-      await drupal.createContentType(name, testName)
-
       await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
       await expect(page.locator('main').getByRole('button', { name: 'Display builder' })).toBeVisible()
 
       // Enable the Display builder for default display
-      await page.getByLabel('Enable with profile', { exact: true }).selectOption('Test')
+      await page.getByLabel('Enable with profile', { exact: true }).selectOption('Test profile')
       await page.getByRole('button', { name: 'Save' }).click()
       await drupal.expectMessage('Your settings have been saved.')
     })
@@ -157,13 +158,15 @@ test(
         .getByRole('checkbox', { name: 'Enable content overrides' }).click()
 
       await expect(page.getByLabel('Override profile')).toBeVisible()
+      await page.getByLabel('Override profile').selectOption('Test profile')
       await page.getByRole('button', { name: 'Save' }).click()
       await drupal.expectMessage('Your settings have been saved.')
     })
 
     await test.step(`Create override`, async () => {
       await page.goto(config.contentTypeAdd.replace('{bundle}', name))
-      await page.getByRole('textbox', { name: 'Title *' }).fill(`Test content for ${name}`)
+      await page.getByRole('textbox', { name: 'Title *' }).fill(`Test content`)
+      await page.getByRole('textbox', { name: 'Body' }).fill(`This is a test content!`)
       await page.getByRole('button', { name: 'Save' }).click()
       await drupal.expectMessage('has been created.')
 
@@ -173,6 +176,13 @@ test(
       await displayBuilder.dragComponentsAndTextfield(
         'I am a test textfield in a slot in an Entity view override!',
       )
+
+      // Add a field.
+      await displayBuilder.openLibrariesTab('Blocks')
+      const target = page.locator(`.db-island-builder > div.db-dropzone`).first()
+      const element = page.locator(`.db-island-library [data-node-title="Body"]`).first()
+
+      await displayBuilder.dragElementFromLibrary('Blocks', element, target, { x: 10, y: 10 })
 
       // Check result on preview and on view entity page.
       await displayBuilder.closeDialog('both')

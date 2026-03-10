@@ -1,6 +1,6 @@
-name: Display Builder Entity View Test
+name: Display Builder Entity View Override Test
 type: module
-description: 'Entity display config entities for testing.'
+description: 'Entity display override config entities for testing.'
 package: Testing
 dependencies:
   - display_builder:display_builder_entity_view

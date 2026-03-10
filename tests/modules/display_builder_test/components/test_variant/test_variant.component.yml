@@ -8,11 +8,11 @@ variants:
   secondary:
     title: Secondary
 slots:
-  slot_1:
+  slot_variant_1:
     title: Slot 1
 props:
   type: object
   properties:
-    prop_string:
+    prop_string_variant:
       title: Title
       type: string

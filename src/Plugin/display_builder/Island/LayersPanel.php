@@ -118,6 +118,7 @@ class LayersPanel extends BuilderPanel {
           'data-slot-id' => $slot_id,
           'data-slot-title' => $definition['title'],
           'data-node-title' => $label,
+          'data-instance-id' => $instance_id . '_' . $slot_id,
         ],
       ];
 
@@ -144,6 +145,7 @@ class LayersPanel extends BuilderPanel {
       // @see assets/js/contextual_menu.js
       '#attributes' => [
         'data-node-title' => $label,
+        'data-instance-id' => $instance_id,
       ],
     ];
     $build = $this->addThirdPartySettingsSummary($data, $build);
@@ -184,6 +186,7 @@ class LayersPanel extends BuilderPanel {
     // @see assets/js/contextual_menu.js
     $build['#attributes']['data-node-title'] = $label['summary'];
     $build['#attributes']['data-slot-position'] = $index;
+    $build['#attributes']['data-instance-id'] = $instance_id;
 
     // Add data-node-type for easier identification of block types in JS, CSS or
     // tests.

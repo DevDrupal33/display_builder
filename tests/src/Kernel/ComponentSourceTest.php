@@ -256,7 +256,7 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
       ],
       'expectedSummary' => [
         'Variant: Primary',
-        'Title: Hello World',
+        'prop_string: Hello World',
       ],
     ];
 

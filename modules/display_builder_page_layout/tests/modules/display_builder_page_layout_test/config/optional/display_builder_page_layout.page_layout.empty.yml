@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - display_builder.profile.test
+  module:
+    - display_builder_test
+    - display_builder_page_layout
+    - system
+id: empty
+label: 'Page empty for tests'
+weight: 0
+conditions:
+  request_path:
+    id: request_path
+    negate: false
+    pages: /test-empty
+profile: test
+sources:
+  - source_id: ''
+    source:
+      value: ''

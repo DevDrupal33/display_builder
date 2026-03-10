@@ -3,6 +3,7 @@
  */
 export default {
   dbList: 'admin/structure/display-builder/instances',
+  dbViewUrl: '/admin/structure/display-builder/instance/{instance_id}',
 
   viewsDbList: 'admin/structure/views/display-builder',
 

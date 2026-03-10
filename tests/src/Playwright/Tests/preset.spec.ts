@@ -3,23 +3,14 @@ import { test } from '../fixtures/loader'
 import * as utils from '../utilities/utils'
 import config from '../playwright.config.loader'
 
-test.beforeEach('Setup', async ({ drupal }) => {
-  await drupal.installModules([ 'display_builder_dev_tools' ])
-  await drupal.drush('state:set -y display_builder.asset_libraries_local true')
-})
-
 test(
   'Preset',
-  { tag: [ '@display_builder', '@display_builder_dev_tools' ] },
+  { tag: [ '@display_builder' ] },
   async ({ page, drupal, displayBuilder }) => {
-    const dbName = `test_${utils.createRandomString()}`
+    const presetName = `test_${utils.createRandomString()}`
 
-    await test.step(`Admin login`, async () => {
-      await drupal.loginAsAdmin()
-    })
-
-    await test.step(`Create dev instance`, async () => {
-      await displayBuilder.createDisplayBuilderFromUi(dbName)
+    await test.step(`Create Page Layout and login`, async () => {
+      await displayBuilder.initTestsWithPageLayout(drupal)
     })
 
     await test.step(`Build instance`, async () => {
@@ -71,7 +62,7 @@ test(
       page.on('dialog', async dialog => {
         expect(dialog.type()).toBe('prompt')
         expect(dialog.message()).toBe('Name of preset')
-        await dialog.accept(`foo_${dbName}`)
+        await dialog.accept(`foo_${presetName}`)
       })
 
       await page
@@ -81,28 +72,25 @@ test(
     })
 
     await test.step(`Check preset and drag`, async () => {
-      const preset = page.getByRole('button', { name: `foo_${dbName}` })
+      const preset = page.getByRole('button', { name: `foo_${presetName}` })
 
       // Check preview on hover
       await page.getByRole('tab', { name: 'Presets' }).click()
       await expect(preset).toBeVisible()
-      // await preset.hover()
-      // await displayBuilder.htmxReady()
-      // await expect(page.getByRole('tooltip')).toBeVisible()
+      await preset.hover()
+      await displayBuilder.htmxReady()
+      await expect(page.getByRole('tooltip')).toBeVisible()
       // From the test component.
-      // await expect(page.getByRole('tooltip')).toMatchAriaSnapshot({ name: 'test-preset-hover.aria.yml' })
+      await expect(page.getByRole('tooltip')).toMatchAriaSnapshot({ name: 'test-preset-hover.aria.yml' })
 
       await displayBuilder.dragElementFromLibrary(
         'Presets',
         preset,
         page.getByRole('heading', { name: 'label: I am a component with a textfield' }),
       )
+
+      await expect(page.locator(`.db-island-builder`)).toMatchAriaSnapshot({ name: 'test-preset-final.aria.yml' })
     })
 
-    await test.step(`Check and delete`, async () => {
-      await displayBuilder.closeDialog('both')
-      await displayBuilder.expectPreviewAriaSnapshot('dev-instance-preset.aria.yml')
-      // await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
-    })
   },
 )

@@ -26,6 +26,7 @@ final class SourceTreeTest extends DisplayBuilderKernelTestBase {
   protected static $modules = [
     'system',
     'user',
+    'path_alias',
     'ui_patterns',
     'display_builder',
     'display_builder_test',

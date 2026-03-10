@@ -6,10 +6,11 @@ import { default as baseConfig } from './playwright.config'
  */
 export default defineConfig({
   ...baseConfig,
-  retries: 2,
-  workers: 1,
+  retries: 0,
+  workers: undefined,
   timeout: 240_000,
   reporter: [
+    // ['dot'],
     ['list', { printSteps: true }],
     ['html'],
   ],
@@ -22,15 +23,17 @@ export default defineConfig({
       mode: 'only-on-failure',
       fullPage: true,
     },
-    video: 'retain-on-failure',
-
+    video: {
+      mode: 'retain-on-failure',
+      size: { width: 1280, height: 920 },
+    },
     launchOptions: {
       // For --headed test, add some slow time.
       slowMo: 100,
     },
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-action-timeout
     actionTimeout: 15_000,
-    testIdAttribute: 'data-test',
+    testIdAttribute: 'data-instance-id',
   },
   webServer: {
     name: 'PHP',

@@ -157,7 +157,7 @@ class PresetLibraryPanel extends IslandPluginBase {
       }
 
       foreach ($group_data['choices'] as $preset) {
-        $build[] = $this->buildPresetItem($builder_id, $preset, !$is_single_group);
+        $build[] = $this->buildPresetItem($builder_id, $preset, TRUE);
       }
     }
 
@@ -187,10 +187,15 @@ class PresetLibraryPanel extends IslandPluginBase {
     if ($with_preview) {
       $url = Url::fromRoute('display_builder.api_preset_preview', $vals);
 
-      return $this->buildPlaceholderButtonWithPreview($builder_id, $preset->get('label'), $vals, $url, $keywords);
+      $build = $this->buildPlaceholderButtonWithPreview($builder_id, $preset->get('label'), $vals, $url, $keywords);
+    }
+    else {
+      $build = $this->buildPlaceholderButton($preset->get('label'), $vals, $keywords);
     }
 
-    return $this->buildPlaceholderButton($preset->get('label'), $vals, $keywords);
+    $build['#attributes']['data-instance-id'][] = $preset->id();
+
+    return $build;
   }
 
   /**

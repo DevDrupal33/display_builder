@@ -1,7 +1,7 @@
 name: Test 2
 description: 'Used for testing Display Builder.'
 slots:
-  slot_1:
+  slot_2_1:
     title: Slot 1
-  slot_2:
+  slot_2_2:
     title: Slot 2

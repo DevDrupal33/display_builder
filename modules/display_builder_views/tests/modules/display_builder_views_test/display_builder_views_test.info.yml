@@ -1,4 +1,4 @@
-name: 'Display Builder Views defaults test'
+name: 'Display Builder Views test'
 type: module
 description: 'Support module for testing Display building with views defaults.'
 package: Testing

@@ -1,0 +1,131 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - display_builder.profile.layers
+  module:
+    - display_builder_test
+    - display_builder_page_layout
+    - system
+    - ui_patterns
+id: layers
+label: 'Layers only pane tests.'
+weight: 0
+conditions:
+  request_path:
+    id: request_path
+    negate: false
+    pages: /test-layers
+profile: layers
+sources:
+  - source_id: block
+    source:
+      plugin_id: local_tasks_block
+    node_id: block_1
+  - source_id: textfield
+    source:
+      value: foo
+    node_id: textfield_1
+  - source_id: component
+    source:
+      component:
+        component_id: 'display_builder_test:test_1'
+        variant_id: null
+        props:
+          prop_string:
+            source_id: textfield
+            source:
+              value: 'Component 1'
+        slots:
+          slot_1:
+            sources:
+              - source_id: token
+                source:
+                  value: corge
+                node_id: token_1
+              - source_id: textfield
+                source:
+                  value: grault
+                node_id: textfield_1_1
+        third_party_settings: ''
+    node_id: test_1
+  - source_id: textfield
+    source:
+      value: bar
+    node_id: textfield_2
+  - source_id: component
+    source:
+      component:
+        component_id: 'display_builder_test:test_1'
+        variant_id: null
+        props:
+          prop_string:
+            source_id: textfield
+            source:
+              value: 'Component 2'
+        slots:
+          slot_1:
+            sources:
+              - source_id: textfield
+                source:
+                  value: garply
+                node_id: textfield_2_1
+        third_party_settings: ''
+    node_id: test_2
+  - source_id: textfield
+    source:
+      value: baz
+    node_id: textfield_3
+  - source_id: component
+    source:
+      component:
+        component_id: 'display_builder_test:test_1'
+        variant_id: null
+        props:
+          prop_string:
+            source_id: textfield
+            source:
+              value: 'Component 3'
+        slots:
+          slot_1:
+            sources:
+              - source_id: token
+                source:
+                  value: waldo
+                node_id: token_2
+              - source_id: textfield
+                source:
+                  value: fred
+                node_id: textfield_3_1
+        third_party_settings: ''
+    node_id: test_3
+  - source_id: textfield
+    source:
+      value: qux
+    node_id: textfield_4
+  - source_id: component
+    source:
+      component:
+        component_id: 'display_builder_test:test_2'
+        slots:
+          slot_2_1:
+            sources:
+              - source_id: token
+                source:
+                  value: plugh
+                node_id: token_3
+              - source_id: textfield
+                source:
+                  value: xyzzy
+                node_id: textfield_4_1
+          slot_2_2:
+            sources:
+              - source_id: textfield
+                source:
+                  value: thud
+                node_id: textfield_4_2
+    node_id: test_4
+  - source_id: textfield
+    source:
+      value: quux
+    node_id: textfield_4

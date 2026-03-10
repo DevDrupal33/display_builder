@@ -1,0 +1,6 @@
+name: Display Builder Page Layout Test
+type: module
+description: 'Display Builder Page Layout for testing.'
+package: Testing
+dependencies:
+  - display_builder:display_builder

@@ -1,5 +1,6 @@
 import { expect, Locator, Page } from '@playwright/test'
 import config from '../playwright.config.loader'
+import * as utils from '../utilities/utils'
 import { Drupal } from './Drupal'
 
 export class Displaybuilder {
@@ -61,7 +62,7 @@ export class Displaybuilder {
     id: string,
     target: Locator,
     targetPosition: any = {
-      x: 20,
+      x: 10,
       y: 10,
     }
   ): Promise<void> {
@@ -246,18 +247,6 @@ export class Displaybuilder {
   }
 
   /**
-   * Refreshes the Display Builder instance view this.page.
-   *
-   * @async
-   * @param {string} dbName - Name of the Display Builder instance.
-   * @returns {Promise<void>}
-   */
-  async refresh(dbName: string): Promise<void> {
-    await this.page.goto(config.dbViewUrl.replace('{db_id}', dbName))
-    await this.htmxReady()
-  }
-
-  /**
    * Create a Display Builder instance from dev UI.
    *
    * @async
@@ -406,44 +395,80 @@ export class Displaybuilder {
   }
 
   /**
-   * Create a Page Layout Display builder from UI.
+   * Initialize tests by creating a Page Layout and logging in.
    *
    * @async
-   * @param {Drupal} drupal - The Drupal object.
-   * @param {string} id - The id of the Display Builder.
+   * @param {Drupal} drupal - The Drupal object for managing Page Layouts and user authentication.
+   * @returns {Promise<void>}
    */
-  async createPageLayoutDisplayBuilder(drupal: Drupal, id: string): Promise<void> {
-    const cmd = `
-      php:eval "Drupal\\display_builder_page_layout\\Entity\\PageLayout::create([
-        'id'   => 'test_${id}',
-        'label'=> 'Test ${id}',
-        Drupal\\display_builder\\DisplayBuildableInterface::PROFILE_PROPERTY => 'default',
-      ])->save();"
-  `.trim();
-
-    await drupal.drush(cmd);
+  async initTestsWithPageLayout(drupal: Drupal): Promise<void> {
+    await this.createUserAndLogin(drupal)
+    await this.createPageLayout(drupal)
   }
 
   /**
-   * Create a Page Layout Display builder from UI.
+   * Create a user with Display Builder role and log in.
    *
    * @async
-   * @param {string} id - The id of the Display Builder.
+   * @param {Drupal} drupal - The Drupal object for user management and login.
+   * @param {string[]} [roles=[]] - An array of roles to assign to the user, append to basic role 'db_test_page'.
+   * @param {string|null} id - The to use, default to random.
+   * @returns {Promise<void>}
    */
-  async createPageLayoutDisplayBuilderFromUi(id: string): Promise<void> {
-    const name = `test_${id}`
-
-    await this.page.goto(`${config.pageAddUrl}`)
-
-    await this.page.getByLabel('Label').fill(name)
-    await this.page.getByLabel('Profile', { exact: true }).selectOption('test')
-    // Fill page condition.
-    await this.page.getByRole('link', { name: 'Pages' }).click()
-    await this.page.getByRole('textbox', { name: 'Pages' }).fill(`/test-${id}`)
-    await this.page.getByRole('button', { name: 'Save' }).click()
-
-    // Check conditions summary.
-    await expect(this.page.getByText(`On the following pages: /test-${id}`)).toBeVisible()
+  async createUserAndLogin(drupal: Drupal, roles: string[] = [], id: string | null = null): Promise<void> {
+    if (!id) {
+      id = utils.createRandomString()
+    }
+    const username = `test_${id}`
+    roles = [ 'db_test_page', ...roles ]
+    await drupal.createUser({
+      username,
+      password: id,
+      email: `${username}}@${id}.com`,
+      roles,
+    })
+    await drupal.login({ username })
   }
 
+  /**
+   * Create a Page Layout from Drush and view it.
+   *
+   * The Page Layout is created with the 'test' profile. A minimal source is
+   * defined to ensure tests consistency.
+   *
+   * @async
+   * @param {Drupal} drupal - The Drupal object.
+   */
+  async createPageLayout(drupal: Drupal): Promise<void> {
+    const id = utils.createRandomString()
+    const profile = 'test'
+
+    const cmd = `
+      php:eval "\\Drupal\\display_builder_page_layout\\Entity\\PageLayout::create([
+        'id' => 'test_${id}',
+        'label'=> 'Test ${id}',
+        'sources' => [['source_id' => '']],
+        \\Drupal\\display_builder\\DisplayBuildableInterface::PROFILE_PROPERTY => '${profile}',
+      ])->save();"
+    `.trim();
+
+    await drupal.drush(cmd);
+    await this.page.goto(`${config.pageViewUrl.replace('{instance_id}', `test_${id}`)}`)
+    await this.shoelaceReady()
+  }
+
+  /**
+   * Manually drags a component to a slot using mouse events.
+   *
+   * @param {Locator} component - The Playwright Locator for the component to be dragged.
+   * @param {Locator} slot - The Playwright Locator for the target slot where the component should be dropped.
+   * @returns A Promise that resolves when the drag-and-drop action is complete.
+   */
+  async dragManual(component: Locator, slot: Locator): Promise<void> {
+    await component.hover({ position: { x: 10, y: 10 }, force: true })
+    await this.page.mouse.down()
+    await slot.hover({ position: { x: 10, y: 10 }, force: true })
+    await this.page.mouse.up()
+    await await this.htmxReady()
+  }
 }

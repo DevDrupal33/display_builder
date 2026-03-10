@@ -1,0 +1,24 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - display_builder.profile.builder
+    - display_builder.profile.default
+    - display_builder.profile.layers
+    - display_builder.profile.test
+  module:
+    - display_builder
+    - display_builder_ui
+    - field_ui
+    - node
+id: db_test_entity
+label: 'Display Builder Test for Entity'
+weight: -8
+is_admin: false
+permissions:
+  - 'administer node display'
+  - 'use display builder builder'
+  - 'use display builder default'
+  - 'use display builder layers'
+  - 'use display builder test'
+  - 'view display builder instance'

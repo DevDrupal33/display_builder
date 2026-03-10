@@ -20,8 +20,8 @@ variables:
     value: 'firefox'
     description: 'Set to a comma-separated list of project.'
   PLAYWRIGHT_TEST_TAG:
-    value: 'display_builder_min'
-    description: "The tag to use for E2E tests. Defaults to 'display_builder_min'."
+    value: 'display_builder'
+    description: "The tag to use for E2E tests. Defaults to 'display_builder'."
 
 .manual-rule: &manual-rule
   - when: manual
@@ -125,7 +125,7 @@ stylelint:
 cspell:
   allow_failure: false
   variables:
-    _CSPELL_IGNORE_PATHS: '**/fixtures/*.yml, *.neon, **/*.story.yml, **/build.env, **/*.patch, **/tests/src/Playwright'
+    _CSPELL_IGNORE_PATHS: '**/fixtures/*.yml, *.neon, **/*.story.yml, **/build.env, **/*.patch, **/tests/src/Playwright, **/tests/**/*.yml'
 
 ## PHPMD job in Drupal CI ##
 
@@ -281,18 +281,9 @@ phpmd:
         - test-results/playwright.xml
       annotations: test-results/links.json
 
-playwright (all):
+playwright:
   extends: .playwright-base
   allow_failure: true
-  rules:
-    - *manual-rule
-  variables:
-    PLAYWRIGHT_TEST_PROJECT: firefox
-    PLAYWRIGHT_TEST_TAG: display_builder
-
-playwright (min):
-  extends: .playwright-base
-  allow_failure: false
   variables:
     PLAYWRIGHT_TEST_PROJECT: firefox, chromium
-    PLAYWRIGHT_TEST_TAG: display_builder_min
+    PLAYWRIGHT_TEST_TAG: display_builder

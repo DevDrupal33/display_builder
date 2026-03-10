@@ -48,13 +48,16 @@ export default defineConfig({
       mode: 'only-on-failure',
       fullPage: true,
     },
-    video: 'retain-on-failure',
+    video: {
+      mode: 'retain-on-failure',
+      size: { width: 1280, height: 900 },
+    },
     // Default timeout for each Playwright action in milliseconds, defaults to 0 (no timeout).
     // Quicker fail on local tests if skip install.
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-action-timeout
     actionTimeout: process.env.CI ? 10_000 : process.env.DRUPAL_TEST_SKIP_INSTALL ? 4_000 : 20_000,
     /* @see https://playwright.dev/docs/locators#locate-by-test-id */
-    testIdAttribute: 'data-test',
+    testIdAttribute: 'data-instance-id',
   },
   /* Configure snapshot folder */
   expect: {

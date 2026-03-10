@@ -1,0 +1,7 @@
+- text: /-2 \| _NOT_SAVED_ \| \d+ \| \s+ \|/
+- emphasis: Textfield
+- text: /textfield has been attached to root -1 \| _NOT_SAVED_ \| \d+ \| \s+ \|/
+- emphasis: "Textfield: I am first"
+- text: /has been updated 0 \| _NOT_SAVED_ \| \d+ \| \s+ \|/
+- emphasis: "Textfield: I am second"
+- text: has been updated

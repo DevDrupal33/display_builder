@@ -3,7 +3,6 @@ import { test } from '../fixtures/loader'
 import * as utils from '../utilities/utils'
 import config from '../playwright.config.loader'
 
-let dbName: string
 // Click position required to avoid icon to intercept the click.
 const position = { position: { x: 5, y: 5 } }
 
@@ -26,28 +25,17 @@ const key = {
 
 test.beforeEach('Setup', async ({ drupal }) => {
   // Breakpoint is required for viewport switcher.
-  await drupal.installModules([ 'display_builder_dev_tools', 'breakpoint' ])
-  await drupal.drush('state:set -y display_builder.asset_libraries_local true')
+  await drupal.installModules([ 'breakpoint' ])
 })
-
-// test.afterEach('Clean', async ({ displayBuilder }) => {
-// await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
-// })
 
 // Buttons in toolbar configuration is based on display_builder.profile.test.yml
 // Any change to the profile will be reflected here.
 test(
   'Toolbar buttons',
-  { tag: [ '@display_builder', '@display_builder_dev_tools' ] },
+  { tag: [ '@display_builder' ] },
   async ({ page, drupal, displayBuilder }) => {
-    dbName = `test_${utils.createRandomString()}`
-
-    await test.step(`Admin login`, async () => {
-      await drupal.loginAsAdmin()
-    })
-
-    await test.step(`Create dev instance`, async () => {
-      await displayBuilder.createDisplayBuilderFromUi(dbName)
+    await test.step(`Create Page Layout and login`, async () => {
+      await displayBuilder.initTestsWithPageLayout(drupal)
     })
 
     // Test highlight and fullscreen before any further tests to not conflict with
@@ -154,9 +142,11 @@ test(
     })
 
     await test.step(`Logs`, async () => {
-      const btn = page.getByRole('tab', { name: 'Logs' })
-      // @todo aria snapshot is hard with the table of logs, because of dates.
+      const btn = page.getByRole('tab', { name: 'Logs', exact: true })
       await testToggleTab(page, btn, '.db-island-logs', null)
+
+      // const btn2 = page.getByRole('tab', { name: '[Test] Logs raw', exact: true })
+      // await testToggleTab(page, btn2, '.db-island-test_logs_raw', 'logs_raw')
     })
 
     await test.step(`Preview`, async () => {
@@ -196,16 +186,10 @@ test(
 
 test(
   'Toolbar keyboard',
-  { tag: [ '@display_builder', '@display_builder_dev_tools' ] },
+  { tag: [ '@display_builder' ] },
   async ({ page, drupal, displayBuilder }) => {
-    dbName = `test_${utils.createRandomString()}`
-
-    await test.step(`Admin login`, async () => {
-      await drupal.loginAsAdmin()
-    })
-
-    await test.step(`Create dev instance`, async () => {
-      await displayBuilder.createDisplayBuilderFromUi(dbName)
+    await test.step(`Create Page Layout and login`, async () => {
+      await displayBuilder.initTestsWithPageLayout(drupal)
     })
 
     // Test highlight and fullscreen before any further tests to not conflict with

@@ -5,7 +5,6 @@ import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.installModules([ 'views', 'views_ui', 'display_builder_views', 'display_builder_views_test' ])
-  await drupal.drush('state:set -y display_builder.asset_libraries_local true')
   // Disable preview to avoid ajax refresh.
   await drupal.drush('config:set -y views.settings ui.show.preview_information false')
   await drupal.drush('config:set -y views.settings ui.always_live_preview false')
@@ -13,7 +12,7 @@ test.beforeEach('Setup', async ({ drupal }) => {
 
 test(
   'Views',
-  { tag: [ '@display_builder', '@display_builder_views', '@display_builder_min' ] },
+  { tag: [ '@display_builder', '@display_builder_views' ] },
   async ({ page, drupal, displayBuilder }) => {
     const testName = utils.createRandomString()
     const name = `test_${testName}`
@@ -22,8 +21,8 @@ test(
     // @see modules/display_builder_views/src/Controller/ViewsManagementController::buildRow()
     const listProfileId = page.locator(`[data-profile-id="profile_${name}"]`)
 
-    await test.step(`Admin login`, async () => {
-      await drupal.loginAsAdmin()
+    await test.step(`Create User and login`, async () => {
+      await displayBuilder.createUserAndLogin(drupal, ['db_test_views'])
     })
 
     await test.step(`Create view and fill areas`, async () => {

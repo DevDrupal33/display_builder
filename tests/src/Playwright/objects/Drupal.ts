@@ -99,42 +99,10 @@ export class Drupal {
     await this.writeBaseUrl()
   }
 
-  async loginAsAdminDrush (): Promise<void> {
+  async loginAsAdmin (uid: number = 1): Promise<void> {
     utils.debug('Login with Drush...')
-    const logInUrl = await this.drush(`user:login --uid=1 --no-browser`)
+    const logInUrl = await this.drush(`user:login --uid=${uid} --no-browser`)
     await this.page.goto(logInUrl)
-  }
-
-  async loginAsAdmin (): Promise<void> {
-    // First see if we are already logged in.
-    await this.page.goto(`${this.drupalSite.url}/${config.logInUrl}`)
-    const title = this.page.locator('h1')
-    if ((await title.innerText()) === 'admin') {
-      return
-    }
-    // If we are not on the login page, log out first.
-    if ((await title.innerText()) !== 'Log in') {
-      await this.logout()
-    }
-
-    let logInUrl: string
-
-    if (process.env.DRUPAL_TEST_SKIP_INSTALL && process.env.DRUPAL_TEST_SKIP_INSTALL === 'true') {
-      if (!this.drupalSite.hasDrush) {
-        throw new Error('Drush is not available for local tests! Please install.')
-      }
-      utils.debug('Login with Drush...')
-      logInUrl = await this.drush(`user:login --uid=1 --no-browser`)
-    } else {
-      utils.debug('Login with test-site.php...')
-      const stdout = await exec(`php core/scripts/test-site.php user-login 1 --site-path ${this.drupalSite.sitePath}`)
-      logInUrl = `${this.drupalSite.url}${stdout.toString()}`
-    }
-
-    await this.page.goto(logInUrl)
-    if ((await title.innerText()) !== 'admin') {
-      await this.loginAsAdmin()
-    }
   }
 
   async login (
@@ -224,12 +192,13 @@ export class Drupal {
     password: string
     email: string
     roles: string[]
-  }): Promise<number> {
+  }): Promise<void> {
     if (this.drupalSite.hasDrush) {
       await this.drush(`user:create ${username} --password=${password} --mail=${email}`)
       for (const role of roles) {
-        await this.drush(`user:role:add ${role} ${username}`)
+        await this.drush(`user:role:add '${role}' '${username}'`)
       }
+      return
     } else {
       const page = this.page
       await page.goto(`${this.drupalSite.url}/admin/people/create`)
@@ -252,22 +221,8 @@ export class Drupal {
       if (userId === undefined || isNaN(userId)) {
         throw new Error(`No user ID found for ${username}`)
       }
-      return userId
+      return
     }
-  }
-
-  async createAdminUserLogin (role: string = 'test', permissions: Array<string> = []): Promise<void> {
-    const user = {
-      username: 'test_admin',
-      password: 'test_admin',
-      email: 'test_admin@local.test',
-      roles: [ role ],
-    }
-
-    await this.createRole({ name: role })
-    await this.addPermissions({ role, permissions })
-    await this.createUser(user)
-    await this.login(user)
   }
 
   async installModules (modules: string[]): Promise<void> {
@@ -308,12 +263,8 @@ export class Drupal {
 
   async createBodyField (bundle: string, name: string): Promise<void> {
     if (this.drupalSite.hasDrush) {
-      // Create the format to avoid a config error on field create.
       await this.drush(
-        `config:set -y --input-format=yaml filter.format.none ? "{status: true, format: 'none', name: 'none'}"`
-      )
-      await this.drush(
-        `field:create -y node ${bundle} --field-name=field_test_${name} --field-label="Body" --field-type=text_long --field-widget=text_textarea --is-required=0 --cardinality=1`
+        `field:create -y node ${bundle} --field-name=field_test_${name} --field-label="Body" --field-type=string_long --field-widget=string_textarea --is-required=0 --cardinality=1`
       )
     } else {
       throw new Error('Field creation without Drush is not supported!')
@@ -493,8 +444,7 @@ export class Drupal {
     } else {
       path = nodePath.resolve(__dirname, `../../../../test-results/${fileName}`)
     }
-    await this.page.screenshot({ path, fullPage })
-  }
+    await this.page.screenshot({ path, fullPage })  }
 
   normalizeAttribute (attribute: string): string {
     return attribute.replaceAll(' ', '-').replaceAll('_', '-')

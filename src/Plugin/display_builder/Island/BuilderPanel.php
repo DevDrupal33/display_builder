@@ -192,6 +192,7 @@ class BuilderPanel extends IslandPluginBase {
     // @see assets/js/contextual_menu.js
     $build['#attributes']['data-node-title'] = $label;
     $build['#attributes']['data-slot-position'] = $index;
+    $build['#attributes']['data-instance-id'] = $instance_id;
 
     foreach ($source->getSlotDefinitions() as $slot_id => $definition) {
       $slot = $this->buildComponentSlot($builder_id, $source, $slot_id, $definition, $instance_id);
@@ -298,6 +299,7 @@ class BuilderPanel extends IslandPluginBase {
     // be a plain string, typically the label or field summary.
     $build['#attributes']['data-node-title'] = $label_info['summary'] ?? $data['source_id'] ?? $data['node_id'] ?? '';
     $build['#attributes']['data-slot-position'] = $index;
+    $build['#attributes']['data-instance-id'] = $instance_id;
 
     // Add data-node-type for easier identification of block types in JS or CSS.
     if (isset($data['source_id'])) {
@@ -537,6 +539,7 @@ class BuilderPanel extends IslandPluginBase {
         'data-slot-id' => $slot_id,
         'data-slot-title' => \ucfirst($definition['title']),
         'data-node-id' => $instance_id,
+        'data-instance-id' => $instance_id . '_' . $slot_id,
       ],
     ];
 

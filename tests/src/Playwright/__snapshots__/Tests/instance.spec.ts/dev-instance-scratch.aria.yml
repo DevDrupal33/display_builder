@@ -1,5 +1,0 @@
-- 'heading "label: First component" [level=5]'
-- 'heading "label: Second component with a textfield" [level=5]'
-- text: I am a test textfield in a slot
-- button "Click me"
-- button "Click me"

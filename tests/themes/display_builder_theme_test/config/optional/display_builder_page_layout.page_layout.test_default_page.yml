@@ -19,7 +19,7 @@ conditions:
   request_path:
     id: request_path
     negate: false
-    pages: /test-display-builder-page
+    pages: /test-default
 profile: default
 sources:
   - source_id: component

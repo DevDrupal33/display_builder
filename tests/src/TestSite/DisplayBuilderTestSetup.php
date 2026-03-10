@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\display_builder\tests\TestSite;
+namespace Drupal\Tests\display_builder\TestSite;
 
 use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\Core\Extension\ThemeInstallerInterface;
@@ -26,6 +26,9 @@ class DisplayBuilderTestSetup implements TestSetupInterface {
       'display_builder',
       'display_builder_ui',
       'display_builder_test',
+      // To have a valid instance to work with in tests.
+      'display_builder_page_layout',
+      'display_builder_page_layout_test',
       'ui_patterns',
       'ui_styles',
     ];
@@ -37,6 +40,10 @@ class DisplayBuilderTestSetup implements TestSetupInterface {
     $theme_installer->install(['display_builder_theme_test'], TRUE);
     $system_theme_config = \Drupal::configFactory()->getEditable('system.theme');
     $system_theme_config->set('default', 'display_builder_theme_test')->save();
+
+    // Set the state to use local asset libraries.
+    $state = \Drupal::state();
+    $state->set('display_builder.asset_libraries_local', TRUE);
   }
 
 }

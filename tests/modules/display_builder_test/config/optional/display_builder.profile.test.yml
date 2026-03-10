@@ -2,8 +2,8 @@ langcode: en
 status: true
 dependencies: {}
 id: test
-label: Test
-description: 'Testing Display builder config.'
+label: 'Test profile'
+description: 'Testing Display Builder main profile.'
 islands:
   library:
     status: true
@@ -117,6 +117,25 @@ islands:
     status: false
     weight: 0
   test_island_menu:
+    status: false
+    weight: 0
+  test_index_raw:
+    status: true
+    weight: -4
+    region: main
+  test_logs_raw:
+    status: true
+    weight: -3
+    region: main
+  state_debug:
+    status: false
+    weight: -2
+    region: null
+  index_debug:
+    status: false
+    weight: -1
+    region: null
+  menu_debug:
     status: false
     weight: 0
 weight: 0
