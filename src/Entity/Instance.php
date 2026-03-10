@@ -20,12 +20,10 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\InstanceStorage;
 use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder\SlotSourceProxy;
-use Drupal\display_builder\SourceWithSlotsInterface;
+use Drupal\display_builder\SourceTree;
 use Drupal\display_builder_ui\InstanceListBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
-use Drupal\ui_patterns\SourceInterface;
-use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\ui_patterns\SourcePluginManager;
 
 /**
@@ -254,7 +252,8 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       return;
     }
 
-    $indexed = $this->buildIndexFromSlot([], $this->present->data ?? [], NULL);
+    $tree = new SourceTree($this->present->data ?? []);
+    $indexed = $tree->getTree();
     $hash = self::getUniqId($indexed);
     $this->present = new HistoryStep(
       $indexed,
@@ -286,16 +285,16 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function moveToRoot(string $node_id, int $position): bool {
-    $root = $this->getCurrentState();
-    $path = $this->getPath($node_id);
-    $data = NestedArray::getValue($root, $path);
+    $tree = new SourceTree($this->getCurrentState());
+    $data = $tree->getNodeData($node_id);
 
-    if (empty($data) || !isset($data['source_id'])) {
+    if (!$data) {
       return FALSE;
     }
 
-    $root = $this->doRemove($root, $node_id);
-    $root = $this->doAttachToRoot($root, $position, $data);
+    if (!$tree->moveToRoot($node_id, $position)) {
+      return FALSE;
+    }
 
     // Get friendly label to display in log instead of ids.
     $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts());
@@ -304,7 +303,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       '%node' => $labelWithSummary['summary'],
       '@thingy' => $data['source_id'],
     ]);
-    $this->setNewPresent($root, $log);
+    $this->setNewPresent($tree->getTree(), $log, TRUE, FALSE);
 
     return TRUE;
   }
@@ -313,29 +312,20 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function moveToSlot(string $node_id, string $parent_id, string $slot_id, int $position): bool {
-    $root = $this->getCurrentState();
-    $path = $this->getPath($node_id);
-    $data = NestedArray::getValue($root, $path);
+    $tree = new SourceTree($this->getCurrentState());
+    $data = $tree->getNodeData($node_id);
 
-    if (empty($data) || !isset($data['source_id'])) {
+    if (!$data) {
       return FALSE;
     }
 
-    if ($this->isNodeAlreadyInSlot($parent_id, $slot_id, $node_id)) {
-      // Moving to the same slot is tricky, because we don't want to remove a
-      // sibling.
-      $root = $this->doMoveToSameSlot($root, $node_id, $parent_id, $slot_id, $position);
-    }
-    else {
-      // Moving to a different slot is easier, we can first delete the previous
-      // node data, and attach it to the new position.
-      $root = $this->doRemove($root, $node_id);
-      $root = $this->doAttachToSlot($root, $parent_id, $slot_id, $position, $data);
+    if (!$tree->moveToSlot($node_id, $parent_id, $slot_id, $position)) {
+      return FALSE;
     }
 
     // Get friendly label to display in log instead of ids.
     $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts());
-    $labelWithSummaryParent = $this->slotSourceProxy()->getLabelWithSummary($this->getNode($parent_id));
+    $labelWithSummaryParent = $this->slotSourceProxy()->getLabelWithSummary($tree->getNodeData($parent_id));
 
     $log = new FormattableMarkup("%node @thingy has been moved to %parent's @slot_id", [
       '%node' => $labelWithSummary['summary'],
@@ -344,7 +334,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       '@slot_id' => $slot_id,
     ]);
 
-    $this->setNewPresent($root, $log);
+    $this->setNewPresent($tree->getTree(), $log, TRUE, FALSE);
 
     return TRUE;
   }
@@ -353,51 +343,51 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function attachToRoot(int $position, string $source_id, array $data, array $third_party_settings = []): string {
-    $data = [
-      'node_id' => \uniqid(),
-      'source_id' => $source_id,
-      'source' => $data,
-    ];
+    $tree = new SourceTree($this->getCurrentState());
+    $node_id = $tree->attachToRoot($position, $source_id, $data);
 
     if ($third_party_settings) {
-      $data['third_party_settings'] = $third_party_settings;
+      foreach ($third_party_settings as $island_id => $settings) {
+        $tree->setThirdPartySettings($node_id, $island_id, $settings);
+      }
     }
 
-    $root = $this->getCurrentState();
-    $root = $this->doAttachToRoot($root, $position, $data);
+    $new_data = $tree->getNode($node_id);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts() ?? []);
+    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($new_data, $this->getContexts() ?? []);
 
     $log = new FormattableMarkup('%node @source_id has been attached to root', [
       '%node' => $labelWithSummary['summary'],
       '@source_id' => $source_id,
     ]);
-    $this->setNewPresent($root, $log, FALSE);
+    $this->setNewPresent($tree->getTree(), $log, FALSE, FALSE);
 
-    return $data['node_id'];
+    return $node_id;
   }
 
   /**
    * {@inheritdoc}
    */
   public function attachToSlot(string $parent_id, string $slot_id, int $position, string $source_id, array $data, array $third_party_settings = []): string {
-    $root = $this->getCurrentState();
-    $data = [
-      'node_id' => \uniqid(),
-      'source_id' => $source_id,
-      'source' => $data,
-    ];
+    $tree = new SourceTree($this->getCurrentState());
+    $node_id = $tree->attachToSlot($parent_id, $slot_id, $position, $source_id, $data);
 
-    if ($third_party_settings) {
-      $data['third_party_settings'] = $third_party_settings;
+    if (!$node_id) {
+      throw new \Exception('Parent or slot not found');
     }
 
-    $root = $this->doAttachToSlot($root, $parent_id, $slot_id, $position, $data);
+    if ($third_party_settings) {
+      foreach ($third_party_settings as $island_id => $settings) {
+        $tree->setThirdPartySettings($node_id, $island_id, $settings);
+      }
+    }
+
+    $new_data = $tree->getNode($node_id);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts() ?? []);
-    $labelWithSummaryParent = $this->slotSourceProxy()->getLabelWithSummary($this->getNode($parent_id));
+    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($new_data, $this->getContexts() ?? []);
+    $labelWithSummaryParent = $this->slotSourceProxy()->getLabelWithSummary($tree->getNode($parent_id));
 
     $log = new FormattableMarkup("%node @source_id has been attached to %parent's @slot_id", [
       '%node' => $labelWithSummary['summary'],
@@ -405,9 +395,9 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       '%parent' => $labelWithSummaryParent['summary'],
       '@slot_id' => $slot_id,
     ]);
-    $this->setNewPresent($root, $log);
+    $this->setNewPresent($tree->getTree(), $log, TRUE, FALSE);
 
-    return $data['node_id'];
+    return $node_id;
   }
 
   /**
@@ -432,71 +422,66 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function setSource(string $node_id, string $source_id, array $data): void {
-    $root = $this->getCurrentState();
-    $path = $this->getPath($node_id);
-    $existing_data = NestedArray::getValue($root, $path) ?? [];
+    $tree = new SourceTree($this->getCurrentState());
 
-    if (!isset($existing_data['node_id']) || ($existing_data['node_id'] !== $node_id)) {
+    if (!$tree->setSource($node_id, $source_id, $data)) {
       throw new \Exception('Node ID mismatch');
     }
-    $existing_data['source_id'] = $source_id;
-    $existing_data['source'] = $data;
-    NestedArray::setValue($root, $path, $existing_data);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($existing_data, $this->getContexts());
+    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($tree->getNodeData($node_id), $this->getContexts());
 
     $log = new FormattableMarkup('%source has been updated', [
       '%source' => $labelWithSummary['summary'],
     ]);
-    $this->setNewPresent($root, $log);
+    $this->setNewPresent($tree->getTree(), $log, TRUE, FALSE);
   }
 
   /**
    * {@inheritdoc}
    */
   public function setThirdPartySettings(string $node_id, string $island_id, array $data): void {
-    $root = $this->getCurrentState();
-    $path = $this->getPath($node_id);
-    $existing_data = NestedArray::getValue($root, $path);
+    $tree = new SourceTree($this->getCurrentState());
 
-    if (!isset($existing_data['third_party_settings'])) {
-      $existing_data['third_party_settings'] = [];
+    if (!$tree->setThirdPartySettings($node_id, $island_id, $data)) {
+      return;
     }
-    $existing_data['third_party_settings'][$island_id] = $data;
-    NestedArray::setValue($root, $path, $existing_data);
 
     // Get friendly label to display in log instead of ids.
-    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($existing_data, $this->getContexts());
+    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($tree->getNodeData($node_id), $this->getContexts());
 
     $log = new FormattableMarkup('%source has been updated by @island_id', [
       '%source' => $labelWithSummary['summary'],
       '@island_id' => $island_id,
     ]);
-    $this->setNewPresent($root, $log);
+    $this->setNewPresent($tree->getTree(), $log, TRUE, FALSE);
   }
 
   /**
    * {@inheritdoc}
    */
   public function remove(string $node_id): void {
-    $root = $this->getCurrentState();
-    $path = $this->getPath($node_id);
-    $data = NestedArray::getValue($root, $path);
-    $parent_id = $this->getParentId($node_id);
-    $root = $this->doRemove($root, $node_id);
+    $tree = new SourceTree($this->getCurrentState());
+    $data = $tree->getNodeData($node_id);
+
+    if (!$data) {
+      return;
+    }
+    $parent_id = $tree->getParentId($node_id);
 
     $contexts = $this->getContexts() ?? [];
 
     // Get friendly label to display in log instead of ids.
     $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $contexts);
-    $labelWithSummaryParent = empty($parent_id) ? ['summary' => 'root'] : $this->slotSourceProxy()->getLabelWithSummary($this->getNode($parent_id), $contexts);
+    $labelWithSummaryParent = empty($parent_id) ? ['summary' => 'root'] : $this->slotSourceProxy()->getLabelWithSummary($tree->getNodeData($parent_id), $contexts);
+
+    $tree->remove($node_id);
 
     $log = new FormattableMarkup('%node has been removed from %parent', [
       '%node' => $labelWithSummary['summary'],
       '%parent' => $labelWithSummaryParent['summary'],
     ]);
-    $this->setNewPresent($root, $log, FALSE);
+    $this->setNewPresent($tree->getTree(), $log, FALSE, FALSE);
   }
 
   /**
@@ -510,7 +495,8 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function setSave(array $save_data): void {
-    $indexed = $this->buildIndexFromSlot([], $save_data, NULL);
+    $tree = new SourceTree($save_data);
+    $indexed = $tree->getTree();
     $hash = self::getUniqId($indexed);
     $this->save = new HistoryStep($indexed, $hash, NULL, \time(), NULL);
   }
@@ -577,12 +563,17 @@ class Instance extends ContentEntityBase implements InstanceInterface {
 
   /**
    * {@inheritdoc}
-   *
-   * @see \Drupal\display_builder\HistoryInterface
    */
   public function clear(): void {
     $this->past = [];
     $this->future = [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isHistoryNew(): bool {
+    return $this->present === NULL && empty($this->past) && empty($this->future);
   }
 
   /**
@@ -683,14 +674,9 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function getPathIndex(): array {
-    // It may be slow to rebuild the index every time we request it. But it is
-    // very difficult to maintain an index synchronized with the state storage
-    // history.
-    $root = $this->getCurrentState();
-    $this->pathIndex = [];
-    $this->buildIndexFromSlot([], $root, NULL);
+    $tree = new SourceTree($this->getCurrentState());
 
-    return $this->pathIndex;
+    return $tree->getPathIndex();
   }
 
   /**
@@ -698,7 +684,11 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    *
    * @see \Drupal\display_builder\HistoryInterface
    */
-  public function setNewPresent(array $data, FormattableMarkup|string $log_message = '', bool $check_hash = TRUE): void {
+  public function setNewPresent(array $data, FormattableMarkup|string $log_message = '', bool $check_hash = TRUE, bool $index = TRUE): void {
+    if ($index) {
+      $tree = new SourceTree($data);
+      $data = $tree->getTree();
+    }
     $hash = self::getUniqId($data);
 
     // Check if this present is the same to avoid duplicates, for example move
@@ -708,6 +698,8 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     }
 
     // 1. Insert the present at the end of the past.
+    // If it's the very first action, we want a NULL in the past to be able to
+    // undo to initial empty state.
     $this->past[] = $this->present;
 
     // Keep only the last x history.
@@ -745,61 +737,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   }
 
   /**
-   * Is the node already in the slot?
-   *
-   * @param string $parent_id
-   *   The node id of the parent.
-   * @param string $slot_id
-   *   The parent slot.
-   * @param string $node_id
-   *   The node id of the source.
-   */
-  private function isNodeAlreadyInSlot(string $parent_id, string $slot_id, string $node_id): bool {
-    if ($parent_id !== $this->getParentId($node_id)) {
-      return FALSE;
-    }
-    $parent_data = $this->getNode($parent_id);
-    $parent = $this->getSlotSourcePlugin($parent_data);
-
-    if (!($parent instanceof SourceWithSlotsInterface)) {
-      return FALSE;
-    }
-
-    foreach ($parent->getSlotValue($slot_id) as $source_data) {
-      if ($source_data['node_id'] === $node_id) {
-        return TRUE;
-      }
-    }
-
-    return FALSE;
-  }
-
-  /**
-   * Build the index from a slot.
-   *
-   * @param array $path
-   *   The path to the slot.
-   * @param array $data
-   *   The slot data.
-   * @param ?string $parent
-   *   The node ID of the parent.
-   *
-   * @return array
-   *   The slot data with the index updated.
-   */
-  private function buildIndexFromSlot(array $path, array $data, ?string $parent): array {
-    // To avoid non consecutive array keys, we rebuild the value list.
-    $data = \array_values($data);
-
-    foreach ($data as $index => $source) {
-      $source_path = \array_merge($path, [$index]);
-      $data[$index] = $this->buildIndexFromSource($source_path, $source, $parent);
-    }
-
-    return $data;
-  }
-
-  /**
    * Sample entity generator.
    */
   private function sampleEntityGenerator(): SampleEntityGeneratorInterface {
@@ -818,13 +755,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   private function currentUser(): AccountInterface {
     return $this->currentUser ??= \Drupal::service('current_user');
-  }
-
-  /**
-   * Slot source proxy.
-   */
-  private function sourceManager(): SourcePluginManager {
-    return $this->sourceManager ??= \Drupal::service('plugin.manager.ui_patterns_source');
   }
 
   /**
@@ -869,195 +799,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   }
 
   /**
-   * Change the position of an source in a slot.
-   *
-   * @param array $slot
-   *   The slot.
-   * @param string $node_id
-   *   The node id of the source.
-   * @param int $to
-   *   The new position.
-   *
-   * @return array
-   *   The updated slot.
-   */
-  private function changeSourcePositionInSlot(array $slot, string $node_id, int $to): array {
-    foreach ($slot as $position => $source) {
-      if ($source['node_id'] === $node_id) {
-        $p1 = \array_splice($slot, $position, 1);
-        $p2 = \array_splice($slot, 0, $to);
-
-        return \array_merge($p2, $p1, $slot);
-      }
-    }
-
-    return $slot;
-  }
-
-  /**
-   * Add path to index and add node ID to source.
-   *
-   * @param array $path
-   *   The path to the slot.
-   * @param array $data
-   *   The slot data.
-   * @param ?string $parent
-   *   The node ID of the parent.
-   *
-   * @return array
-   *   The slot data with the index updated.
-   */
-  private function buildIndexFromSource(array $path, array $data, ?string $parent): array {
-    // First job: Add missing node_id keys.
-    $node_id = empty($data['node_id']) ? \uniqid() : $data['node_id'];
-    $data['node_id'] = $node_id;
-    // Second job: Save the path to the index.
-    $this->pathIndex[$node_id] = [
-      'path' => $path,
-      'parent' => $parent,
-    ];
-
-    if (!isset($data['source_id'])) {
-      return $data;
-    }
-
-    $source = $this->getSlotSourcePlugin($data);
-
-    if (!($source instanceof SourceWithSlotsInterface)) {
-      return $data;
-    }
-
-    foreach ($source->getSlotValues() as $slot_id => $slot) {
-      $slot_path = \array_merge($path, ['source'], $source::getSlotPath($slot_id));
-      $slot = $this->buildIndexFromSlot($slot_path, $slot, $node_id);
-      $data['source'] = $source->setSlotValue($slot_id, $slot);
-    }
-
-    return $data;
-  }
-
-  /**
-   * Internal atomic change of the root state.
-   *
-   * @param array $root
-   *   The root state.
-   * @param int $position
-   *   The position where to insert the data.
-   * @param array $data
-   *   The data to insert.
-   *
-   * @return array
-   *   The updated root state
-   */
-  private function doAttachToRoot(array $root, int $position, array $data): array {
-    \array_splice($root, $position, 0, [$data]);
-
-    return $root;
-  }
-
-  /**
-   * Internal atomic change of the root state.
-   *
-   * @param array $root
-   *   The root state.
-   * @param string $node_id
-   *   The ID of the parent node.
-   * @param string $parent_id
-   *   The ID of the parent node.
-   * @param string $slot_id
-   *   The ID of the slot where to insert the data.
-   * @param int $position
-   *   The position where to insert the data.
-   *
-   * @return array
-   *   The updated root state
-   */
-  private function doMoveToSameSlot(array $root, string $node_id, string $parent_id, string $slot_id, int $position): array {
-    $parent_data = $this->getNode($parent_id);
-    $source = $this->getSlotSourcePlugin($parent_data);
-
-    if ($source instanceof SourceWithSlotsInterface) {
-      $slot = $source->getSlotValue($slot_id);
-      $slot = $this->changeSourcePositionInSlot($slot, $node_id, $position);
-      $root = $this->doUpdateSlotValue($root, $parent_id, $source, $slot_id, $slot);
-    }
-
-    return $root;
-  }
-
-  /**
-   * Internal atomic change of the root state.
-   *
-   * @param array $root
-   *   The root state.
-   * @param string $parent_id
-   *   The ID of the parent node.
-   * @param string $slot_id
-   *   The ID of the slot where to insert the data.
-   * @param int $position
-   *   The position where to insert the data.
-   * @param array $data
-   *   The data to insert.
-   *
-   * @return array
-   *   The updated root state
-   */
-  private function doAttachToSlot(array $root, string $parent_id, string $slot_id, int $position, array $data): array {
-    $parent_data = $this->getNode($parent_id);
-    $source = $this->getSlotSourcePlugin($parent_data);
-
-    if ($source instanceof SourceWithSlotsInterface) {
-      $slot = $source->getSlotValue($slot_id);
-      \array_splice($slot, $position, 0, [$data]);
-      $root = $this->doUpdateSlotValue($root, $parent_id, $source, $slot_id, $slot);
-    }
-
-    return $root;
-  }
-
-  /**
-   * Internal atomic change of the root state.
-   *
-   * @param array $root
-   *   The root state.
-   * @param string $node_id
-   *   The ID of the node.
-   * @param \Drupal\display_builder\SourceWithSlotsInterface $source
-   *   The source plugin.
-   * @param string $slot_id
-   *   The ID of the slot where to insert the data.
-   * @param array $slot_data
-   *   The slot data to replace.
-   *
-   * @return array
-   *   The updated root state
-   */
-  private function doUpdateSlotValue(array $root, string $node_id, SourceWithSlotsInterface $source, string $slot_id, array $slot_data): array {
-    $path = \array_merge($this->getPath($node_id), ['source'], $source::getSlotPath($slot_id));
-    NestedArray::setValue($root, $path, $slot_data);
-
-    return $root;
-  }
-
-  /**
-   * Internal atomic change of the root state.
-   *
-   * @param array $root
-   *   The root state.
-   * @param string $node_id
-   *   The node id of the source.
-   *
-   * @return array
-   *   The updated root state
-   */
-  private function doRemove(array $root, string $node_id): array {
-    $path = $this->getPath($node_id);
-    NestedArray::unsetValue($root, $path);
-
-    return $root;
-  }
-
-  /**
    * Get the path to an source.
    *
    * @param string $node_id
@@ -1068,26 +809,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   private function getPath(string $node_id): array {
     return $this->getPathIndex()[$node_id]['path'] ?? [];
-  }
-
-  /**
-   * Get slot source plugin.
-   *
-   * @param array $data
-   *   The node data from the tree.
-   *
-   * @return \Drupal\ui_patterns\SourceInterface
-   *   The instantiated plugin.
-   */
-  private function getSlotSourcePlugin(array $data): SourceInterface {
-    $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager()->getSlotPropType()]];
-    /** @var \Drupal\ui_patterns\SourceInterface $source */
-    $source = $this->sourceManager()->createInstance(
-      $data['source_id'],
-      SourcePluginBase::buildConfiguration('slot', $slot_definition, $data, [])
-    );
-
-    return $source;
   }
 
 }

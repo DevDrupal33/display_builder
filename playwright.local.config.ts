@@ -6,7 +6,8 @@ import { default as baseConfig } from './playwright.config'
  */
 export default defineConfig({
   ...baseConfig,
-  retries: 1,
+  retries: 2,
+  workers: 1,
   timeout: 240_000,
   reporter: [
     ['list', { printSteps: true }],
@@ -16,7 +17,7 @@ export default defineConfig({
     baseURL: `${process.env.DRUPAL_TEST_BASE_URL}/`,
     ignoreHTTPSErrors: true,
 
-    trace: 'on',
+    trace: 'retain-on-first-failure',
     screenshot: {
       mode: 'only-on-failure',
       fullPage: true,

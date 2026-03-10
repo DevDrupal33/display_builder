@@ -297,25 +297,27 @@ export class Displaybuilder {
   }
 
   /**
-   * Drag test simple component with a textfield in the UI.
+   * Drag test component with a textfield in the UI.
    *
    * @async
-   * @param {string} textfieldTest - Text for the textfield.
+   * @param {string} text - Text for the textfield, required.
+   * @param {string|null} panel_locator - (Optional) The panel locator, default to '.db-island-builder'.
+   * @param {string} componentId - (Optional) The id of the component in the library to drag, default to 'test_simple'.
+   * @param {string} slot_id - (Optional) The slot id where the component should be dropped, default to 'slot_1'.
    * @returns {Promise<void>}
    */
-  async dragSimpleComponentsWithTextfield(textfieldTest: string = 'I am a textfield!', panel_locator: string|null = '.db-island-builder'): Promise<void> {
-    // await this.toggleSidebarView()
+  async dragComponentsAndTextfield(text: string, panel_locator: string|null = '.db-island-builder', componentId: string = 'test_simple', slot_id: string = 'slot_1'): Promise<void> {
     await this.dragElementFromLibraryById(
       'Components',
-      'test_simple',
+      componentId,
       this.page.locator(`${panel_locator} > div.db-dropzone`).first()
     )
-    const componentSimpleSlot = this.page.locator(`${panel_locator} [data-slot-id="slot_1"]`).first()
+    const component = this.page.locator(`${panel_locator} [data-slot-id="${slot_id}"]`).first()
 
-    await this.dragElementFromLibraryById('Blocks', 'textfield', componentSimpleSlot)
+    await this.dragElementFromLibraryById('Blocks', 'textfield', component)
     await this.setElementValue(
       this.page.locator(`${panel_locator} [data-node-type="textfield"]`).first(),
-      textfieldTest,
+      text,
       [
         {
           action: 'fill',

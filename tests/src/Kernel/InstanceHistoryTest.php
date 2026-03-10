@@ -46,7 +46,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
   /**
    * Test the ::restore() method.
    */
-  public function restore(): void {
+  public function testRestore(): void {
     $instance = $this->createDisplayBuilderInstance();
     $testData = [['source_id' => 'component', 'node_id' => '1']];
     $modifiedData = [['source_id' => 'component', 'node_id' => '2']];

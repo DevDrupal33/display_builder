@@ -58,7 +58,7 @@ test(
 
     await test.step(`Build the display`, async () => {
       // Basic common drag component and textfield.
-      await displayBuilder.dragSimpleComponentsWithTextfield('I am a test textfield in a slot in an Entity view!')
+      await displayBuilder.dragComponentsAndTextfield('I am a test textfield in a slot in an Entity view!')
 
       await displayBuilder.closeDialog('second')
 
@@ -170,7 +170,7 @@ test(
       await page.getByRole('link', { name: 'Default display' }).click()
       await displayBuilder.shoelaceReady()
       // Basic common drag component and textfield.
-      await displayBuilder.dragSimpleComponentsWithTextfield(
+      await displayBuilder.dragComponentsAndTextfield(
         'I am a test textfield in a slot in an Entity view override!',
       )
 

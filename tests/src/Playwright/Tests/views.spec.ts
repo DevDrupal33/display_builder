@@ -159,7 +159,7 @@ test(
     })
 
     await test.step(`Build the display`, async () => {
-      await displayBuilder.dragSimpleComponentsWithTextfield('I am a test textfield in a slot in a View!')
+      await displayBuilder.dragComponentsAndTextfield('I am a test textfield in a slot in a View!')
 
       // Result is based on the default page fixture with previous actions.
       // @see modules/display_builder_views/fixtures/default_view.yml

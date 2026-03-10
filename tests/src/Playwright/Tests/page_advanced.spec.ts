@@ -24,18 +24,51 @@ test(
       await displayBuilder.shoelaceReady()
       await displayBuilder.fullHighlight()
 
+      // Delete default to start from scratch.
+      await page
+        .locator('.db-island-builder [data-node-title^="Page layout"]')
+        .click({ button: 'right', position: { x: 40, y: 10 } })
+      await page.getByRole('menuitemcheckbox', { name: 'Remove Page layout' }).locator('slot').nth(1).click()
+
       const dropzoneRoot = page.locator('.db-dropzone--root').first()
 
-      await displayBuilder.dragSimpleComponentsWithTextfield('I am Test in a slot!')
+      await displayBuilder.dragComponentsAndTextfield('Test 1')
+      await expect(page.locator(`.db-island-builder`)).toMatchAriaSnapshot(`
+        - text: Test simple
+        - 'heading "label: none" [level=5]'
+        - text: "Textfield: Test 1 Test 1 Slot 1"
+        - button "Click me"
+        - text: Base container
+      `)
 
-      await displayBuilder.dragElementFromLibraryById('Components', 'test_simple', dropzoneRoot)
-
-      await displayBuilder.dragElementFromLibraryById('Blocks', 'textfield', dropzoneRoot)
+      await displayBuilder.dragComponentsAndTextfield('Test 2')
+      await expect(page.locator(`.db-island-builder`)).toMatchAriaSnapshot(`
+        - text: Test simple
+        - 'heading "label: none" [level=5]'
+        - text: "Textfield: Test 2 Test 2 Slot 1"
+        - button "Click me"
+        - text: Test simple
+        - 'heading "label: none" [level=5]'
+        - text: "Textfield: Test 1 Test 1 Slot 1"
+        - button "Click me"
+        - text: Base container
+      `)
 
       await displayBuilder.dragElement(
         page.locator(`.db-island-builder [data-node-type="textfield"]`).first(),
         page.locator(`.db-island-builder [data-slot-id="slot_1"]`).first(),
       )
+      await expect(page.locator(`.db-island-builder`)).toMatchAriaSnapshot(`
+        - text: Test simple
+        - 'heading "label: none" [level=5]'
+        - text: "Textfield: Test 2 Test 2 Slot 1"
+        - button "Click me"
+        - text: Test simple
+        - 'heading "label: none" [level=5]'
+        - text: "Textfield: Test 1 Test 1 Slot 1"
+        - button "Click me"
+        - text: Base container
+      `)
     })
 
     await test.step(`Check Builder snapshots`, async () => {

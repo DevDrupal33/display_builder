@@ -17,7 +17,7 @@ test(
     const pageLayoutListRow = page.locator(`tr[data-id="${name}"]`)
 
     await test.step(`Admin login`, async () => {
-      await drupal.loginAsAdmin()
+      await drupal.loginAsAdminDrush()
     })
 
     // Create the page layout.
@@ -48,14 +48,19 @@ test(
         page_title: '[Page] Title',
       }
       await displayBuilder.expectBlocksAvailable(sources)
+
     })
 
     await test.step(`Build the display`, async () => {
-      // Basic common drag component and textfield.
-      await displayBuilder.dragSimpleComponentsWithTextfield('I am a test textfield in a slot in a Page Layout!')
+      // Delete default to start from scratch.
+      await page
+        .locator('.db-island-builder [data-node-title^="Page layout"]')
+        .click({ button: 'right', position: { x: 40, y: 10 } })
+      await page.getByRole('menuitemcheckbox', { name: 'Remove Page layout' }).locator('slot').nth(1).click()
 
-      // Result is based on the default page fixture with previous actions.
-      // @see modules/display_builder_page_layout/fixtures/default_page_layout.yml
+      // Basic common drag component and textfield.
+      await displayBuilder.dragComponentsAndTextfield('I am a test textfield in a slot in a Page Layout!')
+
       await displayBuilder.closeDialog('both')
       await displayBuilder.publishDisplayBuilder()
 

@@ -248,4 +248,78 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
     $instance->setSource('non_existent_id', 'test_group_source', []);
   }
 
+  /**
+   * Test remove on non-existent node is a silent no-op.
+   */
+  public function testRemoveSilentOnNonExistentNode(): void {
+    $instance = $this->createDisplayBuilderInstance();
+    $node_id = $instance->attachToRoot(0, 'test_group_source', ['value' => 'keep']);
+
+    // Removing a non-existent node must not alter state.
+    $instance->remove('non_existent_id');
+    self::assertCount(1, $instance->getCurrentState());
+    self::assertSame($node_id, $instance->getCurrentState()[0]['node_id']);
+  }
+
+  /**
+   * Test attachToSlot throws when parent does not exist.
+   */
+  public function testAttachToSlotThrowsOnInvalidParent(): void {
+    $instance = $this->createDisplayBuilderInstance();
+    $this->expectException(\Exception::class);
+    $this->expectExceptionMessage('Parent or slot not found');
+    $instance->attachToSlot('non_existent_parent', 'slot_1', 0, 'test_group_source', []);
+  }
+
+  /**
+   * Test setThirdPartySettings on a non-existent node is a silent no-op.
+   */
+  public function testSetThirdPartySettingsOnNonExistentNodeIsSilent(): void {
+    $instance = $this->createDisplayBuilderInstance();
+    $node_id = $instance->attachToRoot(0, 'test_group_source', ['value' => 'keep']);
+    $before = $instance->getCurrentState();
+
+    // Must not throw and must not alter state.
+    $instance->setThirdPartySettings('non_existent_id', 'some_island', ['data' => 'x']);
+    self::assertSame($before, $instance->getCurrentState());
+    self::assertSame($node_id, $instance->getCurrentState()[0]['node_id']);
+  }
+
+  /**
+   * Test getPathIndex at the Instance level.
+   */
+  public function testGetPathIndex(): void {
+    $instance = $this->createDisplayBuilderInstance();
+    $comp_data = ['component' => ['component_id' => 'display_builder_test:test_1']];
+    $node_a = $instance->attachToRoot(0, 'component', $comp_data);
+    $node_b = $instance->attachToSlot($node_a, 'slot_1', 0, 'test_group_source', ['value' => 'B']);
+
+    $index = $instance->getPathIndex();
+
+    self::assertArrayHasKey($node_a, $index);
+    self::assertArrayHasKey($node_b, $index);
+    self::assertSame([0], $index[$node_a]['path']);
+    self::assertNull($index[$node_a]['parent']);
+    self::assertSame($node_a, $index[$node_b]['parent']);
+    self::assertNotEmpty($index[$node_b]['path']);
+  }
+
+  /**
+   * Test remove cascades to descendants at the Instance level.
+   */
+  public function testRemoveCascadesDescendants(): void {
+    $instance = $this->createDisplayBuilderInstance();
+    $comp_data = ['component' => ['component_id' => 'display_builder_test:test_1']];
+    $node_parent = $instance->attachToRoot(0, 'component', $comp_data);
+    $node_child = $instance->attachToSlot($node_parent, 'slot_1', 0, 'test_group_source', ['value' => 'child']);
+
+    $instance->remove($node_parent);
+
+    self::assertEmpty($instance->getCurrentState());
+    // Both parent and child paths must be gone from the index.
+    $index = $instance->getPathIndex();
+    self::assertArrayNotHasKey($node_parent, $index);
+    self::assertArrayNotHasKey($node_child, $index);
+  }
+
 }

@@ -160,7 +160,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $this->islandId = $is_move ? (string) $request->query->get('from', NULL) : NULL;
 
     return $this->dispatchDisplayBuilderEvent(
-      $is_move ? DisplayBuilderEvents::ON_MOVE : DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
+      $is_move ? DisplayBuilderEvents::ON_MOVE : DisplayBuilderEvents::ON_ATTACH_TO_SLOT,
       NULL,
       $node_id,
       $parent_id,
@@ -410,7 +410,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $label = $request->headers->get('hx-prompt', $label) ?: $label;
     // In HTTP headers, only ASCII is guaranteed to work but historically,
     // HTTP has allowed header values with the ISO-8859-1 charset.
-    $label = mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
+    $label = \mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
     $preset = $preset_storage->create([
       'id' => \uniqid(),
       'label' => $label,

@@ -275,12 +275,8 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
     // `inner_layout` is now the second source of the slot.
     $instance->moveToSlot('source_1', 'inner_layout', 'content', 0);
     $state = $instance->getCurrentState();
-    // `inner_layout` is the only source of the slot but it is indexed "1"
-    // instead of  "0".
-    // We consider this OK because we want to keep consistent indexes
-    // during the chain of atomic operation and we expect the values to
-    // be correctly indexed at the very end, thanks to ::buildIndexFromSlot().
-    $inner_layout = $this->getComponentSlot($state[1], 'slot_2')[1];
+    // `inner_layout` is now the only source of the slot and it is indexed "0".
+    $inner_layout = $this->getComponentSlot($state[1], 'slot_2')[0];
 
     self::assertNotEmpty($inner_layout);
     self::assertSame($this->getLayoutRegion($inner_layout, 'content'), [$source_to_move]);
