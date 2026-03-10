@@ -157,10 +157,11 @@ test(
       await page
         .getByRole('checkbox', { name: 'Enable content overrides' }).click()
 
-      await expect(page.getByLabel('Override profile')).toBeVisible()
-      await page.getByLabel('Override profile').selectOption('Test profile')
+      await expect(page.getByLabel('Profile for overrides')).toBeVisible()
       await page.getByRole('button', { name: 'Save' }).click()
       await drupal.expectMessage('Your settings have been saved.')
+
+      await expect(page.getByText('Display Override Field')).toBeVisible()
     })
 
     await test.step(`Create override`, async () => {

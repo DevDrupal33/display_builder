@@ -39,6 +39,7 @@ trait EntityViewDisplayFormTrait {
 
     // Empty means disable main and override.
     if (empty($profile)) {
+      $this->setOverrideFieldLocked(FALSE);
       $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY);
       $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY);
       $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY);
@@ -57,14 +58,19 @@ trait EntityViewDisplayFormTrait {
       $override_field = $form_state->getValue(DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY, NULL);
 
       if (!$override_field) {
-        $field_name = $this->createOverrideField();
+        $field_name = \sprintf('display_%s', $this->entity->getMode());
+        $field_name = $this->createOverrideField($field_name);
       }
       else {
         $field_name = $override_field;
       }
+      // In case of field change, need to unlock the previous field.
+      $this->setOverrideFieldLocked(FALSE);
       $this->entity->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY, $field_name);
+      $this->setOverrideFieldLocked(TRUE);
     }
     else {
+      $this->setOverrideFieldLocked(FALSE);
       $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY);
       $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY);
     }
@@ -173,22 +179,19 @@ trait EntityViewDisplayFormTrait {
 
     $form['override']['settings'][DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY] = [
       '#type' => 'select',
-      '#title' => $this->t('Override profile'),
+      '#title' => $this->t('Profile for overrides'),
       '#description' => $this->t('The profile used for content overrides. Can be changed at any time.'),
       '#options' => $this->displayBuildable()->getAllowedProfiles(),
       '#default_value' => $overridable->getDisplayBuilderOverrideProfile()?->id() ?? 'default',
     ];
 
-    // If (!empty($options) && !$overrideFieldIsSet) {.
     if (!empty($options)) {
       $form['override']['settings'][DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY] = [
         '#type' => 'select',
-        '#title' => $this->t('Select a field to override this display per content'),
-        '#description' => $this->t('This field will store the Display created for each content.'),
+        '#title' => $this->t('Display Override Field'),
+        '#description' => $this->t('The field where per-content display overrides are stored.'),
         '#options' => $options,
-        // '#empty_option' => $this->t('- Create new field automatically -'),
         '#default_value' => $overrideFieldIsSet,
-        '#disabled' => $overrideFieldIsSet ? TRUE : FALSE,
       ];
     }
 
@@ -240,9 +243,10 @@ trait EntityViewDisplayFormTrait {
     /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $display */
     $display = $this->getEntity();
     $fields = [];
-    // Load field storage definitions.
-    $field_storage_definitions = $this->entityFieldManager->getFieldStorageDefinitions(
+    // Load field instance definitions.
+    $field_storage_definitions = $this->entityFieldManager->getFieldDefinitions(
       $display->getTargetEntityTypeId(),
+      $display->getTargetBundle(),
     );
 
     if ($display instanceof DisplayBuilderOverridableInterface
@@ -352,12 +356,21 @@ trait EntityViewDisplayFormTrait {
    * Create a field based on a name.
    *
    * @param string $field_name
-   *   The field name, field prefix will be added. Default 'display_builder'.
+   *   The field name, field prefix will be added.
    */
-  private function createOverrideField(string $field_name = 'display_builder'): string {
-    // Add the field prefix to the field name.
-    $field_name = $this->configFactory->get('field_ui.settings')->get('field_prefix') . $field_name;
+  private function createOverrideField(string $field_name): string {
+    try {
+      $field_prefix = $this->configFactory()->get('field_ui.settings')->get('field_prefix');
+    }
+    catch (\Throwable $th) {
+      $field_prefix = 'field_';
+    }
 
+    $field_name = $field_prefix . $field_name;
+
+    if (\strlen($field_name) > FieldStorageConfig::NAME_MAX_LENGTH) {
+      $field_name = \substr($field_name, 0, FieldStorageConfig::NAME_MAX_LENGTH);
+    }
     $field_storage = FieldStorageConfig::loadByName($this->entity->getTargetEntityTypeId(), $field_name);
 
     if (!$field_storage) {
@@ -365,27 +378,51 @@ trait EntityViewDisplayFormTrait {
         'field_name' => $field_name,
         'entity_type' => $this->entity->getTargetEntityTypeId(),
         'type' => 'ui_patterns_source',
-        'locked' => TRUE,
       ]);
       $field_storage->setTranslatable(TRUE);
       $field_storage->setCardinality(-1);
       $field_storage->save();
     }
 
+    // Add the field prefix to the field name and cut to max size if needed.
     $field_definition = FieldConfig::loadByName($this->entity->getTargetEntityTypeId(), $this->entity->getTargetBundle(), $field_name);
 
     if (!$field_definition) {
+      $view_mode_id = $this->entity->getMode();
+      $view_mode_id = ($view_mode_id === 'default') ? 'full' : $view_mode_id;
+      $view_mode_id = \sprintf('%s.%s', $this->entity->getTargetEntityTypeId(), $view_mode_id);
+      $view_mode = $this->entityTypeManager->getStorage('entity_view_mode')->load($view_mode_id);
       $field_definition = FieldConfig::create([
         'field_storage' => $field_storage,
         'bundle' => $this->entity->getTargetBundle(),
         'field_name' => $field_name,
-        'label' => $this->t('Display builder (Sources)'),
+        'label' => $this->t('@display display override', ['@display' => $view_mode->label()]),
       ]);
       $field_definition->setTranslatable(TRUE);
       $field_definition->save();
     }
 
     return $field_name;
+  }
+
+  /**
+   * Set the lock status of the override field if it exists.
+   *
+   * @param bool $locked
+   *   Whether to lock or unlock the field.
+   */
+  private function setOverrideFieldLocked(bool $locked): void {
+    $field_name = $this->entity->getDisplayBuilderOverrideField();
+
+    if (!$field_name) {
+      return;
+    }
+    $field_storage = FieldStorageConfig::loadByName($this->entity->getTargetEntityTypeId(), $field_name);
+
+    if ($field_storage) {
+      $field_storage->setLocked($locked);
+      $field_storage->save();
+    }
   }
 
 }
