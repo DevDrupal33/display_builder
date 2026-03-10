@@ -9,6 +9,7 @@ use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder_views\Plugin\display_builder\Buildable\ViewDisplay;
 
 /**
@@ -40,13 +41,8 @@ class ViewsManagementController extends ControllerBase {
       '#empty' => $this->t('No Display builder enabled on any view.'),
     ];
 
-    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
-
-    foreach (\array_keys($storage->loadMultiple()) as $builder_id) {
-      if (!ViewDisplay::checkInstanceId($builder_id)) {
-        continue;
-      }
-      $build['display_builder_table']['#rows'][$builder_id] = $this->buildRow($builder_id);
+    foreach (ViewDisplay::collectInstances() as $instance_id => $instance) {
+      $build['display_builder_table']['#rows'][$instance_id] = $this->buildRow($instance);
     }
     $build['pager'] = ['#type' => 'pager'];
 
@@ -56,29 +52,26 @@ class ViewsManagementController extends ControllerBase {
   /**
    * Builds a table row for a display builder related to a view display managed.
    *
-   * @param string $builder_id
-   *   The builder id.
+   * @param \Drupal\display_builder\InstanceInterface|null $instance
+   *   The display builder instance (or NULL).
    *
    * @return array
    *   A table row.
    */
-  protected function buildRow(string $builder_id): array {
-    $view_id = ViewDisplay::checkInstanceId($builder_id)['view'];
-    $display_id = ViewDisplay::checkInstanceId($builder_id)['display'];
+  protected function buildRow(?InstanceInterface $instance): array {
+    if (!$instance) {
+      return [];
+    }
+
+    $instance_id = (string) $instance->id();
+    $view_id = ViewDisplay::checkInstanceId($instance_id)['view'];
+    $display_id = ViewDisplay::checkInstanceId($instance_id)['display'];
     $view = $this->entityTypeManager()->getStorage('view')->load($view_id);
 
     if (!$view) {
       return [];
     }
-
-    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
-    /** @var \Drupal\display_builder\InstanceInterface $builder */
-    $builder = $storage->load($builder_id);
-
-    if (!$builder) {
-      return [];
-    }
-    $builder = $builder->toArray();
+    $builder = $instance->toArray();
 
     $row = [];
 
@@ -102,7 +95,7 @@ class ViewsManagementController extends ControllerBase {
     }
     $row['operations']['data']['operations'] = [
       '#type' => 'operations',
-      '#links' => $this->getOperationLinks($builder_id),
+      '#links' => $this->getOperationLinks($instance_id),
     ];
 
     return ['data' => $row];
