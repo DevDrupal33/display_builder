@@ -1,0 +1,160 @@
+name: Playwright E2E Tests
+
+on:
+  push:
+    branches:
+      - main
+      - '1.x'
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      skip_e2e_tests:
+        description: 'Set to 1 to skip the E2E tests CI job'
+        default: '0'
+        required: false
+        type: string
+      playwright_debug_level:
+        description: 'E2E tests verbosity level. Can be: error, warn, info, http, verbose, debug, silly.'
+        default: 'info'
+        required: false
+        type: string
+      playwright_test_project:
+        description: 'Set to a comma-separated list of projects.'
+        default: 'firefox,chromium'
+        required: false
+        type: string
+      playwright_test_tag:
+        description: "The tag value to use for E2E tests (the '@' prefix is added automatically). Defaults to 'display_builder'."
+        default: 'display_builder'
+        required: false
+        type: string
+
+env:
+  SKIP_E2E_TESTS: ${{ github.event.inputs.skip_e2e_tests || '0' }}
+  PLAYWRIGHT_TEST_PROJECT: ${{ github.event.inputs.playwright_test_project || 'firefox,chromium' }}
+  PLAYWRIGHT_TEST_TAG: ${{ github.event.inputs.playwright_test_tag || 'display_builder' }}
+  PLAYWRIGHT_DEBUG_LEVEL: ${{ github.event.inputs.playwright_debug_level || 'info' }}
+  # Drupal project path inside the container.
+  DRUPAL_SITE_ROOT: /drupal_site
+
+jobs:
+  playwright:
+    name: Playwright E2E Tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.skip_e2e_tests != '1' }}
+    # @see https://github.com/devdrupal33/display_builder_test
+    container:
+      image: ghcr.io/devdrupal33/display_builder_test:main
+      options: --user root
+    permissions:
+      contents: read
+
+    env:
+      CI: 'true'
+      # Standard variables for Playwright. Mostly similar to NightwatchJS tests.
+      DRUPAL_TEST_BASE_URL: 'http://localhost'
+      DRUPAL_WEB_ROOT: 'web'
+      DRUPAL_TEST_WEBSERVER_USER: 'www-data'
+      # Specific Playwright job variables.
+      PLAYWRIGHT_SKIP_TEARDOWN: 'true'
+      # From the Docker image.
+      PLAYWRIGHT_BROWSERS_PATH: '/var/www/pw-browsers'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Drupal project
+        run: |
+          composer create-project drupal/recommended-project:^11.3 ${DRUPAL_SITE_ROOT} \
+            --no-interaction
+
+      - name: Install Drupal dev dependencies
+        working-directory: ${{ env.DRUPAL_SITE_ROOT }}
+        run: |
+          composer require \
+            drush/drush \
+            drupal/core-dev:^11.3 \
+            --dev --no-update -W
+          composer update
+
+      - name: Add module as path repository and install
+        working-directory: ${{ env.DRUPAL_SITE_ROOT }}
+        run: |
+          composer config repositories.display_builder \
+            '{"type":"path","url":"'"${GITHUB_WORKSPACE}"'","options":{"symlink":false}}'
+          composer require "drupal/display_builder:@dev" -W
+
+      - name: Set up Drupal settings and directories
+        working-directory: ${{ env.DRUPAL_SITE_ROOT }}
+        run: |
+          cp web/sites/default/default.settings.php web/sites/default/settings.php
+          echo '$settings["extension_discovery_scan_tests"] = TRUE;' >> web/sites/default/settings.php
+          mkdir -p web/sites/default/files web/sites/simpletest
+          chmod 777 web/sites/default/files web/sites/simpletest
+          chmod 755 web/sites/default
+          chown -R www-data:www-data web/sites
+
+      - name: Configure Apache webserver
+        run: |
+          cat > /etc/apache2/sites-available/drupal.conf << EOF
+          <VirtualHost *:80>
+              ServerName localhost
+              DocumentRoot ${DRUPAL_SITE_ROOT}/web
+              <Directory ${DRUPAL_SITE_ROOT}/web>
+                  Options FollowSymLinks
+                  AllowOverride All
+                  Require all granted
+              </Directory>
+          </VirtualHost>
+          EOF
+          a2ensite drupal
+          a2dissite 000-default 2>/dev/null || true
+          a2enmod rewrite
+          service apache2 start
+
+      - name: Set Playwright environment variables
+        run: |
+          MODULE_PATH="${DRUPAL_SITE_ROOT}/web/modules/contrib/display_builder"
+          echo "MODULE_PATH=${MODULE_PATH}" >> $GITHUB_ENV
+          echo "DRUPAL_TEST_SETUP_FILE=${MODULE_PATH}/tests/src/TestSite/DisplayBuilderTestSetup.php" >> $GITHUB_ENV
+          echo "DRUPAL_TEST_DB_URL=sqlite://localhost/sites/default/files/simpletest/.test_playwright.sqlite" >> $GITHUB_ENV
+
+      - name: Install npm packages
+        working-directory: ${{ env.MODULE_PATH }}
+        run: npm install
+
+      - name: Install Playwright browsers
+        working-directory: ${{ env.MODULE_PATH }}
+        run: npx playwright install
+
+      - name: Install JavaScript libraries
+        run: |
+          WEB_ROOT="${DRUPAL_SITE_ROOT}/web"
+          if [ ! -f "${WEB_ROOT}/libraries/shoelace/node_modules/@shoelace-style/shoelace/cdn/shoelace.js" ]; then
+            mkdir -p "${WEB_ROOT}/libraries/shoelace"
+            cd "${WEB_ROOT}/libraries/shoelace" && npm init -y && npm install @shoelace-style/shoelace
+          fi
+          if [ ! -f "${WEB_ROOT}/libraries/htmx-ext-sse/node_modules/htmx-ext-sse/dist/sse.min.js" ]; then
+            mkdir -p "${WEB_ROOT}/libraries/htmx-ext-sse"
+            cd "${WEB_ROOT}/libraries/htmx-ext-sse" && npm init -y && npm install htmx-ext-sse
+          fi
+
+      - name: Run Playwright tests
+        working-directory: ${{ env.MODULE_PATH }}
+        run: |
+          _PROJECT_FLAGS=""
+          for p in $(echo "${PLAYWRIGHT_TEST_PROJECT}" | tr ',' ' '); do
+            _PROJECT_FLAGS="${_PROJECT_FLAGS} --project ${p}"
+          done
+          npx playwright test ${_PROJECT_FLAGS} --grep @${PLAYWRIGHT_TEST_TAG}
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: |
+            ${{ env.MODULE_PATH }}/playwright-report/
+            ${{ env.MODULE_PATH }}/test-results/
+          retention-days: 180
