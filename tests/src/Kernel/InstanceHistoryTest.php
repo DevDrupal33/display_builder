@@ -7,7 +7,7 @@ namespace Drupal\Tests\display_builder\Kernel;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\display_builder\Entity\Instance;
-use Drupal\display_builder\HistoryStep;
+use Drupal\display_builder\Plugin\Field\FieldType\HistoryStep;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -61,7 +61,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     // Restore to save.
     $instance->restore();
     self::assertSame($testData, $instance->getCurrentState());
-    self::assertSame('Back to saved data.', $instance->getCurrent()->log);
+    self::assertSame('Back to saved data.', $instance->getCurrent()->getLog());
   }
 
   /**
@@ -338,7 +338,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     // Root level must be an array list because it is a collection of sources.
     $testData = [['source_id' => 'component', 'node_id' => '1', 'source' => []]];
     $time = \time();
-    $instance->present = new HistoryStep($testData, 123, 'Test', $time, 3);
+    $instance->set('present', ['data' => $testData, 'hash' => 123, 'log' => 'Test', 'time' => $time, 'user' => 3]);
 
     $mockStorage = $this->prophesize(EntityStorageInterface::class);
 
@@ -353,10 +353,10 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     self::assertNotEmpty(\array_keys($pathIndex));
     self::assertSame([0], $pathIndex['1']['path']);
 
-    self::assertIsInt($instance->present->hash);
-    self::assertSame('Test', $instance->present->log);
-    self::assertSame($time, $instance->present->time);
-    self::assertSame(3, $instance->present->user);
+    self::assertIsInt($instance->get('present')->first()->getHash());
+    self::assertSame('Test', $instance->get('present')->first()->getLog());
+    self::assertSame($time, $instance->get('present')->first()->getTime());
+    self::assertSame(3, $instance->get('present')->first()->getUser());
   }
 
   /**
@@ -444,11 +444,10 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     // Verify state is set.
     $current = $instance->getCurrent();
     self::assertInstanceOf(HistoryStep::class, $current);
-    self::assertSame($testData, $current->data);
-    self::assertSame('Initial state', $current->log);
-    self::assertIsInt($current->hash);
-    self::assertIsInt($current->time);
-    self::assertGreaterThanOrEqual(0, $current->user);
+    self::assertSame($testData, $current->getData());
+    self::assertSame('Initial state', $current->getLog());
+    self::assertIsInt($current->getHash());
+    self::assertIsInt($current->getTime());
 
     // Verify current state.
     self::assertSame($testData, $instance->getCurrentState());
@@ -473,15 +472,15 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     // Verify save is set.
     self::assertTrue($instance->hasSave());
     self::assertNotNull($instance->save);
-    self::assertInstanceOf(HistoryStep::class, $instance->save);
+    self::assertInstanceOf(HistoryStep::class, $instance->get('save')->first());
 
-    self::assertArrayHasKey('node_id', $instance->save->data[0]);
-    self::assertSame('1', $instance->save->data[0]['node_id']);
+    self::assertArrayHasKey('node_id', $instance->get('save')->first()->getData()[0]);
+    self::assertSame('1', $instance->get('save')->first()->getData()[0]['node_id']);
 
-    self::assertNull($instance->save->log);
-    self::assertIsInt($instance->save->hash);
-    self::assertIsInt($instance->save->time);
-    self::assertNull($instance->save->user);
+    self::assertNull($instance->get('save')->first()->getLog());
+    self::assertIsInt($instance->get('save')->first()->getHash());
+    self::assertIsInt($instance->get('save')->first()->getTime());
+    self::assertNull($instance->get('save')->first()->getUser());
   }
 
   /**
@@ -519,6 +518,8 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     // Try to undo when at beginning.
     $instance->undo();
     self::assertSame($state1, $instance->getCurrentState());
+    self::assertSame(0, $instance->getCountPast());
+    self::assertSame(2, $instance->getCountFuture());
   }
 
 }

@@ -4,6 +4,8 @@ import * as utils from '../utilities/utils'
 import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
+  await drupal.drush('state:set -y display_builder.asset_libraries_local true')
+
   await drupal.installModules([ 'views', 'views_ui', 'display_builder_views', 'display_builder_views_test' ])
   // Disable preview to avoid ajax refresh.
   await drupal.drush('config:set -y views.settings ui.show.preview_information false')
@@ -88,24 +90,29 @@ test(
       // await expect(page.locator('.views-element-container')).toMatchAriaSnapshot({ name: 'view-view-no-db.aria.yml' })
     })
 
-    await test.step(`Set view display`, async () => {
+    await test.step(`Set view display profile`, async () => {
       await page.goto(config.viewsEditUrl.replace('{view_id}', name))
       // Set the builder profile on a view.
       await page.locator('.views-display-setting').getByText('Disabled').click()
+      // Detect a problem here.
       await expect(page.getByLabel('Profile', { exact: true })).toBeVisible()
+
       await page.getByLabel('Profile', { exact: true }).selectOption('default')
       await page.getByText('ApplyCancel').getByText('Apply').click()
       await drupal.ajaxReady()
 
       // Save the View.
       await page.getByRole('button', { name: 'Save' }).click()
+      await drupal.ajaxReady()
       await drupal.expectMessage(`The view Test ${testName} has been saved.`)
     })
 
     await test.step(`Set and switch profile`, async () => {
       await drupal.ajaxReady()
       await page.getByText('Display Builder: Default').getByRole('link', { name: 'Default' }).click()
+       // Detect a problem here.
       await expect(page.getByRole('link', { name: 'build the display' })).toBeVisible()
+
       await page.getByRole('link', { name: 'build the display' }).click()
       await displayBuilder.shoelaceReady()
       await expect(page.getByRole('heading', { name: `Display builder for Test ${testName} Page` })).toBeVisible()
@@ -127,6 +134,7 @@ test(
 
       // Save the View.
       await page.getByRole('button', { name: 'Save' }).click()
+      await drupal.ajaxReady()
       await drupal.expectMessage(`The view Test ${testName} has been saved.`)
 
       // Ensure the good profile is set.
@@ -135,7 +143,7 @@ test(
       await expect(listProfileId).toHaveText('test')
     })
 
-    await test.step(`Check the display`, async () => {
+    await test.step(`Check the base display`, async () => {
       await page.locator(`[data-link-builder="${config.viewsPrefix}${name}__page_1"]`).click()
       await displayBuilder.shoelaceReady()
 
@@ -155,16 +163,18 @@ test(
         view_feed_icons: '[View] Feed_icons',
       }
       await displayBuilder.expectBlocksAvailable(sources)
+
+      await expect(page.locator('.db-island-builder .db-dropzone--root')).toMatchAriaSnapshot({ name: 'view-base.aria.yml' })
     })
 
-    await test.step(`Build the display`, async () => {
+    await test.step(`Change the display`, async () => {
       await displayBuilder.dragComponentsAndTextfield('I am a test textfield in a slot in a View!')
 
       // Result is based on the default page fixture with previous actions.
       // @see modules/display_builder_views/fixtures/default_view.yml
       await displayBuilder.closeDialog('both')
       await displayBuilder.publishDisplayBuilder()
-      await displayBuilder.expectPreviewAriaSnapshot('view.aria.yml')
+      await displayBuilder.expectPreviewAriaSnapshot('view-changed.aria.yml')
     })
 
     await test.step(`Check the view result page`, async () => {
@@ -172,9 +182,9 @@ test(
       await drupal.ajaxReady()
 
       // @todo to test full rendered view we must fill every source.
-      await page.getByRole('link', { name: 'View Page' }).click()
+      await page.getByRole('link', { name: 'View Page' }).click({ timeout: 10000 })
       await expect(page.getByRole('heading', { name: `Test ${testName}` })).toBeVisible()
-      // await expect(page.locator('.views-element-container')).toMatchAriaSnapshot({ name: 'view-view.aria.yml' })
+      await expect(page.locator('.views-element-container .test_simple')).toMatchAriaSnapshot({ name: 'view-result.aria.yml' })
     })
 
     await test.step(`Delete the display`, async () => {
@@ -189,6 +199,8 @@ test(
 
       await expect(page.getByRole('button', { name: 'Save' })).toBeVisible()
       await page.getByRole('button', { name: 'Save' }).click()
+      await drupal.ajaxReady()
+      await drupal.expectMessage(`The view Test ${testName} has been saved.`)
 
       // Ensure the instance is deleted and the view is working.
       await page.goto(config.viewsDbList)

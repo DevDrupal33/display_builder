@@ -54,13 +54,6 @@ dnf install \
 
 Playwright will throw an error on install but tests will work except for Webkit.
 
-## Display Builder tests group
-
-We ship tests without needs of **display_builder_dev_tools** module with tag `@display_builder_min`.  
-These tests are used as our default ci tests.
-
-Tests with dependency on **display_builder_dev_tools** are tagged `@display_builder` and are to be run locally.
-
 ## Quickstart
 
 - Copy env and adjust if needed:
@@ -73,15 +66,15 @@ cp .env.dist .env
 - Run the minimal tests group:
 
 ```bash
-npx playwright test -c playwright.local.config.ts --project=firefox -g '@display_builder_min'
+npx playwright test -c playwright.local.config.ts --project=firefox
 # or use npm script
-npm run test-min
+npm run test
 ```
 
 If you need to run a single test file or grep-style selection:
 
 ```bash
-npx playwright test <the_test_file_without_extension_spec_ts> -c playwright.local.config.ts --project=firefox
+npx playwright test -c playwright.local.config.ts --project=firefox page.spec.ts
 npx playwright test -c playwright.local.config.ts --project=firefox -g 'Page Layout'
 ```
 
@@ -109,8 +102,9 @@ $settings['extension_discovery_scan_tests'] = TRUE;
   - display_builder_test
   - display_builder_ui
   - display_builder_entity_view
+  - display_builder_entity_view_test
   - display_builder_page_layout
-  - display_builder_dev_tools (for `@display_builder` tests)
+  - display_builder_page_layout_test
 
 Theme **MUST** be `display_builder_theme_test` by default, unless test is
 specific for a theme.
@@ -144,18 +138,7 @@ php -S 0.0.0.0:8000 -t web/
 ```bash
 PW_TEST_CONNECT_WS_ENDPOINT=ws://127.0.0.1:3000/ \
 DRUPAL_TEST_BASE_URL='http://localhost:8000' \
-    npx playwright test --project=firefox -g '@display_builder_min'
-```
-
-Or check our commands in npm script:
-
-```bash
-# In one terminal, launch PHP server
-npm run docker-serve-php
-# In an other terminal, launch Playwright server
-npm run docker-serve-pw
-# In an other terminal, launch the tests
-npm run docker-test
+    npx playwright test --project=firefox -g '@display_builder'
 ```
 
 Tips:

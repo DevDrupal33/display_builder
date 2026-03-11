@@ -9,15 +9,16 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder\HistoryStep;
 use Drupal\display_builder\InstanceAccessControlHandler;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\InstanceStorage;
+use Drupal\display_builder\Plugin\Field\FieldType\HistoryStep;
 use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder\SlotSourceProxy;
 use Drupal\display_builder\SourceTree;
@@ -37,7 +38,6 @@ use Drupal\ui_patterns\SourcePluginManager;
   label_plural: new TranslatableMarkup('display builder instances'),
   entity_keys: [
     'id' => 'id',
-    'label' => 'label',
   ],
   handlers: [
     'access' => InstanceAccessControlHandler::class,
@@ -59,64 +59,9 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   private const MAX_HISTORY = 10;
 
   /**
-   * Entity ID.
-   *
-   * Public because injected by ContentEntityStorageBase::initFieldValues().
-   */
-  public string $id;
-
-  /**
-   * Entity label.
-   *
-   * Public because injected by ContentEntityStorageBase::initFieldValues().
-   */
-  public string $label;
-
-  /**
-   * Display Builder profile ID.
-   *
-   * Public because injected by ContentEntityStorageBase::initFieldValues().
-   */
-  public string $profileId = '';
-
-  /**
-   * Present step.
-   */
-  public ?HistoryStep $present = NULL;
-
-  /**
    * Current user.
    */
   public AccountInterface $currentUser;
-
-  /**
-   * Saved step.
-   */
-  public ?HistoryStep $save = NULL;
-
-  /**
-   * Contexts.
-   *
-   * Public because injected by ContentEntityStorageBase::initFieldValues().
-   *
-   * @var \Drupal\Core\Plugin\Context\ContextInterface[]
-   *   An array of contexts, keyed by context name.
-   */
-  public array $contexts = [];
-
-  /**
-   * Past steps.
-   *
-   * @var \Drupal\display_builder\HistoryStep[]
-   */
-  protected array $past = [];
-
-  /**
-   * Future steps.
-   *
-   * @var \Drupal\display_builder\HistoryStep[]
-   */
-  protected array $future = [];
 
   /**
    * Path index.
@@ -153,39 +98,35 @@ class Instance extends ContentEntityBase implements InstanceInterface {
 
   /**
    * {@inheritdoc}
-   *
-   * @todo remove once we manage proper revisions and translations.
    */
   public function __construct(array $values, mixed $entity_type, mixed $bundle = FALSE, mixed $translations = []) {
-    $this->entityTypeId = $entity_type;
-    $this->entityKeys['bundle'] = $bundle ?: $this->entityTypeId;
+    parent::__construct($values, $entity_type, $bundle, $translations);
+    $fields = $this->fieldDefinitions;
 
     foreach ($values as $key => $value) {
-      if (!$value) {
-        continue;
+      if (isset($fields[$key])) {
+        $this->set($key, $value);
       }
-
-      if (\property_exists($this, $key)) {
-        $this->$key = $value;
-      }
-      $values[$key] = [
-        LanguageInterface::LANGCODE_DEFAULT => $value,
-      ];
     }
+  }
 
-    $this->values = $values;
-    $this->translations = [
-      LanguageInterface::LANGCODE_DEFAULT => [
-        'entity' => $this,
-        'status' => TRUE,
-      ],
-    ];
+  /**
+   * {@inheritdoc}
+   */
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+    $fields = parent::baseFieldDefinitions($entity_type);
+    // Override from ContentEntityBase.
+    $fields['id'] = BaseFieldDefinition::create('string');
+    // @todo replace by entity_reference.
+    $fields['profileId'] = BaseFieldDefinition::create('string');
+    $fields['contexts'] = BaseFieldDefinition::create('map');
+    // @todo replace by Revisions API.
+    $fields['present'] = BaseFieldDefinition::create('step');
+    $fields['past'] = BaseFieldDefinition::create('step')->setCardinality(-1);
+    $fields['future'] = BaseFieldDefinition::create('step')->setCardinality(-1);
+    $fields['save'] = BaseFieldDefinition::create('step');
 
-    $this->langcodeKey = '';
-    $this->defaultLangcodeKey = '';
-    $this->setDefaultLangcode();
-
-    unset($translations);
+    return $fields;
   }
 
   /**
@@ -196,16 +137,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     // use of it and because it seems to break the invalidation of
     // ::getCacheTags().
     return !$this->id();
-  }
-
-  /**
-   * {@inheritdoc}
-   *
-   * @todo some case require non empty id, like devel load. Remove once we
-   * manage proper revisions and translations.
-   */
-  public function id() {
-    return $this->id ?? '_none';
   }
 
   /**
@@ -233,12 +164,12 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   public function toArray(): array {
     return [
       'id' => $this->id(),
-      'profileId' => $this->profileId,
-      'contexts' => $this->contexts,
-      'past' => $this->past,
-      'present' => $this->present,
-      'future' => $this->future,
-      'save' => $this->save,
+      'profileId' => $this->get('profileId')->getString(),
+      'contexts' => $this->get('contexts')->first()?->getValue(),
+      'past' => $this->get('past')->getValue(),
+      'present' => $this->get('present')->first()?->getValue(),
+      'future' => $this->get('future')->getValue(),
+      'save' => $this->get('save')->first()?->getValue(),
     ];
   }
 
@@ -248,28 +179,31 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * @see \Drupal\Core\Entity\EntityInterface
    */
   public function postCreate(EntityStorageInterface $storage): void {
-    if (!$this->present) {
+    if ($this->get('present')->isEmpty()) {
       return;
     }
-
-    $tree = new SourceTree($this->present->data ?? []);
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $present */
+    $present = $this->get('present')->first();
+    $tree = new SourceTree($present->getData() ?? []);
     $indexed = $tree->getTree();
     $hash = self::getUniqId($indexed);
-    $this->present = new HistoryStep(
-      $indexed,
-      $hash,
-      $this->present->log,
-      $this->present->time,
-      $this->present->user,
-    );
+
+    $this->set('present', [
+      'data' => $indexed,
+      'hash' => $hash,
+      'log' => $present->getLog(),
+      'time' => $present->getTime(),
+      'user' => $present->getUser(),
+    ]);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getProfile(): ?ProfileInterface {
+    $profile_id = $this->get('profileId')->getString();
     /** @var \Drupal\display_builder\ProfileInterface $profile */
-    $profile = $this->entityTypeManager()->getStorage('display_builder_profile')->load($this->profileId);
+    $profile = $this->entityTypeManager()->getStorage('display_builder_profile')->load($profile_id);
 
     return $profile;
   }
@@ -278,7 +212,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function setProfile(string $profile_id): void {
-    $this->profileId = $profile_id;
+    $this->set('profileId', $profile_id);
   }
 
   /**
@@ -488,7 +422,11 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function getContexts(): ?array {
-    return $this->refreshContexts($this->contexts);
+    if ($this->get('contexts')->isEmpty()) {
+      return [];
+    }
+
+    return $this->refreshContexts($this->get('contexts')->first()->getValue());
   }
 
   /**
@@ -498,7 +436,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     $tree = new SourceTree($save_data);
     $indexed = $tree->getTree();
     $hash = self::getUniqId($indexed);
-    $this->save = new HistoryStep($indexed, $hash, NULL, \time(), NULL);
+    $this->set('save', ['data' => $indexed, 'hash' => $hash, 'log' => NULL, 'time' => \time(), 'user' => NULL]);
   }
 
   /**
@@ -507,14 +445,16 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * @see \Drupal\display_builder\HistoryInterface
    */
   public function getCurrentState(): array {
-    return $this->getCurrent()->data ?? [];
+    return $this->getCurrent()?->getData() ?? [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function restore(): void {
-    $this->setNewPresent($this->save->data, 'Back to saved data.');
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep|null $first */
+    $first = $this->get('save')->first();
+    $this->setNewPresent($first->getData(), 'Back to saved data.');
   }
 
   /**
@@ -523,21 +463,26 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * @see \Drupal\display_builder\HistoryInterface
    */
   public function undo(): void {
-    $past = \array_filter($this->past ?? []);
+    $past = $this->get('past');
 
-    if (empty($past)) {
+    if ($past->isEmpty()) {
       return;
     }
 
-    $present = $this->present;
+    $present_values = $this->get('present')->getValue();
+    \assert(\array_is_list($present_values));
 
     // Remove the last element from the past.
-    $last = \array_pop($past);
-    $this->past = $past;
+    $past_values = $past->getValue();
+    \assert(\array_is_list($past_values));
+    $last = \array_pop($past_values);
+    \assert(!\array_is_list($last));
+    $this->set('past', $past_values);
+
     // Set the present to the element we removed in the previous step.
-    $this->present = $last;
+    $this->set('present', $last);
     // Insert the old present state at the beginning of the future.
-    $this->future = \array_merge([$present], $this->future);
+    $this->set('future', \array_merge($present_values, $this->get('future')->getValue()));
   }
 
   /**
@@ -546,27 +491,29 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * @see \Drupal\display_builder\HistoryInterface
    */
   public function redo(): void {
-    $future = \array_filter($this->future ?? []);
+    $future = $this->get('future');
 
-    if (empty($future)) {
+    if ($future->isEmpty()) {
       return;
     }
 
     // Remove the first element from the future.
-    $first = \array_shift($future);
+    $first = $future->first()->getValue();
+    \assert(!\array_is_list($first));
+    $future->removeItem(0);
     // Insert the old present state at the end of the past.
-    $this->past = \array_merge($this->past, [$this->present]);
+    $this->get('past')->appendItem($this->get('present')->first());
     // Set the present to the element we removed in the previous step.
-    $this->present = $first;
-    $this->future = $future;
+    $this->set('present', $first);
+    $this->set('future', $future->getValue());
   }
 
   /**
    * {@inheritdoc}
    */
   public function clear(): void {
-    $this->past = [];
-    $this->future = [];
+    $this->set('past', NULL);
+    $this->set('future', NULL);
   }
 
   /**
@@ -582,7 +529,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * @see \Drupal\display_builder\HistoryInterface
    */
   public function getCountPast(): int {
-    return \count(\array_filter($this->past));
+    return $this->get('past')->count();
   }
 
   /**
@@ -591,7 +538,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * @see \Drupal\display_builder\HistoryInterface
    */
   public function getCountFuture(): int {
-    return \count(\array_filter($this->future));
+    return $this->get('future')->count();
   }
 
   /**
@@ -599,16 +546,16 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function getUsers(): array {
     $users = [];
-    $steps = \array_merge($this->past, [$this->present], $this->future);
+    $steps = \array_merge($this->get('past')->getValue(), $this->get('present')->getValue(), $this->get('future')->getValue());
 
     foreach ($steps as $step) {
       if ($step === NULL) {
         continue;
       }
-      $user_id = $step->user;
+      $user_id = $step['user'];
 
-      if ($user_id !== NULL && (!isset($users[$user_id]) || $step->time > $users[$user_id])) {
-        $users[$user_id] = $step->time;
+      if ($user_id !== NULL && (!isset($users[$user_id]) || $step['time'] > $users[$user_id])) {
+        $users[$user_id] = $step['time'];
       }
     }
 
@@ -654,20 +601,28 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function hasSave(): bool {
-    return !empty($this->save);
+    return !$this->get('save')->isEmpty();
   }
 
   /**
    * {@inheritdoc}
    */
   public function saveIsCurrent(): bool {
+    $present = $this->get('present');
+    $save = $this->get('save');
+
     // If either present or save is null, they can't be equal unless both are
     // null.
-    if ($this->present === NULL || $this->save === NULL) {
-      return $this->present === NULL && $this->save === NULL;
+    if ($present->isEmpty() || $save->isEmpty()) {
+      return $present->isEmpty() && $save->isEmpty();
     }
 
-    return $this->present->hash === $this->save->hash;
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep|null $present */
+    $present = $present->first();
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep|null $save */
+    $save = $save->first();
+
+    return $present->getHash() === $save->getHash();
   }
 
   /**
@@ -691,33 +646,38 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     }
     $hash = self::getUniqId($data);
 
-    // Check if this present is the same to avoid duplicates, for example move
-    // to the same place.
-    if ($check_hash && $hash === $this->present?->hash) {
-      return;
+    if (!$this->get('present')->isEmpty()) {
+      /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep|null $present */
+      $present = $this->get('present')->first();
+
+      // Check if this present is the same to avoid duplicates, for example move
+      // to the same place.
+      if ($check_hash && $hash === $present->getHash()) {
+        return;
+      }
+
+      // 1. Insert the present at the end of the past.
+      // If it's the very first action, we want a NULL in the past to be able to
+      // undo to initial empty state.
+      $this->get('past')->appendItem($present->getValue());
     }
 
-    // 1. Insert the present at the end of the past.
-    // If it's the very first action, we want a NULL in the past to be able to
-    // undo to initial empty state.
-    $this->past[] = $this->present;
-
     // Keep only the last x history.
-    if (\count($this->past) > self::MAX_HISTORY) {
-      \array_shift($this->past);
+    if ($this->get('past')->count() > self::MAX_HISTORY) {
+      $this->get('past')->removeItem(0);
     }
 
     // 2. Set the present to the new state.
-    $this->present = new HistoryStep(
-      $data,
-      $hash,
-      $log_message,
-      \time(),
-      (int) $this->currentUser()->id(),
-    );
+    $this->set('present', [
+      'data' => $data,
+      'hash' => $hash,
+      'log' => $log_message,
+      'time' => \time(),
+      'user' => (int) $this->currentUser()->id(),
+    ]);
 
     // 3. Clear the future.
-    $this->future = [];
+    $this->set('future', []);
   }
 
   /**
@@ -726,7 +686,10 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * @see \Drupal\display_builder\HistoryInterface
    */
   public function getCurrent(): ?HistoryStep {
-    return $this->present;
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep|null $step */
+    $step = $this->get('present')->first();
+
+    return $step;
   }
 
   /**

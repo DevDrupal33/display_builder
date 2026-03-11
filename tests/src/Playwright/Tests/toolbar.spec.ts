@@ -24,6 +24,7 @@ const key = {
 }
 
 test.beforeEach('Setup', async ({ drupal }) => {
+  await drupal.drush('state:set -y display_builder.asset_libraries_local true')
   // Breakpoint is required for viewport switcher.
   await drupal.installModules([ 'breakpoint' ])
 })

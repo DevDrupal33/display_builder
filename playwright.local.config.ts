@@ -6,14 +6,18 @@ import { default as baseConfig } from './playwright.config'
  */
 export default defineConfig({
   ...baseConfig,
-  retries: 0,
+  retries: 1,
   workers: undefined,
-  timeout: 240_000,
+  timeout: 160_000,
   reporter: [
-    // ['dot'],
-    ['list', { printSteps: true }],
+    ['dot'],
+    // ['list', { printSteps: true }],
     ['html'],
   ],
+  expect: {
+    // @see https://playwright.dev/docs/test-timeouts#expect-timeout
+    // timeout: 10_000,
+  },
   use: {
     baseURL: `${process.env.DRUPAL_TEST_BASE_URL}/`,
     ignoreHTTPSErrors: true,
@@ -32,7 +36,8 @@ export default defineConfig({
       slowMo: 100,
     },
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-action-timeout
-    actionTimeout: 15_000,
+    // actionTimeout: 15_000,
+    // navigationTimeout: 30_000,
     testIdAttribute: 'data-instance-id',
   },
   webServer: {

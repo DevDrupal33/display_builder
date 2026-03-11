@@ -189,7 +189,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
     $instance = $this->getInstance();
 
     // Save the profile in the instance if changed.
-    if ($instance->getProfile()->id() !== $this->profile) {
+    if ($instance->getProfile()?->id() !== $this->profile) {
       $instance->setProfile($this->profile);
       $instance->save();
     }

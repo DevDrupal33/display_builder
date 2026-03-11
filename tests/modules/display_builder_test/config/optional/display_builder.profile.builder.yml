@@ -70,9 +70,15 @@ islands:
     weight: 0
     region: end
   state:
-    status: false
+    status: true
     weight: 0
     region: end
+    publish:
+      value: label
+    restore:
+      value: icon
+    revert:
+      value: icon
   operation:
     status: false
     weight: 0

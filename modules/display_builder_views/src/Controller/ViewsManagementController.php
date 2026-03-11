@@ -71,7 +71,9 @@ class ViewsManagementController extends ControllerBase {
     if (!$view) {
       return [];
     }
-    $builder = $instance->toArray();
+
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $present; */
+    $present = $instance->get('present')->first();
 
     $row = [];
 
@@ -85,10 +87,10 @@ class ViewsManagementController extends ControllerBase {
       'data-profile-id' => \sprintf('profile_%s', $view_id),
       'data' => $view->getDisplay($display_id)['display_options']['display_extenders']['display_builder'][DisplayBuildableInterface::PROFILE_PROPERTY] ?? '?',
     ];
-    $row['updated']['data'] = $builder['present']->time ? DisplayBuilderHelpers::formatTime($this->dateFormatter, (int) $builder['present']->time) : '-';
+    $row['updated']['data'] = $present->getTime() ? DisplayBuilderHelpers::formatTime($this->dateFormatter, (int) $present->getTime()) : '-';
 
-    if (isset($builder['present']->log)) {
-      $row['log']['data'] = $builder['present']->log;
+    if ($log = $present->getLog()) {
+      $row['log']['data'] = $log;
     }
     else {
       $row['log']['data'] = '-';

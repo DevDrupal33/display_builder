@@ -121,11 +121,11 @@ final class InstanceListBuilder extends EntityListBuilder {
 
     $row['profile']['data'] = $instance->getProfile()?->label() ?? '';
 
-    /** @var \Drupal\display_builder\HistoryStep $present */
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $present */
     $present = $instance->getCurrent() ?? NULL;
-    $row['updated']['data'] = ($present && $present->time) ? DisplayBuilderHelpers::formatTime($this->dateFormatter, (int) $present->time) : '-';
+    $row['updated']['data'] = ($present && $present->getTime()) ? DisplayBuilderHelpers::formatTime($this->dateFormatter, (int) $present->getTime()) : '-';
     $row['updated']['class'] = ['priority-medium', 'db-nowrap'];
-    $row['log']['data'] = ($present && $present->log) ? $present->log : '-';
+    $row['log']['data'] = ($present && $present->getLog()) ? $present->getLog() : '-';
     $row['log']['class'] = ['priority-low'];
 
     $result = [
@@ -338,8 +338,8 @@ final class InstanceListBuilder extends EntityListBuilder {
     switch ($sortKey) {
       case 'updated':
         \usort($entities, static function ($a, $b) use ($factor) {
-          $aTime = (int) ($a->present->time ?? 0);
-          $bTime = (int) ($b->present->time ?? 0);
+          $aTime = (int) ($a->present->getTime() ?? 0);
+          $bTime = (int) ($b->present->getTime() ?? 0);
 
           // Default comparator is ascending, multiply by factor to handle desc.
           return $factor * ($aTime <=> $bTime);
@@ -361,7 +361,7 @@ final class InstanceListBuilder extends EntityListBuilder {
       default:
         // Unknown sort: fallback to updated desc behavior for predictability.
         \usort($entities, static function ($a, $b) {
-          return (int) ($b->present->time ?? 0) <=> (int) ($a->present->time ?? 0);
+          return (int) ($b->present->getTime() ?? 0) <=> (int) ($a->present->getTime() ?? 0);
         });
 
         break;

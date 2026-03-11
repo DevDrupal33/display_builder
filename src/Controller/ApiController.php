@@ -18,6 +18,7 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\Plugin\display_builder\Island\ContextualFormPanel;
 use Drupal\display_builder\RenderableBuilderTrait;
+use Drupal\display_builder\SourceTree;
 use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
 use Drupal\ui_patterns\SourcePluginBase;
@@ -69,7 +70,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         $message = $this->t('[attachToRoot] moveToRoot failed with invalid data');
         $debug = [
           'request' => $request->request->all(),
-          'instance' => $display_builder_instance->toArray(),
+          'instance' => $display_builder_instance,
         ];
 
         return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
@@ -86,7 +87,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       $message = '[attachToRoot] Missing content (source_id, node_id or preset_id)';
       $debug = [
         'request' => $request->request->all(),
-        'instance' => $display_builder_instance->toArray(),
+        'instance' => $display_builder_instance,
       ];
 
       return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
@@ -129,7 +130,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
           'node_id' => $node_id,
           'slot' => $slot,
           'request' => $request->request->all(),
-          'instance' => $display_builder_instance->toArray(),
+          'instance' => $display_builder_instance,
         ];
 
         return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
@@ -148,7 +149,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         'node_id' => $node_id,
         'slot' => $slot,
         'request' => $request->request->all(),
-        'instance' => $display_builder_instance->toArray(),
+        'instance' => $display_builder_instance,
       ];
 
       return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
@@ -192,7 +193,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         'node_id' => $node_id,
         'request' => $request->request->all(),
         'body' => $body,
-        'instance' => $display_builder_instance->toArray(),
+        'instance' => $display_builder_instance,
       ];
 
       return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
@@ -240,7 +241,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         'request' => $request->request->all(),
         'form' => $form_state->getValues(),
         'body' => $body,
-        'instance' => $display_builder_instance->toArray(),
+        'instance' => $display_builder_instance,
       ];
 
       return $this->responseMessageError((string) $display_builder_instance->id(), $e->getMessage(), $debug);
@@ -293,7 +294,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         'island_id' => $island_id,
         'request' => $request->request->all(),
         'body' => $body,
-        'instance' => $display_builder_instance->toArray(),
+        'instance' => $display_builder_instance,
       ];
 
       return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
@@ -410,7 +411,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $label = $request->headers->get('hx-prompt', $label) ?: $label;
     // In HTTP headers, only ASCII is guaranteed to work but historically,
     // HTTP has allowed header values with the ISO-8859-1 charset.
-    $label = \mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
+    $label = mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
     $preset = $preset_storage->create([
       'id' => \uniqid(),
       'label' => $label,
@@ -478,13 +479,12 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         $field->setValue(NULL);
         $entity->save();
 
-        // Repopulate the Instance entity from the entity view display config.
-        $data = $display_builder_instance->toArray();
+        $contexts = $display_builder_instance->get('contexts')->first()->getValue();
 
-        if (isset($data['contexts']['view_mode'])
-          && $data['contexts']['view_mode'] instanceof ContextInterface
+        if (isset($contexts['view_mode'])
+          && $contexts['view_mode'] instanceof ContextInterface
         ) {
-          $viewMode = $data['contexts']['view_mode']->getContextValue();
+          $viewMode = $contexts['view_mode']->getContextValue();
           $display_id = "{$instanceInfos['entity_type_id']}.{$entity->bundle()}.{$viewMode}";
 
           /** @var \Drupal\display_builder\DisplayBuildableInterface|null $display */
@@ -569,7 +569,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         'preset_id' => $preset_id,
         'position' => $position,
         'data' => $data,
-        'instance' => $display_builder_instance->toArray(),
+        'instance' => $display_builder_instance,
       ];
 
       return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
@@ -623,7 +623,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         'slot' => $slot,
         'position' => $position,
         'data' => $data,
-        'instance' => $display_builder_instance->toArray(),
+        'instance' => $display_builder_instance,
       ];
 
       return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
@@ -748,7 +748,15 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     array $debug,
   ): array {
     // Reduce verbosity.
-    unset($debug['request']['ajax_page_state']['libraries'], $debug['instance']['contexts'], $debug['instance']['past'], $debug['instance']['future'], $debug['instance']['save']);
+    unset($debug['request']['ajax_page_state']['libraries']);
+
+    $instance = $debug['instance'] ?? NULL;
+
+    if ($instance) {
+      $tree = new SourceTree($debug['instance']->getCurrentState());
+      unset($debug['instance']);
+      $debug['tree'] = $tree->getNormalizedStructure()['structure'];
+    }
 
     $this->getLogger('display_builder')->error('@message <pre>@debug</pre>', [
       '@message' => $message,

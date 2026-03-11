@@ -70,7 +70,7 @@ islands:
     weight: 0
     region: end
   state:
-    status: false
+    status: true
     weight: 0
     region: end
   operation:

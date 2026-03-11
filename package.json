@@ -2,7 +2,7 @@
   "name": "drupal_playwright_test",
   "license": "LGPL-3.0-or-later",
   "description": "Tests e2e for Drupal. See tests/src/Playwright/tests",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "main": "index.js",
   "repository": {
@@ -10,18 +10,18 @@
     "url": "git@git.drupal.org:project/display_builder.git"
   },
   "scripts": {
-    "pw": "npx playwright test -c playwright.local.config.ts --project=chromium",
+    "pw": "npx playwright test -c playwright.local.config.ts --project chromium",
     "test": "npm run pw -- -g @display_builder",
     "test:failed": "npm run pw -- -g @display_builder --last-failed",
     "test:headed": "npm run pw -- --headed -g @display_builder",
     "test:ui": "npm run pw -- --ui -g @display_builder",
-    "test:debug": "PWDEBUG=1 npm run pw -- -g @display_builder",
-    "test:update": "npm run pw -- --update-snapshots=all --update-source-method=overwrite -g @display_builder",
-    "test-clean": "rm -rf playwright-report test-results"
+    "test:debug": "PWDEBUG=1 npm run pw -- -g @display_builder --debug",
+    "test:update": "npm run pw -- -u all --update-source-method overwrite -g @display_builder",
+    "test:clean": "rm -rf playwright-report test-results"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
-    "@types/node": "^24.11.0",
+    "@types/node": "^24.12.0",
     "dotenv": "^17.3.1",
     "winston": "^3.19.0"
   },

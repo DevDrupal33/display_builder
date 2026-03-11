@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder_entity_view\Functional;
 
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
+use Drupal\display_builder_entity_view\Entity\EntityViewDisplayTrait;
+use Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay;
 use Drupal\Tests\BrowserTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;

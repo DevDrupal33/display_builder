@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_test\Plugin\display_builder\Island;
 
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
-use Drupal\display_builder\HistoryStep;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
+use Drupal\display_builder\Plugin\Field\FieldType\HistoryStep;
 
 /**
  * Logs island plugin implementation.
@@ -26,21 +27,16 @@ class TestLogsRawPanel extends IslandPluginBase {
    * {@inheritdoc}
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    $load = $builder->toArray();
-
-    if (!$load) {
-      return [];
-    }
-
-    /** @var \Drupal\display_builder\HistoryStep $present */
-    $present = $load['present'];
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $present */
+    $present = $builder->get('present')->first();
 
     if (!$present) {
       return [];
     }
 
-    $save = $load['save'] ?? NULL;
-    $rows = $this->buildRows($load['past'], $present, $load['future'], $save);
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $save */
+    $save = $builder->get('save')->first() ?? NULL;
+    $rows = $this->buildRows($builder->get('past'), $present, $builder->get('future'), $save);
 
     $build = [];
 
@@ -117,29 +113,31 @@ class TestLogsRawPanel extends IslandPluginBase {
   /**
    * Build rows for the logs table.
    *
-   * @param \Drupal\display_builder\HistoryStep[] $past
+   * @param \Drupal\Core\Field\FieldItemListInterface $past
    *   Steps with time and log message.
-   * @param \Drupal\display_builder\HistoryStep $present
+   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $present
    *   A step with time and log message.
-   * @param \Drupal\display_builder\HistoryStep[] $future
+   * @param \Drupal\Core\Field\FieldItemListInterface $future
    *   Steps with time and log message.
-   * @param \Drupal\display_builder\HistoryStep $save
+   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $save
    *   Saved state.
    *
    * @return array
    *   A renderable array representing a table row.
    */
-  protected function buildRows(array $past, ?HistoryStep $present, array $future, ?HistoryStep $save): array {
+  protected function buildRows(FieldItemListInterface $past, ?HistoryStep $present, FieldItemListInterface $future, ?HistoryStep $save): array {
     $rows = [];
 
-    foreach (\array_filter($past) as $index => $step) {
+    foreach ($past as $index => $step) {
+      /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $step */
       $rows[] = $this->buildRow(-\count($past) + $index, $step, $save);
     }
 
     // Present data.
     $rows[] = $this->buildRow(0, $present, $save);
 
-    foreach (\array_filter($future) as $index => $step) {
+    foreach ($future as $index => $step) {
+      /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $step */
       $rows[] = $this->buildRow($index + 1, $step, $save);
     }
 
@@ -151,9 +149,9 @@ class TestLogsRawPanel extends IslandPluginBase {
    *
    * @param int $index
    *   The row index.
-   * @param \Drupal\display_builder\HistoryStep $step
+   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $step
    *   The step data containing time and log message.
-   * @param \Drupal\display_builder\HistoryStep $save
+   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $save
    *   Saved state.
    *
    * @return array

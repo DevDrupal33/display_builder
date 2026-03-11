@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\DisplayBuilderHelpers;
-use Drupal\display_builder\HistoryStep;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
+use Drupal\display_builder\Plugin\Field\FieldType\HistoryStep;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -56,21 +57,16 @@ class LogsPanel extends IslandPluginBase {
    * {@inheritdoc}
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    $load = $builder->toArray();
-
-    if (!$load) {
-      return [];
-    }
-
-    /** @var \Drupal\display_builder\HistoryStep $present */
-    $present = $load['present'];
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $present */
+    $present = $builder->get('present')->first();
 
     if (!$present) {
       return [];
     }
 
-    $save = $load['save'] ?? NULL;
-    $rows = $this->buildRows($load['past'], $present, $load['future'], $save);
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $save */
+    $save = $builder->get('save')->first() ?? NULL;
+    $rows = $this->buildRows($builder->get('past'), $present, $builder->get('future'), $save);
     $table = [
       '#theme' => 'table',
       '#header' => [
@@ -85,7 +81,7 @@ class LogsPanel extends IslandPluginBase {
 
     return [
       $table,
-      $save ? $this->printSaveAlert(\array_merge($load['past'], [$present], $load['future']), $save) : [],
+      $save ? $this->printSaveAlert(\array_merge($builder->get('past')->getValue(), [$present->getValue()], $builder->get('future')->getValue()), $save) : [],
     ];
   }
 
@@ -141,29 +137,31 @@ class LogsPanel extends IslandPluginBase {
   /**
    * Build rows for the logs table.
    *
-   * @param \Drupal\display_builder\HistoryStep[] $past
+   * @param \Drupal\Core\Field\FieldItemListInterface $past
    *   Steps with time and log message.
-   * @param \Drupal\display_builder\HistoryStep $present
+   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $present
    *   A step with time and log message.
-   * @param \Drupal\display_builder\HistoryStep[] $future
+   * @param \Drupal\Core\Field\FieldItemListInterface $future
    *   Steps with time and log message.
-   * @param \Drupal\display_builder\HistoryStep $save
+   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $save
    *   Saved state.
    *
    * @return array
    *   A renderable array representing a table row.
    */
-  protected function buildRows(array $past, ?HistoryStep $present, array $future, ?HistoryStep $save): array {
+  protected function buildRows(FieldItemListInterface $past, ?HistoryStep $present, FieldItemListInterface $future, ?HistoryStep $save): array {
     $rows = [];
 
-    foreach (\array_filter($past) as $index => $step) {
+    foreach ($past as $index => $step) {
+      /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $step */
       $rows[] = $this->buildRow(-\count($past) + $index, $step, $save);
     }
 
     // Present data.
     $rows[] = $this->buildRow(0, $present, $save);
 
-    foreach (\array_filter($future) as $index => $step) {
+    foreach ($future as $index => $step) {
+      /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $step */
       $rows[] = $this->buildRow($index + 1, $step, $save);
     }
 
@@ -175,25 +173,25 @@ class LogsPanel extends IslandPluginBase {
    *
    * @param int $index
    *   The row index.
-   * @param \Drupal\display_builder\HistoryStep $step
+   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $step
    *   The step data containing time and log message.
-   * @param \Drupal\display_builder\HistoryStep $save
+   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $save
    *   Saved state.
    *
    * @return array
    *   A renderable array representing a table row.
    */
   private function buildRow(int $index, HistoryStep $step, ?HistoryStep $save): array {
-    $user = !empty($step->user) ? $this->entityTypeManager->getStorage('user')->load($step->user) : NULL;
+    $user = !empty($step->getUser()) ? $this->entityTypeManager->getStorage('user')->load($step->getUser()) : NULL;
 
     return [
-      'hash' => $step->hash,
+      'hash' => $step->getHash(),
       'data' => [
         (string) $index,
-        ($save && $step->hash === $save->hash) ? '✅' : '',
-        $step->time ? DisplayBuilderHelpers::formatTime($this->dateFormatter, $step->time) : NULL,
+        ($save && $step->getHash() === $save->getHash()) ? '✅' : '',
+        $step->getTime() ? DisplayBuilderHelpers::formatTime($this->dateFormatter, $step->getTime()) : NULL,
         $user ? $user->getDisplayName() : NULL,
-        $step->log ?? '',
+        $step->getLog() ?? '',
       ],
       'style' => ($index === 0) ? 'font-weight: bold;' : '',
     ];
@@ -202,30 +200,23 @@ class LogsPanel extends IslandPluginBase {
   /**
    * Print an alert if the saved step is not in the history.
    *
-   * @param \Drupal\display_builder\HistoryStep[] $steps
+   * @param array $steps
    *   All steps: past, present and future.
-   * @param \Drupal\display_builder\HistoryStep $save
+   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $save
    *   Saved state.
    *
    * @return array
    *   A renderable array.
    */
   private function printSaveAlert(array $steps, HistoryStep $save): array {
-    $save_found = FALSE;
-
     foreach ($steps as $step) {
-      if ($step && $step->hash === $save->hash) {
-        $save_found = TRUE;
-
-        break;
+      if ($step && ($step['hash'] === $save->getHash())) {
+        return [];
       }
     }
 
-    if ($save_found) {
-      return [];
-    }
     $params = [
-      '%time' => DisplayBuilderHelpers::formatTime($this->dateFormatter, $save->time),
+      '%time' => DisplayBuilderHelpers::formatTime($this->dateFormatter, $save->getTime()),
     ];
 
     return [

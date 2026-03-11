@@ -189,13 +189,13 @@ final class ApiControllerTest extends KernelTestBase {
     $request = Request::create($url->toString(), 'POST', []);
     $request->headers->add([
       // Browsers send HTTP headers values with the ISO-8859-1 charset.
-      'hx-prompt' => \mb_convert_encoding($label, 'ISO-8859-1'),
+      'hx-prompt' => mb_convert_encoding($label, 'ISO-8859-1'),
     ]);
     $this->controller->saveAsPreset($request, $this->instance, $node_id);
     $presets = PatternPreset::loadMultiple();
-    $preset = \array_first($presets);
+    $preset = array_first($presets);
     // Non ISO-8859-1 are replaced by a question mark.
-    $label = $iso_8859_1_characters . \str_repeat('?', \mb_strlen($other_characters));
+    $label = $iso_8859_1_characters . \str_repeat('?', mb_strlen($other_characters));
     self::assertEquals($preset->label(), $label);
   }
 

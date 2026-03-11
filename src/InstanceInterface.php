@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
  * Provides an interface defining a display builder instance entity type.
  */
-interface InstanceInterface extends EntityInterface, HistoryInterface {
+interface InstanceInterface extends ContentEntityInterface, HistoryInterface {
 
   /**
    * Returns the display builder profile.

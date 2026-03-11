@@ -244,15 +244,14 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
 
     $tree = new SourceTree($data);
     $data = $tree->getTree();
-    $hash = Instance::getUniqId($data);
 
-    $present = new HistoryStep(
-      $data,
-      $hash,
-      $this->getInitializationMessage(),
-      \time(),
-      (int) $this->currentUser->id(),
-    );
+    $present = [
+      'data' => $data,
+      'hash' => Instance::getUniqId($data),
+      'log' => $this->getInitializationMessage(),
+      'time' => \time(),
+      'user' => (int) $this->currentUser->id(),
+    ];
 
     $data = [
       'id' => $this->getInstanceId(),

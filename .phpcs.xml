@@ -2,7 +2,7 @@
 <ruleset name="drupal-project">
   <description>Default PHP CodeSniffer configuration for Drupal project.</description>
 
-  <exclude-pattern>./tests/src/Playwright/__snapshots__/*</exclude-pattern>
+  <exclude-pattern>./tests/src/Playwright/*</exclude-pattern>
 
   <arg name="basepath" value="."/>
   <arg name="extensions" value="php,module,inc,install,test,profile,theme,yml"/>
@@ -11,11 +11,9 @@
   <arg value="p"/>
   <arg value="s"/>
 
-  <!-- <rule ref="vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml"/> -->
   <rule ref="Drupal"/>
   <rule ref="DrupalPractice"/>
   <rule ref="Generic.PHP.RequireStrictTypes" />
-  <!-- <rule ref="PHPCompatibility"/> -->
 
   <!-- Force no empty lines after function opening brace. -->
   <rule ref="Squiz.WhiteSpace.FunctionOpeningBraceSpace">

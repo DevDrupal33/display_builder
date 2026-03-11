@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\display_builder\Plugin\Field\FieldType\HistoryStep;
 
 /**
  * History interface.
@@ -19,7 +20,7 @@ interface HistoryInterface {
   /**
    * Get current step.
    *
-   * @return \Drupal\display_builder\HistoryStep|null
+   * @return \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep|null
    *   The current data.
    */
   public function getCurrent(): ?HistoryStep;

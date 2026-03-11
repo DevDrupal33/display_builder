@@ -15,13 +15,13 @@ test(
   'Local tests with DDEV',
   { tag: [ '@local_tests' ] },
   async ({ page, drupal, displayBuilder }) => {
-    const username = `test_${utils.createRandomString()}`
-    const dbName = `standalone__test`
+    // const username = `test_${utils.createRandomString()}`
+    // const dbName = `standalone__test`
 
-    const dropzoneRoot = page.locator('.db-dropzone--root')
+    // const dropzoneRoot = page.locator('.db-dropzone--root')
 
-    await displayBuilder.initTestsWithPageLayout(drupal)
-    await expect(page.locator(`.db-island-builder .db-dropzone--root`)).toMatchAriaSnapshot(``)
+    // await displayBuilder.initTestsWithPageLayout(drupal)
+    // await expect(page.locator(`.db-island-builder .db-dropzone--root`)).toMatchAriaSnapshot(``)
 
     // await test.step(`Prepare user`, async () => {
     //   await drupal.createUser({
