@@ -88,6 +88,7 @@ jobs:
       - name: Install module dev dependencies
         working-directory: ${{ env.DRUPAL_SITE_ROOT }}
         run: |
+          composer config minimum-stability "dev"
           composer require \
             "drupal/sdc_devel:^1.0.2" \
             "drupal/ui_icons:^1.1" \
