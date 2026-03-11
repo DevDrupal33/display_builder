@@ -97,6 +97,14 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   protected SourcePluginManager $sourceManager;
 
   /**
+   * Cached normalized source tree for the current present state.
+   *
+   * Stays valid after mutations (index=FALSE path) and is cleared on undo/redo
+   * when the present pointer jumps to a different history step.
+   */
+  private ?SourceTree $sourceTree = NULL;
+
+  /**
    * {@inheritdoc}
    */
   public function __construct(array $values, mixed $entity_type, mixed $bundle = FALSE, mixed $translations = []) {
@@ -184,8 +192,8 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     }
     /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $present */
     $present = $this->get('present')->first();
-    $tree = new SourceTree($present->getData() ?? []);
-    $indexed = $tree->getTree();
+    $this->sourceTree = new SourceTree($present->getData() ?? []);
+    $indexed = $this->sourceTree->getTree();
     $hash = self::getUniqId($indexed);
 
     $this->set('present', [
@@ -219,7 +227,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function moveToRoot(string $node_id, int $position): bool {
-    $tree = new SourceTree($this->getCurrentState());
+    $tree = $this->getSourceTree();
     $data = $tree->getNodeData($node_id);
 
     if (!$data) {
@@ -246,7 +254,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function moveToSlot(string $node_id, string $parent_id, string $slot_id, int $position): bool {
-    $tree = new SourceTree($this->getCurrentState());
+    $tree = $this->getSourceTree();
     $data = $tree->getNodeData($node_id);
 
     if (!$data) {
@@ -277,7 +285,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function attachToRoot(int $position, string $source_id, array $data, array $third_party_settings = []): string {
-    $tree = new SourceTree($this->getCurrentState());
+    $tree = $this->getSourceTree();
     $node_id = $tree->attachToRoot($position, $source_id, $data);
 
     if ($third_party_settings) {
@@ -304,7 +312,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function attachToSlot(string $parent_id, string $slot_id, int $position, string $source_id, array $data, array $third_party_settings = []): string {
-    $tree = new SourceTree($this->getCurrentState());
+    $tree = $this->getSourceTree();
     $node_id = $tree->attachToSlot($parent_id, $slot_id, $position, $source_id, $data);
 
     if (!$node_id) {
@@ -356,7 +364,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function setSource(string $node_id, string $source_id, array $data): void {
-    $tree = new SourceTree($this->getCurrentState());
+    $tree = $this->getSourceTree();
 
     if (!$tree->setSource($node_id, $source_id, $data)) {
       throw new \Exception('Node ID mismatch');
@@ -375,7 +383,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function setThirdPartySettings(string $node_id, string $island_id, array $data): void {
-    $tree = new SourceTree($this->getCurrentState());
+    $tree = $this->getSourceTree();
 
     if (!$tree->setThirdPartySettings($node_id, $island_id, $data)) {
       return;
@@ -395,7 +403,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function remove(string $node_id): void {
-    $tree = new SourceTree($this->getCurrentState());
+    $tree = $this->getSourceTree();
     $data = $tree->getNodeData($node_id);
 
     if (!$data) {
@@ -483,6 +491,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     $this->set('present', $last);
     // Insert the old present state at the beginning of the future.
     $this->set('future', \array_merge($present_values, $this->get('future')->getValue()));
+    $this->sourceTree = NULL;
   }
 
   /**
@@ -506,6 +515,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     // Set the present to the element we removed in the previous step.
     $this->set('present', $first);
     $this->set('future', $future->getValue());
+    $this->sourceTree = NULL;
   }
 
   /**
@@ -629,9 +639,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function getPathIndex(): array {
-    $tree = new SourceTree($this->getCurrentState());
-
-    return $tree->getPathIndex();
+    return $this->getSourceTree()->getPathIndex();
   }
 
   /**
@@ -641,9 +649,12 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function setNewPresent(array $data, FormattableMarkup|string $log_message = '', bool $check_hash = TRUE, bool $index = TRUE): void {
     if ($index) {
-      $tree = new SourceTree($data);
-      $data = $tree->getTree();
+      // Raw data needs normalizing; build tree and keep it as the new cache.
+      $this->sourceTree = new SourceTree($data);
+      $data = $this->sourceTree->getTree();
     }
+    // When index=FALSE the data was produced by the cached tree's getTree(),
+    // so $this->sourceTree already reflects the new state — no invalidation.
     $hash = self::getUniqId($data);
 
     if (!$this->get('present')->isEmpty()) {
@@ -697,6 +708,26 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public static function getUniqId(array $data): int {
     return \crc32((string) \serialize($data));
+  }
+
+  /**
+   * Get or create the cached source tree for the current present state.
+   *
+   * The cache is populated lazily on first access and remains valid until
+   * undo() or redo() changes the present pointer to a different history step.
+   * Mutations (index=FALSE path) keep it alive since the tree is the source
+   * of the new present data. The index=TRUE path in setNewPresent() replaces
+   * it with a freshly normalized tree.
+   *
+   * @return \Drupal\display_builder\SourceTree
+   *   The source tree for the current state.
+   */
+  private function getSourceTree(): SourceTree {
+    if ($this->sourceTree === NULL) {
+      $this->sourceTree = new SourceTree($this->getCurrentState());
+    }
+
+    return $this->sourceTree;
   }
 
   /**
