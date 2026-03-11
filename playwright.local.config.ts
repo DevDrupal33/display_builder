@@ -15,6 +15,9 @@ export default defineConfig({
     ['html'],
   ],
   expect: {
+    toMatchAriaSnapshot: {
+      pathTemplate: './tests/src/Playwright/__snapshots__/{testFilePath}/{arg}{ext}',
+    },
     // @see https://playwright.dev/docs/test-timeouts#expect-timeout
     // timeout: 10_000,
   },

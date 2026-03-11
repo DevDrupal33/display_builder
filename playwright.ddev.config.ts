@@ -6,11 +6,12 @@ import { default as baseConfig } from './playwright.config'
  */
 export default defineConfig({
   ...baseConfig,
-  retries: 1,
+  retries: 0,
   workers: 1,
-  timeout: 240_000,
+  timeout: 160_000,
   reporter: [
-    ['list', { printSteps: true }],
+    ['dot'],
+    // ['list', { printSteps: true }],
   ],
   use: {
     baseURL: 'https://display-builder.ddev.site/',
@@ -27,7 +28,7 @@ export default defineConfig({
       slowMo: 100,
     },
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-action-timeout
-    actionTimeout: 10_000,
+    // actionTimeout: 10_000,
     testIdAttribute: 'data-instance-id',
   },
   projects: [

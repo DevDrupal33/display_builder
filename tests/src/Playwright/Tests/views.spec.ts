@@ -182,8 +182,8 @@ test(
       await drupal.ajaxReady()
 
       // @todo to test full rendered view we must fill every source.
-      await page.getByRole('link', { name: 'View Page' }).click({ timeout: 10000 })
-      await expect(page.getByRole('heading', { name: `Test ${testName}` })).toBeVisible()
+      await page.getByRole('link', { name: 'View Page' }).click()
+      await expect(page.getByRole('heading', { name: `Test ${testName}` })).toBeVisible({ timeout: 12000 })
       await expect(page.locator('.views-element-container .test_simple')).toMatchAriaSnapshot({ name: 'view-result.aria.yml' })
     })
 

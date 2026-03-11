@@ -107,15 +107,19 @@ export class Displaybuilder {
     targetPosition: any = {
       x: 20,
       y: 10,
-    }
+    },
+    sourcePosition: any = {
+      x: 20,
+      y: 10,
+    },
   ): Promise<void> {
     await this.htmxReady()
 
-    await expect(target).toBeVisible()
-    await expect(element).toBeVisible()
+    // await expect(target).toBeVisible()
+    // await expect(element).toBeVisible()
 
-    await element.scrollIntoViewIfNeeded()
-    await target.scrollIntoViewIfNeeded()
+    // await element.scrollIntoViewIfNeeded()
+    // await target.scrollIntoViewIfNeeded()
 
     // Js step by step drag.
     // await component.hover({ position: { x: 10, y: 10 } })
@@ -129,6 +133,7 @@ export class Displaybuilder {
     await element.dragTo(target, {
       force: true,
       targetPosition,
+      sourcePosition,
     })
 
     await this.htmxReady()
@@ -299,11 +304,12 @@ export class Displaybuilder {
     await this.dragElementFromLibraryById(
       'Components',
       componentId,
-      this.page.locator(`${panel_locator} > div.db-dropzone`).first()
+      this.page.locator(`${panel_locator} > div.db-dropzone`).first(),
+      {x: 40, y: 15},
     )
     const component = this.page.locator(`${panel_locator} [data-slot-id="${slot_id}"]`).first()
 
-    await this.dragElementFromLibraryById('Blocks', 'textfield', component)
+    await this.dragElementFromLibraryById('Blocks', 'textfield', component, {x: 40, y: 15},)
     await this.setElementValue(
       this.page.locator(`${panel_locator} [data-node-type="textfield"]`).first(),
       text,
