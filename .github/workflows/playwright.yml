@@ -85,6 +85,17 @@ jobs:
             '{"type":"path","url":"'"${GITHUB_WORKSPACE}"'","options":{"symlink":false}}'
           composer require "drupal/display_builder:@dev" -W
 
+      - name: Install module dev dependencies
+        working-directory: ${{ env.DRUPAL_SITE_ROOT }}
+        run: |
+          composer require \
+            "drupal/sdc_devel:^1.0.2" \
+            "drupal/ui_icons:^1.1" \
+            "drupal/ui_skins:^1.1" \
+            "drupal/ui_styles:^1.19" \
+            "drupal/display_builder_dev_tools:1.0.x-dev" \
+            --dev -W
+
       - name: Set up Drupal settings and directories
         working-directory: ${{ env.DRUPAL_SITE_ROOT }}
         run: |
