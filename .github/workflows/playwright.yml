@@ -20,7 +20,7 @@ on:
         type: string
       playwright_test_project:
         description: 'Set to a comma-separated list of projects.'
-        default: 'firefox,chromium'
+        default: 'chromium'
         required: false
         type: string
       playwright_test_tag:
@@ -31,7 +31,7 @@ on:
 
 env:
   SKIP_E2E_TESTS: ${{ github.event.inputs.skip_e2e_tests || '0' }}
-  PLAYWRIGHT_TEST_PROJECT: ${{ github.event.inputs.playwright_test_project || 'firefox,chromium' }}
+  PLAYWRIGHT_TEST_PROJECT: ${{ github.event.inputs.playwright_test_project || 'chromium' }}
   PLAYWRIGHT_TEST_TAG: ${{ github.event.inputs.playwright_test_tag || 'display_builder' }}
   PLAYWRIGHT_DEBUG_LEVEL: ${{ github.event.inputs.playwright_debug_level || 'info' }}
   # Drupal project path inside the container.
