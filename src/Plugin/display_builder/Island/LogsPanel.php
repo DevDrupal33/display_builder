@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Core\Datetime\DateFormatterInterface;
-use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\DisplayBuilderHelpers;
@@ -66,7 +65,7 @@ class LogsPanel extends IslandPluginBase {
 
     /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $save */
     $save = $builder->get('save')->first() ?? NULL;
-    $rows = $this->buildRows($builder->get('past'), $present, $builder->get('future'), $save);
+    $rows = $this->buildRows($builder);
     $table = [
       '#theme' => 'table',
       '#header' => [
@@ -137,20 +136,17 @@ class LogsPanel extends IslandPluginBase {
   /**
    * Build rows for the logs table.
    *
-   * @param \Drupal\Core\Field\FieldItemListInterface $past
-   *   Steps with time and log message.
-   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $present
+   * @param \Drupal\display_builder\InstanceInterface $builder
    *   A step with time and log message.
-   * @param \Drupal\Core\Field\FieldItemListInterface $future
-   *   Steps with time and log message.
-   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $save
-   *   Saved state.
    *
    * @return array
    *   A renderable array representing a table row.
    */
-  protected function buildRows(FieldItemListInterface $past, ?HistoryStep $present, FieldItemListInterface $future, ?HistoryStep $save): array {
+  protected function buildRows(InstanceInterface $builder): array {
     $rows = [];
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $save */
+    $save = $builder->get('save')->first();
+    $past = $builder->getPast();
 
     foreach ($past as $index => $step) {
       /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $step */
@@ -158,9 +154,9 @@ class LogsPanel extends IslandPluginBase {
     }
 
     // Present data.
-    $rows[] = $this->buildRow(0, $present, $save);
+    $rows[] = $this->buildRow(0, $builder->getCurrent(), $save);
 
-    foreach ($future as $index => $step) {
+    foreach ($builder->getFuture() as $index => $step) {
       /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $step */
       $rows[] = $this->buildRow($index + 1, $step, $save);
     }

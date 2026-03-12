@@ -11,12 +11,8 @@ declare(strict_types=1);
 
 /**
  * Delete all states after ContentEntityType migration.
- *
- * @param array $sandbox
- *   An associative array containing information about the progress of the
- *   update.
  */
-function display_builder_post_update_1(&$sandbox): void {
+function display_builder_post_update_1(): void {
   $storage = Drupal::service('entity_type.manager')->getStorage('display_builder_instance');
   $instances = $storage->loadMultiple();
   $storage->delete($instances);

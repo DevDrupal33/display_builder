@@ -538,8 +538,14 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    *
    * @see \Drupal\display_builder\HistoryInterface
    */
-  public function getCountPast(): int {
-    return $this->get('past')->count();
+  public function getPast(): array {
+    $past = [];
+
+    foreach ($this->get('past') as $step) {
+      $past[] = $step;
+    }
+
+    return $past;
   }
 
   /**
@@ -547,8 +553,14 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    *
    * @see \Drupal\display_builder\HistoryInterface
    */
-  public function getCountFuture(): int {
-    return $this->get('future')->count();
+  public function getFuture(): array {
+    $future = [];
+
+    foreach ($this->get('future') as $step) {
+      $future[] = $step;
+    }
+
+    return $future;
   }
 
   /**

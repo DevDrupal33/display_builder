@@ -46,20 +46,20 @@ interface HistoryInterface {
   public function setNewPresent(array $state, FormattableMarkup|string $log_message = '', bool $check_hash = TRUE): void;
 
   /**
-   * Get number of past logs.
+   * Get the past steps.
    *
-   * @return int
-   *   The number of past logs.
+   * @return array
+   *   The past steps.
    */
-  public function getCountPast(): int;
+  public function getPast(): array;
 
   /**
-   * Get number of future logs.
+   * Get the future steps.
    *
-   * @return int
-   *   The number of future logs.
+   * @return array
+   *   The future steps.
    */
-  public function getCountFuture(): int;
+  public function getFuture(): array;
 
   /**
    * Move history to the last past state.

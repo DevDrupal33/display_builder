@@ -3,6 +3,7 @@
   <description>Default PHP CodeSniffer configuration for Drupal project.</description>
 
   <exclude-pattern>./tests/src/Playwright/*</exclude-pattern>
+  <exclude-pattern>./github/*</exclude-pattern>
 
   <arg name="basepath" value="."/>
   <arg name="extensions" value="php,module,inc,install,test,profile,theme,yml"/>
