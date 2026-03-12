@@ -40,7 +40,7 @@ test('Layers move tests', { tag: [ '@extra' ] }, async ({ page, drupal, displayB
         - text: "Tabs Textfield: foo Test 1"
         - emphasis: Config
         - list:
-          - listitem: "Title:P Component 1"
+          - listitem: "Title: Component 1"
         - text: "Slot 1 Token: corge Textfield: grault Textfield: bar Test 1"
         - emphasis: Config
         - list:
