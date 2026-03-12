@@ -138,7 +138,7 @@ php -S 0.0.0.0:8000 -t web/
 ```bash
 PW_TEST_CONNECT_WS_ENDPOINT=ws://127.0.0.1:3000/ \
 DRUPAL_TEST_BASE_URL='http://localhost:8000' \
-    npx playwright test --project=firefox -g '@display_builder'
+    npx playwright test --project=firefox -g '@base'
 ```
 
 Tips:

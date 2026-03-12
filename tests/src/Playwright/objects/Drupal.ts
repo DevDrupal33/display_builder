@@ -198,7 +198,6 @@ export class Drupal {
       for (const role of roles) {
         await this.drush(`user:role:add '${role}' '${username}'`)
       }
-      return
     } else {
       const page = this.page
       await page.goto(`${this.drupalSite.url}/admin/people/create`)
@@ -221,7 +220,6 @@ export class Drupal {
       if (userId === undefined || isNaN(userId)) {
         throw new Error(`No user ID found for ${username}`)
       }
-      return
     }
   }
 
@@ -250,8 +248,8 @@ export class Drupal {
       const cmd = `php:eval "Drupal\\node\\Entity\\NodeType::create([
           'type' => '${bundle}',
           'name' => 'Test ${name}',
-        ])->save();"`.trim();
-      await this.drush(cmd);
+        ])->save();"`.trim()
+      await this.drush(cmd)
       await this.createBodyField(bundle, name)
     } else {
       await this.page.goto(config.contentTypesAdd)
@@ -264,7 +262,7 @@ export class Drupal {
   async createBodyField (bundle: string, name: string): Promise<void> {
     if (this.drupalSite.hasDrush) {
       await this.drush(
-        `field:create -y node ${bundle} --field-name=field_test_${name} --field-label="Body" --field-type=string_long --field-widget=string_textarea --is-required=0 --cardinality=1`
+        `field:create -y node ${bundle} --field-name=field_test_${name} --field-label="Body" --field-type=string_long --field-widget=string_textarea --is-required=0 --cardinality=1`,
       )
     } else {
       throw new Error('Field creation without Drush is not supported!')
@@ -444,7 +442,8 @@ export class Drupal {
     } else {
       path = nodePath.resolve(__dirname, `../../../../test-results/${fileName}`)
     }
-    await this.page.screenshot({ path, fullPage })  }
+    await this.page.screenshot({ path, fullPage })
+  }
 
   normalizeAttribute (attribute: string): string {
     return attribute.replaceAll(' ', '-').replaceAll('_', '-')

@@ -7,94 +7,89 @@ test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.drush('state:set -y display_builder.asset_libraries_local true')
 })
 
-test(
-  'Preset',
-  { tag: [ '@display_builder' ] },
-  async ({ page, drupal, displayBuilder }) => {
-    const presetName = `test_${utils.createRandomString()}`
+test('Preset', { tag: [ '@base' ] }, async ({ page, drupal, displayBuilder }) => {
+  const presetName = `test_${utils.createRandomString()}`
 
-    await test.step(`Create Page Layout and login`, async () => {
-      await displayBuilder.initTestsWithPageLayout(drupal)
+  await test.step(`Create Page Layout and login`, async () => {
+    await displayBuilder.initTestsWithPageLayout(drupal)
+  })
+
+  await test.step(`Build instance`, async () => {
+    await displayBuilder.shoelaceReady()
+    await displayBuilder.fullHighlight()
+
+    // Test 2: Open libraries and drag elements and set some values
+    await displayBuilder.dragElementFromLibraryById(
+      'Components',
+      'test_simple',
+      page.locator('.db-dropzone--root').first(),
+    )
+    await displayBuilder.dragElementFromLibraryById('Blocks', 'textfield', page.locator('.db-dropzone--root').first())
+
+    await displayBuilder.dragElement(
+      page.locator(`.db-island-builder [data-node-type="textfield"]`),
+      page.locator(`.db-island-builder [data-slot-id="slot_1"]`),
+    )
+
+    await displayBuilder.setElementValue(
+      page.locator(`.db-island-builder [data-node-type="textfield"]`),
+      'I am a test textfield in a slot',
+      [
+        {
+          action: 'fill',
+          locator: page.locator('#edit-value'),
+        },
+      ],
+    )
+
+    await displayBuilder.setElementValue(
+      page.locator(`.db-island-builder [data-test="test_simple"]`),
+      'I am a component with a textfield',
+      [
+        {
+          action: 'click',
+          locator: page.getByRole('button', { name: 'Label' }),
+        },
+        {
+          action: 'fill',
+          locator: page.locator('input[name="component[props][label][source][value]"]'),
+        },
+      ],
+    )
+  })
+
+  await test.step(`Save preset`, async () => {
+    // Preset will open a dialog prompt to fill a name.
+    page.on('dialog', async dialog => {
+      expect(dialog.type()).toBe('prompt')
+      expect(dialog.message()).toBe('Name of preset')
+      await dialog.accept(`foo_${presetName}`)
     })
 
-    await test.step(`Build instance`, async () => {
-      await displayBuilder.shoelaceReady()
-      await displayBuilder.fullHighlight()
+    await page
+      .getByRole('heading', { name: 'label: I am a component with a textfield' })
+      .click({ button: 'right', position: { x: 40, y: 10 } })
+    await page.getByRole('menuitemcheckbox', { name: 'Save as preset' }).locator('slot').nth(1).click()
+  })
 
-      // Test 2: Open libraries and drag elements and set some values
-      await displayBuilder.dragElementFromLibraryById(
-        'Components',
-        'test_simple',
-        page.locator('.db-dropzone--root').first(),
-      )
-      await displayBuilder.dragElementFromLibraryById('Blocks', 'textfield', page.locator('.db-dropzone--root').first())
+  await test.step(`Check preset and drag`, async () => {
+    const preset = page.getByRole('button', { name: `foo_${presetName}` })
 
-      await displayBuilder.dragElement(
-        page.locator(`.db-island-builder [data-node-type="textfield"]`),
-        page.locator(`.db-island-builder [data-slot-id="slot_1"]`),
-      )
+    // Check preview on hover
+    await page.getByRole('tab', { name: 'Presets' }).click()
+    await expect(preset).toBeVisible()
+    await preset.hover()
+    await displayBuilder.htmxReady()
+    await expect(page.getByRole('tooltip')).toBeVisible()
+    // From the test component.
+    await expect(page.getByRole('tooltip')).toMatchAriaSnapshot({ name: 'test-preset-hover.aria.yml' })
 
-      await displayBuilder.setElementValue(
-        page.locator(`.db-island-builder [data-node-type="textfield"]`),
-        'I am a test textfield in a slot',
-        [
-          {
-            action: 'fill',
-            locator: page.locator('#edit-value'),
-          },
-        ],
-      )
+    await displayBuilder.dragElementFromLibrary(
+      'Presets',
+      preset,
+      page.getByRole('heading', { name: 'label: I am a component with a textfield' }),
+    )
 
-      await displayBuilder.setElementValue(
-        page.locator(`.db-island-builder [data-test="test_simple"]`),
-        'I am a component with a textfield',
-        [
-          {
-            action: 'click',
-            locator: page.getByRole('button', { name: 'Label' }),
-          },
-          {
-            action: 'fill',
-            locator: page.locator('input[name="component[props][label][source][value]"]'),
-          },
-        ],
-      )
-    })
-
-    await test.step(`Save preset`, async () => {
-      // Preset will open a dialog prompt to fill a name.
-      page.on('dialog', async dialog => {
-        expect(dialog.type()).toBe('prompt')
-        expect(dialog.message()).toBe('Name of preset')
-        await dialog.accept(`foo_${presetName}`)
-      })
-
-      await page
-        .getByRole('heading', { name: 'label: I am a component with a textfield' })
-        .click({ button: 'right', position: { x: 40, y: 10 } })
-      await page.getByRole('menuitemcheckbox', { name: 'Save as preset' }).locator('slot').nth(1).click()
-    })
-
-    await test.step(`Check preset and drag`, async () => {
-      const preset = page.getByRole('button', { name: `foo_${presetName}` })
-
-      // Check preview on hover
-      await page.getByRole('tab', { name: 'Presets' }).click()
-      await expect(preset).toBeVisible()
-      await preset.hover()
-      await displayBuilder.htmxReady()
-      await expect(page.getByRole('tooltip')).toBeVisible()
-      // From the test component.
-      await expect(page.getByRole('tooltip')).toMatchAriaSnapshot({ name: 'test-preset-hover.aria.yml' })
-
-      await displayBuilder.dragElementFromLibrary(
-        'Presets',
-        preset,
-        page.getByRole('heading', { name: 'label: I am a component with a textfield' }),
-      )
-
-      await expect(page.locator(`.db-island-builder`)).toMatchAriaSnapshot({ name: 'test-preset-final.aria.yml' })
-    })
-
-  },
-)
+    await expect(page.locator(`.db-island-builder`)).toMatchAriaSnapshot({ name: 'test-preset-final.aria.yml' })
+  })
+})

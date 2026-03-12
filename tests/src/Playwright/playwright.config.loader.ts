@@ -5,11 +5,9 @@ import path from 'path'
 const configDir = path.join(__dirname, 'config')
 
 // Find all playwright.*.config.ts files in the config folder
-const configFiles = fs.readdirSync(configDir)
-  .filter(file =>
-    file.startsWith('playwright.') &&
-    file.endsWith('.config.ts')
-  )
+const configFiles = fs
+  .readdirSync(configDir)
+  .filter(file => file.startsWith('playwright.') && file.endsWith('.config.ts'))
 
 let mergedConfig: { [key: string]: any } = {}
 

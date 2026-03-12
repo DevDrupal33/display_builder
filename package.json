@@ -11,12 +11,12 @@
   },
   "scripts": {
     "pw": "npx playwright test -c playwright.local.config.ts --project chromium",
-    "test": "npm run pw -- -g @display_builder",
-    "test:failed": "npm run pw -- -g @display_builder --last-failed",
-    "test:headed": "npm run pw -- --headed -g @display_builder",
-    "test:ui": "npm run pw -- --ui -g @display_builder",
-    "test:debug": "PWDEBUG=1 npm run pw -- -g @display_builder --debug",
-    "test:update": "npm run pw -- -u all --update-source-method overwrite -g @display_builder",
+    "test": "npm run pw -- -g @base",
+    "test:failed": "npm run pw -- -g @base --last-failed",
+    "test:headed": "npm run pw -- --headed -g @base",
+    "test:ui": "npm run pw -- --ui -g @base",
+    "test:debug": "PWDEBUG=1 npm run pw -- -g @base --debug",
+    "test:update": "npm run pw -- -u all --update-source-method overwrite -g @base",
     "test:clean": "rm -rf playwright-report test-results"
   },
   "devDependencies": {

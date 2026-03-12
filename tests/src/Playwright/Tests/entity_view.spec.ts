@@ -5,18 +5,24 @@ import config from '../playwright.config.loader'
 
 test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.drush('state:set -y display_builder.asset_libraries_local true')
-  await drupal.installModules([ 'field_ui', 'node', 'display_builder_entity_view', 'display_builder_entity_view_test', 'display_builder_entity_view_override_test' ])
+  await drupal.installModules([
+    'field_ui',
+    'node',
+    'display_builder_entity_view',
+    'display_builder_entity_view_test',
+    'display_builder_entity_view_override_test',
+  ])
 })
 
 test(
   'Entity view',
-  { tag: [ '@display_builder', '@display_builder_entity_view' ] },
+  { tag: [ '@base' ] },
   async ({ page, drupal, displayBuilder }) => {
     const id = utils.createRandomString()
     const name = `test_${id}`
 
     await test.step(`Create User and login`, async () => {
-      await displayBuilder.createUserAndLogin(drupal, ['db_test_entity'])
+      await displayBuilder.createUserAndLogin(drupal, [ 'db_test_entity' ])
     })
 
     await test.step(`Create entity type`, async () => {
@@ -129,7 +135,7 @@ test(
 
 test(
   'Entity view override',
-  { tag: [ '@display_builder', '@display_builder_entity_view' ] },
+  { tag: [ '@extra'] },
   async ({ page, drupal, displayBuilder }) => {
     const id = utils.createRandomString()
     const name = `test_${id}`
@@ -139,8 +145,11 @@ test(
     })
 
     await test.step(`Create User and login`, async () => {
-      await displayBuilder.createUserAndLogin(drupal, ['db_test_entity'])
-      await drupal.addPermissions({role: 'db_test_entity', permissions: [`create ${name} content`, `edit own ${name} content`]})
+      await displayBuilder.createUserAndLogin(drupal, [ 'db_test_entity' ])
+      await drupal.addPermissions({
+        role: 'db_test_entity',
+        permissions: [ `create ${name} content`, `edit own ${name} content` ],
+      })
     })
 
     await test.step(`Create entity type and set display`, async () => {
@@ -155,8 +164,7 @@ test(
 
     await test.step(`Enable override`, async () => {
       await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
-      await page
-        .getByRole('checkbox', { name: 'Enable content overrides' }).click()
+      await page.getByRole('checkbox', { name: 'Enable content overrides' }).click()
 
       await expect(page.getByLabel('Profile for overrides')).toBeVisible()
       await page.getByRole('button', { name: 'Save' }).click()
@@ -175,9 +183,7 @@ test(
       await page.getByRole('link', { name: 'Default display' }).click()
       await displayBuilder.shoelaceReady()
       // Basic common drag component and textfield.
-      await displayBuilder.dragComponentsAndTextfield(
-        'I am a test textfield in a slot in an Entity view override!',
-      )
+      await displayBuilder.dragComponentsAndTextfield('I am a test textfield in a slot in an Entity view override!')
 
       // Add a field.
       await displayBuilder.openLibrariesTab('Blocks')

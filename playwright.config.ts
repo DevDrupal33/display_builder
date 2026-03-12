@@ -24,7 +24,7 @@ export default defineConfig({
       ['dot'],
       ['html', { open: 'never' }],
       ['junit', { outputFile: 'test-results/playwright.xml' }],
-      ['./tests/src/Playwright/utilities/reporter.ts', { level: process.env?.PLAYWRIGHT_DEBUG_LEVEL || 'info' }],
+      ['./tests/src/Playwright/utilities/reporter.ts', { level: process.env?.PLAYWRIGHT_DEBUG_LEVEL || 'error' }],
     ]
     : [
       ['list', { printSteps: true }],

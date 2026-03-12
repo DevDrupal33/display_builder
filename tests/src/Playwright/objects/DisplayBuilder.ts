@@ -6,7 +6,7 @@ import { Drupal } from './Drupal'
 export class Displaybuilder {
   readonly page: Page
 
-  constructor({ page }: { page: Page }) {
+  constructor ({ page }: { page: Page }) {
     this.page = page
   }
 
@@ -17,7 +17,7 @@ export class Displaybuilder {
    * @param {string} [targetId='library'] - The target ID for the toolbar button. Default is the Libraries button.
    * @returns {Promise<void>}
    */
-  async toggleSidebarView(targetId: string = 'library'): Promise<void> {
+  async toggleSidebarView (targetId: string = 'library'): Promise<void> {
     const sidebarFirst = this.page.locator(config.startDrawerID)
     const toolbarButton = this.page.locator(`[data-target="${targetId}"]`)
 
@@ -36,7 +36,7 @@ export class Displaybuilder {
    * @async
    * @returns {Promise<void>}
    */
-  async openLibrariesTab(name: string = 'Blocks'): Promise<void> {
+  async openLibrariesTab (name: string = 'Blocks'): Promise<void> {
     const sidebarFirst = this.page.locator(config.startDrawerID)
     if (await sidebarFirst.isHidden()) {
       await this.toggleSidebarView()
@@ -57,14 +57,14 @@ export class Displaybuilder {
    * @param {any} targetPosition - Optional offset within the target to drop to (e.g. `{ x: 20, y: 10 }`).
    * @returns {Promise<void>}
    */
-  async dragElementFromLibraryById(
+  async dragElementFromLibraryById (
     type: string = 'Components',
     id: string,
     target: Locator,
     targetPosition: any = {
       x: 10,
       y: 10,
-    }
+    },
   ): Promise<void> {
     await this.openLibrariesTab(type)
     const element = this.page.locator(`.db-island-library [hx-vals*="${id}"]`).first()
@@ -80,14 +80,14 @@ export class Displaybuilder {
    * @param {Locator} target - The target where the component must be dragged.
    * @returns {Promise<void>}
    */
-  async dragElementFromLibrary(
+  async dragElementFromLibrary (
     type: string = 'Components',
     element: Locator,
     target: Locator,
     targetPosition: any = {
       x: 20,
       y: 10,
-    }
+    },
   ): Promise<void> {
     await this.openLibrariesTab(type)
     await this.dragElement(element, target, targetPosition)
@@ -101,7 +101,7 @@ export class Displaybuilder {
    * @param {Locator} target - The target where the component must be dragged.
    * @returns {Promise<void>}
    */
-  async dragElement(
+  async dragElement (
     element: Locator,
     target: Locator,
     targetPosition: any = {
@@ -148,12 +148,11 @@ export class Displaybuilder {
    * @param {string} value - The string value to set in the instance form.
    * @returns {Promise<void>}
    */
-  async setElementValue(
+  async setElementValue (
     element: Locator,
     value: string,
-    valuePath?: Array<{ action: 'click' | 'fill'; locator: Locator }>
+    valuePath?: Array<{ action: 'click' | 'fill'; locator: Locator }>,
   ): Promise<void> {
-
     await element.click({ position: { x: 5, y: 10 } })
     await this.htmxReady()
 
@@ -180,7 +179,7 @@ export class Displaybuilder {
    * @async
    * @returns {Promise<void>}
    */
-  async publishDisplayBuilder(): Promise<void> {
+  async publishDisplayBuilder (): Promise<void> {
     await this.page.locator('[data-island-action="publish"]').click()
     await this.htmxReady()
   }
@@ -195,7 +194,7 @@ export class Displaybuilder {
    * @param {string} [targetDrawer='first'] - Drawer identifier (default: 'first'). Can be first, second, both.
    * @returns {Promise<void>}
    */
-  async closeDialog(targetDrawer: string = 'first'): Promise<void> {
+  async closeDialog (targetDrawer: string = 'first'): Promise<void> {
     if (targetDrawer === 'both') {
       await this.closeDialog('first')
       await this.closeDialog('second')
@@ -218,7 +217,7 @@ export class Displaybuilder {
    * @async
    * @returns {Promise<void>}
    */
-  async htmxReady(): Promise<void> {
+  async htmxReady (): Promise<void> {
     await expect(this.page.locator('.htmx-request, .htmx-settling, .htmx-swapping, .htmx-added')).toHaveCount(0)
   }
 
@@ -228,7 +227,7 @@ export class Displaybuilder {
    * @async
    * @returns {Promise<void>}
    */
-  async shoelaceReady(): Promise<void> {
+  async shoelaceReady (): Promise<void> {
     await this.page.addScriptTag({
       content: `
         Promise.allSettled([
@@ -259,7 +258,7 @@ export class Displaybuilder {
    * @param {string|null} fixture - (@todo) Name of the Display Builder fixture.
    * @returns {Promise<void>}
    */
-  async createDisplayBuilderFromUi(dbName: string, fixture: string | null = null): Promise<void> {
+  async createDisplayBuilderFromUi (dbName: string, fixture: string | null = null): Promise<void> {
     await this.page.goto(config.devAddInstance)
     await this.page.getByRole('textbox', { name: 'Builder ID' }).fill(dbName)
     await this.page.getByLabel('Profile').selectOption('test')
@@ -278,7 +277,7 @@ export class Displaybuilder {
    * @param {string} dbName - Name of the Display Builder instance.
    * @returns {Promise<void>}
    */
-  async deleteDisplayBuilderFromDevUi(dbName: string): Promise<void> {
+  async deleteDisplayBuilderFromDevUi (dbName: string): Promise<void> {
     await this.page.goto(config.dbList)
     await this.page
       // .getByRole('row', { name: `Dev tools ${config.develPrefix}${dbName} Test` })
@@ -300,26 +299,27 @@ export class Displaybuilder {
    * @param {string} slot_id - (Optional) The slot id where the component should be dropped, default to 'slot_1'.
    * @returns {Promise<void>}
    */
-  async dragComponentsAndTextfield(text: string, panel_locator: string|null = '.db-island-builder', componentId: string = 'test_simple', slot_id: string = 'slot_1'): Promise<void> {
+  async dragComponentsAndTextfield (
+    text: string,
+    panel_locator: string | null = '.db-island-builder',
+    componentId: string = 'test_simple',
+    slot_id: string = 'slot_1',
+  ): Promise<void> {
     await this.dragElementFromLibraryById(
       'Components',
       componentId,
       this.page.locator(`${panel_locator} > div.db-dropzone`).first(),
-      {x: 40, y: 15},
+      { x: 40, y: 15 },
     )
     const component = this.page.locator(`${panel_locator} [data-slot-id="${slot_id}"]`).first()
 
-    await this.dragElementFromLibraryById('Blocks', 'textfield', component, {x: 40, y: 15},)
-    await this.setElementValue(
-      this.page.locator(`${panel_locator} [data-node-type="textfield"]`).first(),
-      text,
-      [
-        {
-          action: 'fill',
-          locator: this.page.locator('#edit-value'),
-        },
-      ]
-    )
+    await this.dragElementFromLibraryById('Blocks', 'textfield', component, { x: 40, y: 15 })
+    await this.setElementValue(this.page.locator(`${panel_locator} [data-node-type="textfield"]`).first(), text, [
+      {
+        action: 'fill',
+        locator: this.page.locator('#edit-value'),
+      },
+    ])
   }
 
   /**
@@ -330,7 +330,7 @@ export class Displaybuilder {
    * @param {boolean} builder - Check in the builder as well..
    * @returns {Promise<void>}
    */
-  async expectBlocksAvailable(blocks: Object, builder: boolean = true): Promise<void> {
+  async expectBlocksAvailable (blocks: Object, builder: boolean = true): Promise<void> {
     await this.openLibrariesTab('Blocks')
 
     // @todo handle hx-vals instead of simple button.
@@ -350,7 +350,7 @@ export class Displaybuilder {
    * @param {string} locatorClass - The locator parameter, default '.db-island-preview'.
    * @returns {Promise<void>}
    */
-  async expectPreviewAriaSnapshot(snapshotName: string, locatorClass: string = '.db-island-preview'): Promise<void> {
+  async expectPreviewAriaSnapshot (snapshotName: string, locatorClass: string = '.db-island-preview'): Promise<void> {
     await this.page.getByRole('tab', { name: 'Preview' }).click()
     await expect(this.page.locator(locatorClass)).toMatchAriaSnapshot({ name: snapshotName })
     await this.page.getByRole('tab', { name: 'Builder' }).click()
@@ -363,7 +363,7 @@ export class Displaybuilder {
    * @param {string} key - The key or key combination to simulate (e.g., 'u' for undo, 'r' for redo).
    * @returns {Promise<void>}
    */
-  async keyboardShortcut(key: string): Promise<void> {
+  async keyboardShortcut (key: string): Promise<void> {
     await this.page.keyboard.press(key)
   }
 
@@ -373,7 +373,7 @@ export class Displaybuilder {
    * @async
    * @returns {Promise<void>}
    */
-  async highlight(): Promise<void> {
+  async highlight (): Promise<void> {
     await this.page.locator('[data-island-action="highlight"]').click()
     await this.htmxReady()
   }
@@ -384,7 +384,7 @@ export class Displaybuilder {
    * @async
    * @returns {Promise<void>}
    */
-  async fullscreen(): Promise<void> {
+  async fullscreen (): Promise<void> {
     await this.page.locator('[data-island-action="fullscreen"]').click()
     await this.htmxReady()
   }
@@ -395,7 +395,7 @@ export class Displaybuilder {
    * @async
    * @returns {Promise<void>}
    */
-  async fullHighlight(): Promise<void> {
+  async fullHighlight (): Promise<void> {
     await this.highlight()
     await this.fullscreen()
   }
@@ -407,7 +407,7 @@ export class Displaybuilder {
    * @param {Drupal} drupal - The Drupal object for managing Page Layouts and user authentication.
    * @returns {Promise<void>}
    */
-  async initTestsWithPageLayout(drupal: Drupal): Promise<void> {
+  async initTestsWithPageLayout (drupal: Drupal): Promise<void> {
     await this.createUserAndLogin(drupal)
     await this.createPageLayout(drupal)
   }
@@ -421,7 +421,7 @@ export class Displaybuilder {
    * @param {string|null} id - The to use, default to random.
    * @returns {Promise<void>}
    */
-  async createUserAndLogin(drupal: Drupal, roles: string[] = [], id: string | null = null): Promise<void> {
+  async createUserAndLogin (drupal: Drupal, roles: string[] = [], id: string | null = null): Promise<void> {
     if (!id) {
       id = utils.createRandomString()
     }
@@ -445,7 +445,7 @@ export class Displaybuilder {
    * @async
    * @param {Drupal} drupal - The Drupal object.
    */
-  async createPageLayout(drupal: Drupal): Promise<void> {
+  async createPageLayout (drupal: Drupal): Promise<void> {
     const id = utils.createRandomString()
     const profile = 'test'
 
@@ -456,9 +456,9 @@ export class Displaybuilder {
         'sources' => [['source_id' => '']],
         \\Drupal\\display_builder\\DisplayBuildableInterface::PROFILE_PROPERTY => '${profile}',
       ])->save();"
-    `.trim();
+    `.trim()
 
-    await drupal.drush(cmd);
+    await drupal.drush(cmd)
     await this.page.goto(`${config.pageViewUrl.replace('{instance_id}', `test_${id}`)}`)
     await this.shoelaceReady()
   }
@@ -470,7 +470,7 @@ export class Displaybuilder {
    * @param {Locator} slot - The Playwright Locator for the target slot where the component should be dropped.
    * @returns A Promise that resolves when the drag-and-drop action is complete.
    */
-  async dragManual(component: Locator, slot: Locator): Promise<void> {
+  async dragManual (component: Locator, slot: Locator): Promise<void> {
     await component.hover({ position: { x: 10, y: 10 }, force: true })
     await this.page.mouse.down()
     await slot.hover({ position: { x: 10, y: 10 }, force: true })
