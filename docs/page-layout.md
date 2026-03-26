@@ -71,29 +71,3 @@ will be loaded for the page, as a replacement of both:
 It is better to keep the most specific ones at the top, and the more generic at the bottom.
 
 If no Page layout matches, _Block Layout_ still manage the page.
-
-## Under the hood
-
-Each page is its own config entity
-
-- `profile`: the Display builder profile (config entity) in use last time the config was saved
-- `sources`: a UI Patterns 2 sources tree
-
-Example:
-
-```yaml
-id: users
-label: Users
-weight: -9
-profile: default
-sources: [...]
-conditions:
-  request_path:
-    id: request_path
-    pages: /user/1
-    negate: '0'
-```
-
-Overview:
-
-![Internals](images/page-layout-internals.webp)

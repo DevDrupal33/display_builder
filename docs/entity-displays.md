@@ -25,7 +25,7 @@ Slot sources specific to the Entity Display context will show up in the "Block L
 
 Display Builder is saving every state in the memory, but is not auto-saving to the configuration.
 
-You can manually save the current state in the configuration or restore the state currently saved in the configuration:
+You can manually publish the current state in the configuration or restore the state currently published in the configuration:
 
 ![State Buttons](images/state-buttons.webp)
 
@@ -36,29 +36,3 @@ Both can be activated at the same time and they don't conflict while building th
 ![Entity View](images/entity-view-lb.webp)
 
 However, only one of the tool will be used to render the content.
-
-## Under the hood
-
-Display Builder data is stored as a third party settings with those properties:
-
-- `profile`: the Display builder profile (config entity) in use last time the config was saved
-- `sources`: a UI Patterns 2 sources tree
-
-Example:
-
-```yaml
-id: node.article.default
-targetEntityType: node
-bundle: article
-mode: default
-content: {}
-hidden: {}
-third_party_settings:
-  display_builder:
-    profile: default
-    sources: [...]
-```
-
-Overview:
-
-![Entity View internal](images/entity-view-internals.webp)

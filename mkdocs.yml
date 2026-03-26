@@ -55,6 +55,7 @@ nav:
       - Pattern presets: 'pattern-presets.md'
       - Real-time collaboration: 'realtime-collaboration.md'
       - Migration from layout builder: 'migration-from-layout-builder.md'
+      - Instances overview: 'instances.md'
   - Configuring Display Builder: 'configuration.md'
   - Extending Display Builder:
       - With island plugins: 'island-plugins.md'
@@ -62,6 +63,7 @@ nav:
   - Contributing:
       - Contributing: 'contributing.md'
       - Tests e2e: 'tests.md'
+      - Internals: 'internals.md'
       - Security model: 'security-model.md'
   - Frequently asked questions: 'faq.md'
 

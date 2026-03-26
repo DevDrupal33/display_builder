@@ -6,33 +6,23 @@ You need `display_builder_entity_view` module and `ui_patterns_field` sub-module
 
 Contrary to Layout Builder, there is no "Allow each content item to have its layout customize" checkbox in the "Manage display" and no "magic" field added to the content bundle.
 
-You can assign a different configurable field to each display:
+You can activate Content Overrides for each display:
 
-![Activate](images/entity-view-activate-2.webp)
+![Before activate](images/entity-view-activate-2.webp)
 
-You can add a "Source (UI Patterns)" field using the usual Field UI:
+On activation, you can pick the [Config Profile](configuration.md) the content editors will use:
 
-![Add field](images/add-field.webp)
+![Activate 1](images/overrides-activate-1.webp)
 
-Or by clicking the "Add a UI Patterns Source field" link:
+A content field has been automatically created to store the overrides:
 
-![Add field with modal](images/overrides-modal.webp)
+![Storage](images/overrides-field.webp)
 
-It is better, but not mandatory, to chose unlimited number of value in field storage:
+The field can be changed later:
 
-![field storage](images/field-storage.webp)
+![Activate 2](images/overrides-activate-2.webp)
 
-> 🚧 2025-11-05: Field cardinality has an impact on content storage but it is not visible yet on Display Builder UI. See [#3544026](https://www.drupal.org/i/3544026)
-
-Most of the time, you will want to remove the field from the content form:
-
-![field storage](images/field-form.webp)
-
-Once the field is created, you can pick it to store the overrides:
-
-![Activate](images/overrides-activate-2.webp)
-
-It is not possible to pick the same field in different displays. You can also select the display builder profile the content editors will use.
+It is not possible to pick the same field in different displays.
 
 ## Use Display builder in the content
 
@@ -52,34 +42,4 @@ The builder is a regular one with the same sources as Entity View Display plus s
 
 ![Builder](images/overrides-builder.webp)
 
-The "Save" button store the display in the content field. The "Restore" button load the display from the content field.
-
-## Under the hood
-
-Display Builder data is stored as content field provided by `ui_patterns_field` module, where every field item has those properties:
-
-- `node_id`: The ID of the node in the source tree
-- `source_id`: the source plugin ID
-- `source`: the source plugin config
-- `third_party_settings`: extra configuration, prefixed by module or island plugin ID
-
-The entity view display config entity has additional `override_field` and `override_profile` properties for the field name storing the data and the related display builder profile:
-
-```yaml
-id: node.article.default
-targetEntityType: node
-bundle: article
-mode: default
-content: {}
-hidden: {}
-third_party_settings:
-  display_builder:
-    profile: default
-    sources: [...]
-    override_field: field_full_display
-    override_profile: default
-```
-
-Overview:
-
-![Overrides internals](images/overrides-internals.webp)
+The "Publish" button store the display in the content field. The "Restore" button load the display from the content field.

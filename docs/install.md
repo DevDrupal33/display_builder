@@ -3,83 +3,47 @@
 !!!warning "Drupal 11.3"
   Display builder targets Drupal **11.3**. No Drupal 10.x support is planned unless sponsored.
 
-## Quick install new project
-
-To simply test Display Builder with Bootstrap.
-
-### Download and configure project
+Like any other Drupal module, it is recommended to use composer:
 
 ```shell
-composer create-project drupal/recommended-project:11.3 display_builder_demo
-cd display_builder_demo
-composer config minimum-stability "dev"
-composer config --json extra.merge-plugin '{ "include": ["web/modules/*/display_builder/composer.json"], "merge-extra": true }'
-composer config extra.enable-patching "true"
-composer require cweagans/composer-patches:^2 wikimedia/composer-merge-plugin:^2 drupal/display_builder:^1 drupal/ui_suite_bootstrap:^5 drupal/ui_icons:^1
-composer require drush/drush
+composer require drupal/display_builder
 ```
 
-### Run and install
+Display Builder is split in sub-modules, one for each Drupal Core's display buildable:
 
-Run and Install the website, for example with [DDEV](https://www.drupal.org/docs/getting-started/installing-drupal/install-drupal-using-ddev-for-local-development).
+- [Entity view](entity-displays.md) and [entity view overrides](entity-displays-overrides.md) (`display_builder_entity_view`)
+- [Page layout](page-layout.md) (`display_builder_page_layout`)
+- [Views](with-views.md) (`display_builder_views`)
 
-Recommended PHP 8.3, install Drupal in Standard profile:
+They can be activated from `Administration > Extends` (`/admin/modules`) or with Drush:
 
 ```shell
-ddev drush -y si standard
+drush -y en display_builder_entity_view display_builder_page_layout display_builder_page_views
 ```
 
-### Enable modules
-
-Some minimum modules are required to properly use Display Builder with Bootstrap:
-
-- Display Builder
-- Display Builder for entity view
-- Display Builder for page layout
-- UI Patterns
-- UI Patterns Library
-- UI Patterns Field
-- UI Patterns Field Formatters
-- UI Styles
-
-Enable from Extend page or with drush:
+You can also install Display Builder UI to [configure Display Builder](configuration.md):
 
 ```shell
-ddev drush -y en display_builder_entity_view display_builder_page_layout ui_styles
+drush -y en display_builder_ui
 ```
 
-### Enable theme
+## Recommended modules
 
-Got to _Administration > Appearance_:
+Display Builder is automatically activating its dependencies:
 
-- **Install and set as default** the UI Suite Bootstrap theme.
-- Uninstall Olivero theme
+- UI Patterns: the "engine" of Display Builder
+- UI Patterns Field: for the [entity overrides](entity-displays-overrides.md) storage
+- UI Patterns Field Formatters: fo format each field item in entity displays
 
-### Create your first Page Layout
+We are also recommending:
 
-Go to _Administration > Structure > Page Layouts_
+- UI Patterns Library (from `ui_patterns` module): provides [a nice component library](https://project.pages.drupalcode.org/ui_patterns/2-authors/1-stories-and-library/)
+- [UI Styles](https://www.drupal.org/project/ui_styles): to use the "Styles" contextual panel
+- [UI Skins](https://www.drupal.org/project/ui_skins): to use the "Design Tokens" contextual panel
 
-- Add a page Layout
-- Label: Default, Profile: Default
-- Save and click the operation "Build display"
+## Patches
 
-Once publish, your display will be used on all pages of the front of your site.
-
-### Create your first Entity display
-
-Go to _Administration > Structure > Content types_
-
-- In the Article line, choose the operation "Manage display"
-- Select Display builder Profile as "Default"
-- Save and click "Build the display"
-
-Once publish, your display will be used for all Articles.
-
-Check this documentation for more insight and usage of Display Builder!
-
-## Patches details
-
-Display Builder require specific dependencies, it's recommended to ease this step using [Composer Merge Plugin](https://github.com/wikimedia/composer-merge-plugin) with this configuration in your main composer file:
+Display Builder may require specific patches for its dependencies, it's recommended to ease this step using [Composer Merge Plugin](https://github.com/wikimedia/composer-merge-plugin) with this configuration in your main composer file:
 
 ```shell
 composer require cweagans/composer-patches:^2 wikimedia/composer-merge-plugin:^2
@@ -126,20 +90,3 @@ cd htmx-ext-sse
 npm init -y
 npm install htmx-ext-sse
 ```
-
-## Troubleshooting
-
-### Browser-side reset
-
-We use `localStorage` that can change anytime, be sure to clear your local storage on each new install to start fresh.
-
-- On Mozilla Firefox: `Privacy & Security` > `Cookies and Site Data` > Select the site > `Remove Selected` > `Save Changes`
-- On Google Chrome: `Developer toolbar` > `Application` > `Local storage` > Select the site > `Clear`
-
-### Server-side reset
-
-In case of a failing Display builder profile (config entity) or instance:
-
-- Install and enable module `display_builder_dev_tools`
-- Go to Structure > Display Builder > Devel
-- `Delete` from the _Operations_ dropdown

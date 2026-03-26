@@ -1,6 +1,6 @@
 # Configuring
 
-You need `display_builder_ui`.
+You need `display_builder_ui` sub-module.
 
 Permissions:
 

@@ -1,6 +1,6 @@
 # Display Builder
 
-![Entity sources](images/entity-display-sources.webp)
+![Entity sources](images/index.webp)
 
 A display building tool by the [UI Suite](https://www.drupal.org/project/ui_suite) team.
 

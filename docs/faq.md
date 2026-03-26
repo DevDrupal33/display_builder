@@ -1,5 +1,16 @@
 # Frequently Asked Questions
 
+## Where are my displays stored?
+
+Display builder is storing displays at the most "normal" place possible:
+
+- [Entity View Display](entity-displays.md): in config entity's Third Party Settings, like Layout Builder do.
+- [Entity View Display Overrides](entity-displays-overrides.md): in an UI Patterns content entity field.
+- [Views](with-views.md): in a Display Extender plugin, so in the View config entity.
+- [Page Layout](page-layout.md): in a dedicated config entity.
+
+Everything at the right place.
+
 ## Why my SDC component doesn't work well with Display Builder?
 
 Display Builder is not doing anything anything specific with your SDC. It is only an user interface upon UI Patterns 2.
@@ -48,10 +59,6 @@ But Canvas is currently targeting a deeper <strong>vertical</strong> scope (befo
 | Content editing     | ✅ the main feature      | ⚠️ Planned                              |
 | Component authoring | ✅ the "code components" | ❌ Out of scope, we promote SDC instead |
 
-Visual explanation:
-
-![XB](images/xb.webp)
-
 Both share more or less the same feature set:
 
 |                         | Canvas              | Display Builder     |
@@ -65,6 +72,15 @@ And they also differ by the technical and strategic choices. For example, Canvas
 So we are going in 2 different directions and our friendly competition will be only on the shared subset of our scopes. So, not such a big deal.
 
 We hope both will be usable in a same project if this is needed by a team. Anyway, we are actively collaborating to provide same or compatible low level API and to improve Drupal Core together. So it is a win-win situation.
+
+## Why am I encountering `TypeError: Drupal\canvas\PropShape\PropShape::componentPluginManager()`?
+
+As of March 2026, Canvas and Display Builder can't be used in the same website because of those issues:
+
+- On Canvas side: [ComponentPluginManager decorator should call decorated service instead of parent](https://www.drupal.org/project/canvas/issues/3552818)
+- On UI Patterns (which is a dependency of Display Builder) side: [ComponentPluginManager decorator incorrectly calls parent instead of decorated service](https://www.drupal.org/project/ui_patterns/issues/3551586)
+
+If one of the module is fixing the issue, it will be enough. If both modules are fixing the issue, it will be perfect.
 
 ## Comparison with Layout Builder
 
@@ -81,3 +97,22 @@ This is doable with Display Builder by creating different Display builder profil
 Layout Builder Lock allows administrators to lock sections of a default layout so users can't perform certain actions when overriding the layout for an individual entity.
 
 This feature is planned for [#3551232](https://www.drupal.org/i/3551232)
+
+## Display Builder is acting weird, what can I do?
+
+If you have issues while using Display Builder, you can mitigate them without losing any published data.
+
+### Browser-side reset
+
+We use `localStorage` that can change anytime, be sure to clear your local storage on each new install to start fresh.
+
+- On Mozilla Firefox: `Privacy & Security` > `Cookies and Site Data` > Select the site > `Remove Selected` > `Save Changes`
+- On Google Chrome: `Developer toolbar` > `Application` > `Local storage` > Select the site > `Clear`
+
+### Server-side reset
+
+Instance entities are volatile storages for the current, often unpublished, work on displays.
+
+- Install and enable module `display_builder_dev_tools`
+- Go to Structure > Display Builder > Instances
+- `Delete` from the _Operations_ dropdown of each instance
