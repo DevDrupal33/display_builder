@@ -32,7 +32,7 @@ test('Builder move tests', { tag: [ '@extra' ] }, async ({ page, drupal, display
   })
 
   await test.step(`Prepare instance`, async () => {
-    await page.goto(`${config.pageViewUrl.replace('{instance_id}', dbName)}`)
+    await page.goto(viewUrl)
     await displayBuilder.shoelaceReady()
     await displayBuilder.fullHighlight()
 
@@ -41,6 +41,7 @@ test('Builder move tests', { tag: [ '@extra' ] }, async ({ page, drupal, display
         - 'button "Block: Tabs"'
         - text: "Textfield: foo foo Test 1 Component 1 Token: corge corge Textfield: grault grault Slot 1 Textfield: bar bar Test 1 Component 2 Textfield: garply garply Slot 1 Textfield: baz baz Test 1 Component 3 Token: waldo waldo Textfield: fred fred Slot 1 Textfield: quux quux Test 2 Token: plugh plugh Textfield: xyzzy xyzzy Slot 1 Textfield: thud thud Slot 2 Textfield: quux quux Base container"
       `)
+    // Referesh and ensure no changes.
     await page.goto(viewUrl)
     await displayBuilder.shoelaceReady()
     await expect(result).toMatchAriaSnapshot(`

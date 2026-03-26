@@ -475,6 +475,6 @@ export class Displaybuilder {
     await this.page.mouse.down()
     await slot.hover({ position: { x: 10, y: 10 }, force: true })
     await this.page.mouse.up()
-    await await this.htmxReady()
+    await this.htmxReady()
   }
 }
