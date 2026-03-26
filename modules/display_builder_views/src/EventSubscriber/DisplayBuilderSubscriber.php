@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_views\EventSubscriber;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
@@ -17,7 +16,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
   public function __construct(
-    private EntityTypeManagerInterface $entityTypeManager,
     private DisplayBuildablePluginManager $displayBuildableManager,
   ) {}
 
@@ -37,10 +35,9 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onSave(DisplayBuilderEvent $event): void {
-    $builder_id = $event->getBuilderId();
     $contexts = $event->getData();
     /** @var \Drupal\display_builder\InstanceInterface $instance */
-    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+    $instance = $event->getInstance();
 
     if (!$instance->hasSaveContextsRequirement(ViewDisplay::getContextRequirement(), $contexts)) {
       return;
@@ -52,7 +49,7 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     if (!$view) {
       return;
     }
-    $display_id = ViewDisplay::checkInstanceId($builder_id)['display'];
+    $display_id = ViewDisplay::checkInstanceId((string) $instance->id())['display'];
     $view->getExecutable()->setDisplay($display_id);
     $extenders = $view->getExecutable()->getDisplay()->getExtenders();
 

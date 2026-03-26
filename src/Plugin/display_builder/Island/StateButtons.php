@@ -10,6 +10,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginToolbarButtonConfigurationBase;
+use Drupal\display_builder\IslandReloadEventsTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -26,6 +27,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   default_region: 'end',
 )]
 class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
+
+  use IslandReloadEventsTrait;
 
   /**
    * The module handler.
@@ -68,50 +71,8 @@ class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
   /**
    * {@inheritdoc}
    */
-  public function onSave(string $builder_id): array {
-    return $this->reloadWithGlobalData($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onAttachToRoot(string $builder_id, string $instance_id): array {
-    return $this->rebuild($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onAttachToSlot(string $builder_id, string $instance_id, string $parent_id): array {
-    return $this->rebuild($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onMove(string $builder_id, string $instance_id): array {
-    return $this->rebuild($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onHistoryChange(string $builder_id): array {
-    return $this->rebuild($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onUpdate(string $builder_id, string $instance_id): array {
-    return $this->rebuild($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onDelete(string $builder_id, string $parent_id): array {
-    return $this->rebuild($builder_id);
+  public function onSave(InstanceInterface $instance): array {
+    return $this->reloadWithGlobalData($instance);
   }
 
   /**
@@ -258,33 +219,6 @@ class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
     $button['#attributes']['outline'] = TRUE;
 
     return $button;
-  }
-
-  /**
-   * Rebuilds the island with the given builder ID.
-   *
-   * @param string $builder_id
-   *   The ID of the builder.
-   *
-   * @return array
-   *   The rebuilt island.
-   */
-  private function rebuild(string $builder_id): array {
-    if (!$this->builder) {
-      // @todo pass \Drupal\display_builder\InstanceInterface object in
-      // parameters instead of loading again.
-      /** @var \Drupal\display_builder\InstanceStorage $storage */
-      $storage = $this->entityTypeManager->getStorage('display_builder_instance');
-      /** @var \Drupal\display_builder\InstanceInterface $builder */
-      $builder = $storage->load($builder_id);
-      $this->builder = $builder;
-    }
-
-    return $this->addOutOfBand(
-      $this->build($this->builder),
-      '#' . $this->getHtmlId($builder_id),
-      'innerHTML'
-    );
   }
 
 }

@@ -17,7 +17,6 @@ services:
     class: '\Drupal\display_builder\Event\DisplayBuilderEventsSubscriber'
     arguments:
       - '@plugin.manager.db_island'
-      - '@entity_type.manager'
     tags:
       - { name: 'event_subscriber' }
 

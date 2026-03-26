@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
@@ -38,20 +40,19 @@ class DesignTokensPanel extends IslandPluginBase implements IslandWithFormInterf
   protected CssVariablePluginManagerInterface $cssVariablePluginManager;
 
   /**
+   * The module handler.
+   */
+  protected ModuleHandlerInterface $moduleHandler;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->cssVariablePluginManager = $container->get('plugin.manager.ui_skins.css_variable');
+    $instance->moduleHandler = $container->get('module_handler');
 
     return $instance;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function label(): string {
-    return 'Tokens';
   }
 
   /**
@@ -122,37 +123,36 @@ class DesignTokensPanel extends IslandPluginBase implements IslandWithFormInterf
   /**
    * {@inheritdoc}
    */
-  public function onAttachToRoot(string $builder_id, string $instance_id): array {
-    return $this->reloadWithInstanceData($builder_id, $instance_id);
+  public function onAttachToRoot(InstanceInterface $instance, string $node_id): array {
+    return $this->reloadWithNodeData($instance, $node_id);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onAttachToSlot(string $builder_id, string $instance_id, string $parent_id): array {
-    return $this->reloadWithInstanceData($builder_id, $instance_id);
+  public function onAttachToSlot(InstanceInterface $instance, string $node_id, string $parent_id): array {
+    return $this->reloadWithNodeData($instance, $node_id);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onActive(string $builder_id, array $data): array {
-    return $this->reloadWithLocalData($builder_id, $data);
+  public function onActive(InstanceInterface $instance, array $data): array {
+    return $this->reloadWithLocalData($instance, $data);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onDelete(string $builder_id, string $parent_id): array {
-    return $this->reloadWithLocalData($builder_id, []);
+  public function onDelete(InstanceInterface $instance, string $parent_id): array {
+    return $this->reloadWithLocalData($instance, []);
   }
 
   /**
    * {@inheritdoc}
    */
   public function isApplicable(): bool {
-    return parent::isApplicable() && \Drupal::service('module_handler')
-      ->moduleExists('ui_skins');
+    return parent::isApplicable() && $this->moduleHandler->moduleExists('ui_skins');
   }
 
   /**

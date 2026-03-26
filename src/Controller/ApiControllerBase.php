@@ -25,6 +25,9 @@ abstract class ApiControllerBase extends ControllerBase {
 
   /**
    * The list of DB events which triggers SSE refresh.
+   *
+   * ON_ACTIVE is intentionally excluded: it is a client-side presence signal
+   * that must not trigger a full SSE broadcast to avoid feedback loops.
    */
   public const array SSE_EVENTS = [
     DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
@@ -86,13 +89,8 @@ abstract class ApiControllerBase extends ControllerBase {
    * @return \Drupal\display_builder\Event\DisplayBuilderEvent
    *   The event.
    */
-  protected function createEventWithEnabledIsland($event_id, $data, $node_id, $parent_id): DisplayBuilderEvent {
-    $builder_id = (string) $this->builder->id();
-
-    $island_configuration = $this->builder->getProfile()->getIslandConfigurations();
-    $island_enabled = $this->builder->getProfile()->getEnabledIslands();
-
-    $event = new DisplayBuilderEvent($builder_id, $island_enabled, $island_configuration, $data, $node_id, $parent_id, $this->islandId);
+  protected function createEventWithEnabledIsland(string $event_id, ?array $data, ?string $node_id, ?string $parent_id): DisplayBuilderEvent {
+    $event = new DisplayBuilderEvent($this->builder, $data, $node_id, $parent_id, $this->islandId);
     $this->eventDispatcher->dispatch($event, $event_id);
 
     return $event;

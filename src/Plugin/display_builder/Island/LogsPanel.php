@@ -10,6 +10,7 @@ use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
+use Drupal\display_builder\IslandReloadEventsTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\Plugin\Field\FieldType\HistoryStep;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -26,6 +27,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   icon: 'list-columns-reverse',
 )]
 class LogsPanel extends IslandPluginBase {
+
+  use IslandReloadEventsTrait;
 
   /**
    * The date formatter.
@@ -87,50 +90,8 @@ class LogsPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function onAttachToRoot(string $builder_id, string $instance_id): array {
-    return $this->reloadWithGlobalData($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onAttachToSlot(string $builder_id, string $instance_id, string $parent_id): array {
-    return $this->reloadWithGlobalData($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onMove(string $builder_id, string $instance_id): array {
-    return $this->reloadWithGlobalData($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onHistoryChange(string $builder_id): array {
-    return $this->reloadWithGlobalData($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onUpdate(string $builder_id, string $instance_id): array {
-    return $this->reloadWithGlobalData($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onDelete(string $builder_id, string $parent_id): array {
-    return $this->reloadWithGlobalData($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onSave(string $builder_id): array {
-    return $this->reloadWithGlobalData($builder_id);
+  public function onSave(InstanceInterface $instance): array {
+    return $this->reloadWithGlobalData($instance);
   }
 
   /**

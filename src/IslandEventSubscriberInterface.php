@@ -12,7 +12,7 @@ interface IslandEventSubscriberInterface {
   /**
    * Event triggered when a node becomes active.
    *
-   * @param string $instance_id
+   * @param \Drupal\display_builder\InstanceInterface $instance
    *   The Display Builder instance ID.
    * @param array $data
    *   The node data.
@@ -20,12 +20,12 @@ interface IslandEventSubscriberInterface {
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onActive(string $instance_id, array $data): array;
+  public function onActive(InstanceInterface $instance, array $data): array;
 
   /**
    * Event triggered when a node is attached to the root.
    *
-   * @param string $instance_id
+   * @param \Drupal\display_builder\InstanceInterface $instance
    *   The Display Builder instance ID.
    * @param string $node_id
    *   The tree node ID.
@@ -33,12 +33,12 @@ interface IslandEventSubscriberInterface {
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onAttachToRoot(string $instance_id, string $node_id): array;
+  public function onAttachToRoot(InstanceInterface $instance, string $node_id): array;
 
   /**
    * Event triggered when a node is attached to a slot.
    *
-   * @param string $instance_id
+   * @param \Drupal\display_builder\InstanceInterface $instance
    *   The Display Builder instance ID.
    * @param string $node_id
    *   The tree node ID.
@@ -48,12 +48,12 @@ interface IslandEventSubscriberInterface {
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onAttachToSlot(string $instance_id, string $node_id, string $parent_id): array;
+  public function onAttachToSlot(InstanceInterface $instance, string $node_id, string $parent_id): array;
 
   /**
    * Event triggered when a node is deleted.
    *
-   * @param string $instance_id
+   * @param \Drupal\display_builder\InstanceInterface $instance
    *   The Display Builder instance ID.
    * @param string $parent_id
    *   The parent node instance ID.
@@ -61,23 +61,23 @@ interface IslandEventSubscriberInterface {
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onDelete(string $instance_id, string $parent_id): array;
+  public function onDelete(InstanceInterface $instance, string $parent_id): array;
 
   /**
    * Event triggered when the history changes.
    *
-   * @param string $instance_id
+   * @param \Drupal\display_builder\InstanceInterface $instance
    *   The Display Builder instance ID.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onHistoryChange(string $instance_id): array;
+  public function onHistoryChange(InstanceInterface $instance): array;
 
   /**
    * Event triggered when a node is moved.
    *
-   * @param string $instance_id
+   * @param \Drupal\display_builder\InstanceInterface $instance
    *   The Display Builder instance ID.
    * @param string $node_id
    *   The tree node ID.
@@ -85,12 +85,12 @@ interface IslandEventSubscriberInterface {
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onMove(string $instance_id, string $node_id): array;
+  public function onMove(InstanceInterface $instance, string $node_id): array;
 
   /**
    * Event triggered when a node is updated.
    *
-   * @param string $instance_id
+   * @param \Drupal\display_builder\InstanceInterface $instance
    *   The Display Builder instance ID.
    * @param string $node_id
    *   The tree node ID.
@@ -98,28 +98,28 @@ interface IslandEventSubscriberInterface {
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onUpdate(string $instance_id, string $node_id): array;
+  public function onUpdate(InstanceInterface $instance, string $node_id): array;
 
   /**
    * Event triggered when a builder is saved.
    *
-   * @param string $instance_id
+   * @param \Drupal\display_builder\InstanceInterface $instance
    *   The Display Builder instance ID.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onSave(string $instance_id): array;
+  public function onSave(InstanceInterface $instance): array;
 
   /**
    * Event triggered when a preset is saved.
    *
-   * @param string $instance_id
+   * @param \Drupal\display_builder\InstanceInterface $instance
    *   The Display Builder instance ID.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onPresetSave(string $instance_id): array;
+  public function onPresetSave(InstanceInterface $instance): array;
 
 }

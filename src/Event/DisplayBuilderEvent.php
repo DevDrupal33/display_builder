@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Event;
 
 use Drupal\Component\EventDispatcher\Event;
+use Drupal\display_builder\InstanceInterface;
 
 /**
  * Event fired when display builder is used.
@@ -21,12 +22,8 @@ final class DisplayBuilderEvent extends Event {
   /**
    * Constructs a DisplayBuilderEvent object.
    *
-   * @param string $builder_id
-   *   The display builder ID.
-   * @param array $island_enabled
-   *   The enabled islands.
-   * @param array $island_configuration
-   *   The island configuration.
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The display builder instance.
    * @param array|null $data
    *   The data associated with this event.
    * @param string|null $node_id
@@ -37,9 +34,7 @@ final class DisplayBuilderEvent extends Event {
    *   Optional current island ID which trigger action.
    */
   public function __construct(
-    private string $builder_id,
-    private array $island_enabled,
-    private array $island_configuration,
+    private InstanceInterface $instance,
     private ?array $data = NULL,
     private ?string $node_id = NULL,
     private ?string $parent_id = NULL,
@@ -59,13 +54,13 @@ final class DisplayBuilderEvent extends Event {
   }
 
   /**
-   * Gets the display builder ID.
+   * Gets the display builder instance.
    *
-   * @return string
-   *   The display builder ID.
+   * @return \Drupal\display_builder\InstanceInterface
+   *   The display builder instance.
    */
-  public function getBuilderId(): string {
-    return $this->builder_id;
+  public function getInstance(): InstanceInterface {
+    return $this->instance;
   }
 
   /**
@@ -95,7 +90,7 @@ final class DisplayBuilderEvent extends Event {
    *   The enabled islands.
    */
   public function getIslandConfiguration(): array {
-    return $this->island_configuration;
+    return $this->instance->getProfile()->getIslandConfigurations();
   }
 
   /**
@@ -105,7 +100,7 @@ final class DisplayBuilderEvent extends Event {
    *   The enabled islands.
    */
   public function getEnabledIslands(): array {
-    return $this->island_enabled;
+    return $this->instance->getProfile()->getEnabledIslands();
   }
 
   /**

@@ -17,7 +17,6 @@ use Drupal\display_builder\IslandConfigurationFormInterface;
 use Drupal\display_builder\IslandConfigurationFormTrait;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
-use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -26,7 +25,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 #[Island(
   id: 'component_library',
   enabled_by_default: TRUE,
-  label: new TranslatableMarkup('Components library'),
+  label: new TranslatableMarkup('Components'),
   description: new TranslatableMarkup('List of available components.'),
   type: IslandType::Library,
 )]
@@ -35,24 +34,19 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
   use IslandConfigurationFormTrait;
 
   /**
-   * The module list extension service.
+   * The theme manager service.
    */
   protected ThemeManagerInterface $themeManager;
 
   /**
-   * The module list extension service.
+   * The theme extension list service.
    */
   protected ThemeExtensionList $themeList;
 
   /**
-   * The module list extension service.
+   * The module extension list service.
    */
   protected ModuleExtensionList $moduleList;
-
-  /**
-   * The UI Patterns source plugin manager.
-   */
-  protected SourcePluginManager $sourceManager;
 
   /**
    * The definitions filtered for current theme.
@@ -86,16 +80,8 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     $instance->themeManager = $container->get('theme.manager');
     $instance->themeList = $container->get('extension.list.theme');
     $instance->moduleList = $container->get('extension.list.module');
-    $instance->sourceManager = $container->get('plugin.manager.ui_patterns_source');
 
     return $instance;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function label(): string {
-    return 'Components';
   }
 
   /**

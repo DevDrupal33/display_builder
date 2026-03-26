@@ -41,19 +41,9 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   protected ?InstanceInterface $builder = NULL;
 
   /**
-   * The current island id which trigger action.
-   */
-  protected string $currentIslandId;
-
-  /**
    * The tree node id (when the island is executed in the context of a node).
    */
   protected ?string $nodeId = NULL;
-
-  /**
-   * The form builder.
-   */
-  protected ?FormBuilderInterface $formBuilder = NULL;
 
   /**
    * {@inheritdoc}
@@ -67,6 +57,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
     protected EntityTypeManagerInterface $entityTypeManager,
     protected SourcePluginManager $sourceManager,
     protected LoggerInterface $logger,
+    protected FormBuilderInterface $formBuilder,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->data = $configuration;
@@ -85,7 +76,8 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
       $container->get('display_builder.htmx_events'),
       $container->get('entity_type.manager'),
       $container->get('plugin.manager.ui_patterns_source'),
-      $container->get('logger.factory')->get('display_builder')
+      $container->get('logger.factory')->get('display_builder'),
+      $container->get('form_builder'),
     );
   }
 
@@ -113,7 +105,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
     }
 
     if (!$this instanceof IslandWithFormInterface) {
-      return [];
+      return $this->buildContent($builder, $data, $options);
     }
 
     $contexts = $this->configuration['contexts'] ?? [];
@@ -130,7 +122,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
     $form_state->addBuildInfo('args', [$this->getArgs(), $contexts, $options]);
     $form_state->setTemporaryValue('gathered_contexts', $contexts);
 
-    $build = $this->formBuilder()->buildForm($this::getFormClass(), $form_state);
+    $build = $this->formBuilder->buildForm($this::getFormClass(), $form_state);
 
     return $this->afterBuild($build, $form_state);
   }
@@ -197,63 +189,63 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * {@inheritdoc}
    */
-  public function onAttachToRoot(string $instance_id, string $node_id): array {
+  public function onAttachToRoot(InstanceInterface $instance, string $node_id): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onAttachToSlot(string $instance_id, string $node_id, string $parent_id): array {
+  public function onAttachToSlot(InstanceInterface $instance, string $node_id, string $parent_id): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onMove(string $instance_id, string $node_id): array {
+  public function onMove(InstanceInterface $instance, string $node_id): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onActive(string $instance_id, array $data): array {
+  public function onActive(InstanceInterface $instance, array $data): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onUpdate(string $instance_id, string $node_id): array {
+  public function onUpdate(InstanceInterface $instance, string $node_id): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onDelete(string $instance_id, string $parent_id): array {
+  public function onDelete(InstanceInterface $instance, string $parent_id): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onHistoryChange(string $instance_id): array {
+  public function onHistoryChange(InstanceInterface $instance): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onSave(string $instance_id): array {
+  public function onSave(InstanceInterface $instance): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onPresetSave(string $instance_id): array {
+  public function onPresetSave(InstanceInterface $instance): array {
     return [];
   }
 
@@ -293,27 +285,39 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   }
 
   /**
+   * Build content for non-form islands.
+   *
+   * Override this method instead of build() when the plugin does not implement
+   * IslandWithFormInterface but still wants to reuse the preamble logic from
+   * build() (setting builder context, checking isApplicable()).
+   *
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
+   * @param array $data
+   *   The data array.
+   * @param array $options
+   *   Additional options.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function buildContent(InstanceInterface $builder, array $data, array $options): array {
+    return [];
+  }
+
+  /**
    * Helper method to reload island with global data.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The display builder instance.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  protected function reloadWithGlobalData(string $builder_id): array {
-    if (!$this->builder) {
-      // @todo pass \Drupal\display_builder\InstanceInterface object in
-      // parameters instead of loading again.
-      /** @var \Drupal\display_builder\InstanceInterface $builder */
-      $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
-      $this->builder = $builder;
-    }
-    $data = $this->builder->getCurrentState();
-
+  protected function reloadWithGlobalData(InstanceInterface $instance): array {
     return $this->addOutOfBand(
-      $this->build($this->builder, $data),
-      '#' . $this->getHtmlId($builder_id),
+      $this->build($instance, $instance->getCurrentState()),
+      '#' . $this->getHtmlId((string) $instance->id()),
       'innerHTML'
     );
   }
@@ -321,70 +325,39 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * Helper method to reload island with provided local data.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The display builder instance.
    * @param array $data
    *   The local data array to use for building the island.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  protected function reloadWithLocalData(string $builder_id, array $data): array {
-    if (!$this->builder) {
-      // @todo pass \Drupal\display_builder\InstanceInterface object in
-      // parameters instead of loading again.
-      /** @var \Drupal\display_builder\InstanceInterface $builder */
-      $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
-      $this->builder = $builder;
-    }
-
+  protected function reloadWithLocalData(InstanceInterface $instance, array $data): array {
     return $this->addOutOfBand(
-      $this->build($this->builder, $data),
-      '#' . $this->getHtmlId($builder_id),
+      $this->build($instance, $data),
+      '#' . $this->getHtmlId((string) $instance->id()),
       'innerHTML'
     );
   }
 
   /**
-   * Helper method to reload island with instance-specific data.
+   * Helper method to reload island with node-specific data.
    *
-   * @param string $instance_id
-   *   The Display Builder instance ID.
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The display builder instance.
    * @param string $node_id
    *   The tree node ID.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  protected function reloadWithInstanceData(string $instance_id, string $node_id): array {
-    if (!$this->builder) {
-      // @todo pass \Drupal\display_builder\InstanceInterface object in
-      // parameters instead of loading again.
-      /** @var \Drupal\display_builder\InstanceInterface $builder */
-      $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($instance_id);
-      $this->builder = $builder;
-    }
-    $data = $this->builder->getNode($node_id);
-
+  protected function reloadWithNodeData(InstanceInterface $instance, string $node_id): array {
     return $this->addOutOfBand(
-      $this->build($this->builder, $data),
-      '#' . $this->getHtmlId($instance_id),
+      $this->build($instance, $instance->getNode($node_id)),
+      '#' . $this->getHtmlId($node_id),
       'innerHTML'
     );
-  }
-
-  /**
-   * Returns the form builder service.
-   *
-   * @return \Drupal\Core\Form\FormBuilderInterface
-   *   The form builder service.
-   */
-  protected function formBuilder() {
-    if (!$this->formBuilder) {
-      $this->formBuilder = \Drupal::formBuilder();
-    }
-
-    return $this->formBuilder;
   }
 
   /**

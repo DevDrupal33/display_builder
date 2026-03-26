@@ -8,10 +8,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandType;
-use Drupal\display_builder\SlotSourceProxy;
 use Drupal\display_builder\SourceWithSlotsInterface;
-use Drupal\ui_patterns\SourceWithChoicesInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Layers island plugin implementation.
@@ -25,21 +22,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   icon: 'bar-chart-steps',
 )]
 class TreePanel extends BuilderPanel {
-
-  /**
-   * Proxy for slot source operations.
-   */
-  protected SlotSourceProxy $slotSourceProxy;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
-    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->slotSourceProxy = $container->get('display_builder.slot_sources_proxy');
-
-    return $instance;
-  }
 
   /**
    * {@inheritdoc}
@@ -79,18 +61,13 @@ class TreePanel extends BuilderPanel {
    * {@inheritdoc}
    */
   protected function buildSingleComponent(string $builder_id, string $instance_id, SourceWithSlotsInterface $source, array $data, int $index = 0): ?array {
-    $component_id = $source->getPluginId();
-    $label = $source->label();
+    $info = $this->resolveComponentInfo($source, $data, $instance_id);
 
-    if ($source instanceof SourceWithChoicesInterface) {
-      $component_id = $source->getChoice($data['source']);
-      $label = $this->slotSourceProxy->getLabelWithSummary($data, [])['label'];
-    }
-    $instance_id = $instance_id ?: $data['node_id'];
-
-    if (!$instance_id || !$component_id) {
+    if ($info === NULL) {
       return NULL;
     }
+
+    ['label' => $label, 'instance_id' => $instance_id] = $info;
 
     $slots = [];
 

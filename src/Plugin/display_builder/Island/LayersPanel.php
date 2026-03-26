@@ -9,10 +9,8 @@ use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\IslandType;
-use Drupal\display_builder\SlotSourceProxy;
 use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\display_builder\ThirdPartySettingsInterface;
-use Drupal\ui_patterns\SourceWithChoicesInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -29,11 +27,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class LayersPanel extends BuilderPanel {
 
   /**
-   * Proxy for slot source operations.
-   */
-  protected SlotSourceProxy $slotSourceProxy;
-
-  /**
    * Island plugins manager.
    */
   protected IslandPluginManagerInterface $islandManager;
@@ -43,7 +36,6 @@ class LayersPanel extends BuilderPanel {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->slotSourceProxy = $container->get('display_builder.slot_sources_proxy');
     $instance->islandManager = $container->get('plugin.manager.db_island');
 
     return $instance;
@@ -80,25 +72,13 @@ class LayersPanel extends BuilderPanel {
    * {@inheritdoc}
    */
   protected function buildSingleComponent(string $builder_id, string $instance_id, SourceWithSlotsInterface $source, array $data, int $index = 0): ?array {
-    $component_id = $source->getPluginID();
-    $label = $source->label();
+    $info = $this->resolveComponentInfo($source, $data, $instance_id);
 
-    if ($source instanceof SourceWithChoicesInterface) {
-      $component_id = $source->getChoice($data['source']);
-      $label = $this->slotSourceProxy->getLabelWithSummary($data, [])['label'];
-    }
-
-    $instance_id = $instance_id ?: $data['node_id'];
-
-    if (!$instance_id || !$component_id) {
-      $params = [
-        '@instance_id' => $instance_id ?? 'NULL',
-        '@component_id' => $component_id,
-      ];
-      $this->logger->error('[LayersPanel::buildSingleComponent] missing component ID: @component_id or instance ID: @instance_id. <pre>' . \print_r($data, TRUE) . '</pre>', $params);
-
+    if ($info === NULL) {
       return NULL;
     }
+
+    ['label' => $label, 'instance_id' => $instance_id] = $info;
 
     $slots = [];
 

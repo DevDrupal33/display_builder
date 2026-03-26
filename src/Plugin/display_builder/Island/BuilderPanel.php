@@ -15,7 +15,6 @@ use Drupal\display_builder\SlotSourceProxy;
 use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Drupal\ui_patterns\SourcePluginBase;
-use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\ui_patterns\SourceWithChoicesInterface;
 use Masterminds\HTML5;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -50,11 +49,6 @@ class BuilderPanel extends IslandPluginBase {
   protected ComponentElementBuilder $componentElementBuilder;
 
   /**
-   * The UI Patterns source plugin manager.
-   */
-  protected SourcePluginManager $sourceManager;
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
@@ -62,7 +56,6 @@ class BuilderPanel extends IslandPluginBase {
     $instance->renderer = $container->get('renderer');
     $instance->slotSourceProxy = $container->get('display_builder.slot_sources_proxy');
     $instance->componentElementBuilder = $container->get('ui_patterns.component_element_builder');
-    $instance->sourceManager = $container->get('plugin.manager.ui_patterns_source');
 
     return $instance;
   }
@@ -105,47 +98,47 @@ class BuilderPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function onAttachToRoot(string $builder_id, string $instance_id): array {
-    return $this->reloadWithGlobalData($builder_id);
+  public function onAttachToRoot(InstanceInterface $instance, string $node_id): array {
+    return $this->reloadWithGlobalData($instance);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onAttachToSlot(string $builder_id, string $instance_id, string $parent_id): array {
-    return $this->replaceInstance($builder_id, $parent_id);
+  public function onAttachToSlot(InstanceInterface $instance, string $node_id, string $parent_id): array {
+    return $this->replaceNode($instance, $parent_id);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onMove(string $builder_id, string $instance_id): array {
-    return $this->reloadWithGlobalData($builder_id);
+  public function onMove(InstanceInterface $instance, string $node_id): array {
+    return $this->reloadWithGlobalData($instance);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onHistoryChange(string $builder_id): array {
-    return $this->reloadWithGlobalData($builder_id);
+  public function onHistoryChange(InstanceInterface $instance): array {
+    return $this->reloadWithGlobalData($instance);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onUpdate(string $builder_id, string $instance_id): array {
-    return $this->replaceInstance($builder_id, $instance_id);
+  public function onUpdate(InstanceInterface $instance, string $node_id): array {
+    return $this->replaceNode($instance, $node_id);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onDelete(string $builder_id, string $parent_id): array {
+  public function onDelete(InstanceInterface $instance, string $parent_id): array {
     if (empty($parent_id)) {
-      return $this->reloadWithGlobalData($builder_id);
+      return $this->reloadWithGlobalData($instance);
     }
 
-    return $this->replaceInstance($builder_id, $parent_id);
+    return $this->replaceNode($instance, $parent_id);
   }
 
   /**
@@ -166,26 +159,13 @@ class BuilderPanel extends IslandPluginBase {
    *   A renderable array.
    */
   protected function buildSingleComponent(string $builder_id, string $instance_id, SourceWithSlotsInterface $source, array $data, int $index = 0): ?array {
-    $component_id = $source->getPluginID();
-    $label = $source->label();
+    $info = $this->resolveComponentInfo($source, $data, $instance_id);
 
-    if ($source instanceof SourceWithChoicesInterface) {
-      $component_id = $source->getChoice($data['source']);
-      $label = $this->slotSourceProxy->getLabelWithSummary($data, [], TRUE);
-      $label = $label['label'] ?? $source->label();
-    }
-
-    $instance_id = $instance_id ?: $data['node_id'] ?? NULL;
-
-    if (!$instance_id || !$component_id) {
-      $params = [
-        '@instance_id' => $instance_id ?? 'NULL',
-        '@component_id' => $component_id,
-      ];
-      $this->logger->error('[BuilderPanel::buildSingleComponent] missing component ID: @component_id or instance ID: @instance_id. <pre>' . \print_r($data, TRUE) . '</pre>', $params);
-
+    if ($info === NULL) {
       return NULL;
     }
+
+    ['component_id' => $component_id, 'label' => $label, 'instance_id' => $instance_id] = $info;
 
     $build = $this->renderSource($data);
     // Required for the context menu label.
@@ -210,6 +190,51 @@ class BuilderPanel extends IslandPluginBase {
     }
 
     return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $source->label(), $index);
+  }
+
+  /**
+   * Resolves component ID, label, and instance ID from source and data.
+   *
+   * Extracts the shared preamble logic used by all buildSingleComponent()
+   * implementations across BuilderPanel, LayersPanel, and TreePanel.
+   *
+   * @param \Drupal\display_builder\SourceWithSlotsInterface $source
+   *   The source plugin.
+   * @param array $data
+   *   The UI Patterns form state data.
+   * @param string $instance_id
+   *   The instance ID. May be empty; resolved from data['node_id'] as fallback.
+   *
+   * @return array{component_id: string, label: string, instance_id: string}|null
+   *   Associative array with 'component_id', 'label', 'instance_id', or NULL
+   *   if either component_id or instance_id could not be resolved.
+   */
+  protected function resolveComponentInfo(SourceWithSlotsInterface $source, array $data, string $instance_id): ?array {
+    $component_id = $source->getPluginID();
+    $label = $source->label();
+
+    if ($source instanceof SourceWithChoicesInterface) {
+      $component_id = $source->getChoice($data['source']);
+      $result = $this->slotSourceProxy->getLabelWithSummary($data, [], TRUE);
+      $label = $result['label'] ?? $source->label();
+    }
+
+    $instance_id = $instance_id ?: $data['node_id'] ?? NULL;
+
+    if (!$instance_id || !$component_id) {
+      $this->logger->error(
+        '[' . static::class . '::buildSingleComponent] missing component ID: @component_id or instance ID: @instance_id. <pre>' . \print_r($data, TRUE) . '</pre>',
+        ['@instance_id' => $instance_id ?? 'NULL', '@component_id' => $component_id],
+      );
+
+      return NULL;
+    }
+
+    return [
+      'component_id' => $component_id,
+      'label' => $label,
+      'instance_id' => $instance_id,
+    ];
   }
 
   /**
@@ -314,21 +339,18 @@ class BuilderPanel extends IslandPluginBase {
   /**
    * Helper method to replace a specific instance in the DOM.
    *
-   * @param string $builder_id
-   *   The builder ID.
-   * @param string $instance_id
-   *   The instance ID.
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The builder instance.
+   * @param string $node_id
+   *   The node ID from the source tree.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  protected function replaceInstance(string $builder_id, string $instance_id): array {
-    $parent_selector = '#' . $this->getHtmlId($builder_id) . ' [data-node-id="' . $instance_id . '"]';
-    // @todo pass \Drupal\display_builder\InstanceInterface object in
-    // parameters instead of loading again.
-    /** @var \Drupal\display_builder\InstanceInterface $builder */
-    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
-    $data = $builder->getNode($instance_id);
+  protected function replaceNode(InstanceInterface $instance, string $node_id): array {
+    $builder_id = (string) $instance->id();
+    $parent_selector = '#' . $this->getHtmlId($builder_id) . ' [data-node-id="' . $node_id . '"]';
+    $data = $instance->getNode($node_id);
     $build = [];
     $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager->getSlotPropType()]];
 
@@ -345,10 +367,10 @@ class BuilderPanel extends IslandPluginBase {
     }
 
     if ($source instanceof SourceWithSlotsInterface) {
-      $build = $this->buildSingleComponent($builder_id, $instance_id, $source, $data);
+      $build = $this->buildSingleComponent($builder_id, $node_id, $source, $data);
     }
     else {
-      $build = $this->buildSingleBlock($builder_id, $instance_id, $data);
+      $build = $this->buildSingleBlock($builder_id, $node_id, $data);
     }
 
     return $this->makeOutOfBand(

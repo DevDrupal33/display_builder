@@ -40,13 +40,12 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onSave(DisplayBuilderEvent $event): void {
-    $builder_id = $event->getBuilderId();
-    /** @var \Drupal\display_builder\InstanceInterface $instance */
-    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
+    $instance = $event->getInstance();
+    $instance_id = (string) $instance->id();
     $contexts = $instance->getContexts();
 
     // Entity view display overrides.
-    if ($params = EntityViewOverride::checkInstanceId($builder_id)) {
+    if ($params = EntityViewOverride::checkInstanceId($instance_id)) {
       /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
       $entity = $this->entityTypeManager->getStorage($params['entity_type_id'])
         ->load($params['entity_id']);
@@ -61,7 +60,7 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     }
 
     // Entity view displays.
-    elseif (EntityView::checkInstanceId($builder_id)) {
+    elseif (EntityView::checkInstanceId($instance_id)) {
       if (!$instance->hasSaveContextsRequirement(EntityView::getContextRequirement(), $contexts)) {
         return;
       }

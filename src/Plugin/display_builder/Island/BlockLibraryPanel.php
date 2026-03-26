@@ -16,7 +16,6 @@ use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\ui_patterns\SourcePluginBase;
-use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\ui_patterns\SourceWithChoicesInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -26,7 +25,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 #[Island(
   id: 'block_library',
   enabled_by_default: TRUE,
-  label: new TranslatableMarkup('Blocks library'),
+  label: new TranslatableMarkup('Blocks'),
   description: new TranslatableMarkup('List of available blocks.'),
   type: IslandType::Library,
 )]
@@ -50,14 +49,9 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
   protected array $sources = [];
 
   /**
-   * The module list extension service.
+   * The module extension list service.
    */
   protected ModuleExtensionList $moduleList;
-
-  /**
-   * The UI Patterns source plugin manager.
-   */
-  protected SourcePluginManager $sourceManager;
 
   /**
    * {@inheritdoc}
@@ -65,7 +59,6 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->moduleList = $container->get('extension.list.module');
-    $instance->sourceManager = $container->get('plugin.manager.ui_patterns_source');
 
     return $instance;
   }
@@ -141,13 +134,6 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
         'content' => $this->buildDraggables($builder_id, $build),
       ],
     ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function label(): string {
-    return 'Blocks';
   }
 
   /**

@@ -20,7 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 #[Island(
   id: 'preset_library',
-  label: new TranslatableMarkup('Preset library'),
+  label: new TranslatableMarkup('Presets'),
   description: new TranslatableMarkup('List of preset, already build group of components.'),
   type: IslandType::Library,
 )]
@@ -39,13 +39,6 @@ class PresetLibraryPanel extends IslandPluginBase {
     $instance->presetConfigStorage = $container->get('entity_type.manager')->getStorage('pattern_preset');
 
     return $instance;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function label(): string {
-    return 'Presets';
   }
 
   /**
@@ -105,8 +98,8 @@ class PresetLibraryPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function onPresetSave(string $builder_id): array {
-    return $this->reloadWithGlobalData($builder_id);
+  public function onPresetSave(InstanceInterface $instance): array {
+    return $this->reloadWithGlobalData($instance);
   }
 
   /**

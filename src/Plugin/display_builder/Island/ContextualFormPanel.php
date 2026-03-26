@@ -14,8 +14,6 @@ use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
 use Drupal\display_builder\IslandWithFormTrait;
 use Drupal\display_builder\SourceWithSlotsInterface;
-use Drupal\ui_patterns\SourcePluginManager;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Instance form island plugin implementation.
@@ -23,35 +21,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 #[Island(
   id: 'contextual_form',
   enabled_by_default: TRUE,
-  label: new TranslatableMarkup('Contextual form'),
+  label: new TranslatableMarkup('Config'),
   description: new TranslatableMarkup('Configure the active component or block.'),
   type: IslandType::Contextual,
 )]
 class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInterface {
 
   use IslandWithFormTrait;
-
-  /**
-   * The UI Patterns source plugin manager.
-   */
-  protected SourcePluginManager $sourceManager;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
-    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->sourceManager = $container->get('plugin.manager.ui_patterns_source');
-
-    return $instance;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function label(): string {
-    return 'Config';
-  }
 
   /**
    * {@inheritdoc}
@@ -121,43 +97,39 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
   /**
    * {@inheritdoc}
    */
-  public function onAttachToRoot(string $builder_id, string $instance_id): array {
-    return $this->reloadWithInstanceData($builder_id, $instance_id);
+  public function onAttachToRoot(InstanceInterface $instance, string $node_id): array {
+    return $this->reloadWithNodeData($instance, $node_id);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onAttachToSlot(string $builder_id, string $instance_id, string $parent_id): array {
-    return $this->reloadWithInstanceData($builder_id, $instance_id);
+  public function onAttachToSlot(InstanceInterface $instance, string $node_id, string $parent_id): array {
+    return $this->reloadWithNodeData($instance, $node_id);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onActive(string $builder_id, array $data): array {
-    return $this->reloadWithLocalData($builder_id, $data);
+  public function onActive(InstanceInterface $instance, array $data): array {
+    return $this->reloadWithLocalData($instance, $data);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onUpdate(string $builder_id, string $instance_id): array {
+  public function onUpdate(InstanceInterface $instance, string $node_id): array {
     // Reload the form itself on update.
-    // @todo pass \Drupal\display_builder\InstanceInterface object in
-    // parameters instead of loading again.
-    /** @var \Drupal\display_builder\InstanceInterface $builder */
-    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
-    $data = $builder->getNode($instance_id);
+    $data = $instance->getNode($node_id);
 
-    return $this->reloadWithLocalData($builder_id, $data);
+    return $this->reloadWithLocalData($instance, $data);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onDelete(string $builder_id, string $parent_id): array {
-    return $this->reloadWithLocalData($builder_id, []);
+  public function onDelete(InstanceInterface $instance, string $parent_id): array {
+    return $this->reloadWithLocalData($instance, []);
   }
 
   /**

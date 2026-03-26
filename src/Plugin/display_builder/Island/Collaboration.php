@@ -15,6 +15,7 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandConfigurationFormInterface;
 use Drupal\display_builder\IslandConfigurationFormTrait;
 use Drupal\display_builder\IslandPluginBase;
+use Drupal\display_builder\IslandReloadEventsTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\file\FileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -31,6 +32,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 )]
 class Collaboration extends IslandPluginBase implements IslandConfigurationFormInterface {
 
+  use IslandReloadEventsTrait;
   use IslandConfigurationFormTrait;
 
   /**
@@ -132,11 +134,6 @@ class Collaboration extends IslandPluginBase implements IslandConfigurationFormI
    * {@inheritdoc}
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    $builder_id = (string) $builder->id();
-    // @todo pass \Drupal\display_builder\InstanceInterface object in
-    // parameters instead of loading again.
-    /** @var \Drupal\display_builder\InstanceInterface $builder */
-    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
     $this->builder = $builder;
     $users = $builder->getUsers();
     $current_user = $this->currentUser->id();
@@ -179,48 +176,6 @@ class Collaboration extends IslandPluginBase implements IslandConfigurationFormI
     $build['#attached']['library'][] = 'display_builder/htmx_sse';
 
     return $build;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onAttachToRoot(string $builder_id, string $instance_id): array {
-    return $this->rebuild($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onAttachToSlot(string $builder_id, string $instance_id, string $parent_id): array {
-    return $this->rebuild($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onMove(string $builder_id, string $instance_id): array {
-    return $this->rebuild($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onHistoryChange(string $builder_id): array {
-    return $this->rebuild($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onUpdate(string $builder_id, string $instance_id): array {
-    return $this->rebuild($builder_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onDelete(string $builder_id, string $parent_id): array {
-    return $this->rebuild($builder_id);
   }
 
   /**
@@ -306,31 +261,6 @@ class Collaboration extends IslandPluginBase implements IslandConfigurationFormI
       ],
       'avatars' => $avatars,
     ];
-  }
-
-  /**
-   * Rebuilds the island with the given builder ID.
-   *
-   * @param string $builder_id
-   *   The ID of the builder.
-   *
-   * @return array
-   *   The rebuilt island.
-   */
-  private function rebuild(string $builder_id): array {
-    if (!$this->builder) {
-      // @todo pass \Drupal\display_builder\InstanceInterface object in
-      // parameters instead of loading again.
-      /** @var \Drupal\display_builder\InstanceInterface $builder */
-      $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
-      $this->builder = $builder;
-    }
-
-    return $this->addOutOfBand(
-      $this->build($this->builder),
-      '#' . $this->getHtmlId($builder_id),
-      'innerHTML'
-    );
   }
 
 }

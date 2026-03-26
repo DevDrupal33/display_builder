@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Event;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\display_builder\IslandPluginManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -18,7 +17,6 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    */
   public function __construct(
     protected IslandPluginManagerInterface $islandManager,
-    protected EntityTypeManagerInterface $entityTypeManager,
   ) {}
 
   /**
@@ -105,7 +103,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onUpdate(DisplayBuilderEvent $event): void {
-    $this->dispatchToIslands($event, __FUNCTION__, [$event->getNodeId(), $event->getCurrentIslandId()]);
+    $this->dispatchToIslands($event, __FUNCTION__, [$event->getNodeId()]);
   }
 
   /**
@@ -139,12 +137,10 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   (Optional) The parameters to the method.
    */
   private function dispatchToIslands(DisplayBuilderEvent $event, string $method, array $parameters = []): void {
-    \array_unshift($parameters, $event->getBuilderId());
+    \array_unshift($parameters, $event->getInstance());
 
     $configuration = $event->getIslandConfiguration();
-    /** @var \Drupal\display_builder\InstanceInterface $builder */
-    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($event->getBuilderId());
-    $contexts = $builder->getContexts();
+    $contexts = $event->getInstance()->getContexts();
     $islands = $this->islandManager->createInstances($this->islandManager->getDefinitions(), $contexts, $configuration);
 
     $island_enabled = $event->getEnabledIslands();
@@ -163,9 +159,6 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
         continue;
       }
 
-      if (!\method_exists($island, $method)) {
-        continue;
-      }
       $result = $island->{$method}(...$parameters);
 
       if ($result !== NULL) {

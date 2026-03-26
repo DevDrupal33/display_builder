@@ -11,6 +11,7 @@ use Drupal\Core\Form\SubformState;
 use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\IslandWithFormInterface;
@@ -142,29 +143,29 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
   /**
    * {@inheritdoc}
    */
-  public function onAttachToRoot(string $builder_id, string $instance_id): array {
-    return $this->reloadWithInstanceData($builder_id, $instance_id);
+  public function onAttachToRoot(InstanceInterface $instance, string $node_id): array {
+    return $this->reloadWithNodeData($instance, $node_id);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onAttachToSlot(string $builder_id, string $instance_id, string $parent_id): array {
-    return $this->reloadWithInstanceData($builder_id, $instance_id);
+  public function onAttachToSlot(InstanceInterface $instance, string $node_id, string $parent_id): array {
+    return $this->reloadWithNodeData($instance, $node_id);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onActive(string $builder_id, array $data): array {
-    return $this->reloadWithLocalData($builder_id, $data);
+  public function onActive(InstanceInterface $instance, array $data): array {
+    return $this->reloadWithLocalData($instance, $data);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function onDelete(string $builder_id, string $parent_id): array {
-    return $this->reloadWithLocalData($builder_id, []);
+  public function onDelete(InstanceInterface $instance, string $parent_id): array {
+    return $this->reloadWithLocalData($instance, []);
   }
 
 }

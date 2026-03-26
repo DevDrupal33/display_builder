@@ -39,9 +39,9 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onSave(DisplayBuilderEvent $event): void {
-    $builder_id = $event->getBuilderId();
+    $instance = $event->getInstance();
     $contexts = $event->getData();
-    $params = PageLayout::checkInstanceId($builder_id);
+    $params = PageLayout::checkInstanceId((string) $instance->id());
 
     if (!$params) {
       return;
@@ -50,9 +50,6 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     // Context requirements is set to allow SourcePlugin when editing. We need
     // a precedence when saving.
     // @todo perhaps we need a third context.
-    /** @var \Drupal\display_builder\InstanceInterface $instance */
-    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
-
     if (!$instance->hasSaveContextsRequirement(PageLayout::getContextRequirement(), $contexts)) {
       return;
     }
