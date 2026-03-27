@@ -17,7 +17,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  *  ...
  *  options:
  *    _admin_route: false
- *    _display_builder_route: true
+ *    _display_builder_full_page_route: true
  *
  * @endcode
  */
@@ -59,8 +59,8 @@ class PageVariantSubscriber implements EventSubscriberInterface {
     // neither the theme's page.html.twig nor the page managed by Display
     // Builder. We want a simple blank page.
     // Example: entity.page_layout.display_builder.
-    if ($options['_display_builder_route'] ?? FALSE) {
-      $event->setPluginId('simple_page');
+    if ($options['_display_builder_full_page_route'] ?? FALSE) {
+      $event->setPluginId('display_builder_full');
 
       return;
     }
@@ -83,7 +83,7 @@ class PageVariantSubscriber implements EventSubscriberInterface {
     }
 
     // Every other pages must be managed by Display Builder.
-    $event->setPluginId('display_builder');
+    $event->setPluginId('display_builder_page_layout');
   }
 
 }

@@ -23,10 +23,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * A variant for pages managed by Display Builder Page Layout.
  */
 #[PageDisplayVariant(
-  id: 'display_builder',
-  admin_label: new TranslatableMarkup('Display Builder page')
+  id: 'display_builder_page_layout',
+  admin_label: new TranslatableMarkup('Display Builder Page Layout')
 )]
-class DisplayBuilderPageVariant extends VariantBase implements ContainerFactoryPluginInterface, PageVariantInterface {
+class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPluginInterface, PageVariantInterface {
 
   private const SOURCE_CONTENT_ID = 'main_page_content';
 

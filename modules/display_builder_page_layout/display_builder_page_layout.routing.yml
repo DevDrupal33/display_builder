@@ -34,7 +34,7 @@ entity.page_layout.display_builder:
       page_layout:
         type: 'entity:page_layout'
     _admin_route: false
-    _display_builder_route: true
+    _display_builder_full_page_route: true
 
 entity.page_layout.delete_form:
   path: '/admin/structure/page-layout/{page_layout}/delete'

@@ -44,4 +44,17 @@ class PageLayoutHook {
     }
   }
 
+  /**
+   * Preprocess theme variables for HTML templates.
+   *
+   * @param array $variables
+   *   The variables array (modify in place).
+   *
+   * @see \Drupal\display_builder_page_layout\Plugin\DisplayVariant\FullPageBuilderPageVariant
+   */
+  #[Hook('preprocess_html')]
+  public function preprocessHtml(array &$variables): void {
+    unset($variables['page']['content']['page_title']);
+  }
+
 }
