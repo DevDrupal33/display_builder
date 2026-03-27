@@ -1,7 +1,7 @@
 # Installation
 
 !!!warning "Drupal 11.3"
-  Display builder targets Drupal **11.3**. No Drupal 10.x support is planned unless sponsored.
+    Display Builder targets Drupal **11.3**. No Drupal 10.x support is planned unless sponsored.
 
 Like any other Drupal module, it is recommended to use composer:
 
@@ -18,7 +18,7 @@ Display Builder is split in sub-modules, one for each Drupal Core's display buil
 They can be activated from `Administration > Extends` (`/admin/modules`) or with Drush:
 
 ```shell
-drush -y en display_builder_entity_view display_builder_page_layout display_builder_page_views
+drush -y en display_builder_entity_view display_builder_page_layout display_builder_views
 ```
 
 You can also install Display Builder UI to [configure Display Builder](configuration.md):
@@ -31,15 +31,15 @@ drush -y en display_builder_ui
 
 Display Builder is automatically activating its dependencies:
 
-- UI Patterns: the "engine" of Display Builder
+- UI Patterns: the *engine* of Display Builder
 - UI Patterns Field: for the [entity overrides](entity-displays-overrides.md) storage
-- UI Patterns Field Formatters: fo format each field item in entity displays
+- UI Patterns Field Formatters: to format each field item in entity displays
 
 We are also recommending:
 
 - UI Patterns Library (from `ui_patterns` module): provides [a nice component library](https://project.pages.drupalcode.org/ui_patterns/2-authors/1-stories-and-library/)
-- [UI Styles](https://www.drupal.org/project/ui_styles): to use the "Styles" contextual panel
-- [UI Skins](https://www.drupal.org/project/ui_skins): to use the "Design Tokens" contextual panel
+- [UI Styles](https://www.drupal.org/project/ui_styles): to use the **Styles** contextual panel
+- [UI Skins](https://www.drupal.org/project/ui_skins): to use the **Design Tokens** contextual panel
 
 ## Patches
 
@@ -53,7 +53,7 @@ composer config extra.enable-patching "true"
 
 ## Local libraries
 
-Display Builder rely on [Shoelace component library](https://shoelace.style/getting-started/installation),
+Display Builder relies on [Shoelace component library](https://shoelace.style/getting-started/installation),
 and HTMX [sse extension](https://htmx.org/extensions/sse/).
 
 By default libraries are loaded with CDN, but you can switch to local copies with drush:
@@ -70,7 +70,7 @@ drush state:delete display_builder.asset_libraries_local
 drush cache:rebuild
 ```
 
-Currently asset.packagist provide a version of Shoelace with Lit dependencies.
+Currently asset.packagist provides a version of Shoelace with Lit dependencies.
 
 Installation with package manager is recommended.
 

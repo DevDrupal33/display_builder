@@ -11,7 +11,7 @@ declare(strict_types=1);
  * Implements hook_install().
  */
 function display_builder_views_install(): void {
-  $config = Drupal::service('config.factory')->getEditable('views.settings');
+  $config = \Drupal::service('config.factory')->getEditable('views.settings');
   /** @var array $display_extenders */
   $display_extenders = $config->get('display_extenders') ?: [];
   $display_extenders[] = 'display_builder';
@@ -23,7 +23,7 @@ function display_builder_views_install(): void {
  * Implements hook_uninstall().
  */
 function display_builder_views_uninstall(): void {
-  $config = Drupal::service('config.factory')->getEditable('views.settings');
+  $config = \Drupal::service('config.factory')->getEditable('views.settings');
   /** @var array $display_extenders */
   $display_extenders = $config->get('display_extenders') ?: [];
   $key = \array_search('display_builder', $display_extenders, TRUE);

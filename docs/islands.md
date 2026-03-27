@@ -3,7 +3,7 @@
 There are 5 type of islands:
 
 - `View` panels: They are displayed tabbed in the center of the toolbar, or as buttons in the start of the toolbar
-- `Button`s: they a re displayed as buttons in the end of the toolbar
+- `Button`s: they are displayed as buttons in the end of the toolbar
 - `Library` panels: They are displayed tabbed into the Library View panel.
 - `Menu` items: they are displayed in the contextual menu triggered with right-click.
 - `Contextual` panels: They are displayed tabbed into the contextual sidebar.
@@ -40,7 +40,10 @@ Manage hierarchical layer view of elements without preview.
 
 ![Layers](images/islands/layers.webp)
 
-Layers is better for dropping components and blocks when the preview in the builder panel is making thinks complicated. For examples: a modal, a sliding slider, a collapsing accordion...
+Layers is better for dropping components and blocks when the preview in the
+builder panel is making things complicated.  
+For examples: a modal, a sliding slider, a collapsing accordion is hard to
+manipulate when built.
 
 ### Tree
 
@@ -168,3 +171,11 @@ Override CSS variables for the active component or block.
 ### Visibility
 
 Set visibility conditions for the active component or block.
+
+## See also
+
+- [Configuring Display Builder](configuration.md) - Configure islands in profiles
+- [Extend with island plugins](island-plugins.md) - Create custom islands
+- [Pattern presets](pattern-presets.md) - Save and reuse component arrangements
+- [Real-time collaboration](realtime-collaboration.md) - Work together with other
+  editors

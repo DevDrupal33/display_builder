@@ -12,17 +12,17 @@ There is no page layout activated by default. You need to create your owns in Ad
 
 ## Create and edit
 
-Adding a page layout is simple:
+Adding a page layout requires the following steps:
 
-- Set the Label
-- Pick your Display builder profile
-- Set your conditions
+1. Set the Label
+2. Pick your Display Builder profile
+3. Set your conditions
 
 ![Add page layout](images/page-layout-add.webp)
 
 Condition plugins is the heart of the form:
 
-- Drupal Core already provides a few plugins. "Pages" is the most commonly used. "Language" is visible only if at least two languages are activated in the site.
+- Drupal Core already provides a few plugins. **Pages** is the most commonly used. **Language** is visible only if at least two languages are activated in the site.
 - You can add more conditions by activating or developing Drupal modules.
 - Most condition plugin utilize contexts. The context will be the one of the page visitors will load.
 - All conditions must be met for a page layout to load.
@@ -39,7 +39,7 @@ Or from the edit page:
 
 ![Edit page layout](images/page-layout-edit.webp)
 
-The Display Builder instance is a normal one with some data preloaded (but not already saved) and some sources specific to the "Page" context:
+The Display Builder instance is a normal one with some data preloaded (but not already saved) and some sources specific to the *Page* context:
 
 - `[Page] title`
 - `[Page] Main content`
@@ -58,7 +58,8 @@ All _Page layouts_ are manageable from the overview page:
 
 _Page layouts_ are draggable and orderable. Order is important. Don't forget to save.
 
-From top to bottom, checking _Page layouts_ one by one, the first one which is both:
+From top to bottom, checking _Page layouts_ one by one, the first one which is
+both:
 
 - enabled with non-empty Display Builder
 - applicable according to all its conditions in the context of the page
@@ -66,8 +67,15 @@ From top to bottom, checking _Page layouts_ one by one, the first one which is b
 will be loaded for the page, as a replacement of both:
 
 - _Block Layout_ admin UI
-- the page regions defined in the theme (with the related `page.html.twig` template)
+- the page regions defined in the theme (with the related `page.html.twig`
+  template)
 
-It is better to keep the most specific ones at the top, and the more generic at the bottom.
+It is better to keep the most specific ones at the top, and the more generic at
+the bottom.
+
+!!!tip
+    Order matters! Position your most specific condition checks at the top, since
+    Display Builder will use the first matching page layout. Generic layouts should
+    be at the bottom as fallbacks.
 
 If no Page layout matches, _Block Layout_ still manage the page.

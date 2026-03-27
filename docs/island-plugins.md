@@ -9,7 +9,7 @@ Display Builder extensively uses HTMX's [out-of-band swapping](https://htmx.org/
 There are 5 type of islands:
 
 - `View` panels: They are displayed tabbed in the center of the toolbar, or as buttons in the start of the toolbar
-- `Button`s: they a re displayed as buttons in the end of the toolbar
+- `Button`s: they are displayed as buttons in the end of the toolbar
 - `Library` panels: They are displayed tabbed into the Library View panel
 - `Menu` items: they are displayed in the contextual menu triggered with right-click
 - `Contextual` panels: They are displayed tabbed into the contextual sidebar
@@ -23,8 +23,8 @@ Visual positioning:
 Notable methods:
 
 - `IslandInterface::build()`: Build the renderable content of the island from state data. This renderable can be annotated by `HtmxEvents` to trigger HTTP requests
-- Everything from `IslandEventSubscriberInterface`: each method (`onAttachToSlot()`, `onMove()`, ()`onUpdate()`...) is an HTMX event managed by the HTTP `ApiController`
-- `PluginFormInterface::buildConfigurationForm()`: to make the island plugin configurable in the [Display builder profile (config entity)](configuration.md)
+- Everything from `IslandEventSubscriberInterface`: each method (`onAttachToSlot()`, `onMove()`, `onUpdate()`...) is an HTMX event managed by the HTTP `ApiController`
+- `PluginFormInterface::buildConfigurationForm()`: to make the island plugin configurable in the [Display Builder profile (config entity)](configuration.md)
 
 HTMX behavior will change according to `IslandInterface::build()` return value:
 
@@ -66,6 +66,6 @@ We provide a small utility to map buttons to keyboard shortcuts to ease actions 
 If your Island provide a button you should use our method `\Drupal\display_builder\RenderableBuilderTrait::buildButton()` to generate your button.
 This method allow a keyboard mapping as parameter. Check the class for more info.
 
-If your island is of type `Island:View`, implement the `keyboardShortcuts()` method.
+If your island is of type `IslandType::View`, implement the `keyboardShortcuts()` method.
 
 _Note_: There is no control on duplicate, please ensure your shortcut is not already used.

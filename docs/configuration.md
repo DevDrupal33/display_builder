@@ -6,15 +6,15 @@ Permissions:
 
 - "Administer display builder"
 
-## List of Display builder profiles
+## List of Display Builder profiles
 
 `/admin/structure/display-builder`
 
-![Display builder profiles](images/configs.webp)
+![Display Builder profiles](images/configs.webp)
 
-## Configuration of a single Display builder profile (config entity)
+## Configuration of a single Display Builder profile (config entity)
 
-Each Display builder profile is a configuration entity with:
+Each Display Builder profile is a configuration entity with:
 
 - Metadata: a label and a description
 - The islands configuration, by type
@@ -22,7 +22,7 @@ Each Display builder profile is a configuration entity with:
 There are 5 type of islands:
 
 - `View` panels: They are displayed tabbed in the center of the toolbar, or as buttons in the start of the toolbar
-- `Button`s: they a re displayed as buttons in the end of the toolbar
+- `Button`s: they are displayed as buttons in the end of the toolbar
 - `Library` panels: They are displayed tabbed into the Library View panel
 - `Menu` items: they are displayed in the contextual menu triggered with right-click
 - `Contextual` panels: They are displayed tabbed into the contextual sidebar
@@ -56,10 +56,17 @@ And Toolbar Buttons can be moved from one side to the other of the toolbar.
 
 ## Access & permissions
 
-Each Display builder profile is associated to a permission:
+Each Display Builder profile is associated to a permission:
 
 ![Permissions](images/permissions.webp)
 
 This is conditioning the builders available in the selector for a specific user:
 
 ![Configuration selector](images/selector.webp)
+
+## See also
+
+- [Available islands](islands.md) - Learn about built-in UI islands
+- [Extend with island plugins](island-plugins.md) - Create custom islands
+- [Entity displays](entity-displays.md) - Example of Display Builder usage
+- [Page layouts](page-layout.md) - Another example of Display Builder usage

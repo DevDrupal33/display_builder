@@ -8,7 +8,7 @@ A pattern preset is a reusable arrangement of components, because:
 They must not be confused with UI components:
 
 - Components are the individual building blocks that a UI is made out of. They're context-agnostic and can be used anywhere within an app. They are SDC plugins.
-- Patterns are the ways these components are used within a UI. They're relevant only in certain context They are config entities.
+- Patterns are the ways these components are used within a UI. They're relevant only in certain contexts. They are config entities.
 
 ## Activate
 

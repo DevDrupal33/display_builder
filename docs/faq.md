@@ -2,10 +2,10 @@
 
 ## Where are my displays stored?
 
-Display builder is storing displays at the most "normal" place possible:
+Display Builder stores displays at the most *normal* place possible:
 
 - [Entity View Display](entity-displays.md): in config entity's Third Party Settings, like Layout Builder do.
-- [Entity View Display Overrides](entity-displays-overrides.md): in an UI Patterns content entity field.
+- [Entity View Display Overrides](entity-displays-overrides.md): in a UI Patterns content entity field.
 - [Views](with-views.md): in a Display Extender plugin, so in the View config entity.
 - [Page Layout](page-layout.md): in a dedicated config entity.
 
@@ -13,7 +13,7 @@ Everything at the right place.
 
 ## Why my SDC component doesn't work well with Display Builder?
 
-Display Builder is not doing anything anything specific with your SDC. It is only an user interface upon UI Patterns 2.
+Display Builder is not doing anything specific with your SDC. It is only a user interface upon UI Patterns 2.
 
 UI Patterns 2 is not expecting you to change your SDC component in order to be compatible.
 
@@ -57,7 +57,7 @@ But Canvas is currently targeting a deeper <strong>vertical</strong> scope (befo
 |                     | Canvas                   | Display Builder                         |
 | ------------------- | ------------------------ | --------------------------------------- |
 | Content editing     | ✅ the main feature      | ⚠️ Planned                              |
-| Component authoring | ✅ the "code components" | ❌ Out of scope, we promote SDC instead |
+| Component authoring | ✅ the *code components* | ❌ Out of scope, we promote SDC instead |
 
 Both share more or less the same feature set:
 
@@ -90,7 +90,7 @@ If one of the module is fixing the issue, it will be enough. If both modules are
 
 `layout_builder_restrictions_by_role` allows restricting what roles can place what blocks or use what layout (so, what component).
 
-This is doable with Display Builder by creating different Display builder profiles by role and [to configure](configuration.md) the _Components library_ and _Block library panels_ differently.
+This is doable with Display Builder by creating different Display Builder profiles by role and [to configure](configuration.md) the _Components library_ and _Block library panels_ differently.
 
 ### What is the equivalent of [Layout Builder Lock](https://www.drupal.org/project/layout_builder_lock)?
 
@@ -113,6 +113,6 @@ We use `localStorage` that can change anytime, be sure to clear your local stora
 
 Instance entities are volatile storages for the current, often unpublished, work on displays.
 
-- Install and enable module `display_builder_dev_tools`
+- Install and enable module [display_builder_dev_tools](http://drupal.org/project/display_builder_dev_tools)
 - Go to Structure > Display Builder > Instances
 - `Delete` from the _Operations_ dropdown of each instance

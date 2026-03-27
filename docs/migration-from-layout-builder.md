@@ -63,7 +63,7 @@ Layout builder components:
 
 ### ⚠️ Note about wrapper templates
 
-Display Builder rendering is skipping do not load `block.html.twig` and `field.html.twig`, so it does not execute `hook_preprocess_block` and `hook_preprocess_field`.
+Display Builder rendering does not load `block.html.twig` and `field.html.twig`, so it does not execute `hook_preprocess_block` and `hook_preprocess_field`.
 
 So, the modules adding third-party settings and executing those hooks will still have the form displayed in the contextual panel, but the alteration of the renderable will not be executed.
 

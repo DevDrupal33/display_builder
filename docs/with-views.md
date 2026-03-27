@@ -1,11 +1,14 @@
 # Use Display Builder with Views
 
-Drupal's Views module is both a query builder and a display builder:
+Drupal's Views module combines two distinct roles: query building and display
+building. Display Builder focuses on the display building aspect, providing a
+more intuitive interface for organizing and configuring the view's display
+regions.
 
-- **query building** is done with filter, sort, contextual filters and relationships plugins. Display Builder is not dealing with them
-- **display building** is done with style, pager, area, exposed form... plugins. Display Builder is not managing them directly but is interacting with them.
+## Overview
 
-Display Builder is providing a nicer way of using, positioning & configuring View's display regions:
+Display Builder provides a nicer way of using, positioning & configuring View's
+display regions:
 
 - Exposed form
 - Attachment before & Attachment after
@@ -21,7 +24,7 @@ Visual representation:
 
 You need `display_builder_views` module.
 
-On the view, Display Builder can be activated in "Other":
+On the view, Display Builder can be activated in **Other**:
 
 ![Views activation 1](images/views-activation-1.webp)
 
@@ -43,6 +46,18 @@ View Title source is also available for string prop:
 
 ![Views title](images/views-title.webp)
 
+!!!note
+    Previews and source configuration directly from Display Builder are still being
+    developed. See the related issues for updates on these features.
+
 > 🚧 2025-08-26: Previews are not working yet. See [#3542796](https://www.drupal.org/i/3542796)
 
 > 🚧 2025-08-26: We are not able to configure the sources directly from Display Builder yet. See [#3533043](https://www.drupal.org/i/3533043)
+
+## See also
+
+- [Display Builder islands](islands.md) - Learn about available UI components
+- [Pattern presets](pattern-presets.md) - Reuse component arrangements across
+  views
+- [Entity view displays](entity-displays.md) - Similar display building for entity
+  views

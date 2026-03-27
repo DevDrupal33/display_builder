@@ -4,7 +4,7 @@
 
 Display Builder data is stored as a third party settings with those properties:
 
-- `profile`: the Display builder profile (config entity) in use last time the config was saved
+- `profile`: the Display Builder profile (config entity) in use last time the config was saved
 - `sources`: a UI Patterns 2 sources tree
 
 Example:
@@ -35,7 +35,7 @@ Display Builder data is stored as content field provided by `ui_patterns_field` 
 - `source`: the source plugin config
 - `third_party_settings`: extra configuration, prefixed by module or island plugin ID
 
-The entity view display config entity has additional `override_field` and `override_profile` properties for the field name storing the data and the related display builder profile:
+The entity view display config entity has additional `override_field` and `override_profile` properties for the field name storing the data and the related Display Builder profile:
 
 ```yaml
 id: node.article.default
@@ -60,7 +60,7 @@ Overview:
 
 Each page is its own config entity
 
-- `profile`: the Display builder profile (config entity) in use last time the config was saved
+- `profile`: the Display Builder profile (config entity) in use last time the config was saved
 - `sources`: a UI Patterns 2 sources tree
 
 Example:
@@ -86,7 +86,7 @@ Overview:
 
 Display Builder is a `display_extender` plugin with those properties:
 
-- `profile`: the Display builder profile (config entity) in use last time the config was saved
+- `profile`: the Display Builder profile (config entity) in use last time the config was saved
 - `sources`: a UI Patterns 2 sources tree
 
 Example:

@@ -1,10 +1,10 @@
-# Entity view displays overrides with Display builder
+# Entity view displays overrides with Display Builder
 
 ## Activate
 
-You need `display_builder_entity_view` module and `ui_patterns_field` sub-module form [UI Patterns 2](https://www.drupal.org/project/ui_patterns) project.
+You need `display_builder_entity_view` module and `ui_patterns_field` sub-module from [UI Patterns 2](https://www.drupal.org/project/ui_patterns) project.
 
-Contrary to Layout Builder, there is no "Allow each content item to have its layout customize" checkbox in the "Manage display" and no "magic" field added to the content bundle.
+Contrary to Layout Builder, there is no "Allow each content item to have its layout customized" checkbox in the "Manage display" and no "magic" field added to the content bundle.
 
 You can activate Content Overrides for each display:
 
@@ -24,13 +24,13 @@ The field can be changed later:
 
 It is not possible to pick the same field in different displays.
 
-## Use Display builder in the content
+## Use Display Builder in the content
 
 Any user with both the permission to edit the content and the one to use the display builder profile can override the display.
 
 A mechanism similar to Layout Builder's overrides, but not limited to the default display.
 
-If the user can override at least one display, a 'Display' tab id added in the content edit tabs:
+If the user can override at least one display, a *Display* tab is added in the content edit tabs:
 
 ![Tabs](images/overrides-tabs.webp)
 
@@ -42,4 +42,13 @@ The builder is a regular one with the same sources as Entity View Display plus s
 
 ![Builder](images/overrides-builder.webp)
 
-The "Publish" button store the display in the content field. The "Restore" button load the display from the content field.
+The **Publish** button stores the display in the content field. The **Restore** button loads the display from the content field.
+
+!!!tip
+    Content editors can override the display once per configured display (default, teaser, etc.). This gives you granular control over how content appears in different contexts.
+
+## See also
+
+- [Entity view displays](entity-displays.md) - Base display configuration
+- [Pattern presets](pattern-presets.md) - Save and reuse component arrangements
+- [Migration from Layout Builder](migration-from-layout-builder.md) - Transition from Layout Builder overrides

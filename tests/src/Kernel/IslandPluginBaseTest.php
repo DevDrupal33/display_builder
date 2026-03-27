@@ -100,7 +100,7 @@ final class IslandPluginBaseTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Tests ::isApplicable()
+   * Tests ::isApplicable().
    *
    * Even with node_id present, empty plugin-scoped third_party_settings makes
    * isApplicable() return FALSE.
@@ -288,7 +288,7 @@ final class IslandPluginBaseTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Tests ::onAttachToRoot()
+   * Tests ::onAttachToRoot().
    *
    * Verified via TestIndexRawPanel::onAttachToRoot() which call
    * reloadWithGlobalData().

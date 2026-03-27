@@ -1,25 +1,27 @@
 # Use Display Builder for entity view displays
 
-As a replacement of Layout Builder and many modules from its ecosystem.
+Display Builder provides a modern interface to replace Layout Builder and many
+related modules from its ecosystem. This section covers how to configure and use
+Display Builder for entity view displays.
 
-## Activate
+## Activate 
 
 You need `display_builder_entity_view` module.
 
-Display builder can be activated for each display, in the "Display builder" fieldset:
+Display Builder can be activated for each display, in the **Display Builder** fieldset:
 
 ![Activate display builder](images/entity-view-activate.webp)
 
-## Use
+## Usage
 
-Once yor Display builder selection is submitted, you will have access to twice the same link:
+Once your Display Builder selection is submitted, you will have access to two links to the same builder:
 
-- The big "Display builder" button replacing the field formatter table
-- An other button under the profile selector
+- The big **Display Builder** button replacing the field formatter table
+- Another button under the profile selector
 
 ![Activated](images/entity-view-activate-2.webp)
 
-Slot sources specific to the Entity Display context will show up in the "Block Library" panel:
+Slot sources specific to the Entity Display context will show up in the **Block Library** panel:
 
 ![Entity sources](images/entity-display-sources.webp)
 
@@ -31,8 +33,14 @@ You can manually publish the current state in the configuration or restore the s
 
 ## Use with Layout Builder
 
-Both can be activated at the same time and they don't conflict while building the display:
+Both can be activated at the same time and they don't conflict while building
+the display:
 
 ![Entity View](images/entity-view-lb.webp)
 
 However, only one of the tool will be used to render the content.
+
+!!!note
+    You can test Display Builder without removing Layout Builder. Both can coexist,
+    allowing you to switch back if needed. Only one will be active for rendering at
+    a time based on your Display Builder profile selection.

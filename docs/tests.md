@@ -4,15 +4,6 @@ End-to-end tests for this module use [Playwright](https://playwright.dev). Tests
 
 This document provides a short Quickstart, examples for local/Docker usage and troubleshooting tips.
 
-- [Prerequisites](#prerequisites)
-- [Display Builder tests group](#display-builder-tests-group)
-- [Quickstart](#quickstart)
-- [Docker: remote Playwright server](#docker-remote-playwright-server)
-- [Reporting and debugging](#reporting-and-debugging)
-- [Troubleshooting (common issues)](#troubleshooting-common-issues)
-- [Where to look in this repo](#where-to-look-in-this-repo)
-- [Fast debug checklist](#fast-debug-checklist)
-
 ## Prerequisites
 
 - Composer dev dependencies (run from repository root):
