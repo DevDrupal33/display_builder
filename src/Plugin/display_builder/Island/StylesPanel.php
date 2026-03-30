@@ -170,7 +170,7 @@ class StylesPanel extends IslandPluginBase implements IslandWithFormInterface, R
   /**
    * {@inheritdoc}
    */
-  public function onDelete(InstanceInterface $instance, string $parent_id): array {
+  public function onDelete(InstanceInterface $instance, ?string $parent_id): array {
     return $this->reloadWithLocalData($instance, []);
   }
 

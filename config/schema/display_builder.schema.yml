@@ -12,9 +12,6 @@ display_builder.profile.*:
       type: uuid
     description:
       type: text
-    debug:
-      type: boolean
-      label: 'Debug mode'
     islands:
       type: sequence
       label: 'Islands'

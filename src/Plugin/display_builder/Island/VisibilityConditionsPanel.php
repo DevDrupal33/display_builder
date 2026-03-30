@@ -164,7 +164,7 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
   /**
    * {@inheritdoc}
    */
-  public function onDelete(InstanceInterface $instance, string $parent_id): array {
+  public function onDelete(InstanceInterface $instance, ?string $parent_id): array {
     return $this->reloadWithLocalData($instance, []);
   }
 

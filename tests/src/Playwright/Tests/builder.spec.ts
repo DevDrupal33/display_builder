@@ -41,9 +41,12 @@ test('Builder move tests', { tag: [ '@extra' ] }, async ({ page, drupal, display
         - 'button "Block: Tabs"'
         - text: "Textfield: foo foo Test 1 Component 1 Token: corge corge Textfield: grault grault Slot 1 Textfield: bar bar Test 1 Component 2 Textfield: garply garply Slot 1 Textfield: baz baz Test 1 Component 3 Token: waldo waldo Textfield: fred fred Slot 1 Textfield: quux quux Test 2 Token: plugh plugh Textfield: xyzzy xyzzy Slot 1 Textfield: thud thud Slot 2 Textfield: quux quux Base container"
       `)
+
     // Referesh and ensure no changes.
     await page.goto(viewUrl)
     await displayBuilder.shoelaceReady()
+    await displayBuilder.fullHighlight()
+
     await expect(result).toMatchAriaSnapshot(`
         - text: "Block: Tabs"
         - 'button "Block: Tabs"'
@@ -60,8 +63,11 @@ test('Builder move tests', { tag: [ '@extra' ] }, async ({ page, drupal, display
         - 'button "Block: Tabs"'
         - text: "foo Component 1 Token: corge corge grault bar Component 2 garply baz Component 3 waldo fred quux plugh xyzzy thud quux"
       `)
+
     await page.goto(viewUrl)
     await displayBuilder.shoelaceReady()
+    await displayBuilder.fullHighlight()
+
     await expect(result).toMatchAriaSnapshot(`
         - 'button "Block: Tabs"'
         - text: "foo Component 1 Token: corge corge grault bar baz Component 2 garply quux plugh xyzzy thud Component 3 waldo fred quux"

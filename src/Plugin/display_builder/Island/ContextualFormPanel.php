@@ -128,7 +128,7 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
   /**
    * {@inheritdoc}
    */
-  public function onDelete(InstanceInterface $instance, string $parent_id): array {
+  public function onDelete(InstanceInterface $instance, ?string $parent_id): array {
     return $this->reloadWithLocalData($instance, []);
   }
 

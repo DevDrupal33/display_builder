@@ -143,16 +143,12 @@ class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPlugi
     $instance_id = $buildable->getInstanceId();
     $this->replaceTitleAndContent($sources, $this->title, $this->mainContent);
 
+    $data = $contexts = [];
     /** @var \Drupal\display_builder\InstanceInterface $instance */
     $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($instance_id);
-
-    if (!$instance) {
-      $contexts = [];
+    if ($instance) {
+      $contexts = $instance->getContexts();
     }
-    else {
-      $contexts = $instance->getContexts() ?? [];
-    }
-    $data = [];
 
     foreach ($sources as $source) {
       $build = $this->componentElementBuilder->buildSource($data, 'content', [], $source, $contexts);

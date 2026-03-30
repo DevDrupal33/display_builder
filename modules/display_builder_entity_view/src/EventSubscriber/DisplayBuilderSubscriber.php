@@ -6,6 +6,7 @@ namespace Drupal\display_builder_entity_view\EventSubscriber;
 
 use Drupal\Core\Entity\Display\EntityDisplayInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Plugin\Context\ContextInterface;
 use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
@@ -30,6 +31,7 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
   public static function getSubscribedEvents(): array {
     return [
       DisplayBuilderEvents::ON_SAVE => 'onSave',
+      DisplayBuilderEvents::ON_REVERT => 'onRevert',
     ];
   }
 
@@ -71,6 +73,60 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
         /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
         $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $display]);
         $buildable->saveSources();
+      }
+    }
+  }
+
+  /**
+   * Event handler for when a display builder override is reverted.
+   *
+   * Clears the entity field override, then reloads sources from the base
+   * entity view display config so the instance reflects the default layout.
+   *
+   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
+   *   The event object.
+   */
+  public function onRevert(DisplayBuilderEvent $event): void {
+    $instance = $event->getInstance();
+    $instance_id = (string) $instance->id();
+    $instanceInfos = EntityViewOverride::checkInstanceId($instance_id);
+
+    if (!isset($instanceInfos['entity_type_id'], $instanceInfos['entity_id'], $instanceInfos['field_name'])) {
+      return;
+    }
+
+    // Do not get the profile entity ID from Instance context because the
+    // data stored there is not reliable yet.
+    // See: https://www.drupal.org/project/display_builder/issues/3544545
+    $entity = $this->entityTypeManager->getStorage($instanceInfos['entity_type_id'])
+      ->load($instanceInfos['entity_id']);
+
+    if (!$entity instanceof FieldableEntityInterface) {
+      return;
+    }
+
+    // Remove the saved state as the field values will be deleted.
+    $instance->setNewPresent([], 'Revert 1/2: clear overridden data and save');
+    $instance->save();
+    $instance->setSave($instance->getCurrentState());
+
+    // Clear field value.
+    $entity->get($instanceInfos['field_name'])->setValue(NULL);
+    $entity->save();
+
+    $contexts = $instance->get('contexts')->first()->getValue();
+
+    if (isset($contexts['view_mode']) && $contexts['view_mode'] instanceof ContextInterface) {
+      $viewMode = $contexts['view_mode']->getContextValue();
+      $display_id = "{$instanceInfos['entity_type_id']}.{$entity->bundle()}.{$viewMode}";
+
+      /** @var \Drupal\display_builder\DisplayBuildableInterface|null $display */
+      $display = $this->entityTypeManager->getStorage('entity_view_display')
+        ->load($display_id);
+
+      if ($display) {
+        $instance->setNewPresent($display->getSources(), 'Revert 2/2: retrieve existing data from config');
+        $instance->save();
       }
     }
   }

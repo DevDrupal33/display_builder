@@ -9,7 +9,6 @@ use Drupal\display_builder\Controller\ApiController;
 use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\Entity\PatternPreset;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -23,7 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
 #[CoversClass(ApiController::class)]
 #[Group('display_builder')]
 #[RunTestsInSeparateProcesses]
-final class ApiControllerTest extends KernelTestBase {
+final class ApiControllerTest extends DisplayBuilderKernelTestBase {
 
   /**
    * The controller to test.
@@ -116,9 +115,7 @@ final class ApiControllerTest extends KernelTestBase {
     self::assertIsArray($response['logs']);
 
     // The new node must appear in the slot in persisted state.
-    $saved = \Drupal::entityTypeManager()
-      ->getStorage('display_builder_instance')
-      ->load($this->instance->id());
+    $saved = $this->loadInstance($this->instance->id());
     $state = $saved->getCurrentState();
     self::assertNotEmpty($state[0]['source']['component']['slots']['slot_1']['sources']);
   }
@@ -146,7 +143,7 @@ final class ApiControllerTest extends KernelTestBase {
 
     self::assertIsArray($response['history']);
     self::assertIsArray($response['state']);
-    self::assertSame('', $this->instance->getParentId($node_a));
+    self::assertNull($this->instance->getParentId($node_a));
   }
 
   /**
@@ -166,10 +163,141 @@ final class ApiControllerTest extends KernelTestBase {
     self::assertIsArray($response['history']);
     self::assertIsArray($response['state']);
 
-    $saved = \Drupal::entityTypeManager()
-      ->getStorage('display_builder_instance')
-      ->load($this->instance->id());
+    $saved = $this->loadInstance($this->instance->id());
     self::assertEmpty($saved->getCurrentState());
+  }
+
+  /**
+   * Tests ::restore() dispatches ON_RESTORE and resets present state.
+   *
+   * The instance is mutated after save, then restore() must reset the present
+   * state back to what was saved.
+   */
+  public function testRestore(): void {
+    $node_id = $this->instance->attachToRoot(0, 'token', []);
+    // Simulate saving to the backing config (normally done via the save route).
+    $this->instance->setSave($this->instance->getCurrentState());
+    $this->instance->save();
+
+    // Mutate after save — this unsaved change should be discarded by restore.
+    $this->instance->attachToRoot(1, 'token', []);
+
+    $request = Request::create(
+      '/api/display-builder/' . $this->instance->id() . '/restore',
+      'POST',
+    );
+    $response = $this->controller->restore($request, $this->instance);
+
+    self::assertIsArray($response['history']);
+    self::assertIsArray($response['state']);
+    self::assertIsArray($response['logs']);
+
+    // Present state must be restored to the single node that was saved.
+    $saved = $this->loadInstance($this->instance->id());
+    $state = $saved->getCurrentState();
+    self::assertCount(1, $state, 'State is reset to the last saved state.');
+    self::assertSame($node_id, $state[0]['node_id']);
+  }
+
+  /**
+   * Tests ::revert() dispatches ON_REVERT and returns the expected shape.
+   *
+   * For a non-override (standalone) instance the subscriber returns early,
+   * so the saved state must be identical to the state before the call.
+   */
+  public function testRevert(): void {
+    $node_id = $this->instance->attachToRoot(0, 'token', []);
+    $this->instance->save();
+
+    $request = Request::create(
+      '/api/display-builder/' . $this->instance->id() . '/revert',
+      'POST',
+    );
+    $response = $this->controller->revert($request, $this->instance);
+
+    self::assertIsArray($response['history']);
+    self::assertIsArray($response['state']);
+    self::assertIsArray($response['logs']);
+
+    // Non-override instance: subscriber returns early, state must be unchanged.
+    $saved = $this->loadInstance($this->instance->id());
+    $state = $saved->getCurrentState();
+    self::assertCount(1, $state, 'State is unchanged for a non-override instance.');
+    self::assertSame($node_id, $state[0]['node_id']);
+  }
+
+  /**
+   * Tests ::paste() copies a node to root with a fresh node_id.
+   */
+  public function testPasteToRoot(): void {
+    $source_node_id = $this->instance->attachToRoot(0, 'component', [
+      'component' => ['component_id' => 'display_builder_test:test_1'],
+    ]);
+    $this->instance->save();
+
+    $url = Url::fromRoute('display_builder.api_paste', [
+      'display_builder_instance' => $this->instance->id(),
+      'node_id' => $source_node_id,
+      'parent_id' => '__root__',
+      'slot_id' => '__none__',
+      'slot_position' => '0',
+    ]);
+    $request = Request::create($url->toString(), 'POST');
+    $response = $this->controller->paste($request, $this->instance, $source_node_id, '__root__', '__none__', '0');
+
+    self::assertIsArray($response['history']);
+    self::assertIsArray($response['state']);
+    self::assertIsArray($response['logs']);
+
+    $saved = $this->loadInstance($this->instance->id());
+    $state = $saved->getCurrentState();
+    // Original + pasted copy must both exist at root.
+    self::assertCount(2, $state);
+    $node_ids = \array_column($state, 'node_id');
+    // The pasted copy gets a refreshed node_id.
+    self::assertCount(2, \array_unique($node_ids), 'Pasted node must have a unique node_id.');
+    self::assertContains($source_node_id, $node_ids, 'Original node must still exist at root.');
+    // Both must share the same source_id.
+    $source_ids = \array_unique(\array_column($state, 'source_id'));
+    self::assertCount(1, $source_ids, 'Pasted node must preserve the source_id.');
+  }
+
+  /**
+   * Tests ::paste() copies a node into a slot with a fresh node_id.
+   */
+  public function testPasteToSlot(): void {
+    $container_id = $this->instance->attachToRoot(0, 'component', [
+      'component' => ['component_id' => 'display_builder_test:test_1'],
+    ]);
+    $source_node_id = $this->instance->attachToRoot(1, 'token', []);
+    $this->instance->save();
+
+    $url = Url::fromRoute('display_builder.api_paste', [
+      'display_builder_instance' => $this->instance->id(),
+      'node_id' => $source_node_id,
+      'parent_id' => $container_id,
+      'slot_id' => 'slot_1',
+      'slot_position' => '0',
+    ]);
+    $request = Request::create($url->toString(), 'POST');
+    $response = $this->controller->paste($request, $this->instance, $source_node_id, $container_id, 'slot_1', '0');
+
+    self::assertIsArray($response['history']);
+    self::assertIsArray($response['state']);
+    self::assertIsArray($response['logs']);
+
+    $saved = $this->loadInstance($this->instance->id());
+    $state = $saved->getCurrentState();
+    // Root still has both original nodes.
+    self::assertCount(2, $state);
+    // The container's slot_1 must now contain the pasted copy.
+    $container = $state[0];
+    $slot_sources = $container['source']['component']['slots']['slot_1']['sources'] ?? [];
+    self::assertNotEmpty($slot_sources, 'Pasted node must appear in target slot.');
+    // The child in the slot must have a different node_id than the source.
+    $pasted_node_id = $slot_sources[0]['node_id'] ?? NULL;
+    self::assertNotNull($pasted_node_id);
+    self::assertNotSame($source_node_id, $pasted_node_id, 'Pasted node must have a refreshed node_id.');
   }
 
   /**
@@ -197,6 +325,75 @@ final class ApiControllerTest extends KernelTestBase {
     // Non ISO-8859-1 are replaced by a question mark.
     $label = $iso_8859_1_characters . \str_repeat('?', \mb_strlen($other_characters));
     self::assertEquals($preset->label(), $label);
+  }
+
+  /**
+   * Tests that setSource() preserves slot children when updating source data.
+   *
+   * This verifies the A-2 fix: SourceTree stores children in its flat
+   * structure (not in source data), so calling setSource() with new settings
+   * that omit slot children still preserves those children on round-trip.
+   */
+  public function testSetSourcePreservesSlotChildren(): void {
+    // Attach a component that has slots to root.
+    $parent_id = $this->instance->attachToRoot(0, 'component', [
+      'component' => ['component_id' => 'display_builder_test:test_1'],
+    ]);
+
+    // Attach a child token into slot_1.
+    $child_id = $this->instance->attachToSlot($parent_id, 'slot_1', 0, 'token', []);
+    $this->instance->save();
+
+    // Update the parent's source with new props but NO slot children in data.
+    $this->instance->setSource($parent_id, 'component', [
+      'component' => ['component_id' => 'display_builder_test:test_1'],
+    ]);
+    $this->instance->save();
+
+    // Reload from storage to verify the persisted state.
+    $saved = $this->loadInstance($this->instance->id());
+    $state = $saved->getCurrentState();
+
+    // The child must still be present inside slot_1.
+    $slot_sources = $state[0]['source']['component']['slots']['slot_1']['sources'] ?? [];
+    self::assertNotEmpty($slot_sources, 'Slot children are preserved after setSource().');
+    self::assertEquals($child_id, $slot_sources[0]['node_id'], 'Child node ID is unchanged.');
+  }
+
+  /**
+   * Tests that saveAsPreset() generates a valid config-entity machine name.
+   *
+   * The ID must match [a-z0-9_], never start with a digit, and must be unique
+   * when the same label is saved twice.
+   */
+  public function testSaveAsPresetGeneratesValidId(): void {
+    $node_id = $this->instance->attachToRoot(0, 'token', []);
+
+    $url = Url::fromRoute('display_builder.api_save_preset', [
+      'display_builder_instance' => $this->instance->id(),
+      'node_id' => $node_id,
+    ]);
+
+    // First save with a label containing spaces and uppercase.
+    $request = Request::create($url->toString(), 'POST', []);
+    $request->headers->add(['hx-prompt' => 'My Preset']);
+    $this->controller->saveAsPreset($request, $this->instance, $node_id);
+
+    // Second save with the same label must produce a different ID.
+    $request2 = Request::create($url->toString(), 'POST', []);
+    $request2->headers->add(['hx-prompt' => 'My Preset']);
+    $this->controller->saveAsPreset($request2, $this->instance, $node_id);
+
+    $presets = PatternPreset::loadMultiple();
+    self::assertCount(2, $presets, 'Both presets were saved.');
+
+    foreach ($presets as $preset) {
+      $id = $preset->id();
+      self::assertMatchesRegularExpression('/^[a-z_][a-z0-9_]*$/', $id, "ID '{$id}' is a valid machine name.");
+    }
+
+    $ids = \array_keys($presets);
+    self::assertCount(2, \array_unique($ids), 'Duplicate labels produce unique IDs.');
   }
 
 }

@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Controller;
 
 use Drupal\Component\Datetime\TimeInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Form\FormAjaxException;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\Context\ContextInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
@@ -19,10 +17,6 @@ use Drupal\display_builder\IslandPluginManagerInterface;
 use Drupal\display_builder\Plugin\display_builder\Island\ContextualFormPanel;
 use Drupal\display_builder\RenderableBuilderTrait;
 use Drupal\display_builder\SourceTree;
-use Drupal\display_builder\SourceWithSlotsInterface;
-use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
-use Drupal\ui_patterns\SourcePluginBase;
-use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -43,8 +37,6 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     protected SharedTempStoreFactory $sharedTempStoreFactory,
     protected SessionInterface $session,
     private IslandPluginManagerInterface $islandPluginManager,
-    #[Autowire(service: 'plugin.manager.ui_patterns_source')]
-    private SourcePluginManager $sourceManager,
   ) {
     parent::__construct($eventDispatcher, $renderer, $time, $sharedTempStoreFactory, $session);
   }
@@ -247,27 +239,6 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       return $this->responseMessageError((string) $display_builder_instance->id(), $e->getMessage(), $debug);
     }
 
-    $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager->getSlotPropType()]];
-    $current_source = $this->sourceManager->createInstance(
-      $node['source_id'],
-      SourcePluginBase::buildConfiguration('slot', $slot_definition, $node, [])
-    );
-
-    if ($current_source instanceof SourceWithSlotsInterface) {
-      /** @var \Drupal\display_builder\SourceWithSlotsInterface $new_source */
-      $new_source = $this->sourceManager->createInstance(
-        $node['source_id'],
-        SourcePluginBase::buildConfiguration('slot', $slot_definition, $data, [])
-      );
-      // We keep the slots values (which are not sent by the contextual form)
-      // instead of removing them.
-      $slots = $current_source->getSlotValues();
-
-      foreach ($slots as $slot_id => $slot) {
-        $data['source'] = $new_source->setSlotValue($slot_id, $slot);
-      }
-    }
-
     $display_builder_instance->setSource($node_id, $node['source_id'], $data['source']);
     $display_builder_instance->save();
 
@@ -351,6 +322,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     // Keep flag for move or attach to root.
     $is_paste_root = FALSE;
+    $new_node_id = NULL;
 
     if (isset($dataToCopy['source_id'], $dataToCopy['source'])) {
       $source_id = $dataToCopy['source_id'];
@@ -365,10 +337,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       // @todo for duplicate and not parent root seems not detected and copy is inside the slot.
       if ($parent_id === '__root__') {
         $is_paste_root = TRUE;
-        $display_builder_instance->attachToRoot(0, $source_id, $data, $dataToCopy['third_party_settings'] ?? []);
+        $new_node_id = $display_builder_instance->attachToRoot(0, $source_id, $data, $dataToCopy['third_party_settings'] ?? []);
       }
       else {
-        $display_builder_instance->attachToSlot($parent_id, $slot_id, (int) $slot_position, $source_id, $data, $dataToCopy['third_party_settings'] ?? []);
+        $new_node_id = $display_builder_instance->attachToSlot($parent_id, $slot_id, (int) $slot_position, $source_id, $data, $dataToCopy['third_party_settings'] ?? []);
       }
     }
     $display_builder_instance->save();
@@ -376,9 +348,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(
-      $is_paste_root ? DisplayBuilderEvents::ON_MOVE : DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
+      $is_paste_root ? DisplayBuilderEvents::ON_ATTACH_TO_ROOT : DisplayBuilderEvents::ON_ATTACH_TO_SLOT,
       NULL,
-      $parent_id,
+      $new_node_id,
+      $is_paste_root ? NULL : $parent_id,
     );
   }
 
@@ -412,8 +385,19 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     // In HTTP headers, only ASCII is guaranteed to work but historically,
     // HTTP has allowed header values with the ISO-8859-1 charset.
     $label = \mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
+
+    // Build a valid config-entity machine name from the label. Config IDs
+    // must match [a-z0-9_] and must not start with a digit.
+    $base_id = 'preset_' . \preg_replace('/[^a-z0-9_]+/', '_', \mb_strtolower($label));
+    $base_id = \trim($base_id, '_');
+    $id = $base_id;
+    $suffix = 1;
+    while ($preset_storage->load($id) !== NULL) {
+      $id = $base_id . '_' . $suffix++;
+    }
+
     $preset = $preset_storage->create([
-      'id' => \uniqid(),
+      'id' => $id,
       'label' => $label,
       'status' => TRUE,
       'description' => '',
@@ -450,59 +434,16 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     $this->builder = $display_builder_instance;
 
-    // @todo on history change is closest to a data change that we need here
-    // without any instance id. Perhaps we need a new event?
-    return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_HISTORY_CHANGE);
+    return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_RESTORE);
   }
 
   /**
    * {@inheritdoc}
    */
   public function revert(Request $request, InstanceInterface $display_builder_instance): array {
-    $instanceInfos = EntityViewOverride::checkInstanceId((string) $display_builder_instance->id());
-
-    if (isset($instanceInfos['entity_type_id'], $instanceInfos['entity_id'], $instanceInfos['field_name'])) {
-      // Do not get the profile entity ID from Instance context because the
-      // data stored there is not reliable yet.
-      // See: https://www.drupal.org/project/display_builder/issues/3544545
-      $entity = $this->entityTypeManager()->getStorage($instanceInfos['entity_type_id'])
-        ->load($instanceInfos['entity_id']);
-
-      if ($entity instanceof FieldableEntityInterface) {
-        // Remove the saved state as the field values will be deleted.
-        $display_builder_instance->setNewPresent([], 'Revert 1/2: clear overridden data and save');
-        $display_builder_instance->save();
-        $display_builder_instance->setSave($display_builder_instance->getCurrentState());
-
-        // Clear field value.
-        $field = $entity->get($instanceInfos['field_name']);
-        $field->setValue(NULL);
-        $entity->save();
-
-        $contexts = $display_builder_instance->get('contexts')->first()->getValue();
-
-        if (isset($contexts['view_mode'])
-          && $contexts['view_mode'] instanceof ContextInterface
-        ) {
-          $viewMode = $contexts['view_mode']->getContextValue();
-          $display_id = "{$instanceInfos['entity_type_id']}.{$entity->bundle()}.{$viewMode}";
-
-          /** @var \Drupal\display_builder\DisplayBuildableInterface|null $display */
-          $display = $this->entityTypeManager()->getStorage('entity_view_display')
-            ->load($display_id);
-
-          $sources = $display->getSources();
-          $display_builder_instance->setNewPresent($sources, 'Revert 2/2: retrieve existing data from config');
-          $display_builder_instance->save();
-        }
-      }
-    }
-
     $this->builder = $display_builder_instance;
 
-    // @todo on history change is closest to a data change that we need here
-    // without any instance id. Perhaps we need a new event?
-    return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_HISTORY_CHANGE);
+    return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_REVERT);
   }
 
   /**

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Entity;
 
-use Drupal\Component\Render\FormattableMarkup;
-use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -25,7 +23,6 @@ use Drupal\display_builder\SourceTree;
 use Drupal\display_builder_ui\InstanceListBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
-use Drupal\ui_patterns\SourcePluginManager;
 
 /**
  * Defines the display builder instance entity class.
@@ -87,14 +84,9 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   protected SampleEntityGeneratorInterface $sampleEntityGenerator;
 
   /**
-   * Slot source proxy.
+   * Slot source proxy for resolving node labels.
    */
-  protected SlotSourceProxy $slotSourceProxy;
-
-  /**
-   * Source plugin manager.
-   */
-  protected SourcePluginManager $sourceManager;
+  private SlotSourceProxy $slotSourceProxy;
 
   /**
    * Cached normalized source tree for the current present state.
@@ -238,13 +230,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       return FALSE;
     }
 
-    // Get friendly label to display in log instead of ids.
-    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts());
-
-    $log = new FormattableMarkup('%node @thingy has been moved to root', [
-      '%node' => $labelWithSummary['summary'],
-      '@thingy' => $data['source_id'],
-    ]);
+    $log = new TranslatableMarkup('@label moved to root', ['@label' => $this->nodeLabel($data)]);
     $this->setNewPresent($tree->getTree(), $log, TRUE, FALSE);
 
     return TRUE;
@@ -265,15 +251,11 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       return FALSE;
     }
 
-    // Get friendly label to display in log instead of ids.
-    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $this->getContexts());
-    $labelWithSummaryParent = $this->slotSourceProxy()->getLabelWithSummary($tree->getNodeData($parent_id));
-
-    $log = new FormattableMarkup("%node @thingy has been moved to %parent's @slot_id", [
-      '%node' => $labelWithSummary['summary'],
-      '@thingy' => $data['source_id'],
-      '%parent' => $labelWithSummaryParent['summary'],
+    $parentData = $tree->getNodeData($parent_id);
+    $log = new TranslatableMarkup('@label moved to slot @slot_id in @parent_label', [
+      '@label' => $this->nodeLabel($data),
       '@slot_id' => $slot_id,
+      '@parent_label' => $parentData ? $this->nodeLabel($parentData) : $parent_id,
     ]);
 
     $this->setNewPresent($tree->getTree(), $log, TRUE, FALSE);
@@ -294,15 +276,8 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       }
     }
 
-    $new_data = $tree->getNode($node_id);
-
-    // Get friendly label to display in log instead of ids.
-    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($new_data, $this->getContexts() ?? []);
-
-    $log = new FormattableMarkup('%node @source_id has been attached to root', [
-      '%node' => $labelWithSummary['summary'],
-      '@source_id' => $source_id,
-    ]);
+    $nodeData = $tree->getNodeData($node_id);
+    $log = new TranslatableMarkup('@label attached to root', ['@label' => $this->nodeLabel($nodeData ?? [])]);
     $this->setNewPresent($tree->getTree(), $log, FALSE, FALSE);
 
     return $node_id;
@@ -325,17 +300,12 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       }
     }
 
-    $new_data = $tree->getNode($node_id);
-
-    // Get friendly label to display in log instead of ids.
-    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($new_data, $this->getContexts() ?? []);
-    $labelWithSummaryParent = $this->slotSourceProxy()->getLabelWithSummary($tree->getNode($parent_id));
-
-    $log = new FormattableMarkup("%node @source_id has been attached to %parent's @slot_id", [
-      '%node' => $labelWithSummary['summary'],
-      '@source_id' => $source_id,
-      '%parent' => $labelWithSummaryParent['summary'],
+    $nodeData = $tree->getNodeData($node_id);
+    $parentData = $tree->getNodeData($parent_id);
+    $log = new TranslatableMarkup('@label attached to slot @slot_id in @parent_label', [
+      '@label' => $this->nodeLabel($nodeData ?? []),
       '@slot_id' => $slot_id,
+      '@parent_label' => $parentData ? $this->nodeLabel($parentData) : $parent_id,
     ]);
     $this->setNewPresent($tree->getTree(), $log, TRUE, FALSE);
 
@@ -346,18 +316,14 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function getNode(string $node_id): array {
-    $root = $this->getCurrentState();
-    $path = $this->getPath($node_id);
-    $value = NestedArray::getValue($root, $path);
-
-    return $value ?? [];
+    return $this->getSourceTree()->getNode($node_id) ?? [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getParentId(string $node_id): string {
-    return $this->getPathIndex()[$node_id]['parent'] ?? '';
+  public function getParentId(string $node_id): ?string {
+    return $this->getPathIndex()[$node_id]['parent'] ?? NULL;
   }
 
   /**
@@ -367,15 +333,11 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     $tree = $this->getSourceTree();
 
     if (!$tree->setSource($node_id, $source_id, $data)) {
-      throw new \Exception('Node ID mismatch');
+      throw new \Exception('Internal node ID mismatch');
     }
 
-    // Get friendly label to display in log instead of ids.
-    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($tree->getNodeData($node_id), $this->getContexts());
-
-    $log = new FormattableMarkup('%source has been updated', [
-      '%source' => $labelWithSummary['summary'],
-    ]);
+    $nodeData = $tree->getNodeData($node_id);
+    $log = new TranslatableMarkup('@label updated config', ['@label' => $this->nodeLabel($nodeData ?? [])]);
     $this->setNewPresent($tree->getTree(), $log, TRUE, FALSE);
   }
 
@@ -384,16 +346,14 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function setThirdPartySettings(string $node_id, string $island_id, array $data): void {
     $tree = $this->getSourceTree();
+    $nodeData = $tree->getNodeData($node_id);
 
     if (!$tree->setThirdPartySettings($node_id, $island_id, $data)) {
       return;
     }
 
-    // Get friendly label to display in log instead of ids.
-    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($tree->getNodeData($node_id), $this->getContexts());
-
-    $log = new FormattableMarkup('%source has been updated by @island_id', [
-      '%source' => $labelWithSummary['summary'],
+    $log = new TranslatableMarkup('@label settings updated by @island_id', [
+      '@label' => $this->nodeLabel($nodeData),
       '@island_id' => $island_id,
     ]);
     $this->setNewPresent($tree->getTree(), $log, TRUE, FALSE);
@@ -411,17 +371,12 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     }
     $parent_id = $tree->getParentId($node_id);
 
-    $contexts = $this->getContexts() ?? [];
-
-    // Get friendly label to display in log instead of ids.
-    $labelWithSummary = $this->slotSourceProxy()->getLabelWithSummary($data, $contexts);
-    $labelWithSummaryParent = empty($parent_id) ? ['summary' => 'root'] : $this->slotSourceProxy()->getLabelWithSummary($tree->getNodeData($parent_id), $contexts);
-
     $tree->remove($node_id);
 
-    $log = new FormattableMarkup('%node has been removed from %parent', [
-      '%node' => $labelWithSummary['summary'],
-      '%parent' => $labelWithSummaryParent['summary'],
+    $parentData = $parent_id === NULL ? NULL : $tree->getNodeData($parent_id);
+    $log = new TranslatableMarkup('@label removed from @parent_label', [
+      '@label' => $this->nodeLabel($data),
+      '@parent_label' => $parentData ? $this->nodeLabel($parentData) : 'root',
     ]);
     $this->setNewPresent($tree->getTree(), $log, FALSE, FALSE);
   }
@@ -429,7 +384,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function getContexts(): ?array {
+  public function getContexts(): array {
     if ($this->get('contexts')->isEmpty()) {
       return [];
     }
@@ -462,7 +417,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   public function restore(): void {
     /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep|null $first */
     $first = $this->get('save')->first();
-    $this->setNewPresent($first->getData(), 'Back to saved data.');
+    $this->setNewPresent($first->getData(), new TranslatableMarkup('Back to saved data.'));
   }
 
   /**
@@ -528,13 +483,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
 
   /**
    * {@inheritdoc}
-   */
-  public function isHistoryNew(): bool {
-    return $this->present === NULL && empty($this->past) && empty($this->future);
-  }
-
-  /**
-   * {@inheritdoc}
    *
    * @see \Drupal\display_builder\HistoryInterface
    */
@@ -590,10 +538,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   public function canSaveContextsRequirement(?array $contexts = NULL): bool {
     $contexts ??= $this->getContexts();
 
-    if ($contexts === NULL) {
-      return FALSE;
-    }
-
     if (!\array_key_exists('context_requirements', $contexts)
       || !($contexts['context_requirements'] instanceof RequirementsContext)) {
       return FALSE;
@@ -607,9 +551,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function hasSaveContextsRequirement(string $key, array $contexts = []): bool {
     $contexts = empty($contexts) ? $this->getContexts() : $contexts;
-    // Some strange edge cases where context is null.
-    $contexts ??= [];
-
     if (!\array_key_exists('context_requirements', $contexts)
       || !($contexts['context_requirements'] instanceof RequirementsContext)
       || !$contexts['context_requirements']->hasValue($key)) {
@@ -659,7 +600,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    *
    * @see \Drupal\display_builder\HistoryInterface
    */
-  public function setNewPresent(array $data, FormattableMarkup|string $log_message = '', bool $check_hash = TRUE, bool $index = TRUE): void {
+  public function setNewPresent(array $data, string|\Stringable $log_message = '', bool $check_hash = TRUE, bool $index = TRUE): void {
     if ($index) {
       // Raw data needs normalizing; build tree and keep it as the new cache.
       $this->sourceTree = new SourceTree($data);
@@ -750,10 +691,18 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   }
 
   /**
-   * Slot source proxy.
+   * Slot source proxy lazy loader.
    */
   private function slotSourceProxy(): SlotSourceProxy {
     return $this->slotSourceProxy ??= \Drupal::service('display_builder.slot_sources_proxy');
+  }
+
+  /**
+   * Returns the human-readable label for a node, falling back to source_id.
+   */
+  private function nodeLabel(array $data): string {
+    $label = $this->slotSourceProxy()->getLabelWithSummary($data, [], TRUE)['label'];
+    return $label !== '' ? $label : ($data['source_id'] ?? '');
   }
 
   /**
@@ -802,19 +751,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     }
 
     return $contexts;
-  }
-
-  /**
-   * Get the path to an source.
-   *
-   * @param string $node_id
-   *   The node id of the source.
-   *
-   * @return array
-   *   The path, one array item by level.
-   */
-  private function getPath(string $node_id): array {
-    return $this->getPathIndex()[$node_id]['path'] ?? [];
   }
 
 }

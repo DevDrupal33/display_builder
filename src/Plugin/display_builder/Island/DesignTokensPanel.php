@@ -144,7 +144,7 @@ class DesignTokensPanel extends IslandPluginBase implements IslandWithFormInterf
   /**
    * {@inheritdoc}
    */
-  public function onDelete(InstanceInterface $instance, string $parent_id): array {
+  public function onDelete(InstanceInterface $instance, ?string $parent_id): array {
     return $this->reloadWithLocalData($instance, []);
   }
 

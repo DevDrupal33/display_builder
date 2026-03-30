@@ -45,7 +45,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
 
     /** @var \Drupal\display_builder\InstanceInterface $builder */
     $builder = $this->entityTypeManager()->getStorage('display_builder_instance')->load($builder_id);
-    $contexts = $builder->getContexts() ?? [];
+    $contexts = $builder->getContexts();
     $islands_enabled_sorted = $this->getIslandsEnableSorted($contexts);
     $build = [
       '#type' => 'component',
@@ -55,11 +55,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         'hash' => (string) $builder->getCurrent()->getHash(),
       ],
       '#slots' => $this->buildSlots($builder, $islands_enabled_sorted),
-      '#attached' => [
-        'drupalSettings' => [
-          'dbDebug' => $entity->isDebugModeActivated(),
-        ],
-      ],
+      '#attached' => [],
       '#cache' => [
         'tags' => \array_merge(
           $builder->getCacheTags(),

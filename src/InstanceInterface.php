@@ -115,7 +115,7 @@ interface InstanceInterface extends ContentEntityInterface, HistoryInterface {
    * @return string
    *   The parent node id. Empty if the node is at the root level.
    */
-  public function getParentId(string $node_id): string;
+  public function getParentId(string $node_id): ?string;
 
   /**
    * Set the source for a tree node.
@@ -160,10 +160,10 @@ interface InstanceInterface extends ContentEntityInterface, HistoryInterface {
   /**
    * Gets the values for all defined contexts.
    *
-   * @return \Drupal\Core\Plugin\Context\ContextInterface[]|null
+   * @return \Drupal\Core\Plugin\Context\ContextInterface[]
    *   An array of set contexts, keyed by context name.
    */
-  public function getContexts(): ?array;
+  public function getContexts(): array;
 
   /**
    * Get users.

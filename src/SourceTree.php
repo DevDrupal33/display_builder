@@ -20,37 +20,37 @@ use Drupal\ui_patterns\SourceInterface;
  * tree is only denormalized back into a nested format when requested via
  * ::getTree() for rendering or persistence.
  */
-class SourceTree {
+final class SourceTree {
 
   /**
    * Flat map of node data keyed by node_id.
    */
-  protected array $nodes = [];
+  private array $nodes = [];
 
   /**
    * Hierarchical structure of node IDs.
    */
-  protected array $structure = [];
+  private array $structure = [];
 
   /**
    * List of root node IDs.
    */
-  protected array $root = [];
+  private array $root = [];
 
   /**
    * Cached path index.
    */
-  protected ?array $pathIndex = NULL;
+  private ?array $pathIndex = NULL;
 
   /**
    * The source plugin manager.
    */
-  protected ?PluginManagerInterface $sourceManager = NULL;
+  private ?PluginManagerInterface $sourceManager = NULL;
 
   /**
    * Cache of resolved plugin classes keyed by source_id.
    */
-  protected array $pluginClassCache = [];
+  private array $pluginClassCache = [];
 
   /**
    * Constructor.
@@ -388,7 +388,7 @@ class SourceTree {
    * @return string
    *   The generated node ID.
    */
-  protected function generateNodeId(): string {
+  private function generateNodeId(): string {
     return \bin2hex(\random_bytes(8));
   }
 
@@ -405,7 +405,7 @@ class SourceTree {
    * @return array
    *   List of node IDs at this level.
    */
-  protected function normalize(array $items, ?string $parent_id, ?string $slot_id): array {
+  private function normalize(array $items, ?string $parent_id, ?string $slot_id): array {
     $ids = [];
 
     foreach ($items as $item) {
@@ -449,7 +449,7 @@ class SourceTree {
    * @return array
    *   The nested tree.
    */
-  protected function denormalize(array $ids): array {
+  private function denormalize(array $ids): array {
     return \array_map(function ($id) {
       $node = $this->nodes[$id];
       $node['node_id'] = $id;
@@ -469,7 +469,7 @@ class SourceTree {
    * @return array
    *   The node data with children injected.
    */
-  protected function injectChildren(array $node, array $slots): array {
+  private function injectChildren(array $node, array $slots): array {
     if (empty($slots)) {
       return $node;
     }
@@ -497,7 +497,7 @@ class SourceTree {
    * @param array $index
    *   The index to populate.
    */
-  protected function buildPathIndex(array $ids, array $current_path, array &$index): void {
+  private function buildPathIndex(array $ids, array $current_path, array &$index): void {
     foreach ($ids as $idx => $id) {
       $path = [...$current_path, $idx];
       $index[$id] = [
@@ -530,7 +530,7 @@ class SourceTree {
    * @return bool
    *   TRUE if found and removed.
    */
-  protected function removeFromCurrentParent(string $node_id): bool {
+  private function removeFromCurrentParent(string $node_id): bool {
     if (!isset($this->structure[$node_id])) {
       return FALSE;
     }
@@ -575,7 +575,7 @@ class SourceTree {
    * @param string $node_id
    *   The node ID.
    */
-  protected function recursiveRemove(string $node_id): void {
+  private function recursiveRemove(string $node_id): void {
     if (!isset($this->structure[$node_id])) {
       return;
     }
@@ -599,7 +599,7 @@ class SourceTree {
    * @return bool
    *   TRUE if descendant.
    */
-  protected function isDescendant(string $node_id, string $potential_ancestor_id): bool {
+  private function isDescendant(string $node_id, string $potential_ancestor_id): bool {
     $current_parent = $this->getParentId($node_id);
 
     while ($current_parent !== NULL) {
@@ -623,7 +623,7 @@ class SourceTree {
    * @return \Drupal\ui_patterns\SourceInterface|null
    *   The source plugin instance or NULL.
    */
-  protected function getSourcePlugin(string $source_id, array $source_configuration): ?SourceInterface {
+  private function getSourcePlugin(string $source_id, array $source_configuration): ?SourceInterface {
     try {
       $plugin = $this->getSourceManager()->createInstance($source_id, ['settings' => $source_configuration]);
 
@@ -643,7 +643,7 @@ class SourceTree {
    * @return string|null
    *   The plugin class or NULL.
    */
-  protected function getPluginClass(string $source_id): ?string {
+  private function getPluginClass(string $source_id): ?string {
     if (\array_key_exists($source_id, $this->pluginClassCache)) {
       return $this->pluginClassCache[$source_id];
     }
@@ -665,7 +665,7 @@ class SourceTree {
    * @return \Drupal\Component\Plugin\PluginManagerInterface
    *   The source plugin manager.
    */
-  protected function getSourceManager(): PluginManagerInterface {
+  private function getSourceManager(): PluginManagerInterface {
     if ($this->sourceManager === NULL) {
       $this->sourceManager = \Drupal::service('plugin.manager.ui_patterns_source');
     }

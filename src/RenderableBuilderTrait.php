@@ -259,30 +259,6 @@ trait RenderableBuilderTrait {
   }
 
   /**
-   * Build an icon button.
-   *
-   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $label
-   *   The button label.
-   * @param string|null $icon
-   *   (Optional) The icon name. Default none.
-   *
-   * @return array
-   *   The icon button render array.
-   *
-   * @todo never used, replace existing buildButton() where relevant
-   */
-  protected function buildIconButton(string|TranslatableMarkup $label, ?string $icon = NULL): array {
-    return [
-      '#type' => 'component',
-      '#component' => 'display_builder:icon_button',
-      '#props' => [
-        'icon' => $icon ?? '',
-        'label' => $label,
-      ],
-    ];
-  }
-
-  /**
    * Build a menu item.
    *
    * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $title

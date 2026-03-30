@@ -64,12 +64,4 @@ interface ProfileInterface extends ConfigEntityInterface {
    */
   public function getRoles(): array;
 
-  /**
-   * Is debug mode activated?
-   *
-   * @return bool
-   *   Activated or not.
-   */
-  public function isDebugModeActivated(): bool;
-
 }

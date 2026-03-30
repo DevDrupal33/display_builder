@@ -29,6 +29,8 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
       DisplayBuilderEvents::ON_ATTACH_TO_SLOT => 'onAttachToSlot',
       DisplayBuilderEvents::ON_DELETE => 'onDelete',
       DisplayBuilderEvents::ON_HISTORY_CHANGE => 'onHistoryChange',
+      DisplayBuilderEvents::ON_RESTORE => 'onRestore',
+      DisplayBuilderEvents::ON_REVERT => 'onRevert',
       DisplayBuilderEvents::ON_MOVE => 'onMove',
       DisplayBuilderEvents::ON_UPDATE => 'onUpdate',
       DisplayBuilderEvents::ON_SAVE => 'onSave',
@@ -83,6 +85,29 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    *   The event object.
    */
   public function onHistoryChange(DisplayBuilderEvent $event): void {
+    $this->dispatchToIslands($event, __FUNCTION__);
+  }
+
+  /**
+   * Event handler for when the builder is restored to its last saved state.
+   *
+   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
+   *   The event object.
+   */
+  public function onRestore(DisplayBuilderEvent $event): void {
+    $this->dispatchToIslands($event, __FUNCTION__);
+  }
+
+  /**
+   * Event handler for when an override is reverted to its default state.
+   *
+   * Reuses the history-change island callbacks since the UI refresh is
+   * identical: all islands must re-render the updated state and history.
+   *
+   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
+   *   The event object.
+   */
+  public function onRevert(DisplayBuilderEvent $event): void {
     $this->dispatchToIslands($event, __FUNCTION__);
   }
 

@@ -55,13 +55,13 @@ interface IslandEventSubscriberInterface {
    *
    * @param \Drupal\display_builder\InstanceInterface $instance
    *   The Display Builder instance ID.
-   * @param string $parent_id
-   *   The parent node instance ID.
+   * @param string|null $parent_id
+   *   The parent node ID, or NULL if the deleted node was at root.
    *
    * @return array
    *   Returns a render array with out-of-band commands.
    */
-  public function onDelete(InstanceInterface $instance, string $parent_id): array;
+  public function onDelete(InstanceInterface $instance, ?string $parent_id): array;
 
   /**
    * Event triggered when the history changes.
@@ -73,6 +73,28 @@ interface IslandEventSubscriberInterface {
    *   Returns a render array with out-of-band commands.
    */
   public function onHistoryChange(InstanceInterface $instance): array;
+
+  /**
+   * Event triggered when the builder state is restored to its last saved state.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  public function onRestore(InstanceInterface $instance): array;
+
+  /**
+   * Event triggered when an override is reverted to its default state.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  public function onRevert(InstanceInterface $instance): array;
 
   /**
    * Event triggered when a node is moved.

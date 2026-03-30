@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\Field\FieldType;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Field\Attribute\FieldType;
 use Drupal\Core\Field\MapFieldItemList;
 use Drupal\Core\Field\Plugin\Field\FieldType\MapItem;
@@ -47,7 +46,7 @@ class HistoryStep extends MapItem {
   /**
    * Get log.
    */
-  public function getLog(): FormattableMarkup|string|null {
+  public function getLog(): \Stringable|string|null {
     return $this->getValue()['log'];
   }
 

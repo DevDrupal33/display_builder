@@ -318,7 +318,7 @@ final class IslandPluginBaseTest extends DisplayBuilderKernelTestBase {
    *   The island plugin instance.
    */
   private function createIsland(string $id, array $configuration = []): IslandInterface {
-    return \Drupal::service('plugin.manager.db_island')->createInstance($id, $configuration);
+    return $this->createIslandPlugin($id, $configuration);
   }
 
   /**

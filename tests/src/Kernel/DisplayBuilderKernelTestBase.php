@@ -7,11 +7,12 @@ namespace Drupal\Tests\display_builder\Kernel;
 use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\Entity\Profile;
 use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\IslandInterface;
 use Drupal\display_builder\ProfileInterface;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
- * Base common methods dor the DisplayBuilder Kernel tests.
+ * Base common methods for the DisplayBuilder Kernel tests.
  *
  * @internal
  */
@@ -62,6 +63,39 @@ abstract class DisplayBuilderKernelTestBase extends KernelTestBase {
     $profile->save();
 
     return $profile;
+  }
+
+  /**
+   * Reload a display_builder_instance from storage by ID.
+   *
+   * @param string $id
+   *   The instance entity ID.
+   *
+   * @return \Drupal\display_builder\InstanceInterface
+   *   The freshly loaded instance.
+   */
+  protected function loadInstance(string $id): InstanceInterface {
+    /** @var \Drupal\display_builder\InstanceInterface $instance */
+    $instance = $this->container->get('entity_type.manager')
+      ->getStorage('display_builder_instance')
+      ->load($id);
+
+    return $instance;
+  }
+
+  /**
+   * Create an island plugin instance via the island plugin manager.
+   *
+   * @param string $id
+   *   The island plugin ID.
+   * @param array $configuration
+   *   Optional plugin configuration.
+   *
+   * @return \Drupal\display_builder\IslandInterface
+   *   The island plugin instance.
+   */
+  protected function createIslandPlugin(string $id, array $configuration = []): IslandInterface {
+    return $this->container->get('plugin.manager.db_island')->createInstance($id, $configuration);
   }
 
 }

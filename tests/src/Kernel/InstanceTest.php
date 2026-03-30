@@ -210,7 +210,7 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
     // Move child to root.
     $instance->moveToRoot($node_id_child, 1);
 
-    self::assertSame('', $instance->getParentId($node_id_child));
+    self::assertNull($instance->getParentId($node_id_child));
     $state = $instance->getCurrentState();
     self::assertCount(2, $state);
     self::assertSame($node_id_child, $state[1]['node_id']);
@@ -244,7 +244,7 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
   public function testSetSourceException(): void {
     $instance = $this->createDisplayBuilderInstance();
     $this->expectException(\Exception::class);
-    $this->expectExceptionMessage('Node ID mismatch');
+    $this->expectExceptionMessage('Internal node ID mismatch');
     $instance->setSource('non_existent_id', 'test_group_source', []);
   }
 

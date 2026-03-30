@@ -50,6 +50,20 @@ trait IslandReloadEventsTrait {
   /**
    * {@inheritdoc}
    */
+  public function onRestore(InstanceInterface $instance): array {
+    return $this->reloadWithGlobalData($instance);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onRevert(InstanceInterface $instance): array {
+    return $this->reloadWithGlobalData($instance);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function onUpdate(InstanceInterface $instance, string $node_id): array {
     return $this->reloadWithGlobalData($instance);
   }
@@ -57,7 +71,7 @@ trait IslandReloadEventsTrait {
   /**
    * {@inheritdoc}
    */
-  public function onDelete(InstanceInterface $instance, string $parent_id): array {
+  public function onDelete(InstanceInterface $instance, ?string $parent_id): array {
     return $this->reloadWithGlobalData($instance);
   }
 

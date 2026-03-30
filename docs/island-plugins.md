@@ -23,7 +23,23 @@ Visual positioning:
 Notable methods:
 
 - `IslandInterface::build()`: Build the renderable content of the island from state data. This renderable can be annotated by `HtmxEvents` to trigger HTTP requests
-- Everything from `IslandEventSubscriberInterface`: each method (`onAttachToSlot()`, `onMove()`, `onUpdate()`...) is an HTMX event managed by the HTTP `ApiController`
+- Everything from `IslandEventSubscriberInterface`: each method is an HTMX event managed by `ApiController`. Islands receive callbacks for every state-changing operation:
+
+  | Method | Triggered when |
+  |---|---|
+  | `onAttachToRoot()` | A node is added at root level |
+  | `onAttachToSlot()` | A node is added into a component slot |
+  | `onMove()` | An existing node is moved |
+  | `onUpdate()` | A node's source configuration is updated |
+  | `onDelete()` | A node is removed |
+  | `onActive()` | A node becomes the focused node |
+  | `onHistoryChange()` | The history pointer changes (undo / redo) |
+  | `onRestore()` | The builder is restored to its last saved state |
+  | `onRevert()` | An entity view override is reverted to the base display config |
+  | `onSave()` | The builder state is saved to the backing config entity |
+  | `onPresetSave()` | A node is saved as a reusable preset |
+
+  The default base class (`IslandPluginBase`) returns an empty array for all events. Use `IslandReloadEventsTrait` if your island needs to do a full re-render on history/restore/revert changes.
 - `PluginFormInterface::buildConfigurationForm()`: to make the island plugin configurable in the [Display Builder profile (config entity)](configuration.md)
 
 HTMX behavior will change according to `IslandInterface::build()` return value:

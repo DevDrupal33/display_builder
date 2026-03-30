@@ -14,7 +14,7 @@
     "test": "npm run pw -- -g @base",
     "test:failed": "npm run pw -- -g @base --last-failed",
     "test:headed": "npm run pw -- --headed -g @base",
-    "test:ui": "npm run pw -- --ui -g @base",
+    "test:ui": "npm run pw -- --ui",
     "test:debug": "PWDEBUG=1 npm run pw -- -g @base --debug",
     "test:update": "npm run pw -- -u all --update-source-method overwrite -g @base",
     "test:clean": "rm -rf playwright-report test-results"

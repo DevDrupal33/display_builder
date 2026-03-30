@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\display_builder\Plugin\Field\FieldType\HistoryStep;
 
 /**
@@ -38,12 +37,16 @@ interface HistoryInterface {
    *
    * @param array $state
    *   The state to set.
-   * @param string|\Drupal\Component\Render\FormattableMarkup $log_message
+   * @param string|\Stringable $log_message
    *   (Optional) The log message.
    * @param bool $check_hash
    *   (Optional) Should check hash to avoid duplicates. Default to TRUE.
+   * @param bool $index
+   *   (Optional) When TRUE the raw $state is normalized through SourceTree
+   *   before storing. Set to FALSE when the data was already produced by
+   *   SourceTree::getTree() to skip redundant normalization. Default to TRUE.
    */
-  public function setNewPresent(array $state, FormattableMarkup|string $log_message = '', bool $check_hash = TRUE): void;
+  public function setNewPresent(array $state, string|\Stringable $log_message = '', bool $check_hash = TRUE, bool $index = TRUE): void;
 
   /**
    * Get the past steps.

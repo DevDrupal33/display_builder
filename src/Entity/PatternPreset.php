@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Entity;
 
+use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Entity\EntityDeleteForm;
@@ -176,13 +177,22 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
       return [];
     }
 
-    // In case of malformed json we don't want to fail, just ignore.
+    // In case of a missing or malformed plugin (e.g. after config import),
+    // return empty rather than crashing. Unexpected exceptions are logged.
     try {
-      $contexts = $this->getContextFromSource($this->sources['source_id'], $this->sources['source']);
-
-      return $contexts;
+      return $this->getContextFromSource($this->sources['source_id'], $this->sources['source']);
     }
-    catch (\Throwable $th) {
+    catch (PluginException) {
+      // Plugin no longer exists or config is malformed — silently skip.
+      return [];
+    }
+    catch (\Exception $e) {
+      // Unexpected runtime error from plugin code: log and degrade gracefully.
+      \Drupal::logger('display_builder')->warning(
+        'PatternPreset @id: unexpected exception resolving contexts: @message',
+        ['@id' => $this->id(), '@message' => $e->getMessage()],
+      );
+
       return [];
     }
   }

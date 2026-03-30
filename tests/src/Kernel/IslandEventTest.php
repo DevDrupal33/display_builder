@@ -155,7 +155,7 @@ final class IslandEventTest extends DisplayBuilderKernelTestBase {
    *   The event object.
    */
   private function dispatch(string $event_name, DisplayBuilderEvent $event): void {
-    \Drupal::service('event_dispatcher')->dispatch($event, $event_name);
+    $this->container->get('event_dispatcher')->dispatch($event, $event_name);
   }
 
   /**

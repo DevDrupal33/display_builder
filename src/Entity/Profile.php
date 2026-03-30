@@ -88,11 +88,6 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
   protected string $description;
 
   /**
-   * The display builder debug mode.
-   */
-  protected bool $debug = FALSE;
-
-  /**
    * The islands configuration for storage.
    */
   protected ?array $islands = [];
@@ -190,13 +185,6 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
     }
 
     return parent::toUrl($rel, $options);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function isDebugModeActivated(): bool {
-    return $this->debug;
   }
 
 }

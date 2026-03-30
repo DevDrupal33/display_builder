@@ -10,6 +10,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\IslandPluginBase;
+use Drupal\display_builder\IslandReloadEventsTrait;
 use Drupal\display_builder\IslandType;
 use Drupal\display_builder\SlotSourceProxy;
 use Drupal\display_builder\SourceWithSlotsInterface;
@@ -32,6 +33,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   icon: 'tools',
 )]
 class BuilderPanel extends IslandPluginBase {
+
+  use IslandReloadEventsTrait;
 
   /**
    * The renderer service.
@@ -98,29 +101,8 @@ class BuilderPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function onAttachToRoot(InstanceInterface $instance, string $node_id): array {
-    return $this->reloadWithGlobalData($instance);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function onAttachToSlot(InstanceInterface $instance, string $node_id, string $parent_id): array {
     return $this->replaceNode($instance, $parent_id);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onMove(InstanceInterface $instance, string $node_id): array {
-    return $this->reloadWithGlobalData($instance);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onHistoryChange(InstanceInterface $instance): array {
-    return $this->reloadWithGlobalData($instance);
   }
 
   /**
@@ -133,7 +115,7 @@ class BuilderPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function onDelete(InstanceInterface $instance, string $parent_id): array {
+  public function onDelete(InstanceInterface $instance, ?string $parent_id): array {
     if (empty($parent_id)) {
       return $this->reloadWithGlobalData($instance);
     }

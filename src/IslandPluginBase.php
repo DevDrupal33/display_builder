@@ -224,7 +224,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * {@inheritdoc}
    */
-  public function onDelete(InstanceInterface $instance, string $parent_id): array {
+  public function onDelete(InstanceInterface $instance, ?string $parent_id): array {
     return [];
   }
 
@@ -232,6 +232,20 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    * {@inheritdoc}
    */
   public function onHistoryChange(InstanceInterface $instance): array {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onRestore(InstanceInterface $instance): array {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onRevert(InstanceInterface $instance): array {
     return [];
   }
 

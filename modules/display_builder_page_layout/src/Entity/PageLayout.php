@@ -157,7 +157,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
 
     if ($display_builder && $instance) {
       $this->addDependency('config', $display_builder->getConfigDependencyName());
-      $contexts = $instance->getContexts() ?? [];
+      $contexts = $instance->getContexts();
 
       foreach ($this->displayBuildable()->getSources() as $source_data) {
         /** @var \Drupal\ui_patterns\SourceInterface $source */
