@@ -9,6 +9,8 @@ use Drupal\ui_patterns\SourceInterface;
 
 /**
  * Defines an interface for slot sources that support slots.
+ *
+ * @todo remove when in UI Patterns module #3571009.
  */
 interface SourceWithSlotsInterface extends SourceInterface {
 

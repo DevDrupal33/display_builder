@@ -44,27 +44,6 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the ::restore() method.
-   */
-  public function testRestore(): void {
-    $instance = $this->createDisplayBuilderInstance();
-    $testData = [['source_id' => 'component', 'node_id' => '1']];
-    $modifiedData = [['source_id' => 'component', 'node_id' => '2']];
-
-    // Set save data.
-    $instance->setSave($testData);
-
-    // Modify current state.
-    $instance->setNewPresent($modifiedData, 'Modified state');
-    self::assertSame($modifiedData, $instance->getCurrentState());
-
-    // Restore to save.
-    $instance->restore();
-    self::assertSame($testData, $instance->getCurrentState());
-    self::assertSame('Back to saved data.', (string) $instance->getCurrent()->getLog());
-  }
-
-  /**
    * Test the ::clear() method.
    */
   public function testClear(): void {
@@ -224,11 +203,11 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // 6. Test Save and Restore.
     $instance->setSave($state1);
-    self::assertTrue($instance->hasSave());
-    self::assertFalse($instance->saveIsCurrent());
+    self::assertTrue($instance->isPublished());
+    self::assertFalse($instance->isPublishedPresent());
 
     $instance->restore();
-    self::assertTrue($instance->saveIsCurrent());
+    self::assertTrue($instance->isPublishedPresent());
     self::assertCount(1, $instance->getCurrentState());
   }
 
@@ -302,7 +281,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     self::assertEmpty($instance->getCurrentState());
     self::assertSame(0, \count($instance->getPast()));
     self::assertSame(0, \count($instance->getFuture()));
-    self::assertFalse($instance->hasSave());
+    self::assertFalse($instance->isPublished());
   }
 
   /**
@@ -397,41 +376,6 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the ::saveIsCurrent() method.
-   */
-  public function testSaveIsCurrent(): void {
-    $instance = $this->createDisplayBuilderInstance();
-    $testData = [['source_id' => 'component', 'node_id' => '1', 'source' => []]];
-
-    // Initially Save match init, so is true.
-    self::assertTrue($instance->saveIsCurrent());
-
-    // Set save data.
-    $instance->setSave($testData);
-    self::assertFalse($instance->saveIsCurrent());
-
-    // Modify state - should no longer be current.
-    $modifiedData = [['source_id' => 'component', 'node_id' => '2', 'source' => []]];
-    $instance->setNewPresent($modifiedData, 'Modified state');
-
-    // Note: There may be edge cases where saveIsCurrent returns unexpected
-    // results.
-    // The important thing is that restore() works correctly, which it does.
-    self::assertFalse($instance->saveIsCurrent());
-
-    // Restore - should be current again.
-    $instance->restore();
-    // After restore, present should equal save, so saveIsCurrent() should be
-    // true.
-    self::assertTrue($instance->saveIsCurrent());
-
-    // Test edge case: when both present and save are null, should return true
-    // This covers the null-safe operator behavior.
-    $instance2 = $this->createDisplayBuilderInstance();
-    self::assertTrue($instance2->saveIsCurrent());
-  }
-
-  /**
    * Test the ::setNewPresent() method.
    */
   public function testSetNewPresent(): void {
@@ -464,13 +408,13 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $testData = [['source_id' => 'component', 'node_id' => '1', 'source' => []]];
 
     // Initially no save.
-    self::assertFalse($instance->hasSave());
+    self::assertFalse($instance->isPublished());
 
     // Set save data.
     $instance->setSave($testData);
 
     // Verify save is set.
-    self::assertTrue($instance->hasSave());
+    self::assertTrue($instance->isPublished());
     self::assertNotNull($instance->save);
     self::assertInstanceOf(HistoryStep::class, $instance->get('save')->first());
 

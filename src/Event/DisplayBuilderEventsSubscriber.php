@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Event;
 
-use Drupal\display_builder\IslandPluginManagerInterface;
+use Drupal\display_builder\Island\IslandFanOutTrait;
+use Drupal\display_builder\Island\IslandPluginManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * The event subscriber for Display Builder islands.
  */
 class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
+
+  use IslandFanOutTrait;
 
   /**
    * Constructs a new DisplayBuilderEventsSubscriber object.
@@ -33,7 +36,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
       DisplayBuilderEvents::ON_REVERT => 'onRevert',
       DisplayBuilderEvents::ON_MOVE => 'onMove',
       DisplayBuilderEvents::ON_UPDATE => 'onUpdate',
-      DisplayBuilderEvents::ON_SAVE => 'onSave',
+      DisplayBuilderEvents::ON_PUBLISH => 'onPublish',
       DisplayBuilderEvents::ON_PRESET_SAVE => 'onPresetSave',
     ];
   }
@@ -41,40 +44,40 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
   /**
    * Event handler for when a block becomes active.
    *
-   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
+   * @param \Drupal\display_builder\Event\DisplayBuilderDataEvent $event
    *   The event object.
    */
-  public function onActive(DisplayBuilderEvent $event): void {
+  public function onActive(DisplayBuilderDataEvent $event): void {
     $this->dispatchToIslands($event, __FUNCTION__, [$event->getData()]);
   }
 
   /**
    * Event handler for when a block is attached to the root.
    *
-   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
+   * @param \Drupal\display_builder\Event\DisplayBuilderNodeEvent $event
    *   The event object.
    */
-  public function onAttachToRoot(DisplayBuilderEvent $event): void {
+  public function onAttachToRoot(DisplayBuilderNodeEvent $event): void {
     $this->dispatchToIslands($event, __FUNCTION__, [$event->getNodeId()]);
   }
 
   /**
    * Event handler for when a block is attached to a slot.
    *
-   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
+   * @param \Drupal\display_builder\Event\DisplayBuilderSlotEvent $event
    *   The event object.
    */
-  public function onAttachToSlot(DisplayBuilderEvent $event): void {
+  public function onAttachToSlot(DisplayBuilderSlotEvent $event): void {
     $this->dispatchToIslands($event, __FUNCTION__, [$event->getNodeId(), $event->getParentId()]);
   }
 
   /**
    * Event handler for when a block is deleted.
    *
-   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
+   * @param \Drupal\display_builder\Event\DisplayBuilderDeleteEvent $event
    *   The event object.
    */
-  public function onDelete(DisplayBuilderEvent $event): void {
+  public function onDelete(DisplayBuilderDeleteEvent $event): void {
     $this->dispatchToIslands($event, __FUNCTION__, [$event->getParentId()]);
   }
 
@@ -114,30 +117,30 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
   /**
    * Event handler for when a block is moved.
    *
-   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
+   * @param \Drupal\display_builder\Event\DisplayBuilderNodeEvent $event
    *   The event object.
    */
-  public function onMove(DisplayBuilderEvent $event): void {
+  public function onMove(DisplayBuilderNodeEvent $event): void {
     $this->dispatchToIslands($event, __FUNCTION__, [$event->getNodeId()]);
   }
 
   /**
    * Event handler for when a block is updated.
    *
-   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
+   * @param \Drupal\display_builder\Event\DisplayBuilderNodeEvent $event
    *   The event object.
    */
-  public function onUpdate(DisplayBuilderEvent $event): void {
+  public function onUpdate(DisplayBuilderNodeEvent $event): void {
     $this->dispatchToIslands($event, __FUNCTION__, [$event->getNodeId()]);
   }
 
   /**
    * Event handler for when a display is saved.
    *
-   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
+   * @param \Drupal\display_builder\Event\DisplayBuilderDataEvent $event
    *   The event object.
    */
-  public function onSave(DisplayBuilderEvent $event): void {
+  public function onPublish(DisplayBuilderDataEvent $event): void {
     $this->dispatchToIslands($event, __FUNCTION__, [$event->getData()]);
   }
 
@@ -149,47 +152,6 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    */
   public function onPresetSave(DisplayBuilderEvent $event): void {
     $this->dispatchToIslands($event, __FUNCTION__);
-  }
-
-  /**
-   * Dispatch the event with a generic code.
-   *
-   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
-   *   The event object.
-   * @param string $method
-   *   The method to dispatch.
-   * @param array $parameters
-   *   (Optional) The parameters to the method.
-   */
-  private function dispatchToIslands(DisplayBuilderEvent $event, string $method, array $parameters = []): void {
-    \array_unshift($parameters, $event->getInstance());
-
-    $configuration = $event->getIslandConfiguration();
-    $contexts = $event->getInstance()->getContexts();
-    $islands = $this->islandManager->createInstances($this->islandManager->getDefinitions(), $contexts, $configuration);
-
-    $island_enabled = $event->getEnabledIslands();
-
-    foreach ($islands as $island_id => $island) {
-      if (!isset($island_enabled[$island_id])) {
-        continue;
-      }
-
-      // Skip the island triggering the HTMX event. Useful to avoid swapping
-      // the content of an island which is already in the expected state.
-      // For examples, if we move an instance in Builder, Layers or Tree
-      // panels, if we change the settings in InstanceForm.
-      // @see Drupal\display_builder\Controller\ApiControllerBase::islandId
-      if ($island_id === $event->getCurrentIslandId()) {
-        continue;
-      }
-
-      $result = $island->{$method}(...$parameters);
-
-      if ($result !== NULL) {
-        $event->appendResult($island_id, $result);
-      }
-    }
   }
 
 }

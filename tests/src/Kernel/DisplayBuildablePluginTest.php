@@ -11,7 +11,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
-use Drupal\display_builder\ProfileInterface;
+use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\Tests\user\Traits\UserCreationTrait;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;

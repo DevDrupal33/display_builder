@@ -12,7 +12,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildablePluginBase;
-use Drupal\display_builder\ProfileInterface;
+use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_page_layout\BuilderDataConverter;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;

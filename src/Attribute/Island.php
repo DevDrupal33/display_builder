@@ -6,7 +6,7 @@ namespace Drupal\display_builder\Attribute;
 
 use Drupal\Component\Plugin\Attribute\AttributeBase;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder\IslandType;
+use Drupal\display_builder\Island\IslandType;
 
 /**
  * The island attribute.
@@ -30,7 +30,7 @@ final class Island extends AttributeBase {
    *   (Optional) A brief description of the plugin.
    * @param class-string|null $deriver
    *   (Optional) The deriver class.
-   * @param \Drupal\display_builder\IslandType|null $type
+   * @param \Drupal\display_builder\Island\IslandType|null $type
    *   (Optional) The island type from enumeration.
    * @param string|null $default_region
    *   (Optional) The island default region, if applicable.

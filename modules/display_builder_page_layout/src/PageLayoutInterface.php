@@ -7,7 +7,7 @@ namespace Drupal\display_builder_page_layout;
 use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
-use Drupal\display_builder\ProfileInterface;
+use Drupal\display_builder\Entity\ProfileInterface;
 
 /**
  * Provides an interface defining a page layout entity type.
@@ -43,7 +43,7 @@ interface PageLayoutInterface extends ConfigEntityInterface, EntityWithPluginCol
   /**
    * Save sources tree retrieved from the Instance entity to config or content.
    *
-   * Triggered by a DisplayBuilderEvents::ON_SAVE event.
+   * Triggered by a DisplayBuilderEvents::ON_PUBLISH event.
    *
    * @param array $sources
    *   A list of nestable sources.

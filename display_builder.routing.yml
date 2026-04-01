@@ -143,11 +143,11 @@ display_builder.api_redo:
       display_builder_instance:
         type: 'entity:display_builder_instance'
 
-display_builder.api_save:
-  path: '/api/display-builder/{display_builder_instance}/save'
+display_builder.api_publish:
+  path: '/api/display-builder/{display_builder_instance}/publish'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiController::save'
+    _controller: '\Drupal\display_builder\Controller\ApiPublishingController::publish'
   requirements:
     _entity_access: 'display_builder_instance.update'
   options:
@@ -160,7 +160,7 @@ display_builder.api_restore:
   path: '/api/display-builder/{display_builder_instance}/restore'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiController::restore'
+    _controller: '\Drupal\display_builder\Controller\ApiPublishingController::restore'
   requirements:
     _entity_access: 'display_builder_instance.update'
   options:
@@ -173,7 +173,7 @@ display_builder.api_revert:
   path: '/api/display-builder/{display_builder_instance}/revert'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiController::revert'
+    _controller: '\Drupal\display_builder\Controller\ApiPublishingController::revert'
   requirements:
     _entity_access: 'display_builder_instance.update'
     _module_dependencies: 'display_builder_entity_view'

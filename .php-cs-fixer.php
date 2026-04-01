@@ -11,12 +11,9 @@ use drupol\PhpCsFixerConfigsDrupal\Config\Drupal8;
 $finder = PhpCsFixer\Finder::create()
   ->name('*.module')
   ->name('*.inc')
-  ->name('*.install')
-  ->name('*.test')
-  ->name('*.profile')
-  ->name('*.theme')
   ->notPath('*.md')
   ->notPath('*.info.yml')
+  ->notName('*.post_update.php')
 ;
 
 $config = new Drupal8();

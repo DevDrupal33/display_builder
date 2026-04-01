@@ -141,45 +141,6 @@ interface ApiControllerInterface {
   public function saveAsPreset(Request $request, InstanceInterface $display_builder_instance, string $node_id): array;
 
   /**
-   * Save display builder instance.
-   *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
-   *   Display builder instance.
-   *
-   * @return array
-   *   A renderable array
-   */
-  public function save(Request $request, InstanceInterface $display_builder_instance): array;
-
-  /**
-   * Restore to last save.
-   *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
-   *   Display builder instance.
-   *
-   * @return array
-   *   A renderable array
-   */
-  public function restore(Request $request, InstanceInterface $display_builder_instance): array;
-
-  /**
-   * Revert entity override to default display.
-   *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
-   *   Display builder instance.
-   *
-   * @return array
-   *   A renderable array
-   */
-  public function revert(Request $request, InstanceInterface $display_builder_instance): array;
-
-  /**
    * Move history to the last past state.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request

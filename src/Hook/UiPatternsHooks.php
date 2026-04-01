@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Hook;
 
 use Drupal\Core\Hook\Attribute\Hook;
-use Drupal\display_builder\IslandPluginManagerInterface;
-use Drupal\display_builder\RenderableAltererInterface;
+use Drupal\display_builder\Island\IslandPluginManagerInterface;
+use Drupal\display_builder\Island\RenderableAltererInterface;
 use Drupal\ui_patterns\SourceInterface;
 
 /**

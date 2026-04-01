@@ -13,7 +13,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\IslandPluginManagerInterface;
+use Drupal\display_builder\Island\IslandPluginManagerInterface;
 use Drupal\display_builder\Plugin\display_builder\Island\ContextualFormPanel;
 use Drupal\display_builder\RenderableBuilderTrait;
 use Drupal\display_builder\SourceTree;
@@ -392,6 +392,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $base_id = \trim($base_id, '_');
     $id = $base_id;
     $suffix = 1;
+
     while ($preset_storage->load($id) !== NULL) {
       $id = $base_id . '_' . $suffix++;
     }
@@ -408,42 +409,6 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_PRESET_SAVE);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function save(Request $request, InstanceInterface $display_builder_instance): array {
-    $display_builder_instance->setSave($display_builder_instance->getCurrentState());
-    $display_builder_instance->save();
-
-    $this->builder = $display_builder_instance;
-
-    return $this->dispatchDisplayBuilderEvent(
-      DisplayBuilderEvents::ON_SAVE,
-      $display_builder_instance->getContexts()
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function restore(Request $request, InstanceInterface $display_builder_instance): array {
-    $display_builder_instance->restore();
-    $display_builder_instance->save();
-
-    $this->builder = $display_builder_instance;
-
-    return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_RESTORE);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function revert(Request $request, InstanceInterface $display_builder_instance): array {
-    $this->builder = $display_builder_instance;
-
-    return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_REVERT);
   }
 
   /**
@@ -500,7 +465,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   protected function attachPresetToRoot(InstanceInterface $display_builder_instance, string $preset_id, int $position): array {
     $presetStorage = $this->entityTypeManager()->getStorage('pattern_preset');
 
-    /** @var \Drupal\display_builder\PatternPresetInterface $preset */
+    /** @var \Drupal\display_builder\Entity\PatternPresetInterface $preset */
     $preset = $presetStorage->load($preset_id);
     $data = $preset->getSources();
 
@@ -552,7 +517,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   protected function attachPresetToSlot(InstanceInterface $display_builder_instance, string $preset_id, string $parent_id, string $slot, int $position): array {
     $presetStorage = $this->entityTypeManager()->getStorage('pattern_preset');
 
-    /** @var \Drupal\display_builder\PatternPresetInterface $preset */
+    /** @var \Drupal\display_builder\Entity\PatternPresetInterface $preset */
     $preset = $presetStorage->load($preset_id);
     $data = $preset->getSources();
 
@@ -583,33 +548,6 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       NULL,
       $node_id,
     );
-  }
-
-  /**
-   * Dispatches a display builder event.
-   *
-   * @param string $event_id
-   *   The event ID.
-   * @param array|null $data
-   *   The data.
-   * @param string|null $node_id
-   *   Optional instance ID.
-   * @param string|null $parent_id
-   *   Optional parent ID.
-   *
-   * @return array
-   *   A renderable array.
-   */
-  protected function dispatchDisplayBuilderEvent(
-    string $event_id,
-    ?array $data = NULL,
-    ?string $node_id = NULL,
-    ?string $parent_id = NULL,
-  ): array {
-    $event = $this->createEventWithEnabledIsland($event_id, $data, $node_id, $parent_id);
-    $this->saveSseData($event_id);
-
-    return $event->getResult();
   }
 
   /**

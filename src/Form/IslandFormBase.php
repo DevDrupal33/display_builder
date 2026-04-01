@@ -6,7 +6,7 @@ namespace Drupal\display_builder\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\display_builder\IslandWithFormInterface;
+use Drupal\display_builder\Island\IslandWithFormInterface;
 
 /**
  * Provides a display builder form for island plugin.
@@ -68,7 +68,7 @@ final class IslandFormBase extends FormBase {
    * @param array $args
    *   Arguments from form_state which allow to load plugin.
    *
-   * @return object|\Drupal\display_builder\IslandInterface
+   * @return object|\Drupal\display_builder\Island\IslandInterface
    *   The Island plugin.
    */
   protected static function getPlugin(array $args) {

@@ -65,6 +65,7 @@ nav:
       - Contributing: 'contributing.md'
       - Tests e2e: 'tests.md'
       - Internals: 'internals.md'
+      - Architecture: 'architecture.md'
       - Security model: 'security-model.md'
   - Frequently asked questions: 'faq.md'
 

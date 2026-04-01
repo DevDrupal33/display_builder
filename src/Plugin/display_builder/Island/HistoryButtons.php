@@ -7,9 +7,9 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\IslandPluginToolbarButtonConfigurationBase;
-use Drupal\display_builder\IslandReloadEventsTrait;
-use Drupal\display_builder\IslandType;
+use Drupal\display_builder\Island\IslandPluginToolbarButtonConfigurationBase;
+use Drupal\display_builder\Island\IslandReloadEventsTrait;
+use Drupal\display_builder\Island\IslandType;
 
 /**
  * History buttons island plugin implementation.

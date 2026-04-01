@@ -46,7 +46,7 @@ class HistoryStep extends MapItem {
   /**
    * Get log.
    */
-  public function getLog(): \Stringable|string|null {
+  public function getLog(): string|\Stringable|null {
     return $this->getValue()['log'];
   }
 

@@ -9,9 +9,9 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\IslandPluginBase;
-use Drupal\display_builder\IslandReloadEventsTrait;
-use Drupal\display_builder\IslandType;
+use Drupal\display_builder\Island\IslandPluginBase;
+use Drupal\display_builder\Island\IslandReloadEventsTrait;
+use Drupal\display_builder\Island\IslandType;
 use Drupal\display_builder\Plugin\Field\FieldType\HistoryStep;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -90,7 +90,7 @@ class LogsPanel extends IslandPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function onSave(InstanceInterface $instance): array {
+  public function onPublish(InstanceInterface $instance): array {
     return $this->reloadWithGlobalData($instance);
   }
 

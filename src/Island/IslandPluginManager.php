@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\display_builder;
+namespace Drupal\display_builder\Island;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -30,7 +30,7 @@ final class IslandPluginManager extends DefaultPluginManager implements IslandPl
       if ($filter_by_island && !isset($filter_by_island[$island_id])) {
         continue;
       }
-      /** @var \Drupal\display_builder\IslandType $type */
+      /** @var \Drupal\display_builder\Island\IslandType $type */
       $type = $island->getPluginDefinition()['type'];
       $result[$type->value][$island_id] = $island;
     }

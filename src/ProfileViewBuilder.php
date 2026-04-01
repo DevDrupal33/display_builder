@@ -8,6 +8,9 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityViewBuilder;
 use Drupal\Core\Security\TrustedCallbackInterface;
+use Drupal\display_builder\Entity\ProfileInterface;
+use Drupal\display_builder\Island\IslandPluginManagerInterface;
+use Drupal\display_builder\Island\IslandType;
 
 /**
  * View builder handler for display builder profiles.
@@ -39,7 +42,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     // the Instance entity ID.
     $builder_id = $view_mode;
 
-    /** @var \Drupal\display_builder\ProfileInterface $entity */
+    /** @var \Drupal\display_builder\Entity\ProfileInterface $entity */
     $entity = $entity;
     $this->entity = $entity;
 
@@ -139,7 +142,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    *
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   The builder instance.
-   * @param \Drupal\display_builder\IslandInterface[] $buttonIslands
+   * @param \Drupal\display_builder\Island\IslandInterface[] $buttonIslands
    *   The button islands.
    * @param string $region
    *   The button region.
@@ -263,7 +266,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    *
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   Display builder instance.
-   * @param \Drupal\display_builder\IslandInterface[] $islands
+   * @param \Drupal\display_builder\Island\IslandInterface[] $islands
    *   The islands to build tabs for.
    * @param array $data
    *   (Optional) The data to pass to the islands.
@@ -307,7 +310,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    *
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   Display builder instance.
-   * @param \Drupal\display_builder\IslandInterface[] $islands
+   * @param \Drupal\display_builder\Island\IslandInterface[] $islands
    *   An array of island objects for which buttons will be created.
    *
    * @return array
@@ -348,7 +351,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    *
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   Display builder instance.
-   * @param \Drupal\display_builder\IslandInterface[] $islands
+   * @param \Drupal\display_builder\Island\IslandInterface[] $islands
    *   The islands to build tabs for.
    * @param bool $contextual
    *   (Optional) Is the tabs contextual? See component for details. Default no.
@@ -387,7 +390,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    *
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   Display builder instance.
-   * @param \Drupal\display_builder\IslandInterface[] $islands
+   * @param \Drupal\display_builder\Island\IslandInterface[] $islands
    *   The islands to build tabs for.
    *
    * @return array
@@ -456,7 +459,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
   /**
    * Gets the display builder island plugin manager.
    *
-   * @return \Drupal\display_builder\IslandPluginManagerInterface
+   * @return \Drupal\display_builder\Island\IslandPluginManagerInterface
    *   The island plugin manager.
    */
   private function islandPluginManager(): IslandPluginManagerInterface {

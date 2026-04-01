@@ -11,8 +11,8 @@ use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\DisplayBuildableInterface;
+use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder_page_layout\AccessControlHandler;
 use Drupal\display_builder_page_layout\Form\PageLayoutForm;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
@@ -219,7 +219,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
       return NULL;
     }
 
-    /** @var \Drupal\display_builder\ProfileInterface $builder */
+    /** @var \Drupal\display_builder\Entity\ProfileInterface $builder */
     $builder = $storage->load($profile_id);
 
     return $builder;

@@ -14,9 +14,9 @@ use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\display_builder\Entity\Profile;
-use Drupal\display_builder\IslandInterface;
-use Drupal\display_builder\IslandType;
-use Drupal\display_builder\ProfileInterface;
+use Drupal\display_builder\Entity\ProfileInterface;
+use Drupal\display_builder\Island\IslandInterface;
+use Drupal\display_builder\Island\IslandType;
 use Drupal\user\RoleInterface;
 
 /**
@@ -36,7 +36,7 @@ final class ProfileForm extends EntityForm {
    */
   public function form(array $form, FormStateInterface $form_state): array {
     $form = parent::form($form, $form_state);
-    /** @var \Drupal\display_builder\ProfileInterface $entity */
+    /** @var \Drupal\display_builder\Entity\ProfileInterface $entity */
     $entity = $this->entity;
 
     $form['label'] = [
@@ -112,7 +112,7 @@ final class ProfileForm extends EntityForm {
 
     $island_configuration = $entity->get('islands') ?? [];
 
-    /** @var \Drupal\display_builder\IslandPluginManagerInterface $islandPluginManager */
+    /** @var \Drupal\display_builder\Island\IslandPluginManagerInterface $islandPluginManager */
     $islandPluginManager = \Drupal::service('plugin.manager.db_island'); // phpcs:ignore
     $island_by_types = $islandPluginManager->getIslandsByTypes();
     $labels = [
@@ -151,7 +151,7 @@ final class ProfileForm extends EntityForm {
     parent::submitForm($form, $form_state);
 
     // Save user permissions.
-    /** @var \Drupal\display_builder\ProfileInterface $entity */
+    /** @var \Drupal\display_builder\Entity\ProfileInterface $entity */
     $entity = $this->entity;
 
     if ($permission = $entity->getPermissionName()) {
@@ -198,7 +198,7 @@ final class ProfileForm extends EntityForm {
   /**
    * Build island type table.
    *
-   * @param \Drupal\display_builder\IslandType $type
+   * @param \Drupal\display_builder\Island\IslandType $type
    *   Island type from IslandType enum.
    * @param array $islands
    *   List of island plugins.
@@ -252,7 +252,7 @@ final class ProfileForm extends EntityForm {
   /**
    * Build island row.
    *
-   * @param \Drupal\display_builder\IslandInterface $island
+   * @param \Drupal\display_builder\Island\IslandInterface $island
    *   Island plugin.
    * @param array $configuration
    *   Configuration of this specific island.
@@ -264,9 +264,9 @@ final class ProfileForm extends EntityForm {
     $id = $island->getPluginId();
     $definition = (array) $island->getPluginDefinition();
     $type = $island->getTypeId();
-    /** @var \Drupal\display_builder\IslandPluginManagerInterface $islandPluginManager */
+    /** @var \Drupal\display_builder\Island\IslandPluginManagerInterface $islandPluginManager */
     $islandPluginManager = \Drupal::service('plugin.manager.db_island'); // phpcs:ignore
-    /** @var \Drupal\display_builder\IslandConfigurationFormInterface $instance */
+    /** @var \Drupal\display_builder\Island\IslandConfigurationFormInterface $instance */
     $instance = $islandPluginManager->createInstance($id, $configuration);
     $weight = isset($configuration['weight']) ? (string) $configuration['weight'] : '0';
 

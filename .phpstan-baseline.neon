@@ -46,22 +46,22 @@ parameters:
 			rawMessage: Cannot access offset 'icon' on array|Drupal\Component\Plugin\Definition\PluginDefinitionInterface.
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/IslandPluginBase.php
+			path: src/Island/IslandPluginBase.php
 
 		-
 			rawMessage: Cannot access offset 'id' on array|Drupal\Component\Plugin\Definition\PluginDefinitionInterface.
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/IslandPluginBase.php
+			path: src/Island/IslandPluginBase.php
 
 		-
 			rawMessage: Cannot access offset 'label' on array|Drupal\Component\Plugin\Definition\PluginDefinitionInterface.
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/IslandPluginBase.php
+			path: src/Island/IslandPluginBase.php
 
 		-
 			rawMessage: Cannot access offset 'type' on array|Drupal\Component\Plugin\Definition\PluginDefinitionInterface.
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/IslandPluginBase.php
+			path: src/Island/IslandPluginBase.php

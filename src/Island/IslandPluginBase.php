@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\display_builder;
+namespace Drupal\display_builder\Island;
 
 use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
 use Drupal\Component\Plugin\PluginBase;
@@ -12,6 +12,10 @@ use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\display_builder\HtmxEvents;
+use Drupal\display_builder\HtmxTrait;
+use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\RenderableBuilderTrait;
 use Drupal\ui_patterns\SourcePluginManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -252,7 +256,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * {@inheritdoc}
    */
-  public function onSave(InstanceInterface $instance): array {
+  public function onPublish(InstanceInterface $instance): array {
     return [];
   }
 

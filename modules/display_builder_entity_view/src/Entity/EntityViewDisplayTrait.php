@@ -12,8 +12,8 @@ use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\display_builder\DisplayBuildableInterface;
+use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
 
 /**
@@ -134,7 +134,7 @@ trait EntityViewDisplayTrait {
   /**
    * Returns the display builder override profile.
    *
-   * @return \Drupal\display_builder\ProfileInterface|null
+   * @return \Drupal\display_builder\Entity\ProfileInterface|null
    *   The display builder override profile, or NULL if not set.
    *
    * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
@@ -361,7 +361,7 @@ trait EntityViewDisplayTrait {
    * @param string $display_builder_id
    *   The display builder ID.
    *
-   * @return \Drupal\display_builder\ProfileInterface|null
+   * @return \Drupal\display_builder\Entity\ProfileInterface|null
    *   The display builder, or NULL if not found.
    */
   private function loadDisplayBuilder(string $display_builder_id): ?ProfileInterface {
@@ -370,7 +370,7 @@ trait EntityViewDisplayTrait {
     }
     $storage = $this->entityTypeManager->getStorage('display_builder_profile');
 
-    /** @var \Drupal\display_builder\ProfileInterface $display_builder */
+    /** @var \Drupal\display_builder\Entity\ProfileInterface $display_builder */
     $display_builder = $storage->load($display_builder_id);
 
     return $display_builder;

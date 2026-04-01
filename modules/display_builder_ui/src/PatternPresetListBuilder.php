@@ -77,7 +77,7 @@ final class PatternPresetListBuilder extends DraggableListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity): array {
-    /** @var \Drupal\display_builder\PatternPresetInterface $entity */
+    /** @var \Drupal\display_builder\Entity\PatternPresetInterface $entity */
     $row = [];
     $row['label'] = $entity->label();
 

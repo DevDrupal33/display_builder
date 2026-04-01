@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\display_builder\Entity\Instance;
-use Drupal\display_builder\IslandInterface;
-use Drupal\display_builder\IslandPluginBase;
+use Drupal\display_builder\Island\IslandInterface;
+use Drupal\display_builder\Island\IslandPluginBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -270,12 +270,12 @@ final class IslandPluginBaseTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Tests that ::onSave() returns empty by default.
+   * Tests that ::onPublish() returns empty by default.
    */
-  public function testOnSaveDefaultReturnsEmptyArray(): void {
+  public function testOnPublishDefaultReturnsEmptyArray(): void {
     $plugin = $this->createIsland('test_minimal');
     $instance = $this->createInstance();
-    self::assertSame([], $plugin->onSave($instance));
+    self::assertSame([], $plugin->onPublish($instance));
   }
 
   /**
@@ -294,7 +294,7 @@ final class IslandPluginBaseTest extends DisplayBuilderKernelTestBase {
    * reloadWithGlobalData().
    */
   public function testReloadWithGlobalDataReturnsOutOfBandRenderable(): void {
-    /** @var \Drupal\display_builder\IslandInterface $plugin */
+    /** @var \Drupal\display_builder\Island\IslandInterface $plugin */
     $plugin = $this->createIsland('test_index_raw');
     $instance = $this->createInstance('my_builder');
 
@@ -314,7 +314,7 @@ final class IslandPluginBaseTest extends DisplayBuilderKernelTestBase {
    * @param array $configuration
    *   Optional plugin configuration.
    *
-   * @return \Drupal\display_builder\IslandInterface
+   * @return \Drupal\display_builder\Island\IslandInterface
    *   The island plugin instance.
    */
   private function createIsland(string $id, array $configuration = []): IslandInterface {

@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\display_builder\Kernel;
 
+use Drupal\display_builder\Event\DisplayBuilderDeleteEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\Event\DisplayBuilderEventsSubscriber;
+use Drupal\display_builder\Event\DisplayBuilderNodeEvent;
+use Drupal\display_builder\Event\DisplayBuilderSlotEvent;
 use Drupal\display_builder\InstanceInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -53,7 +56,7 @@ final class IslandEventTest extends DisplayBuilderKernelTestBase {
   public function testOnAttachToRootDispatchesToEnabledIslands(): void {
     $instance = $this->createInstanceWithIsland('test_index_raw');
 
-    $event = new DisplayBuilderEvent($instance, NULL, 'node_1');
+    $event = new DisplayBuilderNodeEvent($instance, 'node_1');
     $this->dispatch(DisplayBuilderEvents::ON_ATTACH_TO_ROOT, $event);
 
     $this->assertOutOfBandResult($event, 'test_index_raw', $instance);
@@ -65,7 +68,7 @@ final class IslandEventTest extends DisplayBuilderKernelTestBase {
   public function testOnAttachToSlotDispatchesToEnabledIslands(): void {
     $instance = $this->createInstanceWithIsland('test_index_raw');
 
-    $event = new DisplayBuilderEvent($instance, NULL, 'node_1', 'parent_1');
+    $event = new DisplayBuilderSlotEvent($instance, 'node_1', 'parent_1');
     $this->dispatch(DisplayBuilderEvents::ON_ATTACH_TO_SLOT, $event);
 
     $this->assertOutOfBandResult($event, 'test_index_raw', $instance);
@@ -77,7 +80,7 @@ final class IslandEventTest extends DisplayBuilderKernelTestBase {
   public function testOnMoveDispatchesToEnabledIslands(): void {
     $instance = $this->createInstanceWithIsland('test_index_raw');
 
-    $event = new DisplayBuilderEvent($instance, NULL, 'node_1');
+    $event = new DisplayBuilderNodeEvent($instance, 'node_1');
     $this->dispatch(DisplayBuilderEvents::ON_MOVE, $event);
 
     $this->assertOutOfBandResult($event, 'test_index_raw', $instance);
@@ -89,7 +92,7 @@ final class IslandEventTest extends DisplayBuilderKernelTestBase {
   public function testOnDeleteDispatchesToEnabledIslands(): void {
     $instance = $this->createInstanceWithIsland('test_index_raw');
 
-    $event = new DisplayBuilderEvent($instance, NULL, NULL, 'parent_1');
+    $event = new DisplayBuilderDeleteEvent($instance, 'parent_1');
     $this->dispatch(DisplayBuilderEvents::ON_DELETE, $event);
 
     $this->assertOutOfBandResult($event, 'test_index_raw', $instance);
@@ -113,7 +116,7 @@ final class IslandEventTest extends DisplayBuilderKernelTestBase {
   public function testOnUpdateDispatchesToEnabledIslands(): void {
     $instance = $this->createInstanceWithIsland('test_index_raw');
 
-    $event = new DisplayBuilderEvent($instance, NULL, 'node_1');
+    $event = new DisplayBuilderNodeEvent($instance, 'node_1');
     $this->dispatch(DisplayBuilderEvents::ON_UPDATE, $event);
 
     $this->assertOutOfBandResult($event, 'test_index_raw', $instance);
@@ -125,7 +128,7 @@ final class IslandEventTest extends DisplayBuilderKernelTestBase {
   public function testCurrentIslandIdIsSkipped(): void {
     $instance = $this->createInstanceWithIsland('test_index_raw');
 
-    $event = new DisplayBuilderEvent($instance, NULL, 'node_1', NULL, 'test_index_raw');
+    $event = new DisplayBuilderNodeEvent($instance, 'node_1', 'test_index_raw');
     $this->dispatch(DisplayBuilderEvents::ON_ATTACH_TO_ROOT, $event);
 
     self::assertArrayNotHasKey('test_index_raw', $event->getResult());
@@ -140,7 +143,7 @@ final class IslandEventTest extends DisplayBuilderKernelTestBase {
 
     $instance = $this->createDisplayBuilderInstance($profile->id());
 
-    $event = new DisplayBuilderEvent($instance, NULL, 'node_1');
+    $event = new DisplayBuilderNodeEvent($instance, 'node_1');
     $this->dispatch(DisplayBuilderEvents::ON_ATTACH_TO_ROOT, $event);
 
     self::assertArrayNotHasKey('test_index_raw', $event->getResult());

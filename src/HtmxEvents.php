@@ -474,9 +474,9 @@ class HtmxEvents {
    * @return array
    *   The render array.
    */
-  public function onSave(array $build, string $builder_id): array {
+  public function onPublish(array $build, string $builder_id): array {
     $url = new Url(
-      'display_builder.api_save',
+      'display_builder.api_publish',
       [
         'display_builder_instance' => $builder_id,
       ]

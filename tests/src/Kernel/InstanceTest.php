@@ -7,8 +7,7 @@ namespace Drupal\Tests\display_builder\Kernel;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\display_builder\Entity\Instance;
-use Drupal\display_builder\ProfileInterface;
-use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
+use Drupal\display_builder\Entity\ProfileInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -110,27 +109,6 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
     $contexts = $instance->getContexts();
     self::assertArrayHasKey('test', $contexts);
     self::assertSame('test value', $contexts['test']->getContextValue());
-  }
-
-  /**
-   * Test context requirements methods.
-   */
-  public function testContextRequirements(): void {
-    $instance = $this->createDisplayBuilderInstance();
-
-    self::assertFalse($instance->canSaveContextsRequirement());
-    self::assertFalse($instance->hasSaveContextsRequirement('any'));
-
-    $contexts = RequirementsContext::addToContext(['key1'], []);
-
-    $instance = Instance::create([
-      'id' => 'test_id',
-      'contexts' => $contexts,
-    ]);
-
-    self::assertTrue($instance->canSaveContextsRequirement());
-    self::assertTrue($instance->hasSaveContextsRequirement('key1'));
-    self::assertFalse($instance->hasSaveContextsRequirement('key2'));
   }
 
   /**

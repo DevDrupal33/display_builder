@@ -12,7 +12,6 @@ use Drupal\Core\Url;
 use Drupal\display_builder\Form\ProfileForm;
 use Drupal\display_builder\Form\ProfileIslandPluginForm;
 use Drupal\display_builder\ProfileAccessControlHandler;
-use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder\ProfileViewBuilder;
 use Drupal\display_builder_ui\ProfileListBuilder;
 use Drupal\user\Entity\Role;

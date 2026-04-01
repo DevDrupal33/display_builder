@@ -9,9 +9,9 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\IslandPluginToolbarButtonConfigurationBase;
-use Drupal\display_builder\IslandReloadEventsTrait;
-use Drupal\display_builder\IslandType;
+use Drupal\display_builder\Island\IslandPluginToolbarButtonConfigurationBase;
+use Drupal\display_builder\Island\IslandReloadEventsTrait;
+use Drupal\display_builder\Island\IslandType;
 use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -49,7 +49,7 @@ class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
    * {@inheritdoc}
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    if (!$builder->canSaveContextsRequirement()) {
+    if (!$builder->isPublishable()) {
       return [];
     }
 
@@ -71,7 +71,7 @@ class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
   /**
    * {@inheritdoc}
    */
-  public function onSave(InstanceInterface $instance): array {
+  public function onPublish(InstanceInterface $instance): array {
     return $this->reloadWithGlobalData($instance);
   }
 
@@ -87,11 +87,11 @@ class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
   protected function buildStateButtons(InstanceInterface $instance): array {
     $instance_d = (string) $instance->id();
     $buttons = [];
-    $hasSave = $instance->hasSave();
-    $saveIsCurrent = $hasSave ? $instance->saveIsCurrent() : FALSE;
+    $hasSave = $instance->isPublished();
+    $saveIsCurrent = $hasSave ? $instance->isPublishedPresent() : FALSE;
 
     if ($this->isButtonEnabled('publish') && !$saveIsCurrent) {
-      $buttons[] = $this->htmxEvents->onSave($this->buildPublishButton(), $instance_d);
+      $buttons[] = $this->htmxEvents->onPublish($this->buildPublishButton(), $instance_d);
     }
 
     if ($this->isButtonEnabled('restore') && !$saveIsCurrent) {

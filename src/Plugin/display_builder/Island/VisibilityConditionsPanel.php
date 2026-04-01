@@ -12,11 +12,11 @@ use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\IslandPluginBase;
-use Drupal\display_builder\IslandType;
-use Drupal\display_builder\IslandWithFormInterface;
-use Drupal\display_builder\IslandWithFormTrait;
-use Drupal\display_builder\RenderableAltererInterface;
+use Drupal\display_builder\Island\IslandPluginBase;
+use Drupal\display_builder\Island\IslandType;
+use Drupal\display_builder\Island\IslandWithFormInterface;
+use Drupal\display_builder\Island\IslandWithFormTrait;
+use Drupal\display_builder\Island\RenderableAltererInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

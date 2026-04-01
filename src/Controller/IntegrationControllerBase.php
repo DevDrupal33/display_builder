@@ -35,7 +35,7 @@ abstract class IntegrationControllerBase extends ControllerBase {
    *   A renderable array
    */
   protected function renderBuilder(DisplayBuildableInterface $buildable): array {
-    /** @var \Drupal\display_builder\ProfileInterface $profile */
+    /** @var \Drupal\display_builder\Entity\ProfileInterface $profile */
     $profile = $buildable->getProfile();
 
     if (!$profile) {

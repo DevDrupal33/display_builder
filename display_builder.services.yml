@@ -4,9 +4,9 @@ services:
     arguments: []
 
   plugin.manager.db_island:
-    class: Drupal\display_builder\IslandPluginManager
+    class: Drupal\display_builder\Island\IslandPluginManager
     parent: default_plugin_manager
-  Drupal\display_builder\IslandPluginManagerInterface: '@plugin.manager.db_island'
+  Drupal\display_builder\Island\IslandPluginManagerInterface: '@plugin.manager.db_island'
 
   display_builder.slot_sources_proxy:
     class: Drupal\display_builder\SlotSourceProxy

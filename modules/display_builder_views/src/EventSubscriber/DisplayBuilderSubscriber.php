@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder_views\EventSubscriber;
 
 use Drupal\display_builder\DisplayBuildablePluginManager;
-use Drupal\display_builder\Event\DisplayBuilderEvent;
+use Drupal\display_builder\Event\DisplayBuilderDataEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder_views\Plugin\display_builder\Buildable\ViewDisplay;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -24,17 +24,17 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
    */
   public static function getSubscribedEvents(): array {
     return [
-      DisplayBuilderEvents::ON_SAVE => 'onSave',
+      DisplayBuilderEvents::ON_PUBLISH => 'onPublish',
     ];
   }
 
   /**
    * Event handler for when a display builder is saved.
    *
-   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
+   * @param \Drupal\display_builder\Event\DisplayBuilderDataEvent $event
    *   The event object.
    */
-  public function onSave(DisplayBuilderEvent $event): void {
+  public function onPublish(DisplayBuilderDataEvent $event): void {
     $contexts = $event->getData();
     /** @var \Drupal\display_builder\InstanceInterface $instance */
     $instance = $event->getInstance();

@@ -2,22 +2,26 @@
 
 declare(strict_types=1);
 
-namespace Drupal\display_builder;
+namespace Drupal\display_builder\Island;
+
+use Drupal\display_builder\InstanceInterface;
 
 /**
- * Provides default event handler implementations that reload the island.
+ * Reload implementation for IslandStructureEventsInterface methods.
  *
- * Use this trait in island plugins that must reload their full content in
- * response to any structural change in the builder tree. It implements the
- * six most common event handler methods from IslandEventSubscriberInterface
- * by delegating to reloadWithGlobalData().
+ * Provides onAttachToRoot, onAttachToSlot, onMove, onUpdate, and onDelete
+ * handlers that all delegate to reloadWithGlobalData(), which the using
+ * island plugin must provide.
  *
- * Plugins that also need to react to onSave() or onPresetSave() must
- * implement those methods explicitly.
+ * Use this trait when an island should fully reload its content in response
+ * to any structural mutation of the builder tree.
+ *
+ * @see \Drupal\display_builder\Island\IslandStructureEventsInterface
+ * @see \Drupal\display_builder\Island\IslandReloadEventsTrait
  *
  * @phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
  */
-trait IslandReloadEventsTrait {
+trait IslandStructureReloadTrait {
 
   /**
    * {@inheritdoc}
@@ -37,27 +41,6 @@ trait IslandReloadEventsTrait {
    * {@inheritdoc}
    */
   public function onMove(InstanceInterface $instance, string $node_id): array {
-    return $this->reloadWithGlobalData($instance);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onHistoryChange(InstanceInterface $instance): array {
-    return $this->reloadWithGlobalData($instance);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onRestore(InstanceInterface $instance): array {
-    return $this->reloadWithGlobalData($instance);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onRevert(InstanceInterface $instance): array {
     return $this->reloadWithGlobalData($instance);
   }
 

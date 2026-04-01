@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\display_builder;
+namespace Drupal\display_builder\Island;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
 
@@ -36,7 +36,7 @@ interface IslandPluginManagerInterface extends PluginManagerInterface {
    * @param array $configuration
    *   (Optional) An array of configuration.
    *
-   * @return array<string, \Drupal\display_builder\IslandInterface>
+   * @return array<string, \Drupal\display_builder\Island\IslandInterface>
    *   An array of island instances keyed by plugin ID.
    */
   public function createInstances(array $definitions, array $contexts = [], array $configuration = []): array;

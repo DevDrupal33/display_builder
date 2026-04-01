@@ -17,7 +17,6 @@ use Drupal\display_builder\InstanceAccessControlHandler;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\InstanceStorage;
 use Drupal\display_builder\Plugin\Field\FieldType\HistoryStep;
-use Drupal\display_builder\ProfileInterface;
 use Drupal\display_builder\SlotSourceProxy;
 use Drupal\display_builder\SourceTree;
 use Drupal\display_builder_ui\InstanceListBuilder;
@@ -202,7 +201,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function getProfile(): ?ProfileInterface {
     $profile_id = $this->get('profileId')->getString();
-    /** @var \Drupal\display_builder\ProfileInterface $profile */
+    /** @var \Drupal\display_builder\Entity\ProfileInterface $profile */
     $profile = $this->entityTypeManager()->getStorage('display_builder_profile')->load($profile_id);
 
     return $profile;
@@ -535,8 +534,8 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function canSaveContextsRequirement(?array $contexts = NULL): bool {
-    $contexts ??= $this->getContexts();
+  public function isPublishable(): bool {
+    $contexts = $this->getContexts();
 
     if (!\array_key_exists('context_requirements', $contexts)
       || !($contexts['context_requirements'] instanceof RequirementsContext)) {
@@ -551,6 +550,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function hasSaveContextsRequirement(string $key, array $contexts = []): bool {
     $contexts = empty($contexts) ? $this->getContexts() : $contexts;
+
     if (!\array_key_exists('context_requirements', $contexts)
       || !($contexts['context_requirements'] instanceof RequirementsContext)
       || !$contexts['context_requirements']->hasValue($key)) {
@@ -563,14 +563,14 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
-  public function hasSave(): bool {
+  public function isPublished(): bool {
     return !$this->get('save')->isEmpty();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function saveIsCurrent(): bool {
+  public function isPublishedPresent(): bool {
     $present = $this->get('present');
     $save = $this->get('save');
 
@@ -702,6 +702,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   private function nodeLabel(array $data): string {
     $label = $this->slotSourceProxy()->getLabelWithSummary($data, [], TRUE)['label'];
+
     return $label !== '' ? $label : ($data['source_id'] ?? '');
   }
 

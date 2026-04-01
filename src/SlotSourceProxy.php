@@ -9,6 +9,8 @@ use Drupal\Component\Utility\Html;
 
 /**
  * Provide methods missing in UI Patterns.
+ *
+ * @todo remove when moved to UI Patterns #3568363.
  */
 class SlotSourceProxy {
 

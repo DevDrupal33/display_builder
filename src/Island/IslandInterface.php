@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Drupal\display_builder;
+namespace Drupal\display_builder\Island;
 
 use Drupal\Component\Plugin\ConfigurableInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\display_builder\InstanceInterface;
 
 /**
  * Interface for island plugins.

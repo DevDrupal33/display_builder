@@ -119,3 +119,7 @@ display:
 Overview:
 
 ![Internals](images/internals/with-views-internals.webp)
+
+## See also
+
+- [PHP Architecture](architecture.md) — SourceTree engine, event system, and island design that reads and writes these data formats

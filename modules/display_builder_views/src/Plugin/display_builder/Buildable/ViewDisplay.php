@@ -15,7 +15,7 @@ use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\DisplayBuilderHelpers;
-use Drupal\display_builder\ProfileInterface;
+use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\views\Plugin\views\PluginBase;
 
@@ -126,7 +126,7 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
     }
     $storage = $this->entityTypeManager->getStorage('display_builder_profile');
 
-    /** @var \Drupal\display_builder\ProfileInterface $display_builder */
+    /** @var \Drupal\display_builder\Entity\ProfileInterface $display_builder */
     $display_builder = $storage->load($display_builder_id);
 
     return $display_builder;

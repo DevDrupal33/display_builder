@@ -146,6 +146,7 @@ class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPlugi
     $data = $contexts = [];
     /** @var \Drupal\display_builder\InstanceInterface $instance */
     $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($instance_id);
+
     if ($instance) {
       $contexts = $instance->getContexts();
     }

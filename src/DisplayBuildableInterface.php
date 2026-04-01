@@ -10,6 +10,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\display_builder\Entity\ProfileInterface;
 
 /**
  * Interface for entities or plugins natively embedding a display builder.
@@ -213,7 +214,7 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface {
   /**
    * Save sources tree retrieved from the Instance entity to config or content.
    *
-   * Triggered by a DisplayBuilderEvents::ON_SAVE event.
+   * Triggered by a DisplayBuilderEvents::ON_PUBLISH event.
    */
   public function saveSources(): void;
 

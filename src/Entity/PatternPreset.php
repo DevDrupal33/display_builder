@@ -10,7 +10,6 @@ use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Form\PatternPresetForm;
-use Drupal\display_builder\PatternPresetInterface;
 use Drupal\display_builder\SlotSourceProxy;
 use Drupal\display_builder_ui\PatternPresetListBuilder;
 use Drupal\ui_patterns\SourceInterface;

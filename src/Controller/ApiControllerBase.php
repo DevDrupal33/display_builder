@@ -8,10 +8,14 @@ use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
+use Drupal\display_builder\Entity\ProfileInterface;
+use Drupal\display_builder\Event\DisplayBuilderDataEvent;
+use Drupal\display_builder\Event\DisplayBuilderDeleteEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
+use Drupal\display_builder\Event\DisplayBuilderNodeEvent;
+use Drupal\display_builder\Event\DisplayBuilderSlotEvent;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\ProfileInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -36,7 +40,7 @@ abstract class ApiControllerBase extends ControllerBase {
     DisplayBuilderEvents::ON_HISTORY_CHANGE,
     DisplayBuilderEvents::ON_MOVE,
     DisplayBuilderEvents::ON_PRESET_SAVE,
-    DisplayBuilderEvents::ON_SAVE,
+    DisplayBuilderEvents::ON_PUBLISH,
     DisplayBuilderEvents::ON_UPDATE,
   ];
 
@@ -73,6 +77,33 @@ abstract class ApiControllerBase extends ControllerBase {
   ) {}
 
   /**
+   * Dispatches a display builder event.
+   *
+   * @param string $event_id
+   *   The event ID.
+   * @param array|null $data
+   *   The data.
+   * @param string|null $node_id
+   *   Optional instance ID.
+   * @param string|null $parent_id
+   *   Optional parent ID.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function dispatchDisplayBuilderEvent(
+    string $event_id,
+    ?array $data = NULL,
+    ?string $node_id = NULL,
+    ?string $parent_id = NULL,
+  ): array {
+    $event = $this->createEventWithEnabledIsland($event_id, $data, $node_id, $parent_id);
+    $this->saveSseData($event_id);
+
+    return $event->getResult();
+  }
+
+  /**
    * Creates a display builder event with enabled islands only.
    *
    * Use a cache to avoid loading all the builder configuration.
@@ -90,7 +121,23 @@ abstract class ApiControllerBase extends ControllerBase {
    *   The event.
    */
   protected function createEventWithEnabledIsland(string $event_id, ?array $data, ?string $node_id, ?string $parent_id): DisplayBuilderEvent {
-    $event = new DisplayBuilderEvent($this->builder, $data, $node_id, $parent_id, $this->islandId);
+    $event = match ($event_id) {
+      DisplayBuilderEvents::ON_ACTIVE,
+      DisplayBuilderEvents::ON_PUBLISH => new DisplayBuilderDataEvent($this->builder, $data ?? [], $this->islandId),
+
+      DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
+      DisplayBuilderEvents::ON_MOVE,
+      DisplayBuilderEvents::ON_UPDATE => new DisplayBuilderNodeEvent($this->builder, $node_id ?? '', $this->islandId),
+
+      DisplayBuilderEvents::ON_ATTACH_TO_SLOT => new DisplayBuilderSlotEvent($this->builder, $node_id ?? '', $parent_id ?? '', $this->islandId),
+
+      DisplayBuilderEvents::ON_DELETE => new DisplayBuilderDeleteEvent($this->builder, $parent_id, $this->islandId),
+
+      // ON_HISTORY_CHANGE, ON_RESTORE, ON_REVERT, ON_PRESET_SAVE, and any
+      // future/submodule event that carries no extra payload.
+      default => new DisplayBuilderEvent($this->builder, $this->islandId),
+    };
+
     $this->eventDispatcher->dispatch($event, $event_id);
 
     return $event;

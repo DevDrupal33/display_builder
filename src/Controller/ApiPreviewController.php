@@ -65,7 +65,7 @@ class ApiPreviewController extends ControllerBase {
    *   The HTML response.
    */
   public function getPresetPreview(string $preset_id): HtmlResponse {
-    /** @var \Drupal\display_builder\PatternPresetInterface $preset */
+    /** @var \Drupal\display_builder\Entity\PatternPresetInterface $preset */
     $preset = $this->presetConfigStorage->load($preset_id);
     $data = $preset->getSources([], FALSE);
 

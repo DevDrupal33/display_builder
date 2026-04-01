@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\display_builder\Entity\HistoryInterface;
+use Drupal\display_builder\Entity\ProfileInterface;
 
 /**
  * Provides an interface defining a display builder instance entity type.
  */
-interface InstanceInterface extends ContentEntityInterface, HistoryInterface {
+interface InstanceInterface extends ContentEntityInterface, HistoryInterface, PublishableInterface {
 
   /**
    * Returns the display builder profile.
    *
-   * @return \Drupal\display_builder\ProfileInterface|null
+   * @return \Drupal\display_builder\Entity\ProfileInterface|null
    *   The display builder profile.
    */
   public function getProfile(): ?ProfileInterface;
@@ -177,57 +179,12 @@ interface InstanceInterface extends ContentEntityInterface, HistoryInterface {
   public function getUsers(): array;
 
   /**
-   * Check display has required context, meaning it can save value.
-   *
-   * @param \Drupal\Core\Plugin\Context\ContextInterface[]|null $contexts
-   *   (Optional) contexts if already accessible, keyed by context name.
-   *
-   * @return bool
-   *   True if required, False otherwise.
-   */
-  public function canSaveContextsRequirement(?array $contexts = NULL): bool;
-
-  /**
-   * Check display has required context, meaning it can save value.
-   *
-   * @param string $key
-   *   The context key to look for.
-   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
-   *   (Optional) contexts if already accessible, keyed by context name.
-   *
-   * @return bool
-   *   True if required, False otherwise.
-   */
-  public function hasSaveContextsRequirement(string $key, array $contexts = []): bool;
-
-  /**
-   * If display builder has been saved.
-   *
-   * @return bool
-   *   Has save data.
-   */
-  public function hasSave(): bool;
-
-  /**
-   * The save value is the current value of display builder.
-   *
-   * @return bool
-   *   The save is the current or not.
-   */
-  public function saveIsCurrent(): bool;
-
-  /**
    * Get the path index.
    *
    * @return array
    *   The path index.
    */
   public function getPathIndex(): array;
-
-  /**
-   * Restore to the last saved state.
-   */
-  public function restore(): void;
 
   /**
    * Get a hash for this data as uniq id reference.

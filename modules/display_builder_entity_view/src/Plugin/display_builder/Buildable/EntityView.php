@@ -17,7 +17,7 @@ use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
-use Drupal\display_builder\ProfileInterface;
+use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 
@@ -131,7 +131,7 @@ final class EntityView extends DisplayBuildablePluginBase {
   /**
    * Returns the display builder instance.
    *
-   * @return \Drupal\display_builder\ProfileInterface|null
+   * @return \Drupal\display_builder\Entity\ProfileInterface|null
    *   The display builder instance, or NULL if not set.
    *
    * @see \Drupal\display_builder\DisplayBuildableInterface
@@ -281,7 +281,7 @@ final class EntityView extends DisplayBuildablePluginBase {
    * @param string $display_builder_id
    *   The display builder ID.
    *
-   * @return \Drupal\display_builder\ProfileInterface|null
+   * @return \Drupal\display_builder\Entity\ProfileInterface|null
    *   The display builder, or NULL if not found.
    */
   private function loadDisplayBuilder(string $display_builder_id): ?ProfileInterface {
@@ -290,7 +290,7 @@ final class EntityView extends DisplayBuildablePluginBase {
     }
     $storage = $this->entityTypeManager->getStorage('display_builder_profile');
 
-    /** @var \Drupal\display_builder\ProfileInterface $display_builder */
+    /** @var \Drupal\display_builder\Entity\ProfileInterface $display_builder */
     $display_builder = $storage->load($display_builder_id);
 
     return $display_builder;

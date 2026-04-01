@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\display_builder;
+namespace Drupal\display_builder\Entity;
 
 use Drupal\display_builder\Plugin\Field\FieldType\HistoryStep;
 

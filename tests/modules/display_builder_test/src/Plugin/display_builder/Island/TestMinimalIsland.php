@@ -7,8 +7,8 @@ namespace Drupal\display_builder_test\Plugin\display_builder\Island;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\IslandPluginBase;
-use Drupal\display_builder\IslandType;
+use Drupal\display_builder\Island\IslandPluginBase;
+use Drupal\display_builder\Island\IslandType;
 
 /**
  * Minimal island plugin to test IslandPluginBase default behavior.

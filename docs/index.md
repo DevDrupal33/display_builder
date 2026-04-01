@@ -12,6 +12,11 @@ Display Builder provides sub-modules for each Drupal Core's display building nee
 
 Follow us on slack [#display_builder](https://drupal.slack.com/archives/C092EUNPCRW)
 
+## For contributors
+
+- [PHP Architecture](architecture.md) — SourceTree, event system, island plugin design
+- [Contributing](contributing.md) — how to open issues and pull requests
+
 ## Maintainers
 
 Current maintainers:

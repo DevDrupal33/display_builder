@@ -15,6 +15,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\Entity\Instance;
+use Drupal\display_builder\Entity\ProfileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -196,7 +197,7 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
     $options = [];
     $storage = $this->entityTypeManager->getStorage('display_builder_profile');
     $entity_ids = $storage->getQuery()->accessCheck(TRUE)->sort('weight', 'ASC')->execute();
-    /** @var \Drupal\display_builder\ProfileInterface[] $display_builders */
+    /** @var \Drupal\display_builder\Entity\ProfileInterface[] $display_builders */
     $display_builders = $storage->loadMultiple($entity_ids);
 
     // Entity query doesn't execute access control handlers for config
@@ -308,7 +309,7 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
   /**
    * Build profile select when user is allowed to select one.
    *
-   * @param \Drupal\display_builder\ProfileInterface|null $profile
+   * @param \Drupal\display_builder\Entity\ProfileInterface|null $profile
    *   Display Builder profile (or not)
    * @param bool $mandatory
    *   (Optional) Is it mandatory to use Display Builder? (for example, in
@@ -388,7 +389,7 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
   /**
    * Build disabled profile select when user is not allowed to select one.
    *
-   * @param \Drupal\display_builder\ProfileInterface $profile
+   * @param \Drupal\display_builder\Entity\ProfileInterface $profile
    *   Display Builder profile (or not)
    *
    * @return array

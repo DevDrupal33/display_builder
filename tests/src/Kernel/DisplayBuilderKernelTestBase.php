@@ -6,9 +6,9 @@ namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\Entity\Profile;
+use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\IslandInterface;
-use Drupal\display_builder\ProfileInterface;
+use Drupal\display_builder\Island\IslandInterface;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
@@ -50,7 +50,7 @@ abstract class DisplayBuilderKernelTestBase extends KernelTestBase {
    * @param array $values
    *   Extra values to set to the profile.
    *
-   * @return \Drupal\display_builder\ProfileInterface
+   * @return \Drupal\display_builder\Entity\ProfileInterface
    *   The created profile.
    */
   protected static function createDisplayBuilderProfile(string $profile_id, array $values = []): ProfileInterface {
@@ -91,7 +91,7 @@ abstract class DisplayBuilderKernelTestBase extends KernelTestBase {
    * @param array $configuration
    *   Optional plugin configuration.
    *
-   * @return \Drupal\display_builder\IslandInterface
+   * @return \Drupal\display_builder\Island\IslandInterface
    *   The island plugin instance.
    */
   protected function createIslandPlugin(string $id, array $configuration = []): IslandInterface {

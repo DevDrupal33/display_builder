@@ -13,10 +13,10 @@ use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\ComponentLibraryDefinitionHelper;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\IslandConfigurationFormInterface;
-use Drupal\display_builder\IslandConfigurationFormTrait;
-use Drupal\display_builder\IslandPluginBase;
-use Drupal\display_builder\IslandType;
+use Drupal\display_builder\Island\IslandConfigurationFormInterface;
+use Drupal\display_builder\Island\IslandConfigurationFormTrait;
+use Drupal\display_builder\Island\IslandPluginBase;
+use Drupal\display_builder\Island\IslandType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

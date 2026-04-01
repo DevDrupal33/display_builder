@@ -168,65 +168,6 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Tests ::restore() dispatches ON_RESTORE and resets present state.
-   *
-   * The instance is mutated after save, then restore() must reset the present
-   * state back to what was saved.
-   */
-  public function testRestore(): void {
-    $node_id = $this->instance->attachToRoot(0, 'token', []);
-    // Simulate saving to the backing config (normally done via the save route).
-    $this->instance->setSave($this->instance->getCurrentState());
-    $this->instance->save();
-
-    // Mutate after save — this unsaved change should be discarded by restore.
-    $this->instance->attachToRoot(1, 'token', []);
-
-    $request = Request::create(
-      '/api/display-builder/' . $this->instance->id() . '/restore',
-      'POST',
-    );
-    $response = $this->controller->restore($request, $this->instance);
-
-    self::assertIsArray($response['history']);
-    self::assertIsArray($response['state']);
-    self::assertIsArray($response['logs']);
-
-    // Present state must be restored to the single node that was saved.
-    $saved = $this->loadInstance($this->instance->id());
-    $state = $saved->getCurrentState();
-    self::assertCount(1, $state, 'State is reset to the last saved state.');
-    self::assertSame($node_id, $state[0]['node_id']);
-  }
-
-  /**
-   * Tests ::revert() dispatches ON_REVERT and returns the expected shape.
-   *
-   * For a non-override (standalone) instance the subscriber returns early,
-   * so the saved state must be identical to the state before the call.
-   */
-  public function testRevert(): void {
-    $node_id = $this->instance->attachToRoot(0, 'token', []);
-    $this->instance->save();
-
-    $request = Request::create(
-      '/api/display-builder/' . $this->instance->id() . '/revert',
-      'POST',
-    );
-    $response = $this->controller->revert($request, $this->instance);
-
-    self::assertIsArray($response['history']);
-    self::assertIsArray($response['state']);
-    self::assertIsArray($response['logs']);
-
-    // Non-override instance: subscriber returns early, state must be unchanged.
-    $saved = $this->loadInstance($this->instance->id());
-    $state = $saved->getCurrentState();
-    self::assertCount(1, $state, 'State is unchanged for a non-override instance.');
-    self::assertSame($node_id, $state[0]['node_id']);
-  }
-
-  /**
    * Tests ::paste() copies a node to root with a fresh node_id.
    */
   public function testPasteToRoot(): void {

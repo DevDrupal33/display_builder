@@ -4,10 +4,11 @@
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/MainPageContentSource.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageTitleSource.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_ui/src/Form/InstanceListFilterForm.php"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Controller/ApiPublishingController.php"/>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/src/DisplayBuilderHelpers.php" method="findAndReplaceInArray"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Hook/UiPatternsHooks.php"/>
-  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/IslandConfigurationFormTrait.php"/>
-  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/IslandPluginBase.php"/>
-  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/IslandWithFormTrait.php"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Island/IslandConfigurationFormTrait.php"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Island/IslandPluginBase.php"/>
+  <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Island/IslandWithFormTrait.php"/>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/src/Plugin/display_builder/Island/BuilderPanel.php" method="buildSingleBlock"/>
 </phpmd-baseline>

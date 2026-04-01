@@ -11,8 +11,8 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder\IslandPluginManagerInterface;
-use Drupal\display_builder\ProfileInterface;
+use Drupal\display_builder\Entity\ProfileInterface;
+use Drupal\display_builder\Island\IslandPluginManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -69,7 +69,7 @@ final class ProfileListBuilder extends DraggableListBuilder {
    */
   public function buildRow(EntityInterface $entity): array {
     $row = [];
-    /** @var \Drupal\display_builder\ProfileInterface $entity */
+    /** @var \Drupal\display_builder\Entity\ProfileInterface $entity */
     $row['label'] = $entity->label();
     // List enabled view panels instead of showing an empty description.
     $description = $entity->get('description') ?: $this->listViewPanels($entity);
@@ -115,7 +115,7 @@ final class ProfileListBuilder extends DraggableListBuilder {
   /**
    * List enabled view panels as a description fallback.
    *
-   * @param \Drupal\display_builder\ProfileInterface $entity
+   * @param \Drupal\display_builder\Entity\ProfileInterface $entity
    *   The entity.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup

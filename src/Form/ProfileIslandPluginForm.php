@@ -12,8 +12,8 @@ use Drupal\Core\Form\SubformState;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\display_builder\Entity\Profile;
-use Drupal\display_builder\IslandInterface;
-use Drupal\display_builder\IslandPluginManagerInterface;
+use Drupal\display_builder\Island\IslandInterface;
+use Drupal\display_builder\Island\IslandPluginManagerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
@@ -47,7 +47,7 @@ final class ProfileIslandPluginForm extends EntityForm {
    *   The title of the edit plugin form.
    */
   public static function editFormTitle(string $island_id): string {
-    /** @var \Drupal\display_builder\IslandInterface $island */
+    /** @var \Drupal\display_builder\Island\IslandInterface $island */
     $island = \Drupal::service('plugin.manager.db_island')->createInstance($island_id, []);
 
     return $island->label();

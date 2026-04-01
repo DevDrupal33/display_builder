@@ -24,7 +24,7 @@ use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\DisplayBuildablePluginManager;
-use Drupal\display_builder\ProfileInterface;
+use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;

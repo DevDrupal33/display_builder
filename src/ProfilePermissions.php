@@ -44,7 +44,7 @@ class ProfilePermissions implements ContainerInjectionInterface {
     $permissions = [];
     // Generate permissions for each display builder. Warn the administrator
     // that any of them are potentially unsafe.
-    /** @var \Drupal\display_builder\ProfileInterface[] $builders */
+    /** @var \Drupal\display_builder\Entity\ProfileInterface[] $builders */
     $builders = $this->entityTypeManager->getStorage('display_builder_profile')->loadMultiple();
     \uasort($builders, 'Drupal\Core\Config\Entity\ConfigEntityBase::sort');
 

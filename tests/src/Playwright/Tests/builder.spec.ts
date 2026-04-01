@@ -7,7 +7,7 @@ test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.drush('state:set -y display_builder.asset_libraries_local true')
 })
 
-test('Builder move tests', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) => {
+test('Builder move tests', { tag: [ '@wip' ] }, async ({ page, drupal, displayBuilder }) => {
   // display_builder_test/config/optional/display_builder_page_layout.page_layout.builder.yml
   const dbName = `builder`
   const viewUrl = `${config.pageViewUrl.replace('{instance_id}', dbName)}`

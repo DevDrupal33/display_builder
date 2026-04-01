@@ -50,3 +50,8 @@ We accept only pull requests (PR), no patches, with the following expectations:
 #### Commit
 
 - Use new Drupal contribution record system
+
+## See also
+
+- [PHP Architecture](architecture.md) — SourceTree, event system, and island design
+- [Tests](tests.md) — how to run the test suite locally

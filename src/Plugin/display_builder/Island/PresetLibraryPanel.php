@@ -9,10 +9,10 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\BlockLibrarySourceHelper;
+use Drupal\display_builder\Entity\PatternPresetInterface;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\IslandPluginBase;
-use Drupal\display_builder\IslandType;
-use Drupal\display_builder\PatternPresetInterface;
+use Drupal\display_builder\Island\IslandPluginBase;
+use Drupal\display_builder\Island\IslandType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -51,7 +51,7 @@ class PresetLibraryPanel extends IslandPluginBase {
       ->condition('status', TRUE)
       ->sort('weight', 'ASC')
       ->execute();
-    /** @var \Drupal\display_builder\PatternPresetInterface[] $presets */
+    /** @var \Drupal\display_builder\Entity\PatternPresetInterface[] $presets */
     $presets = $this->presetConfigStorage->loadMultiple($entity_ids);
     $contexts = $this->configuration['contexts'] ?? [];
 
@@ -107,7 +107,7 @@ class PresetLibraryPanel extends IslandPluginBase {
    *
    * @param string $builder_id
    *   Builder ID.
-   * @param \Drupal\display_builder\PatternPresetInterface[] $presets
+   * @param \Drupal\display_builder\Entity\PatternPresetInterface[] $presets
    *   The presets to build.
    *
    * @return array
@@ -165,7 +165,7 @@ class PresetLibraryPanel extends IslandPluginBase {
    *
    * @param string $builder_id
    *   Builder ID.
-   * @param \Drupal\display_builder\PatternPresetInterface $preset
+   * @param \Drupal\display_builder\Entity\PatternPresetInterface $preset
    *   The preset entity.
    * @param bool $with_preview
    *   Whether to include preview attributes.
@@ -194,7 +194,7 @@ class PresetLibraryPanel extends IslandPluginBase {
   /**
    * Gets the preset's group from the preset entity in the database.
    *
-   * @param \Drupal\display_builder\PatternPresetInterface $preset
+   * @param \Drupal\display_builder\Entity\PatternPresetInterface $preset
    *   The preset entity.
    *
    * @return string

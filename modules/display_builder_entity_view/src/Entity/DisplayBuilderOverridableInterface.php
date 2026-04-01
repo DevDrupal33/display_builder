@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_entity_view\Entity;
 
-use Drupal\display_builder\ProfileInterface;
+use Drupal\display_builder\Entity\ProfileInterface;
 
 /**
  * Provides method to know if Display Builder is enabled.

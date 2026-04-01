@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\display_builder;
+namespace Drupal\display_builder\Island;
 
 use Drupal\Core\Plugin\PluginFormInterface;
 

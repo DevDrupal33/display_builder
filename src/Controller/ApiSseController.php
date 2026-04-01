@@ -29,7 +29,7 @@ class ApiSseController extends ApiControllerBase {
    *
    * Update islands every time another user is triggering a state altering
    * event: ON_UPDATE, ON_ATTACH_TO_ROOT, ON_ATTACH_TO_SLOT, ON_MOVE,
-   * ON_DELETE, ON_PRESET_SAVE, ON_SAVE and ON_HISTORY_CHANGE.
+   * ON_DELETE, ON_PRESET_SAVE, ON_PUBLISH and ON_HISTORY_CHANGE.
    * Skip ON_ACTIVE.
    *
    * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
