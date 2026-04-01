@@ -630,6 +630,9 @@ final class SourceTree {
       return $plugin instanceof SourceInterface ? $plugin : NULL;
     }
     catch (\Exception $e) {
+      // phpcs:ignore -- lazy-init required; see getSourceManager() docblock.
+      \Drupal::logger('display_builder')->warning('SourceTree: failed to instantiate source plugin %id: @message', ['%id' => $source_id, '@message' => $e->getMessage()]);
+
       return NULL;
     }
   }
@@ -653,6 +656,8 @@ final class SourceTree {
       $this->pluginClassCache[$source_id] = $definition['class'] ?? NULL;
     }
     catch (\Exception $e) {
+      // phpcs:ignore -- lazy-init required; see getSourceManager() docblock.
+      \Drupal::logger('display_builder')->warning('SourceTree: failed to get definition for source plugin %id: @message', ['%id' => $source_id, '@message' => $e->getMessage()]);
       $this->pluginClassCache[$source_id] = NULL;
     }
 
@@ -660,13 +665,19 @@ final class SourceTree {
   }
 
   /**
-   * Get source plugin manager.
+   * Gets the UI Patterns source plugin manager.
+   *
+   * SourceTree is a plain value object instantiated as new SourceTree() from
+   * entity and plugin base classes where constructor injection is unavailable.
+   * The lazy-init fallback using \Drupal::service() is intentional and the
+   * only viable pattern for those call sites.
    *
    * @return \Drupal\Component\Plugin\PluginManagerInterface
    *   The source plugin manager.
    */
   private function getSourceManager(): PluginManagerInterface {
     if ($this->sourceManager === NULL) {
+      // phpcs:ignore -- lazy-init required; see method docblock.
       $this->sourceManager = \Drupal::service('plugin.manager.ui_patterns_source');
     }
 

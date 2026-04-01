@@ -165,6 +165,20 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * {@inheritdoc}
    */
+  public function setBuilderId(string $builder_id): void {
+    $this->builderId = $builder_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setNodeId(?string $node_id): void {
+    $this->nodeId = $node_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function keyboardShortcuts(): array {
     return [];
   }

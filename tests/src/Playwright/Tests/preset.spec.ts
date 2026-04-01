@@ -56,6 +56,25 @@ test('Preset', { tag: [ '@base' ] }, async ({ page, drupal, displayBuilder }) =>
         },
       ],
     )
+
+    // Apply a style
+    await page.getByRole('tab', { name: 'Styles', exact: true }).click()
+
+    await page.getByRole('button', { name: 'Style category 1' }).click()
+    await page.getByRole('group', { name: 'Test style 1' }).getByLabel('- None -').click()
+    const styleOption = page.locator(`input[value="test-style-1"]`)
+    await styleOption.click()
+    await page.getByRole('textbox', { name: 'Extra classes' }).fill('my-extra-class')
+    await displayBuilder.htmxReady()
+
+    await displayBuilder.closeDialog('both')
+    await page.getByRole('tab', { name: 'Preview' }).click()
+    await displayBuilder.shoelaceReady()
+    await expect(page.locator('.db-island-preview')).toMatchAriaSnapshot({ name: 'test-preset.aria.yml' })
+    await expect(page.locator('.db-island-preview').locator('[data-test="test_simple"]').first()).toHaveClass(/my-extra-class/)
+
+    await page.getByRole('tab', { name: 'Builder' }).click()
+    await displayBuilder.shoelaceReady()
   })
 
   await test.step(`Save preset`, async () => {
@@ -73,10 +92,10 @@ test('Preset', { tag: [ '@base' ] }, async ({ page, drupal, displayBuilder }) =>
   })
 
   await test.step(`Check preset and drag`, async () => {
+    await displayBuilder.openLibrariesTab('Presets')
     const preset = page.getByRole('button', { name: `foo_${presetName}` })
 
     // Check preview on hover
-    await page.getByRole('tab', { name: 'Presets' }).click()
     await expect(preset).toBeVisible()
     await preset.hover()
     await displayBuilder.htmxReady()
@@ -90,6 +109,12 @@ test('Preset', { tag: [ '@base' ] }, async ({ page, drupal, displayBuilder }) =>
       page.getByRole('heading', { name: 'label: I am a component with a textfield' }),
     )
 
-    await expect(page.locator(`.db-island-builder`)).toMatchAriaSnapshot({ name: 'test-preset-final.aria.yml' })
+    await displayBuilder.closeDialog('first')
+    await page.getByRole('tab', { name: 'Preview' }).click()
+    await displayBuilder.shoelaceReady()
+    await expect(page.locator('.db-island-preview')).toMatchAriaSnapshot({ name: 'test-preset-final.aria.yml' })
+    // Ensure style is propagated.
+    await expect(page.locator('.db-island-preview').locator('[data-test="test_simple"]').nth(0)).toHaveClass(/my-extra-class/)
+    await expect(page.locator('.db-island-preview').locator('[data-test="test_simple"]').nth(1)).toHaveClass(/my-extra-class/)
   })
 })

@@ -62,28 +62,4 @@ trait IslandWithFormTrait {
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {}
 
-  /**
-   * Set the builder id.
-   *
-   * @param string $builder_id
-   *   The builder id.
-   *
-   * @todo remove this, should be on base class
-   */
-  public function setBuilderId(string $builder_id): void {
-    $this->builderId = $builder_id;
-  }
-
-  /**
-   * Set the tree node ID.
-   *
-   * @param string|null $node_id
-   *   The tree node ID.
-   *
-   * @todo remove this, should be on base class
-   */
-  public function setNodeId(?string $node_id): void {
-    $this->nodeId = $node_id;
-  }
-
 }

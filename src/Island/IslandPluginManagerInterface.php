@@ -12,6 +12,19 @@ use Drupal\Component\Plugin\PluginManagerInterface;
 interface IslandPluginManagerInterface extends PluginManagerInterface {
 
   /**
+   * Creates a pre-configured instance of a plugin.
+   *
+   * @param string $plugin_id
+   *   The ID of the plugin being instantiated.
+   * @param array $configuration
+   *   An array of configuration relevant to the plugin instance.
+   *
+   * @return \Drupal\display_builder\Island\IslandInterface
+   *   A fully configured island plugin instance.
+   */
+  public function createInstance($plugin_id, array $configuration = []);
+
+  /**
    * Get islands plugins by type.
    *
    * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts

@@ -50,7 +50,11 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
         $form = $this->removeItemSelector($form);
       }
     }
-    catch (\Exception) {
+    catch (\Exception $e) {
+      $this->logger->error('Error building contextual form for node @node_id: @message', [
+        '@node_id' => $this->data['node_id'] ?? 'unknown',
+        '@message' => $e->getMessage(),
+      ]);
     }
   }
 

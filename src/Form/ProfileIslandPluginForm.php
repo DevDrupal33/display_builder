@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
+use Drupal\Core\Plugin\CachedDiscoveryClearerInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\display_builder\Entity\Profile;
@@ -35,10 +36,15 @@ final class ProfileIslandPluginForm extends EntityForm {
 
   public function __construct(
     protected IslandPluginManagerInterface $islandPluginManager,
+    private readonly CachedDiscoveryClearerInterface $pluginCacheClearer,
   ) {}
 
   /**
    * Returns the title of the edit plugin form.
+   *
+   * Used as a static route title callback by the routing system, which
+   * does not instantiate the form class. \Drupal::service() is the
+   * correct pattern here.
    *
    * @param string $island_id
    *   The island ID.
@@ -47,10 +53,12 @@ final class ProfileIslandPluginForm extends EntityForm {
    *   The title of the edit plugin form.
    */
   public static function editFormTitle(string $island_id): string {
-    /** @var \Drupal\display_builder\Island\IslandInterface $island */
-    $island = \Drupal::service('plugin.manager.db_island')->createInstance($island_id, []);
+    // phpcs:ignore Drupal.Classes.FullyQualifiedNamespace -- static route callback, DI unavailable.
+    /** @var \Drupal\display_builder\Island\IslandPluginManagerInterface $manager */
+    $manager = \Drupal::service('plugin.manager.db_island');
+    $island = $manager->createInstance($island_id, []);
 
-    return $island->label();
+    return (string) $island->label();
   }
 
   /**
@@ -102,9 +110,7 @@ final class ProfileIslandPluginForm extends EntityForm {
     $result = parent::save($form, $form_state);
 
     // Clear the plugin cache so changes are applied on front theme builder.
-    /** @var \Drupal\Core\Plugin\CachedDiscoveryClearerInterface $pluginCacheClearer */
-    $pluginCacheClearer = \Drupal::service('plugin.cache_clearer'); // phpcs:ignore
-    $pluginCacheClearer->clearCachedDefinitions();
+    $this->pluginCacheClearer->clearCachedDefinitions();
 
     $message_args = ['%label' => $this->entity->label()];
     $this->messenger()->addStatus(
@@ -153,9 +159,7 @@ final class ProfileIslandPluginForm extends EntityForm {
     /** @var \Drupal\display_builder\Entity\Profile $entity */
     $entity = $this->entity;
     $island_configuration = $entity->getIslandConfiguration($this->islandId);
-    $island = $this->islandPluginManager->createInstance($this->islandId, $island_configuration);
-    \assert($island instanceof IslandInterface);
-    $this->island = $island;
+    $this->island = $this->islandPluginManager->createInstance($this->islandId, $island_configuration);
 
     return $this->island;
   }

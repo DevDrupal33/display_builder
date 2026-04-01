@@ -6,12 +6,34 @@ namespace Drupal\display_builder\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\display_builder\Island\IslandInterface;
+use Drupal\display_builder\Island\IslandPluginManagerInterface;
 use Drupal\display_builder\Island\IslandWithFormInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a display builder form for island plugin.
  */
 final class IslandFormBase extends FormBase {
+
+  /**
+   * Constructs a new IslandFormBase.
+   *
+   * @param \Drupal\display_builder\Island\IslandPluginManagerInterface $islandManager
+   *   The island plugin manager.
+   */
+  public function __construct(
+    private readonly IslandPluginManagerInterface $islandManager,
+  ) {}
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): static {
+    return new self(
+      $container->get('plugin.manager.db_island'),
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -25,7 +47,7 @@ final class IslandFormBase extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $island_args = $form_state->getBuildInfo()['args'][0];
-    $plugin = IslandFormBase::getPlugin($island_args);
+    $plugin = $this->getPlugin($island_args);
 
     if (!$plugin instanceof IslandWithFormInterface) {
       return $form;
@@ -41,7 +63,7 @@ final class IslandFormBase extends FormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state): void {
     $island_args = $form_state->getBuildInfo()['args'][0];
-    $plugin = IslandFormBase::getPlugin($island_args);
+    $plugin = $this->getPlugin($island_args);
 
     if (!$plugin instanceof IslandWithFormInterface) {
       return;
@@ -54,7 +76,7 @@ final class IslandFormBase extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $island_args = $form_state->getBuildInfo()['args'][0];
-    $plugin = IslandFormBase::getPlugin($island_args);
+    $plugin = $this->getPlugin($island_args);
 
     if (!$plugin instanceof IslandWithFormInterface) {
       return;
@@ -63,16 +85,16 @@ final class IslandFormBase extends FormBase {
   }
 
   /**
-   * Get Island plugin.
+   * Gets an island plugin instance from form args.
    *
    * @param array $args
    *   Arguments from form_state which allow to load plugin.
    *
-   * @return object|\Drupal\display_builder\Island\IslandInterface
+   * @return \Drupal\display_builder\Island\IslandInterface
    *   The Island plugin.
    */
-  protected static function getPlugin(array $args) {
-    return \Drupal::service('plugin.manager.db_island')->createInstance($args['island_id'], $args['instance']);
+  protected function getPlugin(array $args): IslandInterface {
+    return $this->islandManager->createInstance($args['island_id'], $args['instance']);
   }
 
 }

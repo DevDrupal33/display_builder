@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityViewBuilder;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Security\TrustedCallbackInterface;
+use Drupal\Core\Theme\Registry;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder\Island\IslandPluginManagerInterface;
 use Drupal\display_builder\Island\IslandType;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * View builder handler for display builder profiles.
@@ -20,19 +26,39 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
   use RenderableBuilderTrait;
 
   /**
-   * The entity type manager.
-   */
-  private EntityTypeManagerInterface $entityTypeManager;
-
-  /**
-   * The display builder island plugin manager.
-   */
-  private IslandPluginManagerInterface $islandPluginManager;
-
-  /**
    * The entity we are building the view for.
    */
   private ProfileInterface $entity;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(
+    EntityTypeInterface $entity_type,
+    EntityRepositoryInterface $entity_repository,
+    LanguageManagerInterface $language_manager,
+    Registry $theme_registry,
+    EntityDisplayRepositoryInterface $entity_display_repository,
+    private readonly EntityTypeManagerInterface $entityTypeManager,
+    private readonly IslandPluginManagerInterface $islandPluginManager,
+  ) {
+    parent::__construct($entity_type, $entity_repository, $language_manager, $theme_registry, $entity_display_repository);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type): static {
+    return new static(
+      $entity_type,
+      $container->get('entity.repository'),
+      $container->get('language_manager'),
+      $container->get('theme.registry'),
+      $container->get('entity_display.repository'),
+      $container->get('entity_type.manager'),
+      $container->get('plugin.manager.db_island'),
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -47,7 +73,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     $this->entity = $entity;
 
     /** @var \Drupal\display_builder\InstanceInterface $builder */
-    $builder = $this->entityTypeManager()->getStorage('display_builder_instance')->load($builder_id);
+    $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
     $contexts = $builder->getContexts();
     $islands_enabled_sorted = $this->getIslandsEnableSorted($contexts);
     $build = [
@@ -439,35 +465,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     // @todo just key by weight and default weight in Island?
     $islands_enable_by_weight = $this->entity->getEnabledIslands();
 
-    return $this->islandPluginManager()->getIslandsByTypes($contexts, $this->entity->getIslandConfigurations(), $islands_enable_by_weight);
-  }
-
-  /**
-   * Gets the entity type manager.
-   *
-   * @return \Drupal\Core\Entity\EntityTypeManagerInterface
-   *   The entity type manager.
-   */
-  private function entityTypeManager(): EntityTypeManagerInterface {
-    if (!isset($this->entityTypeManager)) {
-      $this->entityTypeManager = \Drupal::service('entity_type.manager');
-    }
-
-    return $this->entityTypeManager;
-  }
-
-  /**
-   * Gets the display builder island plugin manager.
-   *
-   * @return \Drupal\display_builder\Island\IslandPluginManagerInterface
-   *   The island plugin manager.
-   */
-  private function islandPluginManager(): IslandPluginManagerInterface {
-    if (!isset($this->islandPluginManager)) {
-      $this->islandPluginManager = \Drupal::service('plugin.manager.db_island');
-    }
-
-    return $this->islandPluginManager;
+    return $this->islandPluginManager->getIslandsByTypes($contexts, $this->entity->getIslandConfigurations(), $islands_enable_by_weight);
   }
 
 }

@@ -13,6 +13,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder\Exception\InvalidNodeException;
 use Drupal\display_builder\InstanceAccessControlHandler;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\InstanceStorage;
@@ -290,7 +291,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     $node_id = $tree->attachToSlot($parent_id, $slot_id, $position, $source_id, $data);
 
     if (!$node_id) {
-      throw new \Exception('Parent or slot not found');
+      throw new InvalidNodeException('Parent or slot not found');
     }
 
     if ($third_party_settings) {
@@ -332,7 +333,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     $tree = $this->getSourceTree();
 
     if (!$tree->setSource($node_id, $source_id, $data)) {
-      throw new \Exception('Internal node ID mismatch');
+      throw new InvalidNodeException('Internal node ID mismatch');
     }
 
     $nodeData = $tree->getNodeData($node_id);

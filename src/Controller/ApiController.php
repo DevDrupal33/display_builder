@@ -12,6 +12,7 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
+use Drupal\display_builder\Exception\FormValidationException;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandPluginManagerInterface;
 use Drupal\display_builder\Plugin\display_builder\Island\ContextualFormPanel;
@@ -378,7 +379,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   public function saveAsPreset(Request $request, InstanceInterface $display_builder_instance, string $node_id): array {
     $label = (string) $this->t('New preset');
     $data = $display_builder_instance->getNode($node_id);
-    self::cleanNodeId($data);
+    self::cleanPreset($data);
 
     $preset_storage = $this->entityTypeManager()->getStorage('pattern_preset');
     $label = $request->headers->get('hx-prompt', $label) ?: $label;
@@ -582,7 +583,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       if (!empty($formErrors)) {
         $first_error = \reset($formErrors);
 
-        throw new \Exception((string) $first_error);
+        throw new FormValidationException((string) $first_error);
       }
       $formBuilder->validateForm($formClass, $form, $form_state);
       $formErrors = $form_state->getErrors();
@@ -590,7 +591,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       if (!empty($formErrors)) {
         $first_error = \reset($formErrors);
 
-        throw new \Exception((string) $first_error);
+        throw new FormValidationException((string) $first_error);
       }
     }
     catch (FormAjaxException $e) {
@@ -666,23 +667,36 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   }
 
   /**
-   * Recursively regenerate the node_id key.
+   * Recursively clean the node data for export or preset saving.
+   *
+   * Unset node_id and remove empty values.
    *
    * @param array $array
    *   The array reference.
-   *
-   * @todo set as utils because clone in ExportForm.php?
    */
-  private static function cleanNodeId(array &$array): void {
+  private static function cleanPreset(array &$array): void {
     unset($array['node_id']);
 
     foreach ($array as $key => &$value) {
       if (\is_array($value)) {
-        self::cleanNodeId($value);
+        self::cleanPreset($value);
 
-        if (isset($value['source_id'], $value['source']['value']) && empty($value['source']['value'])) {
+        // Remove empty values to reduce size and noise in the exported preset.
+        if (isset($value['source_id'], $value['source']['value']) && $value['source']['value'] === '') {
           unset($array[$key]);
         }
+      }
+
+      if ($key === 'extra' && empty($value)) {
+        unset($array[$key]);
+      }
+
+      if ($key === 'third_party_settings' && empty($value)) {
+        unset($array[$key]);
+      }
+
+      if ($key === 'variant_id' && $value === NULL) {
+        unset($array[$key]);
       }
     }
   }

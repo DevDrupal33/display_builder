@@ -7,26 +7,35 @@ namespace Drupal\display_builder;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\EntityAccessControlHandler;
+use Drupal\Core\Entity\EntityHandlerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines the access control handler for the instance entity type.
  */
-final class InstanceAccessControlHandler extends EntityAccessControlHandler {
-
-  /**
-   * The display buildable manager.
-   */
-  protected DisplayBuildablePluginManager $displayBuildableManager;
+final class InstanceAccessControlHandler extends EntityAccessControlHandler implements EntityHandlerInterface {
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(EntityTypeInterface $entity_type) {
+  public function __construct(
+    EntityTypeInterface $entity_type,
+    protected readonly DisplayBuildablePluginManager $displayBuildableManager,
+  ) {
     parent::__construct($entity_type);
-    $this->displayBuildableManager = \Drupal::service('plugin.manager.display_buildable');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type): static {
+    return new self(
+      $entity_type,
+      $container->get('plugin.manager.display_buildable'),
+    );
   }
 
   /**

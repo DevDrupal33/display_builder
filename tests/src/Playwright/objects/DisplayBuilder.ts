@@ -352,8 +352,10 @@ export class Displaybuilder {
    */
   async expectPreviewAriaSnapshot (snapshotName: string, locatorClass: string = '.db-island-preview'): Promise<void> {
     await this.page.getByRole('tab', { name: 'Preview' }).click()
+    await this.shoelaceReady()
     await expect(this.page.locator(locatorClass)).toMatchAriaSnapshot({ name: snapshotName })
     await this.page.getByRole('tab', { name: 'Builder' }).click()
+    await this.shoelaceReady()
   }
 
   /**
