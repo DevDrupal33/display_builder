@@ -7,40 +7,8 @@ namespace Drupal\display_builder\Event;
 /**
  * Defines events for the display builder.
  *
- * Event name = island method name contract
- * ----------------------------------------
- * Every constant value in this class MUST equal the camelCase method name
- * defined on IslandEventSubscriberInterface. For example:
- *
- * @code
- *   public const ON_PUBLISH = 'onPublish';
- *   // IslandEventSubscriberInterface::onPublish() must exist.
- *
- * @endcode
- *
- * This convention lets IslandFanOutTrait::dispatchToIslands() invoke the
- * correct island method generically using __FUNCTION__ — no explicit map
- * needed. Any new event added here or in a submodule events class MUST
- * follow the same rule; a LogicException is thrown at runtime otherwise.
- *
- * Typed event classes
- * -------------------
- * Each event is dispatched as a typed subclass of DisplayBuilderEvent that
- * carries only the data relevant to that event:
- * - DisplayBuilderEvent
- *   - single node_id (ON_ATTACH_TO_ROOT, ON_MOVE, ON_UPDATE)
- * - DisplayBuilderEvent
- *   — node_id + parent_id (ON_ATTACH_TO_SLOT)
- * - DisplayBuilderEvent
- *   — optional parent_id (ON_DELETE)
- * - DisplayBuilderEvent
- *   — data array (ON_ACTIVE, ON_PUBLISH)
- * - DisplayBuilderEvent
- *   — instance only (ON_HISTORY_CHANGE, ON_RESTORE, ON_REVERT, ON_PRESET_SAVE)
- *
  * @see \Drupal\display_builder\Event\DisplayBuilderEvent
  * @see \Drupal\display_builder\Island\IslandEventSubscriberInterface
- * @see \Drupal\display_builder\Island\IslandFanOutTrait
  */
 final class DisplayBuilderEvents {
 
