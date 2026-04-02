@@ -18,7 +18,6 @@ test('Preset', { tag: [ '@base' ] }, async ({ page, drupal, displayBuilder }) =>
     await displayBuilder.shoelaceReady()
     await displayBuilder.fullHighlight()
 
-    // Test 2: Open libraries and drag elements and set some values
     await displayBuilder.dragElementFromLibraryById(
       'Components',
       'test_simple',

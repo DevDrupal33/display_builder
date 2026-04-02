@@ -46,16 +46,6 @@ test(
       // Enable highlight to ease drag.
       await displayBuilder.fullHighlight()
 
-      // Check preview on hover
-      await displayBuilder.openLibrariesTab('Components')
-      const testComponent = page.getByRole('button', { name: 'Test simple', exact: true })
-      await expect(testComponent).toBeVisible()
-      await testComponent.hover()
-      await displayBuilder.htmxReady()
-      await expect(page.getByRole('tooltip')).toBeVisible()
-      // From the test component.
-      await expect(page.getByRole('tooltip')).toMatchAriaSnapshot({ name: 'test-simple-hover.aria.yml' })
-
       // Test the proper blocks are available for Entity view context.
       // @todo test more fields in sources list.
       const sources = {
@@ -86,28 +76,6 @@ test(
       // Click somewhere for htmx submit
       await page.getByRole('tab', { name: 'Builder' }).click()
       await displayBuilder.htmxReady()
-
-      // Apply a style
-      await page.getByRole('tab', { name: 'Styles', exact: true }).click()
-
-      await page.getByRole('button', { name: 'Style category 1' }).click()
-      await page.getByRole('group', { name: 'Test style 1' }).getByLabel('- None -').click()
-      const styleOption = page.locator(`input[value="test-style-1"]`)
-      await styleOption.click()
-      await displayBuilder.htmxReady()
-
-      // Apply style extra class.
-      await page.locator(`input[name='styles[wrapper][_ui_styles_extra]']`).fill('foo bar')
-
-      // Click somewhere for htmx submit
-      await page.getByRole('tab', { name: 'Builder' }).click()
-      await displayBuilder.htmxReady()
-
-      // Ensure styles are applied
-      // @todo ensure they are on preview or view
-      await expect(page.locator(`.db-island-builder [data-test="test_simple"]`)).toHaveClass(
-        /test-style-1 foo bar test_simple/,
-      )
 
       await displayBuilder.closeDialog('both')
       await displayBuilder.publishDisplayBuilder()

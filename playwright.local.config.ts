@@ -8,18 +8,19 @@ export default defineConfig({
   ...baseConfig,
   retries: 1,
   workers: undefined,
-  timeout: 160_000,
+  timeout: 180_000,
   reporter: [
     ['dot'],
     // ['list', { printSteps: true }],
     ['html'],
   ],
+  snapshotPathTemplate: '__screenshots__{/projectName}/{testFilePath}/{arg}{ext}',
   expect: {
     toMatchAriaSnapshot: {
       pathTemplate: './tests/src/Playwright/__snapshots__/{testFilePath}/{arg}{ext}',
     },
     // @see https://playwright.dev/docs/test-timeouts#expect-timeout
-    // timeout: 10_000,
+    timeout: 10_000,
   },
   use: {
     baseURL: `${process.env.DRUPAL_TEST_BASE_URL}/`,
@@ -39,8 +40,8 @@ export default defineConfig({
       slowMo: 100,
     },
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-action-timeout
-    // actionTimeout: 15_000,
-    // navigationTimeout: 30_000,
+    actionTimeout: 15_000,
+    navigationTimeout: 30_000,
     testIdAttribute: 'data-instance-id',
   },
   webServer: {

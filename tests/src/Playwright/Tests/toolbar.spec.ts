@@ -115,7 +115,8 @@ test('Toolbar buttons', { tag: [ '@extra' ] }, async ({ page, drupal, displayBui
     await expect(page.locator('.display-builder__main')).toHaveAttribute('style', 'max-width: 575px;')
 
     await switchViewport.click()
-    await page.getByRole('menuitem', { name: 'Fluid' }).locator('slot').nth(1).click()
+    // Tooltip hover can mess the click, need to be on the right side of the button.
+    await page.getByRole('menuitem', { name: 'Fluid' }).locator('slot').nth(1).click({ position: { x: 130, y: 20 } })
     await expect(switchViewportList).not.toBeVisible()
     await expect(page.locator('.display-builder__main')).toHaveAttribute('style', 'max-width: 100%;')
   })

@@ -13,7 +13,7 @@ test.beforeEach('Setup', async ({ drupal }) => {
 
 test('Local tests with DDEV', { tag: [ '@local' ] }, async ({ page, drupal, displayBuilder }) => {
   // const username = `test_${utils.createRandomString()}`
-  // const dbName = `standalone__test`
+  // const instanceId = `standalone__test`
   // const dropzoneRoot = page.locator('.db-dropzone--root')
   // await displayBuilder.initTestsWithPageLayout(drupal)
   // await expect(page.locator(`.db-island-builder .db-dropzone--root`)).toMatchAriaSnapshot(``)
@@ -27,7 +27,7 @@ test('Local tests with DDEV', { tag: [ '@local' ] }, async ({ page, drupal, disp
   //   await drupal.login({ username })
   // })
   // await test.step(`Prepare instance`, async () => {
-  //   await page.goto(`${config.dbViewUrl.replace('{instance_id}', dbName)}`)
+  //   await page.goto(`${config.dbViewUrl.replace('{instance_id}', instanceId)}`)
   //   await displayBuilder.shoelaceReady()
   //   await displayBuilder.fullscreen()
   // })

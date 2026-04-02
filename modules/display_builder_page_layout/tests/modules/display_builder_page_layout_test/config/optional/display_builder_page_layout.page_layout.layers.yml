@@ -24,7 +24,7 @@ sources:
     node_id: block_1
   - source_id: textfield
     source:
-      value: foo
+      value: textfield_1
     node_id: textfield_1
   - source_id: component
     source:
@@ -35,23 +35,23 @@ sources:
           prop_string:
             source_id: textfield
             source:
-              value: 'Component 1'
+              value: component_1_textfield_1
         slots:
           slot_1:
             sources:
               - source_id: token
                 source:
-                  value: corge
-                node_id: token_1
+                  value: component_1_token_1
+                node_id: component_1_token_1
               - source_id: textfield
                 source:
-                  value: grault
-                node_id: textfield_1_1
+                  value: component_1_textfield_2
+                node_id: component_1_textfield_2
         third_party_settings: ''
-    node_id: test_1
+    node_id: component_1
   - source_id: textfield
     source:
-      value: bar
+      value: textfield_2
     node_id: textfield_2
   - source_id: component
     source:
@@ -62,19 +62,19 @@ sources:
           prop_string:
             source_id: textfield
             source:
-              value: 'Component 2'
+              value: component_2_textfield_1
         slots:
           slot_1:
             sources:
               - source_id: textfield
                 source:
-                  value: garply
-                node_id: textfield_2_1
+                  value: component_2_textfield_2
+                node_id: component_2_textfield_2
         third_party_settings: ''
-    node_id: test_2
+    node_id: component_2
   - source_id: textfield
     source:
-      value: baz
+      value: textfield_3
     node_id: textfield_3
   - source_id: component
     source:
@@ -85,23 +85,23 @@ sources:
           prop_string:
             source_id: textfield
             source:
-              value: 'Component 3'
+              value: component_3_textfield_1
         slots:
           slot_1:
             sources:
               - source_id: token
                 source:
-                  value: waldo
-                node_id: token_2
+                  value: component_3_token_2
+                node_id: component_3_token_2
               - source_id: textfield
                 source:
-                  value: fred
-                node_id: textfield_3_1
+                  value: component_3_textfield_2
+                node_id: component_3_textfield_2
         third_party_settings: ''
-    node_id: test_3
+    node_id: component_3
   - source_id: textfield
     source:
-      value: qux
+      value: textfield_4
     node_id: textfield_4
   - source_id: component
     source:
@@ -112,20 +112,20 @@ sources:
             sources:
               - source_id: token
                 source:
-                  value: plugh
-                node_id: token_3
+                  value: component_4_token_1
+                node_id: component_4_token_1
               - source_id: textfield
                 source:
-                  value: xyzzy
-                node_id: textfield_4_1
+                  value: component_4_textfield_1
+                node_id: component_4_textfield_1
           slot_2_2:
             sources:
               - source_id: textfield
                 source:
-                  value: thud
-                node_id: textfield_4_2
-    node_id: test_4
+                  value: component_4_textfield_2
+                node_id: component_4_textfield_2
+    node_id: component_4
   - source_id: textfield
     source:
-      value: quux
-    node_id: textfield_4
+      value: textfield_5
+    node_id: textfield_5

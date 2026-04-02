@@ -8,24 +8,24 @@ test.beforeEach('Setup', async ({ drupal }) => {
 })
 
 test('Builder move tests', { tag: [ '@wip' ] }, async ({ page, drupal, displayBuilder }) => {
-  // display_builder_test/config/optional/display_builder_page_layout.page_layout.builder.yml
-  const dbName = `builder`
-  const viewUrl = `${config.pageViewUrl.replace('{instance_id}', dbName)}`
+  // modules/display_builder_page_layout/tests/modules/display_builder_page_layout_test/config/optional/display_builder_page_layout.page_layout.builder.yml
+  const instanceId = `builder`
+  const viewUrl = `${config.pageViewUrl.replace('{instance_id}', instanceId)}`
 
   const result = page.locator(`.db-island-builder`)
   const dropzoneRoot = page.locator('.db-dropzone--root')
 
   // ID from config:
-  // display_builder_test/config/optional/display_builder_page_layout.page_layout.layers.yml
-  const test_1 = page.getByTestId('test_1')
-  const test_1_slot = page.getByTestId('test_1_slot_1')
-  const test_2 = page.getByTestId('test_2')
-  const test_2_slot = page.getByTestId('test_2_slot_1')
-  const test_3 = page.getByTestId('test_3')
-  const test_3_slot = page.getByTestId('test_3_slot_1')
-  const test_4 = page.getByTestId('test_4')
-  const test_4_slot_1 = page.getByTestId('test_4_slot_2_1')
-  const test_4_slot_2 = page.getByTestId('test_4_slot_2_2')
+  // modules/display_builder_page_layout/tests/modules/display_builder_page_layout_test/config/optional/display_builder_page_layout.page_layout.builder.yml
+  const component_1 = page.getByTestId('component_1')
+  const component_1_slot = page.getByTestId('component_1_slot_1')
+  const component_2 = page.getByTestId('component_2')
+  const component_2_slot = page.getByTestId('component_2_slot_1')
+  const component_3 = page.getByTestId('component_3')
+  const component_3_slot = page.getByTestId('component_3_slot_1')
+  const component_4 = page.getByTestId('component_4')
+  const component_4_slot_1 = page.getByTestId('component_4_slot_2_1')
+  const component_4_slot_2 = page.getByTestId('component_4_slot_2_2')
 
   await test.step(`User login`, async () => {
     await displayBuilder.createUserAndLogin(drupal)
@@ -37,10 +37,10 @@ test('Builder move tests', { tag: [ '@wip' ] }, async ({ page, drupal, displayBu
     await displayBuilder.fullHighlight()
 
     await expect(result).toMatchAriaSnapshot(`
-        - text: "Block: Tabs"
-        - 'button "Block: Tabs"'
-        - text: "Textfield: foo foo Test 1 Component 1 Token: corge corge Textfield: grault grault Slot 1 Textfield: bar bar Test 1 Component 2 Textfield: garply garply Slot 1 Textfield: baz baz Test 1 Component 3 Token: waldo waldo Textfield: fred fred Slot 1 Textfield: quux quux Test 2 Token: plugh plugh Textfield: xyzzy xyzzy Slot 1 Textfield: thud thud Slot 2 Textfield: quux quux Base container"
-      `)
+      - text: "Block: Tabs"
+      - 'button "Block: Tabs"'
+      - text: "Textfield: textfield_1 textfield_1 Test 1 component_1_textfield_1 Token: component_1_token_1 component_1_token_1 Textfield: component_1_textfield_2 component_1_textfield_2 Slot 1 Textfield: textfield_2 textfield_2 Test 1 component_2_textfield_1 Textfield: component_2_textfield_2 component_2_textfield_2 Slot 1 Textfield: textfield_3 textfield_3 Test 1 component_3_textfield_1 Token: component_3_token_2 component_3_token_2 Textfield: component_3_textfield_2 component_3_textfield_2 Slot 1 Textfield: textfield_4 textfield_4 Test 2 Token: component_4_token_1 component_4_token_1 Textfield: component_4_textfield_1 component_4_textfield_1 Slot 1 Textfield: component_4_textfield_2 component_4_textfield_2 Slot 2 Textfield: textfield_5 textfield_5 Base container"
+    `)
 
     // Referesh and ensure no changes.
     await page.goto(viewUrl)
@@ -48,30 +48,32 @@ test('Builder move tests', { tag: [ '@wip' ] }, async ({ page, drupal, displayBu
     await displayBuilder.fullHighlight()
 
     await expect(result).toMatchAriaSnapshot(`
-        - text: "Block: Tabs"
-        - 'button "Block: Tabs"'
-        - text: foo Component 1 corge grault bar Component 2 garply baz Component 3 waldo fred quux plugh xyzzy thud quux
-      `)
+      - text: "Block: Tabs"
+      - 'button "Block: Tabs"'
+      - text: "Textfield: textfield_1 textfield_1 Test 1 component_1_textfield_1 Token: component_1_token_1 component_1_token_1 Textfield: component_1_textfield_2 component_1_textfield_2 Slot 1 Textfield: textfield_2 textfield_2 Test 1 component_2_textfield_1 Textfield: component_2_textfield_2 component_2_textfield_2 Slot 1 Textfield: textfield_3 textfield_3 Test 1 component_3_textfield_1 Token: component_3_token_2 component_3_token_2 Textfield: component_3_textfield_2 component_3_textfield_2 Slot 1 Textfield: textfield_4 textfield_4 Test 2 Token: component_4_token_1 component_4_token_1 Textfield: component_4_textfield_1 component_4_textfield_1 Slot 1 Textfield: component_4_textfield_2 component_4_textfield_2 Slot 2 Textfield: textfield_5 textfield_5 Base container"
+    `)
   })
 
   await test.step(`Move all in 1 slot`, async () => {
-    await displayBuilder.dragManual(test_2, test_1_slot)
-    await displayBuilder.dragManual(test_3, test_1_slot)
-    await displayBuilder.dragManual(test_4, test_1_slot)
+    await displayBuilder.dragManual(component_2, component_1_slot)
+    await displayBuilder.dragManual(component_3, component_1_slot)
+    await displayBuilder.dragManual(component_4, component_1_slot)
 
     await expect(result).toMatchAriaSnapshot(`
-        - 'button "Block: Tabs"'
-        - text: "foo Component 1 Token: corge corge grault bar Component 2 garply baz Component 3 waldo fred quux plugh xyzzy thud quux"
-      `)
+      - text: "Block: Tabs"
+      - 'button "Block: Tabs"'
+      - text: "Textfield: textfield_1 textfield_1 Test 1 component_1_textfield_1 Test 2 Token: component_4_token_1 component_4_token_1 Textfield: component_4_textfield_1 component_4_textfield_1 Slot 1 Textfield: component_4_textfield_2 component_4_textfield_2 Slot 2 Test 1 component_3_textfield_1 Test 1 component_2_textfield_1 Token: component_1_token_1 component_1_token_1 Textfield: component_1_textfield_2 component_1_textfield_2 Slot 1 Textfield: textfield_2 textfield_2 Textfield: component_2_textfield_2 component_2_textfield_2 Slot 1 Textfield: textfield_3 textfield_3 Token: component_3_token_2 component_3_token_2 Textfield: component_3_textfield_2 component_3_textfield_2 Slot 1 Textfield: textfield_4 textfield_4 Textfield: textfield_5 textfield_5 Base container"
+    `)
 
     await page.goto(viewUrl)
     await displayBuilder.shoelaceReady()
     await displayBuilder.fullHighlight()
 
     await expect(result).toMatchAriaSnapshot(`
-        - 'button "Block: Tabs"'
-        - text: "foo Component 1 Token: corge corge grault bar baz Component 2 garply quux plugh xyzzy thud Component 3 waldo fred quux"
-      `)
+      - text: "Block: Tabs"
+      - 'button "Block: Tabs"'
+      - text: "Textfield: textfield_1 textfield_1 Test 1 component_1_textfield_1 Test 2 Token: component_4_token_1 component_4_token_1 Textfield: component_4_textfield_1 component_4_textfield_1 Slot 1 Textfield: component_4_textfield_2 component_4_textfield_2 Slot 2 Test 1 component_3_textfield_1 Token: component_3_token_2 component_3_token_2 Textfield: component_3_textfield_2 component_3_textfield_2 Slot 1 Test 1 component_2_textfield_1 Textfield: component_2_textfield_2 component_2_textfield_2 Slot 1 Token: component_1_token_1 component_1_token_1 Textfield: component_1_textfield_2 component_1_textfield_2 Slot 1 Textfield: textfield_2 textfield_2 Textfield: textfield_3 textfield_3 Textfield: textfield_4 textfield_4 Textfield: textfield_5 textfield_5 Base container"
+    `)
   })
 
   await test.step(`View the result page`, async () => {

@@ -425,7 +425,7 @@ export class Displaybuilder {
    */
   async createUserAndLogin (drupal: Drupal, roles: string[] = [], id: string | null = null): Promise<void> {
     if (!id) {
-      id = utils.createRandomString()
+      id = utils.createRandomString(6)
     }
     const username = `test_${id}`
     roles = [ 'db_test_page', ...roles ]

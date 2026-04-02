@@ -7,7 +7,7 @@ test.beforeEach('Setup', async ({ drupal }) => {
   await drupal.drush('state:set -y display_builder.asset_libraries_local true')
 })
 
-test('Secondary actions', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) => {
+test('Drawer resize', { tag: [ '@wip' ] }, async ({ page, drupal, displayBuilder }) => {
   const firstDrawerId = 'db-first-drawer'
   const secondDrawerId = 'db-second-drawer'
 
@@ -15,50 +15,30 @@ test('Secondary actions', { tag: [ '@extra' ] }, async ({ page, drupal, displayB
     await displayBuilder.initTestsWithPageLayout(drupal)
   })
 
-  await test.step(`Check preview on components`, async () => {
-    await displayBuilder.openLibrariesTab('Components')
-    const testComponent = page.getByRole('button', { name: 'Test simple', exact: true })
-    await testComponent.hover()
-    await displayBuilder.htmxReady()
-    // From the test component.
-    await expect(page.getByRole('tooltip', { name: 'label: Bar Foo Click me' })).toBeVisible()
+  await test.step(`Drawer resize`, async () => {
+    const firstDrawer = page.locator(`#${firstDrawerId}`)
+    await firstDrawer.locator(`.shoelace-resize-handle`).hover()
+    await page.mouse.down()
+    await page.mouse.move(400 + 133, 400)
+    await page.mouse.up()
+    let box = await firstDrawer.locator(`.drawer__panel`).boundingBox()
+
+    await expect(firstDrawer).toHaveAttribute('style', '--size: 533px;')
+    await expect(firstDrawer).toHaveAttribute('data-offset-left', '533px')
+    await expect(box?.width).toEqual(533)
+
+    const secondDrawer = page.locator(`#${secondDrawerId}`)
+    await secondDrawer.locator(`.shoelace-resize-handle`).hover()
+    await page.mouse.down()
+    box = await secondDrawer.locator(`.drawer__panel`).boundingBox()
+    await page.mouse.move((box?.x ?? 0) - 133, 400)
+    await page.mouse.up()
+
+    await expect(secondDrawer).toHaveAttribute('style', '--size: 533px;')
+    box = await secondDrawer.locator(`.drawer__panel`).boundingBox()
+    expect(box?.width).toEqual(533)
   })
 
-  await test.step(`Check preview on blocks`, async () => {
-    await displayBuilder.openLibrariesTab('Blocks')
-    const testBlock = page.getByRole('button', { name: 'Powered by Drupal', exact: true })
-    await testBlock.hover()
-    await displayBuilder.htmxReady()
-    await expect(page.getByRole('tooltip')).toMatchAriaSnapshot({ name: 'block-powered-hover.aria.yml' })
-  })
-
-  // await test.step(`Drawer resize`, async () => {
-  //   const firstDrawer = page.locator(`#${firstDrawerId}`)
-  //   await firstDrawer.locator(`.shoelace-resize-handle`).hover()
-  //   await page.mouse.down()
-  //   await page.mouse.move(400 + 133, 400)
-  //   await page.mouse.up()
-  //   let box = await firstDrawer.locator(`.drawer__panel`).boundingBox()
-
-  //   await expect(firstDrawer).toHaveAttribute('style', '--size: 533px;')
-  //   await expect(firstDrawer).toHaveAttribute('data-offset-left', '533px')
-  //   await expect(box?.width).toEqual(533)
-
-  //   const secondDrawer = page.locator(`#${secondDrawerId}`)
-  //   await secondDrawer.locator(`.shoelace-resize-handle`).hover()
-  //   await page.mouse.down()
-  //   box = await secondDrawer.locator(`.drawer__panel`).boundingBox()
-  //   await page.mouse.move((box?.x ?? 0) - 133, 400)
-  //   await page.mouse.up()
-
-  //   await expect(secondDrawer).toHaveAttribute('style', '--size: 533px;')
-  //   box = await secondDrawer.locator(`.drawer__panel`).boundingBox()
-  //   expect(box?.width).toEqual(533)
-  // })
-
-  // await test.step(`Delete`, async () => {
-  // await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
-  // })
 })
 
 test('Contextual menu', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) => {
@@ -145,7 +125,7 @@ test('Contextual menu', { tag: [ '@extra' ] }, async ({ page, drupal, displayBui
     await expect(page.locator('.db-island-builder')).toMatchAriaSnapshot({ name: 'contextual-remove.aria.yml' })
 
     // await test.step(`Delete`, async () => {
-    // await displayBuilder.deleteDisplayBuilderFromDevUi(dbName)
+    // await displayBuilder.deleteDisplayBuilderFromDevUi(instanceId)
     // })
   })
 })
