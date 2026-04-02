@@ -9,25 +9,13 @@ use Drupal\display_builder\InstanceInterface;
 
 /**
  * Event fired when display builder is used.
- *
- * This is the base class for all display builder events. It carries only the
- * fields common to every event: the instance and the optional current island.
- * Per-event data (node ID, parent ID, payload array) lives in typed subclasses:
- *
- * - DisplayBuilderNodeEvent  — node_id (string, required)
- * - DisplayBuilderSlotEvent  — node_id + parent_id (both required strings)
- * - DisplayBuilderDeleteEvent — parent_id (?string, optional)
- * - DisplayBuilderDataEvent  — data (array, required)
- *
- * @see \Drupal\display_builder\Event\DisplayBuilderEvents
- * @see \Drupal\display_builder\Island\IslandEventSubscriberInterface
  */
-class DisplayBuilderEvent extends Event {
+final class DisplayBuilderEvent extends Event {
 
   /**
    * The result for this event.
    *
-   * A render array keyed by island ID.
+   * A render array.
    */
   private array $result = [];
 
@@ -36,12 +24,20 @@ class DisplayBuilderEvent extends Event {
    *
    * @param \Drupal\display_builder\InstanceInterface $instance
    *   The display builder instance.
+   * @param array|null $data
+   *   The data associated with this event.
+   * @param string|null $node_id
+   *   The tree node ID.
+   * @param string|null $parent_id
+   *   The parent node ID.
    * @param string|null $current_island_id
-   *   Optional island ID that triggered the action. Islands matching this ID
-   *   are skipped during fan-out to avoid redundant out-of-band swaps.
+   *   Optional current island ID which trigger action.
    */
   public function __construct(
     private InstanceInterface $instance,
+    private ?array $data = NULL,
+    private ?string $node_id = NULL,
+    private ?string $parent_id = NULL,
     private ?string $current_island_id = NULL,
   ) {}
 
@@ -68,6 +64,26 @@ class DisplayBuilderEvent extends Event {
   }
 
   /**
+   * Gets the data associated with this event.
+   *
+   * @return array|null
+   *   The event data.
+   */
+  public function getData(): ?array {
+    return $this->data;
+  }
+
+  /**
+   * Gets the tree node ID.
+   *
+   * @return string
+   *   The tree node ID.
+   */
+  public function getNodeId(): ?string {
+    return $this->node_id;
+  }
+
+  /**
    * Gets the enabled islands.
    *
    * @return array
@@ -88,9 +104,19 @@ class DisplayBuilderEvent extends Event {
   }
 
   /**
+   * Gets the parent node ID.
+   *
+   * @return string
+   *   The parent node ID.
+   */
+  public function getParentId(): ?string {
+    return $this->parent_id;
+  }
+
+  /**
    * Gets the current island ID.
    *
-   * @return string|null
+   * @return string
    *   The current island ID which trigger action.
    */
   public function getCurrentIslandId(): ?string {

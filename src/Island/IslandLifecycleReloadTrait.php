@@ -15,9 +15,6 @@ use Drupal\display_builder\InstanceInterface;
  *
  * Use this trait when an island should fully reload its content in response
  * to history pointer changes, state restores, or entity view reverts.
- *
- * @see \Drupal\display_builder\Island\IslandLifecycleEventsInterface
- * @see \Drupal\display_builder\Island\IslandReloadEventsTrait
  */
 trait IslandLifecycleReloadTrait {
 

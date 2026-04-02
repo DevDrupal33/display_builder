@@ -27,13 +27,13 @@ namespace Drupal\display_builder\Event;
  * -------------------
  * Each event is dispatched as a typed subclass of DisplayBuilderEvent that
  * carries only the data relevant to that event:
- * - DisplayBuilderNodeEvent
+ * - DisplayBuilderEvent
  *   - single node_id (ON_ATTACH_TO_ROOT, ON_MOVE, ON_UPDATE)
- * - DisplayBuilderSlotEvent
+ * - DisplayBuilderEvent
  *   — node_id + parent_id (ON_ATTACH_TO_SLOT)
- * - DisplayBuilderDeleteEvent
+ * - DisplayBuilderEvent
  *   — optional parent_id (ON_DELETE)
- * - DisplayBuilderDataEvent
+ * - DisplayBuilderEvent
  *   — data array (ON_ACTIVE, ON_PUBLISH)
  * - DisplayBuilderEvent
  *   — instance only (ON_HISTORY_CHANGE, ON_RESTORE, ON_REVERT, ON_PRESET_SAVE)

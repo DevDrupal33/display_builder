@@ -4,37 +4,146 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Island;
 
+use Drupal\display_builder\InstanceInterface;
+
 /**
- * Aggregate interface for all island event groups.
- *
- * This interface extends all four event sub-interfaces and serves two purposes:
- *
- * 1. Backward compatibility — existing code that type-hints against
- *    IslandEventSubscriberInterface or IslandInterface continues to work
- *    without changes.
- *
- * 2. Full-coverage contract — IslandPluginBase implements this aggregate,
- *    providing no-op defaults for every event method.  Island plugins may
- *    implement only the specific sub-interfaces they need instead of the full
- *    set.
- *
- * Sub-interfaces by concern:
- * - IslandStructureEventsInterface — onAttachToRoot, onAttachToSlot, onMove,
- *   onUpdate, onDelete
- * - IslandLifecycleEventsInterface — onHistoryChange, onRestore, onRevert
- * - IslandSaveEventsInterface      — onPublish, onPresetSave
- * - IslandActiveEventInterface     — onActive
- *
- * @see \Drupal\display_builder\Island\IslandStructureEventsInterface
- * @see \Drupal\display_builder\Island\IslandLifecycleEventsInterface
- * @see \Drupal\display_builder\Island\IslandSaveEventsInterface
- * @see \Drupal\display_builder\Island\IslandActiveEventInterface
- * @see \Drupal\display_builder\Island\IslandFanOutTrait
+ * Interface for Island event subscriber.
  */
-interface IslandEventSubscriberInterface extends
-  IslandActiveEventInterface,
-  IslandLifecycleEventsInterface,
-  IslandSaveEventsInterface,
-  IslandStructureEventsInterface {
+interface IslandEventSubscriberInterface {
+
+  /**
+   * Event triggered when a node becomes active.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance ID.
+   * @param array $data
+   *   The node data.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  public function onActive(InstanceInterface $instance, array $data): array;
+
+  /**
+   * Event triggered when a node is attached to the root.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance ID.
+   * @param string $node_id
+   *   The tree node ID.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  public function onAttachToRoot(InstanceInterface $instance, string $node_id): array;
+
+  /**
+   * Event triggered when a node is attached to a slot.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance ID.
+   * @param string $node_id
+   *   The tree node ID.
+   * @param string $parent_id
+   *   The parent node instance ID.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  public function onAttachToSlot(InstanceInterface $instance, string $node_id, string $parent_id): array;
+
+  /**
+   * Event triggered when a node is deleted.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance ID.
+   * @param string|null $parent_id
+   *   The parent node ID, or NULL if the deleted node was at root.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  public function onDelete(InstanceInterface $instance, ?string $parent_id): array;
+
+  /**
+   * Event triggered when the history changes.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance ID.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  public function onHistoryChange(InstanceInterface $instance): array;
+
+  /**
+   * Event triggered when the builder state is restored to its last saved state.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  public function onRestore(InstanceInterface $instance): array;
+
+  /**
+   * Event triggered when an override is reverted to its default state.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  public function onRevert(InstanceInterface $instance): array;
+
+  /**
+   * Event triggered when a node is moved.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance ID.
+   * @param string $node_id
+   *   The tree node ID.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  public function onMove(InstanceInterface $instance, string $node_id): array;
+
+  /**
+   * Event triggered when a node is updated.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance ID.
+   * @param string $node_id
+   *   The tree node ID.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  public function onUpdate(InstanceInterface $instance, string $node_id): array;
+
+  /**
+   * Event triggered when a builder is published.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance ID.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  public function onPublish(InstanceInterface $instance): array;
+
+  /**
+   * Event triggered when a preset is saved.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance ID.
+   *
+   * @return array
+   *   Returns a render array with out-of-band commands.
+   */
+  public function onPresetSave(InstanceInterface $instance): array;
 
 }

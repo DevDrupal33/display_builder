@@ -57,49 +57,9 @@ Every constant in `DisplayBuilderEvents` is set to the camelCase island method n
 const ON_PUBLISH = 'onPublish';
 ```
 
-`IslandFanOutTrait::dispatchToIslands()` uses this convention to call the right island method generically. Any new event **must** follow this rule.
-
-### Typed event classes
-
-| Class | Extra fields | Used for |
-|-------|-------------|----------|
-| `DisplayBuilderEvent` | — (base) | ON_HISTORY_CHANGE, ON_RESTORE, ON_REVERT |
-| `DisplayBuilderNodeEvent` | `string $nodeId` | ON_ATTACH_TO_ROOT, ON_MOVE, ON_UPDATE |
-| `DisplayBuilderSlotEvent` | `string $nodeId`, `string $parentId` | ON_ATTACH_TO_SLOT |
-| `DisplayBuilderDeleteEvent` | `?string $parentId` | ON_DELETE |
-| `DisplayBuilderDataEvent` | `array $data` | ON_ACTIVE, ON_PUBLISH |
-
-Always type-hint subscriber handlers against the specific subclass, not the base `DisplayBuilderEvent`.
-
-### Fan-out: IslandFanOutTrait
-
-`src/Island/IslandFanOutTrait.php` contains the canonical fan-out algorithm. Any event subscriber that needs to forward events to islands should use this trait (the using class must provide `IslandPluginManagerInterface $islandManager`).
-
-- `dispatchToIslands(event, method, parameters)` — for core events listed in `METHOD_INTERFACE_MAP`
-- `dispatchCustomEventToIslands(event, method, island_interface, parameters)` — for submodule-defined events; accepts an explicit interface so the instanceof check resolves correctly
-
-`METHOD_INTERFACE_MAP` maps each method name to the sub-interface that declares it. Islands that do not implement the required interface are silently skipped — no changes needed in existing islands when new events are added.
-
-See [Adding a custom island event](island-plugins.md#adding-a-custom-island-event) for a complete walkthrough.
-
 ## Island plugin system
 
 Islands are Drupal plugins (`src/Plugin/display_builder/Island/`) annotated with `#[Island(...)]`. All island layer code lives in `src/Island/`.
-
-### Event sub-interfaces
-
-Island event methods are split into four focused interfaces. Islands only implement what they need:
-
-| Interface | Methods |
-|-----------|---------|
-| `IslandStructureEventsInterface` | `onAttachToRoot`, `onAttachToSlot`, `onMove`, `onUpdate`, `onDelete` |
-| `IslandLifecycleEventsInterface` | `onHistoryChange`, `onRestore`, `onRevert` |
-| `IslandSaveEventsInterface` | `onPublish`, `onPresetSave` |
-| `IslandActiveEventInterface` | `onActive` |
-
-`IslandEventSubscriberInterface` is an empty aggregate that extends all four — existing code type-hinted against it continues to work unchanged.
-
-`IslandPluginBase` implements the full aggregate with no-op defaults for every method.
 
 ### Reload traits
 

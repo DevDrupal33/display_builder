@@ -7,7 +7,7 @@ namespace Drupal\display_builder_page_layout\EventSubscriber;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\CachedDiscoveryClearerInterface;
 use Drupal\display_builder\DisplayBuildablePluginManager;
-use Drupal\display_builder\Event\DisplayBuilderDataEvent;
+use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder_page_layout\Plugin\display_builder\Buildable\PageLayout;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -35,10 +35,10 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
   /**
    * Event handler for when a display builder is saved.
    *
-   * @param \Drupal\display_builder\Event\DisplayBuilderDataEvent $event
+   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
    *   The event object.
    */
-  public function onPublish(DisplayBuilderDataEvent $event): void {
+  public function onPublish(DisplayBuilderEvent $event): void {
     $instance = $event->getInstance();
     $contexts = $event->getData();
     $params = PageLayout::checkInstanceId((string) $instance->id());

@@ -16,7 +16,6 @@ use Drupal\display_builder\InstanceInterface;
  * Use this trait when an island should fully reload its content in response
  * to any structural mutation of the builder tree.
  *
- * @see \Drupal\display_builder\Island\IslandStructureEventsInterface
  * @see \Drupal\display_builder\Island\IslandReloadEventsTrait
  *
  * @phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed

@@ -9,12 +9,8 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Drupal\display_builder\Entity\ProfileInterface;
-use Drupal\display_builder\Event\DisplayBuilderDataEvent;
-use Drupal\display_builder\Event\DisplayBuilderDeleteEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
-use Drupal\display_builder\Event\DisplayBuilderNodeEvent;
-use Drupal\display_builder\Event\DisplayBuilderSlotEvent;
 use Drupal\display_builder\InstanceInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -121,23 +117,7 @@ abstract class ApiControllerBase extends ControllerBase {
    *   The event.
    */
   protected function createEventWithEnabledIsland(string $event_id, ?array $data, ?string $node_id, ?string $parent_id): DisplayBuilderEvent {
-    $event = match ($event_id) {
-      DisplayBuilderEvents::ON_ACTIVE,
-      DisplayBuilderEvents::ON_PUBLISH => new DisplayBuilderDataEvent($this->builder, $data ?? [], $this->islandId),
-
-      DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
-      DisplayBuilderEvents::ON_MOVE,
-      DisplayBuilderEvents::ON_UPDATE => new DisplayBuilderNodeEvent($this->builder, $node_id ?? '', $this->islandId),
-
-      DisplayBuilderEvents::ON_ATTACH_TO_SLOT => new DisplayBuilderSlotEvent($this->builder, $node_id ?? '', $parent_id ?? '', $this->islandId),
-
-      DisplayBuilderEvents::ON_DELETE => new DisplayBuilderDeleteEvent($this->builder, $parent_id, $this->islandId),
-
-      // ON_HISTORY_CHANGE, ON_RESTORE, ON_REVERT, ON_PRESET_SAVE, and any
-      // future/submodule event that carries no extra payload.
-      default => new DisplayBuilderEvent($this->builder, $this->islandId),
-    };
-
+    $event = new DisplayBuilderEvent($this->builder, $data, $node_id, $parent_id, $this->islandId);
     $this->eventDispatcher->dispatch($event, $event_id);
 
     return $event;
