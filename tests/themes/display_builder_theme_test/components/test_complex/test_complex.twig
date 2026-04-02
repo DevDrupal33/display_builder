@@ -1,10 +1,10 @@
 {% set test_attributes = create_attribute(test_attributes|default({})) %}
 {% set test_attributes = test_attributes.addClass(['test-attr']) %}
-{% set test_attributes = test_attributes.setAttribute('data-test', 'testing') %}
+{% set test_attributes = test_attributes.setAttribute('data-test', 'test-child') %}
 
-<div{{ attributes.addClass('test_complex') }}>
+<div{{ attributes.addClass('test_complex').setAttribute('data-test', 'test-parent') }}>
   <div{{ test_attributes }}>
-    label: {{ label|default('none') }}, open: {{ open ? 'true' : 'false' }}, duration: {{ duration|default(0) }}
+    <h2>label: {{ label|default('none') }}, open: {{ open ? 'true' : 'false' }}, duration: {{ duration|default(0) }}</h2>
     <div class="slot slot_1">
       Slot:1 {{ slot_1 }}
       <div class="slot sub_slot_1_1">

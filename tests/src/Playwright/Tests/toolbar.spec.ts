@@ -31,7 +31,7 @@ test.beforeEach('Setup', async ({ drupal }) => {
 
 // Buttons in toolbar configuration is based on display_builder.profile.test.yml
 // Any change to the profile will be reflected here.
-test('Toolbar buttons', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) => {
+test('Buttons', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) => {
   await test.step(`Create Page Layout and login`, async () => {
     await displayBuilder.initTestsWithPageLayout(drupal)
   })
@@ -182,7 +182,7 @@ test('Toolbar buttons', { tag: [ '@extra' ] }, async ({ page, drupal, displayBui
   }
 })
 
-test('Toolbar keyboard', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) => {
+test('Keyboard', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) => {
   await test.step(`Create Page Layout and login`, async () => {
     await displayBuilder.initTestsWithPageLayout(drupal)
   })

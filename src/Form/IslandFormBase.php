@@ -19,11 +19,12 @@ final class IslandFormBase extends FormBase {
   /**
    * Constructs a new IslandFormBase.
    *
-   * @param \Drupal\display_builder\Island\IslandPluginManagerInterface $islandManager
-   *   The island plugin manager.
+   * @param \Drupal\display_builder\Island\IslandPluginManagerInterface|null $islandManager
+   *   The island plugin manager. NULL when form is rebuilt from cache without
+   *   going through the container — getIslandManager() handles the fallback.
    */
   public function __construct(
-    private readonly IslandPluginManagerInterface $islandManager,
+    private ?IslandPluginManagerInterface $islandManager = NULL,
   ) {}
 
   /**
@@ -94,7 +95,23 @@ final class IslandFormBase extends FormBase {
    *   The Island plugin.
    */
   protected function getPlugin(array $args): IslandInterface {
-    return $this->islandManager->createInstance($args['island_id'], $args['instance']);
+    return $this->getIslandManager()->createInstance($args['island_id'], $args['instance']);
+  }
+
+  /**
+   * Gets the island plugin manager, falling back to the container.
+   *
+   * FormBase subclasses may be rebuilt from cache without going through
+   * create(), leaving injected properties uninitialized.
+   *
+   * @return \Drupal\display_builder\Island\IslandPluginManagerInterface
+   *   The island plugin manager.
+   *
+   * @phpcs:disable DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
+   */
+  private function getIslandManager(): IslandPluginManagerInterface {
+    // @phpstan-ignore nullCoalesce.property
+    return $this->islandManager ??= \Drupal::service('plugin.manager.db_island');
   }
 
 }

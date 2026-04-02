@@ -425,14 +425,14 @@ export class Displaybuilder {
    */
   async createUserAndLogin (drupal: Drupal, roles: string[] = [], id: string | null = null): Promise<void> {
     if (!id) {
-      id = utils.createRandomString(6)
+      id = utils.createRandomString()
     }
     const username = `test_${id}`
     roles = [ 'db_test_page', ...roles ]
     await drupal.createUser({
       username,
       password: id,
-      email: `${username}}@${id}.com`,
+      email: `${username}@${id}.com`,
       roles,
     })
     await drupal.login({ username })
