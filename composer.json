@@ -40,7 +40,8 @@
     "extra": {
         "patches": {
             "drupal/ui_patterns": {
-                "https://www.drupal.org/i/3570294 throw error on missing component instead of fatal": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/478.patch"
+                "https://www.drupal.org/i/3570294 throw error on missing component instead of fatal": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/478.patch",
+                "https://www.drupal.org/i/3583926 bug: comment form not shown on comment field display ": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/488.patch"
             }
         }
     },
