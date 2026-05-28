@@ -5,3 +5,9 @@ services:
       - '@plugin.manager.display_buildable'
     tags:
       - { name: 'event_subscriber' }
+
+  display_builder_views.display_builder_views_hook:
+    class: Drupal\display_builder_views\Hook\DisplayBuilderViewsHook
+    arguments:
+      - '@entity_type.manager'
+      - '@plugin.manager.display_buildable'

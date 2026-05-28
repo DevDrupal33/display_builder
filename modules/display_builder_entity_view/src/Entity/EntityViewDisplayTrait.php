@@ -11,6 +11,7 @@ use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder\InstanceInterface;
@@ -173,6 +174,8 @@ trait EntityViewDisplayTrait {
    * @see \Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE): void {
+    $instance = $this->getInstance();
+
     if ($profile = $this->displayBuildable()->getProfile()) {
       $this->displayBuildable()->initInstanceIfMissing();
 
@@ -205,6 +208,13 @@ trait EntityViewDisplayTrait {
       }
     }
 
+    // Reset the state once you import a configuration.
+    if ($instance && $this->isSyncing()) {
+      $log = new TranslatableMarkup('Synced from configuration import.');
+      $current_sources = $this->displayBuildable()->getSources();
+      $instance->setNewPresent($current_sources, $log);
+      $instance->save();
+    }
     parent::postSave($storage, $update);
   }
 

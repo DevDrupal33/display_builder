@@ -296,6 +296,29 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
   }
 
   /**
+   * Test the config import updates the instance to use imported sources.
+   */
+  public function testConfigImportUpdatesInstance(): void {
+    $expected = Yaml::decode(\file_get_contents(__DIR__ . '/../../fixtures/sources.yml'));
+    $display = self::createTestDisplayWithProfile();
+
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $display]);
+    $buildable->initInstanceIfMissing();
+
+    $display->setSyncing(TRUE);
+    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::SOURCES_PROPERTY, $expected);
+    $display->save();
+    $display->setSyncing(FALSE);
+
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($buildable->getInstanceId());
+    $actual = $instance->getCurrentState();
+    self::removeNodeId($actual);
+
+    self::assertSame($expected, $actual);
+  }
+
+  /**
    * Helper to create and save a test display.
    *
    * @param string $view_mode

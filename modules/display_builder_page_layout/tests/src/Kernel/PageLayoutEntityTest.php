@@ -141,4 +141,68 @@ final class PageLayoutEntityTest extends KernelTestBase {
     self::assertSame(10, $updated->get('weight'));
   }
 
+  /**
+   * Test the config import updates the instance to use imported sources.
+   */
+  public function testConfigImportUpdatesInstance(): void {
+    // Create a PageLayout entity.
+    /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $entity */
+    $entity = PageLayout::create([
+      'id' => 'edit_layout',
+      'label' => 'Original Label',
+      'weight' => 5,
+      DisplayBuildableInterface::PROFILE_PROPERTY => 'test',
+      DisplayBuildableInterface::SOURCES_PROPERTY => [],
+      'conditions' => [],
+    ]);
+    $entity->setStatus(TRUE)->save();
+
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $entity]);
+    $buildable->initInstanceIfMissing();
+    $expected = [
+      [
+        'source_id' => 'page_layout',
+        'source' => [
+          'regions' => [
+            'header' => [
+              [
+                'source_id' => 'block',
+                'source' => [
+                  'plugin_id' => 'local_tasks_block',
+                ],
+              ],
+            ],
+          ],
+        ],
+      ],
+    ];
+    $entity->setSyncing(TRUE);
+    $entity->set(DisplayBuildableInterface::SOURCES_PROPERTY, $expected);
+    $entity->save();
+    $entity->setSyncing(FALSE);
+
+    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($buildable->getInstanceId());
+    $actual = $instance->getCurrentState();
+    self::removeNodeId($actual);
+
+    self::assertSame($expected, $actual);
+  }
+
+  /**
+   * Recursively remove the _node_id key.
+   *
+   * @param array $array
+   *   The array reference.
+   */
+  private static function removeNodeId(array &$array): void {
+    unset($array['node_id']);
+
+    foreach ($array as &$value) {
+      if (\is_array($value)) {
+        self::removeNodeId($value);
+      }
+    }
+  }
+
 }

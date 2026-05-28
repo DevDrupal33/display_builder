@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_page_layout\Entity;
 
+use Drupal\Core\Cache\CacheTagsInvalidatorInterface;
 use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
@@ -202,9 +203,16 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
       // tag for the others.
       /** @var \Drupal\Core\Config\Entity\ConfigEntityTypeInterface $entity_type */
       $entity_type = $this->getEntityType();
-      \Drupal::service('cache_tags.invalidator')->invalidateTags([$entity_type->getConfigPrefix()]);
+      $this->cacheTagsInvalidator()->invalidateTags([$entity_type->getConfigPrefix()]);
     }
 
+    // Reset the state once you import a configuration.
+    if ($instance && $this->isSyncing()) {
+      $log = new TranslatableMarkup('Synced from configuration import.');
+      $current_sources = $this->getSources();
+      $instance->setNewPresent($current_sources, $log);
+      $instance->save();
+    }
     parent::postSave($storage, $update);
   }
 
@@ -325,6 +333,16 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
    */
   private function sourceManager(): SourcePluginManager {
     return \Drupal::service('plugin.manager.ui_patterns_source');
+  }
+
+  /**
+   * Gets the Cache Tags Invalidator service.
+   *
+   * @return \Drupal\Core\Cache\CacheTagsInvalidatorInterface
+   *   The cache tags invalidator service.
+   */
+  private function cacheTagsInvalidator(): CacheTagsInvalidatorInterface {
+    return \Drupal::service('cache_tags.invalidator');
   }
 
 }
