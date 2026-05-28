@@ -86,18 +86,21 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
    * {@inheritdoc}
    */
   public function getPropValue(): mixed {
+    /** @var array<string, mixed> $page */
     $page = [
       '#type' => 'page',
     ];
 
     foreach ($this->getSlotValues() as $region_id => $region) {
-      $page[$region_id] = [];
+      $region_content = [];
 
       foreach ($region as $source) {
         $content = $this->componentElementBuilder->buildSource([], 'content', [], $source, $this->configuration['contexts'] ?? []) ?? [];
         $content = $content['#slots']['content'][0] ?? [];
-        $page[$region_id][] = $content;
+        $region_content[] = $content;
       }
+
+      $page[(string) $region_id] = $region_content;
     }
 
     return $page;
