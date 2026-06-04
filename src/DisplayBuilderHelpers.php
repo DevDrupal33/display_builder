@@ -57,7 +57,7 @@ class DisplayBuilderHelpers {
         $newValue = [
           'source_id' => 'token',
           'source' => [
-            'value' => '<div class="db-background db-preview-placeholder ' . $class . '">' . $replacement['new_value_title'] . '</div>',
+            'value' => Markup::create('<div class="db-background db-preview-placeholder ' . $class . '">' . $replacement['new_value_title'] . '</div>'),
           ],
         ];
         $searchKey = \array_key_first($search);
