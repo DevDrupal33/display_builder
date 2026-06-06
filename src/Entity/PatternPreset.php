@@ -284,7 +284,13 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
     $slots = $source->getSetting('component')['slots'] ?? [];
 
     foreach ($slots as $slot) {
+      if (!is_array($slot)) {
+        continue;
+      }
       foreach ($slot['sources'] ?? [] as $slot_source) {
+        if (empty($slot_source['source']) || empty($slot_source['source_id'])) {
+          continue;
+        }
         $contexts = \array_merge($contexts, $this->getContextFromSource($slot_source['source_id'], $slot_source['source']));
       }
     }
@@ -292,6 +298,12 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
     $props = $source->getSetting('component')['props'] ?? [];
 
     foreach ($props as $prop_source) {
+      if (!is_array($prop_source)) {
+        continue;
+      }
+      if (empty($prop_source['source']) || empty($prop_source['source_id'])) {
+        continue;
+      }
       $contexts = \array_merge($contexts, $this->getContextFromSource($prop_source['source_id'], $prop_source['source']));
     }
 
