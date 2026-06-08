@@ -12,6 +12,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Pager\PagerManagerInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Utility\TableSort;
 use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\DisplayBuilderHelpers;
@@ -230,6 +231,42 @@ final class InstanceListBuilder extends EntityListBuilder {
     ];
 
     return $build;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getOperations(EntityInterface $entity) {
+    $buildable = NULL;
+
+    // @todo Replace by Instance::get('buildable') when it will be available.
+    foreach ($this->providers as $provider) {
+      if (\str_starts_with((string) $entity->id(), $provider['instance_prefix'])) {
+        $buildable = $provider['class'];
+
+        break;
+      }
+    }
+
+    if ($buildable) {
+      $operations = [
+        'build' => [
+          'title' => new TranslatableMarkup('Build display'),
+          'url' => $buildable::getUrlFromInstanceId((string) $entity->id()),
+          'weight' => -1,
+        ],
+        'edit' => [
+          'title' => new TranslatableMarkup('Edit display'),
+          'url' => $buildable::getDisplayUrlFromInstanceId((string) $entity->id()),
+          'weight' => 10,
+        ],
+      ];
+    }
+
+    return \array_merge(
+      $operations ?? [],
+      parent::getOperations($entity),
+    );
   }
 
   /**

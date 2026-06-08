@@ -9,15 +9,12 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuilderHelpers;
-use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay;
 use Drupal\display_builder_entity_view\Form\EntityViewDisplayForm;
 use Drupal\display_builder_entity_view\Form\LayoutBuilderEntityViewDisplayForm;
-use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityView;
 use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
 
 /**
@@ -48,48 +45,6 @@ class DisplayBuilderEntityViewHook {
       $entity_types['entity_view_display']
         ->setClass(EntityViewDisplay::class)
         ->setFormClass('edit', EntityViewDisplayForm::class);
-    }
-  }
-
-  /**
-   * Implements hook_entity_operation_alter().
-   *
-   * @param array $operations
-   *   An associative array of operations.
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity for which the operations are being altered.
-   */
-  #[Hook('entity_operation_alter')]
-  public function entityOperationAlter(array &$operations, EntityInterface $entity): void {
-    if (!$entity instanceof InstanceInterface) {
-      return;
-    }
-
-    $id = (string) $entity->id();
-
-    if (\str_starts_with($id, EntityView::getPrefix())) {
-      $operations['build'] = [
-        'title' => new TranslatableMarkup('Build display'),
-        'url' => EntityView::getUrlFromInstanceId($id),
-        'weight' => -1,
-      ];
-      $operations['edit'] = [
-        'title' => new TranslatableMarkup('Edit display'),
-        'url' => EntityView::getDisplayUrlFromInstanceId($id),
-        'weight' => 10,
-      ];
-    }
-    elseif (\str_starts_with($id, EntityViewOverride::getPrefix())) {
-      $operations['build'] = [
-        'title' => new TranslatableMarkup('Build display'),
-        'url' => EntityViewOverride::getUrlFromInstanceId($id),
-        'weight' => -1,
-      ];
-      $operations['edit'] = [
-        'title' => new TranslatableMarkup('Edit display'),
-        'url' => EntityViewOverride::getUrlFromInstanceId($id),
-        'weight' => 10,
-      ];
     }
   }
 
