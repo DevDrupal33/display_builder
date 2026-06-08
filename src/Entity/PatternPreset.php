@@ -8,11 +8,12 @@ use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Entity\EntityDeleteForm;
+use Drupal\Core\Plugin\Context\ContextDefinitionInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Form\PatternPresetForm;
 use Drupal\display_builder\SlotSourceProxy;
+use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\display_builder_ui\PatternPresetListBuilder;
-use Drupal\ui_patterns\SourceInterface;
 use Drupal\ui_patterns\SourcePluginManager;
 
 /**
@@ -260,54 +261,63 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
     /** @var \Drupal\ui_patterns\SourceInterface $source */
     $source = $this->sourcePluginManager()->createInstance($source_id, ['settings' => $source]);
 
-    if ($source->getPluginId() === 'component') {
-      return $this->getContextsFromComponent($source);
+    if ($source instanceof SourceWithSlotsInterface) {
+      return $this->getContextsFromSlots($source);
     }
 
     // @todo Traverse also context switchers.
-    return $source->getContextDefinitions();
+    return \array_filter($source->getContextDefinitions(), static function (ContextDefinitionInterface $definition) {
+      return $definition->isRequired();
+    });
   }
 
   /**
-   * Get contexts from component.
-   *
    * Go through all slots and props to get the nested sources contexts.
    *
-   * @param \Drupal\ui_patterns\SourceInterface $source
+   * @param \Drupal\display_builder\SourceWithSlotsInterface $source
    *   Source plugin.
    *
    * @return array
-   *   Context definitions of the component source.
+   *   Context definitions of the source.
    */
-  private function getContextsFromComponent(SourceInterface $source): array {
+  private function getContextsFromSlots(SourceWithSlotsInterface $source): array {
     $contexts = [];
-    $slots = $source->getSetting('component')['slots'] ?? [];
 
-    foreach ($slots as $slot) {
-      if (!is_array($slot)) {
-        continue;
-      }
-      foreach ($slot['sources'] ?? [] as $slot_source) {
-        if (empty($slot_source['source']) || empty($slot_source['source_id'])) {
-          continue;
+    if (\is_iterable($source)) {
+      foreach ($source as $slot) {
+        foreach (\is_array($slot) ? ($slot['sources'] ?? []) : [] as $source_item) {
+          $contexts = \array_merge($contexts, $this->getContextsFromSourceItem($source_item));
         }
-        $contexts = \array_merge($contexts, $this->getContextFromSource($slot_source['source_id'], $slot_source['source']));
       }
     }
 
-    $props = $source->getSetting('component')['props'] ?? [];
+    // @todo Make it generic if SourceWithPropsInterface is introduced in UI Patterns.
+    $component = $source->getSetting('component');
+    $props = \is_array($component) ? ($component['props'] ?? []) : [];
 
-    foreach ($props as $prop_source) {
-      if (!is_array($prop_source)) {
-        continue;
-      }
-      if (empty($prop_source['source']) || empty($prop_source['source_id'])) {
-        continue;
-      }
-      $contexts = \array_merge($contexts, $this->getContextFromSource($prop_source['source_id'], $prop_source['source']));
+    foreach ($props as $source_item) {
+      $contexts = \array_merge($contexts, $this->getContextsFromSourceItem($source_item));
     }
 
     return $contexts;
+  }
+
+  /**
+   * Returns context definitions for a single source item, if valid.
+   *
+   * @param mixed $source_item
+   *   A raw source item, expected to be an array with 'source_id' and 'source'
+   *   keys. Invalid or incomplete items return an empty array.
+   *
+   * @return array
+   *   Context definitions, or an empty array if the item is not a valid source.
+   */
+  private function getContextsFromSourceItem(mixed $source_item): array {
+    if (!\is_array($source_item) || empty($source_item['source']) || empty($source_item['source_id'])) {
+      return [];
+    }
+
+    return $this->getContextFromSource($source_item['source_id'], $source_item['source']);
   }
 
   /**
