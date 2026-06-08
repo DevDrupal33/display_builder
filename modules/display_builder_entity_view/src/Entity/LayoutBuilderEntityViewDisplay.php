@@ -6,7 +6,6 @@ namespace Drupal\display_builder_entity_view\Entity;
 
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
@@ -22,7 +21,7 @@ use Drupal\ui_patterns\SourcePluginManager;
  * @see \Drupal\display_builder_entity_view\Hook\DisplayBuilderEntityViewHook::entityTypeAlter()
  * @see \Drupal\display_builder_entity_view\Entity\EntityViewDisplay
  */
-class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay implements DisplayBuilderEntityDisplayInterface, DisplayBuilderOverridableInterface {
+class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay implements DisplayBuilderEntityDisplayInterface {
 
   use EntityViewDisplayTrait;
 
@@ -65,7 +64,6 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
    *   The entity type ID.
    */
   public function __construct(array $values, $entity_type) {
-    $this->entityFieldManager = \Drupal::service('entity_field.manager');
     parent::__construct($values, $entity_type);
     $this->sourcePluginManager = \Drupal::service('plugin.manager.ui_patterns_source');
     $this->entityTypeManager = \Drupal::service('entity_type.manager');
@@ -86,38 +84,6 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
       }
     }
     parent::preSave($storage);
-  }
-
-  /**
-   * Returns the field name used to store overridden displays.
-   *
-   * @return string|null
-   *   The field name used to store overridden displays, or NULL if not set.
-   *
-   * @see Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
-   */
-  public function getDisplayBuilderOverrideField(): ?string {
-    return $this->getThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY);
-  }
-
-  /**
-   * {@inheritdoc}
-   *
-   * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface
-   */
-  public function initialImport(): array {
-    if ($this->getThirdPartySetting('layout_builder', 'enabled')) {
-      $sections = $this->getThirdPartySetting('layout_builder', 'sections', []);
-
-      if (!\is_array($sections)) {
-        $sections = [];
-      }
-
-      return $this->dataConverter->convertFromLayoutBuilder($sections);
-    }
-
-    // If Layout Builder is not used, import from Manage Display data.
-    return $this->dataConverter->convertFromManageDisplay($this->getTargetEntityTypeId(), $this->getTargetBundle(), $this->content);
   }
 
   /**

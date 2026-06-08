@@ -15,8 +15,8 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Controller\IntegrationControllerBase;
-use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
-use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
+use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
+use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -71,7 +71,7 @@ final class EntityViewOverridesController extends IntegrationControllerBase {
 
     /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $entity_display */
     $entity_display = $this->getEntityViewDisplay($entity_type_id, $entity->bundle(), $view_mode);
-    \assert($entity_display instanceof DisplayBuilderOverridableInterface);
+    \assert($entity_display instanceof DisplayBuilderEntityDisplayInterface);
     /** @var \Drupal\Core\Field\FieldItemListInterface $with_display_builder */
     $with_display_builder = $entity->get($entity_display->getDisplayBuilderOverrideField());
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
@@ -167,7 +167,7 @@ final class EntityViewOverridesController extends IntegrationControllerBase {
    *   The first overridable view mode name, or NULL if none is found.
    */
   protected function getFirstOverridableViewMode(EntityInterface $entity, AccountInterface $account): ?string {
-    $display_infos = EntityViewDisplay::getDisplayInfos($this->entityTypeManager());
+    $display_infos = EntityViewOverride::getDisplayInfos($this->entityTypeManager());
     $view_modes = $display_infos[$entity->getEntityTypeId()]['bundles'][$entity->bundle()] ?? [];
 
     foreach (\array_keys($view_modes) as $view_mode) {
@@ -230,7 +230,7 @@ final class EntityViewOverridesController extends IntegrationControllerBase {
 
     $display = self::getEntityViewDisplay($entity->getEntityTypeId(), $entity->bundle(), $view_mode_name);
 
-    if (!$display instanceof DisplayBuilderOverridableInterface) {
+    if (!$display instanceof DisplayBuilderEntityDisplayInterface) {
       return $forbidden;
     }
 

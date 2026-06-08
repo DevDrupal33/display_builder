@@ -18,6 +18,8 @@ use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\Entity\ProfileInterface;
+use Drupal\display_builder_entity_view\BuilderDataConverter;
+use Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 
@@ -42,11 +44,17 @@ final class EntityView extends DisplayBuildablePluginBase {
   protected SampleEntityGeneratorInterface $sampleEntityGenerator;
 
   /**
+   * The data converter from Manage Display and Layout Builder.
+   */
+  protected BuilderDataConverter $dataConverter;
+
+  /**
    * {@inheritdoc}
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->sampleEntityGenerator = \Drupal::service('ui_patterns.sample_entity_generator');
+    $this->dataConverter = \Drupal::service('display_builder_entity_view.builder_data_converter');
     $this->entity = $configuration['entity'];
   }
 
@@ -129,39 +137,30 @@ final class EntityView extends DisplayBuildablePluginBase {
   }
 
   /**
-   * Returns the display builder instance.
-   *
-   * @return \Drupal\display_builder\Entity\ProfileInterface|null
-   *   The display builder instance, or NULL if not set.
-   *
-   * @see \Drupal\display_builder\DisplayBuildableInterface
+   * {@inheritdoc}
    */
   public function getProfile(): ?ProfileInterface {
-    $display_builder_id = $this->entity->getThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY);
+    $profile_id = $this->entity->getThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY);
 
-    if ($display_builder_id === NULL) {
+    if ($profile_id === NULL) {
       return NULL;
     }
 
-    return $this->loadDisplayBuilder($display_builder_id);
+    /** @var \Drupal\display_builder\Entity\ProfileInterface $profile */
+    $profile = $this->entityTypeManager->getStorage('display_builder_profile')->load($profile_id);
+
+    return $profile;
   }
 
   /**
-   * Returns the sources of the display builder.
-   *
-   * @return array
-   *   The sources of the display builder.
-   *
-   * @see \Drupal\display_builder\DisplayBuildableInterface
+   * {@inheritdoc}
    */
   public function getSources(): array {
     return $this->entity->getThirdPartySetting('display_builder', DisplayBuildableInterface::SOURCES_PROPERTY, []);
   }
 
   /**
-   * Saves the sources of the display builder.
-   *
-   * @see \Drupal\display_builder\DisplayBuildableInterface
+   * {@inheritdoc}
    */
   public function saveSources(): void {
     $data = $this->getInstance()->getCurrentState();
@@ -219,8 +218,21 @@ final class EntityView extends DisplayBuildablePluginBase {
       // - LayoutBuilderEntityViewDisplay::initialImport()
       /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $display */
       $display = $this->entity;
-      $sources = $display->initialImport();
-      $this->initialDataSource = 'import';
+
+      if ($display instanceof LayoutBuilderEntityViewDisplay && $display->getThirdPartySetting('layout_builder', 'enabled')) {
+        $sections = $display->getThirdPartySetting('layout_builder', 'sections', []);
+
+        if (!\is_array($sections)) {
+          $sections = [];
+        }
+
+        $sources = $this->dataConverter->convertFromLayoutBuilder($sections);
+        $this->initialDataSource = 'layout_builder';
+      }
+      else {
+        $sources = $this->dataConverter->convertFromManageDisplay($display->getTargetEntityTypeId(), $display->getTargetBundle(), $display->getComponents());
+        $this->initialDataSource = 'manage_display';
+      }
     }
 
     return $sources;
@@ -230,8 +242,12 @@ final class EntityView extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   protected function getInitializationMessage(): TranslatableMarkup {
-    if ($this->initialDataSource === 'import') {
-      return $this->t('Import from Layout Builder or Manage Display configuration.');
+    if ($this->initialDataSource === 'layout_builder') {
+      return $this->t('Import from Layout Builder configuration.');
+    }
+
+    if ($this->initialDataSource === 'manage_display') {
+      return $this->t('Import from Manage Display configuration.');
     }
 
     return $this->t('Initialization from existing Entity View Display configuration.');
@@ -273,27 +289,6 @@ final class EntityView extends DisplayBuildablePluginBase {
       'view_mode_name' => $view_mode,
       'entity' => $entity,
     ];
-  }
-
-  /**
-   * Loads display builder by id.
-   *
-   * @param string $display_builder_id
-   *   The display builder ID.
-   *
-   * @return \Drupal\display_builder\Entity\ProfileInterface|null
-   *   The display builder, or NULL if not found.
-   */
-  private function loadDisplayBuilder(string $display_builder_id): ?ProfileInterface {
-    if (empty($display_builder_id)) {
-      return NULL;
-    }
-    $storage = $this->entityTypeManager->getStorage('display_builder_profile');
-
-    /** @var \Drupal\display_builder\Entity\ProfileInterface $display_builder */
-    $display_builder = $storage->load($display_builder_id);
-
-    return $display_builder;
   }
 
 }

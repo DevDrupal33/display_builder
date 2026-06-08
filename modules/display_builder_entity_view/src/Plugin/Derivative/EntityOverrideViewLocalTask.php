@@ -11,7 +11,7 @@ use Drupal\Core\Routing\RouteProviderInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\Theme\ComponentPluginManager;
-use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
+use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -47,7 +47,7 @@ class EntityOverrideViewLocalTask extends DeriverBase implements ContainerDerive
    */
   public function getDerivativeDefinitions($base_plugin_definition): array {
     $this->derivatives = [];
-    $display_infos = EntityViewDisplay::getDisplayInfos($this->entityTypeManager);
+    $display_infos = EntityViewOverride::getDisplayInfos($this->entityTypeManager);
 
     foreach ($display_infos as $entity_type_id => $display_info) {
       $forward = \sprintf('entity.%s.display_builder.forward', $entity_type_id);

@@ -126,7 +126,7 @@ trait EntityViewDisplayTrait {
    * @return string|null
    *   The field name used to store overridden displays, or NULL if not set.
    *
-   * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
+   * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface
    */
   public function getDisplayBuilderOverrideField(): ?string {
     return $this->getThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY);
@@ -138,7 +138,7 @@ trait EntityViewDisplayTrait {
    * @return \Drupal\display_builder\Entity\ProfileInterface|null
    *   The display builder override profile, or NULL if not set.
    *
-   * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
+   * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface
    */
   public function getDisplayBuilderOverrideProfile(): ?ProfileInterface {
     $display_builder_id = $this->getThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY);
@@ -156,7 +156,7 @@ trait EntityViewDisplayTrait {
    * @return bool
    *   TRUE if the display can be overridden, FALSE otherwise.
    *
-   * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface
+   * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface
    */
   public function isDisplayBuilderOverridable(): bool {
     return !empty($this->getDisplayBuilderOverrideField())

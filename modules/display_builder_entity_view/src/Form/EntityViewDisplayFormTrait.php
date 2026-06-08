@@ -12,7 +12,6 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
-use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 
@@ -125,7 +124,7 @@ trait EntityViewDisplayFormTrait {
     /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $entity */
     $entity = $this->getEntity();
 
-    if ($entity instanceof DisplayBuilderOverridableInterface) {
+    if ($entity instanceof DisplayBuilderEntityDisplayInterface) {
       $form['display_builder_wrapper'][DisplayBuildableInterface::PROFILE_PROPERTY]['override_form'] = $this->buildOverridesForm($entity);
     }
 
@@ -141,8 +140,8 @@ trait EntityViewDisplayFormTrait {
    * @return array
    *   The renderable form array.
    */
-  protected function buildOverridesForm(DisplayBuilderEntityDisplayInterface|DisplayBuilderOverridableInterface $entity): array {
-    /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface $overridable */
+  protected function buildOverridesForm(DisplayBuilderEntityDisplayInterface $entity): array {
+    /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $overridable */
     $overridable = $entity;
 
     $options = $this->getSourceFieldAsOptions();
@@ -222,7 +221,7 @@ trait EntityViewDisplayFormTrait {
     $field_names = [];
 
     foreach ($displays as $display) {
-      if ($display instanceof DisplayBuilderOverridableInterface) {
+      if ($display instanceof DisplayBuilderEntityDisplayInterface) {
         if ($display->isDisplayBuilderOverridable()
           && $current_display->id() !== $display->id()) {
           $field_names[] = $display->getDisplayBuilderOverrideField();
@@ -249,9 +248,7 @@ trait EntityViewDisplayFormTrait {
       $display->getTargetBundle(),
     );
 
-    if ($display instanceof DisplayBuilderOverridableInterface
-      && $display instanceof EntityViewDisplayInterface
-    ) {
+    if ($display instanceof DisplayBuilderEntityDisplayInterface) {
       $already_mapped = $this->getAlreadyMappedFields($display);
 
       foreach ($field_storage_definitions as $field_name => $field_definition) {

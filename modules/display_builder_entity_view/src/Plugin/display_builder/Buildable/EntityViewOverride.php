@@ -27,7 +27,6 @@ use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
-use Drupal\display_builder_entity_view\Entity\DisplayBuilderOverridableInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 
 /**
@@ -156,9 +155,16 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   public function getProfile(): ?ProfileInterface {
-    \assert($this->display instanceof DisplayBuilderOverridableInterface);
+    $profile_id = $this->display->getThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY);
 
-    return $this->display->getDisplayBuilderOverrideProfile();
+    if ($profile_id === NULL) {
+      return NULL;
+    }
+
+    /** @var \Drupal\display_builder\Entity\ProfileInterface $profile */
+    $profile = $this->entityTypeManager->getStorage('display_builder_profile')->load($profile_id);
+
+    return $profile;
   }
 
   /**
@@ -270,6 +276,56 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
     }
 
     return $instances;
+  }
+
+  /**
+   * Gets entity_view_display information grouped by entity type.
+   *
+   * @todo should be replaced by service, see #3542273
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager service.
+   *
+   * @return array
+   *   An array of display information keyed with 'node', then 'modes' and
+   *   'bundles':
+   *
+   *   @code
+   *   [
+   *     'node' => [
+   *       'modes' => [
+   *         'teaser' => 'Teaser',
+   *       ],
+   *      'bundles' => [
+   *        'article' => [
+   *          'teaser' => 'Teaser',
+   *        ],
+   *      ],
+   *    ],
+   *   ];
+   *
+   *   @endcode
+   */
+  public static function getDisplayInfos(EntityTypeManagerInterface $entityTypeManager): array {
+    /** @var \Drupal\display_builder_entity_view\Entity\EntityViewDisplay[] $displays */
+    $displays = $entityTypeManager
+      ->getStorage('entity_view_display')
+      ->loadMultiple();
+    $view_mode_storage = $entityTypeManager->getStorage('entity_view_mode');
+    $tabs_info = [];
+
+    foreach ($displays as $display) {
+      if (!$display->getDisplayBuilderOverrideField()) {
+        continue;
+      }
+
+      $entity_type_id = $display->getTargetEntityTypeId();
+      $view_mode = $view_mode_storage->load(\sprintf('%s.%s', $entity_type_id, $display->getMode()));
+      $tabs_info[$entity_type_id]['modes'][$display->getMode()] = $view_mode?->label() ?? t('Default');
+      $tabs_info[$entity_type_id]['bundles'][$display->getTargetBundle()][$display->getMode()] = $view_mode?->label() ?? t('Default');
+    }
+
+    return $tabs_info;
   }
 
   /**
@@ -450,7 +506,7 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
     ]);
 
     foreach ($displays as $display) {
-      if ($display instanceof DisplayBuilderOverridableInterface
+      if ($display instanceof DisplayBuilderEntityDisplayInterface
         && $display->getDisplayBuilderOverrideField() === $fieldName
         && $display->getTargetEntityTypeId()
         && $display->getTargetBundle() === $bundle

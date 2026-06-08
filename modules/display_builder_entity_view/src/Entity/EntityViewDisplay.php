@@ -21,7 +21,7 @@ use Drupal\ui_patterns\SourcePluginManager;
  * @see \Drupal\display_builder_entity_view\Hook\DisplayBuilderEntityViewHook::entityTypeAlter()
  * @see \Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay
  */
-class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderEntityDisplayInterface, DisplayBuilderOverridableInterface {
+class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderEntityDisplayInterface {
 
   use EntityViewDisplayTrait;
 
@@ -70,68 +70,6 @@ class EntityViewDisplay extends CoreEntityViewDisplay implements DisplayBuilderE
     $this->componentElementBuilder = \Drupal::service('ui_patterns.component_element_builder');
     $this->dataConverter = \Drupal::service('display_builder_entity_view.builder_data_converter');
     $this->displayBuildableManager = \Drupal::service('plugin.manager.display_buildable');
-  }
-
-  /**
-   * Gets entity_view_display information grouped by entity type.
-   *
-   * @todo should be replaced by service, see #3542273
-   *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
-   *   The entity type manager service.
-   *
-   * @return array
-   *   An array of display information keyed with 'node', then 'modes' and
-   *   'bundles':
-   *
-   *   @code
-   *   [
-   *     'node' => [
-   *       'modes' => [
-   *         'teaser' => 'Teaser',
-   *       ],
-   *      'bundles' => [
-   *        'article' => [
-   *          'teaser' => 'Teaser',
-   *        ],
-   *      ],
-   *    ],
-   *   ];
-   *
-   *   @endcode
-   */
-  public static function getDisplayInfos(EntityTypeManagerInterface $entityTypeManager): array {
-    /** @var \Drupal\display_builder_entity_view\Entity\EntityViewDisplay[] $displays */
-    $displays = $entityTypeManager
-      ->getStorage('entity_view_display')
-      ->loadMultiple();
-    $view_mode_storage = $entityTypeManager->getStorage('entity_view_mode');
-    $tabs_info = [];
-
-    foreach ($displays as $display) {
-      if (!$display->getDisplayBuilderOverrideField()) {
-        continue;
-      }
-
-      $entity_type_id = $display->getTargetEntityTypeId();
-      $view_mode = $view_mode_storage->load(\sprintf('%s.%s', $entity_type_id, $display->getMode()));
-      $tabs_info[$entity_type_id]['modes'][$display->getMode()] = $view_mode?->label() ?? t('Default');
-      $tabs_info[$entity_type_id]['bundles'][$display->getTargetBundle()][$display->getMode()] = $view_mode?->label() ?? t('Default');
-    }
-
-    return $tabs_info;
-  }
-
-  /**
-   * Initial import from existing data.
-   *
-   * @return array
-   *   List of UI Patterns sources.
-   *
-   * @see EntityView::initInstanceIfMissing()
-   */
-  public function initialImport(): array {
-    return $this->dataConverter->convertFromManageDisplay($this->getTargetEntityTypeId(), $this->getTargetBundle(), $this->content);
   }
 
 }
