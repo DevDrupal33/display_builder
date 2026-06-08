@@ -53,42 +53,42 @@ final class BuilderPanelTest extends DisplayBuilderKernelTestBase {
     $data = [
       [
         'source_id' => 'block',
-        'node_id' => \uniqid(),
+        'node_id' => \bin2hex(\random_bytes(8)),
         'source' => [
           'plugin_id' => 'display_builder_test_correct',
         ],
       ],
       [
         'source_id' => 'block',
-        'node_id' => \uniqid(),
+        'node_id' => \bin2hex(\random_bytes(8)),
         'source' => [
           'plugin_id' => 'display_builder_test_empty',
         ],
       ],
       [
         'source_id' => 'block',
-        'node_id' => \uniqid(),
+        'node_id' => \bin2hex(\random_bytes(8)),
         'source' => [
           'plugin_id' => 'display_builder_test_multi_root',
         ],
       ],
       [
         'source_id' => 'block',
-        'node_id' => \uniqid(),
+        'node_id' => \bin2hex(\random_bytes(8)),
         'source' => [
           'plugin_id' => 'display_builder_test_no_attributes',
         ],
       ],
       [
         'source_id' => 'block',
-        'node_id' => \uniqid(),
+        'node_id' => \bin2hex(\random_bytes(8)),
         'source' => [
           'plugin_id' => 'system_messages_block',
         ],
       ],
       [
         'source_id' => 'entity_field',
-        'node_id' => \uniqid(),
+        'node_id' => \bin2hex(\random_bytes(8)),
       ],
     ];
     $builder_panel = $this->createIslandPlugin('builder');

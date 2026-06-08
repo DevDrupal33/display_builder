@@ -328,7 +328,7 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
    */
   private static function fillInternalId(array &$array): void {
     if (isset($array['source_id']) && !isset($array['node_id'])) {
-      $array['node_id'] = \uniqid();
+      $array['node_id'] = \bin2hex(\random_bytes(8));
     }
 
     foreach ($array as &$value) {

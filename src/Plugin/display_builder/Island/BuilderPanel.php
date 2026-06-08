@@ -372,7 +372,7 @@ class BuilderPanel extends IslandPluginBase {
    *   Use it or not.
    */
   protected function useAttributesVariable(array $renderable): bool {
-    $random = \uniqid();
+    $random = \bin2hex(\random_bytes(8));
     $renderable['#attributes'][$random] = $random;
     $html = $this->renderer->renderInIsolation($renderable);
 
