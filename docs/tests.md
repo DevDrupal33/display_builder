@@ -54,10 +54,10 @@ cd web/modules/custom/display_builder
 cp .env.dist .env
 ```
 
-- Run the minimal tests group:
+- Run the `base` tests with firefox locally:
 
 ```bash
-npx playwright test -c playwright.local.config.ts --project=firefox
+npx playwright test -c playwright.local.config.ts --project=firefox -g @base
 # or use npm script
 npm run test
 ```
