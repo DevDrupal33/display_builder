@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * @file
+ * Test module for display_builder_entity_view.
+ *
+ * @phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function display_builder_entity_view_test_entity_extra_field_info(): array {
+  $extra = [];
+  $extra['node']['display_builder_test']['display'] = [
+    'db_test_extra_field' => [
+      'label' => t('DB Test Extra Field'),
+      'description' => t('A pseudo-field component.'),
+      'weight' => 0,
+      'visible' => TRUE,
+    ],
+    'db_test_entity_type_field' => [
+      'label' => t('DB Test Entity Type Field'),
+      'description' => t('Extra field rendered by hook_ENTITY_TYPE_view.'),
+      'weight' => 0,
+      'visible' => TRUE,
+    ],
+  ];
+
+  return $extra;
+}
+
+/**
+ * Implements hook_entity_view().
+ *
+ * Renders db_test_extra_field for node display_builder_test entities.
+ */
+function display_builder_entity_view_test_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, string $view_mode): void {
+  if ($entity->getEntityTypeId() !== 'node' && $entity->bundle() !== 'display_builder_test') {
+    return;
+  }
+
+  if ($display->getComponent('db_test_extra_field')) {
+    $build['db_test_extra_field'] = [
+      '#markup' => 'hook_entity_view:db_test_extra_field:' . $entity->label(),
+    ];
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view().
+ *
+ * Renders db_test_entity_type_field using the entity-type-specific hook.
+ */
+function display_builder_entity_view_test_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, string $view_mode): void {
+  if ($entity->bundle() !== 'display_builder_test') {
+    return;
+  }
+
+  if ($display->getComponent('db_test_entity_type_field')) {
+    $build['db_test_entity_type_field'] = [
+      '#markup' => 'hook_entity_test_view:db_test_entity_type_field:' . $entity->label(),
+    ];
+  }
+}

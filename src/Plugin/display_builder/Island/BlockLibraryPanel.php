@@ -35,9 +35,7 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
 
   private const HIDE_SOURCE = [
     'component',
-    // Used only for imports from Manage Display and Layout Builder.
-    'extra_field',
-    // No Wysiwyg from our UI until #3561474 is fixed.
+    // @todo enable Wysiwyg from our UI when #3561474 is fixed.
     'wysiwyg',
   ];
 

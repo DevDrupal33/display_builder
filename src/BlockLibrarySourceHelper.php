@@ -155,6 +155,11 @@ class BlockLibrarySourceHelper {
       }
     }
 
+    // Sort alphabetically within groups by label.
+    \usort($result_choices, static function (array $a, array $b): int {
+      return \strnatcasecmp((string) ($a['label']), (string) ($b['label']));
+    });
+
     return $result_choices;
   }
 
