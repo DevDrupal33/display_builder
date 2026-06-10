@@ -210,9 +210,9 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
         'builder_id' => (string) $display_builder_instance->id(),
         'instance' => $node,
       ],
-      $display_builder_instance->getContexts(),
+      $display_builder_instance->getAvailableContexts(),
     ]);
-    $form_state->setTemporaryValue('gathered_contexts', $display_builder_instance->getContexts());
+    $form_state->setTemporaryValue('gathered_contexts', $display_builder_instance->getAvailableContexts());
     // The body received corresponds to raw form values.
     // We need to set them in the form state to properly
     // take them into account.
@@ -290,7 +290,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     // phpcs:disable Drupal.Files.LineLength.TooLong
     // @todo should context be injected for third party settings?
-    // $form_state->setTemporaryValue('gathered_contexts', $display_builder_instance->getContexts());
+    // $form_state->setTemporaryValue('gathered_contexts', $display_builder_instance->getAvailableContexts());
     // phpcs:enable Drupal.Files.LineLength.TooLong
     // The body received corresponds to raw form values.
     // We need to set them in the form state to properly
@@ -416,8 +416,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * {@inheritdoc}
    */
   public function undo(Request $request, InstanceInterface $display_builder_instance): array {
-    $display_builder_instance->undo();
-    $display_builder_instance->save();
+    /** @var \Drupal\display_builder\Entity\InstanceStorage $storage */
+    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
+    /** @var \Drupal\display_builder\InstanceInterface $display_builder_instance */
+    $display_builder_instance = $storage->undo($display_builder_instance);
 
     $this->builder = $display_builder_instance;
 
@@ -428,8 +430,10 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * {@inheritdoc}
    */
   public function redo(Request $request, InstanceInterface $display_builder_instance): array {
-    $display_builder_instance->redo();
-    $display_builder_instance->save();
+    /** @var \Drupal\display_builder\Entity\InstanceStorage $storage */
+    $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
+    /** @var \Drupal\display_builder\InstanceInterface $display_builder_instance */
+    $display_builder_instance = $storage->redo($display_builder_instance);
 
     $this->builder = $display_builder_instance;
 

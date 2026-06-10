@@ -30,11 +30,10 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
    * {@inheritdoc}
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    $builder_id = (string) $builder->id();
     $buttons = [
-      $this->isButtonEnabled('undo') ? $this->buildUndoButton($builder, $builder_id) : [],
-      $this->isButtonEnabled('redo') ? $this->buildRedoButton($builder, $builder_id) : [],
-      $this->isButtonEnabled('clear') ? $this->buildClearButton($builder, $builder_id) : [],
+      $this->isButtonEnabled('undo') ? $this->buildUndoButton($builder) : [],
+      $this->isButtonEnabled('redo') ? $this->buildRedoButton($builder) : [],
+      $this->isButtonEnabled('clear') ? $this->buildClearButton($builder) : [],
     ];
 
     if (empty(\array_filter($buttons))) {
@@ -76,16 +75,14 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
   /**
    * Builds the undo button.
    *
-   * @param \Drupal\display_builder\InstanceInterface $instance
+   * @param \Drupal\display_builder\InstanceInterface $builder
    *   The builder instance.
-   * @param string $builder_id
-   *   The builder ID.
    *
    * @return array
    *   The undo button render array.
    */
-  private function buildUndoButton(InstanceInterface $instance, string $builder_id): array {
-    $past = $instance->getPast();
+  private function buildUndoButton(InstanceInterface $builder): array {
+    $past = $builder->getPast();
     $undo = $this->buildButton(
       ($this->showLabel('undo') && $past) ? (string) \count($past) : '',
       'undo',
@@ -98,7 +95,7 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
       $undo['#attributes']['disabled'] = 'disabled';
     }
 
-    return $this->htmxEvents->onUndo($undo, $builder_id);
+    return $this->htmxEvents->onUndo($undo, (string) $builder->id());
   }
 
   /**
@@ -106,13 +103,11 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
    *
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   The builder instance.
-   * @param string $builder_id
-   *   The builder ID.
    *
    * @return array
    *   The redo button render array.
    */
-  private function buildRedoButton(InstanceInterface $builder, string $builder_id): array {
+  private function buildRedoButton(InstanceInterface $builder): array {
     $future = $builder->getFuture();
     $redo = $this->buildButton(
       ($this->showLabel('redo') && $future) ? (string) \count($future) : '',
@@ -126,7 +121,7 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
       $redo['#attributes']['disabled'] = 'disabled';
     }
 
-    return $this->htmxEvents->onRedo($redo, $builder_id);
+    return $this->htmxEvents->onRedo($redo, (string) $builder->id());
   }
 
   /**
@@ -134,13 +129,11 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
    *
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   The builder instance.
-   * @param string $builder_id
-   *   The builder ID.
    *
    * @return array
    *   The clear button render array.
    */
-  private function buildClearButton(InstanceInterface $builder, string $builder_id): array {
+  private function buildClearButton(InstanceInterface $builder): array {
     $clear = $this->buildButton(
       $this->showLabel('clear') ? $this->t('Clear') : '',
       'clear',
@@ -155,7 +148,7 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
       $clear['#attributes']['class'] = ['hidden'];
     }
 
-    return $this->htmxEvents->onClear($clear, $builder_id);
+    return $this->htmxEvents->onClear($clear, (string) $builder->id());
   }
 
 }

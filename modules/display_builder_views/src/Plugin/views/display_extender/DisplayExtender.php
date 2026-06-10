@@ -84,7 +84,6 @@ final class DisplayExtender extends DisplayExtenderPluginBase {
     // @todo we should have always a fallback.
     $profile_id = $form_state->getValue(DisplayBuildableInterface::PROFILE_PROPERTY, 'default');
     $this->options[DisplayBuildableInterface::PROFILE_PROPERTY] = $profile_id;
-    $buildable = $this->displayBuildable();
 
     if (empty($profile_id)) {
       // If no Display Builder selected, we delete the related instance.
@@ -97,15 +96,8 @@ final class DisplayExtender extends DisplayExtenderPluginBase {
       return;
     }
 
+    $buildable = $this->displayBuildable();
     $buildable->initInstanceIfMissing();
-
-    // Save the profile in the instance if changed.
-    $instance = $this->getInstance();
-
-    if ($instance && $buildable->getProfile()->id() !== $profile_id) {
-      $instance->setProfile($profile_id);
-      $instance->save();
-    }
   }
 
   /**

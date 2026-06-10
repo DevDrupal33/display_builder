@@ -87,8 +87,7 @@ class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
   protected function buildStateButtons(InstanceInterface $instance): array {
     $instance_d = (string) $instance->id();
     $buttons = [];
-    $hasSave = $instance->isPublished();
-    $saveIsCurrent = $hasSave ? $instance->isPublishedPresent() : FALSE;
+    $saveIsCurrent = $instance->isPublishedPresent();
 
     if ($this->isButtonEnabled('publish') && !$saveIsCurrent) {
       $buttons[] = $this->htmxEvents->onPublish($this->buildPublishButton(), $instance_d);

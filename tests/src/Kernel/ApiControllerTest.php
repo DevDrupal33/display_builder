@@ -6,7 +6,6 @@ namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\Core\Url;
 use Drupal\display_builder\Controller\ApiController;
-use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\Entity\PatternPreset;
 use Drupal\display_builder\InstanceInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -42,6 +41,7 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
     'user',
     'path_alias',
     'ui_patterns',
+    'ui_patterns_field',
     'ui_styles',
     'ui_skins',
     'breakpoint',
@@ -62,11 +62,7 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
     $this->installConfig(['system', 'display_builder', 'ui_patterns', 'display_builder_test']);
 
     // Create a real builder entity.
-    $this->instance = Instance::create([
-      'id' => 'test_instance',
-      'label' => 'Test Builder instance',
-      'profileId' => 'test',
-    ]);
+    $this->instance = $this->createDisplayBuilderInstance('test', 'test_instance');
     $this->instance->save();
 
     // Get the controller from the container.

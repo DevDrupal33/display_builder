@@ -37,6 +37,8 @@ abstract class ApiControllerBase extends ControllerBase {
     DisplayBuilderEvents::ON_MOVE,
     DisplayBuilderEvents::ON_PRESET_SAVE,
     DisplayBuilderEvents::ON_PUBLISH,
+    DisplayBuilderEvents::ON_RESTORE,
+    DisplayBuilderEvents::ON_REVERT,
     DisplayBuilderEvents::ON_UPDATE,
   ];
 

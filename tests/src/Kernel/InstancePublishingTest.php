@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\display_builder\Entity\Instance;
-use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -27,6 +26,7 @@ final class InstancePublishingTest extends DisplayBuilderKernelTestBase {
     'system',
     'user',
     'ui_patterns',
+    'ui_patterns_field',
     'display_builder',
     'display_builder_ui',
     'display_builder_test',
@@ -43,53 +43,36 @@ final class InstancePublishingTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test context requirements methods.
-   */
-  public function testContextRequirements(): void {
-    $instance = $this->createDisplayBuilderInstance();
-
-    self::assertFalse($instance->isPublishable());
-    self::assertFalse($instance->hasSaveContextsRequirement('any'));
-
-    $contexts = RequirementsContext::addToContext(['key1'], []);
-
-    $instance = Instance::create([
-      'id' => 'test_id',
-      'contexts' => $contexts,
-    ]);
-
-    self::assertTrue($instance->isPublishable());
-    self::assertTrue($instance->hasSaveContextsRequirement('key1'));
-    self::assertFalse($instance->hasSaveContextsRequirement('key2'));
-  }
-
-  /**
    * Test the ::isPublishedPresent() method.
    */
   public function testIsPublishedPresent(): void {
+    // We create an instance entity with 'test' as display buildable plugin,
+    // so the data will be published in the State API.
     $instance = $this->createDisplayBuilderInstance();
     $testData = [['source_id' => 'component', 'node_id' => '1', 'source' => []]];
+    $instance->setNewPresent($testData, 'Initial state');
 
-    // Initially Save match init, so is true.
+    $instance->publish();
     self::assertTrue($instance->isPublishedPresent());
-
-    // Set save data.
-    $instance->setSave($testData);
-    self::assertFalse($instance->isPublishedPresent());
 
     // Modify state - should no longer be current.
     $modifiedData = [['source_id' => 'component', 'node_id' => '2', 'source' => []]];
     $instance->setNewPresent($modifiedData, 'Modified state');
 
-    // Note: There may be edge cases where saveIsCurrent returns unexpected
-    // results.
-    // The important thing is that restore() works correctly, which it does.
+    // We don't publish yet.
     self::assertFalse($instance->isPublishedPresent());
 
-    // Restore - should be current again.
+    // Restore to the initial state.
     $instance->restore();
     // After restore, present should equal save, so isPublishedPresent() should
     // be true.
+    self::assertTrue($instance->isPublishedPresent());
+
+    // We test again, but we publish.
+    $instance->setNewPresent($modifiedData, 'Modified state');
+    self::assertFalse($instance->isPublishedPresent());
+
+    $instance->publish();
     self::assertTrue($instance->isPublishedPresent());
 
     // Test edge case: when both present and save are null, should return true
@@ -103,20 +86,26 @@ final class InstancePublishingTest extends DisplayBuilderKernelTestBase {
    */
   public function testRestore(): void {
     $instance = $this->createDisplayBuilderInstance();
-    $testData = [['source_id' => 'component', 'node_id' => '1']];
-    $modifiedData = [['source_id' => 'component', 'node_id' => '2']];
+    $testData = [['source_id' => 'component', 'source' => [], 'third_party_settings' => [], 'node_id' => '1']];
+    $modifiedData = [['source_id' => 'component', 'source' => [], 'third_party_settings' => [], 'node_id' => '2']];
 
-    // Set save data.
-    $instance->setSave($testData);
+    // Publish initial data.
+    $instance->setNewPresent($testData, 'Modified state');
+    self::assertSame($testData, $instance->getCurrentState());
 
-    // Modify current state.
+    $instance->publish();
+    self::assertTrue($instance->isPublishedPresent());
+
+    // Modify current state without publishing.
     $instance->setNewPresent($modifiedData, 'Modified state');
     self::assertSame($modifiedData, $instance->getCurrentState());
+    self::assertFalse($instance->isPublishedPresent());
 
-    // Restore to save.
+    // Published state.
     $instance->restore();
     self::assertSame($testData, $instance->getCurrentState());
-    self::assertSame('Back to saved data.', (string) $instance->getCurrent()->getLog());
+    self::assertSame('Restore published data.', (string) $instance->getRevisionLogMessage());
+    self::assertTrue($instance->isPublishedPresent());
   }
 
 }

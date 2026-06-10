@@ -28,6 +28,7 @@ final class SourceTreeTest extends DisplayBuilderKernelTestBase {
     'user',
     'path_alias',
     'ui_patterns',
+    'ui_patterns_field',
     'display_builder',
     'display_builder_test',
     'layout_discovery',

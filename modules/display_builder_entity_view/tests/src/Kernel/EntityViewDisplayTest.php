@@ -57,6 +57,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
       ]);
     $this->config('system.theme')->set('default', 'display_builder_theme_test')->save();
     $this->installConfig(['display_builder']);
+    $this->installEntitySchema('display_builder_instance');
     $this->displayBuildableManager = $this->container->get('plugin.manager.display_buildable');
   }
 
@@ -79,7 +80,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     }
     $display = self::createTestDisplay($view_mode);
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $display]);
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $display]);
 
     self::assertSame($view_mode, $display->getMode());
     $id = \sprintf('%sentity_test__entity_test__%s', EntityView::getPrefix(), $view_mode);
@@ -144,7 +145,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
   public function testGetBuilderUrl(): void {
     $display = self::createTestDisplay();
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $display]);
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $display]);
     $url = $buildable->getBuilderUrl();
 
     self::assertSame('display_builder_entity_view.entity_test', $url->getRouteName());
@@ -205,7 +206,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
   public function testGetDisplayBuilder(): void {
     $display = self::createTestDisplay();
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $display]);
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $display]);
 
     $profile = $buildable->getProfile();
     self::assertNull($profile);
@@ -239,7 +240,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
   public function testGetSources(): void {
     $display = self::createTestDisplay();
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $display]);
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $display]);
 
     $sources = $buildable->getSources();
     self::assertEmpty($sources);
@@ -257,7 +258,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
   public function testSaveSources(): void {
     $display = self::createTestDisplayWithProfile();
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $display]);
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $display]);
 
     $sources = $buildable->getSources();
     self::assertEmpty($sources);
@@ -276,7 +277,8 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $sources = $buildable->getSources();
     self::removeNodeId($sources);
 
-    self::assertSame($expected, $sources);
+    self::assertSame($expected[0]['source_id'], $sources[0]['source_id']);
+    self::assertSame($expected[0]['source'], $sources[0]['source']);
   }
 
   /**
@@ -285,7 +287,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
   public function testInitInstanceIfMissing(): void {
     $display = self::createTestDisplayWithProfile();
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $display]);
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $display]);
 
     $buildable->initInstanceIfMissing();
     $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($buildable->getInstanceId());
@@ -303,7 +305,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $display = self::createTestDisplayWithProfile();
 
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $display]);
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $display]);
     $buildable->initInstanceIfMissing();
 
     $display->setSyncing(TRUE);

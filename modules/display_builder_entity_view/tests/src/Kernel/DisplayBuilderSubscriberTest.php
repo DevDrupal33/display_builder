@@ -69,6 +69,13 @@ final class DisplayBuilderSubscriberTest extends EntityKernelTestBase {
       'id' => 'standalone__test',
       'label' => 'Test instance',
       'profileId' => 'test',
+      'buildable' => [
+        'plugin_id' => 'test',
+        'configuration' => [
+          'instance_id' => 'standalone__test',
+          'profile_id' => 'test',
+        ],
+      ],
     ]);
     $node_id = $instance->attachToRoot(0, 'token', []);
     $instance->save();

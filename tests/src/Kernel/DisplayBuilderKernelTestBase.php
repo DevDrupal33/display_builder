@@ -30,13 +30,20 @@ abstract class DisplayBuilderKernelTestBase extends KernelTestBase {
    *   The instance for which to check access.
    */
   protected function createDisplayBuilderInstance(?string $profile_id = NULL, ?string $instance_id = NULL): InstanceInterface {
-    if ($profile_id === NULL) {
-      $profile = $this->createDisplayBuilderProfile($this->randomMachineName());
-      $profile_id = $profile->id();
-    }
+    $instance_id = $instance_id ?? $this->randomMachineName();
+    $profile_id = $profile_id ?? $this->randomMachineName();
+    $this->createDisplayBuilderProfile($profile_id);
     $instance = Instance::create([
-      'id' => $instance_id ?? $this->randomMachineName(),
-      'profileId' => $profile_id,
+      'id' => $instance_id,
+      // Because there is no proper Drupal integration to rely on, we set the
+      // instance ID and the profile entity themselves as plugin configuration.
+      'buildable' => [
+        'plugin_id' => 'test',
+        'configuration' => [
+          'instance_id' => $instance_id,
+          'profile_id' => $profile_id,
+        ],
+      ],
     ]);
 
     return $instance;
@@ -54,6 +61,9 @@ abstract class DisplayBuilderKernelTestBase extends KernelTestBase {
    *   The created profile.
    */
   protected static function createDisplayBuilderProfile(string $profile_id, array $values = []): ProfileInterface {
+    if ($profile = Profile::load($profile_id)) {
+      return $profile;
+    }
     $data = [
       'id' => $profile_id,
       'label' => 'Test Profile',

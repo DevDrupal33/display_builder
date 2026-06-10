@@ -26,6 +26,7 @@ final class BuilderPanelTest extends DisplayBuilderKernelTestBase {
     'system',
     'user',
     'ui_patterns',
+    'ui_patterns_field',
     'display_builder',
     'display_builder_test',
   ];
@@ -47,7 +48,6 @@ final class BuilderPanelTest extends DisplayBuilderKernelTestBase {
     $instance = Instance::create([
       'id' => 'test_instance',
       'label' => 'Test Instance',
-      'profileId' => 'test_profile',
     ]);
 
     $data = [

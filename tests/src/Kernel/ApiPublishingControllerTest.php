@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\display_builder\Controller\ApiPublishingController;
-use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\InstanceInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -40,6 +39,7 @@ final class ApiPublishingControllerTest extends DisplayBuilderKernelTestBase {
     'user',
     'path_alias',
     'ui_patterns',
+    'ui_patterns_field',
     'ui_styles',
     'ui_skins',
     'breakpoint',
@@ -60,11 +60,7 @@ final class ApiPublishingControllerTest extends DisplayBuilderKernelTestBase {
     $this->installConfig(['system', 'display_builder', 'ui_patterns', 'display_builder_test']);
 
     // Create a real builder entity.
-    $this->instance = Instance::create([
-      'id' => 'test_instance',
-      'label' => 'Test Builder instance',
-      'profileId' => 'test',
-    ]);
+    $this->instance = $this->createDisplayBuilderInstance('test', 'test_instance');
     $this->instance->save();
 
     // Get the controller from the container.
@@ -79,11 +75,16 @@ final class ApiPublishingControllerTest extends DisplayBuilderKernelTestBase {
    */
   public function testRestore(): void {
     $node_id = $this->instance->attachToRoot(0, 'token', []);
-    // Simulate saving to the backing config (normally done via the save route).
-    $this->instance->setSave($this->instance->getCurrentState());
+    // We need to save before publishing so TestDisplayBuildablePlugin plugin
+    // will be able to load the Instance entity.
+    $this->instance->save();
+    // Simulate publishing to the permanent storage (normally done via the
+    // publish route).
+    $this->instance->publish();
     $this->instance->save();
 
-    // Mutate after save — this unsaved change should be discarded by restore.
+    // Mutate after save — this unpublished change should be discarded by
+    // restore.
     $this->instance->attachToRoot(1, 'token', []);
 
     $request = Request::create(
@@ -96,7 +97,7 @@ final class ApiPublishingControllerTest extends DisplayBuilderKernelTestBase {
     self::assertIsArray($response['state']);
     self::assertIsArray($response['logs']);
 
-    // Present state must be restored to the single node that was saved.
+    // Present state must be restored to the published state.
     $saved = $this->loadInstance($this->instance->id());
     $state = $saved->getCurrentState();
     self::assertCount(1, $state, 'State is reset to the last saved state.');

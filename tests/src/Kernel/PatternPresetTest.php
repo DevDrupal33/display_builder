@@ -33,6 +33,7 @@ final class PatternPresetTest extends KernelTestBase {
     'user',
     'filter',
     'ui_patterns',
+    'ui_patterns_field',
     'display_builder',
     'display_builder_test',
     'node',

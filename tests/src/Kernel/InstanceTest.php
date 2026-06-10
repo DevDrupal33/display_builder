@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\display_builder\Kernel;
 
-use Drupal\Core\Plugin\Context\Context;
-use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\Entity\ProfileInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -29,6 +27,7 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
     'system',
     'user',
     'ui_patterns',
+    'ui_patterns_field',
     'display_builder',
     'display_builder_ui',
     'display_builder_test',
@@ -55,7 +54,7 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the ::getProfile() and ::setProfile() methods.
+   * Test the ::getProfile() methods.
    */
   public function testProfile(): void {
     $this->createDisplayBuilderProfile('test_profile');
@@ -64,51 +63,6 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
     $loaded_profile = $instance->getProfile();
     self::assertInstanceOf(ProfileInterface::class, $loaded_profile);
     self::assertSame('test_profile', $loaded_profile->id());
-
-    $this->createDisplayBuilderProfile('new_profile');
-    $instance->setProfile('new_profile');
-    self::assertSame('new_profile', $instance->getProfile()->id());
-  }
-
-  /**
-   * Test the ::toArray() method.
-   */
-  public function testToArray(): void {
-    $instance = $this->createDisplayBuilderInstance(NULL, 'test_id');
-    $array = $instance->toArray();
-
-    self::assertIsArray($array);
-    self::assertSame('test_id', $array['id']);
-    self::assertArrayHasKey('profileId', $array);
-    self::assertArrayHasKey('contexts', $array);
-    self::assertArrayHasKey('past', $array);
-    self::assertArrayHasKey('present', $array);
-    self::assertArrayHasKey('future', $array);
-    self::assertArrayHasKey('save', $array);
-  }
-
-  /**
-   * Test the ::getContexts() method.
-   */
-  public function testContexts(): void {
-    $instance = $this->createDisplayBuilderInstance();
-
-    // Default contexts should be empty or from profile.
-    self::assertEmpty($instance->getContexts());
-
-    $context_definition = new ContextDefinition('string', 'Test Context');
-    $context = new Context($context_definition, 'test value');
-
-    // We can't directly set contexts on Instance as there's no setContexts.
-    // However, it's passed via Instance::create().
-    $instance = Instance::create([
-      'id' => 'test_id',
-      'contexts' => ['test' => $context],
-    ]);
-
-    $contexts = $instance->getContexts();
-    self::assertArrayHasKey('test', $contexts);
-    self::assertSame('test value', $contexts['test']->getContextValue());
   }
 
   /**

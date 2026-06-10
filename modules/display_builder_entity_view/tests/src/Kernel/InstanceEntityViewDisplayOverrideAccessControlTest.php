@@ -37,6 +37,7 @@ final class InstanceEntityViewDisplayOverrideAccessControlTest extends AccessCon
     // Required for administer users permission.
     'field_ui',
     'ui_patterns',
+    'ui_patterns_field',
     'display_builder',
     'display_builder_ui',
     'display_builder_entity_view',

@@ -58,7 +58,7 @@ final class EntityViewController extends IntegrationControllerBase {
     }
 
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $entity_display]);
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $entity_display]);
 
     return $this->renderBuilder($buildable);
   }

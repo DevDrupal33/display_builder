@@ -4,14 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\display_builder\Kernel;
 
-use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Access\AccessResultInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
-use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\Tests\user\Traits\UserCreationTrait;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -37,6 +31,7 @@ final class DisplayBuildablePluginTest extends DisplayBuilderKernelTestBase {
     'system',
     'user',
     'ui_patterns',
+    'ui_patterns_field',
     'display_builder',
     'display_builder_test',
     'display_builder_ui',
@@ -54,6 +49,7 @@ final class DisplayBuildablePluginTest extends DisplayBuilderKernelTestBase {
     parent::setUp();
     $this->installConfig(['system', 'display_builder', 'ui_patterns']);
     $this->installEntitySchema('user');
+    $this->installEntitySchema('display_builder_instance');
     $this->installEntitySchema('display_builder_profile');
   }
 
@@ -88,12 +84,16 @@ final class DisplayBuildablePluginTest extends DisplayBuilderKernelTestBase {
     $this->setUpCurrentUser([], $permissions);
 
     // Setup plugin.
-    $plugin = TestDisplayBuildablePlugin::create($this->container, [], 'test', []);
-
-    if (isset($data['current_profile'])) {
-      $plugin->profile = $profiles[$data['current_profile']];
+    if (isset($data['instance_id'])) {
+      $instance = self::createDisplayBuilderInstance($data['current_profile'] ?? NULL, $data['instance_id']);
     }
-    $plugin->instanceId = $data['instance_id'] ?? NULL;
+    $plugin = \Drupal::service('plugin.manager.display_buildable')->createInstance(
+      'test',
+      [
+        'instance_id' => $instance?->id() ?? NULL,
+        'profile_id' => $data['current_profile'] ?? NULL,
+      ]
+    );
 
     // Build form.
     $form = $plugin->buildInstanceForm();
@@ -234,7 +234,7 @@ final class DisplayBuildablePluginTest extends DisplayBuilderKernelTestBase {
           'admin_permission' => FALSE,
           'profile_permissions' => ['p1'],
           'current_profile' => 'p1',
-          'instance_id' => 'inst1',
+          'instance_id' => 'test__inst1',
         ],
         'expect' => [
           'select' => TRUE,
@@ -242,116 +242,6 @@ final class DisplayBuildablePluginTest extends DisplayBuilderKernelTestBase {
         ],
       ],
     ];
-  }
-
-}
-
-/**
- * Test class for DisplayBuildablePluginBase.
- */
-class TestDisplayBuildablePlugin extends DisplayBuildablePluginBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public ?ProfileInterface $profile = NULL;
-
-  /**
-   * {@inheritdoc}
-   */
-  public ?string $instanceId = NULL;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getPrefix(): string {
-    return 'test_prefix';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getProfile(): ?ProfileInterface {
-    return $this->profile;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInstanceId(): ?string {
-    return $this->instanceId;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getBuilderUrl(): Url {
-    return Url::fromRoute('entity.display_builder_instance.collection');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getContext(): array {
-    return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getContextRequirement(): string {
-    return '';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getDisplayUrlFromInstanceId(string $instance_id): Url {
-    return Url::fromRoute('entity.display_builder_instance.collection');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function saveSources(): void {}
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getUrlFromInstanceId(string $instance_id): Url {
-    return Url::fromRoute('entity.display_builder_instance.collection');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getSources(): array {
-    return $this->instance->getCurrentState();
-  }
-
-  /**
-   * {@inheritdoc}
-   *
-   * phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundInImplementedInterfaceAfterLastUsed
-   */
-  public static function checkAccess(string $instance_id, AccountInterface $account): AccessResultInterface {
-    return AccessResult::allowed();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function checkInstanceId(string $instance_id): ?array {
-    return [
-      'id' => $instance_id,
-    ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function collectInstances(?EntityTypeManagerInterface $entityTypeManager = NULL): array {
-    return [];
   }
 
 }

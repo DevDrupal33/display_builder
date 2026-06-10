@@ -6,7 +6,8 @@ namespace Drupal\display_builder_views\Plugin\display_builder\Buildable;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Plugin\Context\Context;
+use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -17,6 +18,7 @@ use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
+use Drupal\views\Entity\View;
 use Drupal\views\Plugin\views\PluginBase;
 
 /**
@@ -39,15 +41,32 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->extender = $configuration['extender'];
-  }
 
-  /**
-   * {@inheritdoc}
-   */
-  public static function getContextRequirement(): string {
-    // @see \Drupal\ui_patterns_views\Plugin\UiPatterns\Source\ViewRowsSource.
-    return 'views:style';
+    // It is better to take the plugin from configuration when available in
+    // order to manipulate the view "executable" from the tempstore.  So, we
+    // have access to the state not yet saved in config.
+    if (isset($configuration['extender'])) {
+      $this->extender = $configuration['extender'];
+      // Configuration to store in the Instance entity.
+      unset($this->configuration['extender']);
+      $this->configuration['view_id'] = $this->extender->view->id();
+      $this->configuration['view_display'] = $this->extender->view->current_display;
+
+      return;
+    }
+
+    // If extender plugin is not directly passed, we can get it from the
+    // configuration data (as stored in Instance entity):
+    // - view_id (string)
+    // - view_display (string)
+    // However, this is loading a "real" View entity, as stored in config. So
+    // it may miss unsaved parameters.
+    $view = View::load($configuration['view_id'] ?? '')?->getExecutable() ?? NULL;
+
+    if ($view) {
+      $view->setDisplay($configuration['view_display'] ?? '');
+      $this->extender = $view->getDisplay()->getExtenders()['display_builder'];
+    }
   }
 
   /**
@@ -116,10 +135,11 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   public function getProfile(): ?ProfileInterface {
-    if (!isset($this->extender->options[DisplayBuildableInterface::PROFILE_PROPERTY])) {
-      return NULL;
+    $display_builder_id = $this->extender->options[DisplayBuildableInterface::PROFILE_PROPERTY] ?? NULL;
+
+    if ($display_builder_id === NULL && $this->getInstance()) {
+      return $this->getInstance()->getProfile();
     }
-    $display_builder_id = $this->extender->options[DisplayBuildableInterface::PROFILE_PROPERTY];
 
     if (empty($display_builder_id)) {
       return NULL;
@@ -168,10 +188,10 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public static function collectInstances(?EntityTypeManagerInterface $entityTypeManager = NULL): array {
+  public static function collectInstances(): array {
     $entityTypeManager = \Drupal::service('entity_type.manager');
+    $displayBuildableManager = \Drupal::service('plugin.manager.display_buildable');
     $storage = $entityTypeManager->getStorage('view');
-    $instance_storage = $entityTypeManager->getStorage('display_builder_instance');
     $instances = [];
 
     foreach ($storage->loadMultiple() as $view) {
@@ -183,14 +203,37 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
           continue;
         }
         $instance_id = \sprintf('%s%s__%s', self::getPrefix(), $view->id(), $display_id);
-        // We are OK with keeping the null values if the instance entity
-        // doesn't exists in storage. So the caller can decide to create
-        // the missing Instance entities.
-        $instances[$instance_id] = $instance_storage->load($instance_id);
+        /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+        $buildable = $displayBuildableManager->createInstance('view_display',
+          [
+            'view_id' => $view->id(),
+            'view_display' => $display_id,
+          ]
+        );
+        $buildable->initInstanceIfMissing();
+        $instance_id = $buildable->getInstanceId();
+        $instances[$instance_id] = $buildable->getInstance();
       }
     }
 
     return $instances;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRuntimeContexts(array $unqualified_context_ids): array {
+    // Contexts needed by UI Patterns Source can be added by each Display
+    // Buildable plugin by overriding this method.
+    // @todo filter by $unqualified_context_ids.
+    $contexts = [];
+    $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($this->extender->view->storage);
+    // Needed by ui_patterns_views's ViewRowsSource.
+    // Will be filled by \Drupal\display_builder_views\Hook\PreprocessViewsView.
+    $contexts['ui_patterns_views:rows'] = new Context(new ContextDefinition('any'), []);
+    $contexts = RequirementsContext::addToContext(['views:style'], $contexts);
+
+    return $contexts;
   }
 
   /**
@@ -218,20 +261,6 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
     }
 
     return $sources;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getInitialContext(): array {
-    $contexts = [];
-    // Mark for usage with views.
-    $contexts = RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
-    // Add view entity that we need in our sources or even UI Patterns Views
-    // sources.
-    $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($this->extender->view->storage);
-
-    return $contexts;
   }
 
 }

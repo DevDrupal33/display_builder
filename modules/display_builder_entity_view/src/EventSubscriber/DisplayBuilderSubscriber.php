@@ -8,10 +8,8 @@ use Drupal\Core\Entity\Display\EntityDisplayInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Plugin\Context\ContextInterface;
-use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
-use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityView;
 use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -22,7 +20,6 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
 
   public function __construct(
     protected EntityTypeManagerInterface $entityTypeManager,
-    protected DisplayBuildablePluginManager $displayBuildableManager,
   ) {}
 
   /**
@@ -30,51 +27,8 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
    */
   public static function getSubscribedEvents(): array {
     return [
-      DisplayBuilderEvents::ON_PUBLISH => 'onPublish',
       DisplayBuilderEvents::ON_REVERT => 'onRevert',
     ];
-  }
-
-  /**
-   * Event handler for when a display builder is saved.
-   *
-   * @param \Drupal\display_builder\Event\DisplayBuilderEvent $event
-   *   The event object.
-   */
-  public function onPublish(DisplayBuilderEvent $event): void {
-    $instance = $event->getInstance();
-    $instance_id = (string) $instance->id();
-    $contexts = $instance->getContexts();
-
-    // Entity view display overrides.
-    if ($params = EntityViewOverride::checkInstanceId($instance_id)) {
-      /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
-      $entity = $this->entityTypeManager->getStorage($params['entity_type_id'])
-        ->load($params['entity_id']);
-      /** @var \Drupal\Core\Entity\FieldableEntityInterface $override */
-      $override = $entity->get($params['field_name']);
-
-      if ($override) {
-        /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-        $buildable = $this->displayBuildableManager->createInstance('entity_view_override', ['field' => $override]);
-        $buildable->saveSources();
-      }
-    }
-
-    // Entity view displays.
-    elseif (EntityView::checkInstanceId($instance_id)) {
-      if (!$instance->hasSaveContextsRequirement(EntityView::getContextRequirement(), $contexts)) {
-        return;
-      }
-      // Entity view display parameters are also in route match.
-      $display = $this->getEntityViewDisplayEntity($contexts['entity'], $contexts['view_mode']);
-
-      if ($display) {
-        /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-        $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $display]);
-        $buildable->saveSources();
-      }
-    }
   }
 
   /**
@@ -108,21 +62,16 @@ class DisplayBuilderSubscriber implements EventSubscriberInterface {
     // Remove the saved state as the field values will be deleted.
     $instance->setNewPresent([], 'Revert 1/2: clear overridden data and save');
     $instance->save();
-    $instance->setSave($instance->getCurrentState());
 
     // Clear field value.
     $entity->get($instanceInfos['field_name'])->setValue(NULL);
     $entity->save();
 
-    $contexts = $instance->get('contexts')->first()->getValue();
+    $config = $instance->get('buildable')->first()->get('configuration')->getValue();
 
-    if (isset($contexts['view_mode']) && $contexts['view_mode'] instanceof ContextInterface) {
-      $viewMode = $contexts['view_mode']->getContextValue();
-      $display_id = "{$instanceInfos['entity_type_id']}.{$entity->bundle()}.{$viewMode}";
-
+    if (isset($config['display_id'])) {
       /** @var \Drupal\display_builder\DisplayBuildableInterface|null $display */
-      $display = $this->entityTypeManager->getStorage('entity_view_display')
-        ->load($display_id);
+      $display = $this->entityTypeManager->getStorage('entity_view_display')->load($config['display_id']);
 
       if ($display) {
         $instance->setNewPresent($display->getSources(), 'Revert 2/2: retrieve existing data from config');

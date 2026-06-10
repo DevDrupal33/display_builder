@@ -39,8 +39,10 @@ abstract class AccessControlTestBase extends DisplayBuilderKernelTestBase {
     'system',
     'user',
     'ui_patterns',
+    'ui_patterns_field',
     'display_builder',
     'display_builder_ui',
+    'display_builder_test',
   ];
 
   /**

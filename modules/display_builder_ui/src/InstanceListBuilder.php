@@ -48,7 +48,6 @@ final class InstanceListBuilder extends EntityListBuilder {
     private readonly RequestStack $requestStack,
     private readonly EntityTypeManagerInterface $entityTypeManager,
     private DisplayBuildablePluginManager $displayBuildableManager,
-    private EntityStorageInterface $instanceStorage,
   ) {
     parent::__construct($entity_type, $storage);
 
@@ -103,15 +102,11 @@ final class InstanceListBuilder extends EntityListBuilder {
     $row['id']['data'] = $instance_id;
     $row['id']['class'] = ['hidden'];
 
-    $type = '-';
-
-    foreach ($this->providers as $provider) {
-      if (\str_starts_with($instance_id, $provider['instance_prefix'])) {
-        $type = $provider['label'];
-
-        break;
-      }
-    }
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\PluginItem $item */
+    $item = $instance->get('buildable')->first();
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $item->getInstance();
+    $type = $buildable->label() ?? '-';
 
     // Set a human readable name from id.
     $row['context']['data'] = $type;
@@ -122,11 +117,9 @@ final class InstanceListBuilder extends EntityListBuilder {
 
     $row['profile']['data'] = $instance->getProfile()?->label() ?? '';
 
-    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $present */
-    $present = $instance->getCurrent() ?? NULL;
-    $row['updated']['data'] = ($present && $present->getTime()) ? DisplayBuilderHelpers::formatTime($this->dateFormatter, (int) $present->getTime()) : '-';
+    $row['updated']['data'] = $instance->get('revision_created') ? DisplayBuilderHelpers::formatTime($this->dateFormatter, (int) $instance->get('revision_created')->getString()) : '-';
     $row['updated']['class'] = ['priority-medium', 'db-nowrap'];
-    $row['log']['data'] = ($present && $present->getLog()) ? $present->getLog() : '-';
+    $row['log']['data'] = $instance->getRevisionLogMessage() ?: '-';
     $row['log']['class'] = ['priority-low'];
 
     $result = [
@@ -150,19 +143,11 @@ final class InstanceListBuilder extends EntityListBuilder {
       $container->get('request_stack'),
       $container->get('entity_type.manager'),
       $container->get('plugin.manager.display_buildable'),
-      $container->get('entity_type.manager')->getStorage('display_builder_instance'),
     );
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function getFormId(): string {
-    return 'display_builder_instance_list_builder';
-  }
-
-  /**
-   * Retrieve filter values from the current request (GET).
+   * Retrieve filter values from session.
    *
    * @param \Symfony\Component\HttpFoundation\Session\SessionInterface $session
    *   Current session.
@@ -171,12 +156,27 @@ final class InstanceListBuilder extends EntityListBuilder {
    *   Associative array of filters.
    */
   public static function getSessionFilters(SessionInterface $session): array {
-    $filters = $session->get('db_instances_overview_filter', []);
+    $state = $session->get('db_instances_overview', []);
+    $filters = $state['filters'] ?? [];
 
     return [
       'context' => isset($filters['context']) ? (string) $filters['context'] : '',
       'name' => isset($filters['name']) ? (string) $filters['name'] : '',
     ];
+  }
+
+  /**
+   * Retrieve sort values from session.
+   *
+   * @param \Symfony\Component\HttpFoundation\Session\SessionInterface $session
+   *   Current session.
+   *
+   * @return array
+   *   Associative array with 'key' and 'direction'.
+   */
+  public static function getSessionSort(SessionInterface $session): array {
+    $state = $session->get('db_instances_overview', []);
+    return $state['sort'] ?? [];
   }
 
   /**
@@ -191,9 +191,23 @@ final class InstanceListBuilder extends EntityListBuilder {
     // Build headers & request once.
     $headers = $this->buildHeader();
     $request = $this->requestStack->getCurrentRequest() ?? \Drupal::request();
-    $order = TableSort::getOrder($headers, $request);
-    $direction = TableSort::getSort($headers, $request);
-    $sortKey = $order['sql'] ?? 'updated';
+    $session = $this->requestStack->getSession();
+
+    if ($request->query->has('order') || $request->query->has('sort')) {
+      // Sort params are explicit in the URL — use and merge into session.
+      $order = TableSort::getOrder($headers, $request);
+      $direction = TableSort::getSort($headers, $request);
+      $sortKey = $order['sql'] ?? 'updated';
+      $state = $session->get('db_instances_overview', []);
+      $state['sort'] = ['key' => $sortKey, 'direction' => $direction];
+      $session->set('db_instances_overview', $state);
+    }
+    else {
+      // No sort in URL — restore from session or fall back to default.
+      $saved = self::getSessionSort($session);
+      $sortKey = $saved['key'] ?? 'updated';
+      $direction = $saved['direction'] ?? TableSort::DESC;
+    }
 
     // Sort using a dedicated helper.
     $this->sortEntities($entities, $sortKey, $direction);
@@ -206,6 +220,23 @@ final class InstanceListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function render(): array {
+    $request = $this->requestStack->getCurrentRequest() ?? \Drupal::request();
+
+    // When sort is not in the URL, inject the effective sort (session or
+    // default) into the request so TableSort marks the correct header column.
+    if (!$request->query->has('order') && !$request->query->has('sort')) {
+      $saved = self::getSessionSort($this->requestStack->getSession());
+      $sortKey = $saved['key'] ?? 'updated';
+      $direction = $saved['direction'] ?? TableSort::DESC;
+      // TableSort matches 'order' against header 'data' labels (translated).
+      $labelMap = [
+        'name' => (string) $this->t('Instance'),
+        'updated' => (string) $this->t('Updated'),
+      ];
+      $request->query->set('order', $labelMap[$sortKey] ?? (string) $this->t('Updated'));
+      $request->query->set('sort', $direction);
+    }
+
     $build = parent::render();
 
     $build['#attached']['library'][] = 'display_builder_ui/instance_list';
@@ -237,44 +268,28 @@ final class InstanceListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function getOperations(EntityInterface $entity) {
-    $buildable = NULL;
-
-    // @todo Replace by Instance::get('buildable') when it will be available.
-    foreach ($this->providers as $provider) {
-      if (\str_starts_with((string) $entity->id(), $provider['instance_prefix'])) {
-        $buildable = $provider['class'];
-
-        break;
-      }
-    }
-
-    if ($buildable) {
-      $operations = [
-        'build' => [
-          'title' => new TranslatableMarkup('Build display'),
-          'url' => $buildable::getUrlFromInstanceId((string) $entity->id()),
-          'weight' => -1,
-        ],
-        'edit' => [
-          'title' => new TranslatableMarkup('Edit display'),
-          'url' => $buildable::getDisplayUrlFromInstanceId((string) $entity->id()),
-          'weight' => 10,
-        ],
-      ];
-    }
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\PluginItem $field */
+    $field = $entity->get('buildable')->first();
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $field->getInstance();
+    $operations = [
+      'build' => [
+        'title' => new TranslatableMarkup('Build display'),
+        'url' => $buildable::getUrlFromInstanceId((string) $entity->id()),
+        'weight' => -1,
+      ],
+      'edit' => [
+        'title' => new TranslatableMarkup('Edit display'),
+        'url' => $buildable::getDisplayUrlFromInstanceId((string) $entity->id()),
+        'weight' => 10,
+      ],
+    ];
 
     return \array_merge(
-      $operations ?? [],
+      $operations,
       parent::getOperations($entity),
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getEntityIds(): array {
-    // To avoid implementing EntityStorageInterface::getQuery().
-    return \array_keys($this->getStorage()->loadMultiple());
   }
 
   /**
@@ -327,9 +342,6 @@ final class InstanceListBuilder extends EntityListBuilder {
         continue;
       }
 
-      if (!$entity['instance']) {
-        $entity['instance'] = $this->instanceStorage->create(['id' => $entity['id'], 'label' => $entity['id']]);
-      }
       $result[] = $entity['instance'];
     }
 
@@ -375,8 +387,8 @@ final class InstanceListBuilder extends EntityListBuilder {
     switch ($sortKey) {
       case 'updated':
         \usort($entities, static function ($a, $b) use ($factor) {
-          $aTime = (int) ($a->present->getTime() ?? 0);
-          $bTime = (int) ($b->present->getTime() ?? 0);
+          $aTime = (int) ($a->get('revision_created')->getString() ?? 0);
+          $bTime = (int) ($b->get('revision_created')->getString() ?? 0);
 
           // Default comparator is ascending, multiply by factor to handle desc.
           return $factor * ($aTime <=> $bTime);
@@ -398,7 +410,7 @@ final class InstanceListBuilder extends EntityListBuilder {
       default:
         // Unknown sort: fallback to updated desc behavior for predictability.
         \usort($entities, static function ($a, $b) {
-          return (int) ($b->present->getTime() ?? 0) <=> (int) ($a->present->getTime() ?? 0);
+          return (int) ($b->get('revision_created')->getString() ?? 0) <=> (int) ($a->get('revision_created')->getString() ?? 0);
         });
 
         break;

@@ -2,7 +2,20 @@
 
 ## Entity displays
 
-Display Builder data is stored as a third party settings with those properties:
+### Context management
+
+Display Builder integration with Entity Displays is a `ContextProvider` for Source plugins:
+
+| Context             | Type                   |
+| ------------------- | ---------------------- |
+| entity              | a fake "sample" entity |
+| view_mode           | `string`               |
+| bundle              | `string`               |
+| context_requirement | "entity" literal       |
+
+### Permanent storage
+
+Display Builder data is stored as a third party settings in an EntityViewDisplay config entity, with those properties:
 
 - `profile`: the Display Builder profile (config entity) in use last time the config was saved
 - `sources`: a UI Patterns 2 sources tree
@@ -22,11 +35,28 @@ third_party_settings:
     sources: [...]
 ```
 
+### Workflow
+
+The communication between temporary and permanent storages is made by `entity_view` display buildable plugin.
+
 Overview:
 
 ![Entity View internal](images/internals/entity-view-internals.webp)
 
 ## Entity display overrides
+
+### Context management
+
+Display Builder integration with Entity Displays Overrides is a `ContextProvider` for Source plugins:
+
+| Context             | Type                         |
+| ------------------- | ---------------------------- |
+| entity              | a fieldable content `entity` |
+| view_mode           | `string`                     |
+| bundle              | `string`                     |
+| context_requirement | "content" literal            |
+
+### Permanent storage
 
 Display Builder data is stored as content field provided by `ui_patterns_field` module, where every field item has those properties:
 
@@ -52,11 +82,25 @@ third_party_settings:
     override_profile: default
 ```
 
+### Workflow
+
+The communication between temporary and permanent storages is made by `entity_view_override` display buildable plugin.
+
 Overview:
 
 ![Overrides internals](images/internals/overrides-internals.webp)
 
 ## Page Layouts
+
+### Context management
+
+Display Builder integration with Page Layouts is a `ContextProvider` for Source plugins:
+
+| Context             | Type                 |
+| ------------------- | -------------------- |
+| context_requirement | "page" literal       |
+
+### Permanent storage
 
 Each page is its own config entity
 
@@ -78,11 +122,27 @@ conditions:
     negate: '0'
 ```
 
+### Workflow
+
+The communication between temporary and permanent storages is made by `page_layout` display buildable plugin.
+
 Overview:
 
 ![Internals](images/internals/page-layout-internals.webp)
 
 ## Views
+
+### Context management
+
+Display Builder integration with Views is a `ContextProvider` for Source plugins:
+
+| Context                        | Type                     |
+| ------------------------------ | ------------------------ |
+| ui_patterns_views:view_entity' | `entity:view`            |
+| `ui_patterns_views:rows`       | `any` (renderable array) |
+| context_requirement            | "views:style" literal    |
+
+### Permanent storage
 
 Display Builder is a `display_extender` plugin with those properties:
 
@@ -115,6 +175,10 @@ display:
           profile: default
           sources: [...]
 ```
+
+### Workflow
+
+The communication between temporary and permanent storages is made by `view_display` display buildable plugin.
 
 Overview:
 

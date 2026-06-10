@@ -18,19 +18,6 @@ interface PublishableInterface {
   public function isPublishable(): bool;
 
   /**
-   * Check display has required context, meaning it can save value.
-   *
-   * @param string $key
-   *   The context key to look for.
-   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
-   *   (Optional) contexts if already accessible, keyed by context name.
-   *
-   * @return bool
-   *   True if required, False otherwise.
-   */
-  public function hasSaveContextsRequirement(string $key, array $contexts = []): bool;
-
-  /**
    * If display builder has been saved.
    *
    * @return bool
@@ -47,7 +34,30 @@ interface PublishableInterface {
   public function isPublishedPresent(): bool;
 
   /**
-   * Restore to the last saved state.
+   * Get the hash of the published data.
+   *
+   * @return ?int
+   *   The hash of the published data. NULL if the display has never been
+   *    published.
+   */
+  public function getPublishedHash(): ?int;
+
+  /**
+   * Get the time of the published data.
+   *
+   * @return ?int
+   *   The timestamp of the published data. NULL if the display has never been
+   *    published.
+   */
+  public function getPublishedTime(): ?int;
+
+  /**
+   * Publish current state.
+   */
+  public function publish(): void;
+
+  /**
+   * Restore to the last published state.
    */
   public function restore(): void;
 

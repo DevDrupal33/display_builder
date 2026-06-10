@@ -118,7 +118,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   /**
    * The loaded display builder instance.
    */
-  protected ?InstanceInterface $instance;
+  private ?InstanceInterface $instance;
 
   /**
    * The conditions plugins for this page.
@@ -158,9 +158,9 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
 
     if ($display_builder && $instance) {
       $this->addDependency('config', $display_builder->getConfigDependencyName());
-      $contexts = $instance->getContexts();
+      $contexts = $instance->getAvailableContexts() ?? [];
 
-      foreach ($this->displayBuildable()->getSources() as $source_data) {
+      foreach ($this->getSources() as $source_data) {
         /** @var \Drupal\ui_patterns\SourceInterface $source */
         $source = $this->sourceManager()->getSource('', [], $source_data, $contexts);
         $this->addDependencies($source->calculateDependencies());
@@ -188,12 +188,6 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   public function postSave(EntityStorageInterface $storage, $update = TRUE): void {
     $this->displayBuildable()->initInstanceIfMissing();
     $instance = $this->getInstance();
-
-    // Save the profile in the instance if changed.
-    if ($instance->getProfile()?->id() !== $this->profile) {
-      $instance->setProfile($this->profile);
-      $instance->save();
-    }
 
     if ($this->isImpactingPageVariantDetection($update)) {
       // In DisplayBuilderPageVariant we add PageLayout::>getCacheTags() to the

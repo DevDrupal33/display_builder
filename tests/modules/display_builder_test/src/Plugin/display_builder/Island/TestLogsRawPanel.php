@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_test\Plugin\display_builder\Island;
 
-use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandPluginBase;
 use Drupal\display_builder\Island\IslandReloadEventsTrait;
 use Drupal\display_builder\Island\IslandType;
-use Drupal\display_builder\Plugin\Field\FieldType\HistoryStep;
 
 /**
  * Logs island plugin implementation.
@@ -30,16 +28,8 @@ class TestLogsRawPanel extends IslandPluginBase {
    * {@inheritdoc}
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $present */
-    $present = $builder->get('present')->first();
-
-    if (!$present) {
-      return [];
-    }
-
-    /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $save */
-    $save = $builder->get('save')->first() ?? NULL;
-    $rows = $this->buildRows($builder->get('past'), $present, $builder->get('future'), $save);
+    $published_hash = $builder->getPublishedHash();
+    $rows = $this->buildRows($builder, $published_hash);
 
     $build = [];
 
@@ -74,32 +64,29 @@ class TestLogsRawPanel extends IslandPluginBase {
   /**
    * Build rows for the logs table.
    *
-   * @param \Drupal\Core\Field\FieldItemListInterface $past
-   *   Steps with time and log message.
-   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $present
-   *   A step with time and log message.
-   * @param \Drupal\Core\Field\FieldItemListInterface $future
-   *   Steps with time and log message.
-   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $save
-   *   Saved state.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   The instance entity.
+   * @param ?int $published_hash
+   *   The hash of the published content, if any.
    *
    * @return array
    *   A renderable array representing a table row.
    */
-  protected function buildRows(FieldItemListInterface $past, ?HistoryStep $present, FieldItemListInterface $future, ?HistoryStep $save): array {
+  protected function buildRows(InstanceInterface $builder, ?int $published_hash): array {
     $rows = [];
+    $past = $builder->getPast();
 
     foreach ($past as $index => $step) {
-      /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $step */
-      $rows[] = $this->buildRow(-\count($past) + $index, $step, $save);
+      /** @var \Drupal\display_builder\InstanceInterface $step */
+      $rows[] = $this->buildRow(-\count($past) + $index, $step, $published_hash);
     }
 
     // Present data.
-    $rows[] = $this->buildRow(0, $present, $save);
+    $rows[] = $this->buildRow(0, $builder, $published_hash);
 
-    foreach ($future as $index => $step) {
-      /** @var \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $step */
-      $rows[] = $this->buildRow($index + 1, $step, $save);
+    foreach ($builder->getFuture() as $index => $step) {
+      /** @var \Drupal\display_builder\InstanceInterface $step */
+      $rows[] = $this->buildRow($index + 1, $step, $published_hash);
     }
 
     return $rows;
@@ -110,22 +97,22 @@ class TestLogsRawPanel extends IslandPluginBase {
    *
    * @param int $index
    *   The row index.
-   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $step
+   * @param \Drupal\display_builder\InstanceInterface $step
    *   The step data containing time and log message.
-   * @param \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep $save
-   *   Saved state.
+   * @param ?int $published_hash
+   *   The hash of the published content, if any.
    *
    * @return array
    *   A renderable array representing a table row.
    */
-  private function buildRow(int $index, HistoryStep $step, ?HistoryStep $save): array {
-    $user = !empty($step->user) ? $this->entityTypeManager->getStorage('user')->load($step->user) : NULL;
+  private function buildRow(int $index, InstanceInterface $step, ?int $published_hash): array {
+    $hash = $step->getHash();
 
     return [
       (string) $index,
-      ($save && (string) $step->hash === $save->hash) ? '_SAVED_' : '_NOT_SAVED_',
+      ($published_hash && $hash === $published_hash) ? '_SAVED_' : '_NOT_SAVED_',
       (string) $step->time ?? '_NO_TIME_',
-      $user ? $user->getDisplayName() : '_NO_USER_',
+      $step->getRevisionUser()?->getDisplayName() ?? '_NO_USER_',
       (string) $step->log ?? '_NO_LOG_',
     ];
   }

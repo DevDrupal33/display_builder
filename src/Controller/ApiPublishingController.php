@@ -25,19 +25,16 @@ class ApiPublishingController extends ApiControllerBase {
    *   A renderable array
    */
   public function publish(Request $request, InstanceInterface $display_builder_instance): array {
-    $display_builder_instance->setSave($display_builder_instance->getCurrentState());
+    $display_builder_instance->publish();
     $display_builder_instance->save();
 
     $this->builder = $display_builder_instance;
 
-    return $this->dispatchDisplayBuilderEvent(
-      DisplayBuilderEvents::ON_PUBLISH,
-      $display_builder_instance->getContexts()
-    );
+    return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_PUBLISH);
   }
 
   /**
-   * Restore to last save.
+   * Restore to last published state.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   HTTP Request.

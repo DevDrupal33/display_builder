@@ -7,7 +7,7 @@ namespace Drupal\display_builder_entity_view\Plugin\display_builder\Buildable;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
@@ -34,11 +34,6 @@ use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 final class EntityView extends DisplayBuildablePluginBase {
 
   /**
-   * The page layout entity storing the display.
-   */
-  public ?EntityViewDisplayInterface $entity = NULL;
-
-  /**
    * The sample entity generator.
    */
   protected SampleEntityGeneratorInterface $sampleEntityGenerator;
@@ -49,20 +44,30 @@ final class EntityView extends DisplayBuildablePluginBase {
   protected BuilderDataConverter $dataConverter;
 
   /**
+   * The display entity.
+   */
+  private ?EntityViewDisplayInterface $entity;
+
+  /**
    * {@inheritdoc}
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->sampleEntityGenerator = \Drupal::service('ui_patterns.sample_entity_generator');
     $this->dataConverter = \Drupal::service('display_builder_entity_view.builder_data_converter');
-    $this->entity = $configuration['entity'];
-  }
 
-  /**
-   * {@inheritdoc}
-   */
-  public static function getContextRequirement(): string {
-    return 'entity';
+    if (isset($configuration['display'])) {
+      $this->entity = $configuration['display'];
+      unset($this->configuration['display']);
+      $this->configuration['display_id'] = $this->entity->id();
+
+      return;
+    }
+
+    // Configuration (as stored in Instance entity):
+    // - display_id (string)
+    // No dependency injection in plugin constructors.
+    $this->entity = EntityViewDisplay::load($configuration['display_id'] ?? '');
   }
 
   /**
@@ -82,17 +87,7 @@ final class EntityView extends DisplayBuildablePluginBase {
   }
 
   /**
-   * Checks access.
-   *
-   * @param string $instance_id
-   *   Instance entity ID.
-   * @param \Drupal\Core\Session\AccountInterface $account
-   *   The user session for which to check access.
-   *
-   * @return \Drupal\Core\Access\AccessResultInterface
-   *   The access result.
-   *
-   * @see \Drupal\display_builder\InstanceAccessControlHandler
+   * {@inheritdoc}
    */
   public static function checkAccess(string $instance_id, AccountInterface $account): AccessResultInterface {
     $params = self::getUrlParamsFromInstanceId($instance_id);
@@ -183,26 +178,48 @@ final class EntityView extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public static function collectInstances(?EntityTypeManagerInterface $entityTypeManager = NULL): array {
-    $instances = [];
+  public static function collectInstances(): array {
     $entityTypeManager = \Drupal::service('entity_type.manager');
-    $storage = $entityTypeManager->getStorage('entity_view_display');
-    $instance_storage = $entityTypeManager->getStorage('display_builder_instance');
+    $displayBuildableManager = \Drupal::service('plugin.manager.display_buildable');
 
-    foreach ($storage->loadMultiple() as $display_id => $display) {
+    $instances = [];
+    $storage = $entityTypeManager->getStorage('entity_view_display');
+
+    foreach ($storage->loadMultiple() as $display) {
       /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display */
       $display_builder = $display->getThirdPartySettings('display_builder');
 
       if (!empty($display_builder[DisplayBuildableInterface::PROFILE_PROPERTY] ?? NULL)) {
-        $instance_id = \sprintf('%s%s', self::getPrefix(), \str_replace('.', '__', $display_id));
-        // We are OK with keeping the null values if the instance entity
-        // doesn't exists in storage. So the caller can decide to create
-        // the missing Instance entities.
-        $instances[$instance_id] = $instance_storage->load($instance_id);
+        /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+        $buildable = $displayBuildableManager->createInstance(
+          'entity_view',
+          ['display' => $display]
+        );
+        $buildable->initInstanceIfMissing();
+        $instance = $buildable->getInstance();
+        $instances[(string) $instance->id()] = $instance;
       }
     }
 
     return $instances;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRuntimeContexts(array $unqualified_context_ids): array {
+    // Contexts not needed by Display Builder but expected by UiPatterns source
+    // plugins.
+    $contexts = [];
+    $entity_type_id = $this->entity->getTargetEntityTypeId();
+    $bundle = $this->entity->getTargetBundle();
+    $sampleEntity = $this->sampleEntityGenerator->get($entity_type_id, $bundle);
+    $contexts['entity'] = EntityContext::fromEntity($sampleEntity);
+    $contexts['view_mode'] = new Context(ContextDefinition::create('string'), $this->entity->getMode());
+    $contexts['bundle'] = new Context(ContextDefinition::create('string'), $bundle);
+    $contexts = RequirementsContext::addToContext(['entity'], $contexts);
+
+    return $contexts;
   }
 
   /**
@@ -251,23 +268,6 @@ final class EntityView extends DisplayBuildablePluginBase {
     }
 
     return $this->t('Initialization from existing Entity View Display configuration.');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getInitialContext(): array {
-    $entity_type_id = $this->entity->getTargetEntityTypeId();
-    $bundle = $this->entity->getTargetBundle();
-    $view_mode = $this->entity->getMode();
-    $sampleEntity = $this->sampleEntityGenerator->get($entity_type_id, $bundle);
-    $contexts = [
-      'entity' => EntityContext::fromEntity($sampleEntity),
-      'bundle' => new Context(ContextDefinition::create('string'), $bundle),
-      'view_mode' => new Context(ContextDefinition::create('string'), $view_mode),
-    ];
-
-    return RequirementsContext::addToContext([self::getContextRequirement()], $contexts);
   }
 
   /**

@@ -4,4 +4,5 @@ description: 'An advanced Display Builder for Drupal, require to have a sub modu
 core_version_requirement: ^11.3.3
 package: 'User interface'
 dependencies:
+  - ui_patterns:ui_patterns_field
   - ui_patterns:ui_patterns_library

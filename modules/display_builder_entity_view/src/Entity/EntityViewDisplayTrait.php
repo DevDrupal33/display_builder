@@ -44,7 +44,7 @@ trait EntityViewDisplayTrait {
     if (!$instance) {
       return $this;
     }
-    $contexts = $instance->getContexts();
+    $contexts = $instance->getAvailableContexts();
 
     if (!$contexts) {
       return $this;
@@ -101,7 +101,7 @@ trait EntityViewDisplayTrait {
       return TRUE;
     }
 
-    $contexts = $instance->getContexts();
+    $contexts = $instance->getAvailableContexts();
 
     foreach ($this->displayBuildable()->getSources() as $source_data) {
       /** @var \Drupal\ui_patterns\SourceInterface $source */
@@ -174,42 +174,9 @@ trait EntityViewDisplayTrait {
    * @see \Drupal\Core\Entity\Display\EntityViewDisplayInterface
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE): void {
-    $instance = $this->getInstance();
-
-    if ($profile = $this->displayBuildable()->getProfile()) {
-      $this->displayBuildable()->initInstanceIfMissing();
-
-      // Save the profile in the instance if changed.
-      $instance = $this->getInstance();
-      $profile_id = (string) $profile->id();
-
-      if ($instance && ($instance->getProfile()?->id() !== $profile_id)) {
-        $instance->setProfile($profile_id);
-      }
-      $instance->save();
-    }
-
-    // Do also overrides.
-    if ($profile = $this->getDisplayBuilderOverrideProfile()) {
-      $profile_id = (string) $profile->id();
-      $storage = $this->entityTypeManager->getStorage('display_builder_instance');
-
-      foreach ($storage->loadMultiple() as $override) {
-        /** @var \Drupal\display_builder\InstanceInterface $override */
-        if (!$this->isOverrideOfCurrentDisplay($override)) {
-          continue;
-        }
-
-        if ($override->getProfile()->id() === $profile_id) {
-          continue;
-        }
-        $override->setProfile($profile_id);
-        $override->save();
-      }
-    }
-
     // Reset the state once you import a configuration.
-    if ($instance && $this->isSyncing()) {
+    if ($this->isSyncing()) {
+      $instance = $this->getInstance();
       $log = new TranslatableMarkup('Synced from configuration import.');
       $current_sources = $this->displayBuildable()->getSources();
       $instance->setNewPresent($current_sources, $log);
@@ -260,10 +227,11 @@ trait EntityViewDisplayTrait {
       $sources = [];
 
       if ($this->isDisplayBuilderOverridable()) {
-        $display_builder_field = $this->getDisplayBuilderOverrideField();
-        $overridden_field = $entity->get($display_builder_field);
         /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-        $buildable = $this->displayBuildableManager->createInstance('entity_view_override', ['field' => $overridden_field]);
+        $buildable = $this->displayBuildableManager->createInstance(
+          'entity_view_override',
+          ['display' => $this, 'entity' => $entity]
+        );
         $sources = $buildable->getSources();
       }
 
@@ -360,7 +328,7 @@ trait EntityViewDisplayTrait {
    */
   protected function displayBuildable(): DisplayBuildableInterface {
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $this]);
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $this]);
 
     return $buildable;
   }

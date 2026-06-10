@@ -165,7 +165,7 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
     \array_unshift($parameters, $event->getInstance());
 
     $configuration = $event->getIslandConfiguration();
-    $contexts = $event->getInstance()->getContexts();
+    $contexts = $event->getInstance()->getAvailableContexts();
     $islands = $this->islandManager->createInstances($this->islandManager->getDefinitions(), $contexts, $configuration);
 
     $island_enabled = $event->getEnabledIslands();

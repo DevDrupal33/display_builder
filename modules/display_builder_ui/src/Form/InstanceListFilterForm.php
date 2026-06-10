@@ -82,13 +82,14 @@ final class InstanceListFilterForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    $session_filters = $this->getRequest()->getSession()->get('db_instances_overview_filter', []);
+    $session = $this->getRequest()->getSession();
+    $state = $session->get('db_instances_overview', []);
     $values = $form_state->getValues();
-
-    $session_filters['context'] = $values['context'];
-    $session_filters['name'] = $values['name'];
-
-    $this->getRequest()->getSession()->set('db_instances_overview_filter', $session_filters);
+    $state['filters'] = [
+      'context' => $values['context'],
+      'name' => $values['name'],
+    ];
+    $session->set('db_instances_overview', $state);
   }
 
   /**
@@ -100,7 +101,10 @@ final class InstanceListFilterForm extends FormBase {
    *   The current state of the form.
    */
   public function resetForm(array &$form, FormStateInterface $form_state): void {
-    $this->getRequest()->getSession()->remove('db_instances_overview_filter');
+    $session = $this->getRequest()->getSession();
+    $state = $session->get('db_instances_overview', []);
+    unset($state['filters']);
+    $session->set('db_instances_overview', $state);
   }
 
 }

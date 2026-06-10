@@ -30,6 +30,7 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
     'system',
     'user',
     'ui_patterns',
+    'ui_patterns_field',
     'ui_styles',
     'display_builder',
     'display_builder_test',

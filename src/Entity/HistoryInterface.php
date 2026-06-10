@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Entity;
 
-use Drupal\display_builder\Plugin\Field\FieldType\HistoryStep;
-
 /**
  * History interface.
  *
@@ -15,14 +13,6 @@ use Drupal\display_builder\Plugin\Field\FieldType\HistoryStep;
  * Inspired from https://redux.js.org/usage/implementing-undo-history
  */
 interface HistoryInterface {
-
-  /**
-   * Get current step.
-   *
-   * @return \Drupal\display_builder\Plugin\Field\FieldType\HistoryStep|null
-   *   The current data.
-   */
-  public function getCurrent(): ?HistoryStep;
 
   /**
    * Get the state of the current step.
@@ -63,16 +53,6 @@ interface HistoryInterface {
    *   The future steps.
    */
   public function getFuture(): array;
-
-  /**
-   * Move history to the last past state.
-   */
-  public function undo(): void;
-
-  /**
-   * Move history to the first future state.
-   */
-  public function redo(): void;
 
   /**
    * Reset history to the current state.

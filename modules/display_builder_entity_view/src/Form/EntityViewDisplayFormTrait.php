@@ -344,7 +344,7 @@ trait EntityViewDisplayFormTrait {
    */
   protected function displayBuildable(): DisplayBuildableInterface {
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['entity' => $this->getEntity()]);
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $this->getEntity()]);
 
     return $buildable;
   }

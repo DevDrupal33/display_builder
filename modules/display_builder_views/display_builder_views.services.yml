@@ -1,11 +1,4 @@
 services:
-  display_builder_views.display_builder_subscriber:
-    class: Drupal\display_builder_views\EventSubscriber\DisplayBuilderSubscriber
-    arguments:
-      - '@plugin.manager.display_buildable'
-    tags:
-      - { name: 'event_subscriber' }
-
   display_builder_views.display_builder_views_hook:
     class: Drupal\display_builder_views\Hook\DisplayBuilderViewsHook
     arguments:

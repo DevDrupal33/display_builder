@@ -32,6 +32,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
     'display_builder_test',
     'display_builder_page_layout',
     'ui_patterns',
+    'ui_patterns_field',
     'path_alias',
   ];
 
@@ -58,6 +59,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
     $this->config('system.theme')->set('default', 'display_builder_theme_test')->save();
 
     $this->installEntitySchema('user');
+    $this->installEntitySchema('display_builder_instance');
     $this->installConfig(['display_builder']);
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
@@ -175,6 +177,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
             ],
           ],
         ],
+        'third_party_settings' => [],
       ],
     ];
     $entity->setSyncing(TRUE);

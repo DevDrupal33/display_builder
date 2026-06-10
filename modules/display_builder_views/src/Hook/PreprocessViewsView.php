@@ -8,7 +8,6 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
-use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -53,14 +52,14 @@ class PreprocessViewsView {
 
     // Inject the view in context to be available by our UI Patterns source
     // plugins.
-    $contexts = [];
-    $view_entity = $this->entityTypeManager->getStorage('view')->load($view->id());
-    $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($view_entity);
-    $contexts['ui_patterns_views:view'] = new Context(new ContextDefinition('any'), $view);
-    $contexts['ui_patterns_views:rows'] = new Context(new ContextDefinition('any'), $variables['rows'] ?? []);
+    $contexts = $buildable->getAvailableContexts();
+    // Needed by \Drupal\display_builder_views\Plugin\ViewsUiPatternsSourceBase.
     // @todo pass all variables for each source, find a way to do it sooner than
     // in this preprocess if possible.
+    // @todo Can we remove it once #3533043 and #3542796 are done?
     $contexts['ui_patterns_views:variables'] = new Context(new ContextDefinition('any'), $variables);
+    // Needed by ui_patterns_views's ViewRowsSource.
+    $contexts['ui_patterns_views:rows'] = new Context(new ContextDefinition('any'), $variables['rows'] ?? []);
 
     $fake_build = [];
 

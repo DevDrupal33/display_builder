@@ -7,6 +7,16 @@
 
 declare(strict_types=1);
 
+use Drupal\Core\Entity\ContentEntityType;
+use Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder\Entity\Instance;
+use Drupal\display_builder\Entity\InstanceStorage;
+use Drupal\display_builder\InstanceAccessControlHandler;
+use Drupal\display_builder_ui\InstanceListBuilder;
+
 /**
  * Implements hook_uninstall().
  */
@@ -16,4 +26,171 @@ function display_builder_uninstall(): void {
   $storage->delete($instances);
 
   \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
+}
+
+/**
+ * Update Instance storage #1/4: Delete instances entities from State API.
+ *
+ * Between 1.0.0-beta4 and 1.0.0-beta5, InstanceStorage handler is switching
+ * from its own custom logic, based on State API, to the standard
+ * SqlContentEntityStorage.
+ */
+function display_builder_update_11101(): void {
+  // We bypass InstanceStorage here because the old one has already been
+  // replaced.
+  $state = \Drupal::state();
+  $instanceList = $state->get('display_builder_index', []);
+
+  foreach ($instanceList as $instanceId) {
+    $state->delete('display_builder_' . $instanceId);
+  }
+  $state->delete('display_builder_index');
+}
+
+/**
+ * Update Instance storage #2/4: Enable the UI Patterns Field module.
+ */
+function display_builder_update_11102(): void {
+  // The module which is providing a field type plugin used in
+  // Instance::baseFieldDefinitions().
+  \Drupal::service('module_installer')->install(['ui_patterns_field']);
+}
+
+/**
+ * Update Instance storage #3/4: Uninstall Instance entity type.
+ */
+function display_builder_update_11103(): void {
+  $entity_type = \Drupal::entityTypeManager()->getDefinition('display_builder_instance');
+  \Drupal::entityDefinitionUpdateManager()->uninstallEntityType($entity_type);
+}
+
+/**
+ * Update Instance storage #4/4: Install Instance entity type.
+ */
+function display_builder_update_11104(): void {
+  // We need to recreate the full ContentEntityType definition and the full
+  // field storage definitions verbatim here, because can't use a live entity
+  // type definition in an update hook.
+  // See examples in https://www.drupal.org/node/3034742
+  $entity_type = new ContentEntityType([
+    'class' => Instance::class,
+    'provider' => 'display_builder',
+    'id' => 'display_builder_instance',
+    'label' => new TranslatableMarkup('Display Builder instance'),
+    'label_collection' => new TranslatableMarkup('Display builder instances'),
+    'label_singular' => new TranslatableMarkup('display builder instance'),
+    'label_plural' => new TranslatableMarkup('display builder instances'),
+    'entity_keys' => [
+      'id' => 'id',
+      'revision' => 'revision',
+      'langcode' => 'langcode',
+      'default_langcode' => 'default_langcode',
+    ],
+    'handlers' => [
+      'access' => InstanceAccessControlHandler::class,
+      'storage' => InstanceStorage::class,
+      'storage_schema' => SqlContentEntityStorageSchema::class,
+      'list_builder' => InstanceListBuilder::class,
+    ],
+    'links' => [
+      'collection' => '/admin/structure/display-builder/instances',
+    ],
+    'label_count' => [
+      'singular' => '@count instance',
+      'plural' => '@count instances',
+    ],
+    'translatable' => TRUE,
+    'base_table' => 'display_builder_instance',
+    'data_table' => 'display_builder_instance_field_data',
+    'revision_table' => 'display_builder_instance_revision',
+    'revision_data_table' => 'display_builder_instance_field_revision',
+    'revision_metadata_keys' => [
+      'revision_user' => 'revision_user',
+      'revision_created' => 'revision_created',
+      'revision_log_message' => 'revision_log_message',
+    ],
+  ]);
+
+  $fieldDefinitions = [
+    // From Instance::baseFieldDefinitions() — overrides ContentEntityBase
+    // integer id.
+    'id' => BaseFieldDefinition::create('string')
+      ->setRequired(TRUE)
+      ->setReadOnly(TRUE),
+    // From ContentEntityBase::baseFieldDefinitions().
+    'revision' => BaseFieldDefinition::create('integer')
+      ->setLabel(new TranslatableMarkup('Revision ID'))
+      ->setReadOnly(TRUE)
+      ->setSetting('unsigned', TRUE),
+    'langcode' => BaseFieldDefinition::create('language')
+      ->setLabel(new TranslatableMarkup('Language'))
+      ->setDisplayOptions('view', [
+        'region' => 'hidden',
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'language_select',
+        'weight' => 2,
+      ])
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE),
+    // From RevisionLogEntityTrait::revisionLogBaseFieldDefinitions().
+    'revision_created' => BaseFieldDefinition::create('created')
+      ->setLabel(new TranslatableMarkup('Revision create time'))
+      ->setDescription(new TranslatableMarkup('The time that the current revision was created.'))
+      ->setRevisionable(TRUE),
+    'revision_user' => BaseFieldDefinition::create('entity_reference')
+      ->setLabel(new TranslatableMarkup('Revision user'))
+      ->setDescription(new TranslatableMarkup('The user ID of the author of the current revision.'))
+      ->setSetting('target_type', 'user')
+      ->setRevisionable(TRUE),
+    'revision_log_message' => BaseFieldDefinition::create('string_long')
+      ->setLabel(new TranslatableMarkup('Revision log message'))
+      ->setDescription(new TranslatableMarkup('Briefly describe the changes you have made.'))
+      ->setRevisionable(TRUE)
+      ->setDefaultValue('')
+      ->setDisplayOptions('form', [
+        'type' => 'string_textarea',
+        'weight' => 25,
+        'settings' => [
+          'rows' => 4,
+        ],
+      ]),
+    // From Instance::baseFieldDefinitions().
+    'buildable' => BaseFieldDefinition::create('plugin')
+      ->setSetting('plugin_manager_id', 'plugin.manager.display_buildable')
+      ->setRequired(TRUE)
+      ->setReadOnly(TRUE),
+    'sources' => BaseFieldDefinition::create('ui_patterns_source')
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
+      ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED),
+    'hash' => BaseFieldDefinition::create('integer')
+      ->setRevisionable(TRUE)
+      ->setSetting('size', 'big'),
+    'published' => BaseFieldDefinition::create('timestamp'),
+    // Added by EntityFieldManager for translatable entities.
+    'default_langcode' => BaseFieldDefinition::create('boolean')
+      ->setLabel(new TranslatableMarkup('Default translation'))
+      ->setDescription(new TranslatableMarkup('A flag indicating whether this is the default translation.'))
+      ->setTranslatable(TRUE)
+      ->setRevisionable(TRUE)
+      ->setDefaultValue(TRUE),
+    // Added by EntityFieldManager for revisionable entities.
+    'revision_default' => BaseFieldDefinition::create('boolean')
+      ->setLabel(new TranslatableMarkup('Default revision'))
+      ->setDescription(new TranslatableMarkup('A flag indicating whether this was a default revision when it was saved.'))
+      ->setStorageRequired(TRUE)
+      ->setInternal(TRUE)
+      ->setTranslatable(FALSE)
+      ->setRevisionable(TRUE),
+    // Added by EntityFieldManager for revisionable and translatable entities.
+    'revision_translation_affected' => BaseFieldDefinition::create('boolean')
+      ->setLabel(new TranslatableMarkup('Revision translation affected'))
+      ->setDescription(new TranslatableMarkup('Indicates if the last edit of a translation belongs to current revision.'))
+      ->setReadOnly(TRUE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE),
+  ];
+
+  \Drupal::entityDefinitionUpdateManager()->installFieldableEntityType($entity_type, $fieldDefinitions);
 }

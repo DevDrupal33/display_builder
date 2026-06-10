@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
+use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Access\AccessResultInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Plugin\Context\ContextProviderInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
@@ -15,7 +16,7 @@ use Drupal\display_builder\Entity\ProfileInterface;
 /**
  * Interface for entities or plugins natively embedding a display builder.
  */
-interface DisplayBuildableInterface extends ContainerFactoryPluginInterface {
+interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, ContextProviderInterface, PluginInspectionInterface {
 
   // Storage property for of the override field.
   // This will we used in some schema.yml, careful if you change it.
@@ -32,6 +33,11 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface {
   // Storage property for the nestable list of UI Patterns 2 sources.
   // This will we used in some schema.yml, careful if you change it.
   public const SOURCES_PROPERTY = 'sources';
+
+  /**
+   * Returns the translated plugin label.
+   */
+  public function label(): string;
 
   /**
    * Build form for integration with Display Builder.
@@ -80,16 +86,10 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface {
   /**
    * Collect instances related to this buildable.
    *
-   * Null values are returned so the caller can decide to create the missing
-   * Instance entities.
-   *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface|null $entityTypeManager
-   *   (Optional) The entity type manager service or null.
-   *
-   * @return array
-   *   A associative array of Instance entities or null values.
+   * @return array<string, \Drupal\display_builder\InstanceInterface>
+   *   A associative array of Instance entities.
    */
-  public static function collectInstances(?EntityTypeManagerInterface $entityTypeManager = NULL): array;
+  public static function collectInstances(): array;
 
   /**
    * Get profiles allowed for the user.
@@ -109,14 +109,6 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface {
    *   A Drupal URL object.
    */
   public function getBuilderUrl(): Url;
-
-  /**
-   * Get the context requirement.
-   *
-   * @return string
-   *   The context requirement.
-   */
-  public static function getContextRequirement(): string;
 
   /**
    * Get the display url that use this instance.
@@ -213,8 +205,6 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface {
 
   /**
    * Save sources tree retrieved from the Instance entity to config or content.
-   *
-   * Triggered by a DisplayBuilderEvents::ON_PUBLISH event.
    */
   public function saveSources(): void;
 

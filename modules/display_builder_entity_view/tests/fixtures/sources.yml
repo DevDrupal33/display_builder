@@ -18,3 +18,4 @@
                   value:
                     sources:
                       - source_id: field_property:node:title:value
+  third_party_settings: {}

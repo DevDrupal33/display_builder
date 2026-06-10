@@ -28,6 +28,7 @@ final class IslandPluginBaseTest extends DisplayBuilderKernelTestBase {
     'system',
     'user',
     'ui_patterns',
+    'ui_patterns_field',
     'display_builder',
     'display_builder_test',
   ];
@@ -334,7 +335,6 @@ final class IslandPluginBaseTest extends DisplayBuilderKernelTestBase {
     return Instance::create([
       'id' => $id,
       'label' => 'Test Instance',
-      'profileId' => 'test_profile',
     ]);
   }
 

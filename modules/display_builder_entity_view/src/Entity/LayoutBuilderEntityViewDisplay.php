@@ -100,7 +100,6 @@ class LayoutBuilderEntityViewDisplay extends CoreLayoutBuilderEntityViewDisplay 
     $sections = $this->getThirdPartySetting('layout_builder', 'sections');
     $sources = $this->dataConverter->convertFromLayoutBuilder($sections);
 
-    /** @var \Drupal\display_builder\InstanceStorage $storage */
     $storage = $this->entityTypeManager->getStorage('display_builder_instance');
     /** @var \Drupal\display_builder\InstanceInterface $instance */
     $instance = $storage->load($this->displayBuildable()->getInstanceId());

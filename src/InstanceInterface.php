@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\RevisionLogInterface;
+use Drupal\Core\Plugin\Context\ContextProviderInterface;
 use Drupal\display_builder\Entity\HistoryInterface;
 use Drupal\display_builder\Entity\ProfileInterface;
 
 /**
  * Provides an interface defining a display builder instance entity type.
  */
-interface InstanceInterface extends ContentEntityInterface, HistoryInterface, PublishableInterface {
+interface InstanceInterface extends ContentEntityInterface, ContextProviderInterface, HistoryInterface, PublishableInterface, RevisionLogInterface {
 
   /**
    * Returns the display builder profile.
@@ -20,14 +22,6 @@ interface InstanceInterface extends ContentEntityInterface, HistoryInterface, Pu
    *   The display builder profile.
    */
   public function getProfile(): ?ProfileInterface;
-
-  /**
-   * Set the display builder profile from id.
-   *
-   * @param string $profile_id
-   *   Entity ID of the display builder profile.
-   */
-  public function setProfile(string $profile_id): void;
 
   /**
    * Move a source to root.
@@ -152,22 +146,6 @@ interface InstanceInterface extends ContentEntityInterface, HistoryInterface, Pu
   public function remove(string $node_id): void;
 
   /**
-   * Set the save value of a display builder.
-   *
-   * @param array $save_data
-   *   The builder data to save.
-   */
-  public function setSave(array $save_data): void;
-
-  /**
-   * Gets the values for all defined contexts.
-   *
-   * @return \Drupal\Core\Plugin\Context\ContextInterface[]
-   *   An array of set contexts, keyed by context name.
-   */
-  public function getContexts(): array;
-
-  /**
    * Get users.
    *
    * All users which have authored a step in present, past or future, with the
@@ -196,5 +174,13 @@ interface InstanceInterface extends ContentEntityInterface, HistoryInterface, Pu
    *   The uniq id value.
    */
   public static function getUniqId(array $data): int;
+
+  /**
+   * Get saved hash of the current data.
+   *
+   * @return int
+   *   The uniq id value.
+   */
+  public function getHash(): ?int;
 
 }

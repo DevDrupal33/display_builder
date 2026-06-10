@@ -6,15 +6,6 @@ services:
     tags:
       - { name: event_subscriber }
 
-  display_builder_page_layout.display_builder_subscriber:
-    class: Drupal\display_builder_page_layout\EventSubscriber\DisplayBuilderSubscriber
-    arguments:
-      - '@plugin.cache_clearer'
-      - '@entity_type.manager'
-      - '@plugin.manager.display_buildable'
-    tags:
-      - { name: 'event_subscriber' }
-
   display_builder_page_layout.builder_data_converter:
     class: Drupal\display_builder_page_layout\BuilderDataConverter
     arguments:

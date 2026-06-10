@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
-use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Plugin\PluginBase;
+use Drupal\Core\Plugin\ConfigurablePluginBase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -21,17 +20,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Base class for display_buildable plugins.
  */
-abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayBuildableInterface {
+abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase implements DisplayBuildableInterface {
 
   /**
    * The entity type manager.
    */
   protected EntityTypeManagerInterface $entityTypeManager;
-
-  /**
-   * The loaded display builder instance.
-   */
-  protected ?InstanceInterface $instance;
 
   /**
    * Current user.
@@ -76,10 +70,11 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
    * {@inheritdoc}
    */
   public function label(): string {
-    // Cast the label to a string since it is a TranslatableMarkup object.
+    /** @var array $definition */
     $definition = $this->pluginDefinition;
 
-    return (string) ($definition instanceof PluginDefinitionInterface ? $definition->id() : ($definition['label'] ?? ''));
+    // Cast the label to a string since it is a TranslatableMarkup object.
+    return (string) $definition['label'];
   }
 
   /**
@@ -99,10 +94,6 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
    * {@inheritdoc}
    */
   public function getInstance(): ?InstanceInterface {
-    if (isset($this->instance)) {
-      return $this->instance;
-    }
-
     if ($this->getInstanceId() === NULL) {
       return NULL;
     }
@@ -111,25 +102,7 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
     /** @var \Drupal\display_builder\InstanceInterface|null $instance */
     $instance = $storage->load($this->getInstanceId());
 
-    if (!$instance) {
-      return NULL;
-    }
-
-    $this->instance = $instance;
-
-    return $this->instance;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInstanceId(): ?string {
-    // Plugins will override this method.
-    if (!isset($this->instance)) {
-      return NULL;
-    }
-
-    return (string) $this->instance->id();
+    return $instance;
   }
 
   /**
@@ -146,14 +119,6 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
   public function getBuilderUrl(): Url {
     // Plugins will override this method.
     return Url::fromRoute('<front>');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getContextRequirement(): string {
-    // Plugins will override this method.
-    return '';
   }
 
   /**
@@ -235,6 +200,13 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getAvailableContexts() {
+    return $this->getRuntimeContexts([]);
+  }
+
+  /**
    * Create a display builder instance.
    *
    * @return \Drupal\Core\Entity\EntityInterface
@@ -242,36 +214,25 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
    */
   protected function createDisplayBuilderInstance(): EntityInterface {
     $data = $this->getInitialSources();
-
     $tree = new SourceTree($data);
     $data = $tree->getTree();
-
-    $present = [
-      'data' => $data,
-      'hash' => Instance::getUniqId($data),
-      'log' => $this->getInitializationMessage(),
-      'time' => \time(),
-      'user' => (int) $this->currentUser->id(),
-    ];
-
     $data = [
       'id' => $this->getInstanceId(),
       'profileId' => $this->getProfile()->id(),
-      'contexts' => $this->getInitialContext(),
-      'present' => $present,
+      'buildable' => [
+        'plugin_id' => $this->getPluginId(),
+        'configuration' => $this->getConfiguration(),
+      ],
+      'sources' => $data,
+      'hash' => Instance::getUniqId($data),
+      'revision_log_message' => $this->getInitializationMessage(),
+      'revision_created' => \time(),
+      'revision_user' => (int) $this->currentUser->id(),
     ];
 
     $storage = $this->entityTypeManager->getStorage('display_builder_instance');
     /** @var \Drupal\display_builder\InstanceInterface $instance */
     $instance = $storage->create($data);
-
-    // If we get the data directly from config or content, the data is
-    // considered as already saved.
-    // If we convert it from other tools, or import it from other places, the
-    // user needs to save it themselves after retrieval.
-    if ($this->getSources()) {
-      $instance->setSave($this->getSources());
-    }
 
     return $instance;
   }
@@ -284,16 +245,6 @@ abstract class DisplayBuildablePluginBase extends PluginBase implements DisplayB
    */
   protected function getInitializationMessage(): TranslatableMarkup {
     return $this->t('Initialization of the display builder.');
-  }
-
-  /**
-   * Initialize contexts for this implementation.
-   *
-   * @return array<\Drupal\Core\Plugin\Context\ContextInterface>
-   *   The contexts.
-   */
-  protected function getInitialContext(): array {
-    return [];
   }
 
   /**

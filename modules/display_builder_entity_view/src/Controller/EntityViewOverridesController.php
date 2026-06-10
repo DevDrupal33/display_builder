@@ -72,10 +72,11 @@ final class EntityViewOverridesController extends IntegrationControllerBase {
     /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $entity_display */
     $entity_display = $this->getEntityViewDisplay($entity_type_id, $entity->bundle(), $view_mode);
     \assert($entity_display instanceof DisplayBuilderEntityDisplayInterface);
-    /** @var \Drupal\Core\Field\FieldItemListInterface $with_display_builder */
-    $with_display_builder = $entity->get($entity_display->getDisplayBuilderOverrideField());
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $this->displayBuildableManager->createInstance('entity_view_override', ['field' => $with_display_builder]);
+    $buildable = $this->displayBuildableManager->createInstance(
+      'entity_view_override',
+      ['display' => $entity_display, 'entity' => $entity]
+    );
 
     return $this->renderBuilder($buildable);
   }

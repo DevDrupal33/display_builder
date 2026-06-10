@@ -31,6 +31,7 @@ final class LayoutSourceTest extends DisplayBuilderKernelTestBase {
     'system',
     'user',
     'ui_patterns',
+    'ui_patterns_field',
     'layout_discovery',
     'display_builder',
     'display_builder_test',
