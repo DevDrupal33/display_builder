@@ -260,14 +260,14 @@ final class EntityView extends DisplayBuildablePluginBase {
    */
   protected function getInitializationMessage(): TranslatableMarkup {
     if ($this->initialDataSource === 'layout_builder') {
-      return $this->t('Import from Layout Builder configuration.');
+      return $this->t('Import display from Layout Builder configuration');
     }
 
     if ($this->initialDataSource === 'manage_display') {
-      return $this->t('Import from Manage Display configuration.');
+      return $this->t('Import display from Manage Display configuration');
     }
 
-    return $this->t('Initialization from existing Entity View Display configuration.');
+    return $this->t('Initialize display from existing Entity View Display configuration');
   }
 
   /**

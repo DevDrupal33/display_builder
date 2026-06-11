@@ -241,10 +241,10 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
    */
   protected function getInitializationMessage(): TranslatableMarkup {
     if ($this->initialDataSource === 'fixture') {
-      return $this->t('Initialization from default configuration.');
+      return $this->t('Initialize display from default configuration');
     }
 
-    return $this->t('Initialization from existing View configuration.');
+    return $this->t('Initialize display from existing View configuration');
   }
 
   /**

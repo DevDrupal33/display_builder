@@ -177,7 +177,7 @@ trait EntityViewDisplayTrait {
     // Reset the state once you import a configuration.
     if ($this->isSyncing()) {
       $instance = $this->getInstance();
-      $log = new TranslatableMarkup('Synced from configuration import.');
+      $log = new TranslatableMarkup('Synchronize display from imported configuration');
       $current_sources = $this->displayBuildable()->getSources();
       $instance->setNewPresent($current_sources, $log);
       $instance->save();

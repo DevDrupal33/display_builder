@@ -362,14 +362,14 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
    */
   protected function getInitializationMessage(): TranslatableMarkup {
     if ($this->initialDataSource === 'display_builder') {
-      return $this->t('Copy from Entity View Display configuration.');
+      return $this->t('Copy display from Entity View Display configuration');
     }
 
     if ($this->initialDataSource === 'layout_builder_override') {
-      return $this->t('Import from Layout Builder override.');
+      return $this->t('Import display from Layout Builder override');
     }
 
-    return $this->t('Initialization from existing content.');
+    return $this->t('Initialize display from existing content');
   }
 
   /**

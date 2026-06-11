@@ -62,7 +62,7 @@ class DisplayBuilderViewsHook {
 
       // Reset the state once you import a configuration.
       if ($instance) {
-        $log = new TranslatableMarkup('Synced from configuration import.');
+        $log = new TranslatableMarkup('Synchronize display from imported configuration');
         $instance->setNewPresent($sources, $log);
         $instance->save();
       }

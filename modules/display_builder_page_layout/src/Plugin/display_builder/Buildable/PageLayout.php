@@ -189,10 +189,10 @@ final class PageLayout extends DisplayBuildablePluginBase {
    */
   protected function getInitializationMessage(): TranslatableMarkup {
     if ($this->initialDataSource === 'theme') {
-      return $this->t('Import from Block Layout configuration.');
+      return $this->t('Import display from Block Layout configuration');
     }
 
-    return $this->t('Initialization from existing Page Layout configuration.');
+    return $this->t('Initialize display from existing Page Layout configuration');
   }
 
   /**

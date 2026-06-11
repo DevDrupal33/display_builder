@@ -194,7 +194,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       return FALSE;
     }
 
-    $log = new TranslatableMarkup('@label moved to root', ['@label' => $this->nodeLabel($data)]);
+    $log = new TranslatableMarkup('Move @label to root', ['@label' => $this->nodeLabel($data)]);
     $this->setNewPresent($tree->getTree(), $log, TRUE, FALSE);
 
     return TRUE;
@@ -216,7 +216,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     }
 
     $parentData = $tree->getNodeData($parent_id);
-    $log = new TranslatableMarkup('@label moved to slot @slot_id in @parent_label', [
+    $log = new TranslatableMarkup('Move @label to slot @slot_id in @parent_label', [
       '@label' => $this->nodeLabel($data),
       '@slot_id' => $slot_id,
       '@parent_label' => $parentData ? $this->nodeLabel($parentData) : $parent_id,
@@ -241,7 +241,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     }
 
     $nodeData = $tree->getNodeData($node_id);
-    $log = new TranslatableMarkup('@label attached to root', ['@label' => $this->nodeLabel($nodeData ?? [])]);
+    $log = new TranslatableMarkup('Attach @label to root', ['@label' => $this->nodeLabel($nodeData ?? [])]);
     $this->setNewPresent($tree->getTree(), $log, FALSE, FALSE);
 
     return $node_id;
@@ -266,7 +266,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
 
     $nodeData = $tree->getNodeData($node_id);
     $parentData = $tree->getNodeData($parent_id);
-    $log = new TranslatableMarkup('@label attached to slot @slot_id in @parent_label', [
+    $log = new TranslatableMarkup('Attach @label to slot @slot_id in @parent_label', [
       '@label' => $this->nodeLabel($nodeData ?? []),
       '@slot_id' => $slot_id,
       '@parent_label' => $parentData ? $this->nodeLabel($parentData) : $parent_id,
@@ -301,7 +301,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     }
 
     $nodeData = $tree->getNodeData($node_id);
-    $log = new TranslatableMarkup('@label updated config', ['@label' => $this->nodeLabel($nodeData ?? [])]);
+    $log = new TranslatableMarkup('Update @label configuration', ['@label' => $this->nodeLabel($nodeData ?? [])]);
     $this->setNewPresent($tree->getTree(), $log, TRUE, FALSE);
   }
 
@@ -316,7 +316,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       return;
     }
 
-    $log = new TranslatableMarkup('@label settings updated by @island_id', [
+    $log = new TranslatableMarkup('Update @island_id configuration in @label', [
       '@label' => $this->nodeLabel($nodeData),
       '@island_id' => $island_id,
     ]);
@@ -338,7 +338,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     $tree->remove($node_id);
 
     $parentData = $parent_id === NULL ? NULL : $tree->getNodeData($parent_id);
-    $log = new TranslatableMarkup('@label removed from @parent_label', [
+    $log = new TranslatableMarkup('Remove @label from @parent_label', [
       '@label' => $this->nodeLabel($data),
       '@parent_label' => $parentData ? $this->nodeLabel($parentData) : 'root',
     ]);

@@ -244,7 +244,7 @@ abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase impleme
    *   The log message.
    */
   protected function getInitializationMessage(): TranslatableMarkup {
-    return $this->t('Initialization of the display builder.');
+    return $this->t('Initialize display');
   }
 
   /**

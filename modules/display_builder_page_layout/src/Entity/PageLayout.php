@@ -202,7 +202,7 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
 
     // Reset the state once you import a configuration.
     if ($instance && $this->isSyncing()) {
-      $log = new TranslatableMarkup('Synced from configuration import.');
+      $log = new TranslatableMarkup('Synchronize display from imported configuration');
       $current_sources = $this->getSources();
       $instance->setNewPresent($current_sources, $log);
       $instance->save();
