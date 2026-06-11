@@ -71,7 +71,12 @@ class TemplateOverride {
     }
 
     if (isset($variables['theme_hook_original'])) {
-      $suggestions[] = $variables['theme_hook_original'] . '__display_builder';
+      // CommentViewBuilder overrides #theme to a compound suggestion like
+      // 'comment__FIELD_NAME__CONTENT_BUNDLE'.
+      // Extract the base entity type ID (first segment) so the registered
+      // suggestion 'comment__display_builder' is always used.
+      $base_hook = explode('__', $variables['theme_hook_original'])[0];
+      $suggestions[] = $base_hook . '__display_builder';
     }
   }
 
