@@ -123,7 +123,7 @@ class Collaboration extends IslandPluginBase implements IslandConfigurationFormI
    */
   public function configurationSummary(): array {
     $conf = $this->getConfiguration();
-    $with_picture_text = $conf['image_style'] ? $this->t('With @style picture.', ['@style' => $conf['image_style']]) : $this->t('With picture');
+    $with_picture_text = $conf['image_style'] ? $this->t('With @style picture.', ['@style' => $conf['image_style']]) : $this->t('With picture.');
 
     return [
       $conf['image_field'] ? $with_picture_text : $this->t('Without picture.'),

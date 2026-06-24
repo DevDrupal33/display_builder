@@ -214,7 +214,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
       '@status' => \implode(', ', \array_filter(\array_unique(\array_merge(['stable', 'undefined'], $configuration['component_status'] ?? []))) ?: [$this->t('stable, undefined')]),
     ]);
 
-    $summary[] = $configuration['include_no_ui'] ? $this->t('Include no UI components') : $this->t('Exclude no UI components');
+    $summary[] = $configuration['include_no_ui'] ? $this->t('Include `no UI` components') : $this->t('Exclude `no UI` components');
 
     $list = [];
 

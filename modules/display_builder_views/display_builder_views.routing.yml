@@ -21,7 +21,7 @@ display_builder_views.views.manage:
 display_builder_views.views.collection:
   path: '/admin/structure/views/display-builder'
   defaults:
-    _title: ' Display builders in Views'
+    _title: 'Display builders in Views'
     _controller: '\Drupal\display_builder_views\Controller\ViewsManagementController::pageViewsIndex'
   requirements:
     _permission: 'administer views'
