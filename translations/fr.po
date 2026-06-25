@@ -1,0 +1,1928 @@
+# French translation of Display Builder (1.0.0-beta4)
+# Copyright (c) 2026 by the French translation team
+# Generated from files:
+#  display_builder/src/BlockLibrarySourceHelper.php: n/a
+#  display_builder/display_builder.info.yml: n/a
+#  display_builder/modules/display_builder_entity_view/display_builder_entity_view.info.yml: n/a
+#  display_builder/modules/display_builder_page_layout/display_builder_page_layout.info.yml: n/a
+#  display_builder/modules/display_builder_ui/display_builder_ui.info.yml: n/a
+#  display_builder/modules/display_builder_views/display_builder_views.info.yml: n/a
+#  display_builder/modules/display_builder_page_layout/src/Form/PageLayoutForm.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/PageLayoutListBuilder.php: n/a
+#  display_builder/modules/display_builder_ui/src/ProfileListBuilder.php: n/a
+#  display_builder/modules/display_builder_views/src/Controller/ViewsManagementController.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/MenuDelete.php: n/a
+#  display_builder/src/Controller/ApiController.php: n/a
+#  display_builder/config/schema/display_builder.schema.yml: n/a
+#  display_builder/modules/display_builder_ui/src/PatternPresetListBuilder.php: n/a
+#  display_builder/src/Form/PatternPresetForm.php: n/a
+#  display_builder/src/Form/ProfileForm.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php: n/a
+#  display_builder/modules/display_builder_ui/src/Form/InstanceListFilterForm.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/BlockLibraryPanel.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/ComponentLibraryPanel.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/ViewportSwitcher.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/LogsPanel.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/Collaboration.php: n/a
+#  display_builder/modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml: n/a
+#  display_builder/assets/js/db_drawer.js: n/a
+#  display_builder/components/display_builder/display_builder.twig: n/a
+#  display_builder/src/Plugin/display_builder/Island/BackButton.php: n/a
+#  display_builder/src/IslandPluginToolbarButtonConfigurationBase.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/PreviewPanel.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/ControlsButtons.php: n/a
+#  display_builder/config/optional/display_builder.profile.default.yml: n/a
+#  display_builder/modules/display_builder_entity_view/src/Entity/EntityViewDisplay.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/display_builder/Buildable/ViewDisplay.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/HistoryButtons.php: n/a
+#  display_builder/modules/display_builder_entity_view/src/Plugin/Derivative/EntityOverrideViewLocalTask.php: n/a
+#  display_builder/modules/display_builder_ui/src/InstanceListBuilder.php: n/a
+#  display_builder/src/Plugin/UiPatterns/Source/LayoutSource.php: n/a
+#  display_builder/src/Plugin/UiPatterns/Source/ComponentSource.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/Entity/PageLayout.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/Plugin/display_builder/Buildable/PageLayout.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/VisibilityConditionsPanel.php: n/a
+#  display_builder/components/theme_menu/theme_menu.twig: n/a
+#  display_builder/src/Plugin/display_builder/Island/StateButtons.php: n/a
+#  display_builder/src/IslandType.php: n/a
+#  display_builder/assets/js/contextual_menu.js: n/a
+#  display_builder/modules/display_builder_views/src/Hook/DisplayBuilderViewsHook.php: n/a
+#  display_builder/src/DisplayBuildablePluginBase.php: n/a
+#  display_builder/components/shoelace/drawer/drawer.twig: n/a
+#  display_builder/modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ExtraFieldSource.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/Menu.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/TreePanel.php: n/a
+#  display_builder/modules/display_builder_ui/display_builder_ui.links.task.yml: n/a
+#  display_builder/src/Plugin/display_builder/Island/MenuPreset.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/PresetLibraryPanel.php: n/a
+#  display_builder/modules/display_builder_ui/display_builder_ui.links.action.yml: n/a
+#  display_builder/modules/display_builder_ui/display_builder_ui.links.menu.yml: n/a
+#  display_builder/src/Plugin/display_builder/Island/BuilderPanel.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/LayersPanel.php: n/a
+#  display_builder/src/ProfileViewBuilder.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/StylesPanel.php: n/a
+#  display_builder/assets/js/form_description.js: n/a
+#  display_builder/modules/display_builder_entity_view/src/Hook/DisplayBuilderEntityViewHook.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/Hook/PageLayoutHook.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/LibrariesPanel.php: n/a
+#  display_builder/modules/display_builder_views/display_builder_views.routing.yml: n/a
+#  display_builder/modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityView.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/Controller/PageLayoutController.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/ContextualFormPanel.php: n/a
+#  display_builder/modules/display_builder_views/src/Form/ConfirmViewsBuilderDeleteForm.php: n/a
+#  display_builder/modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ContentEntitySource.php: n/a
+#  display_builder/modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php: n/a
+#  display_builder/modules/display_builder_ui/display_builder_ui.routing.yml: n/a
+#  display_builder/modules/display_builder_views/display_builder_views.links.menu.yml: n/a
+#  display_builder/modules/display_builder_entity_view/src/Controller/EntityViewController.php: n/a
+#  display_builder/modules/display_builder_views/display_builder_views.links.task.yml: n/a
+#  display_builder/src/Entity/PatternPreset.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/ViewsUiPatternsSourceBase.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/MainPageContentSource.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageTitleSource.php: n/a
+#  display_builder/src/Form/ProfileIslandPluginForm.php: n/a
+#  display_builder/modules/display_builder_entity_view/config/schema/display_builder_entity_view.schema.yml: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewAttachmentAfterSource.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewAttachmentBeforeSource.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewExposedSource.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewFeedIconsSource.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewHeaderSource.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewMoreSource.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewPagerSource.php: n/a
+#  display_builder/modules/display_builder_page_layout/display_builder_page_layout.links.action.yml: n/a
+#  display_builder/modules/display_builder_page_layout/display_builder_page_layout.links.menu.yml: n/a
+#  display_builder/modules/display_builder_page_layout/display_builder_page_layout.routing.yml: n/a
+#  display_builder/modules/display_builder_views/src/Controller/ViewsController.php: n/a
+#  display_builder/src/ProfilePermissions.php: n/a
+#  display_builder/modules/display_builder_views/config/schema/display_builder_views.schema.yml: n/a
+#  display_builder/modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityViewOverride.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/Plugin/DisplayVariant/DisplayBuilderPageVariant.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewFooterSource.php: n/a
+#  display_builder/src/Entity/Profile.php: n/a
+#  display_builder/modules/display_builder_ui/display_builder_ui.permissions.yml: n/a
+#  display_builder/src/Entity/Instance.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/DesignTokensPanel.php: n/a
+#  display_builder/components/library_panel/library_panel.twig: n/a
+#  display_builder/modules/display_builder_entity_view/src/Controller/EntityViewOverridesController.php: n/a
+#  display_builder/modules/display_builder_page_layout/display_builder_page_layout.permissions.yml: n/a
+#  display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageLayoutSource.php: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Display Builder (1.0.0-beta4)\n"
+"POT-Creation-Date: 2026-06-24 14:25+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: French\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n>1);\n"
+
+#: src/BlockLibrarySourceHelper.php:79
+msgid "Forms"
+msgstr "Formulaires"
+
+#: display_builder.info.yml:0; modules/display_builder_entity_view/display_builder_entity_view.info.yml:0; modules/display_builder_page_layout/display_builder_page_layout.info.yml:0; modules/display_builder_ui/display_builder_ui.info.yml:0; modules/display_builder_views/display_builder_views.info.yml:0
+msgid "User interface"
+msgstr "Interface utilisateur"
+
+#: modules/display_builder_page_layout/src/Form/PageLayoutForm.php:196
+msgid "Pages"
+msgstr "Pages"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:66; modules/display_builder_ui/src/ProfileListBuilder.php:62
+# Suggestion on the localization server:
+# Statut
+msgid "Status"
+msgstr "État"
+
+#: modules/display_builder_views/src/Controller/ViewsManagementController.php:123; src/Plugin/display_builder/Island/MenuDelete.php:19
+msgid "Delete"
+msgstr "Supprimer"
+
+#: src/Controller/ApiController.php:697
+msgid "Submit"
+msgstr "Soumettre"
+
+#: modules/display_builder_views/src/Controller/ViewsManagementController.php:39
+msgid "Operations"
+msgstr "Actions"
+
+#: config/schema/display_builder.schema.yml:0; modules/display_builder_ui/src/PatternPresetListBuilder.php:68; src/Form/PatternPresetForm.php:54
+msgid "Group"
+msgstr "Groupe"
+
+#: src/Form/ProfileForm.php:221
+msgid "Actions"
+msgstr "Actions"
+
+#: src/Plugin/display_builder/Island/MenuDelete.php:33
+msgid "Remove"
+msgstr "Retirer"
+
+#: config/schema/display_builder.schema.yml:0; modules/display_builder_ui/src/PatternPresetListBuilder.php:69; modules/display_builder_ui/src/ProfileListBuilder.php:60; src/Form/PatternPresetForm.php:47; src/Form/ProfileForm.php:61
+msgid "Description"
+msgstr "Description"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:84; modules/display_builder_ui/src/ProfileListBuilder.php:83; modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php:125
+msgid "Disabled"
+msgstr "Désactivé"
+
+#: config/schema/display_builder.schema.yml:0; modules/display_builder_page_layout/src/PageLayoutListBuilder.php:84; modules/display_builder_page_layout/src/Form/PageLayoutForm.php:74; modules/display_builder_ui/src/ProfileListBuilder.php:83; src/Form/PatternPresetForm.php:68; src/Form/ProfileForm.php:140,217,280
+msgid "Enabled"
+msgstr "Activé"
+
+#: modules/display_builder_ui/src/Form/InstanceListFilterForm.php:72
+msgid "Reset"
+msgstr "Réinitialiser"
+
+#: src/Plugin/display_builder/Island/BlockLibraryPanel.php:110; src/Plugin/display_builder/Island/ComponentLibraryPanel.php:212; src/Plugin/display_builder/Island/ViewportSwitcher.php:111
+# Suggestion on the localization server:
+# Aucun
+msgid "None"
+msgstr "Aucun(e)"
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:22
+msgid "Logs"
+msgstr "Journaux"
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:81
+msgid "Message"
+msgstr "Message"
+
+#: src/Plugin/display_builder/Island/Collaboration.php:83,103
+msgid "- None -"
+msgstr "- Aucun(e) -"
+
+#: config/schema/display_builder.schema.yml:0; modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0; src/Form/ProfileForm.php:222,342
+msgid "Weight"
+msgstr "Poids"
+
+#: assets/js/db_drawer.js:0; components/display_builder/display_builder.twig:36
+msgid "Settings"
+msgstr "Paramètres"
+
+#: src/Plugin/display_builder/Island/BackButton.php:38,54,20
+msgid "Back"
+msgstr "Précédent"
+
+#: config/schema/display_builder.schema.yml:0; modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0; modules/display_builder_page_layout/src/Form/PageLayoutForm.php:52; modules/display_builder_ui/src/PatternPresetListBuilder.php:67; modules/display_builder_ui/src/ProfileListBuilder.php:59; src/IslandPluginToolbarButtonConfigurationBase.php:42; src/Form/PatternPresetForm.php:30; src/Form/ProfileForm.php:44
+# Suggestion on the localization server:
+# Étiquette
+msgid "Label"
+msgstr "Libellé"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:22
+msgid "Preview"
+msgstr "Aperçu"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:87,170
+msgid "Help"
+msgstr "Aide"
+
+#: src/Controller/ApiController.php:405
+msgid "New preset"
+msgstr "Nouveau réglage prédéfini"
+
+#: config/optional/display_builder.profile.default.yml:0; modules/display_builder_entity_view/src/Entity/EntityViewDisplay.php:118,119; src/Plugin/display_builder/Island/ComponentLibraryPanel.php:414; src/Plugin/display_builder/Island/ViewportSwitcher.php:85
+# Suggestion on the localization server:
+# Défaut
+msgid "Default"
+msgstr "Par défaut"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:43
+msgid "Icon"
+msgstr "Icône"
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:79
+msgid "Time"
+msgstr "Heure"
+
+#: modules/display_builder_views/src/Plugin/display_builder/Buildable/ViewDisplay.php:27; src/BlockLibrarySourceHelper.php:71,224
+msgid "Views"
+msgstr "Vues"
+
+#: modules/display_builder_views/src/Controller/ViewsManagementController.php:35
+msgid "View"
+msgstr "Voir"
+
+#: config/schema/display_builder.schema.yml:0
+msgid "Format"
+msgstr "Format"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:19
+msgid "History"
+msgstr "Historique"
+
+#: config/schema/display_builder.schema.yml:0; src/Form/ProfileForm.php:220,301
+msgid "Region"
+msgstr "Région"
+
+#: modules/display_builder_entity_view/src/Plugin/Derivative/EntityOverrideViewLocalTask.php:58
+msgid "Display"
+msgstr "Affichage"
+
+#: modules/display_builder_ui/src/InstanceListBuilder.php:79; modules/display_builder_views/src/Controller/ViewsManagementController.php:37
+msgid "Updated"
+msgstr "Mis à jour"
+
+#: modules/display_builder_ui/src/PatternPresetListBuilder.php:71; src/Plugin/display_builder/Island/ControlsButtons.php:82,150
+msgid "Theme"
+msgstr "Thème"
+
+#: src/Plugin/UiPatterns/Source/LayoutSource.php:35
+msgid "Layout"
+msgstr "Mise en page"
+
+#: src/Plugin/UiPatterns/Source/ComponentSource.php:18
+msgid "Component"
+msgstr "Composant"
+
+#: config/schema/display_builder.schema.yml:0; modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0; modules/display_builder_ui/src/InstanceListBuilder.php:64
+# Suggestion on the localization server:
+# ID
+msgid "ID"
+msgstr "Identifiant (ID)"
+
+#: src/BlockLibrarySourceHelper.php:77; src/Plugin/display_builder/Island/LogsPanel.php:80
+msgid "User"
+msgstr "Utilisateur"
+
+#: src/Form/ProfileForm.php:314
+# Suggestion on the localization server:
+# Configure
+msgid "Configure"
+msgstr "Configurer"
+
+#: modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0; modules/display_builder_page_layout/src/PageLayoutListBuilder.php:63; modules/display_builder_page_layout/src/Entity/PageLayout.php:27; modules/display_builder_page_layout/src/Plugin/display_builder/Buildable/PageLayout.php:25
+msgid "Page layout"
+msgstr "Mise en page"
+
+#: src/BlockLibrarySourceHelper.php:70,218
+msgid "Page"
+msgstr "Page"
+
+#: src/BlockLibrarySourceHelper.php:78,235
+msgid "Utilities"
+msgstr "Utilitaires"
+
+#: src/Plugin/display_builder/Island/VisibilityConditionsPanel.php:26
+msgid "Visibility"
+msgstr "Visibilité"
+
+#: modules/display_builder_ui/src/ProfileListBuilder.php:61; src/Form/ProfileForm.php:72
+msgid "Roles"
+msgstr "Rôles"
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:78
+msgid "Published"
+msgstr "Publié"
+
+#: modules/display_builder_ui/src/Form/InstanceListFilterForm.php:66
+# Suggestion on the localization server:
+# Filtre
+msgid "Filter"
+msgstr "Filtrer"
+
+#: src/BlockLibrarySourceHelper.php:72,279
+msgid "Fields"
+msgstr "Champs"
+
+#: modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0; modules/display_builder_page_layout/src/PageLayoutListBuilder.php:65; modules/display_builder_page_layout/src/Form/PageLayoutForm.php:138
+msgid "Conditions"
+msgstr "Conditions"
+
+#: components/theme_menu/theme_menu.twig:16; src/BlockLibrarySourceHelper.php:76
+msgid "System"
+msgstr "Système"
+
+#: src/Plugin/display_builder/Island/StateButtons.php:23
+msgid "State"
+msgstr "État"
+
+#: src/IslandType.php:54
+# Suggestion on the localization server:
+# Démarrer
+msgid "Start"
+msgstr "Début"
+
+#: src/IslandType.php:55
+msgid "End"
+msgstr "Fin"
+
+#: assets/js/contextual_menu.js:0
+msgid "Base"
+msgstr "Base"
+
+#: src/Form/ProfileForm.php:219
+msgid "Configuration"
+msgstr "Configuration"
+
+#: modules/display_builder_views/src/Hook/DisplayBuilderViewsHook.php:41
+msgid "Edit view"
+msgstr "Modifier la vue"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:64; modules/display_builder_ui/src/InstanceListBuilder.php:77; modules/display_builder_views/src/Controller/ViewsManagementController.php:36; src/DisplayBuildablePluginBase.php:328,401
+msgid "Profile"
+msgstr "Profil"
+
+#: components/shoelace/drawer/drawer.twig:21
+msgid "Close"
+msgstr "Fermer"
+
+#: modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0
+msgid "Condition"
+msgstr "Condition"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:45
+msgid "Hidden"
+msgstr "Caché"
+
+#: src/Form/PatternPresetForm.php:60
+msgid "Sources"
+msgstr "Sources"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:108,211
+msgid "Clear"
+msgstr "Vider"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:98
+msgid "Undo"
+msgstr "Annuler"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:19
+msgid "Controls"
+msgstr "Contrôles"
+
+#: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ExtraFieldSource.php:23
+msgid "Entity"
+msgstr "Entité"
+
+#: src/Plugin/display_builder/Island/StateButtons.php:161,252
+msgid "Revert"
+msgstr "Rétablir"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:85
+msgid "Empty"
+msgstr "Vide"
+
+#: src/IslandType.php:50
+msgid "Sidebar"
+msgstr "Barre latérale"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:112; src/Plugin/display_builder/Island/Menu.php:32
+msgid "Duplicate"
+msgstr "Dupliquer"
+
+#: src/Plugin/display_builder/Island/TreePanel.php:21
+msgid "Tree"
+msgstr "Arborescence"
+
+#: src/Plugin/display_builder/Island/Menu.php:39
+msgid "Copy"
+msgstr "Copier"
+
+#: src/BlockLibrarySourceHelper.php:75
+msgid "Menus"
+msgstr "Menus"
+
+#: src/Plugin/display_builder/Island/StateButtons.php:153,214
+msgid "Publish"
+msgstr "Publier"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:103
+msgid "Redo"
+msgstr "Refaire"
+
+#: modules/display_builder_ui/display_builder_ui.links.task.yml:0
+msgid "Profiles"
+msgstr "Profils"
+
+#: modules/display_builder_ui/src/PatternPresetListBuilder.php:70
+msgid "Contexts"
+msgstr "Contextes"
+
+#: src/Plugin/display_builder/Island/StateButtons.php:157,233
+msgid "Restore"
+msgstr "Restaurer"
+
+#: src/Plugin/display_builder/Island/MenuPreset.php:18
+msgid "Preset"
+msgstr "Pré-réglage"
+
+#: modules/display_builder_ui/src/InstanceListBuilder.php:68; modules/display_builder_ui/src/Form/InstanceListFilterForm.php:48
+msgid "Context"
+msgstr "Contexte"
+
+#: modules/display_builder_ui/src/PatternPresetListBuilder.php:84; src/BlockLibrarySourceHelper.php:36,81,204,258; src/Plugin/display_builder/Island/PresetLibraryPanel.php:211
+msgid "Others"
+msgstr "Autres"
+
+#: modules/display_builder_ui/src/PatternPresetListBuilder.php:96
+msgid "Any"
+msgstr "Tout"
+
+#: src/Plugin/display_builder/Island/Menu.php:35
+msgid "Paste"
+msgstr "Coller"
+
+#: src/Form/ProfileForm.php:123
+msgid "Menu items"
+msgstr "Eléments de menu"
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:77
+msgid "Step"
+msgstr "Étape"
+
+#: modules/display_builder_ui/display_builder_ui.links.action.yml:0
+msgid "Add profile"
+msgstr "Ajouter un profil"
+
+#: modules/display_builder_page_layout/src/Form/PageLayoutForm.php:192
+msgid "User roles"
+msgstr "Rôles de l'utilisateur"
+
+#: config/schema/display_builder.schema.yml:0
+msgid "Debug mode"
+msgstr "Mode debug"
+
+#: modules/display_builder_ui/display_builder_ui.links.task.yml:0
+msgid "Presets"
+msgstr "Réglages prédéfinis"
+
+#: modules/display_builder_ui/display_builder_ui.links.action.yml:0; modules/display_builder_ui/display_builder_ui.links.menu.yml:0
+msgid "Add preset"
+msgstr "Ajouter un réglage prédéfini"
+
+#: modules/display_builder_ui/display_builder_ui.links.menu.yml:0; modules/display_builder_ui/display_builder_ui.links.task.yml:0
+msgid "Instances"
+msgstr "Instances"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:281
+msgid "Variants"
+msgstr "Variantes"
+
+#: components/theme_menu/theme_menu.twig:5
+msgid "Light"
+msgstr "Léger"
+
+#: src/Plugin/display_builder/Island/BuilderPanel.php:267; src/Plugin/display_builder/Island/LayersPanel.php:164; src/Plugin/display_builder/Island/TreePanel.php:161
+msgid "Field: @label"
+msgstr "Champ : @label"
+
+#: src/ProfileViewBuilder.php:407
+msgid "Select an action"
+msgstr "Sélectionnez une action"
+
+#: src/Plugin/display_builder/Island/LayersPanel.php:267
+msgid "Config"
+msgstr "Configuration"
+
+#: src/DisplayBuildablePluginBase.php:344
+msgid "- Disabled -"
+msgstr "- Désactivé -"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:78,122
+msgid "Fullscreen"
+msgstr "Plein écran"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:144
+msgid "Experimental"
+msgstr "Expérimental"
+
+#: modules/display_builder_ui/src/Form/InstanceListFilterForm.php:40
+# Suggestions on the localization server:
+# - Tous -
+# - N'importe lequel -
+msgid "- Any -"
+msgstr "- Tout -"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:86
+msgid "Compact"
+msgstr "Compact"
+
+#: src/Plugin/display_builder/Island/LayersPanel.php:23
+msgid "Layers"
+msgstr "Couches"
+
+#: src/Plugin/display_builder/Island/StylesPanel.php:66,133
+msgid "Styles"
+msgstr "Styles"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:140,177
+msgid "Fluid"
+msgstr "Fluide"
+
+#: assets/js/form_description.js:0
+msgid "Show description"
+msgstr "Afficher la description"
+
+#: src/Plugin/display_builder/Island/Collaboration.php:95
+msgid "Image field"
+msgstr "Champ image"
+
+#: modules/display_builder_entity_view/src/Hook/DisplayBuilderEntityViewHook.php:77,89; modules/display_builder_page_layout/src/Hook/PageLayoutHook.php:40
+msgid "Edit display"
+msgstr "Modifier l'affichage"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:73,102
+# Suggestion on the localization server:
+# Mise en exergue (highlight)
+msgid "Highlight"
+msgstr "Surligner"
+
+#: src/Plugin/display_builder/Island/LibrariesPanel.php:19
+msgid "Libraries"
+msgstr "Bibliothèques"
+
+#: src/Form/ProfileForm.php:120
+msgid "Toolbar buttons"
+msgstr "Boutons de la barre d'outils"
+
+#: src/Plugin/display_builder/Island/Collaboration.php:110
+msgid "Image style"
+msgstr "Style d'image"
+
+#: modules/display_builder_views/display_builder_views.routing.yml:0
+msgid "Confirm deletion"
+msgstr "Confirmer la suppréssion"
+
+#: modules/display_builder_ui/display_builder_ui.links.menu.yml:0
+msgid "Preset list"
+msgstr "Liste preset"
+
+#: components/theme_menu/theme_menu.twig:10
+msgid "Dark"
+msgstr "Sombre"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:247
+msgid "None selected"
+msgstr "Aucun sélectionné"
+
+#: modules/display_builder_ui/src/InstanceListBuilder.php:72; modules/display_builder_ui/src/Form/InstanceListFilterForm.php:55
+msgid "Instance"
+msgstr "Instance"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:128
+msgid "component"
+msgstr "composant"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:114
+msgid "Format: @format"
+msgstr "Format : @format"
+
+#: assets/js/form_description.js:0; src/Plugin/UiPatterns/Source/ComponentSource.php:202
+msgid "Hide description"
+msgstr "Masquer la description"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:94
+msgid "breakpoint"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:94
+msgid "breakpoints"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:236
+msgid "grouped"
+msgstr "groupés"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:145
+# Suggestion on the localization server:
+#, fuzzy
+msgid "Deprecated"
+msgstr "Obsolète"
+
+#: src/Plugin/display_builder/Island/BuilderPanel.php:29
+msgid "Builder"
+msgstr ""
+
+#: src/BlockLibrarySourceHelper.php:80
+msgid "Lists (Views)"
+msgstr "Listes (Views)"
+
+#: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ExtraFieldSource.php:19
+msgid "Extra field"
+msgstr ""
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityView.php:29
+# Suggestion on the localization server:
+#, fuzzy
+msgid "Entity view"
+msgstr "Vue d'entité"
+
+#: modules/display_builder_page_layout/src/Controller/PageLayoutController.php:62
+msgid "Duplicate of @label"
+msgstr "Copie de @label"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:128
+msgid "components"
+msgstr "composants"
+
+#: src/Form/ProfileForm.php:218
+msgid "Island"
+msgstr "Île"
+
+#: src/Plugin/display_builder/Island/ContextualFormPanel.php:95
+msgid "No configuration required."
+msgstr "Aucune configuration requise."
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:146
+msgid "Obsolete"
+msgstr "Obsolète"
+
+#: modules/display_builder_views/src/Form/ConfirmViewsBuilderDeleteForm.php:58
+msgid "Do you want to delete %id?"
+msgstr "Voulez-vous supprimer %id ?"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:288
+msgid "Mosaic"
+msgstr "Mosaïque"
+
+#: src/Form/PatternPresetForm.php:105
+msgid "The import failed with the following message: %message"
+msgstr "L'import a échoué avec le message suivant : %message"
+
+#: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ContentEntitySource.php:141
+msgid "Pick a display mode"
+msgstr "Choisissez un mode d'affichage"
+
+#: src/ProfileViewBuilder.php:247
+msgid "Filter by name"
+msgstr "Filtrer par nom"
+
+#: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ContentEntitySource.php:22
+msgid "Content entity"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:274
+msgid "Grouped"
+msgstr "Groupé"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:240
+msgid "variants"
+msgstr "variations"
+
+#: src/Plugin/UiPatterns/Source/ComponentSource.php:244
+msgid "Variant: @variant"
+msgstr "Variante : @variant"
+
+#: src/Plugin/display_builder/Island/Menu.php:18
+msgid "Main menu items"
+msgstr "Éléments du menu principal"
+
+#: src/BlockLibrarySourceHelper.php:73,274
+# Suggestion on the localization server:
+#, fuzzy
+msgid "Referenced entities"
+msgstr "Entités référencées"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:29
+# Suggestion on the localization server:
+#, fuzzy
+msgid "Components library"
+msgstr "Bibliothèque de composants"
+
+#: src/Plugin/UiPatterns/Source/ComponentSource.php:19
+# Suggestion on the localization server:
+#, fuzzy
+msgid "Add a Component"
+msgstr "Ajouter un composant"
+
+#: src/Plugin/display_builder/Island/BlockLibraryPanel.php:29
+msgid "Blocks library"
+msgstr "Bibliothèque de blocs"
+
+#: display_builder.info.yml:0; modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php:72,123,24
+msgid "Display Builder"
+msgstr ""
+
+#: assets/js/contextual_menu.js:0
+msgid "Copied (!label)"
+msgstr "Copié (!label)"
+
+#: assets/js/contextual_menu.js:0
+msgid "Copy !label"
+msgstr "Copier !label"
+
+#: assets/js/contextual_menu.js:0
+msgid "Paste !label"
+msgstr "Coller !label"
+
+#: assets/js/contextual_menu.js:0
+msgid "Duplicate !label"
+msgstr "Dupliquer !label"
+
+#: assets/js/contextual_menu.js:0
+msgid "Remove !label"
+msgstr "Supprimer !label"
+
+#: components/display_builder/display_builder.twig:47
+msgid "Sidebar buttons"
+msgstr "Boutons de la barre latérale"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:104,118; modules/display_builder_ui/display_builder_ui.links.menu.yml:0; modules/display_builder_ui/display_builder_ui.routing.yml:0; modules/display_builder_views/display_builder_views.links.menu.yml:0
+msgid "Display builder"
+msgstr ""
+
+#: config/schema/display_builder.schema.yml:0
+msgid "Display builder Preset"
+msgstr ""
+
+#: modules/display_builder_ui/src/InstanceListBuilder.php:85; modules/display_builder_views/src/Controller/ViewsManagementController.php:38
+msgid "Last log"
+msgstr "Dernier journal"
+
+#: modules/display_builder_entity_view/display_builder_entity_view.info.yml:0
+msgid "Display Builder for entity view"
+msgstr ""
+
+#: modules/display_builder_entity_view/display_builder_entity_view.info.yml:0
+msgid "Provide integration of Display Builder to entity view."
+msgstr ""
+
+#: modules/display_builder_entity_view/src/Controller/EntityViewController.php:36
+msgid "Display builder for @bundle, @view_mode_name"
+msgstr "Display builder pour @bundle, @view_mode_name"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.info.yml:0
+msgid "Display Builder for page layout"
+msgstr ""
+
+#: modules/display_builder_page_layout/display_builder_page_layout.info.yml:0
+msgid "Provide integration of Display Builder to the page layout system."
+msgstr ""
+
+#: modules/display_builder_ui/display_builder_ui.info.yml:0
+msgid "Display Builder UI"
+msgstr ""
+
+#: modules/display_builder_views/display_builder_views.links.task.yml:0
+msgid "Display builders"
+msgstr ""
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0; src/Entity/PatternPreset.php:24,26
+msgid "Pattern presets"
+msgstr ""
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0
+msgid "Add a Pattern preset"
+msgstr "Ajouter un preset"
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0
+msgid "Edit a Pattern preset"
+msgstr "Editer un preset"
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0
+msgid "Delete a Pattern preset"
+msgstr "Effacer un preset"
+
+#: modules/display_builder_views/display_builder_views.info.yml:0
+msgid "Display Builder for Views"
+msgstr ""
+
+#: modules/display_builder_views/display_builder_views.info.yml:0
+msgid "Associate Display Builder with Views."
+msgstr ""
+
+#: modules/display_builder_views/src/Plugin/ViewsUiPatternsSourceBase.php:76
+msgid "This element must be configured in the corresponding view."
+msgstr "Cet élément doit être configuré dans la vue correspondante."
+
+#: modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php:124,25
+msgid "Use display builder as output for this view."
+msgstr "Utilisez display builder comme sortie pour cette vue."
+
+#: modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/MainPageContentSource.php:21
+msgid "The Drupal `Main page content` block (system_main_block)."
+msgstr "Le bloc `Contenu de la page principale` de Drupal (system_main_block)."
+
+#: modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageTitleSource.php:21
+msgid "The Drupal `Page title` block (page_title)."
+msgstr "Le bloc `Titre de la page` de Drupal (page_title)."
+
+#: src/IslandType.php:37
+msgid "Unknown island type."
+msgstr "Type d'island inconnu."
+
+#: src/Controller/ApiController.php:567
+msgid "[attachToRoot] Missing preset source_id data"
+msgstr ""
+
+#: src/Controller/ApiController.php:619
+msgid "[attachToSlot] Missing preset source_id data"
+msgstr ""
+
+#: src/Entity/PatternPreset.php:23,25
+msgid "Pattern preset"
+msgstr ""
+
+#: src/Form/ProfileForm.php:180; src/Form/ProfileIslandPluginForm.php:112
+msgid "Created new display builder config %label."
+msgstr "Création d'une nouvelle configuration de display builder %label."
+
+#: src/Form/ProfileForm.php:181; src/Form/ProfileIslandPluginForm.php:113
+msgid "Updated display builder config %label."
+msgstr "Configuration du display builder mise à jour %label."
+
+#: src/Form/PatternPresetForm.php:83
+msgid "Created new preset %label."
+msgstr "Création d'un nouveau preset %label."
+
+#: src/Form/PatternPresetForm.php:84
+msgid "Updated preset %label."
+msgstr "Preset mis à jour %label."
+
+#: src/Plugin/display_builder/Island/BuilderPanel.php:97; src/Plugin/display_builder/Island/TreePanel.php:69
+msgid "Base container"
+msgstr "Conteneur de base"
+
+#: src/Plugin/display_builder/Island/BuilderPanel.php:204
+msgid "Empty by default. Configure it to make it visible"
+msgstr "Vide par défaut. Configurez-le pour le rendre visible."
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:158
+msgid "Undo last change"
+msgstr "Annuler la dernière modification"
+
+#: src/Plugin/display_builder/Island/MenuPreset.php:32
+msgid "Save as preset"
+msgstr "Enregistrer comme preset"
+
+#: src/Plugin/display_builder/Island/MenuPreset.php:33
+msgid "Name of preset"
+msgstr "Nom du preset"
+
+#: src/Plugin/display_builder/Island/PresetLibraryPanel.php:23
+msgid "Preset library"
+msgstr "Librairie de preset"
+
+#: src/Plugin/display_builder/Island/PresetLibraryPanel.php:24
+msgid "List of preset, already build group of components."
+msgstr "Liste de preset, liste de composanrts déjà construits."
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:23
+msgid "Show a real time preview of the display."
+msgstr "Afficher un aperçu en temps réel de l'affichage."
+
+#: src/Plugin/display_builder/Island/StateButtons.php:236
+msgid "Restore to last saved version"
+msgstr "Restaurer la dernière version enregistrée"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:83
+msgid "Pick a theme mode as light/dark/system for the display builder."
+msgstr "Choisissez un mode de thème (clair/sombre/système) pour display builder."
+
+#: src/DisplayBuildablePluginBase.php:286
+msgid "Initialization of the display builder."
+msgstr "Initialisation du display builder."
+
+#: modules/display_builder_entity_view/config/schema/display_builder_entity_view.schema.yml:0
+msgid "Display Builder settings"
+msgstr "Configuration Display Builder"
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewAttachmentAfterSource.php:16
+msgid "[View] Attachment after"
+msgstr ""
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewAttachmentBeforeSource.php:16
+msgid "[View] Attachment before"
+msgstr ""
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewExposedSource.php:16
+msgid "[View] Exposed form"
+msgstr ""
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewFeedIconsSource.php:16
+msgid "[View] Feed icons"
+msgstr ""
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewHeaderSource.php:16
+msgid "[View] Header"
+msgstr ""
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewMoreSource.php:16
+msgid "[View] More"
+msgstr ""
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewPagerSource.php:16
+msgid "[View] Pager"
+msgstr ""
+
+#: modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/MainPageContentSource.php:20
+msgid "[Page] Main content"
+msgstr ""
+
+#: modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageTitleSource.php:20
+msgid "[Page] Title"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:23
+msgid "Logs based on changes history."
+msgstr "Journaux basés sur l'historique des modifications."
+
+#: config/schema/display_builder.schema.yml:0
+msgid "Island configuration"
+msgstr "Conifguration des Island"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.links.action.yml:0
+msgid "Add page layout"
+msgstr "Ajouter une mise en page"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.links.menu.yml:0; modules/display_builder_page_layout/display_builder_page_layout.routing.yml:0; modules/display_builder_page_layout/src/Entity/PageLayout.php:28
+msgid "Page layouts"
+msgstr "Mise en page"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.links.menu.yml:0
+msgid "Manage page layouts with Display Builder."
+msgstr "Gérez la mise en page avec Display Builder."
+
+#: modules/display_builder_page_layout/display_builder_page_layout.routing.yml:0
+msgid "Add a page layout"
+msgstr "Ajouter une mise en page"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.routing.yml:0
+msgid "Edit a page layout"
+msgstr "Modifier la mise en page"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.routing.yml:0
+msgid "Delete a page layout"
+msgstr "Supprimer une mise en page"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:34
+msgid ""
+"The first enabled, non-empty, applicable to a page according to its "
+"conditions, page layout will be loaded."
+msgstr ""
+"Le premier élément activé, non vide et applicable à une page selon ses conditions, la mise en page sera chargée."
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:51
+msgid ""
+"Without any active Page Layout, pages are managed by <a "
+"href=\"@url\">Block Layout</a>."
+msgstr ""
+"Sans mise en page active, les pages sont gérées par <a "
+"href=\"@url\">Mise en page des blocs</a>."
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:175
+msgid "On the following pages: @pages"
+msgstr "Sur les pages suivantes : @pages"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:178
+msgid "Not on the following pages: @pages"
+msgstr "Non utilisé sur les pages suivantes : @pages"
+
+#: modules/display_builder_entity_view/src/Hook/DisplayBuilderEntityViewHook.php:72,84; modules/display_builder_page_layout/src/PageLayoutListBuilder.php:105; modules/display_builder_page_layout/src/Hook/PageLayoutHook.php:35; modules/display_builder_views/src/Controller/ViewsManagementController.php:116; modules/display_builder_views/src/Hook/DisplayBuilderViewsHook.php:36
+msgid "Build display"
+msgstr ""
+
+#: modules/display_builder_page_layout/src/Controller/PageLayoutController.php:26
+msgid "Build %label page layout"
+msgstr "Créer la mise en page %label"
+
+#: modules/display_builder_page_layout/src/Entity/PageLayout.php:29
+msgid "page layout"
+msgstr "mise en page"
+
+#: modules/display_builder_page_layout/src/Entity/PageLayout.php:30
+msgid "page layouts"
+msgstr "mises en page"
+
+#: modules/display_builder_page_layout/src/Form/PageLayoutForm.php:89
+msgid "Created new page layout %label."
+msgstr "Création d'une nouvelle mise en page %label."
+
+#: modules/display_builder_page_layout/src/Form/PageLayoutForm.php:90
+msgid "Updated page layout %label."
+msgstr "Mise à jour de la mise en page %label."
+
+#: modules/display_builder_page_layout/src/Form/PageLayoutForm.php:201
+msgid "Activate on the listed pages"
+msgstr "Activer sur les pages listées"
+
+#: modules/display_builder_page_layout/src/Form/PageLayoutForm.php:202
+msgid "Skip for the listed pages"
+msgstr "Passez pour les pages listées"
+
+#: modules/display_builder_ui/src/ProfileListBuilder.php:80
+msgid "No roles may use this display builder"
+msgstr "Aucun rôle ne peut utiliser ce display builder"
+
+#: modules/display_builder_ui/src/ProfileListBuilder.php:129
+msgid "With: @panels"
+msgstr "Avec : @panels"
+
+#: modules/display_builder_views/display_builder_views.routing.yml:0
+msgid "Display builders in Views"
+msgstr "Display Builder dans les vues"
+
+#: modules/display_builder_views/src/Controller/ViewsController.php:33
+msgid "Display builder for @view @display"
+msgstr "Display Builder pour la vue @view @display"
+
+#: modules/display_builder_views/src/Controller/ViewsManagementController.php:41
+msgid "No Display builder enabled on any view."
+msgstr "Aucun Display builder  n'est activé sur aucune vue."
+
+#: modules/display_builder_views/src/Plugin/ViewsUiPatternsSourceBase.php:54
+msgid "[View] @name placeholder"
+msgstr "[Vue] @name espace réservé"
+
+#: src/ProfilePermissions.php:62
+msgid ""
+"Warning: This permission may have security implications depending on "
+"how the display builder is configured."
+msgstr ""
+
+#: src/Controller/ApiController.php:69
+msgid "[attachToRoot] moveToRoot failed with invalid data"
+msgstr ""
+
+#: src/Controller/ApiController.php:290
+msgid "[thirdPartySettingsUpdate] Missing payload!"
+msgstr ""
+
+#: src/Form/ProfileForm.php:82
+msgid "Island configuration will be available only after saving this form."
+msgstr "La configuration de l'Island ne sera disponible qu'après l'enregistrement de ce formulaire."
+
+#: src/Plugin/display_builder/Island/Collaboration.php:124
+msgid "With @style picture."
+msgstr "Avec une photo @style."
+
+#: src/Plugin/display_builder/Island/Collaboration.php:124
+msgid "With picture."
+msgstr "Avec photo."
+
+#: src/Plugin/display_builder/Island/Collaboration.php:127
+msgid "Without picture."
+msgstr "Sans photo"
+
+#: src/Plugin/display_builder/Island/Collaboration.php:282
+msgid "at @time"
+msgstr "à @time"
+
+#: src/Plugin/display_builder/Island/BlockLibraryPanel.php:251
+msgid "@name (@count block)"
+msgid_plural "@name (@count blocks)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:142
+msgid "Allowed status"
+msgstr "Statut autorisé"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:148
+msgid "Components with stable or undefined status will always be available."
+msgstr "Les composants dont le statut est stable ou indéfini seront toujours disponibles."
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:154
+msgid "Show components grouped"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:155
+msgid "Provide a list of grouped components for selection."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:161
+msgid "Show components variants"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:162
+msgid "Provide a list of components per variants for selection."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:168
+msgid "Show components mosaic"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:169
+msgid "Provide a list of mosaic components for selection."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:177
+msgid "Include marked as excluded from the UI"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:178
+msgid ""
+"Components with no ui flag are meant for internal use only. Force to "
+"include them. Drupal 11.3+ only."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:197,198,199
+msgid "At least one display must be selected!"
+msgstr "Au moins un affichage doit être sélectionné !"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:227
+msgid "Allowed status: @status"
+msgstr "Statut autorisé : @status"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:228
+msgid "stable, undefined"
+msgstr "stable, indéfini"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:231
+msgid "Include `no UI` components"
+msgstr "Inclure les composants marqués `no UI`"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:231
+msgid "Exclude `no UI `components"
+msgstr "Exclure les composants marqués `no UI`"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:244
+msgid "mosaic"
+msgstr "mosaïque"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:246
+msgid "Components list as: @list"
+msgstr "Liste des composants : @list"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:109
+msgid "A button to clear the logs history (past and future)."
+msgstr "Un bouton pour effacer l'historique des journaux (passé et futur)."
+
+#: config/schema/display_builder.schema.yml:0; src/Form/ProfileForm.php:92
+msgid "Islands"
+msgstr ""
+
+#: config/schema/display_builder.schema.yml:0; modules/display_builder_entity_view/config/schema/display_builder_entity_view.schema.yml:0; modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0; modules/display_builder_views/config/schema/display_builder_views.schema.yml:0
+msgid "UI Patterns sources"
+msgstr ""
+
+#: config/schema/display_builder.schema.yml:0
+msgid "UI Styles settings"
+msgstr ""
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityViewOverride.php:38
+msgid "Entity view override"
+msgstr ""
+
+#: modules/display_builder_entity_view/config/schema/display_builder_entity_view.schema.yml:0; modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0; modules/display_builder_views/config/schema/display_builder_views.schema.yml:0
+msgid "Display Builder profile"
+msgstr "Profil Display Builder"
+
+#: modules/display_builder_entity_view/config/schema/display_builder_entity_view.schema.yml:0
+msgid "Display Builder override profile"
+msgstr "Profil de remplacement Display Builder"
+
+#: modules/display_builder_entity_view/config/schema/display_builder_entity_view.schema.yml:0
+msgid "Display Builder field"
+msgstr ""
+
+#: modules/display_builder_entity_view/src/Plugin/Derivative/EntityOverrideViewLocalTask.php:58
+msgid ":display display"
+msgstr "affichage :display"
+
+#: modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0
+msgid "Source: Main page content"
+msgstr ""
+
+#: modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0
+msgid "Source: Page title"
+msgstr ""
+
+#: modules/display_builder_page_layout/src/Plugin/DisplayVariant/DisplayBuilderPageVariant.php:27
+msgid "Display Builder page"
+msgstr ""
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewFooterSource.php:16
+msgid "[View] Footer"
+msgstr ""
+
+#: src/DisplayBuildablePluginBase.php:355
+msgid "Add and configure display builder profiles"
+msgstr "Ajouter et configurer les profils display builde"
+
+#: src/DisplayBuildablePluginBase.php:380
+msgid "Build the display"
+msgstr "Construire l'affichage"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:518; src/Plugin/display_builder/Island/ViewportSwitcher.php:306
+msgid "@name (@type, @count @singular)"
+msgid_plural "@name (@type, @count @plural)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:82
+msgid "Selector format"
+msgstr "Format du sélecteur"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:83
+msgid ""
+"Choose the appearance of the selector. Normal select or a compact "
+"dropdown menu."
+msgstr ""
+"Choisissez l'apparence du sélecteur : sélecteur normal ou menu déroulant compact."
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:214
+msgid "Switch viewport"
+msgstr "Changer de fenêtre d'affichage"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:25
+msgid "Viewport switcher"
+msgstr "Sélecteur de fenêtre d'affichage"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:26
+msgid "Change main region width according to breakpoints."
+msgstr "Modifier la largeur de la zone principale en fonction des points de rupture."
+
+#: config/optional/display_builder.profile.default.yml:0
+msgid "With sensible configuration, for the common usage."
+msgstr "Avec une configuration simple, pour une utilisation courante."
+
+#: display_builder.info.yml:0
+msgid ""
+"An advanced Display Builder for Drupal, require to have a sub module "
+"enable to build Entity view, Page or Views."
+msgstr ""
+
+#: config/schema/display_builder.schema.yml:0; src/Entity/Profile.php:26
+msgid "Display builder profile"
+msgstr ""
+
+#: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ExtraFieldSource.php:64
+msgid "Extra field: @field"
+msgstr ""
+
+#: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ExtraFieldSource.php:83
+msgid "⚠️ Imported but not supported"
+msgstr "⚠️ Importé mais non pris en charge"
+
+#: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ExtraFieldSource.php:20
+msgid ""
+"❌ Used only for imports from Manage Display and Layout Builder. "
+"Hidden from Library."
+msgstr ""
+"❌ Utilisé uniquement pour les importations depuis Gérer l'affichage et le générateur de mise en page. Masqué dans la bibliothèque."
+
+#: modules/display_builder_ui/display_builder_ui.info.yml:0
+msgid ""
+"Create and manage Display Builder profile, pattern preset and view "
+"instances from the UI."
+msgstr ""
+"Créez et gérez des profils Display Builder, des préréglages de modèles et des instances de vue depuis l'interface utilisateur."
+
+#: modules/display_builder_ui/display_builder_ui.links.menu.yml:0
+msgid "Available Pattern preset created."
+msgstr ""
+
+#: modules/display_builder_ui/display_builder_ui.links.menu.yml:0
+msgid "Add a reusable Pattern preset."
+msgstr ""
+
+#: modules/display_builder_ui/display_builder_ui.links.menu.yml:0
+msgid "Available display builder instances."
+msgstr "Liste des instances Display Builder"
+
+#: modules/display_builder_ui/display_builder_ui.permissions.yml:0
+msgid "View, edit and delete any Display Builder profile."
+msgstr ""
+
+#: modules/display_builder_ui/display_builder_ui.permissions.yml:0
+msgid "View, edit and delete any pattern preset."
+msgstr ""
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0
+msgid "Add a Display Builder profile"
+msgstr ""
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0
+msgid "Edit a Display Builder profile"
+msgstr ""
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0
+msgid "Delete a Display Builder profile"
+msgstr ""
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0
+msgid "Display Builder instances"
+msgstr "Instances Display builder"
+
+#: modules/display_builder_views/display_builder_views.links.menu.yml:0
+msgid "Manage Display Builder instance used in Views."
+msgstr ""
+
+#: src/Entity/Instance.php:34
+msgid "Display Builder instance"
+msgstr ""
+
+#: src/Entity/Instance.php:35
+msgid "Display builder instances"
+msgstr ""
+
+#: src/Entity/Instance.php:36
+msgid "display builder instance"
+msgstr ""
+
+#: src/Entity/Instance.php:37
+msgid "display builder instances"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/Collaboration.php:27
+msgid "Real-time collaboration"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/Collaboration.php:28
+msgid "Allow concurrent editing with multiple users."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:157
+msgid "Undo (shortcut: u)"
+msgstr "Annuler (raccourci : u)"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:185
+msgid "Redo (shortcut: r)"
+msgstr "Rétablir (raccourci : r)"
+
+#: src/Plugin/display_builder/Island/StateButtons.php:255
+msgid "Revert to default display (not overridden)"
+msgstr "Rétablir l'affichage par défaut (non modifié)"
+
+#: config/schema/display_builder.schema.yml:0
+msgid "Label and icon visibility"
+msgstr "Visibilité des étiquettes et des icônes"
+
+#: modules/display_builder_ui/display_builder_ui.links.menu.yml:0
+msgid "Create and manage Display Builder profiles, presets and instances."
+msgstr ""
+
+#: modules/display_builder_ui/src/InstanceListBuilder.php:212
+msgid ""
+"Instances are versions of displays (entity views, page layouts, "
+"views...) currently under work."
+msgstr "Les instances sont des versions d'affichages (vues d'entités, mises en page, vues...) actuellement en cours de développement."
+
+#: modules/display_builder_ui/src/PatternPresetListBuilder.php:125; src/Plugin/display_builder/Island/PresetLibraryPanel.php:80
+msgid "Pattern presets are reusable arrangements of components and blocks."
+msgstr "Les presets sont des agencements réutilisables de composants et de blocs."
+
+#: modules/display_builder_ui/src/ProfileListBuilder.php:94
+msgid ""
+"Profiles define the display building experience (available features, "
+"layout arrangement) for specific user roles."
+msgstr ""
+
+#: src/BlockLibrarySourceHelper.php:82,229
+msgid "Dev tools"
+msgstr ""
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:44
+msgid "Icon + Label"
+msgstr "Icône + Étiquette"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:52
+msgid "@name button"
+msgstr "boutton @name"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:80
+msgid "No buttons. Will not be displayed."
+msgstr "Aucun bouton. Ne sera pas affiché."
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:84
+msgid "Buttons: @buttons."
+msgstr "Bouttons: @buttons."
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:106
+msgid "@button (label only)"
+msgstr "@bouton (étiquette uniquement)"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:107
+msgid "@button (icon only)"
+msgstr "@button (icône uniquement)"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:108
+msgid "@button (icon and label)"
+msgstr "@bouton (icône et étiquette)"
+
+#: src/IslandType.php:32
+msgid "Panels shown as a main area tab or as a sidebar."
+msgstr ""
+
+#: src/IslandType.php:33
+msgid "Panels available as tab in the Library panel."
+msgstr ""
+
+#: src/IslandType.php:34
+msgid "Toolbar buttons allowing direct actions in the builder."
+msgstr ""
+
+#: src/IslandType.php:35
+msgid "Panels visible only when the a source is selected."
+msgstr ""
+
+#: src/IslandType.php:36
+msgid "Items available in the contextual menu."
+msgstr ""
+
+#: src/IslandType.php:51
+msgid "Main area (Tabs)"
+msgstr ""
+
+#: src/Controller/ApiController.php:146
+msgid "[attachToSlot] Missing content (component_id, block_id or node_id)"
+msgstr ""
+
+#: src/Entity/Profile.php:27
+msgid "Display builder profiles"
+msgstr ""
+
+#: src/Entity/Profile.php:28
+msgid "display builder profile"
+msgstr ""
+
+#: src/Entity/Profile.php:29
+msgid "display builders profiles"
+msgstr ""
+
+#: src/Form/ProfileForm.php:119
+msgid "View panels"
+msgstr ""
+
+#: src/Form/ProfileForm.php:121
+msgid "Contextual panels"
+msgstr ""
+
+#: src/Form/ProfileForm.php:122
+msgid "Library panels"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/BackButton.php:41
+msgid "Exit without losing any data."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/BackButton.php:21
+msgid "Exit the display builder and go back to admin UI."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/BlockLibraryPanel.php:94
+msgid "Exclude modules"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/BlockLibraryPanel.php:109
+msgid "Excluded modules: @exclude"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/BlockLibraryPanel.php:30
+msgid "List of available blocks."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/BuilderPanel.php:76
+msgid "Show the builder"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/BuilderPanel.php:272
+msgid "Block: @label"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:127; src/Plugin/display_builder/Island/ViewportSwitcher.php:93
+msgid "Exclude providers"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:134
+msgid "Exclude by id"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:135
+msgid ""
+"Provide a space separated list of components id to exclude, must be "
+"prefixed by provider. Example: "
+"\"ui_suite_bootstrap:card_body<br>ui_suite_bootstrap:table_cell\"."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:211; src/Plugin/display_builder/Island/ViewportSwitcher.php:110
+msgid "Excluded providers: @exclude"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:219
+msgid "Component(s) excluded"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:30
+msgid "List of available components."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:223
+msgid "@count component excluded"
+msgid_plural "@count components excluded"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Plugin/display_builder/Island/ContextualFormPanel.php:26
+msgid "Contextual form"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ContextualFormPanel.php:27
+msgid "Configure the active component or block."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:74
+msgid "Highlight builder zones to ease drag and move around."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:88
+msgid "Information about the available keyboard shortcuts."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:105
+msgid "Highlight components. (shortcut: H)"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:106
+msgid "Toggle highlight (shift+H)"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:125
+msgid "Toggle fullscreen. (shortcut: F)"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:126
+msgid "Toggle fullscreen (shift+F)"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:156
+msgid "Switch the display builder interface theme."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:20
+msgid "Control the building experience."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:99
+msgid "Undo action, icon is always visible, label is number of undo."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:104
+msgid "Redo action, icon is always visible, label is number of redo."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:186
+msgid "Redo last undone change"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:20
+msgid "Undo and redo changes."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/LayersPanel.php:58
+msgid "Show the layer"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/LayersPanel.php:24
+msgid "Manage hierarchical layer view of elements without preview."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/LibrariesPanel.php:33
+msgid "Show the libraries"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:51
+msgid "Show the logs"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:234
+msgid "Saved at %time but not visible in logs"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/Menu.php:19
+msgid "Copy, paste and duplicate."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/MenuDelete.php:20
+msgid "Remove a component or block."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/MenuPreset.php:19
+msgid "Save as a preset."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/PresetLibraryPanel.php:85
+msgid "Add presets from the contextual menu."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:51
+msgid "Show the preview"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/StateButtons.php:217
+msgid "Publish this display in current state. (shortcut: P)"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/StateButtons.php:217
+msgid "Publish this display (shift+P)"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/StateButtons.php:24
+msgid "Publish and reset the display."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/TreePanel.php:50
+msgid "Show the tree"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/TreePanel.php:22
+msgid "Hierarchical view of components and blocks."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/DesignTokensPanel.php:27
+msgid "Override CSS variables for the active component or block."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/StylesPanel.php:27
+msgid "Apply style utilities to the active component or block"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:193
+msgid "Switch viewport of this display"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/VisibilityConditionsPanel.php:27
+msgid "Set visibility conditions for the active component or block."
+msgstr ""
+
+#: components/library_panel/library_panel.twig:10
+msgid "Filter by name or detail"
+msgstr ""
+
+#: modules/display_builder_entity_view/src/Controller/EntityViewOverridesController.php:50
+msgid "Display builder for @title, @view_mode_name"
+msgstr ""
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityViewOverride.php:238
+msgid "Updated using Display Builder."
+msgstr ""
+
+#: modules/display_builder_page_layout/display_builder_page_layout.permissions.yml:0
+msgid "Administer page layouts"
+msgstr ""
+
+#: modules/display_builder_page_layout/display_builder_page_layout.permissions.yml:0
+msgid "View, edit and delete any page layout."
+msgstr ""
+
+#: modules/display_builder_ui/display_builder_ui.permissions.yml:0
+msgid "Administer Display Builder profiles"
+msgstr ""
+
+#: modules/display_builder_ui/display_builder_ui.permissions.yml:0
+msgid "Administer Display Builder presets"
+msgstr ""
+
+#: modules/display_builder_ui/display_builder_ui.permissions.yml:0
+msgid "List Display Builder instances"
+msgstr ""
+
+#: modules/display_builder_ui/display_builder_ui.permissions.yml:0
+msgid "View the admin page about Display Builder instances."
+msgstr ""
+
+#: modules/display_builder_ui/src/Form/InstanceListFilterForm.php:56
+msgid "Contains characters..."
+msgstr ""
+
+#: src/DisplayBuildablePluginBase.php:168
+msgid "You are not allowed to use Display Builder."
+msgstr ""
+
+#: src/DisplayBuildablePluginBase.php:329
+msgid "The profile defines the features available in the builder."
+msgstr ""
+
+#: src/DisplayBuildablePluginBase.php:402
+msgid "You are not allowed to use Display Builder here."
+msgstr ""
+
+#: src/ProfilePermissions.php:54
+msgid "Use the %label Display Builder profile"
+msgstr ""
+
+#: src/Controller/ApiController.php:190
+msgid "[update] Missing payload!"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/BuilderPanel.php:30
+msgid ""
+"The Display Builder main island. Build the display with dynamic "
+"preview."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/DesignTokensPanel.php:26
+msgid "Design tokens (CSS variables)"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:214
+msgid "Clear history (shortcut: Shift+C)"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:215
+msgid "Clear all changes history (Shift+C)"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/LibrariesPanel.php:20
+msgid "Pick elements from libraries and drop them in the display."
+msgstr ""
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:131
+msgid "[Placeholder] Block messages"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:135
+msgid "[Placeholder] Page title"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:139
+msgid "[Placeholder] Page content"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:144
+msgid "[Placeholder] View attachment before"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:149
+msgid "[Placeholder] View exposed form"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:154
+msgid "[Placeholder] View header"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:159
+msgid "[Placeholder] View rows"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:164
+msgid "[Placeholder] View attachment after"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:169
+msgid "[Placeholder] View pager"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:173
+msgid "[Placeholder] View more"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:177
+msgid "[Placeholder] View footer"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:182
+msgid "[Placeholder] View feed icons"
+msgstr ""
+
+#: src/Plugin/display_builder/Island/StylesPanel.php:26
+msgid "Style utilities"
+msgstr ""
+
+#: modules/display_builder_page_layout/display_builder_page_layout.routing.yml:0
+msgid "Duplicate page layout"
+msgstr "Mise en page dupliquée"
+
+#: src/Plugin/display_builder/Island/BlockLibraryPanel.php:218; src/Plugin/display_builder/Island/BuilderPanel.php:342,452
+msgid "Invalid source found: %message"
+msgstr ""
+
+#: modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0
+msgid "Source: Page layout"
+msgstr ""
+
+#: modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageLayoutSource.php:29
+msgid "Page layout (from active theme)"
+msgstr ""
+
+#: modules/display_builder_ui/src/InstanceListBuilder.php:214
+msgid ""
+"They are created automatically from the displays and saved in the "
+"configuration when published."
+msgstr ""
+
+#: src/Form/PatternPresetForm.php:61
+msgid ""
+"It is not recommended to manually edit a Pattern as an invalid format "
+"can lead to an error on all display."
+msgstr ""
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:154,172
+msgid "Content Override"
+msgstr "Surcharge de contenu"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:165
+msgid "Enable content overrides"
+msgstr "Activer les surcharges de contenu"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:166
+msgid "Each content will have the option to define a custom display."
+msgstr ""
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:182
+msgid "Profile for overrides"
+msgstr "Profil pour les surcharges"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:183
+msgid "The profile used for content overrides. Can be changed at any time."
+msgstr "Profil utilisé pour les surcharges de contenu. Peut être modifié à tout moment."
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:191
+msgid "Display Override Field"
+msgstr "Champ de remplacement d'affichage"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:192
+msgid "The field where per-content display overrides are stored."
+msgstr "Le champ où sont stockées les surcharges d'affichage par contenu."
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:399
+msgid "@display display override"
+msgstr "remplacement d'affichage @display"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:122
+msgid "Enable with profile"
+msgstr "Activer avec un profil"
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityView.php:234
+msgid "Import from Layout Builder or Manage Display configuration."
+msgstr "Import from Layout Builder or Manage Display configuration."
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityView.php:237
+msgid "Initialization from existing Entity View Display configuration."
+msgstr "Initialisation à partir de la configuration d'affichage de la vue d'entité existante."
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityViewOverride.php:280
+msgid "Copy from Entity View Display configuration."
+msgstr "Copier à partir de la configuration d'affichage de la vue Entité."
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityViewOverride.php:284
+msgid "Import from Layout Builder override."
+msgstr "Importer à partir de la surcharge Layout Builder."
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityViewOverride.php:287
+msgid "Initialization from existing content."
+msgstr "Initialisation à partir du contenu existant."
+
+#: modules/display_builder_page_layout/src/Plugin/display_builder/Buildable/PageLayout.php:170
+msgid "Import from Block Layout configuration."
+msgstr "Importer à partir de la configuration de la mise en page par blocs."
+
+#: modules/display_builder_page_layout/src/Plugin/display_builder/Buildable/PageLayout.php:173
+msgid "Initialization from existing Page Layout configuration."
+msgstr "Initialisation à partir de la configuration de mise en page existante."
+
+#: modules/display_builder_views/src/Plugin/display_builder/Buildable/ViewDisplay.php:201
+msgid "Initialization from default configuration."
+msgstr "Initialisation à partir de la configuration par défaut."
+
+#: modules/display_builder_views/src/Plugin/display_builder/Buildable/ViewDisplay.php:204
+msgid "Initialization from existing View configuration."
+msgstr "Initialisation à partir de la configuration de vue existante."
+
+#: src/Controller/ApiController.php:127
+msgid "[attachToSlot] moveToSlot failed with invalid data"
+msgstr ""
+
+#: src/Controller/ApiController.php:758
+msgid "Error: @error, check logs for more details."
+msgstr "Erreur : @error, consultez les journaux pour plus de détails."
+
+#: src/Controller/ApiController.php:753
+msgid "@message <pre>@debug</pre>"
+msgstr ""
+

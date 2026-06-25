@@ -1,0 +1,76 @@
+[project]
+site_name = "Display Builder"
+site_description = "A display building tool by the UI Suite team."
+repo_name = "project/display_builder"
+repo_url = "https://git.drupalcode.org/project/display_builder"
+edit_uri = "/-/edit/main/docs/"
+nav = [
+  { "Introduction" = "index.md" },
+  { "Installation" = "install.md" },
+  { "Update" = "update.md" },
+  { "Using Display Builder" = [
+    { "For entity displays" = "entity-displays.md" },
+    { "For entity displays overrides" = "entity-displays-overrides.md" },
+    { "For page layout" = "page-layout.md" },
+    { "With Views" = "with-views.md" },
+  ]},
+  { "Features" = [
+    { "Available islands" = "islands.md" },
+    { "Pattern presets" = "pattern-presets.md" },
+    { "Real-time collaboration" = "realtime-collaboration.md" },
+    { "Migration from layout builder" = "migration-from-layout-builder.md" },
+    { "Instances overview" = "instances.md" },
+  ]},
+  { "Configuring Display Builder" = "configuration.md" },
+  { "Extending Display Builder" = [
+    { "With island plugins" = "island-plugins.md" },
+    { "With source plugins" = "source-plugins.md" },
+  ]},
+  { "Contributing" = [
+    { "Contributing" = "contributing.md" },
+    { "Tests e2e" = "tests.md" },
+    { "Internals" = "internals.md" },
+    { "Architecture" = "architecture.md" },
+    { "Security model" = "security-model.md" },
+  ]},
+  { "Frequently asked questions" = "faq.md" },
+]
+
+[project.theme]
+language = "en"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+primary = "blue"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+primary = "blue"
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+primary = "blue"
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/drupal"
+link = "https://www.drupal.org/project/display_builder"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/gitlab"
+link = "https://git.drupalcode.org/project/display_builder"
+
+[[project.extra.social]]
+icon = "fontawesome/solid/bolt"
+link = "https://beyris.eu"
+
+[[project.extra.social]]
+icon = "fontawesome/solid/blog"
+link = "https://developpeur-drupal.com/en"
