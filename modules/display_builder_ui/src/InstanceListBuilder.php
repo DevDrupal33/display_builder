@@ -176,6 +176,7 @@ final class InstanceListBuilder extends EntityListBuilder {
    */
   public static function getSessionSort(SessionInterface $session): array {
     $state = $session->get('db_instances_overview', []);
+
     return $state['sort'] ?? [];
   }
 

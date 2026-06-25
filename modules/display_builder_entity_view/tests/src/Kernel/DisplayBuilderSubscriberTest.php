@@ -11,6 +11,7 @@ use Drupal\display_builder_entity_view\EventSubscriber\DisplayBuilderSubscriber;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests DisplayBuilderSubscriber event reactions.
@@ -20,6 +21,7 @@ use PHPUnit\Framework\Attributes\Group;
 #[CoversClass(DisplayBuilderSubscriber::class)]
 #[Group('display_builder')]
 #[Group('display_builder_entity_view')]
+#[RunTestsInSeparateProcesses]
 final class DisplayBuilderSubscriberTest extends EntityKernelTestBase {
 
   /**

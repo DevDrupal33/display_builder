@@ -23,7 +23,7 @@
     "require": {
         "php": ">=8.3",
         "drupal/core": "^11.3",
-        "drupal/ui_patterns": "^2.0.15"
+        "drupal/ui_patterns": "^2.0.16"
     },
     "require-dev": {
         "drupal/sdc_devel": "^1.0.2",
@@ -40,7 +40,8 @@
     "extra": {
         "patches": {
             "drupal/ui_patterns": {
-                "https://www.drupal.org/i/3570294 throw error on missing component instead of fatal": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/478.patch"
+                "https://drupal.org/i/3570294 throw error on missing component instead of fatal": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/478.patch",
+                "https://drupal.org/i/3604317 SourceValueItem: fix mainPropertyName and isEmpty so phantom field prototype items are filtered correctly": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/514.patch"
             }
         }
     },

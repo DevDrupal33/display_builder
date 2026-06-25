@@ -7,6 +7,8 @@ include:
       - "/includes/include.drupalci.workflows.yml"
 
 variables:
+  _PHPUNIT_CONCURRENT: '1'
+  _PHPUNIT_TESTGROUPS: 'display_builder'
   SKIP_PHPMD:
     value: '0'
     description: 'Set to 1 to skip the PHPMD CI job'
@@ -124,7 +126,7 @@ stylelint:
 cspell:
   allow_failure: true
   variables:
-    _CSPELL_IGNORE_PATHS: '**/fixtures/*.yml, *.neon, **/*.story.yml, **/build.env, **/*.patch, **/tests/src/Playwright, **/tests/**/*.yml'
+    _CSPELL_IGNORE_PATHS: '*.po, **/fixtures/*.yml, *.neon, **/*.story.yml, **/build.env, **/*.patch, **/tests/src/Playwright, **/tests/**/*.yml'
 
 ## PHPMD job in Drupal CI ##
 
@@ -294,3 +296,35 @@ playwright_extra:
   variables:
     PLAYWRIGHT_TEST_PROJECT: chromium
     PLAYWRIGHT_TEST_TAG: extra
+
+## Pages / documentation job ##
+
+pages:
+  stage: validate
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ROOT_NAMESPACE == "project"
+      exists:
+        - zensical.toml
+      changes: &doc-changed-files-path
+        - docs/**/*
+        - zensical.toml
+    - if: $_PAGES_FORCE_REBUILD == "1" && $CI_PIPELINE_SOURCE =~ /(schedule|web)/ && $CI_PROJECT_ROOT_NAMESPACE == "project"
+      exists:
+        - zensical.toml
+    - if: $CI_PROJECT_ROOT_NAMESPACE == "issue"
+      changes: *doc-changed-files-path
+      when: manual
+      allow_failure: true
+  needs: []
+  image: python:latest
+  script:
+    - echo -e "\e[0Ksection_start:`date +%s`:build_docs[collapsed=true]\r\e[0KInstall Zensical and build the documentation site"
+    - python3 -m venv .venv
+    - source .venv/bin/activate
+    - pip install zensical
+    - echo -e "\e[0Ksection_end:`date +%s`:build_docs\r\e[0K"
+    - zensical build --clean
+    - printf "Documentation site available at $CI_PAGES_URL\n"
+  artifacts:
+    paths:
+      - public

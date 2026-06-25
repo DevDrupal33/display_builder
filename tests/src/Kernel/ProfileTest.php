@@ -15,7 +15,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  *
  * @internal
  */
-#[CoversClass('\Drupal\display_builder\Entity\Profile')]
+#[CoversClass(Profile::class)]
 #[Group('display_builder')]
 #[RunTestsInSeparateProcesses]
 final class ProfileTest extends DisplayBuilderKernelTestBase {

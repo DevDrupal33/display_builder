@@ -160,11 +160,13 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * @see \Drupal\Core\Entity\EntityInterface
    */
   public function postCreate(EntityStorageInterface $storage): void {
-    if ($this->get('sources')->isEmpty()) {
+    $sources = $this->get('sources')->getValue() ?? [];
+
+    if (empty($sources)) {
       return;
     }
 
-    $this->sourceTree = new SourceTree($this->get('sources')->getValue() ?? []);
+    $this->sourceTree = new SourceTree($sources);
     $indexed = $this->sourceTree->getTree();
 
     $hash = self::getUniqId($indexed);
@@ -287,7 +289,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function getParentId(string $node_id): ?string {
-    return $this->getPathIndex()[$node_id]['parent'] ?? NULL;
+    return $this->getSourceTree()->getParentId($node_id);
   }
 
   /**
@@ -376,13 +378,15 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   public function publish(): void {
     $this->getBuildablePlugin()->saveSources();
     $this->set('published', \Drupal::time()->getRequestTime());
+    $this->setNewRevision(FALSE);
+    $this->save();
   }
 
   /**
    * {@inheritdoc}
    */
   public function restore(): void {
-    $this->setNewPresent($this->getBuildablePlugin()->getSources(), 'Restore published data.');
+    $this->setNewPresent($this->getBuildablePlugin()->getSources(), new TranslatableMarkup('Restore published data.'));
   }
 
   /**

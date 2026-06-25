@@ -10,6 +10,7 @@ use Drupal\Tests\display_builder\Kernel\AccessControlTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the instance access control handlers.
@@ -18,6 +19,8 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[CoversClass(InstanceAccessControlHandler::class)]
 #[Group('display_builder')]
+#[Group('display_builder_views')]
+#[RunTestsInSeparateProcesses]
 final class InstanceViewsAccessControlTest extends AccessControlTestBase {
 
   /**

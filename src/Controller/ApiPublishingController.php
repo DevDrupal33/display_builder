@@ -26,7 +26,6 @@ class ApiPublishingController extends ApiControllerBase {
    */
   public function publish(Request $request, InstanceInterface $display_builder_instance): array {
     $display_builder_instance->publish();
-    $display_builder_instance->save();
 
     $this->builder = $display_builder_instance;
 
@@ -46,7 +45,6 @@ class ApiPublishingController extends ApiControllerBase {
    */
   public function restore(Request $request, InstanceInterface $display_builder_instance): array {
     $display_builder_instance->restore();
-    $display_builder_instance->save();
 
     $this->builder = $display_builder_instance;
 

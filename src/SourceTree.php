@@ -237,6 +237,11 @@ final class SourceTree {
       return FALSE;
     }
 
+    // Forbidden move: moving a node into itself.
+    if ($node_id === $parent_id) {
+      return FALSE;
+    }
+
     // Forbidden move: moving a parent into its own descendant.
     if ($this->isDescendant($parent_id, $node_id)) {
       return FALSE;
@@ -428,7 +433,7 @@ final class SourceTree {
         }
       }
 
-      $item['node_id'] = $node_id;
+      unset($item['node_id']);
       $this->structure[$node_id] = [
         'parent' => $parent_id,
         'slot' => $slot_id,
@@ -451,8 +456,7 @@ final class SourceTree {
    */
   private function denormalize(array $ids): array {
     return \array_map(function ($id) {
-      $node = $this->nodes[$id];
-      $node['node_id'] = $id;
+      $node = ['node_id' => $id] + $this->nodes[$id];
 
       return $this->injectChildren($node, $this->structure[$id]['slots']);
     }, $ids);
@@ -507,6 +511,10 @@ final class SourceTree {
 
       $struct = $this->structure[$id];
       $source_id = $this->nodes[$id]['source_id'];
+
+      if ($source_id === NULL) {
+        continue;
+      }
       $class = $this->getPluginClass($source_id);
 
       foreach ($struct['slots'] as $slot_id => $child_ids) {

@@ -81,7 +81,6 @@ final class ApiPublishingControllerTest extends DisplayBuilderKernelTestBase {
     // Simulate publishing to the permanent storage (normally done via the
     // publish route).
     $this->instance->publish();
-    $this->instance->save();
 
     // Mutate after save — this unpublished change should be discarded by
     // restore.

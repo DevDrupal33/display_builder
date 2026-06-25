@@ -14,6 +14,7 @@ use Drupal\views\Entity\View;
 use Drupal\views\Views;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Kernel test for the Views Display Extender.
@@ -22,6 +23,8 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[CoversClass(DisplayExtender::class)]
 #[Group('display_builder')]
+#[Group('display_builder_views')]
+#[RunTestsInSeparateProcesses]
 final class DisplayExtenderTest extends KernelTestBase {
 
   /**

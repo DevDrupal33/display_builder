@@ -394,6 +394,28 @@ final class SourceTreeTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
+   * Test getNodeData returns a consistent shape regardless of creation path.
+   *
+   * Nodes loaded from existing data (normalize) and nodes added at runtime
+   * (attachToRoot/attachToSlot) must both omit node_id from the flat data.
+   */
+  public function testGetNodeDataShapeIsConsistentAcrossCreationPaths(): void {
+    // Runtime creation path.
+    $runtime_tree = new SourceTree([], $this->sourceManager);
+    $id = $runtime_tree->attachToRoot(0, 'textfield', ['value' => 'hello']);
+    $data = $runtime_tree->getNodeData($id);
+    self::assertArrayNotHasKey('node_id', $data);
+
+    // Normalize path (simulates loading from storage).
+    $initial = [
+      ['node_id' => 'existing_node', 'source_id' => 'textfield', 'source' => ['value' => 'hello']],
+    ];
+    $loaded_tree = new SourceTree($initial, $this->sourceManager);
+    $data = $loaded_tree->getNodeData('existing_node');
+    self::assertArrayNotHasKey('node_id', $data);
+  }
+
+  /**
    * Test remove cascades to descendants.
    */
   public function testRemoveCascadesDescendants(): void {
@@ -427,6 +449,22 @@ final class SourceTreeTest extends DisplayBuilderKernelTestBase {
     $tree = $data_tree->getTree();
     self::assertCount(1, $tree);
     self::assertSame($node_a, $tree[0]['node_id']);
+  }
+
+  /**
+   * Test moveToSlot is blocked when target is the node itself.
+   */
+  public function testMoveToSlotForbiddenIntoSelf(): void {
+    $data_tree = new SourceTree([], $this->sourceManager);
+    $node_a = $data_tree->attachToRoot(0, 'component', ['component' => ['component_id' => 'display_builder_test:test_1']]);
+
+    self::assertFalse($data_tree->moveToSlot($node_a, $node_a, 'slot_1', 0));
+
+    // Tree must be unchanged.
+    $tree = $data_tree->getTree();
+    self::assertCount(1, $tree);
+    self::assertSame($node_a, $tree[0]['node_id']);
+    self::assertNull($data_tree->getParentId($node_a));
   }
 
   /**

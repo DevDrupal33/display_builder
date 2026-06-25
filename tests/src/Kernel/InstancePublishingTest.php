@@ -86,24 +86,24 @@ final class InstancePublishingTest extends DisplayBuilderKernelTestBase {
    */
   public function testRestore(): void {
     $instance = $this->createDisplayBuilderInstance();
-    $testData = [['source_id' => 'component', 'source' => [], 'third_party_settings' => [], 'node_id' => '1']];
-    $modifiedData = [['source_id' => 'component', 'source' => [], 'third_party_settings' => [], 'node_id' => '2']];
+    $testData = ['node_id' => '1', 'source_id' => 'component', 'source' => [], 'third_party_settings' => []];
+    $modifiedData = ['node_id' => '2', 'source_id' => 'component', 'source' => [], 'third_party_settings' => []];
 
     // Publish initial data.
-    $instance->setNewPresent($testData, 'Modified state');
-    self::assertSame($testData, $instance->getCurrentState());
+    $instance->setNewPresent([$testData], 'Modified state');
+    self::assertSame($testData, $instance->getCurrentState()[0]);
 
     $instance->publish();
     self::assertTrue($instance->isPublishedPresent());
 
     // Modify current state without publishing.
-    $instance->setNewPresent($modifiedData, 'Modified state');
-    self::assertSame($modifiedData, $instance->getCurrentState());
+    $instance->setNewPresent([$modifiedData], 'Modified state');
+    self::assertSame($modifiedData, $instance->getCurrentState()[0]);
     self::assertFalse($instance->isPublishedPresent());
 
     // Published state.
     $instance->restore();
-    self::assertSame($testData, $instance->getCurrentState());
+    self::assertSame($testData, $instance->getCurrentState()[0]);
     self::assertSame('Restore published data.', (string) $instance->getRevisionLogMessage());
     self::assertTrue($instance->isPublishedPresent());
   }

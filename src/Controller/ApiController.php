@@ -362,7 +362,6 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   public function delete(Request $request, InstanceInterface $display_builder_instance, string $node_id): array {
     $parent_id = $display_builder_instance->getParentId($node_id);
     $display_builder_instance->remove($node_id);
-    $display_builder_instance->save();
     $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(

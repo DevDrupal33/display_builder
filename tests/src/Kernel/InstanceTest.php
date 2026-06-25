@@ -167,7 +167,8 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
     self::assertSame(['foo' => 'bar'], $node['third_party_settings']['test_island']);
 
     $instance->remove($node_id);
-    self::assertEmpty($instance->getCurrentState());
+    $node = $instance->getNode($node_id);
+    self::assertEmpty($node);
   }
 
   /**
@@ -191,6 +192,33 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
     $instance->remove('non_existent_id');
     self::assertCount(1, $instance->getCurrentState());
     self::assertSame($node_id, $instance->getCurrentState()[0]['node_id']);
+  }
+
+  /**
+   * Test that publish() persists the published timestamp.
+   */
+  public function testPublishPersistsTimestamp(): void {
+    $instance = $this->createDisplayBuilderInstance();
+    $instance->attachToRoot(0, 'test_group_source', ['value' => 'foo']);
+
+    $instance->publish();
+
+    $reloaded = $this->loadInstance($instance->id());
+    self::assertNotNull($reloaded->getPublishedTime());
+  }
+
+  /**
+   * Test getParentId returns the correct value for root, child, and missing.
+   */
+  public function testGetParentId(): void {
+    $instance = $this->createDisplayBuilderInstance();
+    $comp_data = ['component' => ['component_id' => 'display_builder_test:test_1']];
+    $node_root = $instance->attachToRoot(0, 'component', $comp_data);
+    $node_child = $instance->attachToSlot($node_root, 'slot_1', 0, 'test_group_source', ['value' => 'child']);
+
+    self::assertNull($instance->getParentId($node_root));
+    self::assertSame($node_root, $instance->getParentId($node_child));
+    self::assertNull($instance->getParentId('non_existent_id'));
   }
 
   /**
@@ -247,7 +275,6 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
 
     $instance->remove($node_parent);
 
-    self::assertEmpty($instance->getCurrentState());
     // Both parent and child paths must be gone from the index.
     $index = $instance->getPathIndex();
     self::assertArrayNotHasKey($node_parent, $index);

@@ -11,6 +11,7 @@ use Drupal\display_builder_page_layout\Entity\PageLayout;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Kernel test for the PageLayout config entity and its form.
@@ -19,6 +20,8 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[CoversClass(PageLayout::class)]
 #[Group('display_builder')]
+#[Group('display_builder_page_layout')]
+#[RunTestsInSeparateProcesses]
 final class PageLayoutEntityTest extends KernelTestBase {
 
   /**

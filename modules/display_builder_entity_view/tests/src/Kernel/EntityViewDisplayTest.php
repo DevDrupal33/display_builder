@@ -16,6 +16,7 @@ use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the Display Builder EntityViewDisplay and EntityViewDisplayTrait.
@@ -26,6 +27,7 @@ use PHPUnit\Framework\Attributes\Group;
 #[CoversClass(EntityViewDisplayTrait::class)]
 #[Group('display_builder')]
 #[Group('display_builder_entity_view')]
+#[RunTestsInSeparateProcesses]
 final class EntityViewDisplayTest extends EntityKernelTestBase {
 
   /**

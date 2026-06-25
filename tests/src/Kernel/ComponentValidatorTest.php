@@ -15,8 +15,8 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  * @internal
  */
 #[CoversNothing]
-#[RunTestsInSeparateProcesses]
 #[Group('display_builder')]
+#[RunTestsInSeparateProcesses]
 final class ComponentValidatorTest extends SdcDevelComponentKernelTestBase {
 
   /**
