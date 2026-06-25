@@ -1,0 +1,4 @@
+services:
+  Drupal\display_builder_entity_view_test\Hook\DisplayBuilderEntityViewTestHooks:
+    class: Drupal\display_builder_entity_view_test\Hook\DisplayBuilderEntityViewTestHooks
+    autowire: true

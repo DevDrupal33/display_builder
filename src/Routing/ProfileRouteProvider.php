@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Routing;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Routing\AdminHtmlRouteProvider;
 use Symfony\Component\Routing\Route;
@@ -59,7 +60,7 @@ class ProfileRouteProvider extends AdminHtmlRouteProvider {
 
       // Entity types with serial IDs can specify this in their route
       // requirements, improving the matching process.
-      if ($this->getEntityTypeIdKeyType($entity_type) === 'integer') {
+      if (DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', static fn () => $entity_type->hasIntegerId(), fn () => $this->getEntityTypeIdKeyType($entity_type) === 'integer')) {
         $route->setRequirement($entity_type_id, '\d+');
       }
 

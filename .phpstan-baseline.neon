@@ -7,6 +7,18 @@ parameters:
 			path: modules/display_builder_page_layout/src/Form/PageLayoutForm.php
 
 		-
+			rawMessage: 'Call to an undefined method Drupal\Core\Extension\Extension::listVisibleRegions().'
+			identifier: method.notFound
+			count: 1
+			path: modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageLayoutSource.php
+
+		-
+			rawMessage: 'Unable to resolve the template type Current in call to static method Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall()'
+			identifier: argument.templateType
+			count: 1
+			path: modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageLayoutSource.php
+
+		-
 			rawMessage: Cannot access offset 'class' on array|Drupal\Component\Plugin\Definition\PluginDefinitionInterface.
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -65,3 +77,15 @@ parameters:
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Island/IslandPluginBase.php
+
+		-
+			rawMessage: 'Call to an undefined method Drupal\Core\Entity\EntityTypeInterface::hasIntegerId().'
+			identifier: method.notFound
+			count: 1
+			path: src/Routing/ProfileRouteProvider.php
+
+		-
+			rawMessage: 'Unable to resolve the template type Current in call to static method Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall()'
+			identifier: argument.templateType
+			count: 1
+			path: src/Routing/ProfileRouteProvider.php

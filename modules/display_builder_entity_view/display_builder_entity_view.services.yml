@@ -22,3 +22,7 @@ services:
     class: Drupal\display_builder_entity_view\BuilderDataConverter
     arguments:
       - '@entity_field.manager'
+
+  Drupal\display_builder_entity_view\Hook\DisplayBuilderEntityViewHooks:
+    class: Drupal\display_builder_entity_view\Hook\DisplayBuilderEntityViewHooks
+    autowire: true

@@ -1,7 +1,7 @@
 name: 'Display Builder'
 type: module
 description: 'An advanced Display Builder for Drupal, require to have a sub module enable to build Entity view, Page or Views.'
-core_version_requirement: ^11.3.3
+core_version_requirement: ^11.3.3 || ^12
 package: 'User interface'
 dependencies:
   - ui_patterns:ui_patterns_field

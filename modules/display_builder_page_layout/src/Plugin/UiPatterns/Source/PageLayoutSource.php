@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_page_layout\Plugin\UiPatterns\Source;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -201,7 +202,7 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
    *   An array of region names and their human readable labels.
    */
   private function systemRegionList(string $theme): array {
-    return system_region_list($theme, REGIONS_VISIBLE);
+    return DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', static fn () => \Drupal::service('theme_handler')->getTheme($theme)->listVisibleRegions(), static fn () => system_region_list($theme, REGIONS_VISIBLE));
   }
 
 }
