@@ -15,9 +15,7 @@ islands:
       deprecated: '0'
       obsolete: '0'
     include_no_ui: false
-    show_grouped: true
-    show_variants: true
-    show_mosaic: true
+    show: grouped
   block_library:
     status: true
     weight: -9

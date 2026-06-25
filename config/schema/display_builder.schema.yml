@@ -85,12 +85,17 @@ display_builder.islands.component_library:
         type: string
     include_no_ui:
       type: boolean
+    show:
+      type: string
     show_grouped:
       type: boolean
+      deprecated: "The 'show_grouped' config schema is deprecated in display_builder:1.0.0-beta5 and is removed from display_builder:1.0.0-rc1. Use the 'show' config schema instead."
     show_variants:
       type: boolean
+      deprecated: "The 'show_variants' config schema is deprecated in display_builder:1.0.0-beta5 and is removed from display_builder:1.0.0-rc1. Use the 'show' config schema instead."
     show_mosaic:
       type: boolean
+      deprecated: "The 'show_mosaic' config schema is deprecated in display_builder:1.0.0-beta5 and is removed from display_builder:1.0.0-rc1. Use the 'show' config schema instead."
 
 display_builder.islands.block_library:
   type: display_builder.islands

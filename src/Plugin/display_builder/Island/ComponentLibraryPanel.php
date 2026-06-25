@@ -95,9 +95,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
         'experimental',
       ],
       'include_no_ui' => FALSE,
-      'show_grouped' => TRUE,
-      'show_variants' => TRUE,
-      'show_mosaic' => TRUE,
+      'show' => 'grouped',
     ];
   }
 
@@ -135,25 +133,23 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
       '#default_value' => $configuration['component_status'],
     ];
 
-    $form['show_grouped'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Show components grouped'),
-      '#description' => $this->t('Provide a list of grouped components for selection.'),
-      '#default_value' => $configuration['show_grouped'],
-    ];
+    // Compatibility layer with previous config.
+    // @todo Remove before 1.0.0-rc1.
+    if (!isset($configuration['show'])) {
+      $configuration['show'] = $configuration['show_mosaic'] ? 'mosaic' : 'grouped';
+      $configuration['show'] = $configuration['show_variants'] ? 'variants' : $configuration['show'];
+      $configuration['show'] = $configuration['show_grouped'] ? 'grouped' : $configuration['show'];
+    }
 
-    $form['show_variants'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Show components variants'),
-      '#description' => $this->t('Provide a list of components per variants for selection.'),
-      '#default_value' => $configuration['show_variants'],
-    ];
-
-    $form['show_mosaic'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Show components mosaic'),
-      '#description' => $this->t('Provide a list of mosaic components for selection.'),
-      '#default_value' => $configuration['show_mosaic'],
+    $form['show'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Components list'),
+      '#default_value' => $configuration['show'],
+      '#options' => [
+        'grouped' => $this->t('By group'),
+        'variants' => $this->t('With variants'),
+        'mosaic' => $this->t('Thumbnails mosaic'),
+      ],
     ];
 
     // Drupal 11.3+ new exclude feature.
@@ -166,24 +162,6 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     ];
 
     return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function validateConfigurationForm(array &$form, FormStateInterface $form_state): void {
-    $values = $form_state->getValues();
-
-    // At least one display must be enabled.
-    $show_grouped = (bool) $values['show_grouped'];
-    $show_variants = (bool) $values['show_variants'];
-    $show_mosaic = (bool) $values['show_mosaic'];
-
-    if (!$show_grouped && !$show_variants && !$show_mosaic) {
-      $form_state->setError($form['show_grouped'], $this->t('At least one display must be selected!'));
-      $form_state->setError($form['show_variants'], $this->t('At least one display must be selected!'));
-      $form_state->setError($form['show_mosaic'], $this->t('At least one display must be selected!'));
-    }
   }
 
   /**
@@ -216,21 +194,12 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
 
     $summary[] = $configuration['include_no_ui'] ? $this->t('Include `no UI` components') : $this->t('Exclude `no UI` components');
 
-    $list = [];
-
-    if ((bool) $configuration['show_grouped']) {
-      $list[] = $this->t('grouped');
-    }
-
-    if ((bool) $configuration['show_variants']) {
-      $list[] = $this->t('variants');
-    }
-
-    if ((bool) $configuration['show_mosaic']) {
-      $list[] = $this->t('mosaic');
-    }
     $summary[] = $this->t('Components list as: @list', [
-      '@list' => !empty($list) ? \implode(', ', $list) : $this->t('None selected'),
+      '@list' => match ($configuration['show']) {
+        'variants' => $this->t('variants'),
+        'mosaic' => $this->t('mosaic'),
+        default => $this->t('grouped'),
+      },
     ]);
 
     return $summary;
@@ -253,49 +222,11 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     $this->definitionsGrouped = $definitions['grouped'] ?? [];
     $this->sourcesData = $definitions['sources'] ?? [];
 
-    $panes = [];
-
-    if ((bool) $configuration['show_grouped']) {
-      $panes['grouped'] = [
-        'title' => $this->t('Grouped'),
-        'content' => $this->getComponentsGrouped($builder_id),
-      ];
-    }
-
-    if ((bool) $configuration['show_variants']) {
-      $panes['variants'] = [
-        'title' => $this->t('Variants'),
-        'content' => $this->getComponentsVariants($builder_id),
-      ];
-    }
-
-    if ((bool) $configuration['show_mosaic']) {
-      $panes['mosaic'] = [
-        'title' => $this->t('Mosaic'),
-        'content' => $this->getComponentsMosaic($builder_id),
-      ];
-    }
-
-    $tabs = [];
-    $content = [];
-
-    foreach ($panes as $pane_id => $pane) {
-      $id = 'db-' . $builder_id . '-components-tab---' . $pane_id;
-      $tabs[] = [
-        'title' => $pane['title'],
-        'url' => '#' . $id,
-      ];
-      $content[] = $this->wrapContent($pane['content'], $id);
-    }
-
-    return [
-      '#type' => 'component',
-      '#component' => 'display_builder:library_panel',
-      '#slots' => [
-        'tabs' => (\count($panes) > 1) ? $this->buildTabs('db-' . $builder_id . '-components-tabs', $tabs) : [],
-        'content' => $content,
-      ],
-    ];
+    return match ($configuration['show']) {
+      'mosaic' => $this->getComponentsMosaic($builder_id),
+      'variants' => $this->getComponentsVariants($builder_id),
+      default => $this->getComponentsGrouped($builder_id),
+    };
   }
 
   /**
