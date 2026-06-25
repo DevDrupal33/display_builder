@@ -175,7 +175,8 @@ trait EntityViewDisplayTrait {
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE): void {
     // Reset the state once you import a configuration.
-    if ($this->isSyncing() && $instance = $this->getInstance()) {
+    if ($this->isSyncing()) {
+      $instance = $this->getInstance();
       $log = new TranslatableMarkup('Synchronize display from imported configuration');
       $current_sources = $this->displayBuildable()->getSources();
       $instance->setNewPresent($current_sources, $log);
