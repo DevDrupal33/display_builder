@@ -218,8 +218,21 @@ class ExtraFieldSource extends SourcePluginBase {
     // Build component additions from the concrete view builder implementation.
     // For nodes this includes NodeViewBuilder::buildComponents(), which adds
     // extras like 'links' and 'langcode' before view hooks run.
+    // Populate protected build defaults (e.g. CommentViewBuilder sets
+    // #comment_threaded) so buildComponents() receives a complete build array.
+    $get_defaults = \Closure::bind(
+      function ($e, $vm) {
+        // @phpstan-ignore-next-line
+        return $this->getBuildDefaults($e, $vm);
+      },
+      $view_builder,
+      \get_class($view_builder)
+    );
+    $defaults = $get_defaults($entity, $view_mode);
+    // Strip cache metadata and the entity key — handled separately below.
+    unset($defaults['#cache'], $defaults['#' . $entity_type_id]);
     $build_list = [
-      $entity_key => [
+      $entity_key => $defaults + [
         '#' . $entity_type_id => $entity,
         '#view_mode' => $view_mode,
       ],
