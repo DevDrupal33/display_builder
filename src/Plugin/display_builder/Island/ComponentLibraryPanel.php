@@ -222,11 +222,19 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     $this->definitionsGrouped = $definitions['grouped'] ?? [];
     $this->sourcesData = $definitions['sources'] ?? [];
 
-    return match ($configuration['show']) {
+    $content = match ($configuration['show']) {
       'mosaic' => $this->getComponentsMosaic($builder_id),
       'variants' => $this->getComponentsVariants($builder_id),
       default => $this->getComponentsGrouped($builder_id),
     };
+
+    return [
+      '#type' => 'component',
+      '#component' => 'display_builder:library_panel',
+      '#slots' => [
+        'content' => $content,
+      ],
+    ];
   }
 
   /**
