@@ -1,3 +1,76 @@
+## [1.0.0-beta5] - 2026-06-26
+
+### 🚀 Features
+
+- Instance performance with tree cache
+- [#3579216](https://www.drupal.org/project/display_builder/issues/3579216) Page layouts must be built in a full page builder
+- [#3562989](https://www.drupal.org/project/display_builder/issues/3562989) Implements RevisionLogInterface for Instance entity
+- [#3571038](https://www.drupal.org/project/display_builder/issues/3571038) Render extra field values
+- [#3534619](https://www.drupal.org/project/display_builder/issues/3534619) Support for legacy preprocesses
+
+### 🐛 Bug Fixes
+
+- Mismatched entity after update
+- [#3581893](https://www.drupal.org/project/display_builder/issues/3581893) beta fixes and cleanup
+- [#3581893](https://www.drupal.org/project/display_builder/issues/3581893) minor fixes on architecture and tests
+- [#3581893](https://www.drupal.org/project/display_builder/issues/3581893) form base regression, require lazy service init, add test
+- [#3572328](https://www.drupal.org/project/display_builder/issues/3572328) Always prefer imported view display over saved state
+- [#3593682](https://www.drupal.org/project/display_builder/issues/3593682) DisplayBuilderHelpers : use Markup object when injecting html as string
+- [#3573122](https://www.drupal.org/project/display_builder/issues/3573122) Error when saving a presets after a migration from Layout Builder
+- [#3549567](https://www.drupal.org/project/display_builder/issues/3549567) TokenSource::getContextDefinitions() always return entity
+- Uniqid is not so uniq, replace with random_bytes
+- [#3595403](https://www.drupal.org/project/display_builder/issues/3595403) Entity template override
+- *(typo)* Text fixes
+- [#3603094](https://www.drupal.org/project/display_builder/issues/3603094) Skip config import if no instance entity
+- Resolve [#3597233](https://www.drupal.org/project/display_builder/issues/3597233) "Drupal 12 compatibility fixes"
+- Revert "Resolve [#3597233](https://www.drupal.org/project/display_builder/issues/3597233) "Drupal 12 compatibility fixes""
+- [#3579298](https://www.drupal.org/project/display_builder/issues/3579298) component library search was removed
+
+### 💼 Other
+
+- [#3577791](https://www.drupal.org/project/display_builder/issues/3577791) Adopt Field API for Instance entity data
+- [#3582234](https://www.drupal.org/project/display_builder/issues/3582234) Split publishing logic from state logic
+- [#3582234](https://www.drupal.org/project/display_builder/issues/3582234) Split publishing logic from state logic - simplify
+- [#3593112](https://www.drupal.org/project/display_builder/issues/3593112) Remove entity_operation_alter hooks
+- [#3593247](https://www.drupal.org/project/display_builder/issues/3593247) Move some entity view logic to buildable plugins
+- [#3592749](https://www.drupal.org/project/display_builder/issues/3592749) Consistency of revision logs messages
+- Resolve [#3606114](https://www.drupal.org/project/display_builder/issues/3606114) "Docs, translations and changelog"
+- Revert "revert: 21d1d216, entity sync with config"
+
+### 🚜 Refactor
+
+- [#3579298](https://www.drupal.org/project/display_builder/issues/3579298) Simpler ComponentLibrary configuration
+
+### 📚 Documentation
+
+- [#3580549](https://www.drupal.org/project/display_builder/issues/3580549) Update documentation
+- [#3582234](https://www.drupal.org/project/display_builder/issues/3582234) fix leftover doc
+- Minor playwright test fix
+
+### 🎨 Styling
+
+- Fix phpstan new offsetAssign.dimType error
+
+### 🧪 Testing
+
+- Update
+- Update and split Playwright tests
+- Fix playwright snapshot
+- Typo and doc
+- Update and split tests
+
+### ⚙️ Miscellaneous Tasks
+
+- *(instance)* Update for content type change of instance
+- Add github actions to run Playwright
+- [#3578224](https://www.drupal.org/project/display_builder/issues/3578224) add getPast() and getFuture() to HistoryInterface
+- [#3578999](https://www.drupal.org/project/display_builder/issues/3578999) Pass existing Instance object to islands methods instead of loading it again
+- Temporary patch on ui_patterns for comment form
+- Remove legacy ui_patterns patch
+
+### ◀️ Revert
+
+- 21d1d216, entity sync with config
 ## [1.0.0-beta4] - 2026-03-10
 
 ### 🚀 Features
