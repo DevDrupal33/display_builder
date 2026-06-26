@@ -1,7 +1,9 @@
 [project]
 site_name = "Display Builder"
+site_url = "https://project.pages.drupalcode.org/display_builder/"
+site_dir = "public"
 site_description = "A display building tool by the UI Suite team."
-repo_name = "project/display_builder"
+repo_name = "drupal/display_builder"
 repo_url = "https://git.drupalcode.org/project/display_builder"
 edit_uri = "/-/edit/main/docs/"
 nav = [

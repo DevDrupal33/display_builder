@@ -300,21 +300,17 @@ playwright_extra:
 ## Pages / documentation job ##
 
 pages:
-  stage: validate
+  stage: build
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ROOT_NAMESPACE == "project"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       exists:
         - zensical.toml
       changes: &doc-changed-files-path
         - docs/**/*
         - zensical.toml
-    - if: $_PAGES_FORCE_REBUILD == "1" && $CI_PIPELINE_SOURCE =~ /(schedule|web)/ && $CI_PROJECT_ROOT_NAMESPACE == "project"
+    - if: $_PAGES_FORCE_REBUILD == "1" && $CI_PIPELINE_SOURCE =~ /(schedule|web)/
       exists:
-        - zensical.toml
-    - if: $CI_PROJECT_ROOT_NAMESPACE == "issue"
-      changes: *doc-changed-files-path
-      when: manual
-      allow_failure: true
+    - *manual-rule
   needs: []
   image: python:latest
   script:
