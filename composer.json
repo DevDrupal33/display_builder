@@ -42,6 +42,9 @@
             "drupal/ui_patterns": {
                 "https://drupal.org/i/3570294 throw error on missing component instead of fatal": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/478.patch",
                 "https://drupal.org/i/3604317 SourceValueItem: fix mainPropertyName and isEmpty so phantom field prototype items are filtered correctly": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/514.patch"
+            },
+            "drupal/ui_styles": {
+                "https://drupal.org/i/3600682 Handle item_attributes removal": "https://git.drupalcode.org/project/ui_styles/-/merge_requests/96.patch"
             }
         }
     },
