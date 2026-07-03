@@ -16,7 +16,7 @@ display_builder_views.views.manage:
         # The value for {view} will be converted to a view entity loaded from
         # the views temp store.
         tempstore: true
-        converter: 'drupal.proxy_original_service.paramconverter.views_ui'
+        converter: 'paramconverter.views_ui'
 
 display_builder_views.views.collection:
   path: '/admin/structure/views/display-builder'

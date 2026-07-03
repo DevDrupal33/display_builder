@@ -4,3 +4,9 @@ services:
     arguments:
       - '@entity_type.manager'
       - '@plugin.manager.display_buildable'
+
+  display_builder_views.routes:
+    class: Drupal\display_builder_views\Routing\DisplayBuilderRoutes
+    autowire: true
+    tags:
+      - { name: event_subscriber }
