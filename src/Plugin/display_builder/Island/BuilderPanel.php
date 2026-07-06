@@ -85,7 +85,7 @@ class BuilderPanel extends IslandPluginBase {
         'variant' => 'root',
       ],
       '#slots' => [
-        'content' => $this->digFromSlot($builder_id, $data),
+        'content' => $this->digFromSlot($builder, $data),
       ],
       '#attributes' => [
         // Required for JavaScript @see components/dropzone/dropzone.js.
@@ -126,10 +126,10 @@ class BuilderPanel extends IslandPluginBase {
   /**
    * Build renderable from state data.
    *
-   * @param string $builder_id
-   *   Display Builder ID.
-   * @param string $instance_id
-   *   The instance ID.
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance ID.
+   * @param string $node_id
+   *   The tree node ID.
    * @param \Drupal\display_builder\SourceWithSlotsInterface $source
    *   The source plugin.
    * @param array $data
@@ -140,24 +140,25 @@ class BuilderPanel extends IslandPluginBase {
    * @return array|null
    *   A renderable array.
    */
-  protected function buildSingleComponent(string $builder_id, string $instance_id, SourceWithSlotsInterface $source, array $data, int $index = 0): ?array {
-    $info = $this->resolveComponentInfo($source, $data, $instance_id);
+  protected function buildSingleComponent(InstanceInterface $instance, string $node_id, SourceWithSlotsInterface $source, array $data, int $index = 0): ?array {
+    $info = $this->resolveComponentInfo($source, $data, $node_id);
 
     if ($info === NULL) {
       return NULL;
     }
 
-    ['component_id' => $component_id, 'label' => $label, 'instance_id' => $instance_id] = $info;
+    ['component_id' => $component_id, 'label' => $label, 'instance_id' => $node_id] = $info;
 
     $build = $this->renderSource($data);
     // Required for the context menu label.
     // @see assets/js/contextual_menu.js
     $build['#attributes']['data-node-title'] = $label;
     $build['#attributes']['data-slot-position'] = $index;
-    $build['#attributes']['data-instance-id'] = $instance_id;
+    // @see https://playwright.dev/docs/locators#locate-by-test-id
+    $build['#attributes']['data-testid'] = $node_id;
 
     foreach ($source->getSlotDefinitions() as $slot_id => $definition) {
-      $slot = $this->buildComponentSlot($builder_id, $source, $slot_id, $definition, $instance_id);
+      $slot = $this->buildComponentSlot($instance, $source, $slot_id, $definition, $node_id);
       $build = $source->setSlotRenderable($build, $slot_id, $slot);
     }
 
@@ -171,7 +172,7 @@ class BuilderPanel extends IslandPluginBase {
       $build = $this->wrapContent($build);
     }
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $source->label(), $index);
+    return $this->htmxEvents->onInstanceClick($build, (string) $instance->id(), $node_id, $source->label(), $index);
   }
 
   /**
@@ -222,10 +223,10 @@ class BuilderPanel extends IslandPluginBase {
   /**
    * Build renderable from state data.
    *
-   * @param string $builder_id
-   *   Display Builder ID.
-   * @param string $instance_id
-   *   The instance ID.
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance ID.
+   * @param string $node_id
+   *   The tree node ID.
    * @param array $data
    *   The UI Patterns form state data.
    * @param int $index
@@ -234,10 +235,10 @@ class BuilderPanel extends IslandPluginBase {
    * @return array|null
    *   A renderable array.
    */
-  protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): ?array {
-    $instance_id = $instance_id ?: $data['node_id'] ?? NULL;
+  protected function buildSingleBlock(InstanceInterface $instance, string $node_id, array $data, int $index = 0): ?array {
+    $node_id = $node_id ?: $data['node_id'] ?? NULL;
 
-    if (!$instance_id) {
+    if (!$node_id) {
       return NULL;
     }
 
@@ -306,14 +307,15 @@ class BuilderPanel extends IslandPluginBase {
     // be a plain string, typically the label or field summary.
     $build['#attributes']['data-node-title'] = $label_info['summary'] ?? $data['source_id'] ?? $data['node_id'] ?? '';
     $build['#attributes']['data-slot-position'] = $index;
-    $build['#attributes']['data-instance-id'] = $instance_id;
+    // @see https://playwright.dev/docs/locators#locate-by-test-id
+    $build['#attributes']['data-testid'] = $node_id;
 
     // Add data-node-type for easier identification of block types in JS or CSS.
     if (isset($data['source_id'])) {
       $build['#attributes']['data-node-type'] = $data['source_id'];
     }
 
-    $build = $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label_info['summary'] ?? $label_info['label'] ?? '', $index);
+    $build = $this->htmxEvents->onInstanceClick($build, (string) $instance->id(), $node_id, $label_info['summary'] ?? $label_info['label'] ?? '', $index);
 
     return $build;
   }
@@ -349,10 +351,10 @@ class BuilderPanel extends IslandPluginBase {
     }
 
     if ($source instanceof SourceWithSlotsInterface) {
-      $build = $this->buildSingleComponent($builder_id, $node_id, $source, $data);
+      $build = $this->buildSingleComponent($instance, $node_id, $source, $data);
     }
     else {
-      $build = $this->buildSingleBlock($builder_id, $node_id, $data);
+      $build = $this->buildSingleBlock($instance, $node_id, $data);
     }
 
     return $this->makeOutOfBand(
@@ -429,15 +431,15 @@ class BuilderPanel extends IslandPluginBase {
   /**
    * Build builder renderable, recursively.
    *
-   * @param string $builder_id
-   *   Builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance ID.
    * @param array $data
    *   The current 'slice' of data.
    *
    * @return array
    *   A renderable array.
    */
-  protected function digFromSlot(string $builder_id, array $data): array {
+  protected function digFromSlot(InstanceInterface $instance, array $data): array {
     $renderable = [];
     $slot_definition = ['ui_patterns' => ['type_definition' => $this->sourceManager->getSlotPropType()]];
 
@@ -459,7 +461,7 @@ class BuilderPanel extends IslandPluginBase {
       }
 
       if ($source_plugin instanceof SourceWithSlotsInterface) {
-        $component = $this->buildSingleComponent($builder_id, '', $source_plugin, $source, $index);
+        $component = $this->buildSingleComponent($instance, '', $source_plugin, $source, $index);
 
         if ($component) {
           $renderable[$index] = $component;
@@ -468,7 +470,7 @@ class BuilderPanel extends IslandPluginBase {
         continue;
       }
 
-      $block = $this->buildSingleBlock($builder_id, '', $source, $index);
+      $block = $this->buildSingleBlock($instance, '', $source, $index);
 
       if ($block) {
         $renderable[$index] = $block;
@@ -524,21 +526,22 @@ class BuilderPanel extends IslandPluginBase {
   /**
    * Build a component slot with dropzone.
    *
-   * @param string $builder_id
-   *   The builder ID.
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance ID.
    * @param \Drupal\display_builder\SourceWithSlotsInterface $source
    *   The source plugin.
    * @param string $slot_id
    *   The slot ID.
    * @param array $definition
    *   The slot definition.
-   * @param string $instance_id
-   *   The instance ID.
+   * @param string $node_id
+   *   The node id of the source.
    *
    * @return array
    *   A renderable array for the slot.
    */
-  private function buildComponentSlot(string $builder_id, SourceWithSlotsInterface $source, string $slot_id, array $definition, string $instance_id): array {
+  private function buildComponentSlot(InstanceInterface $instance, SourceWithSlotsInterface $source, string $slot_id, array $definition, string $node_id): array {
+    $builder_id = (string) $instance->id();
     $dropzone = [
       '#type' => 'component',
       '#component' => 'display_builder:dropzone',
@@ -553,16 +556,17 @@ class BuilderPanel extends IslandPluginBase {
         // @see assets/js/contextual_menu.js
         'data-slot-id' => $slot_id,
         'data-slot-title' => \ucfirst($definition['title']),
-        'data-node-id' => $instance_id,
-        'data-instance-id' => $instance_id . '_' . $slot_id,
+        'data-node-id' => $node_id,
+        // @see https://playwright.dev/docs/locators#locate-by-test-id
+        'data-testid' => $node_id . '_' . $slot_id,
       ],
     ];
 
     if ($sources = $source->getSlotValue($slot_id)) {
-      $dropzone['#slots']['content'] = $this->digFromSlot($builder_id, $sources);
+      $dropzone['#slots']['content'] = $this->digFromSlot($instance, $sources);
     }
 
-    return $this->htmxEvents->onSlotDrop($dropzone, $builder_id, $this->getPluginID(), $instance_id, $slot_id);
+    return $this->htmxEvents->onSlotDrop($dropzone, $builder_id, $this->getPluginID(), $node_id, $slot_id);
   }
 
 }

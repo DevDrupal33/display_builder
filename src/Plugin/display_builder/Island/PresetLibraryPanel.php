@@ -186,7 +186,8 @@ class PresetLibraryPanel extends IslandPluginBase {
       $build = $this->buildPlaceholderButton($preset->get('label'), $vals, $keywords);
     }
 
-    $build['#attributes']['data-instance-id'][] = $preset->id();
+    // @see https://playwright.dev/docs/locators#locate-by-test-id
+    $build['#attributes']['data-testid'][] = $preset->id();
 
     return $build;
   }

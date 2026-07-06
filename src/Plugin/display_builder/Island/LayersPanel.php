@@ -71,14 +71,14 @@ class LayersPanel extends BuilderPanel {
   /**
    * {@inheritdoc}
    */
-  protected function buildSingleComponent(string $builder_id, string $instance_id, SourceWithSlotsInterface $source, array $data, int $index = 0): ?array {
-    $info = $this->resolveComponentInfo($source, $data, $instance_id);
+  protected function buildSingleComponent(InstanceInterface $instance, string $node_id, SourceWithSlotsInterface $source, array $data, int $index = 0): ?array {
+    $info = $this->resolveComponentInfo($source, $data, $node_id);
 
     if ($info === NULL) {
       return NULL;
     }
 
-    ['label' => $label, 'instance_id' => $instance_id] = $info;
+    ['label' => $label, 'instance_id' => $node_id] = $info;
 
     $slots = [];
 
@@ -92,20 +92,22 @@ class LayersPanel extends BuilderPanel {
         ],
         '#attributes' => [
           // Required for JavaScript @see components/dropzone/dropzone.js.
-          'data-db-id' => $builder_id,
+          'data-db-id' => $instance->id(),
           // Slot is needed for contextual menu paste.
           // @see assets/js/contextual_menu.js
           'data-slot-id' => $slot_id,
           'data-slot-title' => $definition['title'],
+          'data-node-id' => $node_id,
           'data-node-title' => $label,
-          'data-instance-id' => $instance_id . '_' . $slot_id,
+          // @see https://playwright.dev/docs/locators#locate-by-test-id
+          'data-testid' => $node_id . '_' . $slot_id,
         ],
       ];
 
       if ($sources = $source->getSlotValue($slot_id)) {
-        $dropzone['#slots']['content'] = $this->digFromSlot($builder_id, $sources);
+        $dropzone['#slots']['content'] = $this->digFromSlot($instance, $sources);
       }
-      $dropzone = $this->htmxEvents->onSlotDrop($dropzone, $builder_id, $this->getPluginID(), $instance_id, $slot_id);
+      $dropzone = $this->htmxEvents->onSlotDrop($dropzone, (string) $instance->id(), $this->getPluginID(), $node_id, $slot_id);
       $slots[] = [
         [
           '#plain_text' => $definition['title'],
@@ -125,19 +127,21 @@ class LayersPanel extends BuilderPanel {
       // @see assets/js/contextual_menu.js
       '#attributes' => [
         'data-node-title' => $label,
-        'data-instance-id' => $instance_id,
+        'data-node-id' => $node_id,
+        // @see https://playwright.dev/docs/locators#locate-by-test-id
+        'data-testid' => $node_id,
       ],
     ];
     $build = $this->addThirdPartySettingsSummary($data, $build);
     $build = $this->addComponentSettingsSummary($source, $build);
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $source->label(), $index);
+    return $this->htmxEvents->onInstanceClick($build, (string) $instance->id(), $node_id, $source->label(), $index);
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): array {
+  protected function buildSingleBlock(InstanceInterface $instance, string $node_id, array $data, int $index = 0): array {
     $label = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
 
     if (isset($data['source_id']) && $data['source_id'] === 'entity_field') {
@@ -152,9 +156,9 @@ class LayersPanel extends BuilderPanel {
       ],
     ];
 
-    $instance_id = $instance_id ?: $data['node_id'] ?? NULL;
+    $node_id = $node_id ?: $data['node_id'] ?? NULL;
 
-    if (!$instance_id) {
+    if (!$node_id) {
       $this->logger->error('[LayersPanel::buildSingleBlock] missing instance ID. <pre>' . \print_r($data, TRUE) . '</pre>');
 
       return $build;
@@ -166,7 +170,8 @@ class LayersPanel extends BuilderPanel {
     // @see assets/js/contextual_menu.js
     $build['#attributes']['data-node-title'] = $label['summary'];
     $build['#attributes']['data-slot-position'] = $index;
-    $build['#attributes']['data-instance-id'] = $instance_id;
+    // @see https://playwright.dev/docs/locators#locate-by-test-id
+    $build['#attributes']['data-testid'] = $node_id;
 
     // Add data-node-type for easier identification of block types in JS, CSS or
     // tests.
@@ -174,7 +179,7 @@ class LayersPanel extends BuilderPanel {
       $build['#attributes']['data-node-type'] = $data['source_id'];
     }
 
-    return $this->htmxEvents->onInstanceClick($build, $builder_id, $instance_id, $label['summary'], $index);
+    return $this->htmxEvents->onInstanceClick($build, (string) $instance->id(), $node_id, $label['summary'], $index);
   }
 
   /**

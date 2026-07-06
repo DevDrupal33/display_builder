@@ -43,7 +43,7 @@ class TreePanel extends BuilderPanel {
       '#type' => 'component',
       '#component' => 'display_builder:panel_tree',
       '#slots' => [
-        'items' => $this->digFromSlot($builder_id, $data),
+        'items' => $this->digFromSlot($builder, $data),
       ],
       '#attributes' => [
         // Required for JavaScript @see components/dropzone/dropzone.js.
@@ -60,14 +60,14 @@ class TreePanel extends BuilderPanel {
   /**
    * {@inheritdoc}
    */
-  protected function buildSingleComponent(string $builder_id, string $instance_id, SourceWithSlotsInterface $source, array $data, int $index = 0): ?array {
-    $info = $this->resolveComponentInfo($source, $data, $instance_id);
+  protected function buildSingleComponent(InstanceInterface $instance, string $node_id, SourceWithSlotsInterface $source, array $data, int $index = 0): ?array {
+    $info = $this->resolveComponentInfo($source, $data, $node_id);
 
     if ($info === NULL) {
       return NULL;
     }
 
-    ['label' => $label, 'instance_id' => $instance_id] = $info;
+    ['label' => $label, 'instance_id' => $node_id] = $info;
 
     $slots = [];
 
@@ -86,14 +86,14 @@ class TreePanel extends BuilderPanel {
         '#attributes' => [
           'data-slot-id' => $slot_id,
           'data-slot-title' => $definition['title'],
-          'data-node-id' => $instance_id,
+          'data-node-id' => $node_id,
           'data-node-title' => $label,
           'data-menu-type' => 'slot',
         ],
       ];
 
       if ($sources = $source->getSlotValue($slot_id)) {
-        $items['#slots']['children'] = $this->digFromSlot($builder_id, $sources);
+        $items['#slots']['children'] = $this->digFromSlot($instance, $sources);
       }
 
       $slots[] = $items;
@@ -118,7 +118,7 @@ class TreePanel extends BuilderPanel {
       // Required for the context menu label.
       // @see assets/js/contextual_menu.js
       '#attributes' => [
-        'data-node-id' => $instance_id,
+        'data-node-id' => $node_id,
         'data-node-title' => $label,
         'data-slot-position' => $index,
         'data-menu-type' => 'component',
@@ -130,8 +130,8 @@ class TreePanel extends BuilderPanel {
   /**
    * {@inheritdoc}
    */
-  protected function buildSingleBlock(string $builder_id, string $instance_id, array $data, int $index = 0): array {
-    $instance_id = $instance_id ?: $data['node_id'];
+  protected function buildSingleBlock(InstanceInterface $instance, string $node_id, array $data, int $index = 0): array {
+    $node_id = $node_id ?: $data['node_id'];
     $label = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
 
     if (isset($data['source_id']) && $data['source_id'] === 'entity_field') {
@@ -148,7 +148,7 @@ class TreePanel extends BuilderPanel {
         'title' => $label['summary'],
       ],
       '#attributes' => [
-        'data-node-id' => $instance_id,
+        'data-node-id' => $node_id,
         // This label is used for contextual menu.
         // @see assets/js/contextual_menu.js
         'data-node-title' => $label['summary'],

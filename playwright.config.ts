@@ -56,8 +56,6 @@ export default defineConfig({
     // Quicker fail on local tests if skip install.
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-action-timeout
     actionTimeout: process.env.CI ? 10_000 : process.env.DRUPAL_TEST_SKIP_INSTALL ? 4_000 : 20_000,
-    /* @see https://playwright.dev/docs/locators#locate-by-test-id */
-    testIdAttribute: 'data-instance-id',
   },
   /* Configure snapshot folder */
   expect: {

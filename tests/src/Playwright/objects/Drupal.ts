@@ -262,7 +262,7 @@ export class Drupal {
   async createBodyField (bundle: string, name: string): Promise<void> {
     if (this.drupalSite.hasDrush) {
       await this.drush(
-        `field:create -y node ${bundle} --field-name=field_test_${name} --field-label="Body" --field-type=string_long --field-widget=string_textarea --is-required=0 --cardinality=1`,
+        `field:create -y node ${bundle} --field-name=field_test_${name} --field-label="Body" --field-type=string_long --field-widget=string_textarea --is-required=0 --cardinality=1 --is-translatable=0`,
       )
     } else {
       throw new Error('Field creation without Drush is not supported!')

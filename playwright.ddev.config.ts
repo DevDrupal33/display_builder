@@ -29,7 +29,6 @@ export default defineConfig({
     },
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-action-timeout
     // actionTimeout: 10_000,
-    testIdAttribute: 'data-instance-id',
   },
   projects: [
     {
