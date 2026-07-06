@@ -100,7 +100,7 @@ final class LayoutBuilderOverrideMigrationTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('Layout builder OVERRIDE config: NEW');
 
     // Enable Display Builder override.
-    $this->drupalGet('admin/structure/types/manage/display_builder_test/display');
+    $this->drupalGet('admin/structure/types/manage/display_builder_test/display/default');
     $edit = [
       'profile' => self::PROFILE_ID,
       'override_status' => 1,

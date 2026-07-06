@@ -30,7 +30,7 @@ test(
     })
 
     await test.step(`Enable display`, async () => {
-      await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
+      await page.goto(config.contentTypesDisplay.replace('{content_type}', name).replace('{display}', 'default'))
       await expect(page.locator('main').getByRole('button', { name: 'Display builder' })).toBeVisible()
 
       // Enable the Display builder for default display
@@ -90,7 +90,7 @@ test(
 
     await test.step(`Disable the display`, async () => {
       // Disable the display builder.
-      await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
+      await page.goto(config.contentTypesDisplay.replace('{content_type}', name).replace('{display}', 'default'))
       await page.getByLabel('Enable with profile', { exact: true }).selectOption('- Disabled -')
       await page.getByRole('button', { name: 'Save' }).click()
 
@@ -121,7 +121,7 @@ test(
     })
 
     await test.step(`Create entity type and set display`, async () => {
-      await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
+      await page.goto(config.contentTypesDisplay.replace('{content_type}', name).replace('{display}', 'default'))
       await expect(page.locator('main').getByRole('button', { name: 'Display builder' })).toBeVisible()
 
       // Enable the Display builder for default display
@@ -131,7 +131,7 @@ test(
     })
 
     await test.step(`Enable override`, async () => {
-      await page.goto(config.contentTypesDisplay.replace('{content_type}', name))
+      await page.goto(config.contentTypesDisplay.replace('{content_type}', name).replace('{display}', 'default'))
       await page.getByRole('checkbox', { name: 'Enable content overrides' }).click()
 
       await expect(page.getByLabel('Profile for overrides')).toBeVisible()

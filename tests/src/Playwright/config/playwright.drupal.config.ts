@@ -10,7 +10,7 @@ export default {
   contentTypesEdit: 'admin/structure/types/manage/{content_type}',
   contentTypesFields: 'admin/structure/types/manage/{content_type}/fields',
   contentTypesFormDisplay: 'admin/structure/types/manage/{content_type}/form-display',
-  contentTypesDisplay: 'admin/structure/types/manage/{content_type}/display',
+  contentTypesDisplay: 'admin/structure/types/manage/{content_type}/display/{display}',
   contentTypesPermissions: 'admin/structure/types/manage/{content_type}/permissions',
 
   contentList: 'admin/content',
