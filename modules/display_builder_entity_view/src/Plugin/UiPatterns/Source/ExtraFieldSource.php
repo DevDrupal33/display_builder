@@ -27,8 +27,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   context_definitions: [
     'entity' => new ContextDefinition('entity', label: new TranslatableMarkup('Entity'), required: TRUE),
     'view_mode' => new ContextDefinition('string', label: new TranslatableMarkup('View mode'), required: FALSE),
-  ],
-  metadata: ['group' => new TranslatableMarkup('Fields')],
+  ]
 )]
 class ExtraFieldSource extends SourcePluginBase {
 

@@ -214,10 +214,6 @@ class BlockLibrarySourceHelper {
       return $group;
     }
 
-    if (isset($source_definition['metadata']['group'])) {
-      return (string) $source_definition['metadata']['group'];
-    }
-
     switch ($provider) {
       case 'display_builder_page_layout':
         $group = (string) new TranslatableMarkup('Page');
@@ -227,6 +223,11 @@ class BlockLibrarySourceHelper {
       case 'display_builder_views':
       case 'ui_patterns_views':
         $group = (string) new TranslatableMarkup('Views');
+
+        break;
+
+      case 'display_builder_entity_view':
+        $group = (string) new TranslatableMarkup('Fields');
 
         break;
 
