@@ -498,6 +498,12 @@ class BuilderPanel extends IslandPluginBase {
   /**
    * Check if a renderable array is empty.
    *
+   * If assertion is enabled, the render can fail on some specific cases like
+   * comment form wirthout a commented entity. In that case, we consider the
+   * renderable as empty.
+   *
+   * @todo This is a workaround for a specific case, we should find a better way
+   *
    * @param array $renderable
    *   The renderable array to check.
    *
@@ -505,7 +511,12 @@ class BuilderPanel extends IslandPluginBase {
    *   TRUE if the rendered output is empty, FALSE otherwise.
    */
   private function isEmpty(array $renderable): bool {
-    $html = $this->renderer->renderInIsolation($renderable);
+    try {
+      $html = $this->renderer->renderInIsolation($renderable);
+    }
+    catch (\Throwable $e) {
+      return TRUE;
+    }
 
     return empty(\trim((string) $html));
   }

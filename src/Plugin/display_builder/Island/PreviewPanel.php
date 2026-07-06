@@ -63,7 +63,6 @@ class PreviewPanel extends IslandPluginBase {
       return [];
     }
 
-    // Replace preview for empty block until #3561447.
     $this->alterPreviewPlaceholder($data);
 
     $returned = [];
@@ -80,7 +79,9 @@ class PreviewPanel extends IslandPluginBase {
    * Replace placeholder for preview.
    *
    * Some block source will not be created, create a simple placeholder to have
-   * a preview instead of nothing. Until #3561447 is resoled.
+   * a preview instead of nothing.
+   *
+   * @todo move as an issue to UI Patterns?
    *
    * @param array $data
    *   The instance data to replace.
