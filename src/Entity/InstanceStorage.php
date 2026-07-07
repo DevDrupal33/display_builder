@@ -15,7 +15,7 @@ use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
  */
 class InstanceStorage extends SqlContentEntityStorage {
 
-  private const MAX_HISTORY = 10;
+  private const MAX_HISTORY = 20;
 
   /**
    * Load the last past revision as default.

@@ -264,15 +264,15 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $instance = $this->createDisplayBuilderInstance();
     self::assertEmpty($instance->getCurrentState());
 
-    // Create more states than MAX_HISTORY (10)
-    for ($i = 1; $i <= 15; ++$i) {
+    // Create more states than MAX_HISTORY.
+    for ($i = 1; $i <= 25; ++$i) {
       $state = $this->makeSource('state_' . $i);
       $instance->setNewPresent($state, "State {$i}");
       $instance->setNewPresent($state, "State {$i}");
     }
 
-    // Should only keep last 10 states.
-    self::assertSame(10, \count($instance->getPast()));
+    // Should only keep last 20 states.
+    self::assertSame(20, \count($instance->getPast()));
   }
 
   /**
