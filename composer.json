@@ -23,14 +23,14 @@
     "require": {
         "php": ">=8.3",
         "drupal/core": "^11.3",
-        "drupal/ui_patterns": "^2.0.16"
+        "drupal/ui_patterns": "^2.0.17"
     },
     "require-dev": {
         "drupal/sdc_devel": "^1.0.2",
         "drupal/ui_icons": "^1.1",
         "drupal/ui_skins": "^1.1",
         "drupal/ui_styles": "^1.19",
-        "drupal/display_builder_dev_tools": "1.0.x-dev"
+        "drupal/display_builder_dev_tools": "*"
     },
     "suggest": {
         "drupal/ui_styles": "Provide Styles features in Display builder",
@@ -39,10 +39,6 @@
     },
     "extra": {
         "patches": {
-            "drupal/ui_patterns": {
-                "https://drupal.org/i/3570294 throw error on missing component instead of fatal": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/478.patch",
-                "https://drupal.org/i/3604317 SourceValueItem: fix mainPropertyName and isEmpty so phantom field prototype items are filtered correctly": "https://git.drupalcode.org/project/ui_patterns/-/merge_requests/514.patch"
-            }
         }
     },
     "scripts": {
