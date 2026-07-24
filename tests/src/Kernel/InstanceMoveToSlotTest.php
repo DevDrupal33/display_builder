@@ -40,7 +40,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
     parent::setUp();
     $this->installEntitySchema('user');
     $this->installEntitySchema('display_builder_instance');
-    $this->installConfig(['display_builder']);
+    $this->installConfig(['display_builder', 'display_builder_test']);
   }
 
   /**

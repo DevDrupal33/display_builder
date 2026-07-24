@@ -1,48 +1,12 @@
 {% set builder_id = builder_id|default('display-builder-' ~ random()) %}
-{% set attributes = attributes.setAttribute('id', builder_id).addClass('display-builder') %}
+{% set classes = [
+    'display-builder',
+    buildable_id ? 'display-builder-' ~ buildable_id : '',
+  ]
+%}
+{% set attributes = attributes.setAttribute('id', builder_id).addClass(classes) %}
 
 <section{{ attributes }}>
-  {% set first_drawer_content %}
-    {# @todo create a component for drawer resizable? #}
-    <div class="shoelace-resize-handle"></div>
-    <span class="shoelace-drawer__content">
-      {% for island in view_sidebar %}
-        <span class="shoelace-drawer__content_island">
-          {{ island }}
-        </span>
-      {% endfor %}
-    </span>
-  {% endset %}
-
-  {{ include('display_builder:drawer', {
-    id: 'db-first-drawer',
-    content: first_drawer_content,
-    contained: true,
-    footer_close: false,
-    attributes: {
-      class: 'db-background',
-    },
-  }, with_context: false) }}
-
-  {% set second_drawer_content %}
-    <div class="shoelace-resize-handle"></div>
-    <span class="shoelace-drawer__content">
-      {{ contextual_islands }}
-    </span>
-  {% endset %}
-
-  {{ include('display_builder:drawer', {
-    id: 'db-second-drawer',
-    label: 'Settings'|t,
-    variant: 'end',
-    content: second_drawer_content,
-    contained: true,
-    footer_close: false,
-    attributes: {
-      class: 'db-background',
-    },
-  }, with_context: false) }}
-
   {% set start %}
     <sl-button-group label="{{ 'Sidebar buttons'|t }}">
       {{ view_sidebar_buttons }}
@@ -57,10 +21,39 @@
       end: end_buttons,
     }, with_context: false) }}
 
-  <div class="display-builder__main">
-    <span id="message-{{ builder_id }}"></span>
-    {{ view_main }}
+  <div class="display-builder__body">
+    <aside id="db-first-drawer" class="db-sidebar db-sidebar--start db-background is-collapsed">
+      <div class="db-sidebar__resize-handle"></div>
+      <div class="db-sidebar__content">
+        {% for island in view_sidebar %}
+          <div class="db-sidebar__pane">
+            {{ island }}
+          </div>
+        {% endfor %}
+      </div>
+    </aside>
+
+    <div class="display-builder__main">
+      {{ view_main }}
+    </div>
+
+    <aside id="db-second-drawer" class="db-sidebar db-sidebar--end db-background is-collapsed">
+      <div class="db-sidebar__resize-handle"></div>
+      <div class="db-sidebar__header">
+        <span class="db-sidebar__title">{{ 'Settings'|t }}</span>
+        {{ include('display_builder:icon_button', {
+          icon: 'x-lg',
+          label: 'Close'|t,
+          attributes: {id: 'db-second-drawer-close', class: 'db-sidebar__close'},
+        }, with_context: false) }}
+      </div>
+      <div class="db-sidebar__content">
+        {{ contextual_islands }}
+      </div>
+    </aside>
   </div>
+
+  {{ view_floating_controls }}
 
   {% if menu_islands %}
     <div class="display-builder__menu">
@@ -68,6 +61,11 @@
     </div>
   {% endif %}
 
-  <div id="preview-{{ builder_id }}" class="db-background db-preview" role="tooltip"></div>
+  {# Library preview on hover. @see components/display_builder/js/preview.js #}
+  <div id="preview-{{ builder_id }}" class="db-background db-preview" role="tooltip" hidden></div>
+
+  {# Toast stack, outside the scrolling main area so it stays pinned.
+     @see \Drupal\display_builder\RenderableBuilderTrait::buildError() #}
+  <div id="message-{{ builder_id }}" class="db-messages" role="status" aria-live="polite"></div>
 
 </section>

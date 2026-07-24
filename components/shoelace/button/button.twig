@@ -2,13 +2,34 @@
 {% set attributes = (variant and variant != 'default') ? attributes.setAttribute('variant', variant) : attributes %}
 {% set attributes = id ? attributes.setAttribute('id', 'button-' ~ id) : attributes %}
 
+{# An icon-only button - the profile's display mode hides the label and moves it
+   to the tooltip instead (@see ProfileViewBuilder::buildStartButtons()) - has no
+   accessible name of its own: a tooltip only ever describes, it never names, so
+   it is announced as bare "button" and axe reports button-name / link-name
+   (critical). The name has to come from *inside* the button: what actually takes
+   focus is the <button part="base"> in sl-button's shadow root, which an
+   aria-label on the <sl-button> host does not reach (confirmed - axe kept
+   flagging it). sl-icon's own label attribute does reach it, because the icon is
+   slotted into that button and renders as role="img" with the label as its
+   accessible text - this is Shoelace's documented approach for icon-only
+   buttons. Buttons keeping their visible label are left alone: that text already
+   names them, and a second name here could contradict it. #}
+{% set icon_label = label ? '' : (tooltip|default(attributes['title'])) %}
+
 {% if tooltip %}
-  <sl-tooltip>
+  {# Below, not Shoelace's default "top": buttons carrying a tooltip are
+     almost all toolbar buttons, and the builder toolbar is pinned right
+     under Drupal's own admin toolbar - a tooltip opening upward lands
+     inside that strip, where Drupal's chrome (deliberately above the whole
+     builder in normal mode, @see components/display_builder/css/variables.css)
+     paints straight over it. Shoelace still flips back to the top by itself
+     when there is no room below. #}
+  <sl-tooltip placement="bottom">
     <div slot="content">{{ tooltip }}</div>
 {% endif %}
 <sl-button{{ attributes }}>
   {% if icon %}
-    <sl-icon name="{{ icon }}"></sl-icon>
+    <sl-icon name="{{ icon }}"{% if icon_label %} label="{{ icon_label }}"{% endif %}></sl-icon>
   {% endif %}
   {{ label }}
 </sl-button>

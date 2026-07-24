@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - display_builder.profile.test_base
+    - display_builder.profile.test_builder
+    - display_builder.profile.test_scaffold
+    - node.type.display_builder_test
+  module:
+    - display_builder
+    - display_builder_ui
+    - field_ui
+    - node
+id: test_db_entity
+label: test_db_entity
+weight: -9
+is_admin: false
+permissions:
+  - 'administer node display'
+  - 'administer pattern preset'
+  - 'create display_builder_test content'
+  - 'use display builder test_base'
+  - 'use display builder test_builder'
+  - 'use display builder test_scaffold'
+  - 'view display builder instance'
+  - 'view the administration theme'

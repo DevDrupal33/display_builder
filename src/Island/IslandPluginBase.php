@@ -12,8 +12,8 @@ use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\display_builder\DisplayBuilderHtmx;
 use Drupal\display_builder\HtmxEvents;
-use Drupal\display_builder\HtmxTrait;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\RenderableBuilderTrait;
 use Drupal\ui_patterns\SourcePluginManager;
@@ -25,7 +25,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 abstract class IslandPluginBase extends PluginBase implements IslandInterface {
 
-  use HtmxTrait;
   use RenderableBuilderTrait;
   use StringTranslationTrait;
 
@@ -317,6 +316,26 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function isDeferrable(): bool {
+    // View panels share a tab strip or a sidebar drawer and Floating controls
+    // ride along with the panel they attach to, so all of them spend most of
+    // their time off screen. Everything else is permanently visible.
+    return \in_array($this->getTypeId(), [
+      IslandType::View->value,
+      IslandType::Floating->value,
+    ], TRUE);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function reload(InstanceInterface $instance): array {
+    return $this->reloadWithGlobalData($instance);
+  }
+
+  /**
    * Build content for non-form islands.
    *
    * Override this method instead of build() when the plugin does not implement
@@ -347,7 +366,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    *   Returns a render array with out-of-band commands.
    */
   protected function reloadWithGlobalData(InstanceInterface $instance): array {
-    return $this->addOutOfBand(
+    return DisplayBuilderHtmx::outOfBand(
       $this->build($instance, $instance->getCurrentState()),
       '#' . $this->getHtmlId((string) $instance->id()),
       'innerHTML'
@@ -366,7 +385,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    *   Returns a render array with out-of-band commands.
    */
   protected function reloadWithLocalData(InstanceInterface $instance, array $data): array {
-    return $this->addOutOfBand(
+    return DisplayBuilderHtmx::outOfBand(
       $this->build($instance, $data),
       '#' . $this->getHtmlId((string) $instance->id()),
       'innerHTML'
@@ -385,7 +404,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    *   Returns a render array with out-of-band commands.
    */
   protected function reloadWithNodeData(InstanceInterface $instance, string $node_id): array {
-    return $this->addOutOfBand(
+    return DisplayBuilderHtmx::outOfBand(
       $this->build($instance, $instance->getNode($node_id)),
       '#' . $this->getHtmlId($node_id),
       'innerHTML'

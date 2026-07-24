@@ -14,3 +14,7 @@ props:
     sticky:
       title: Sticky
       type: boolean
+libraryOverrides:
+  css:
+    component:
+      toolbar.css: {}

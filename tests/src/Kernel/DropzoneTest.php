@@ -8,7 +8,7 @@ use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandInterface;
 use Drupal\display_builder\Plugin\display_builder\Island\BuilderPanel;
-use Drupal\display_builder\Plugin\display_builder\Island\LayersPanel;
+use Drupal\display_builder\Plugin\display_builder\Island\ScaffoldPanel;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -19,7 +19,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  * @internal
  */
 #[CoversClass(BuilderPanel::class)]
-#[CoversClass(LayersPanel::class)]
+#[CoversClass(ScaffoldPanel::class)]
 #[Group('display_builder')]
 #[RunTestsInSeparateProcesses]
 final class DropzoneTest extends DisplayBuilderKernelTestBase {
@@ -59,15 +59,14 @@ final class DropzoneTest extends DisplayBuilderKernelTestBase {
         'plugin_id' => 'test',
         'configuration' => [
           'instance_id' => 'test_instance',
-          'profile_id' => 'default',
         ],
       ],
     ]);
 
     $builder_panel = $this->createIslandPlugin('builder');
     $this->testBuildInPanel($builder_panel, $instance, $node_id);
-    $layers = $this->createIslandPlugin('layers');
-    $this->testBuildInPanel($layers, $instance, $node_id);
+    $scaffold = $this->createIslandPlugin('scaffold');
+    $this->testBuildInPanel($scaffold, $instance, $node_id);
   }
 
   /**
@@ -89,21 +88,19 @@ final class DropzoneTest extends DisplayBuilderKernelTestBase {
     self::assertSame('root', $root_dropzone['#props']['variant']);
     self::assertSame('test_instance', $root_dropzone['#attributes']['data-db-id']);
     $url = '/api/display-builder/test_instance?from=' . $panel->getPluginId();
-    self::assertSame($url, $root_dropzone['#attributes']['hx-post']);
+    self::assertSame($url, (string) $root_dropzone['#attributes']['data-hx-post']);
 
     $nested_dropzone = match ($panel->getPluginId()) {
-      'layers' => $root_dropzone['#slots']['content'][0]['#slots']['children'][0][1],
+      'scaffold' => $root_dropzone['#slots']['content'][0]['#slots']['children'][0][1],
       default => $root_dropzone['#slots']['content'][0]['content']['#slots']['slot_1'],
     };
     self::assertSame('display_builder:dropzone', $nested_dropzone['#component']);
-    self::assertSame('highlighted', $nested_dropzone['#props']['variant']);
     self::assertSame('test_instance', $nested_dropzone['#attributes']['data-db-id']);
     self::assertSame('slot_1', $nested_dropzone['#attributes']['data-slot-id']);
     self::assertSame($node_id, $nested_dropzone['#attributes']['data-node-id']);
-    // @see https://playwright.dev/docs/locators#locate-by-test-id
-    self::assertSame($node_id . '_slot_1', $nested_dropzone['#attributes']['data-testid']);
+
     $url = '/api/display-builder/test_instance/_node/' . $node_id . '/slot_1?from=' . $panel->getPluginId();
-    self::assertSame($url, $nested_dropzone['#attributes']['hx-post']);
+    self::assertSame($url, (string) $nested_dropzone['#attributes']['data-hx-post']);
   }
 
 }

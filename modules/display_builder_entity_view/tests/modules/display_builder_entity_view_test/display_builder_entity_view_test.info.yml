@@ -3,4 +3,6 @@ type: module
 description: 'Entity display config entities for testing.'
 package: Testing
 dependencies:
+  - display_builder:display_builder_ui
   - display_builder:display_builder_entity_view
+  - display_builder:display_builder_test

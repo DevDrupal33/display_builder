@@ -1,4 +1,26 @@
-/* Temporary fixes related to themes and plugins */
+/* Fixes related to core, themes and plugins.
+
+   Fixes for a *specific* admin chrome module live in their own file, so it
+   stays obvious which chrome a rule is compensating for: the classic Toolbar
+   module (and Admin Toolbar contrib on top of it) in _fix_toolbar.css, the
+   Navigation module in _fix_navigation.css. Both always load, so anything
+   here - and there - must hold whichever of them is, or isn't, in play. */
+/* cspell:ignore zindex */
+
+/* Available tokens modal on expand */
+.display-builder-is-expanded .modal {
+  --bs-modal-zindex: var(--db-z-dialog);
+  --bs-backdrop-zindex: var(--db-z-dialog-backdrop);
+}
+
+/* Drupal dialog (token browser, etc.) on expand */
+.display-builder-is-expanded .ui-widget-overlay {
+  z-index: var(--db-z-dialog-backdrop) !important;
+}
+
+.display-builder-is-expanded .ui-dialog {
+  z-index: var(--db-z-dialog) !important;
+}
 
 /* Olivero fix for header z-index */
 :has(.display-builder):has(.site-header__fixable) {
@@ -7,12 +29,9 @@
   }
 }
 
-/* Fix for fullscreen */
-.display-builder-is-fullscreen {
-  #toolbar-administration {
-    display: none;
-  }
-
+/* Fix for expand mode. Hiding the admin chrome itself is each integration
+   file's job, @see the note at the top of this file. */
+.display-builder-is-expanded {
   .site-header {
     z-index: 1;
     opacity: 0;
@@ -24,7 +43,7 @@
 .db-island-preview .db-placeholder:not([data-node-type="token"]) {
   display: block;
   width: 100%;
-  padding: 1rem;
+  padding: 0;
 }
 
 /* DSFR fixes */

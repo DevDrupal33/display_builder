@@ -1,7 +1,7 @@
 {% if title or children %}
   {% set modifier = children ? 'component' : 'block' %}
-  <sl-card {{ attributes.addClass('db-layer').addClass('db-layer--' ~ modifier) }}>
-    <div {% if modifier != 'block' %}slot="header"{% endif %} class="db-layer__header">
+  <div {{ attributes.addClass('db-layer').addClass('db-layer--' ~ modifier) }}>
+    <div class="db-layer__header">
       {% if title %}
         <div class="db-layer__title">{{ title }}</div>
       {% endif %}
@@ -16,5 +16,5 @@
         {{ children }}
       </div>
     {% endif %}
-  </sl-card>
+  </div>
 {% endif %}

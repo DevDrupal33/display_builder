@@ -1,0 +1,210 @@
+/**
+ * @file
+ * Display Builder's full theme palette - every color used anywhere in
+ * components/ (except components/shoelace/, which are thin wrappers
+ * around Shoelace's own components and stay on Shoelace's own tokens
+ * directly) is named here, grouped by the component that consumes it.
+ *
+ * Sub-components (layer, dropzone, panel_tree, contextual_menu, toolbar,
+ * library_panel, placeholder...) are never rendered outside Display
+ * Builder's own shell, so there's no real reusability benefit to keeping
+ * their colors local to each component's own directory - centralizing
+ * them here instead gives a single file to scan/override the whole
+ * palette from. Non-color structural tokens (sizes, outline widths,
+ * transitions, z-index offsets) stay in each component's own
+ * variables.css, since those are more implementation detail than theme.
+ * @see components/display_builder/css/variables.css
+ *
+ * Selector is `:root, .display-builder.sl-theme-dark` (not just `:root`)
+ * on purpose, even though every value below is identical text in both -
+ * a var() reference only re-evaluates against the light/dark cascade of
+ * whichever selector its own declaration actually matches, not of
+ * whatever element ends up inheriting it. A plain `:root` declaration
+ * freezes its var(--sl-color-*) references at :root's own (always light)
+ * cascade, and every dark-mode descendant just inherits that already-
+ * frozen light value - matching the selector here as well forces the
+ * substitution to happen again directly on .sl-theme-dark itself, which
+ * is what actually picks up Shoelace's dark-flipped tokens. Confirmed
+ * live: without this, --sl-color-neutral-0 itself correctly reports its
+ * dark value when queried, but --toolbar-color-background (a plain
+ * :root-only var(--sl-color-neutral-0) alias) stayed frozen white
+ * regardless.
+ */
+:root,
+.display-builder.sl-theme-dark {
+  /* Base */
+  --db-background-color: var(--sl-color-neutral-0);
+  --db-text-color: var(--sl-color-neutral-900);
+  --db-background-image: repeating-linear-gradient(45deg, oklch(100% 0 0), oklch(100% 0 0) 13px, var(--sl-color-neutral-100) 13px, var(--sl-color-neutral-100) 14px);
+
+  /* Table (panel logs) */
+  --db-table-bg: var(--sl-color-neutral-50);
+  --db-table-border: var(--sl-color-neutral-200);
+  --db-table-header-bg: var(--sl-color-neutral-100);
+  --db-table-header-color: var(--sl-color-neutral-900);
+  --db-table-row-hover: var(--sl-color-neutral-200);
+
+  /* Toolbar */
+  --toolbar-color: var(--db-text-color);
+  --toolbar-color-background: var(--sl-color-neutral-0);
+  --toolbar-color-border: var(--sl-color-neutral-200);
+  /* The active tab's label, one step darker than the --sl-color-primary-600
+     Shoelace uses by default: that one lands at 4.10:1 on the toolbar's white
+     background (measured), under WCAG AA's 4.5:1 for text this size, and axe
+     reports it as a serious color-contrast violation. primary-700 clears it at
+     ~5.4:1 while staying recognizably the same accent.
+     @see components/shoelace/tabs/tabs.css
+     @see tests/src/Playwright/Tests/accessibility.spec.ts */
+  --db-tab-color-active: var(--sl-color-primary-700);
+
+  /* Sidebar */
+  --db-sidebar-border: var(--sl-color-neutral-200);
+  --db-resize-handle-bg: rgb(0, 0, 0, 0.1);
+  --db-resize-handle-bg-hover: var(--sl-color-primary-400, rgb(45, 25, 90, 0.2));
+
+  /* Preview island */
+  --preview-color-background: var(--sl-color-neutral-0);
+  --preview-color-border: var(--sl-color-neutral-200);
+  --preview-color-description: var(--sl-color-neutral-700);
+
+  /* Form */
+  --db-form-checkbox-bg-dark: var(--sl-color-neutral-200);
+  --db-form-checkbox-color-dark: var(--sl-color-neutral-800);
+  --db-form-radio-checked-bg-dark: rgb(255, 255, 255, 0.2);
+  --db-form-toggle-color: var(--sl-color-neutral-600);
+  --db-form-details-border: var(--sl-color-neutral-200);
+  --db-form-details-bg: var(--sl-color-neutral-100);
+  --db-form-details-hover-bg: var(--sl-color-neutral-200);
+  --db-form-focus-outline: var(--sl-color-primary-500);
+
+  /* Misc */
+  --db-color-danger: var(--sl-color-danger-400);
+  --db-preview-placeholder-outline: var(--sl-color-neutral-400);
+  --db-shadow-color: rgb(27, 31, 35, 0.15);
+  --db-highlight-outline: var(--sl-color-purple-700);
+
+  /* Contextual menu */
+  --menu-color-border: var(--sl-color-neutral-200);
+  --menu-color-danger: var(--sl-color-danger-600);
+  --menu-color-debug-border: var(--sl-color-neutral-600);
+
+  /* Dropzone */
+  /* Small visual highlight */
+  --dropzone-color-light: var(--sl-color-warning-300);
+  /* Strong visual highlight */
+  --dropzone-color-strong: var(--sl-color-warning-600);
+  /* Strong highlight for action source */
+  --dropzone-color-hover: var(--sl-color-primary-300);
+  /* Strong highlight for action target */
+  --dropzone-color-target: var(--sl-color-primary-400);
+  --dropzone-color-target-light: var(--sl-color-teal-600);
+  /* Dropzone title label (@see components/dropzone/dropzone.css) - a
+     solid tag, not a neutral pill, so it reads as "colored" the same
+     way the --component-color-* and --block-color-* labels below do. */
+  --dropzone-color-text: var(--sl-color-neutral-0);
+  --dropzone-color-bg: var(--dropzone-color-strong);
+
+  /* Root dropzone ("Base container") label - a third, distinct color
+     from both regular dropzones (amber, above) and placed nodes
+     (violet/pink, below): it's neither a slot you drop into nor
+     something you placed. Reuses --dropzone-color-target-light (teal),
+     otherwise unused, rather than introducing a new literal.
+     @see components/dropzone/dropzone.css */
+  --root-color-text: var(--sl-color-neutral-0);
+  --root-color-border: var(--dropzone-color-target-light);
+  --root-color-bg: var(--dropzone-color-target-light);
+
+  /* Canvas node (a placed component's or block's own root, as opposed
+     to a dropzone or the root container) - two colors, pairing with the
+     same component/block color identity already used in the Tree side
+     panel (--tree-color-type-component: violet-800,
+     --tree-color-type-block: pink-800 below), while staying distinct
+     from --dropzone-color-* (amber) and --root-color-* (teal) above.
+     @see components/dropzone/dropzone.css */
+  --component-color-outline: var(--sl-color-violet-600);
+  --component-color-text: var(--sl-color-neutral-0);
+  --component-color-bg: var(--sl-color-violet-600);
+  --block-color-outline: var(--sl-color-pink-600);
+  --block-color-text: var(--sl-color-neutral-0);
+  --block-color-bg: var(--sl-color-pink-600);
+
+  /* Layer (the Wireframe based panels' schematic cards)
+     Every color here aliases an identity color already defined above,
+     rather than picking its own: a component is violet, a block is pink,
+     a slot is amber and the root container is teal in the Builder canvas
+     (the --component-color, --block-color, --dropzone-color and
+     --root-color groups above) and in the Tree panel (--tree-color-type-*,
+     which aliases the same three for the same reason), so a node keeps
+     one identity across all four panels. Previously these were an
+     unrelated neutral/primary ramp, which made the same node read as a
+     different thing in each panel.
+
+     Backgrounds are a low-percentage mix of the identity color into the
+     panel background rather than a separate hue: Wireframe cards stack and
+     nest arbitrarily deep, so a saturated fill per card would drown the
+     text and every nesting level would fight the next. The outline
+     carries the identity; the fill only tints toward it.
+     @see components/layer/layer.css */
+  --layer-text-color: var(--db-text-color);
+  --layer-text-color-hover: var(--sl-color-primary-700);
+  --layer-root-outline: var(--root-color-border);
+  --layer-root-bg: var(--sl-color-neutral-50);
+  --layer-component-outline: var(--component-color-outline);
+  --layer-component-bg: color-mix(in sRGB, var(--component-color-outline) 5%, var(--db-background-color));
+  --layer-component-bg-hover: color-mix(in sRGB, var(--component-color-outline) 14%, var(--db-background-color));
+  --layer-block-outline: var(--block-color-outline);
+  --layer-block-bg: color-mix(in sRGB, var(--block-color-outline) 5%, var(--db-background-color));
+  --layer-block-bg-hover: color-mix(in sRGB, var(--block-color-outline) 14%, var(--db-background-color));
+  --layer-slot-outline: var(--dropzone-color-strong);
+  --layer-slot-title-color: var(--dropzone-color-strong);
+  /* Drag & drop - same target color the Builder canvas uses for the live
+     drop target, so "this is where it lands" reads identically in both. */
+  --layer-drag-outline: var(--dropzone-color-target);
+  --layer-drag-bg: color-mix(in sRGB, var(--dropzone-color-target) 12%, transparent);
+  /* Config summary pills - neutral on purpose: they sit next to the amber
+     slot titles and the colored outlines, and carry no identity of their
+     own to encode. */
+  --layer-pill-bg-color: var(--sl-color-neutral-100);
+  --layer-pill-border-color: var(--sl-color-neutral-300);
+  --layer-pill-text-color: var(--sl-color-neutral-700);
+
+  /* Tree */
+  --tree-block-border-color: var(--sl-color-primary-700);
+  --tree-color-label-hover: var(--sl-color-primary-700);
+  /* Matches the Builder "Highlight" option's own colored dots
+     (@see components/dropzone/dropzone.css's [data-highlight-menu] rule)
+     so a node's tree icon and its highlight color are the same. */
+  --tree-color-type-component: var(--component-color-outline);
+  --tree-color-type-slot: var(--dropzone-color-strong);
+  --tree-color-type-block: var(--block-color-outline);
+  --tree-color-selected-outline: var(--sl-color-fuchsia-800);
+
+  /* Library panel */
+  --library-color-match-border: var(--sl-color-success-600);
+  --library-color-match-bg: var(--sl-color-success-200);
+
+  /* Placeholder */
+  --placeholder-color-hover-border: var(--sl-color-primary-600);
+  --placeholder-color-hover-bg: var(--sl-color-neutral-100);
+
+  /* Save status */
+  /* neutral-600, not the neutral-500 this reads as at a glance: 500 lands
+     at 4.83:1 on the toolbar, which clears AA for 14px text by so little
+     that any future toolbar tint would push it under. */
+  --save-status-color-label: var(--sl-color-neutral-600);
+  /* A draft revision was written - the routine, most frequent outcome. */
+  --save-status-color-dot: var(--sl-color-success-600);
+  /* The display was published: same primary as the Publish button it sits
+     next to, so the cue reads as belonging to that action. */
+  --save-status-color-dot-published: var(--sl-color-primary-600);
+  /* Restore and revert both discard work rather than record it, so they
+     borrow the warning hue their own buttons already use. */
+  --save-status-color-dot-lifecycle: var(--sl-color-warning-600);
+}
+
+/* The one color whose dark value is a genuinely different literal, not
+   just the same var(--sl-color-*) reference re-evaluated - everything
+   else is handled by the combined selector above. */
+.display-builder.sl-theme-dark {
+  --db-background-image: repeating-linear-gradient(45deg, oklch(20% 0 0), oklch(20% 0 0) 13px, var(--sl-color-neutral-50) 13px, var(--sl-color-neutral-50) 14px);
+}

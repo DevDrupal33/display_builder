@@ -1,0 +1,30 @@
+/**
+ * @file
+ * Fixes for the classic Toolbar module (core/modules/toolbar) and for Admin
+ * Toolbar contrib, which builds on it and shares its #toolbar-administration
+ * markup. Split from _fix.css by which module it targets, for readability -
+ * it loads whether or not that module is installed (@see
+ * display_builder.libraries.yml), which costs nothing because every selector
+ * below is scoped to #toolbar-administration and so matches nothing at all on
+ * a site running the Navigation module instead (@see _fix_navigation.css).
+ * Keep it that way: a selector here that could match without the Toolbar
+ * module would silently become a fix applied to every site.
+ */
+
+/* Expanded mode covers the whole viewport: the toolbar's own fixed bar is not
+   part of what is being edited, and it sits above the builder's entire z-index
+   ladder in normal mode by design (@see components/display_builder/css/variables.css),
+   so it has to be taken out rather than covered.
+   Note that hiding it does *not* make Drupal core's displace system recompute
+   --drupal-displace-offset-*: those keep the value they had while the bar was
+   visible, which is why expanded mode zeroes the offsets itself rather than
+   trusting them (@see components/toolbar/toolbar.css,
+   components/display_builder/css/sidebar.css). */
+.display-builder-is-expanded #toolbar-administration {
+  display: none !important;
+}
+
+/* Bootstrap margin on admin toolbar search (admin_toolbar_search). */
+#toolbar-administration .toolbar-tab .form-type-search {
+  margin-bottom: 0 !important;
+}

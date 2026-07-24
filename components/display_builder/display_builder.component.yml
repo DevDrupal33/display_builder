@@ -10,6 +10,8 @@ slots:
     title: View main tabs
   view_main:
     title: View main
+  view_floating_controls:
+    title: View floating controls
   start_buttons:
     title: Action buttons (start)
   end_buttons:
@@ -24,20 +26,33 @@ props:
     builder_id:
       title: HTML ID
       $ref: ui-patterns://identifier
+    buildable_id:
+      title: HTML ID
+      $ref: ui-patterns://identifier
 libraryOverrides:
+  js:
+    js/display_builder.js: {}
+    js/deferred_islands.js: {}
+    js/sidebar.js: {}
+    js/preview.js: {}
+    js/keyboard.js: {}
+    js/form.js: {}
+  css:
+    component:
+      css/variables.css: {}
+      css/colors.css: {}
+      css/move.css: {}
+      css/display_builder.css: {}
+      css/sidebar.css: {}
+      css/preview.css: {}
+    theme:
+      css/form.css: {}
   dependencies:
     - core/drupal
     - core/drupal.displace
     - core/once
     - display_builder/_fix
-    - display_builder/contextual_menu
-    - display_builder/db_drawer
-    - display_builder/form
-    - display_builder/form_description
-    - display_builder/keyboard
     - display_builder/local_storage_manager
-    - display_builder/preview
-    - display_builder/search
     - core/drupal.htmx
     # Introduced by navigation module, internal but we can rely on it for now.
     - core/internal.floating-ui

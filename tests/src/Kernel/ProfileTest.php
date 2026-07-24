@@ -46,13 +46,14 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
    * Tests creating and editing a Display Builder entity.
    */
   public function testDisplayBuilderEntityCrud(): void {
+    $profile_test_id = 'test_profile_id';
+
     $enable_island = ['status' => TRUE, 'weight' => 2];
     $updated_island = ['status' => FALSE, 'weight' => 3];
 
     // Create a new display builder entity.
-    $id = 'test_builder';
     $data = [
-      'label' => 'Test Builder crud',
+      'label' => 'Test builder',
       'description' => 'Test Description crud',
       'islands' => [
         'test_island_button' => $enable_island,
@@ -61,11 +62,11 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
         'test_island_menu' => $enable_island,
       ],
     ];
-    $profile = self::createDisplayBuilderProfile('test_builder', $data);
+    $profile = self::createDisplayBuilderProfile($profile_test_id, $data);
 
     // Test that the entity was created correctly.
     self::assertNotEmpty($profile->id());
-    self::assertSame($id, $profile->id());
+    self::assertSame($profile_test_id, $profile->id());
     self::assertSame($data['label'], $profile->label());
     self::assertSame($data['description'], $profile->get('description'));
 
@@ -77,7 +78,7 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
     self::assertSame($enable_island, $config['test_island_menu']);
 
     // Test entity loading.
-    $loaded = Profile::load('test_builder');
+    $loaded = Profile::load($profile_test_id);
     self::assertNotNull($loaded);
     self::assertSame($profile->id(), $loaded->id());
     self::assertSame($profile->label(), $loaded->label());
@@ -94,7 +95,7 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
     $profile->save();
 
     // Reload and verify changes.
-    $updated = Profile::load('test_builder');
+    $updated = Profile::load($profile_test_id);
     self::assertSame('Updated Builder', $updated->label());
     self::assertSame('Updated Description', $updated->get('description'));
 
@@ -201,6 +202,50 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
     $updated = Profile::load('test_islands');
     $enabledIslands = $updated->getEnabledIslands();
     self::assertArrayHasKey($islandId, $enabledIslands);
+  }
+
+  /**
+   * Migrates legacy profile island config from layers to scaffold.
+   */
+  public function testLayersIslandMigratesToScaffold(): void {
+    $profile_storage = $this->container->get('entity_type.manager')->getStorage('display_builder_profile');
+
+    $profile = Profile::create([
+      'id' => 'legacy_layers_profile',
+      'label' => 'Legacy layers profile',
+      'description' => 'Test migration',
+      'islands' => [
+        'layers' => [
+          'status' => TRUE,
+          'weight' => -4,
+          'region' => 'main',
+        ],
+        'builder' => [
+          'status' => TRUE,
+          'weight' => -5,
+          'region' => 'main',
+        ],
+      ],
+    ]);
+    $profile->save();
+
+    $module_path = \Drupal::service('extension.list.module')->getPath('display_builder');
+
+    require_once \Drupal::root() . '/' . $module_path . '/display_builder.post_update.php';
+    display_builder_post_update_2();
+
+    $profile = $profile_storage->load('legacy_layers_profile');
+    self::assertNotNull($profile);
+
+    $islands = $profile->getIslandConfigurations();
+    self::assertArrayHasKey('scaffold', $islands);
+    self::assertSame([
+      'status' => TRUE,
+      'weight' => -4,
+      'region' => 'main',
+    ], $islands['scaffold']);
+    self::assertArrayNotHasKey('layers', $islands);
+    self::assertArrayHasKey('builder', $islands);
   }
 
   /**

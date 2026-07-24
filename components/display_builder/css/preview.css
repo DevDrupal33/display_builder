@@ -1,0 +1,61 @@
+/* Library preview popup, positioned by js/preview.js via Floating UI. */
+.db-preview {
+  position: fixed;
+  z-index: var(--db-z-preview);
+  top: 0;
+  left: 0;
+
+  /* A column so the description stays pinned at the bottom and the rendered
+     component absorbs the clipping when there is not enough room. max-width
+     and max-height are deliberately not set here: the size() middleware
+     writes them inline from the space actually available at the final
+     placement, which a static cap cannot know. */
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  width: max-content;
+  padding: 10px;
+  transition: opacity 120ms ease;
+
+  /* Informational only: never intercept the pointer, so leaving the
+     placeholder always hides it and a drag start is never swallowed. */
+  pointer-events: none;
+  border: 1px solid var(--preview-color-border, #ccc);
+  border-radius: 5px;
+  background-color: var(--preview-color-background);
+  box-shadow: 0 4px 16px rgb(0, 0, 0, 0.15);
+}
+
+/* Hidden without display: none, so Floating UI can still measure the box
+   and js/preview.js can place it before revealing it - a popup positioned
+   only after it becomes visible is visibly drawn at stale coordinates
+   first. Beats the UA [hidden] rule, hence the display below. */
+.db-preview[hidden] {
+  display: flex;
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* min-height lets this shrink below its content, which is what keeps the
+   description visible when the rendered component is too tall to fit. */
+.db-preview__content {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Previewed components carry their own outer spacing, which would fight
+   the popup's own padding. */
+.db-preview__content > * {
+  margin: 0 !important;
+}
+
+.db-preview__description {
+  flex-shrink: 0;
+  max-width: 25rem;
+  margin-top: 10px;
+  padding-top: 8px;
+  color: var(--preview-color-description);
+  border-top: 1px solid var(--preview-color-border, #ccc);
+  font-size: var(--sl-font-size-small, 0.875rem);
+  line-height: 1.4;
+}

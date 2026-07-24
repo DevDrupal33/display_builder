@@ -1572,14 +1572,6 @@ msgstr ""
 msgid "Toggle highlight (shift+H)"
 msgstr ""
 
-#: src/Plugin/display_builder/Island/ControlsButtons.php:125
-msgid "Toggle fullscreen. (shortcut: F)"
-msgstr ""
-
-#: src/Plugin/display_builder/Island/ControlsButtons.php:126
-msgid "Toggle fullscreen (shift+F)"
-msgstr ""
-
 #: src/Plugin/display_builder/Island/ControlsButtons.php:156
 msgid "Switch the display builder interface theme."
 msgstr ""

@@ -32,6 +32,12 @@ final class DisplayBuilderEvent extends Event {
    *   The parent node ID.
    * @param string|null $current_island_id
    *   Optional current island ID which trigger action.
+   * @param array|null $visible_islands
+   *   Optional list of island plugin IDs the client reports as currently
+   *   visible on screen. NULL means the client did not report anything, in
+   *   which case every island is rendered - the pre-deferral behavior. An
+   *   empty array is meaningful and distinct from NULL: it means the client
+   *   reported that nothing deferrable is visible.
    */
   public function __construct(
     private InstanceInterface $instance,
@@ -39,6 +45,7 @@ final class DisplayBuilderEvent extends Event {
     private ?string $node_id = NULL,
     private ?string $parent_id = NULL,
     private ?string $current_island_id = NULL,
+    private ?array $visible_islands = NULL,
   ) {}
 
   /**
@@ -121,6 +128,16 @@ final class DisplayBuilderEvent extends Event {
    */
   public function getCurrentIslandId(): ?string {
     return $this->current_island_id;
+  }
+
+  /**
+   * Gets the islands the client reports as currently visible.
+   *
+   * @return array|null
+   *   The visible island plugin IDs, or NULL if the client did not report.
+   */
+  public function getVisibleIslands(): ?array {
+    return $this->visible_islands;
   }
 
   /**

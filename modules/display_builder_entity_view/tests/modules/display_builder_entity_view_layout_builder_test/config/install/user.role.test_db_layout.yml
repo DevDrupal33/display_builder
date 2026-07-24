@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - display_builder.profile.test_min
+    - node.type.display_builder_layout_test
+  module:
+    - display_builder
+    - display_builder_ui
+    - field_ui
+    - node
+id: test_db_layout
+label: test_db_layout
+weight: 2
+is_admin: false
+permissions:
+  - 'administer node display'
+  - 'create display_builder_layout_test content'
+  - 'use display builder test_min'
+  - 'view display builder instance'

@@ -126,7 +126,7 @@ stylelint:
 cspell:
   allow_failure: true
   variables:
-    _CSPELL_IGNORE_PATHS: '*.po, **/fixtures/*.yml, *.neon, **/*.story.yml, **/build.env, **/*.patch, **/tests/src/Playwright, **/tests/**/*.yml'
+    _CSPELL_IGNORE_PATHS: '**/composer.json, *.po, **/fixtures/*.yml, *.neon, **/*.story.yml, **/build.env, **/*.patch, **/tests/src/Playwright, **/tests/**/*.yml'
 
 ## PHPMD job in Drupal CI ##
 

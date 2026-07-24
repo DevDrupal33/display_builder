@@ -1,0 +1,176 @@
+langcode: en
+status: true
+dependencies: {}
+id: test_scaffold
+label: 'Test scaffold'
+description: 'Simple test profile for automated tests with only scaffold panel.'
+islands:
+  library:
+    status: true
+    weight: -10
+    region: sidebar
+  logs:
+    status: false
+    weight: -9
+    region: main
+  scaffold:
+    status: true
+    weight: -5
+    region: main
+  preview:
+    status: true
+    weight: -4
+    region: main
+  tree:
+    status: false
+    weight: -7
+    region: main
+  builder:
+    status: false
+    weight: -6
+    region: main
+  state_debug:
+    status: false
+    weight: -3
+    region: main
+  index_debug:
+    status: false
+    weight: -4
+    region: main
+  test_island_view:
+    status: false
+    weight: -2
+    region: null
+  collaboration:
+    status: false
+    weight: 0
+    region: end
+  controls:
+    status: true
+    weight: 0
+    region: end
+    highlight:
+      value: label
+    expand:
+      value: label
+    theme:
+      value: hidden
+    help:
+      value: hidden
+  history:
+    status: false
+    weight: 0
+    region: end
+  viewport:
+    status: false
+    weight: 0
+    region: end
+  back:
+    status: false
+    weight: 0
+    region: end
+  state:
+    status: true
+    weight: 0
+    region: end
+  operation:
+    status: false
+    weight: 0
+    region: null
+  reset_button:
+    status: false
+    weight: 0
+    region: null
+  test_island_button:
+    status: false
+    weight: 0
+    region: null
+  contextual_form:
+    status: true
+    weight: 0
+  tokens:
+    status: false
+    weight: 0
+  styles:
+    status: false
+    weight: 0
+  visibility_conditions:
+    status: false
+    weight: 0
+  test_island_contextual:
+    status: false
+    weight: 0
+  component_library:
+    status: true
+    weight: 0
+    exclude:
+      display_builder: display_builder
+      navigation: navigation
+      ui_patterns: ui_patterns
+    exclude_id: ''
+    component_status:
+      experimental: experimental
+      deprecated: '0'
+      obsolete: '0'
+    include_no_ui: false
+    show: grouped
+    preview: false
+  block_library:
+    status: true
+    weight: 0
+    exclude:
+      display_builder_test: display_builder_test
+      user: user
+      help: help
+      views: views
+      system: system
+      node: node
+    show: grouped
+    preview: false
+  preset_library:
+    status: false
+    weight: 0
+  test_island_library:
+    status: false
+    weight: 0
+  menu:
+    status: true
+    weight: 0
+  menu_preset:
+    status: false
+    weight: 0
+  menu_delete:
+    status: true
+    weight: 0
+  menu_debug:
+    status: true
+    weight: 0
+  test_island_menu:
+    status: false
+    weight: 0
+  index_debug_raw:
+    status: true
+    weight: 0
+    region: main
+  test_index_raw:
+    status: true
+    weight: 0
+    region: main
+  test_logs_raw:
+    status: false
+    weight: 0
+    region: null
+  test_minimal:
+    status: false
+    weight: 0
+    region: null
+  highlight:
+    status: true
+    weight: 0
+  menu_styles:
+    status: false
+    weight: 0
+library_flat: false
+library_tabs_display: icon
+contextual_tabs_display: icon
+weight: 0

@@ -19,13 +19,14 @@ Each Display Builder profile is a configuration entity with:
 - Metadata: a label and a description
 - The islands configuration, by type
 
-There are 5 type of islands:
+There are 6 type of islands:
 
 - `View` panels: They are displayed tabbed in the center of the toolbar, or as buttons in the start of the toolbar
 - `Button`s: they are displayed as buttons in the end of the toolbar
 - `Library` panels: They are displayed tabbed into the Library View panel
 - `Menu` items: they are displayed in the contextual menu triggered with right-click
 - `Contextual` panels: They are displayed tabbed into the contextual sidebar
+- `Floating` controls: they float over one or more `View` panels (e.g. the Canvas or Preview panel), only visible while an attached panel is the active main tab
 
 Visual positioning:
 
@@ -53,6 +54,12 @@ Some islands can be moved between 2 different regions. For example, View Panels 
 And Toolbar Buttons can be moved from one side to the other of the toolbar.
 
 ![Islands configuration](images/config-2.webp)
+
+`Floating` controls are the exception: which panel(s) they attach to is
+fixed by the plugin itself (not admin-configurable, since a floating
+control is usually built for a specific panel's own layout/CSS) - no
+region choice, just enable/disable and (if two or more attach to the same
+panel) reordering.
 
 ## Access & permissions
 

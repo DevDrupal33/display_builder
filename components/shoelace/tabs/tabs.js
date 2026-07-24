@@ -9,21 +9,48 @@
   /**
    * Synchronizes the visibility of tab panes based on active tab state.
    *
+   * Also toggles any floating controls attached to this tab group's panes.
+   * A floating control is rendered once and can ride several panes at once
+   * (data-attached-to="<selector>,<selector>,..." @see
+   * \Drupal\display_builder\ProfileViewBuilder::buildFloatingControlsRegion()),
+   * so it stays visible while ANY of its attached panes is the active tab
+   * rather than following a single one.
+   *
    * @param {NodeList} tabs - Collection of tab elements
    */
   function syncPanes(tabs) {
-    Array.from(tabs).forEach((tab) => {
+    const tabArray = Array.from(tabs);
+    const groupTargets = new Set();
+    const activeTargets = new Set();
+
+    tabArray.forEach((tab) => {
       const target = tab.getAttribute('data-target');
       const pane = document.querySelector(target);
-      if (!pane) {
+      const isActive = tab.classList.contains('shoelace-tabs__tab--active');
+
+      if (pane) {
+        pane.classList.toggle('shoelace-tabs__tab--hidden', !isActive);
+      }
+      if (target) {
+        groupTargets.add(target);
+        if (isActive) {
+          activeTargets.add(target);
+        }
+      }
+    });
+
+    // Only touch floating controls owned by this tab group (one of their
+    // attached panes is one of this group's tabs), leaving another group's
+    // controls to that group's own syncPanes() call.
+    const root = tabArray[0]?.closest('.display-builder') ?? document;
+    root.querySelectorAll('[data-attached-to]').forEach((el) => {
+      const targets = el.getAttribute('data-attached-to').split(',');
+
+      if (!targets.some((target) => groupTargets.has(target))) {
         return;
       }
-
-      if (tab.classList.contains('shoelace-tabs__tab--active')) {
-        pane.classList.remove('shoelace-tabs__tab--hidden');
-      } else {
-        pane.classList.add('shoelace-tabs__tab--hidden');
-      }
+      const anyActive = targets.some((target) => activeTargets.has(target));
+      el.classList.toggle('shoelace-tabs__tab--hidden', !anyActive);
     });
   }
 
@@ -41,17 +68,17 @@
       tab.classList.remove('shoelace-tabs__tab--active');
       tab.removeAttribute('active');
       Drupal.displayBuilder.LocalStorageManager.remove(
-        builderId,
         `tabActive.${tabId}`,
+        builderId,
       );
     });
     activeTab.classList.add('shoelace-tabs__tab--active');
     activeTab.setAttribute('active', true);
     if (saveState) {
       Drupal.displayBuilder.LocalStorageManager.set(
-        builderId,
         `tabActive.${tabId}`,
         activeTab.dataset.target,
+        builderId,
       );
     }
     syncPanes(tabs);
@@ -126,8 +153,9 @@
    */
   function restoreTabsState(builderId, tabs) {
     const tabOpen = Drupal.displayBuilder.LocalStorageManager.get(
-      builderId,
       `tabActive.${tabs.id}`,
+      null,
+      builderId,
     );
     if (!tabOpen) {
       return;
@@ -161,7 +189,9 @@
     attach(context) {
       once('shoelaceTabs', '.shoelace-tabs', context).forEach(
         (tabsComponent) => {
-          const builderId = tabsComponent.closest('.display-builder').id;
+          const builder = tabsComponent.closest('.display-builder');
+          if (!builder || !builder.id) return;
+          const builderId = builder.id;
           addSwitchingMechanism(builderId, tabsComponent);
           // Restore tabs state from local storage
           restoreTabsState(builderId, tabsComponent);

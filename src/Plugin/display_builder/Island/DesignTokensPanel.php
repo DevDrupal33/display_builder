@@ -29,6 +29,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   description: new TranslatableMarkup('Override CSS variables for the active component or block.'),
   type: IslandType::Contextual,
   modules: ['ui_skins'],
+  icon: 'braces',
 )]
 class DesignTokensPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {
 
@@ -122,16 +123,22 @@ class DesignTokensPanel extends IslandPluginBase implements IslandWithFormInterf
 
   /**
    * {@inheritdoc}
+   *
+   * No-op: a freshly attached node always has a brand-new node_id, so its
+   * own contextual panel can never already be open in the second drawer for
+   * this or any other reload to target.
    */
   public function onAttachToRoot(InstanceInterface $instance, string $node_id): array {
-    return $this->reloadWithNodeData($instance, $node_id);
+    return [];
   }
 
   /**
    * {@inheritdoc}
+   *
+   * @see self::onAttachToRoot()
    */
   public function onAttachToSlot(InstanceInterface $instance, string $node_id, string $parent_id): array {
-    return $this->reloadWithNodeData($instance, $node_id);
+    return [];
   }
 
   /**

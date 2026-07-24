@@ -28,6 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Blocks'),
   description: new TranslatableMarkup('List of available blocks.'),
   type: IslandType::Library,
+  icon: 'bricks',
 )]
 class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationFormInterface {
 
@@ -35,7 +36,8 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
 
   private const HIDE_SOURCE = [
     'component',
-    // @todo enable Wysiwyg from our UI when #3561474 is fixed.
+    // Token is deprecated in UI Patterns; 'Textfield' allow token.
+    'token',
     'wysiwyg',
   ];
 
@@ -71,6 +73,9 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
         'htmx',
         'shortcut',
       ],
+      'exclude_id' => '',
+      'show' => 'grouped',
+      'preview' => TRUE,
     ];
   }
 
@@ -80,11 +85,46 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
   public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
     $configuration = $this->getConfiguration();
 
-    $form['exclude'] = [
+    $form['display'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Display'),
+    ];
+
+    $form['display']['show'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Display blocks as'),
+      '#default_value' => $configuration['show'],
+      '#options' => [
+        'grouped' => $this->t('grouped'),
+        'flat' => $this->t('flat list'),
+      ],
+    ];
+
+    $form['display']['preview'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable preview on hover'),
+      '#description' => $this->t('Enable or disable the preview of components when hovering over them.'),
+      '#default_value' => $configuration['preview'],
+    ];
+
+    $form['configuration'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Configuration'),
+    ];
+
+    $form['configuration']['exclude'] = [
       '#type' => 'checkboxes',
-      '#title' => $this->t('Exclude modules'),
+      '#title' => $this->t('Exclude from modules'),
+      '#description' => $this->t('Select the modules which blocks have to be excluded from the block library.'),
       '#options' => $this->getProvidersOptions(),
       '#default_value' => $configuration['exclude'],
+    ];
+
+    $form['configuration']['exclude_id'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Exclude by id'),
+      '#description' => $this->t('Provide a list of id to exclude. One id by line, source id is used. Example: "help_block views_block:comments_recent-block_1 system_menu_block:account field:node:article:vid".'),
+      '#default_value' => $configuration['exclude_id'],
     ];
 
     return $form;
@@ -96,11 +136,33 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
   public function configurationSummary(): array {
     $configuration = $this->getConfiguration();
 
-    return [
-      $this->t('Excluded modules: @exclude', [
-        '@exclude' => \implode(', ', \array_filter($configuration['exclude'] ?? []) ?: [$this->t('None')]),
-      ]),
-    ];
+    $summary[] = $this->t('Blocks displayed as: <em>@list</em>', [
+      '@list' => match ($configuration['show']) {
+        'flat' => $this->t('flat'),
+        default => $this->t('grouped'),
+      },
+    ]);
+
+    if ($configuration['preview']) {
+      $summary[] = $this->t('Preview on hover enabled');
+    }
+
+    $summary[] = $this->t('Excluded modules: @exclude', [
+      '@exclude' => \implode(', ', \array_filter($configuration['exclude'] ?? []) ?: [$this->t('None')]),
+    ]);
+
+    if (\strlen($configuration['exclude_id'] ?? '') > 5) {
+      $value = \preg_split('/\r\n|\r|\n/', \trim($configuration['exclude_id'] ?? ''));
+
+      if ($value === FALSE) {
+        $summary[] = $this->t('Block(s) excluded');
+      }
+      else {
+        $summary[] = $this->formatPlural(\count($value), '@count block excluded', '@count blocks excluded by id');
+      }
+    }
+
+    return $summary;
   }
 
   /**
@@ -114,15 +176,38 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
       $configuration['exclude'] ?? [],
       self::HIDE_PROVIDER
     );
-    $categories = BlockLibrarySourceHelper::getGroupedChoices(
-      $this->getSources(),
-      $exclude_providers,
-    );
+    $exclude_by_id = \preg_split('/\r\n|\r|\n/', \trim($configuration['exclude_id'] ?? '')) ?: [];
 
     $build = [];
 
-    foreach ($categories as $category_data) {
-      $build[] = $this->buildCategorySection($category_data, $builder_id);
+    if ($configuration['show'] === 'grouped') {
+      $categories = BlockLibrarySourceHelper::getGroupedChoices(
+        $this->getSources(),
+        $exclude_providers,
+        $exclude_by_id,
+        (bool) $configuration['preview'],
+      );
+
+      foreach ($categories as $category_data) {
+        $build[] = $this->buildCategorySection($category_data, $builder_id, (bool) $configuration['preview']);
+      }
+    }
+    else {
+      $choices = BlockLibrarySourceHelper::getChoices(
+        $this->getSources(),
+        $exclude_providers,
+        $exclude_by_id,
+        (bool) $configuration['preview'],
+      );
+
+      foreach ($choices as $choice) {
+        if ($configuration['preview']) {
+          $build[] = $this->buildPlaceholderListWithPreview($builder_id, $choice['label'], $data, $choice['preview'], $choice['keywords']);
+        }
+        else {
+          $build[] = $this->buildPlaceholderList($choice['label'], $data, $choice['keywords']);
+        }
+      }
     }
 
     return [
@@ -141,26 +226,35 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
    *   The category data.
    * @param string $builder_id
    *   The builder ID.
+   * @param bool $preview
+   *   Whether to show preview on hover.
    *
    * @return array
    *   The render array for the category section.
    */
-  private function buildCategorySection(array $category_data, string $builder_id): array {
+  private function buildCategorySection(array $category_data, string $builder_id, bool $preview): array {
     $section = [];
 
     if (!empty($category_data['label'])) {
       $section[] = [
         '#type' => 'html_tag',
         '#tag' => 'h4',
-        '#attributes' => ['class' => 'db-filter-hide-on-search'],
+        '#attributes' => [
+          'class' => ['db-placeholder__group', 'db-filter-hide-on-search'],
+        ],
         '#value' => $category_data['label'],
       ];
     }
 
     foreach ($category_data['choices'] as $choice) {
-      $section[] = $choice['preview']
-        ? $this->buildPlaceholderButtonWithPreview($builder_id, $choice['label'], $choice['data'] ?? [], $choice['preview'], $choice['keywords'] ?? '')
-        : $this->buildPlaceholderButton($choice['label'], $choice['data'] ?? [], $choice['keywords'] ?? '');
+      $label = $choice['label'] ?? '-';
+
+      if ($preview && $choice['preview']) {
+        $section[] = $this->buildPlaceholderListWithPreview($builder_id, $label, $choice['data'] ?? [], $choice['preview'], $choice['keywords'] ?? '');
+      }
+      else {
+        $section[] = $this->buildPlaceholderList($label, $choice['data'] ?? [], $choice['keywords'] ?? '');
+      }
     }
 
     return $section;

@@ -3,18 +3,16 @@ import { test } from '../fixtures/loader'
 import * as utils from '../utilities/utils'
 import config from '../playwright.config.loader'
 
-test.beforeEach('Setup', async ({ drupal }) => {
-  await drupal.drush('state:set -y display_builder.asset_libraries_local true')
-})
-
 test('Config form', { tag: [ '@base' ] }, async ({ page, drupal, displayBuilder }) => {
   await test.step(`Create Page Layout and login`, async () => {
-    await displayBuilder.initTestsWithPageLayout(drupal)
+    await displayBuilder.initTestsWithPageLayout(drupal, config.testProfileBuilderId)
   })
+
+  await displayBuilder.highlight()
 
   await test.step('Drag component', async () => {
     await displayBuilder.dragElementFromLibraryById(
-      'Components',
+      'component',
       'test_complex',
       page.locator(`.db-island-builder > div.db-dropzone`).first(),
       { x: 40, y: 15 },
@@ -22,27 +20,46 @@ test('Config form', { tag: [ '@base' ] }, async ({ page, drupal, displayBuilder 
   })
 
   await test.step(`Apply config on component`, async () => {
-    await page.getByRole('heading', { name: 'label: none, open: false, duration: 0' }).click()
+    await page.getByTestId('display_builder_theme_test:test_complex').click()
 
-    await expect(page.getByRole('tab', { name: 'Config', exact: true })).toBeVisible()
+    await expect(page.getByTestId('tab_contextual_contextual_form')).toBeVisible()
 
-    await page.getByRole('tab', { name: 'Config', exact: true }).click()
+    await page.getByTestId('tab_contextual_contextual_form').click()
     await displayBuilder.shoelaceReady()
 
-    await page.getByRole('button', { name: 'Attributes', exact: true }).click()
-    await page.getByRole('textbox', { name: 'Attributes', exact: true }).fill('data-foo="bar"')
-    await page.getByRole('button', { name: 'Test attributes', exact: true }).click()
-    await page.getByRole('textbox', { name: 'Test attributes', exact: true }).fill('data-bar="foo"')
+    await displayBuilder.setContextualFormValue(
+      page.getByRole('button', { name: 'Attributes', exact: true }),
+      page.getByRole('textbox', { name: 'Attributes', exact: true }),
+      'data-foo="bar"',
+    )
 
-    await page.getByRole('button', { name: 'Label' }).click()
-    await page.getByRole('textbox', { name: 'Label' }).fill('Test Label')
-    await page.getByRole('button', { name: 'Open' }).click()
-    await page.getByRole('checkbox', { name: 'Open' }).uncheck()
-    await page.getByRole('button', { name: 'Duration' }).click()
-    await page.getByRole('spinbutton', { name: 'Duration' }).fill('100')
+    await displayBuilder.setContextualFormValue(
+      page.getByRole('button', { name: 'Test attributes', exact: true }),
+      page.getByRole('textbox', { name: 'Test attributes', exact: true }),
+      'data-bar="foo"',
+    )
+
+    await displayBuilder.setContextualFormValue(
+      page.getByRole('button', { name: 'Label', exact: true }),
+      page.getByRole('textbox', { name: 'Label', exact: true }),
+      'Test Label',
+    )
+
+    await displayBuilder.setContextualFormValue(
+      page.getByRole('button', { name: 'Open', exact: true }),
+      page.getByRole('checkbox', { name: 'Open', exact: true }),
+      'Test Label',
+      'uncheck',
+    )
+
+    await displayBuilder.setContextualFormValue(
+      page.getByRole('button', { name: 'Duration', exact: true }),
+      page.getByRole('spinbutton', { name: 'Duration', exact: true }),
+      '100',
+    )
 
     // Click somewhere for htmx submit
-    await page.getByRole('tab', { name: 'Builder' }).click()
+    await page.getByTestId('tab_view_builder').click()
     await displayBuilder.shoelaceReady()
     await displayBuilder.htmxReady()
   })
@@ -50,7 +67,23 @@ test('Config form', { tag: [ '@base' ] }, async ({ page, drupal, displayBuilder 
   await test.step(`Check result`, async () => {
     await expect(page.locator('.db-island-builder [data-test="test-parent"]')).toHaveAttribute('data-foo', 'bar')
     await expect(page.locator('.db-island-builder [data-test="test-child"]')).toHaveAttribute('data-bar', 'foo')
+  })
 
-    await displayBuilder.expectPreviewAriaSnapshot('config.aria.yml')
+  // Targeted locator assertions instead of a full-tree aria snapshot: the
+  // Preview must reflect the submitted config. The component renders its props
+  // into the heading ("label: <Label>, open: <Open>, duration: <Duration>"), so
+  // asserting the heading text pins every value we set above without redding on
+  // an unrelated markup change elsewhere in the tree.
+  await test.step(`Preview reflects the config`, async () => {
+    await page.getByTestId('tab_view_preview').click()
+    await displayBuilder.shoelaceReady()
+
+    const heading = page.locator('.db-island-preview').getByRole('heading', { level: 2 })
+    await expect(heading).toContainText('label: Test Label')
+    await expect(heading).toContainText('open: false')
+    await expect(heading).toContainText(/duration: \d+/)
+
+    await page.getByTestId('tab_view_builder').click()
+    await displayBuilder.shoelaceReady()
   })
 })

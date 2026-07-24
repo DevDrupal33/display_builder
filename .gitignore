@@ -11,3 +11,4 @@ biome.json
 /blob-report/
 /playwright/.cache/
 /.php-cs-fixer.cache
+.claude/

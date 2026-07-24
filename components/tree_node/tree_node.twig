@@ -1,0 +1,20 @@
+{% set has_children = children %}
+{% set attributes = attributes.setAttribute('data-expanded', expanded ? 'true' : 'false') %}
+<div{{ attributes.addClass('db-tree-node') }}>
+  <div class="db-tree-node__row">
+    {% if has_children %}
+      <button type="button" class="db-tree-node__toggle" aria-expanded="{{ expanded ? 'true' : 'false' }}">
+        <sl-icon name="chevron-right" class="db-tree-node__chevron"></sl-icon>
+      </button>
+    {% endif %}
+    {% if icon %}
+      <sl-icon name="{{ icon }}" class="db-tree-node__icon"></sl-icon>
+    {% endif %}
+    <span class="db-tree-node__title">{{ title }}</span>
+  </div>
+  {% if has_children %}
+    <div class="db-tree-node__children">
+      {{ children }}
+    </div>
+  {% endif %}
+</div>

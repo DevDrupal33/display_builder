@@ -1,357 +1,266 @@
-:root,
-.display-builder.sl-theme-dark {
-  --dropzone-placeholder-min-height: 1rem;
-  --dropzone-slot-min-height: 2rem;
-  --dropzone-slot-min-width: 3rem;
-  --dropzone-slot-outline-type: dashed;
-  --dropzone-slot-outline-width: 2px;
-  --dropzone-slot-outline-offset: -2px;
-  --dropzone-slot-outline-type-light: dotted;
-  --dropzone-slot-outline-width-light: 1px;
-  --dropzone-slot-outline-offset-light: -1px;
+/* Dropzone drag & drop UI + canvas node highlighting.
+   @see components/dropzone/dropzone.js, assets/js/highlight.js
 
-  /* Small visual highlight */
-  --dropzone-color-light: var(--sl-color-warning-300);
-  /* Strong visual highlight */
-  --dropzone-color-strong: var(--sl-color-warning-600);
-  /* Strong highlight for action source */
-  --dropzone-color-hover: var(--sl-color-primary-300);
-  /* Strong highlight for action target */
-  --dropzone-color-target: var(--sl-color-warning-800);
-  --dropzone-color-target-light: var(--sl-color-teal-600);
-  --dropzone-z-index-label-root: 203;
-  --dropzone-z-index-label-element: 202;
-  --dropzone-z-index-label-slot: 201;
-}
+   Idle: minimal chrome, just enough size for dropzones to remain
+   droppable targets.
 
-/* Common styles */
+   Highlighted, on any of:
+   - `.display-builder--on-drag` - dragging from the sidebar library
+   - `.display-builder--on-move` - moving something already in the builder
+   - `.display-builder--highlight-slot` - manual "Drop zones" checkbox
+   - `.display-builder--highlight-component` - manual "Components" checkbox
+   - `.display-builder--highlight-block` - manual "Blocks" checkbox
+   - `.display-builder--highlight-space` - manual "Visual spacing"
+     checkbox (breathing room around highlighted elements, see its own
+     block below)
+   The `--highlight-*` classes come from independent checkboxes in the
+   "Highlight" dropdown (assets/js/highlight.js, each persisted to
+   localStorage separately) - not mutually exclusive, and not tied to
+   on-drag/on-move at all. All of them are toggled on the outer
+   `.display-builder` element. Scoped to `.db-island-builder`: matches
+   HighlightToggle's own docblock ("highlighting only has a visible
+   effect [in the Builder pane]") and keeps this from leaking into the
+   Wireframe/Tree side panels, which stamp the same `data-node-title`
+   attribute onto their own tree rows (@see
+   BuilderPanel::buildNodeAttributes(), reused by WireframePanelBase.php and
+   TreePanel.php) and already have their own separate highlight rules
+   anyway (@see components/layer/layer.css).
+
+   Node highlighting ("Components"/"Blocks") is deliberately not tied to
+   on-drag/on-move: mid-drag, only "where can I drop this" matters -
+   showing every placed node's title too would compete with that one
+   signal. The manual checkboxes are a different use case (browsing the
+   canvas's structure at rest), where all of this earns its keep.
+
+   Four colors distinguish what's being shown:
+   - --dropzone-color-*: "where you can drop" (a slot dropzone)
+   - --root-color-*: the root dropzone ("Base container") - not really a
+     slot, so not amber either
+   - --component-color-* and --block-color-*: "what's already there" -
+     split by node type (@see BuilderPanel::buildNodeAttributes(), a block's
+     own root carries `data-node-type`, a component's never does) */
+
 .db-dropzone {
   position: relative;
-  display: inline-block;
-  box-sizing: border-box;
-  width: 100%;
-  /* Will fail scroll of Sortable */
-  /* min-height: var(--dropzone-slot-min-height); */
+  min-width: var(--dropzone-slot-min-width);
+  min-height: var(--dropzone-slot-min-height);
+  transition:
+    outline-color 0.15s ease,
+    background-color 0.15s ease,
+    margin 0.15s ease;
 }
 
-/* Because builder placeholders are normal button, reset hover as we want to
-handle it instead of shoelace */
-.db-placeholder.shoelace-button::part(base):hover {
-  color: var(--sl-color-neutral-700);
-  background-color: var(--sl-color-neutral-0);
-}
-
-/** Normal context, when nothing happen yet **/
-
-.db-island-builder {
-  .db-dropzone[data-component-id][data-slot-id]:empty {
-    min-width: var(--dropzone-slot-min-width);
-    min-height: var(--dropzone-slot-min-height);
+.display-builder--on-drag,
+.display-builder--on-move {
+  /* Empty canvas has nothing to give it height - grow it for the
+     duration of the drag so there's always somewhere to release the
+     mouse, not just a thin 2rem strip. */
+  .db-island-builder .db-dropzone--root:empty {
+    min-height: 60vh;
   }
 }
 
-/* Act on the dropzone root */
-
-/* @todo Start when builder is empty, show root and label to help start */
-/* Same when start dragging to avoid non trigger of HTMX when the mouse is out of the dropzone. */
-.display-builder--onDrag .db-dropzone--root {
-  /* width: 98%; */
-  /* height: 100%; */
-  /* min-height: 50vh; */
-}
-
-.db-dropzone--root:empty {
-  width: 98%;
-  height: 100%;
-  min-height: 50vh;
-  margin: 0 0 0.5rem 1rem;
-  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target-light) var(--dropzone-slot-outline-type-light);
-}
-
-.shoelace-drawer .db-dropzone--root:empty {
-  margin-top: 1.5rem;
-  margin-left: 0;
-}
-
-.display-builder--fullscreen .db-dropzone--root {
-  width: 98%;
-  min-height: 10vh;
-  margin: 0 0 0 1rem;
-}
-
-/* Enough to make something with empty slot selectable */
-[data-node-id][data-component-id]:has([data-slot-id]:empty) {
-  min-width: var(--dropzone-placeholder-min-height);
-  min-height: var(--dropzone-placeholder-min-height);
-}
-
-/* Highlight empty slots */
-[data-slot-id]:empty {
-  margin: 0.2rem;
-  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
-}
-
-/** Hover context, when something is to be dropped **/
-
-/* When nothing happen, slightly highlight containers of slot */
-.db-island-builder {
-  .db-dropzone [data-component-id]:not([data-slot-id]) {
-    outline: var(--dropzone-slot-outline-width-light) var(--dropzone-color-light) var(--dropzone-slot-outline-type-light);
-  }
-
-  /* On hover, highlight only possible selectable elements */
-  .db-dropzone [data-node-id]:hover,
-  .db-dropzone [data-node-id]:not([data-component-id]):hover,
-  .db-placeholder[data-node-id]:hover {
-    position: relative;
-    cursor: pointer !important;
-    outline: var(--dropzone-slot-outline-width) var(--dropzone-color-hover) var(--dropzone-slot-outline-type) !important;
-    outline-offset: var(--dropzone-slot-outline-offset-light) !important;
-  }
-
-  .db-dropzone [data-node-id]:hover::before,
-  .db-dropzone [data-node-id]:not([data-component-id]):hover::before,
-  .db-placeholder[data-node-id]:hover::before {
-    position: absolute;
-    z-index: var(--dropzone-z-index-label-element, 1);
-    top: -16px;
-    left: 0;
-    display: inline-block;
-    width: auto;
-    margin-top: 0;
-    margin-left: 0;
-    padding: 0 3px;
-    content: attr(data-node-title);
-    text-align: left;
-    white-space: nowrap;
-    color: var(--db-background-color);
-    background-color: var(--dropzone-color-hover);
-    font-size: 0.9rem;
-  }
-
-  .db-dropzone--ghost,
-  .db-dropzone--chosen {
-    opacity: 0.4;
-    border: var(--dropzone-slot-outline-width) var(--dropzone-color-hover) var(--dropzone-slot-outline-type);
-  }
-
-  .db-dropzone--chosen {
-    opacity: 0.8;
-  }
-
-  .db-draggable--chosen {
-    opacity: 0.8;
-  }
-}
-
-/* Try to have highlight mode full for builder. */
-.display-builder--highlight {
-  .db-island-builder .db-dropzone[data-component-id][data-slot-id]:empty {
-    padding: 1rem 2rem;
-  }
-  .db-island-builder .db-dropzone--root {
-    padding: 0.3rem;
-  }
-  /* Expand empty slot on drag to be able to move and instance */
-  .db-island-builder [data-slot-id]:hover,
-  .db-island-builder [data-slot-id]:empty,
-  .display-builder--onDrag .db-island-builder [data-slot-id]:empty {
-    min-width: var(--dropzone-slot-min-width);
-    min-height: var(--dropzone-slot-min-height);
-  }
-
-  /* When start dragging something, highlight strongly targets and show labels */
-  .db-island-builder .db-dropzone--root,
-  .display-builder--onDrag .db-island-builder .db-dropzone--root {
-    outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target-light) var(--dropzone-slot-outline-type) !important;
-    outline-offset: 0 !important;
-  }
-
-  .db-island-builder [data-slot-id],
-  .display-builder--onDrag .db-island-builder [data-slot-id] {
-    padding: 0.5rem;
-    outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
-    outline-offset: var(--dropzone-slot-outline-offset);
-  }
-
-  /* Builder only highlight */
+.display-builder--on-drag,
+.display-builder--on-move,
+.display-builder--highlight-slot {
   .db-island-builder {
-    .db-dropzone [data-component-id]:not([data-slot-id]) {
-      padding: 0.7rem;
-      outline: var(--dropzone-slot-outline-width) var(--dropzone-color-light) var(--dropzone-slot-outline-type);
+    /* Every dropzone is a potential target: light outline, roomier hit
+       area than at rest. */
+    .db-dropzone {
+      min-width: var(--dropzone-slot-min-width-dragging);
+      min-height: var(--dropzone-slot-min-height-dragging);
+      outline: var(--dropzone-slot-outline-width-light) var(--dropzone-slot-outline-type-light) var(--dropzone-color-light);
+      outline-offset: var(--dropzone-slot-outline-offset-light);
     }
-    .db-dropzone [data-node-id],
-    .db-dropzone [data-node-id]:not([data-component-id]),
-    .db-placeholder[data-node-id] {
-      position: relative;
-      margin: 0.5rem;
-      padding: 0.5rem;
-      cursor: pointer !important;
-      outline: var(--dropzone-slot-outline-width) var(--dropzone-color-strong) var(--dropzone-slot-outline-type);
-      outline-offset: var(--dropzone-slot-outline-offset);
+    .db-dropzone--root {
+      outline-color: var(--root-color-border);
     }
-    .db-dropzone [data-node-id]::before,
-    .db-dropzone [data-node-id]:not([data-component-id])::before,
-    .db-placeholder[data-node-id]::before {
+
+    /* Title label. A slot dropzone carries its slot title in
+       `data-slot-title` (ucfirst'd); the root dropzone has no slot
+       title of its own, only `data-node-title`.
+       @see BuilderPanel::buildComponentSlot()/buildRootDropzone(),
+       BuilderPanel::buildSlotAttributes()
+
+       Position splits by kind so labels collide far less often: plain
+       slot labels stay on the left, node labels (below) go top-right,
+       root is centered - three different spots so a slot or a node
+       flush against root (zero padding between the two boundaries,
+       common for a component's outer slot placed directly at root)
+       never lands on top of root's own label. */
+    .db-dropzone[data-slot-title]::before,
+    .db-dropzone--root::before {
       position: absolute;
-      z-index: var(--dropzone-z-index-label-element, 1);
+      z-index: var(--db-z-label-slot);
       top: 0;
       left: 0;
-      display: inline-block;
-      padding: 0 3px;
+      overflow: hidden;
+      max-width: var(--dropzone-label-max-width);
+      padding: 0.1rem 0.4rem;
+      content: attr(data-slot-title);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      pointer-events: none;
+      color: var(--dropzone-color-text);
+      background-color: var(--dropzone-color-bg);
+      font-size: var(--sl-font-size-x-small);
+      /* Forced: this label sits over arbitrary canvas content (e.g. a
+         heading), whose own font-weight/color would otherwise inherit
+         straight through - it needs to read as chrome, not as part of
+         whatever it's layered on top of. */
+      font-weight: normal;
+      line-height: 1.4;
+    }
+
+    .db-dropzone--root::before {
+      z-index: var(--db-z-label-root);
+      top: -10px;
+      left: 50%;
       content: attr(data-node-title);
-      text-align: left;
-      color: var(--db-background-color);
-      background-color: var(--dropzone-color-hover);
-      font-size: 14px;
+      transform: translateX(-50%);
+      color: var(--root-color-text);
+      background-color: var(--root-color-bg);
     }
 
-    .db-dropzone [data-node-id]::before,
-    .db-dropzone [data-node-id]:not([data-component-id])::before,
-    .db-placeholder[data-node-id]::before {
-      white-space: nowrap;
-      background-color: var(--dropzone-color-strong);
+    /* The dropzone currently under the pointer: Sortable parents its
+       ghost placeholder (ghostClass: 'db-dropzone--ghost', @see
+       dropzone.js) directly inside whichever dropzone is the live drop
+       target, so :has() picks it out with no extra JS. Stronger outline
+       tier + a tinted background. */
+    .db-dropzone:has(> .db-dropzone--ghost) {
+      outline: var(--dropzone-slot-outline-width-light) var(--dropzone-slot-outline-type) var(--dropzone-color-target);
+      outline-offset: var(--dropzone-slot-outline-offset-light);
+      background-color: color-mix(in sRGB, var(--dropzone-color-target) 10%, transparent);
+
+      /* Two slot dropzones can still sit flush against each other (both
+         on the left, e.g. a slot placed directly inside another slot
+         with no padding between them) - whichever has the higher
+         resting z-index would otherwise win regardless of which one is
+         actually the live target. Force the target's own label on top:
+         it's the one piece of information that matters while
+         dragging. */
+      &::before {
+        z-index: calc(var(--db-z-label-root) + 1);
+      }
     }
-    .db-dropzone [data-node-id]:hover::before,
-    .db-dropzone [data-node-id]:not([data-component-id]):hover::before,
-    .db-placeholder[data-node-id]:hover::before {
-      white-space: nowrap;
-      background-color: var(--dropzone-color-hover) !important;
+  }
+}
+
+/* Node highlighting - split into two independent checkboxes so a
+   component-heavy or block-heavy canvas can be highlighted without the
+   other kind adding noise. Both share the same position (top-right,
+   flush - root's own label is centered instead, see above, so the two
+   no longer compete for the same corner even when a node sits flush
+   against root) and only differ in selector (component vs. block, see
+   below) and color, so each is a fully separate block rather than a
+   shared base + override:
+   sharing would mean checking only one of the two still gives the other
+   kind bare outline/label *structure* with no color set, since the
+   trigger class it'd need for its own color wouldn't be present.
+   @see the file banner comment above for why on-drag/on-move don't get
+   either of these. */
+.display-builder--highlight-component {
+  .db-island-builder {
+    /* A placed component's own root - every instance carries
+       data-node-title (@see BuilderPanel::buildNodeAttributes()); the
+       :not() tells it apart from a slot dropzone, whose data-node-title
+       is its *parent* component's title, not its own
+       (@see BuilderPanel::buildSlotAttributes()). Excludes
+       [data-node-type], which only a block's own root carries. */
+    [data-node-title]:not(.db-dropzone, [data-node-type]) {
+      position: relative;
+      outline: var(--dropzone-slot-outline-width-light) var(--dropzone-slot-outline-type-light) var(--component-color-outline);
+      outline-offset: var(--dropzone-slot-outline-offset-light);
+
+      &::before {
+        position: absolute;
+        z-index: var(--db-z-label-element);
+        top: 0;
+        right: 0;
+        overflow: hidden;
+        max-width: var(--dropzone-label-max-width);
+        padding: 0.1rem 0.4rem;
+        content: attr(data-node-title);
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        pointer-events: none;
+        color: var(--component-color-text);
+        background-color: var(--component-color-bg);
+        font-size: var(--sl-font-size-x-small);
+        font-weight: normal;
+        line-height: 1.4;
+      }
     }
   }
+}
 
-  .db-island-builder [data-slot-id]::after,
-  .display-builder--onDrag .db-island-builder [data-slot-id]::after {
-    position: absolute;
-    z-index: var(--dropzone-z-index-label-slot);
-    top: -10px;
-    right: -10px;
-    display: inline-block;
-    padding: 0 3px;
-    content: attr(title);
-    text-align: left;
-    white-space: nowrap;
-    color: var(--db-background-color);
-    background-color: var(--dropzone-color-target);
-    font-size: 0.9rem;
-  }
-  /* Base container style when starting empty with nothing */
-  .db-island-builder .db-dropzone--root:empty::after,
-  .db-island-builder .db-dropzone.db-dropzone--root::after,
-  .display-builder--onDrag .db-island-builder .db-dropzone.db-dropzone--root::after {
-    position: absolute;
-    z-index: var(--dropzone-z-index-label-root);
-    top: -9px;
-    right: -2px;
-    display: inline-block;
-    padding: 0 3px;
-    content: attr(data-node-title);
-    text-align: left;
-    color: var(--db-background-color);
-    background-color: var(--dropzone-color-target-light);
-    font-size: 0.7rem;
-  }
-  .db-island-builder .db-dropzone.db-dropzone--root::before {
-    font-size: 0.9rem;
-  }
+.display-builder--highlight-block {
+  .db-island-builder {
+    /* A placed block's own root - unlike a component, always carries
+       data-node-type (@see BuilderPanel::buildNodeAttributes(), called
+       with the block's source_id as $node_type). */
+    [data-node-title][data-node-type]:not(.db-dropzone) {
+      position: relative;
+      outline: var(--dropzone-slot-outline-width-light) var(--dropzone-slot-outline-type-light) var(--block-color-outline);
+      outline-offset: var(--dropzone-slot-outline-offset-light);
 
-  .db-island-builder .db-dropzone *:not([data-slot-id]):has([data-slot-id])::before,
-  .display-builder--onDrag .db-island-builder .db-dropzone *:not([data-slot-id]):has([data-slot-id])::before {
-    position: absolute;
-    z-index: var(--dropzone-z-index-label-element, 1);
-    top: -2px;
-    left: -2px;
-    display: inline-block;
-    padding: 0 3px;
-    content: attr(data-node-title);
-    text-align: left;
-    color: var(--db-background-color);
-    background-color: var(--dropzone-color-strong);
-    font-size: 14px;
-  }
-  .db-island-builder .db-dropzone *:not([data-slot-id]):has([data-slot-id])::before {
-    z-index: calc(var(--dropzone-z-index-label-element, 1) + 1);
-    top: -2px;
-    left: -2px;
-    width: auto;
-    max-height: 2rem;
-    margin-top: 0;
-    margin-left: 0;
+      &::before {
+        position: absolute;
+        z-index: var(--db-z-label-element);
+        top: 0;
+        right: 0;
+        overflow: hidden;
+        max-width: var(--dropzone-label-max-width);
+        padding: 0.1rem 0.4rem;
+        content: attr(data-node-title);
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        pointer-events: none;
+        color: var(--block-color-text);
+        background-color: var(--block-color-bg);
+        font-size: var(--sl-font-size-x-small);
+        font-weight: normal;
+        line-height: 1.4;
+      }
+    }
   }
 }
 
-/** On drag context, when something is selected **/
-
-/* Reset the slight highlight when nothing happen */
-.display-builder--onDrag .db-dropzone [data-component-id][data-node-id]:not([data-slot-id]) {
-  position: relative;
-  outline: 0 none transparent;
-  outline-offset: 0;
+/* "Visual spacing" checkbox: extra margin around every highlighted
+   element so adjacent outlines/labels get breathing room instead of
+   touching or crowding each other - independent of which of Drop
+   zones/Components/Blocks (or none) is also active, since it's about
+   the layout, not about what's shown.
+   Margin (not padding) so it's the gap *between* dropzones/nodes rather
+   than shrinking their own content area. */
+.display-builder--highlight-space {
+  .db-island-builder {
+    .db-dropzone--root,
+    .db-dropzone:not(.db-dropzone--root),
+    [data-node-title]:not(.db-dropzone) {
+      margin: var(--dropzone-space-margin);
+      padding: var(--dropzone-space-padding);
+    }
+  }
 }
 
-/* From library drag need more visual hint */
-.db-island-library .db-draggable--chosen {
-  opacity: 0.8;
-}
+/* Highlight dropdown menu itself (not the canvas): a colored dot next to
+   Drop zones/Components/Blocks previews which color each checkbox
+   controls before checking anything. The dot is a plain `icon` prop
+   (@see HighlightToggle::build(), components/shoelace/menu/menu.twig) -
+   tinted here rather than a dedicated swatch element, since Shoelace's
+   <sl-icon> SVGs already use fill: currentColor, so setting `color` on
+   the icon is enough. */
+[data-highlight-menu] {
+  sl-menu-item[value="slot"] sl-icon[slot="prefix"] {
+    color: var(--dropzone-color-strong);
+  }
 
-/* Completely hide the drag element to avoid confusion with what's under the mouse when selected */
-.db-draggable--drag,
-.db-dropzone--drag {
-  opacity: 0 !important;
-}
+  sl-menu-item[value="component"] sl-icon[slot="prefix"] {
+    color: var(--component-color-outline);
+  }
 
-/* Reset the hover effect when on drag to focus on possible targets */
-.display-builder--onDrag .db-dropzone [data-node-id]:hover,
-.display-builder--onDrag .db-dropzone [data-node-id]:not([data-component-id]):hover,
-.display-builder--onDrag .db-placeholder[data-node-id]:hover {
-  outline: 0 none transparent;
-  outline-offset: 0;
-}
-
-/* When on drag reset the normal slight highlight */
-.display-builder--onDrag .db-dropzone > * {
-  outline: 0 none transparent;
-  outline-offset: 0;
-}
-
-/* When moving something inside the builder highlight the slots. */
-.display-builder--onMove .db-island-builder [data-slot-id] {
-  padding: 0;
-  outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
-  outline-offset: var(--dropzone-slot-outline-offset);
-}
-
-/* Fix for block of menu 'tools' which display without border / shadow */
-.db-dropzone--highlighted:has(span.db-block-system-menu-blocktools) {
-  display: inline-grid;
-}
-
-/* Manual fix to give token more space to be able to grab */
-.display-builder [data-node-id].db-block-token,
-.display-builder [data-node-id].db-block-wysiwyg {
-  padding: 1px 0 0 1px;
-}
-
-/* Manual fix for some inline block */
-/* @todo find a better solution */
-.display-builder [data-node-id].db-block-system-branding-block,
-.display-builder [data-node-id].db-block-token,
-.display-builder [data-node-id].db-block-icon-renderable,
-.display-builder [data-node-id].db-placeholder-token,
-.display-builder [data-node-id][class*="db-block-system-menu"] {
-  display: inline-block;
-}
-
-.display-builder [data-node-id].db-block-wysiwyg {
-  display: inline;
-}
-
-/* If token or wysiwyg has a block tag, set to block */
-.display-builder [data-node-id].db-block-wysiwyg:has(address, article, aside, blockquote, canvas, dd, div, dl, dt, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hr, li, main, nav, ol, p, pre, section, table, tfoot, ul, video),
-.display-builder [data-node-id].db-block-token:has(address, article, aside, blockquote, canvas, dd, div, dl, dt, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hr, li, main, nav, ol, p, pre, section, table, tfoot, ul, video) {
-  display: block;
-}
-/* .display-builder [data-node-id].db-block-wysiwyg, */
-.display-builder [data-node-id].db-block-system-breadcrumb-block {
-  display: block;
+  sl-menu-item[value="block"] sl-icon[slot="prefix"] {
+    color: var(--block-color-outline);
+  }
 }

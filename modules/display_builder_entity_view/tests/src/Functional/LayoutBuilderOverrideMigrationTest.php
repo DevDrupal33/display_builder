@@ -28,7 +28,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 #[RunTestsInSeparateProcesses]
 final class LayoutBuilderOverrideMigrationTest extends BrowserTestBase {
 
-  public const PROFILE_ID = 'default';
+  public const PROFILE_ID = 'test_min';
 
   /**
    * {@inheritdoc}
@@ -43,13 +43,13 @@ final class LayoutBuilderOverrideMigrationTest extends BrowserTestBase {
     'display_builder',
     'display_builder_test',
     'display_builder_entity_view',
-    'display_builder_entity_view_override_test',
+    'display_builder_entity_view_layout_override_test',
   ];
 
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected $defaultTheme = 'display_builder_theme_test';
 
   /**
    * The entity type manager service.
@@ -65,16 +65,7 @@ final class LayoutBuilderOverrideMigrationTest extends BrowserTestBase {
     parent::setUp();
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
-
-    // Create and log in user.
-    $admin_user = $this->drupalCreateUser([
-      'administer node display',
-      'access administration pages',
-      'create display_builder_test content',
-      'edit any display_builder_test content',
-      'use display builder ' . self::PROFILE_ID,
-      'configure all display_builder_test node layout overrides',
-    ]);
+    $admin_user = $this->createUser([], 'test_db_layout_override', TRUE);
     $this->drupalLogin($admin_user);
   }
 
@@ -85,7 +76,7 @@ final class LayoutBuilderOverrideMigrationTest extends BrowserTestBase {
     // Create Layout Builder override for a node.
     // Node from config has already a layout builder field.
     $node = $this->createNode([
-      'type' => 'display_builder_test',
+      'type' => 'db_layout_override_test',
       'title' => 'Test layout builder override',
     ]);
     $nid = $node->id();
@@ -100,7 +91,7 @@ final class LayoutBuilderOverrideMigrationTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('Layout builder OVERRIDE config: NEW');
 
     // Enable Display Builder override.
-    $this->drupalGet('admin/structure/types/manage/display_builder_test/display/default');
+    $this->drupalGet('admin/structure/types/manage/db_layout_override_test/display/default');
     $edit = [
       'profile' => self::PROFILE_ID,
       'override_status' => 1,

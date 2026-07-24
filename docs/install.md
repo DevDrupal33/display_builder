@@ -1,7 +1,7 @@
 # Installation
 
-!!!warning "Drupal 11.3"
-    Display Builder targets Drupal **11.3**. No Drupal 10.x support is planned unless sponsored.
+!!!warning "Drupal 11.3+"
+    Display Builder targets Drupal **11.3+**. No Drupal 10.x support is planned unless sponsored.
 
 Like any other Drupal module, it is recommended to use composer:
 

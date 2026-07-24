@@ -3,7 +3,6 @@
  */
 export default {
   dbList: 'admin/structure/display-builder/instances',
-  dbViewUrl: '/admin/structure/display-builder/instance/{instance_id}',
 
   viewsDbList: 'admin/structure/views/display-builder',
 
@@ -11,20 +10,31 @@ export default {
   pageAddUrl: 'admin/structure/page-layout/add',
   pageViewUrl: 'admin/structure/page-layout/{instance_id}/builder',
 
-  devAddInstance: 'admin/structure/display-builder/instance/add',
-
   // PageLayout::getPrefix()
   pagePrefix: 'page_layout__',
   // EntityViewDisplay::getPrefix()
   entityPrefix: 'entity_view__',
   // DisplayExtender::getPrefix()
   viewsPrefix: 'views__',
-  // StandaloneEntity::getPrefix()
-  develPrefix: 'standalone__',
 
-  keyFullscreen: 'Shift+F',
-  keyHighlight: 'Shift+H',
+  keyExpand: 'Shift+E',
 
   startDrawerID: '#db-first-drawer',
   endDrawerID: '#db-second-drawer',
+
+  // @see labels values in tests/modules/display_builder_test/config/install/display_builder.profile.*.yml
+  testProfileFullId: 'test_base',
+  testProfileFull: 'Test full',
+  testProfileBuilderId: 'test_builder',
+  testProfileBuilder: 'Test builder',
+  testProfileScaffoldId: 'test_scaffold',
+  testProfileScaffold: 'Test scaffold',
+  testProfileTreeId: 'test_tree',
+  testProfileTree: 'Test tree',
+  testProfileCollaborationId: 'test_collaboration',
+  testProfileCollaboration: 'Test collaboration',
+  testProfileExtraId: 'test_extra',
+  testProfileExtra: 'Test extra',
+  testProfileMin: 'Test min',
+  testProfileMinId: 'test_min',
 }

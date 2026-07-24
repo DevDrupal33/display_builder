@@ -45,7 +45,7 @@ class ComponentLibraryDefinitionHelper {
     $uiPatternsSdcManager = $this->sdcManager;
     $definitions = $uiPatternsSdcManager->getNegotiatedSortedDefinitions();
     $filtered = $grouped = $sources = [];
-    $exclude_by_id = \preg_split('/\s+/', \trim($configuration['exclude_id'] ?? '')) ?: [];
+    $exclude_by_id = \preg_split('/\r\n|\r|\n|\s+/', \trim($configuration['exclude_id'] ?? '')) ?: [];
     /** @var \Drupal\ui_patterns\SourceWithChoicesInterface $source */
     $source = $this->sourceManager->createInstance('component');
 

@@ -60,7 +60,7 @@ final class ApiPublishingControllerTest extends DisplayBuilderKernelTestBase {
     $this->installConfig(['system', 'display_builder', 'ui_patterns', 'display_builder_test']);
 
     // Create a real builder entity.
-    $this->instance = $this->createDisplayBuilderInstance('test', 'test_instance');
+    $this->instance = $this->createDisplayBuilderInstance('test_base', 'test_instance');
     $this->instance->save();
 
     // Get the controller from the container.

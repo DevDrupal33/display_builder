@@ -53,17 +53,17 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
   /**
    * The field items where the override is stored.
    */
-  private ?FieldItemListInterface $field = NULL;
+  protected ?FieldItemListInterface $field = NULL;
 
   /**
    * The display buildable plugin manager.
    */
-  private DisplayBuildablePluginManager $displayBuildableManager;
+  protected DisplayBuildablePluginManager $displayBuildableManager;
 
   /**
    * The overridden display.
    */
-  private ?DisplayBuilderEntityDisplayInterface $display;
+  protected ?DisplayBuilderEntityDisplayInterface $display;
 
   /**
    * {@inheritdoc}

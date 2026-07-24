@@ -17,6 +17,18 @@ display_builder.profile.*:
       label: 'Islands'
       sequence:
         type: display_builder.islands.[%key]
+    library_flat:
+      type: boolean
+      label: 'Flatten library panels'
+    library_tabs_display:
+      type: display_builder.panels_display
+      label: 'Show library tabs as'
+    contextual_tabs_display:
+      type: display_builder.panels_display
+      label: 'Show contextual tabs as'
+    view_panels_display:
+      type: display_builder.panels_display
+      label: 'Show View panels as'
     weight:
       type: weight
       label: Weight
@@ -63,7 +75,7 @@ display_builder.islands.controls:
   mapping:
     highlight:
       type: display_builder.toolbar.button
-    fullscreen:
+    expand:
       type: display_builder.toolbar.button
     theme:
       type: display_builder.toolbar.button
@@ -87,6 +99,8 @@ display_builder.islands.component_library:
       type: boolean
     show:
       type: string
+    preview:
+      type: boolean
     show_grouped:
       type: boolean
       deprecated: "The 'show_grouped' config schema is deprecated in display_builder:1.0.0-beta5 and is removed from display_builder:1.0.0-rc1. Use the 'show' config schema instead."
@@ -105,9 +119,17 @@ display_builder.islands.block_library:
       sequence:
         type: string
     exclude_id:
-      type: sequence
-      sequence:
-        type: string
+      type: string
+    show:
+      type: string
+    preview:
+      type: boolean
+
+display_builder.islands.preset_library:
+  type: display_builder.islands
+  mapping:
+    preview:
+      type: boolean
 
 display_builder.islands.collaboration:
   type: display_builder.islands
@@ -133,6 +155,13 @@ display_builder.islands.back:
   mapping:
     back:
       type: display_builder.toolbar.button
+
+display_builder.islands.scaffold:
+  type: display_builder.islands
+  mapping:
+    components:
+      type: string
+      label: 'Component IDs to render'
 
 display_builder.pattern_preset.*:
   type: config_entity
@@ -167,6 +196,16 @@ ui_patterns_slot_source.third_party_setting.styles:
   mapping:
     styles:
       type: ui_styles.selected_mapping
+
+display_builder.panels_display:
+  type: string
+  label: 'Panels display'
+  constraints:
+    Choice:
+      - label
+      - icon
+      - icon_label
+    FullyValidatable: ~
 
 display_builder.toolbar.button:
   label: 'Label and icon visibility'

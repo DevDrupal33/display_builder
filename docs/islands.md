@@ -1,12 +1,13 @@
 # Available islands
 
-There are 5 type of islands:
+There are 6 type of islands:
 
 - `View` panels: They are displayed tabbed in the center of the toolbar, or as buttons in the start of the toolbar
 - `Button`s: they are displayed as buttons in the end of the toolbar
 - `Library` panels: They are displayed tabbed into the Library View panel.
 - `Menu` items: they are displayed in the contextual menu triggered with right-click.
 - `Contextual` panels: They are displayed tabbed into the contextual sidebar.
+- `Floating` controls: they float over one or more `View` panels, only visible while an attached panel is the active main tab.
 
 Visual positioning:
 
@@ -28,28 +29,38 @@ By default, 3 libraries are available:
 
 ![Library](images/islands/library.webp)
 
-### Builder
+### Canvas
 
 The Display Builder main island. Build the display with dynamic preview.
 
-![Builder](images/islands/builder.webp)
+![Canvas](images/islands/builder.webp)
 
-### Layers
+### Wireframe
 
-Manage hierarchical layer view of elements without preview.
+Schematic hierarchical view of elements without preview.
 
-![Layers](images/islands/layers.webp)
+![Wireframe](images/islands/layers.webp)
 
-Layers is better for dropping components and blocks when the preview in the
-builder panel is making things complicated.  
+The wireframe is better for dropping components and blocks when the preview in
+the canvas panel is making things complicated.  
 For examples: a modal, a sliding slider, a collapsing accordion is hard to
 manipulate when built.
 
-### Tree
+### Scaffold
+
+Same schematic view as the Wireframe, except that a configurable allowlist of
+layout components (e.g. Bootstrap grid rows) is rendered with its real output,
+so the actual layout nesting is visible at a glance. Everything else stays a
+plain wireframe card.
+
+Which components count as "layout" is theme-specific, hence a configurable
+list rather than a hardcoded one — set it in the island's configuration form.
+
+### Navigator
 
 Hierarchical view of components and blocks.
 
-![Library](images/islands/tree.webp)
+![Navigator](images/islands/tree.webp)
 
 ### Preview
 
@@ -106,12 +117,6 @@ See [real-time collaboration documentation](realtime-collaboration.md).
 
 ![Preview](images/islands/back.webp)
 
-### Viewport switcher
-
-Change main region width according to breakpoints.
-
-![Preview](images/islands/viewport.webp)
-
 ### Back
 
 Exit the display builder and go back to admin UI.
@@ -140,7 +145,7 @@ See [patterns presets documentation](pattern-presets.md).
 
 ## Menu items
 
-Available on secondary click on a block, component or slot, in Builder or Layer panels:
+Available on secondary click on a block, component or slot, in Canvas or Wireframe panels:
 
 ![Logs](images/islands/menu.webp)
 
@@ -171,6 +176,26 @@ Override CSS variables for the active component or block.
 ### Visibility
 
 Set visibility conditions for the active component or block.
+
+## Floating controls
+
+A floating control is pinned to the top-left of the View panel(s) it's
+attached to, below the toolbar, only visible while one of those panels is
+the active main tab. Unlike Toolbar buttons, a floating control lives
+alongside a specific panel's own content because it's usually meaningless
+anywhere else (e.g. it depends on CSS scoped to that panel).
+
+### Highlight
+
+Highlight zones to ease drag and move around. Attached to the Canvas and
+Scaffold panels, where highlighting has a visible effect.
+
+### Viewport switcher
+
+Change main region width according to breakpoints. Attached to both the
+Canvas and Preview panels.
+
+![Preview](images/islands/viewport.webp)
 
 ## See also
 

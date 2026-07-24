@@ -2,7 +2,7 @@
   "name": "drupal_playwright_test",
   "license": "LGPL-3.0-or-later",
   "description": "Tests e2e for Drupal. See tests/src/Playwright/tests",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "main": "index.js",
   "repository": {
@@ -10,7 +10,7 @@
     "url": "git@git.drupal.org:project/display_builder.git"
   },
   "scripts": {
-    "pw": "npx playwright test -c playwright.local.config.ts --project chromium",
+    "pw": "npx playwright test -c playwright.local.config.ts --project firefox",
     "test": "npm run pw -- -g @base",
     "test:failed": "npm run pw -- --last-failed",
     "test:headed": "npm run pw -- --headed",
@@ -20,7 +20,8 @@
     "test:clean": "rm -rf playwright-report test-results"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.61.1",
     "@types/node": "^24.12.0",
     "dotenv": "^17.3.1",
     "winston": "^3.19.0"

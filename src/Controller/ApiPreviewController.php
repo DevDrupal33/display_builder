@@ -19,22 +19,13 @@ class ApiPreviewController extends ControllerBase {
 
   use RenderableBuilderTrait;
 
-  /**
-   * The Pattern preset storage.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected $presetConfigStorage;
-
   public function __construct(
     #[Autowire(service: 'plugin.manager.component_story')]
     private StoryPluginManager $storyPluginManager,
     #[Autowire(service: 'plugin.manager.sdc')]
     private ComponentPluginManager $componentManager,
     private RendererInterface $renderer,
-  ) {
-    $this->presetConfigStorage = $this->entityTypeManager()->getStorage('pattern_preset');
-  }
+  ) {}
 
   /**
    * Get block preview.
@@ -46,13 +37,7 @@ class ApiPreviewController extends ControllerBase {
    *   The HTML response.
    */
   public function getBlockPreview(string $block_id): HtmlResponse {
-    $build = $this->generateBlock($block_id);
-
-    $html = $this->renderer->renderRoot($build);
-    $response = new HtmlResponse();
-    $response->setContent($html);
-
-    return $response;
+    return $this->buildResponse($this->generateBlock($block_id));
   }
 
   /**
@@ -66,16 +51,10 @@ class ApiPreviewController extends ControllerBase {
    */
   public function getPresetPreview(string $preset_id): HtmlResponse {
     /** @var \Drupal\display_builder\Entity\PatternPresetInterface $preset */
-    $preset = $this->presetConfigStorage->load($preset_id);
+    $preset = $this->entityTypeManager()->getStorage('pattern_preset')->load($preset_id);
     $data = $preset->getSources([], FALSE);
 
-    $build = $this->renderSource($data);
-
-    $html = $this->renderer->renderRoot($build);
-    $response = new HtmlResponse();
-    $response->setContent($html);
-
-    return $response;
+    return $this->buildResponse($this->renderSource($data), $preset->get('description'));
   }
 
   /**
@@ -111,11 +90,7 @@ class ApiPreviewController extends ControllerBase {
       }
     }
 
-    $html = $this->renderer->renderRoot($build);
-    $response = new HtmlResponse();
-    $response->setContent($html);
-
-    return $response;
+    return $this->buildResponse($build, $this->getComponentDescription($component_id));
   }
 
   /**
@@ -136,6 +111,69 @@ class ApiPreviewController extends ControllerBase {
     ];
 
     return $this->renderSource($data);
+  }
+
+  /**
+   * Build the preview response, with an optional description footer.
+   *
+   * The rendered thing and its description are wrapped separately so the
+   * description can stay pinned at the bottom of the popup while the render
+   * above it absorbs the clipping, whenever the popup had to be capped to
+   * the room left on screen.
+   *
+   * @param array $build
+   *   The renderable to preview.
+   * @param string|null $description
+   *   (Optional) Description to show below it, when there is one.
+   *
+   * @return \Drupal\Core\Render\HtmlResponse
+   *   The HTML response.
+   *
+   * @see components/display_builder/css/preview.css
+   */
+  private function buildResponse(array $build, ?string $description = NULL): HtmlResponse {
+    $wrapper = [
+      'content' => [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['db-preview__content']],
+        'content' => $build,
+      ],
+    ];
+
+    if ($description !== NULL && \trim($description) !== '') {
+      $wrapper['description'] = [
+        '#type' => 'container',
+        '#attributes' => ['class' => ['db-preview__description']],
+        'text' => ['#plain_text' => $description],
+      ];
+    }
+
+    $response = new HtmlResponse();
+    $response->setContent($this->renderer->renderRoot($wrapper));
+
+    return $response;
+  }
+
+  /**
+   * Get a component description, if it declares one.
+   *
+   * @param string $component_id
+   *   The component id.
+   *
+   * @return string|null
+   *   The description, or NULL when the component has none or is unknown.
+   */
+  private function getComponentDescription(string $component_id): ?string {
+    try {
+      $definition = $this->componentManager->getDefinition($component_id);
+    }
+    catch (\Throwable $th) {
+      return NULL;
+    }
+
+    $description = $definition['description'] ?? NULL;
+
+    return $description === NULL ? NULL : (string) $description;
   }
 
   /**

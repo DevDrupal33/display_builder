@@ -33,7 +33,7 @@ export default defineConfig({
     },
     video: {
       mode: 'retain-on-failure',
-      size: { width: 1280, height: 920 },
+      size: { width: 1280, height: 900 },
     },
     launchOptions: {
       // For --headed test, add some slow time.
@@ -45,7 +45,9 @@ export default defineConfig({
   },
   webServer: {
     name: 'PHP',
-    command: 'php -q -S localhost:8000 -t ../../../',
+    // PHP's built-in server is single-threaded by default.
+    // PHP_CLI_SERVER_WORKERS forks it so requests are actually concurrent.
+    command: 'PHP_CLI_SERVER_WORKERS=8 php -q -S localhost:8000 -t ../../../',
     url: 'http://localhost:8000',
     reuseExistingServer: true,
     stdout: 'ignore',

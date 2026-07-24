@@ -1,0 +1,132 @@
+/**
+ * @file
+ * Display Builder's own non-color CSS custom properties, and where they
+ * relate to Drupal core's Navigation module and Shoelace - every other
+ * stylesheet in this module should consume the names defined here rather
+ * than referencing Navigation or Shoelace variables directly at the point
+ * of use. For the module's color palette, @see colors.css instead.
+ *
+ * Only --toolbar-height actually bridges to Navigation
+ * (--admin-toolbar-top-bar-height, defined at :root in
+ * core/modules/navigation/css/components/top-bar.pcss.css, so it's
+ * globally inherited regardless of DOM position). Navigation's other
+ * design tokens (spacing, font, gray-100) are scoped to elements carrying
+ * [data-drupal-admin-styles] - only .admin-toolbar itself and a mobile
+ * control-bar div, per navigation.html.twig - not :root, so they never
+ * actually inherit into Display Builder's own markup, which lives outside
+ * that subtree as a sibling. Referencing them here would look like a live
+ * relationship without ever actually being one (confirmed live: empty
+ * string via getComputedStyle(document.documentElement), even with
+ * Navigation installed and expanded) - so the ones below go straight to
+ * Shoelace instead, which IS always reachable (its tokens are set at
+ * :root by the theme).
+ * @see web/core/modules/navigation/css/base/variables.pcss.css
+ * @see web/core/modules/navigation/css/components/top-bar.pcss.css
+ */
+:root {
+  /* Matches Navigation module's own 4/8/12/16px spacing scale, via
+     Shoelace's equivalent tokens (verified live: 2x-small=4px,
+     x-small=8px, small=12px, medium=16px). */
+  --db-space-4: var(--sl-spacing-2x-small, 4px);
+  --db-space-8: var(--sl-spacing-x-small, 8px);
+  --db-space-12: var(--sl-spacing-small, 12px);
+  --db-space-16: var(--sl-spacing-medium, 16px);
+
+  /* Toolbar row height. */
+  --toolbar-height: var(--admin-toolbar-top-bar-height, calc(4 * var(--db-space-16)));
+
+  /* Sidebar header row height - same row as the toolbar when Navigation's
+     own value is available (matching --toolbar-height above), but a
+     shorter fallback than --toolbar-height's when it isn't - pre-existing
+     choice, preserved as-is. */
+  --db-sidebar-header-height: var(--admin-toolbar-top-bar-height, 38px);
+
+  /* Sidebar width. */
+  --db-sidebar-width: 17rem;
+
+  /* Clearance above the root container. */
+  --dropzone-root-margin: 0;
+  --dropzone-root-padding: 0.5rem;
+
+  /* Placeholder background pattern size (@see colors.css for the pattern's
+     own colors, --db-background-image). */
+  --db-background-size: 40px 40px;
+
+  /* Shoelace override */
+  --sl-tooltip-arrow-size: 0;
+
+  /* Opacity when htmx load. */
+  --db-loading-opacity: 0.9;
+  /* A panel holding content known to be out of date, pending refresh. Stronger
+  than --db-loading-opacity: that one is a brief whole-builder flash, this is a
+  panel the user is looking at while it catches up. */
+  --db-island-stale-opacity: 0.45;
+  --db-island-stale-grayscale: 0.85;
+
+  /* ── Stacking ladder ───────────────────────────────────────────────────
+     Every z-index this module uses is named here and only here - a bare
+     z-index at a point of use is a bug, since which layer wins can only be
+     reasoned about by reading the whole ladder at once.
+
+     Two bases, one per mode:
+
+     - Normal mode: the builder is ordinary page content sharing the page
+       with Drupal's own chrome - toolbar / navigation (501), settings
+       tray, contextual links, jQuery UI dialogs - so every builder rung
+       below sits *under* --db-z-index and can never cover a Drupal tool.
+       @see https://www.drupal.org/docs/develop/theming-drupal/z-indexes-in-drupal-8
+       @see web/core/modules/navigation/css/base/variables.pcss.css
+
+     - Expanded mode: .display-builder--expanded is position: fixed at
+       --db-z-index-expanded, above the toolbar / navigation / settings
+       tray but below dialogs and contextual links, which must stay
+       reachable (@see assets/css/_fix.css). Being positioned *with* a
+       z-index also makes it a stacking context, so each rung below is then
+       only ever compared against its siblings inside the builder: the one
+       ladder sorts both modes, and no rung needs an expanded variant of
+       its own. */
+  --db-z-index: 501;
+  /* Try to be hover everything */
+  --db-z-index-expanded: 1251;
+
+  /* Builder chrome, bottom to top. The order is the whole point:
+     - floating controls sit lowest, inside the main pane, so an open
+       sidebar drawer (case 2, position: fixed) covers them rather than
+       being punched through by a control belonging to the pane behind it;
+     - the toolbar is above the sidebars because its buttons' Shoelace
+       tooltips are not hoisted (strategy="absolute"), so they paint in
+       .db-toolbar's own stacking context - at an equal z-index the
+       sidebars, later in the DOM, would swallow every tooltip that opens
+       over one;
+     - preview / contextual menu / messages are transient overlays that
+       must stay readable over all of the above. */
+  --db-z-floating-controls: calc(var(--db-z-index) - 6);
+  --db-z-sidebar: calc(var(--db-z-index) - 5);
+  --db-z-toolbar: calc(var(--db-z-index) - 4);
+  --db-z-preview: calc(var(--db-z-index) - 3);
+  --db-z-menu: calc(var(--db-z-index) - 2);
+  --db-z-message: calc(var(--db-z-index) - 1);
+
+  /* Canvas overlay labels (dropzone / layer / hovered node), a family of
+     their own: they annotate rendered site content, which carries the
+     theme's own z-indexes, so they need to beat that - but they stay far
+     below every chrome rung above, or a label would paint over the
+     toolbar as its node scrolls underneath.
+     @see components/dropzone/dropzone.css, components/layer/layer.css */
+  --db-z-label-slot: 201;
+  --db-z-label-element: 202;
+  --db-z-label-root: 203;
+  --db-z-label-node: 204;
+
+  /* Drupal / Bootstrap dialogs opened *from* the builder. They are
+     rendered at body level, outside .display-builder, so unlike the rungs
+     above they are not inside expanded mode's stacking context and need
+     absolute values of their own to clear it. @see assets/css/_fix.css */
+  --db-z-dialog-backdrop: calc(var(--db-z-index-expanded) + 2);
+  --db-z-dialog: calc(var(--db-z-index-expanded) + 3);
+
+  /* With Admin toolbar. */
+  &:has(.toolbar-horizontal) {
+    --db-z-index: 401;
+  }
+}

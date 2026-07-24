@@ -30,14 +30,9 @@ class ControlsButtons extends IslandPluginToolbarButtonConfigurationBase {
     $buttons = [];
     $library = [];
 
-    if ($this->isButtonEnabled('highlight')) {
-      $buttons[] = $this->buildHighlightButton();
-      $library[] = 'display_builder/highlight';
-    }
-
-    if ($this->isButtonEnabled('fullscreen')) {
-      $buttons[] = $this->buildFullscreenButton();
-      $library[] = 'display_builder/fullscreen';
+    if ($this->isButtonEnabled('expand')) {
+      $buttons[] = $this->buildExpandButton();
+      $library[] = 'display_builder/expand';
     }
 
     if ($this->isButtonEnabled('theme')) {
@@ -69,13 +64,9 @@ class ControlsButtons extends IslandPluginToolbarButtonConfigurationBase {
    */
   protected function hasButtons(): array {
     return [
-      'highlight' => [
-        'title' => $this->t('Highlight'),
-        'description' => $this->t('Highlight builder zones to ease drag and move around.'),
-        'default' => 'icon',
-      ],
-      'fullscreen' => [
-        'title' => $this->t('Fullscreen'),
+      'expand' => [
+        'title' => $this->t('Expand'),
+        'description' => $this->t('Expand the builder to cover the current viewport.'),
         'default' => 'icon',
       ],
       'theme' => [
@@ -92,43 +83,23 @@ class ControlsButtons extends IslandPluginToolbarButtonConfigurationBase {
   }
 
   /**
-   * Builds the highlight button.
+   * Builds the expand button.
    *
    * @return array
-   *   The highlight button render array.
+   *   The expand button render array.
    */
-  private function buildHighlightButton(): array {
-    $highlight = $this->buildButton(
-      $this->showLabel('highlight') ? $this->t('Highlight') : '',
-      'highlight',
-      $this->showIcon('highlight') ? 'border' : '',
-      $this->t('Highlight components. (shortcut: H)'),
-      ['H' => $this->t('Toggle highlight (shift+H)')]
+  private function buildExpandButton(): array {
+    $expand = $this->buildButton(
+      $this->showLabel('expand') ? $this->t('Expand') : '',
+      'expand',
+      $this->showIcon('expand') ? 'arrows-fullscreen' : '',
+      $this->t('Expand to cover the viewport. (shortcut: Shift+E)'),
+      ['shift+e' => $this->t('Toggle expand')]
     );
     // Required for the library to work.
-    $highlight['#attributes']['data-set-highlight'] = TRUE;
+    $expand['#attributes']['data-set-expand'] = TRUE;
 
-    return $highlight;
-  }
-
-  /**
-   * Builds the fullscreen button.
-   *
-   * @return array
-   *   The fullscreen button render array.
-   */
-  private function buildFullscreenButton(): array {
-    $fullscreen = $this->buildButton(
-      $this->showLabel('fullscreen') ? $this->t('Fullscreen') : '',
-      'fullscreen',
-      $this->showIcon('fullscreen') ? 'fullscreen' : '',
-      $this->t('Toggle fullscreen. (shortcut: F)'),
-      ['F' => $this->t('Toggle fullscreen (shift+F)')]
-    );
-    // Required for the library to work.
-    $fullscreen['#attributes']['data-set-fullscreen'] = TRUE;
-
-    return $fullscreen;
+    return $expand;
   }
 
   /**

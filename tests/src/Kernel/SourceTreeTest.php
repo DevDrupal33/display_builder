@@ -49,6 +49,13 @@ final class SourceTreeTest extends DisplayBuilderKernelTestBase {
     $this->installEntitySchema('user');
     $this->installConfig(['system', 'display_builder', 'display_builder_test', 'ui_patterns']);
 
+    // system.theme ships with 'stark' as the default, but the theme itself is
+    // not installed in a kernel test, so PageLayoutSource's region lookup
+    // throws UnknownExtensionException. Point the default at the test theme
+    // that is actually installed here.
+    \Drupal::service('theme_installer')->install(['display_builder_theme_test']);
+    $this->config('system.theme')->set('default', 'display_builder_theme_test')->save();
+
     $this->sourceManager = $this->container->get('plugin.manager.ui_patterns_source');
   }
 

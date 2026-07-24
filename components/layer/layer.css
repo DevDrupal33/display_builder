@@ -1,465 +1,438 @@
-:root,
-.display-builder.sl-theme-dark {
-  --layer-base-container-bg-color: var(--sl-color-neutral-200);
-  --layer-base-padding: 0.25rem;
-  --layer-base-border-width: 2px;
-  --layer-transition: 0.2s ease-in-out;
-  --layer-gap: 0.5rem;
-  --layer-pill-padding: 0.1rem 0.5rem;
-  --layer-border-size: 0.2rem;
-  --layer-border-type: solid;
-  --layer-border-radius: var(--sl-border-radius-medium);
-  --layer-text-color-hover: var(--sl-color-primary-700);
-  --layer-component-bg-color: var(--sl-color-neutral-50);
-  --layer-component-bg-color-hover: var(--sl-color-orange-100);
-  --layer-component-border-color: var(--sl-color-neutral-300);
-  --layer-component-border-color-hover: var(--sl-color-purple-700);
-  --layer-block-bg-color: var(--sl-color-primary-100);
-  --layer-block-bg-color-hover: var(--sl-color-primary-200);
-  --layer-block-border-color: var(--sl-color-primary-700);
-  --layer-block-border-color-hover: var(--sl-color-primary-700);
-  --layer-block-text-color: var(--sl-color-primary-800);
-  --layer-pill-bg-color: var(--sl-color-indigo-50);
-  --layer-pill-border-color: var(--sl-color-warning-300);
-  --layer-pill-text-color: var(--sl-color-neutral-950);
-  --layer-slot-title-color: var(--sl-color-warning-700);
-}
+/* The Wireframe and Scaffold panels - a schematic, hierarchical view of the
+   same tree the Builder canvas renders live.
+   @see src/Plugin/display_builder/Island/ScaffoldPanel.php
 
-/* Keep a top border test when drag */
-/* .display-builder--onMove:not(.display-builder--highlight) .db-layer.db-dropzone--chosen + .db-layer,
-.display-builder--onDrag:not(.display-builder--highlight) .db-layer.db-dropzone--chosen + .db-layer {
-  border-top: 3px solid var(--layer-slot-title-color);
-  padding-top: 0.2rem;
-} */
+   Both panels are the same component (`display_builder:layer`, a card per
+   node) and share every rule here; Scaffold only differs in that a
+   configured allowlist of "layout" components is rendered with its real
+   output instead of a card (@see BuilderPanel::buildComponentRealRender()),
+   which is why the last block below exists.
 
-/* When moving something inside the builder highlight the slots. */
-.display-builder--onMove,
-.display-builder--onDrag {
+   Colors are not this file's own: they alias the identity colors already
+   used by the Builder canvas and the Tree panel - component violet, block
+   pink, slot amber, root teal - so a node reads as the same thing in
+   every panel. @see components/display_builder/css/colors.css
+
+   Why this isn't just the Builder's highlight treatment: there, outlines
+   and labels are chrome layered *over* real content, so they're opt-in
+   (the "Highlight" checkboxes) and off by default - permanent outlines
+   would bury the preview they're annotating. Here the schematic *is* the
+   content: a card has no meaning beyond the box, its color and its title,
+   so the highlight is unconditional and structural rather than toggled.
+   Hence solid per-type outlines at rest, and no dependency on any
+   .display-builder--highlight-* class.
+
+   Titles are a real element here (.db-layer__title), so cards never need
+   the Builder's ::before label - only Scaffold's real-rendered components,
+   which have no card, fall back to it (last block). */
+
+.db-island-scaffold {
+  /* The panel's own container. Teal, matching the Builder's "Base
+     container" root dropzone. */
   .db-dropzone--root {
-    outline: var(--dropzone-slot-outline-width) var(--dropzone-slot-outline-type) var(--dropzone-color-target);
+    --layer-gap: 0.5rem;
+    --layer-base-padding: 0.25rem;
+
+    position: relative;
+    border-radius: var(--layer-border-radius);
+    outline: var(--layer-base-border-width) var(--layer-border-type) var(--layer-root-outline);
+    outline-offset: calc(var(--layer-base-border-width) * -1);
+    background-color: var(--layer-root-bg);
   }
 
-  .db-island-layers {
-    [data-slot-id] {
-      border-radius: 0.1rem;
-      outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
-    }
+  /* Centered and straddling the container's top edge, exactly like the
+     Builder's own root label (@see components/dropzone/dropzone.css) - it
+     used to sit top-left, which is where the floating controls above are
+     pinned. Unlike the Builder's, it's always on (see file banner). */
+  .db-dropzone--root::before {
+    position: absolute;
+    z-index: var(--db-z-label-root);
+    top: -10px;
+    left: 50%;
+    overflow: hidden;
+    max-width: var(--dropzone-label-max-width);
+    padding: 0.1rem 0.4rem;
+    content: attr(data-node-title);
+    transform: translateX(-50%);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    color: var(--root-color-text);
+    background-color: var(--root-color-bg);
+    font-size: var(--sl-font-size-x-small);
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1.4;
+  }
 
-    [data-slot-id]:has(.db-layer) {
-      outline-width: var(--dropzone-slot-outline-width);
-    }
+  /* A slot: the drop target between cards. Kept quiet at rest - the cards
+     inside it already show the structure - and only outlined when empty
+     (below) or during a drag (further down), where "you can drop here" is
+     the whole point. */
+  .db-dropzone[data-slot-id] {
+    min-height: 2rem;
+    margin: 0.2rem 0;
+    border-radius: var(--sl-border-radius-small);
+  }
 
-    .db-layer.db-layer--component::part(base) {
-      border-style: solid;
-    }
+  /* An empty slot has no cards to show its extent, so it would otherwise
+     be an invisible gap with no hint that it's a valid target. */
+  .db-dropzone[data-slot-id]:empty {
+    outline: var(--layer-slot-border-width) var(--layer-slot-border-type) var(--layer-slot-outline);
+    outline-offset: calc(var(--layer-slot-border-width) * -1);
+  }
 
-    .db-layer.db-layer--component:hover::part(base) {
-      border-color: var(--layer-component-border-color);
-      background-color: var(--layer-base-container-bg-color);
-    }
+  /* A node. The whole card is the drag handle - Sortable is created with
+     no `handle` option (@see components/dropzone/dropzone.js) - hence
+     `grab` on the card itself rather than on a sub-element. */
+  .db-layer {
+    position: relative;
+    margin: 0 0 var(--layer-gap);
+    cursor: grab;
+    transition:
+      outline-color var(--layer-transition),
+      background-color var(--layer-transition),
+      box-shadow var(--layer-transition);
+    color: var(--layer-text-color);
+    border-radius: var(--layer-border-radius);
+    outline: var(--layer-base-border-width) var(--layer-border-type) transparent;
+    outline-offset: calc(var(--layer-base-border-width) * -1);
+    font-size: 0.9rem;
+    scroll-margin-top: var(--toolbar-height, 64px);
+  }
+
+  .db-layer:last-child {
+    margin-bottom: 0;
+  }
+
+  /* The two node identities. A component holds slots (and therefore
+     nests); a block is a leaf. @see components/layer/layer.twig, which
+     picks the modifier on exactly that distinction. */
+  .db-layer--component {
+    outline-color: var(--layer-component-outline);
+    background-color: var(--layer-component-bg);
+  }
+
+  .db-layer--block {
+    outline-color: var(--layer-block-outline);
+    background-color: var(--layer-block-bg);
+  }
+
+  .db-layer__header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  /* Grip dots: a cue that the card is draggable, not a hit target of its
+     own (the whole card already is one, see .db-layer above) - hence a
+     pseudo-element and pointer-events: none. Faint at rest so a deep tree
+     doesn't turn into a column of grips, full strength on the hovered
+     card only. */
+  .db-layer__header::before {
+    flex: 0 0 auto;
+    width: var(--layer-grip-width);
+    height: 1rem;
+    content: "";
+    transition: opacity var(--layer-transition);
+    pointer-events: none;
+    opacity: var(--layer-grip-opacity);
+    background-image: radial-gradient(circle at 1.5px 1.5px, currentColor 1px, transparent 1.2px);
+    background-size: 3px 3px;
+  }
+
+  .db-layer__title {
+    overflow: hidden;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: var(--sl-font-weight-semibold);
+  }
+
+  /* The node's config summary (@see WireframePanelBase::addComponentSettingsSummary()
+     and addThirdPartySettingsSummary()) - right-aligned pills, so the
+     titles stay a scannable left column however much summary each node
+     carries. */
+  .db-layer__info {
+    overflow: hidden;
+    flex: 0 1 auto;
+    min-width: 0;
+    text-align: right;
+    font-size: 0.75rem;
+  }
+
+  .db-layer__info em {
+    margin-right: 0.2rem;
+    margin-left: 0.3rem;
+  }
+
+  .db-layer__info ul {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .db-layer__info li {
+    display: inline-block;
+    margin-right: 0.125rem;
+    padding: var(--layer-pill-padding);
+    color: var(--layer-pill-text-color);
+    border: 1px solid var(--layer-pill-border-color);
+    border-radius: var(--sl-border-radius-pill);
+    background-color: var(--layer-pill-bg-color);
+  }
+
+  /* Slot titles are bare text nodes, not elements (@see
+     WireframePanelBase::buildSingleComponent(), which emits a '#plain_text'
+     sibling before each slot's dropzone), so they can only be styled by
+     inheritance from here - and every element child has to opt back out,
+     hence the reset below. */
+  .db-layer__children {
+    padding: 0 var(--layer-base-padding) var(--layer-base-padding) 0.5rem;
+    color: var(--layer-slot-title-color);
+    font-size: 0.75rem;
+    font-style: italic;
+  }
+
+  .db-layer__children > * {
+    color: var(--layer-text-color);
+    font-size: 0.9rem;
+    font-style: normal;
+  }
+
+  /* :hover is true for every ancestor of whatever the pointer is over,
+     and these cards nest arbitrarily deep - without the :has() guard a
+     leaf hover would light up its whole ancestor chain, the outermost
+     card dominating. Same pattern as the Builder canvas's own node hover.
+     @see components/display_builder/css/display_builder.css */
+  .db-layer:hover:not(:has(.db-layer:hover)) {
+    box-shadow: var(--sl-shadow-medium);
+  }
+
+  .db-layer--component:hover:not(:has(.db-layer:hover)) {
+    background-color: var(--layer-component-bg-hover);
+  }
+
+  .db-layer--block:hover:not(:has(.db-layer:hover)) {
+    background-color: var(--layer-block-bg-hover);
+  }
+
+  .db-layer:hover:not(:has(.db-layer:hover)) > .db-layer__header {
+    color: var(--layer-text-color-hover);
+  }
+
+  .db-layer:hover:not(:has(.db-layer:hover)) > .db-layer__header::before {
+    opacity: var(--layer-grip-opacity-hover);
+  }
+
+  /* Keyboard parity with the hover cue - the cards are focusable
+     (tabindex="0", @see HtmxEvents::onInstanceClick()), so tabbing
+     through the tree has to show where you are. */
+  .db-layer:focus-visible {
+    outline-color: var(--layer-drag-outline);
+    outline-offset: 1px;
+  }
+}
+
+/* Drag & move.
+   Sortable's three classes are named db-dropzone--* but land on the
+   dragged *item*, which here is a .db-layer, not a dropzone (@see
+   components/dropzone/dropzone.js, which sets ghostClass/chosenClass/
+   dragClass). ghostClass and chosenClass end up on the same node - the
+   original element, left in place as the insertion preview - so they're
+   styled as one thing rather than fighting each other. */
+.db-island-scaffold {
+  /* Where it will land: the card's own footprint, hollowed out. Keeping
+     the card's size (rather than collapsing it to a bar, as the Builder
+     canvas does) is the point of a schematic view - you're re-ordering
+     boxes, so the gap has to be the shape of the box. */
+  .db-layer.db-dropzone--ghost {
+    outline: var(--layer-base-border-width) var(--layer-slot-border-type) var(--layer-drag-outline) !important;
+    background-color: var(--layer-drag-bg) !important;
+    box-shadow: none;
+  }
+
+  .db-layer.db-dropzone--ghost > * {
+    opacity: 0.35;
   }
 
   .db-layer.db-dropzone--chosen {
-    margin: var(--layer-gap) 0 var(--layer-gap) 0;
-    &.db-layer--block::part(base) {
-      background-color: var(--layer-block-bg-color-hover) !important;
-    }
-    &.db-layer--component::part(base) {
-      background-color: var(--layer-component-bg-color-hover) !important;
-    }
+    cursor: grabbing;
   }
 
-  .db-layer.db-layer--block {
-    &::part(base) {
-      border-style: solid;
-    }
+  /* What follows the cursor. */
+  .db-layer.db-dropzone--drag {
+    opacity: 0.9;
+    box-shadow: var(--sl-shadow-x-large);
   }
+}
 
-  .db-layer {
-    .db-layer__info {
-      &.db-layer--block {
-        &:hover {
-          &::part(base) {
-            background-color: var(--layer-block-bg-color);
-          }
-        }
-      }
+.display-builder--on-move,
+.display-builder--on-drag {
+  .db-island-scaffold {
+    /* Mid-drag every slot is a candidate, so they all surface at once -
+       the one moment the Builder canvas and these panels agree on
+       behavior, and for the same reason. */
+    .db-dropzone[data-slot-id] {
+      outline: var(--layer-slot-border-width) var(--layer-slot-border-type) var(--layer-slot-outline);
+      outline-offset: calc(var(--layer-slot-border-width) * -1);
+      background-color: color-mix(in sRGB, var(--layer-slot-outline) 6%, transparent);
+    }
+
+    /* An empty panel has nothing to give it height - grow it for the
+       duration of the drag so there's always somewhere to release.
+       @see the .db-island-builder equivalent in dropzone.css */
+    .db-dropzone--root:empty {
+      min-height: 40vh;
+    }
+
+    /* The live target. Sortable parents the ghost directly inside
+       whichever dropzone is currently under the pointer, so :has() picks
+       it out with no extra JS - same trick as the Builder canvas. */
+    .db-dropzone[data-slot-id]:has(> .db-dropzone--ghost),
+    .db-dropzone--root:has(> .db-dropzone--ghost) {
+      outline: var(--layer-base-border-width) var(--layer-border-type) var(--layer-drag-outline);
+      outline-offset: calc(var(--layer-base-border-width) * -1);
+      background-color: var(--layer-drag-bg);
+    }
+
+    /* Fade the rest of the tree back so the candidate slots and the live
+       target carry the drag on their own. */
+    .db-layer:not(.db-dropzone--ghost, :has(.db-dropzone--ghost)) {
+      opacity: 0.75;
     }
   }
 }
 
-.db-island-layers {
-  .db-dropzone[data-component-id][data-slot-id] {
-    min-width: 0;
-    min-height: 2rem;
-  }
+/* Scaffold only: the configured "layout" components, rendered with their
+   real output instead of a card (@see ScaffoldPanel's docblock). They
+   have no .db-layer__title to name them, so this is the one place the
+   panels borrow the Builder's ::before label - a card never needs it.
 
-  .db-dropzone--root {
-    padding: 1rem;
-    background-color: var(--layer-base-container-bg-color);
-  }
+   Same identity colors and the same top-right label geometry as the
+   Builder's own component/block highlight (@see dropzone.css), so a real
+   render reads consistently whichever panel it's in. Thinner outline than
+   a card's: this box wraps live content rather than being the schematic
+   itself.
 
-  [data-slot-id] {
-    margin: 0.2rem;
-    outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target) var(--dropzone-slot-outline-type);
-  }
-
-  [data-slot-id]:has(.db-layer) {
-    outline-width: 0;
-  }
-
-  .db-layer {
-    scroll-margin-top: var(--toolbar-height, 64px);
+   The exclusions mirror display_builder.css's: .db-layer is a card (it
+   has its own title), dropzones carry their *parent's* data-node-title
+   rather than their own, and .db-menu is the contextual menu, not a node.
+   On hover, display_builder.css's more specific rule repaints this label
+   purple like every other hovered node - deliberate: identity at rest,
+   highlight on hover. */
+.db-island-scaffold {
+  [data-node-title]:not(.db-layer, .db-dropzone, .db-menu, [data-slot-id]) {
     position: relative;
-    width: 100%;
-    min-height: 1rem;
-    margin: 0 0 var(--layer-gap) 0;
-    cursor: move;
-    color: var(--db-text-color);
-    font-size: 0.9rem;
+    margin-bottom: var(--layer-gap);
+    outline: var(--layer-slot-border-width) var(--layer-border-type) var(--component-color-outline);
+    outline-offset: calc(var(--layer-slot-border-width) * -1);
+  }
 
-    /* box-shadow: var(--sl-shadow-x-large); */
+  [data-node-title]:not(.db-layer, .db-dropzone, .db-menu, [data-slot-id])::before {
+    position: absolute;
+    z-index: var(--db-z-label-element);
+    top: 0;
+    right: 0;
+    overflow: hidden;
+    max-width: var(--dropzone-label-max-width);
+    padding: 0.1rem 0.4rem;
+    content: attr(data-node-title);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    color: var(--component-color-text);
+    background-color: var(--component-color-bg);
+    font-size: var(--sl-font-size-x-small);
+    font-weight: normal;
+    /* Forced: this label sits over arbitrary rendered content, whose own
+       font-weight/style would otherwise inherit straight through. */
+    font-style: normal;
+    line-height: 1.4;
+  }
 
-    &::part(base) {
-      padding: var(--layer-base-padding);
-      transition: var(--layer-transition);
-      border: var(--layer-border-size) var(--layer-border-type) transparent;
-      border-radius: var(--layer-border-radius);
-      box-shadow: var(--sl-shadow-small);
-    }
+  /* A block's own root always carries data-node-type; a component's never
+     does. @see BuilderPanel::buildNodeAttributes() */
+  [data-node-title][data-node-type]:not(.db-layer, .db-dropzone, .db-menu, [data-slot-id]) {
+    outline-color: var(--block-color-outline);
+  }
 
-    &::part(header) {
-      padding: 0.2rem 0.5rem;
-      border-bottom: none;
-    }
+  [data-node-title][data-node-type]:not(.db-layer, .db-dropzone, .db-menu, [data-slot-id])::before {
+    color: var(--block-color-text);
+    background-color: var(--block-color-bg);
+  }
 
-    &:hover {
-      color: var(--layer-text-color-hover);
+  /* A real render's own slots, which - unlike a card's - have no
+     '#plain_text' title emitted next to them, so they'd be unnamed
+     boxes. `:not(.db-layer__children > *)` is what tells the two apart:
+     a card's slots live in .db-layer__children and are already named. */
+  .db-dropzone[data-slot-title]:not(.db-layer__children > *)::before {
+    position: absolute;
+    z-index: var(--db-z-label-slot);
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    max-width: var(--dropzone-label-max-width);
+    padding: 0.1rem 0.4rem;
+    content: attr(data-slot-title);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    color: var(--dropzone-color-text);
+    background-color: var(--dropzone-color-bg);
+    font-size: var(--sl-font-size-x-small);
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1.4;
+  }
 
-      &::part(base) {
-        box-shadow: var(--sl-shadow-x-large);
-      }
-    }
-
-    .db-layer__title {
-      flex-basis: 20%;
-      margin: 0;
-      font-size: 0.9rem;
-    }
-
-    .db-layer__header {
-      display: flex;
-    }
-
-    .db-layer__info {
-      flex-grow: 1;
-      margin: 0 0.25rem 0 1rem;
-      text-align: right;
-      font-size: 0.75rem;
-
-      em {
-        margin-right: 0.2rem;
-        margin-left: 0.3rem;
-      }
-
-      ul {
-        display: inline;
-        margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-
-      li {
-        display: inline-block;
-        margin-right: 0.125rem;
-        padding: var(--layer-pill-padding);
-        color: var(--layer-pill-text-color);
-        border: 1px solid var(--layer-pill-border-color);
-        border-radius: var(--sl-border-radius-pill);
-        background-color: var(--layer-pill-bg-color);
-      }
-    }
-
-    .db-layer__children {
-      padding-left: 0.4375rem;
-      color: var(--layer-slot-title-color);
-      font-style: italic;
-
-      > * {
-        font-style: normal;
-      }
-    }
-
-    .db-layer__children > slot {
-      margin-top: 0.4375rem;
-    }
-
-    &.db-layer--component,
-    &.db-layer--block {
-      &::part(base) {
-        padding: 0;
-      }
-    }
-
-    &.db-layer--component {
-      &::part(base) {
-        border-color: var(--layer-component-border-color);
-        background-color: var(--layer-component-bg-color);
-      }
-
-      &::part(body) {
-        padding: 0.5rem 1rem 0.5rem 0.5rem;
-      }
-    }
-
-    &.db-layer--block {
-      margin-bottom: var(--layer-gap);
-      padding: 0;
-      cursor: grab;
-
-      &::part(body) {
-        padding: 0.2rem var(--layer-gap);
-      }
-
-      &::part(base) {
-        padding: 0;
-        color: var(--layer-block-text-color);
-        border-color: var(--layer-block-border-color);
-        background-color: var(--layer-block-bg-color);
-      }
-
-      &:hover {
-        &::part(base) {
-          border-color: var(--layer-block-border-color-hover);
-          background-color: var(--layer-block-bg-color-hover);
-        }
-      }
-    }
+  .db-dropzone[data-slot-title]:not(.db-layer__children > *) {
+    position: relative;
+    padding-top: 1.2rem;
+    outline: var(--layer-slot-border-width) var(--layer-slot-border-type) var(--layer-slot-outline);
+    outline-offset: calc(var(--layer-slot-border-width) * -1);
   }
 }
 
-.display-builder--highlight {
-  .db-island-layers {
-    .db-dropzone--root {
-      outline: var(--dropzone-slot-outline-width) var(--dropzone-color-target-light) var(--dropzone-slot-outline-type) !important;
-    }
+/* The Highlight floating control, which is attached to this pane as well
+   as the Builder's (@see HighlightToggle's attach_to).
 
-    [data-slot-id] {
-      padding: 0.2rem;
-    }
+   Its checkboxes toggle --highlight-* classes on the outer
+   .display-builder (@see assets/js/highlight.js), so they're shared with
+   the Builder pane - these rules only decide what they mean *here*. They
+   live in this file rather than widening dropzone.css's own
+   .db-island-builder scoping, because there the --highlight-slot trigger
+   shares a rule with --on-drag/--on-move, which this file already answers
+   separately for the schematic panels.
 
-    .db-dropzone[data-component-id][data-slot-id]:empty {
-      &::after {
-        min-height: 1.7rem;
-        margin-left: 1rem;
-        content: " Empty slot ";
-        font-size: x-small;
-        font-style: italic;
-      }
-    }
+   Only two of the four boxes do anything extra in Scaffold: "Components"
+   and "Blocks" are already permanently on here (see the block above and
+   the file banner), so there's nothing left for them to reveal. */
 
-    .db-layer {
-      &.db-layer--component {
-        &::part(base) {
-          border-color: var(--layer-component-border-color-hover);
-        }
-      }
-    }
+/* "Drop zones": at rest only *empty* slots are outlined, since the cards
+   inside a filled one already show its extent - this is the "show me
+   every target, filled or not" view, at the Builder's roomier hit size. */
+.display-builder--highlight-slot .db-island-scaffold {
+  .db-dropzone[data-slot-id] {
+    min-height: var(--dropzone-slot-min-height-dragging);
+    outline: var(--layer-slot-border-width) var(--layer-slot-border-type) var(--layer-slot-outline);
+    outline-offset: calc(var(--layer-slot-border-width) * -1);
+    background-color: color-mix(in sRGB, var(--layer-slot-outline) 6%, transparent);
   }
 }
 
-/* Monochromatic Saturation Indigo-Violet Ramp */
-
-.display-builder:not(.sl-theme-dark) .db-island-layers .db-layer.db-layer--component:hover {
-  --layer-hover-bg: oklch(98% 0.01 260);
-  --layer-hover-border: oklch(94% 0.02 260);
-
-  &::part(base) {
-    border-color: var(--layer-hover-border);
-    background-color: var(--layer-hover-bg);
-  }
-
-  & & {
-    --layer-hover-bg: oklch(96% 0.02 260);
-    --layer-hover-border: oklch(90% 0.04 260);
-    & & {
-      --layer-hover-bg: oklch(94% 0.03 260);
-      --layer-hover-border: oklch(86% 0.06 260);
-      & & {
-        --layer-hover-bg: oklch(92% 0.04 260);
-        --layer-hover-border: oklch(82% 0.08 260);
-        & & {
-          --layer-hover-bg: oklch(90% 0.05 260);
-          --layer-hover-border: oklch(78% 0.1 260);
-          & & {
-            --layer-hover-bg: oklch(88% 0.06 260);
-            --layer-hover-border: oklch(74% 0.12 260);
-            & & {
-              --layer-hover-bg: oklch(86% 0.07 260);
-              --layer-hover-border: oklch(70% 0.14 260);
-              & & {
-                --layer-hover-bg: oklch(84% 0.08 260);
-                --layer-hover-border: oklch(65% 0.16 260);
-                & & {
-                  --layer-hover-bg: oklch(82% 0.09 260);
-                  --layer-hover-border: oklch(60% 0.18 260);
-                  & & {
-                    --layer-hover-bg: oklch(80% 0.1 260);
-                    --layer-hover-border: oklch(55% 0.2 260);
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-.display-builder.sl-theme-dark .db-island-layers .db-layer.db-layer--component:hover {
-  --layer-hover-bg: oklch(25% 0.04 260);
-  --layer-hover-border: oklch(35% 0.08 260);
-
-  &::part(base) {
-    border-color: var(--layer-hover-border);
-    background-color: var(--layer-hover-bg);
-  }
-
-  & & {
-    --layer-hover-bg: oklch(28% 0.05 260);
-    --layer-hover-border: oklch(38% 0.09 260);
-    & & {
-      --layer-hover-bg: oklch(31% 0.06 260);
-      --layer-hover-border: oklch(41% 0.1 260);
-      & & {
-        --layer-hover-bg: oklch(34% 0.07 260);
-        --layer-hover-border: oklch(44% 0.11 260);
-        & & {
-          --layer-hover-bg: oklch(37% 0.08 260);
-          --layer-hover-border: oklch(47% 0.12 260);
-          & & {
-            --layer-hover-bg: oklch(40% 0.09 260);
-            --layer-hover-border: oklch(50% 0.13 260);
-            & & {
-              --layer-hover-bg: oklch(43% 0.1 260);
-              --layer-hover-border: oklch(53% 0.14 260);
-              & & {
-                --layer-hover-bg: oklch(46% 0.11 260);
-                --layer-hover-border: oklch(56% 0.15 260);
-                & & {
-                  --layer-hover-bg: oklch(49% 0.12 260);
-                  --layer-hover-border: oklch(59% 0.16 260);
-                  & & {
-                    --layer-hover-bg: oklch(52% 0.13 260);
-                    --layer-hover-border: oklch(62% 0.17 260);
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-.display-builder.display-builder--onMove:not(.sl-theme-dark) .db-island-layers,
-.display-builder.display-builder--onDrag:not(.sl-theme-dark) .db-island-layers {
-  .db-layer.db-layer--component:has(.db-dropzone--chosen) {
-    --layer-bg: oklch(98% 0.01 260);
-    --layer-border: oklch(94% 0.02 260);
-
-    &::part(base) {
-      border-color: var(--layer-border);
-      background-color: var(--layer-bg);
-    }
-
-    & & {
-      --layer-bg: oklch(96% 0.02 260);
-      --layer-border: oklch(90% 0.04 260);
-      & & {
-        --layer-bg: oklch(94% 0.03 260);
-        --layer-border: oklch(86% 0.06 260);
-        & & {
-          --layer-bg: oklch(92% 0.04 260);
-          --layer-border: oklch(82% 0.08 260);
-          & & {
-            --layer-bg: oklch(90% 0.05 260);
-            --layer-border: oklch(78% 0.1 260);
-            & & {
-              --layer-bg: oklch(88% 0.06 260);
-              --layer-border: oklch(74% 0.12 260);
-              & & {
-                --layer-bg: oklch(86% 0.07 260);
-                --layer-border: oklch(70% 0.14 260);
-                & & {
-                  --layer-bg: oklch(84% 0.08 260);
-                  --layer-border: oklch(65% 0.16 260);
-                  & & {
-                    --layer-bg: oklch(82% 0.09 260);
-                    --layer-border: oklch(60% 0.18 260);
-                    & & {
-                      --layer-bg: oklch(80% 0.1 260);
-                      --layer-border: oklch(55% 0.2 260);
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-.display-builder.sl-theme-dark.display-builder--onMove .db-island-layers,
-.display-builder.sl-theme-dark.display-builder--onDrag .db-island-layers {
-  .db-layer.db-layer--component:has(.db-dropzone--chosen) {
-    --layer-hover-bg: oklch(25% 0.04 260);
-    --layer-hover-border: oklch(35% 0.08 260);
-
-    &::part(base) {
-      border-color: var(--layer-border);
-      background-color: var(--layer-bg);
-    }
-
-    & & {
-      --layer-hover-bg: oklch(28% 0.05 260);
-      --layer-hover-border: oklch(38% 0.09 260);
-      & & {
-        --layer-hover-bg: oklch(31% 0.06 260);
-        --layer-hover-border: oklch(41% 0.1 260);
-        & & {
-          --layer-hover-bg: oklch(34% 0.07 260);
-          --layer-hover-border: oklch(44% 0.11 260);
-          & & {
-            --layer-hover-bg: oklch(37% 0.08 260);
-            --layer-hover-border: oklch(47% 0.12 260);
-            & & {
-              --layer-hover-bg: oklch(40% 0.09 260);
-              --layer-hover-border: oklch(50% 0.13 260);
-              & & {
-                --layer-hover-bg: oklch(43% 0.1 260);
-                --layer-hover-border: oklch(53% 0.14 260);
-                & & {
-                  --layer-hover-bg: oklch(46% 0.11 260);
-                  --layer-hover-border: oklch(56% 0.15 260);
-                  & & {
-                    --layer-hover-bg: oklch(49% 0.12 260);
-                    --layer-hover-border: oklch(59% 0.16 260);
-                    & & {
-                      --layer-hover-bg: oklch(52% 0.13 260);
-                      --layer-hover-border: oklch(62% 0.17 260);
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+/* "Visual spacing": breathing room so adjacent outlines and labels stop
+   touching - worth more here than in the Builder, since a real-rendered
+   grid packs its columns flush against each other by design. Same tokens
+   as the Builder's own version. @see components/dropzone/dropzone.css */
+.display-builder--highlight-space .db-island-scaffold {
+  .db-dropzone[data-slot-id],
+  .db-layer,
+  [data-node-title]:not(.db-dropzone, .db-menu, [data-slot-id]) {
+    margin: var(--dropzone-space-margin);
+    padding: var(--dropzone-space-padding);
   }
 }

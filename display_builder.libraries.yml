@@ -13,6 +13,9 @@ _htmx_sse_cdn:
     https://cdn.jsdelivr.net/npm/htmx-ext-sse@2.2.3/dist/sse.min.js:
       type: external
       minified: true
+      attributes:
+        # integrity: 'sha384-Y4gc0CK6Kg+hmulDc6rZPJu0tqvk7EWlih0Oh+2OkAi1ZDlCbBDCQEE2uVk472Ky'
+        crossorigin: anonymous
 
 _htmx_sse_local:
   js:
@@ -38,9 +41,15 @@ _shoelace_cdn:
       https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.min.css:
         type: external
         minified: true
+        attributes:
+          # integrity: 'sha384-M+C/2jSkTP7YSiPPehDdTw83rJI29ijSR9ZAvsmXyloKVFMtxpKOBZMD/vqL/m3t'
+          crossorigin: anonymous
       https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/dark.min.css:
         type: external
         minified: true
+        attributes:
+          # integrity: 'sha384-NT+VSt72u+fz0PfYmxREk1vAZB7V7C/MTR0h20VbKyyppnaL3/+sL2ATPJL1ps51'
+          crossorigin: anonymous
   js:
     # https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace.min.js:
     https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.min.js:
@@ -48,6 +57,8 @@ _shoelace_cdn:
       minified: true
       attributes:
         type: module
+        # integrity: 'sha384-2K6qlhxAuwXHTOJvMkVXpHnJcPHhlM2FXXLXJE2qkR6igDl8IrXI6gM670/KfoQ2'
+        crossorigin: anonymous
 
 # Only to be loaded as a display_builder/shoelace dependency.
 # The default value for pipeline jobs.
@@ -63,71 +74,11 @@ _shoelace_local:
       attributes:
         type: module
 
-db_drawer:
-  css:
-    component:
-      ./assets/css/db_drawer.css: {}
-  js:
-    ./assets/js/db_drawer.js: {}
-  dependencies:
-    - core/drupal
-    - core/drupalSettings
-    - core/drupal.displace
-
-search:
-  css:
-    component:
-      ./assets/css/search.css: {}
-  js:
-    ./assets/js/search.js: {}
-  dependencies:
-    - core/drupal
-    - core/drupalSettings
-    - core/drupal.debounce
-    - core/once
-
-form_description:
-  js:
-    ./assets/js/form_description.js: {}
-  dependencies:
-    - core/drupal
-    - core/drupalSettings
-    - core/once
-    - display_builder/local_storage_manager
-
-preview:
-  css:
-    component:
-      ./assets/css/preview.css: {}
-  js:
-    ./assets/js/preview.js: {}
-  dependencies:
-    - core/drupal
-    - core/internal.floating-ui
-
-contextual_menu:
-  js:
-    ./assets/js/contextual_menu.js: {}
-  dependencies:
-    - core/internal.floating-ui
-
-# Keyboard mapping behavior.
-keyboard:
-  js:
-    ./assets/js/keyboard.js: {}
-
 # Local storage utility class.
 local_storage_manager:
   js:
     ./assets/js/localStorageManager.js: {}
 
-# Contextual forms tweaks.
-form:
-  css:
-    theme:
-      ./assets/css/form.css: {}
-
-# Viewport switcher island.
 viewport_switcher:
   js:
     ./assets/js/viewport_switcher.js: {}
@@ -135,18 +86,44 @@ viewport_switcher:
 highlight:
   js:
     ./assets/js/highlight.js: {}
+  dependencies:
+    - core/once
+    - display_builder/local_storage_manager
 
-fullscreen:
+expand:
   js:
-    ./assets/js/fullscreen.js: {}
+    ./assets/js/expand.js: {}
 
-# Custom fixes for CKEditor and Wysiwyg.
-_fix_wysiwyg:
+# Standalone CKEditor 5, hand-attached to a plain #type => 'textarea' -
+# never core's #type => 'text_format' / editor.module Drupal.editors
+# integration. @see assets/js/textarea_ckeditor.js
+textarea_ckeditor:
   js:
-    ./assets/js/_fix_wysiwyg.js: {}
+    ./assets/js/textarea_ckeditor.js: {}
+  dependencies:
+    - core/once
+    - core/ckeditor5
+    - core/ckeditor5.editorClassic
+    - core/ckeditor5.essentials
+    - core/ckeditor5.basic
+    - core/ckeditor5.heading
+    - core/ckeditor5.link
+    - core/ckeditor5.list
+    - core/ckeditor5.blockquote
+    - core/ckeditor5.htmlSupport
+    - core/ckeditor5.sourceEditing
+    - core/ckeditor5.showBlocks
 
 # Global fixes meant to disappear or replaced by a cleaner solution.
+# The per-admin-chrome files are split by which module they target, for
+# readability only - both load unconditionally, since every selector in them is
+# scoped to that module's own unique element ID and so matches nothing at all on
+# a site not running it.
 _fix:
   css:
     theme:
       ./assets/css/_fix.css: {}
+      # Classic Toolbar module, and Admin Toolbar contrib on top of it.
+      ./assets/css/_fix_toolbar.css: {}
+      # Navigation module.
+      ./assets/css/_fix_navigation.css: {}

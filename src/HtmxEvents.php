@@ -12,130 +12,188 @@ use Drupal\Core\Url;
  */
 class HtmxEvents {
 
-  use HtmxTrait;
+  public const HTMX_REQUEST = 'click consume';
 
   /**
    * Delete on click.
+   *
+   * The node ID isn't known until the contextual menu resolves what was
+   * right-clicked, so it's supplied at request time via 'hx-vals'
+   * (@see components/contextual_menu/contextual_menu.js) rather than baked into
+   * the URL here.
    *
    * @param array $build
    *   The render array.
    * @param string $builder_id
    *   The instance entity ID.
-   * @param string $node_id
-   *   The node id of the source.
    *
    * @return array
    *   The render array.
    */
-  public function onClickDelete(array $build, string $builder_id, string $node_id): array {
+  public function onClickDelete(array $build, string $builder_id): array {
     $url = new Url(
       'display_builder.api_delete',
       [
         'display_builder_instance' => $builder_id,
-        'node_id' => $node_id,
       ]
     );
 
-    $attributes = [
-      'hx-on:click' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event, "close")', $builder_id),
-    ];
+    $htmx = DisplayBuilderHtmx::request('post', $url, self::HTMX_REQUEST);
+    $htmx->on('click', \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event, "close")', $builder_id));
+    $htmx->applyTo($build);
 
-    return $this->setHtmxAttributes($build, $url, 'click consume', 'delete', $attributes);
+    return $build;
   }
 
   /**
    * Save as preset on click.
    *
+   * The node ID isn't known until the contextual menu resolves what was
+   * right-clicked, so it's supplied at request time via 'hx-vals'
+   * (@see components/contextual_menu/contextual_menu.js) rather than baked into
+   * the URL here.
+   *
    * @param array $build
    *   The render array.
    * @param string $builder_id
    *   The instance entity ID.
-   * @param string $node_id
-   *   The node id of the source.
    * @param string|\Drupal\Component\Render\MarkupInterface $prompt
    *   The prompt before save.
    *
    * @return array
    *   The render array.
    */
-  public function onClickSavePreset(array $build, string $builder_id, string $node_id, MarkupInterface|string $prompt): array {
+  public function onClickSavePreset(array $build, string $builder_id, MarkupInterface|string $prompt): array {
     $url = new Url(
       'display_builder.api_save_preset',
       [
         'display_builder_instance' => $builder_id,
-        'node_id' => $node_id,
       ]
     );
 
-    return $this->setHtmxAttributes($build, $url, 'click consume', 'post', ['hx-prompt' => $prompt]);
+    $htmx = DisplayBuilderHtmx::request('post', $url, self::HTMX_REQUEST);
+    $htmx->prompt((string) $prompt);
+    $htmx->applyTo($build);
+
+    return $build;
   }
 
   /**
    * Paste on click.
    *
+   * The node/parent/slot IDs aren't known until the contextual menu
+   * resolves what was right-clicked and what was previously copied, so
+   * they're supplied at request time via 'hx-vals'
+   * (@see components/contextual_menu/contextual_menu.js) rather than baked into
+   * the URL here.
+   *
    * @param array $build
    *   The render array.
    * @param string $builder_id
    *   The instance entity ID.
-   * @param string $node_id
-   *   The node id to copy.
-   * @param string $parent_id
-   *   The instance id target.
-   * @param string $slot_id
-   *   The instance target slot id.
-   * @param string $slot_position
-   *   The slot position.
    *
    * @return array
    *   The render array.
    */
-  public function onClickPaste(array $build, string $builder_id, string $node_id, string $parent_id, string $slot_id, string $slot_position): array {
+  public function onClickPaste(array $build, string $builder_id): array {
     $url = new Url(
       'display_builder.api_paste',
       [
         'display_builder_instance' => $builder_id,
-        'node_id' => $node_id,
-        'parent_id' => $parent_id,
-        'slot_id' => $slot_id,
-        'slot_position' => $slot_position,
       ]
     );
 
-    return $this->setHtmxAttributes($build, $url, 'click consume', 'post');
+    DisplayBuilderHtmx::request('post', $url, self::HTMX_REQUEST)->applyTo($build);
+
+    return $build;
   }
 
   /**
    * Duplicate on placeholder click.
    *
+   * The node/parent/slot IDs aren't known until the contextual menu
+   * resolves what was right-clicked, so they're supplied at request time
+   * via 'hx-vals' (@see components/contextual_menu/contextual_menu.js) rather
+   * than baked into the URL here.
+   *
    * @param array $build
    *   The render array.
    * @param string $builder_id
    *   The instance entity ID.
-   * @param string $node_id
-   *   The node id to copy.
-   * @param string $parent_id
-   *   The instance id target.
-   * @param string $slot_id
-   *   The instance target slot id.
-   * @param string $slot_position
-   *   The slot position.
    *
    * @return array
    *   The render array.
    */
-  public function onClickDuplicate(array $build, string $builder_id, string $node_id, string $parent_id, string $slot_id, string $slot_position): array {
+  public function onClickDuplicate(array $build, string $builder_id): array {
     $url = new Url(
       'display_builder.api_duplicate',
       [
         'display_builder_instance' => $builder_id,
-        'node_id' => $node_id,
-        'parent_id' => $parent_id,
-        'slot_id' => $slot_id,
-        'slot_position' => $slot_position,
       ]
     );
 
-    return $this->setHtmxAttributes($build, $url, 'click consume', 'post');
+    DisplayBuilderHtmx::request('post', $url, self::HTMX_REQUEST)->applyTo($build);
+
+    return $build;
+  }
+
+  /**
+   * Paste or merge styles on click.
+   *
+   * Used by both the "Paste styles" and "Merge styles" menu items - they
+   * hit the same endpoint and only differ in the 'mode' request value,
+   * which the contextual menu sets based on which item was clicked
+   * (@see components/contextual_menu/contextual_menu.js), same as the
+   * target/source node IDs.
+   *
+   * @param array $build
+   *   The render array.
+   * @param string $builder_id
+   *   The instance entity ID.
+   *
+   * @return array
+   *   The render array.
+   */
+  public function onClickPasteStyles(array $build, string $builder_id): array {
+    $url = new Url(
+      'display_builder.api_paste_styles',
+      [
+        'display_builder_instance' => $builder_id,
+      ]
+    );
+
+    DisplayBuilderHtmx::request('post', $url, self::HTMX_REQUEST)->applyTo($build);
+
+    return $build;
+  }
+
+  /**
+   * Delete styles on click.
+   *
+   * The node ID isn't known until the contextual menu resolves what was
+   * right-clicked, so it's supplied at request time via 'hx-vals'
+   * (@see components/contextual_menu/contextual_menu.js) rather than baked into
+   * the URL here.
+   *
+   * @param array $build
+   *   The render array.
+   * @param string $builder_id
+   *   The instance entity ID.
+   *
+   * @return array
+   *   The render array.
+   */
+  public function onClickDeleteStyles(array $build, string $builder_id): array {
+    $url = new Url(
+      'display_builder.api_delete_styles',
+      [
+        'display_builder_instance' => $builder_id,
+      ]
+    );
+
+    DisplayBuilderHtmx::request('post', $url, self::HTMX_REQUEST)->applyTo($build);
+
+    return $build;
   }
 
   /**
@@ -160,11 +218,11 @@ class HtmxEvents {
       ]
     );
 
-    $attributes = [
-      'hx-on:dragend' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event, "dragend")', $builder_id),
-    ];
+    $htmx = DisplayBuilderHtmx::request('post', $url, 'dragend consume');
+    $htmx->on('dragend', \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event, "dragend")', $builder_id));
+    $htmx->applyTo($build);
 
-    return $this->setHtmxAttributes($build, $url, 'dragend consume', 'post', $attributes);
+    return $build;
   }
 
   /**
@@ -195,11 +253,11 @@ class HtmxEvents {
       ]
     );
 
-    $attributes = [
-      'hx-on:dragend' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event, "dragend")', $builder_id),
-    ];
+    $htmx = DisplayBuilderHtmx::request('post', $url, 'dragend consume');
+    $htmx->on('dragend', \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event, "dragend")', $builder_id));
+    $htmx->applyTo($build);
 
-    return $this->setHtmxAttributes($build, $url, 'dragend consume', 'post', $attributes);
+    return $build;
   }
 
   /**
@@ -228,11 +286,14 @@ class HtmxEvents {
       ]
     );
 
+    $htmx = DisplayBuilderHtmx::request('get', $url, self::HTMX_REQUEST);
+    $htmx->vals(['node_id' => $node_id]);
+    $htmx->on('click', \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event, "click")', $builder_id));
+    $htmx->applyTo($build);
+
     $attributes = [
       'tabindex' => '0',
       'data-node-id' => $node_id,
-      'hx-vals' => \json_encode(['node_id' => $node_id]),
-      'hx-on:click' => \sprintf('Drupal.displayBuilder.handleSecondDrawer(%s, this, event, "click")', $builder_id),
     ];
 
     // If not set before we add information for contextual menu or drawer label.
@@ -245,7 +306,9 @@ class HtmxEvents {
       $attributes['data-slot-position'] = $index;
     }
 
-    return $this->setHtmxAttributes($build, $url, 'click consume', 'get', $attributes);
+    $build['#attributes'] = \array_merge($build['#attributes'] ?? [], $attributes);
+
+    return $build;
   }
 
   /**
@@ -264,6 +327,10 @@ class HtmxEvents {
    *   The render array.
    */
   public function onInstanceFormChange(array $build, string $builder_id, string $island_id, string $node_id): array {
+    if (!isset($build['source'])) {
+      return $build;
+    }
+
     $url = new Url(
       'display_builder.api_update',
       [
@@ -273,15 +340,11 @@ class HtmxEvents {
       ]
     );
 
-    $extra_attr = [];
+    $htmx = DisplayBuilderHtmx::request('put', $url, 'change consume');
 
-    // Specific Wysiwyg extra code to make it work.
-    if (isset($build['source']['value']['#type']) && $build['source']['value']['#type'] === 'text_format') {
-      $extra_attr['hx-on:htmx:config-request'] = 'Drupal.displayBuilder.fixWysiwyg(this, event)';
-      $build['#attached']['library'][] = 'display_builder/_fix_wysiwyg';
-    }
+    $htmx->applyTo($build['source']);
 
-    return $this->setHtmxAttributesOnSubKey($build, $url, 'change consume', 'put', $extra_attr, 'source');
+    return $build;
   }
 
   /**
@@ -312,17 +375,12 @@ class HtmxEvents {
       ]
     );
 
-    $extra_attr = [
-      'hx-include' => '#' . $build['source']['#id'],
-    ];
+    $htmx = DisplayBuilderHtmx::request('put', $url, self::HTMX_REQUEST);
+    $htmx->include('#' . $build['source']['#id']);
 
-    // Specific Wysiwyg extra code to make it work.
-    if (isset($build['source']['value']['#type']) && $build['source']['value']['#type'] === 'text_format') {
-      $extra_attr['hx-on:htmx:config-request'] = 'Drupal.displayBuilder.fixWysiwyg(this, event)';
-      $build['#attached']['library'][] = 'display_builder/_fix_wysiwyg';
-    }
+    $htmx->applyTo($build['update']);
 
-    return $this->setHtmxAttributesOnSubKey($build, $url, 'click consume', 'put', $extra_attr, 'update');
+    return $build;
   }
 
   /**
@@ -350,7 +408,9 @@ class HtmxEvents {
       ]
     );
 
-    return $this->setHtmxAttributes($build, $url, 'change', 'put');
+    DisplayBuilderHtmx::request('put', $url, 'change')->applyTo($build);
+
+    return $build;
   }
 
   /**
@@ -372,7 +432,9 @@ class HtmxEvents {
       ]
     );
 
-    return $this->setHtmxAttributes($build, $url, 'click consume', 'post');
+    DisplayBuilderHtmx::request('post', $url, self::HTMX_REQUEST)->applyTo($build);
+
+    return $build;
   }
 
   /**
@@ -394,7 +456,9 @@ class HtmxEvents {
       ]
     );
 
-    return $this->setHtmxAttributes($build, $url, 'click consume', 'post');
+    DisplayBuilderHtmx::request('post', $url, self::HTMX_REQUEST)->applyTo($build);
+
+    return $build;
   }
 
   /**
@@ -416,7 +480,9 @@ class HtmxEvents {
       ]
     );
 
-    return $this->setHtmxAttributes($build, $url, 'click consume', 'post');
+    DisplayBuilderHtmx::request('post', $url, self::HTMX_REQUEST)->applyTo($build);
+
+    return $build;
   }
 
   /**
@@ -438,7 +504,9 @@ class HtmxEvents {
       ]
     );
 
-    return $this->setHtmxAttributes($build, $url, 'click consume', 'post');
+    DisplayBuilderHtmx::request('post', $url, self::HTMX_REQUEST)->applyTo($build);
+
+    return $build;
   }
 
   /**
@@ -460,7 +528,9 @@ class HtmxEvents {
       ]
     );
 
-    return $this->setHtmxAttributes($build, $url, 'click consume', 'post');
+    DisplayBuilderHtmx::request('post', $url, self::HTMX_REQUEST)->applyTo($build);
+
+    return $build;
   }
 
   /**
@@ -482,60 +552,7 @@ class HtmxEvents {
       ]
     );
 
-    return $this->setHtmxAttributes($build, $url, 'click consume', 'post');
-  }
-
-  /**
-   * Sets HTMX attributes for a given URL, trigger, and method.
-   *
-   * @param array $build
-   *   The render array to modify.
-   * @param \Drupal\Core\Url $url
-   *   The URL for the HTMX request.
-   * @param string $trigger
-   *   The HTMX trigger.
-   * @param string $method
-   *   The HTTP method.
-   * @param array $extra_attr
-   *   (Optional) Extra attributes to add.
-   *
-   * @return array
-   *   The modified render array.
-   */
-  private function setHtmxAttributes(array $build, Url $url, string $trigger, string $method, array $extra_attr = []): array {
-    $attr = $this->setTrigger($trigger, $method, $url);
-    $attr = \array_merge($attr, $extra_attr);
-    $build['#attributes'] = \array_merge($build['#attributes'] ?? [], $attr);
-
-    return $build;
-  }
-
-  /**
-   * Sets HTMX attributes for a given URL, trigger, and method on a subkey.
-   *
-   * @param array $build
-   *   The render array to modify.
-   * @param \Drupal\Core\Url $url
-   *   The URL for the HTMX request.
-   * @param string $trigger
-   *   The HTMX trigger.
-   * @param string $method
-   *   The HTTP method.
-   * @param array $extra_attr
-   *   (Optional) Extra attributes to add.
-   * @param string $source_key
-   *   The name of the key to modify, example : update, source.
-   *
-   * @return array
-   *   The modified render array.
-   */
-  private function setHtmxAttributesOnSubKey(array $build, Url $url, string $trigger, string $method, array $extra_attr, string $source_key): array {
-    if (!isset($build[$source_key])) {
-      return $build;
-    }
-    $attr = $this->setTrigger($trigger, $method, $url);
-    $attr = \array_merge($attr, $extra_attr);
-    $build[$source_key]['#attributes'] = \array_merge($build[$source_key]['#attributes'] ?? [], $attr);
+    DisplayBuilderHtmx::request('post', $url, self::HTMX_REQUEST)->applyTo($build);
 
     return $build;
   }

@@ -58,6 +58,27 @@ interface ApiControllerInterface {
   public function get(Request $request, InstanceInterface $display_builder_instance, string $node_id): array;
 
   /**
+   * Rebuild a single island which was deferred while it was off screen.
+   *
+   * Panels hidden behind an inactive tab or a closed sidebar drawer are
+   * skipped by the event fan-out, so they go stale. The client calls this when
+   * the user brings one back into view.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   HTTP Request.
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
+   *   Display builder instance.
+   * @param string $island_id
+   *   The island plugin ID to rebuild.
+   *
+   * @return array
+   *   A renderable array carrying the island's out-of-band swap.
+   *
+   * @see \Drupal\display_builder\Event\DisplayBuilderEventsSubscriber::shouldDefer()
+   */
+  public function reloadIsland(Request $request, InstanceInterface $display_builder_instance, string $island_id): array;
+
+  /**
    * Update source.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -88,57 +109,6 @@ interface ApiControllerInterface {
    *   A renderable array
    */
   public function thirdPartySettingsUpdate(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $island_id): array;
-
-  /**
-   * Paste a source.
-   *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
-   *   Display builder instance.
-   * @param string $node_id
-   *   Node ID of the source.
-   * @param string $parent_id
-   *   Parent ID.
-   * @param string $slot_id
-   *   Slot ID.
-   * @param string $slot_position
-   *   Slot position.
-   *
-   * @return array
-   *   A renderable array
-   */
-  public function paste(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $parent_id, string $slot_id, string $slot_position): array;
-
-  /**
-   * Delete a source.
-   *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
-   *   Display builder instance.
-   * @param string $node_id
-   *   Node ID of the source to delete.
-   *
-   * @return array
-   *   A renderable array
-   */
-  public function delete(Request $request, InstanceInterface $display_builder_instance, string $node_id): array;
-
-  /**
-   * Save a source as preset.
-   *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
-   *   Display builder instance.
-   * @param string $node_id
-   *   Node ID of the source to save.
-   *
-   * @return array
-   *   A renderable array
-   */
-  public function saveAsPreset(Request $request, InstanceInterface $display_builder_instance, string $node_id): array;
 
   /**
    * Move history to the last past state.

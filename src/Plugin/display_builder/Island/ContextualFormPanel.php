@@ -24,6 +24,7 @@ use Drupal\display_builder\SourceWithSlotsInterface;
   label: new TranslatableMarkup('Config'),
   description: new TranslatableMarkup('Configure the active component or block.'),
   type: IslandType::Contextual,
+  icon: 'sliders',
 )]
 class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInterface {
 
@@ -89,7 +90,7 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
       '#submit_button' => FALSE,
       '#attributes' => [
         'type' => 'button',
-        'data-wysiwyg-fix' => TRUE,
+        'data-testid' => 'contextual_form_update',
       ],
     ];
 
@@ -100,16 +101,22 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
 
   /**
    * {@inheritdoc}
+   *
+   * No-op: a freshly attached node always has a brand-new node_id, so its
+   * own contextual panel can never already be open in the second drawer for
+   * this or any other reload to target.
    */
   public function onAttachToRoot(InstanceInterface $instance, string $node_id): array {
-    return $this->reloadWithNodeData($instance, $node_id);
+    return [];
   }
 
   /**
    * {@inheritdoc}
+   *
+   * @see self::onAttachToRoot()
    */
   public function onAttachToSlot(InstanceInterface $instance, string $node_id, string $parent_id): array {
-    return $this->reloadWithNodeData($instance, $node_id);
+    return [];
   }
 
   /**

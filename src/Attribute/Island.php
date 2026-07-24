@@ -38,6 +38,14 @@ final class Island extends AttributeBase {
    *   (Optional) Icon for this island.
    * @param array $modules
    *   (Optional) List of other modules required for this Island.
+   * @param array $attach_to
+   *   (Optional) For IslandType::Floating islands only: the plugin IDs of
+   *   the View islands this floating control attaches to. It renders once
+   *   per listed island, alongside that island's own content, and is only
+   *   visible while that island's main tab is active. Not admin-configurable
+   *   - unlike default_region, this is a fixed part of the plugin
+   *   definition, since a floating control is usually meaningless outside
+   *   the island(s) it was built for (e.g. CSS scoped to that island).
    */
   public function __construct(
     public readonly string $id,
@@ -49,6 +57,7 @@ final class Island extends AttributeBase {
     public readonly ?string $default_region = NULL,
     public readonly ?string $icon = NULL,
     public readonly array $modules = [],
+    public readonly array $attach_to = [],
   ) {}
 
 }

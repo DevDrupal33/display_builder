@@ -22,10 +22,10 @@ class ConfirmViewsBuilderDeleteForm extends ConfirmFormBase {
   /**
    * Display builder id to delete.
    */
-  private ?string $builderId;
+  protected ?string $builderId;
 
   public function __construct(
-    private readonly EntityTypeManagerInterface $entityTypeManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
   ) {}
 
   /**

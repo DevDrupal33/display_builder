@@ -22,17 +22,17 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 #[Island(
   id: 'viewport',
-  label: new TranslatableMarkup('Viewport switcher'),
-  description: new TranslatableMarkup('Change main region width according to breakpoints.'),
-  type: IslandType::Button,
+  label: new TranslatableMarkup('Responsive width'),
+  description: new TranslatableMarkup('Change main region width according to breakpoints for canvas and preview panels.'),
+  type: IslandType::Floating,
   modules: ['breakpoint'],
-  default_region: 'end',
+  attach_to: ['builder', 'preview'],
 )]
 class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFormInterface {
 
   use IslandConfigurationFormTrait;
 
-  private const HIDE_PROVIDER = ['toolbar'];
+  private const HIDE_PROVIDER = ['toolbar', 'stark'];
 
   /**
    * The module list extension service.
@@ -67,7 +67,7 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
   public function defaultConfiguration(): array {
     return [
       'exclude' => [],
-      'format' => 'default',
+      'format' => 'compact',
     ];
   }
 
@@ -137,7 +137,7 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
     $options = $data = [];
     $items = [
       [
-        'title' => $this->t('Fluid'),
+        'title' => $this->t('Fluid (Current viewport)'),
         'class' => 'active',
       ],
       [
@@ -145,24 +145,14 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
       ],
     ];
 
-    foreach ($groups as $group_id => $label) {
-      $points = $this->breakpointManager->getBreakpointsByGroup($group_id);
-
-      foreach ($points as $point_id => $point) {
-        $query = $point->getMediaQuery();
-        $width = $this->getMaxWidthValueFromMediaQuery($query);
-
-        if (!$width) {
-          continue;
-        }
-        $point_label = $point->getLabel();
-        $options[$label][$point_id] = $point_label;
-        $items[] = [
-          'title' => $point_label,
-          'value' => $point_id,
-        ];
-        $data[$point_id] = $width;
-      }
+    foreach ($this->getViewports($groups) as $viewport) {
+      $point_id = $viewport['id'];
+      $options[$viewport['group']][$point_id] = $viewport['label'];
+      $items[] = [
+        'title' => $viewport['label'],
+        'value' => $point_id,
+      ];
+      $data[$point_id] = $viewport['width'];
     }
 
     $select = [
@@ -174,7 +164,7 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
       '#props' => [
         'options' => $options,
         'icon' => 'window',
-        'empty_option' => $this->t('Fluid'),
+        'empty_option' => $this->t('Fluid (Current viewport)'),
       ],
       '#attributes' => [
         'style' => 'display: inline-block;',
@@ -190,8 +180,14 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
     unset($select['#attributes']['style']);
     $select['#props']['icon'] = NULL;
 
-    $button = $this->buildButton('', NULL, 'display', $this->t('Switch viewport of this display'));
+    // A plain title attribute, not the dropdown's own #props.tooltip (which
+    // wraps the trigger in a Shoelace <sl-tooltip>): Floating UI computes a
+    // permanently broken position for a tooltip that's part of the
+    // server-rendered HTML inside a floating controls cluster.
+    $button = $this->buildButton('', NULL, 'display');
     $button['#attributes']['class'] = ['switch-viewport-btn'];
+    $button['#attributes']['size'] = 'small';
+    $button['#attributes']['title'] = $this->t('Switch viewport of this display');
 
     return [
       '#type' => 'component',
@@ -210,11 +206,10 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
           ],
         ],
       ],
-      '#props' => [
-        'tooltip' => $this->t('Switch viewport'),
-      ],
       '#attributes' => [
-        'class' => ['switch-viewport'],
+        // db-background: visual surface now that this floats over the
+        // pane's own content, instead of sitting in the toolbar's chrome.
+        'class' => ['switch-viewport', 'db-background'],
         'data-island-action' => 'viewport',
       ],
       '#attached' => [
@@ -238,7 +233,7 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
       }
 
       // Exclude definitions with not supported media queries.
-      if (!$this->getMaxWidthValueFromMediaQuery($definition['mediaQuery'])) {
+      if (!$this->getWidthValueFromMediaQuery($definition['mediaQuery'])) {
         unset($definitions[$definition_id]);
       }
     }
@@ -247,37 +242,138 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
   }
 
   /**
-   * Get width and max width from media query.
+   * Collect the de-duplicated viewport widths from the breakpoint groups.
+   *
+   * Breakpoints are read as boundaries on the width axis regardless of whether
+   * they are expressed as min-width or max-width: mobile-first design systems
+   * (Bootstrap's own SCSS, most Drupal core themes) declare only min-width, so
+   * keying the switcher on max-width alone would leave it empty for them.
+   * Design systems that ship both directions (e.g. UI Suite Bootstrap) describe
+   * each boundary twice, one pixel apart (max-width: 575px vs min-width: 576px)
+   * so near-duplicate edges are collapsed to a single entry.
+   *
+   * @param array $groups
+   *   Breakpoint group IDs to read, keyed by group ID.
+   *
+   * @return array
+   *   Viewport descriptors sorted by width, each with 'id', 'group', 'width'
+   *   (a CSS length string) and 'label' (a synthesized device label).
+   */
+  protected function getViewports(array $groups): array {
+    $candidates = [];
+
+    foreach ($groups as $group_id => $group_label) {
+      $points = $this->breakpointManager->getBreakpointsByGroup($group_id);
+
+      foreach ($points as $point_id => $point) {
+        $width = $this->getWidthValueFromMediaQuery($point->getMediaQuery());
+
+        if ($width === NULL) {
+          continue;
+        }
+        [$value, $unit] = $width;
+        $candidates[] = [
+          'id' => $point_id,
+          'group' => $group_label,
+          'value' => $value,
+          'unit' => $unit,
+        ];
+      }
+    }
+
+    // Sort by unit then numeric value so mirror-pair edges (which share a unit
+    // and sit one pixel apart) become neighbors for de-duplication below.
+    \usort($candidates, static fn (array $a, array $b): int => [$a['unit'], $a['value']] <=> [$b['unit'], $b['value']]);
+
+    $viewports = [];
+    $previous = NULL;
+
+    foreach ($candidates as $candidate) {
+      // Collapse an edge within 2px of the previous kept one - mirror pairs
+      // differ by exactly 1px. Different units never collapse.
+      if ($previous !== NULL
+        && $previous['unit'] === $candidate['unit']
+        && \abs($previous['value'] - $candidate['value']) <= 2) {
+        continue;
+      }
+      $viewports[] = [
+        'id' => $candidate['id'],
+        'group' => $candidate['group'],
+        'width' => $candidate['value'] . $candidate['unit'],
+        'label' => $this->getViewportLabel($candidate['value'], $candidate['unit']),
+      ];
+      $previous = $candidate;
+    }
+
+    return $viewports;
+  }
+
+  /**
+   * Extract a width boundary from a media query.
+   *
+   * Reads the numeric width from a min-width, max-width, `width >=` or
+   * `width <=` expression: the direction is irrelevant here, the value is the
+   * boundary at which the layout changes and therefore a usable target width.
    *
    * @param string $query
    *   The media query from the breakpoint definition.
    *
-   * @return ?string
-   *   The width with its unit (120px, 13em, 100vh...). Null is no width found.
+   * @return array{int, string}|null
+   *   The width value and its unit (e.g. [575, 'px']), or NULL when the query
+   *   carries no supported width expression.
    */
-  protected function getMaxWidthValueFromMediaQuery(string $query): ?string {
+  protected function getWidthValueFromMediaQuery(string $query): ?array {
     if (\str_contains($query, 'not ')) {
       // Queries with negated expression(s) are not supported.
       return NULL;
     }
-    // Look for max-width: 1250px or max-width: 1250 px.
-    \preg_match('/max-width:\s*([0-9]+)\s*([A-Za-z]+)/', $query, $matches);
 
-    if (\count($matches) > 2) {
-      return $matches[1] . $matches[2];
-    }
-    // Looking for width <= 1250px or <= 1250 px.
-    \preg_match('/width\s*<=\s*([0-9]+)\s*([A-Za-z]+)/', $query, $matches);
-
-    if (\count($matches) > 1) {
-      return $matches[1];
+    // min-width: 1250px or max-width: 1250 px (optional space before the unit).
+    if (\preg_match('/(?:min|max)-width:\s*([0-9]+)\s*([A-Za-z]+)/', $query, $matches)) {
+      return [(int) $matches[1], $matches[2]];
     }
 
-    // @todo Currently only supports queries with max-width or width <= using
-    // px, em, vh units.
-    // Does not support min-width, percentage units, or complex/combined media
-    // queries.
+    // Range syntax: width <= 1250px or width >= 1250px.
+    if (\preg_match('/width\s*[<>]=\s*([0-9]+)\s*([A-Za-z]+)/', $query, $matches)) {
+      return [(int) $matches[1], $matches[2]];
+    }
+
+    // @todo Currently only supports px, em, vh units. Does not support
+    // percentage units or complex/combined media queries.
     return NULL;
+  }
+
+  /**
+   * Build a friendly device label for a viewport width.
+   *
+   * A breakpoint's own label ("Large and smaller") reads awkwardly in a device
+   * picker, so a width-bucketed device name is synthesized instead and the
+   * exact width shown alongside it. Non-pixel units keep their raw value.
+   *
+   * @param int $value
+   *   The numeric width.
+   * @param string $unit
+   *   The CSS length unit (px, em, ...).
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The label, e.g. "Mobile (575px)".
+   */
+  protected function getViewportLabel(int $value, string $unit): TranslatableMarkup {
+    if ($unit !== 'px') {
+      return $this->t('@width', ['@width' => $value . $unit]);
+    }
+
+    $device = match (TRUE) {
+      $value < 576 => $this->t('Mobile'),
+      $value < 992 => $this->t('Tablet'),
+      $value < 1400 => $this->t('Desktop'),
+      default => $this->t('Large desktop'),
+    };
+
+    return $this->t('@device (@width)', [
+      '@device' => $device,
+      '@width' => $value . $unit,
+    ]);
   }
 
   /**

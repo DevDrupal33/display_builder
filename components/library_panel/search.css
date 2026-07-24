@@ -1,0 +1,65 @@
+.display-builder .shoelace-button-search,
+.display-builder .db-search-instance {
+  width: 100%;
+}
+
+/* Search filter tweaks to hide the form and handle results */
+/* @see components/display_builder/display_builder.js */
+.display-builder .db-form .db-search-instance {
+  display: none;
+}
+/* @todo add instance form when possible, currently only apply to styles and
+ skins because instance form do not have an easy to use markup */
+.display-builder .db-form:has(.shoelace-tabs [active][data-target$="styles"]) .db-search-instance,
+.display-builder .db-form:has(.shoelace-tabs [active][data-target$="skins"]) .db-search-instance {
+  display: block;
+}
+.db-search-instance {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.db-form-search-found .db-island-styles .db-search-found,
+.db-form-search-found .db-island-tokens .db-search-found {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  padding: 0 0.5rem 0.5rem 0.5rem;
+  border: 1px solid var(--library-color-match-border);
+  background-color: var(--library-color-match-bg);
+}
+.db-form-search-found .db-island-styles details > fieldset:not(.db-element-search-in),
+.db-form-search-found .db-island-styles details > div:not(.db-element-search-in),
+.db-form-search-found .db-island-tokens details > fieldset:not(.db-element-search-in),
+.db-form-search-found .db-island-tokens details > div:not(.db-element-search-in) {
+  display: none;
+}
+.db-form-search-found .db-island-styles .db-element-search-in,
+.db-form-search-found .db-island-tokens .db-element-search-in {
+  display: block;
+}
+
+.display-builder .shoelace-button-search,
+.db-form .db-search-instance {
+  margin-bottom: 0.5rem;
+  padding: 0;
+  border: 0 none;
+}
+
+.db-search-library {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* The search box carries a real label for its accessible name - a placeholder
+   alone leaves it unnamed for assistive tech (axe label-title-only, serious) -
+   but showing it would only repeat the placeholder and the magnifier icon in a
+   panel this narrow, so it is hidden the way Drupal core hides one
+   (@see core/misc/components/visually-hidden.module.css). If the label should
+   become visible one day, delete this rule - nothing else depends on it. */
+.db-search-library::part(form-control-label) {
+  position: absolute !important;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  width: 1px;
+  height: 1px;
+  word-wrap: normal;
+}

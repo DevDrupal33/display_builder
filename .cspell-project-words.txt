@@ -6,6 +6,7 @@ draggables
 dropzone
 dropzones
 FloatingUIDOM
+grayscale
 htmx
 offcanvas
 phpdbg
@@ -25,21 +26,12 @@ oportunitatis
 videri
 vivere
 
-analyse
-drupol
-friendsoftwig
-phpcsfixer
-twigcs
-vincentlanglet
-
 beyris
 dureau
-fontawesome
 meulle
 mikael
 mogtofu
 pdureau
-pymdownx
 valverde
 
 libicu
@@ -50,3 +42,4 @@ pwuser
 
 sentity
 stest
+fanout

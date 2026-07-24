@@ -44,7 +44,7 @@ export type DrupalSiteInstall = {
  */
 export const drupalSite = base.extend<DrupalSiteInstall>({
   drupalSite: [
-    async ({}, use, workerInfo) => {
+    async ({ }, use, workerInfo) => {
       if (process.env.DRUPAL_TEST_SKIP_INSTALL && process.env.DRUPAL_TEST_SKIP_INSTALL === 'true') {
         const withDrush = await hasDrush()
         utils.info('Drupal is installed, skip installation for tests')

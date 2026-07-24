@@ -111,4 +111,41 @@ interface IslandInterface extends ConfigurableInterface, ContainerFactoryPluginI
    */
   public function alterRenderable(InstanceInterface $instance, array $build): array;
 
+  /**
+   * Whether this island's rebuild may be deferred while it is off screen.
+   *
+   * Deferrable islands are skipped by the event fan-out when the client
+   * reports them as hidden, and fetched again via reload() once the user
+   * brings them back into view.
+   *
+   * An island must decline if its pane content is not produced by its own
+   * build() - reload() would then swap in something incomplete. Panels that
+   * are permanently on screen have nothing to gain and also decline.
+   *
+   * @return bool
+   *   TRUE if this island can be deferred and later reloaded on its own.
+   *
+   * @see self::reload()
+   * @see \Drupal\display_builder\Event\DisplayBuilderEventsSubscriber::shouldDefer()
+   */
+  public function isDeferrable(): bool;
+
+  /**
+   * Rebuild this island from the instance's current state, out of band.
+   *
+   * Produces the same out-of-band swap the event fan-out would have produced,
+   * but on demand and for this island alone. Used to refresh a panel which was
+   * deferred (skipped) while it was hidden, once it becomes visible again.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   Display builder instance.
+   *
+   * @return array
+   *   A renderable array carrying the out-of-band swap.
+   *
+   * @see \Drupal\display_builder\Controller\ApiController::reloadIsland()
+   * @see \Drupal\display_builder\Event\DisplayBuilderEventsSubscriber::shouldDefer()
+   */
+  public function reload(InstanceInterface $instance): array;
+
 }

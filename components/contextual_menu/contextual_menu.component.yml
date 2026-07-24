@@ -10,3 +10,10 @@ slots:
 props:
   type: object
   properties: {}
+libraryOverrides:
+  css:
+    component:
+      contextual_menu.css: {}
+  dependencies:
+    - core/drupal
+    - display_builder/local_storage_manager

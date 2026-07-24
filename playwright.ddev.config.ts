@@ -8,7 +8,7 @@ export default defineConfig({
   ...baseConfig,
   retries: 0,
   workers: 1,
-  timeout: 160_000,
+  timeout: 20_000,
   reporter: [
     ['dot'],
     // ['list', { printSteps: true }],
@@ -28,16 +28,16 @@ export default defineConfig({
       slowMo: 100,
     },
     // @see https://playwright.dev/docs/api/class-testoptions#test-options-action-timeout
-    // actionTimeout: 10_000,
+    actionTimeout: 5_000,
   },
   projects: [
     {
-      name: 'ddev',
+      name: 'ddev-firefox',
       use: {
         ...devices['Desktop Firefox'],
         baseURL: 'https://display-builder.ddev.site/',
         deviceScaleFactor: 1,
-        viewport: { width: 1280, height: 920 },
+        viewport: { width: 1920, height: 1080 },
       },
     },
   ],

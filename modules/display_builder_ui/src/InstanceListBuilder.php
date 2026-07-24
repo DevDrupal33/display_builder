@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_ui;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
@@ -34,7 +35,7 @@ final class InstanceListBuilder extends EntityListBuilder {
   /**
    * Cached list of display builder providers.
    */
-  private array $providers = [];
+  protected array $providers = [];
 
   /**
    * {@inheritdoc}
@@ -42,12 +43,12 @@ final class InstanceListBuilder extends EntityListBuilder {
   public function __construct(
     protected EntityTypeInterface $entity_type,
     EntityStorageInterface $storage,
-    private readonly DateFormatterInterface $dateFormatter,
-    private readonly FormBuilderInterface $formBuilder,
-    private readonly PagerManagerInterface $pagerManager,
-    private readonly RequestStack $requestStack,
-    private readonly EntityTypeManagerInterface $entityTypeManager,
-    private DisplayBuildablePluginManager $displayBuildableManager,
+    protected DateFormatterInterface $dateFormatter,
+    protected FormBuilderInterface $formBuilder,
+    protected PagerManagerInterface $pagerManager,
+    protected RequestStack $requestStack,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected DisplayBuildablePluginManager $displayBuildableManager,
   ) {
     parent::__construct($entity_type, $storage);
 
@@ -242,9 +243,7 @@ final class InstanceListBuilder extends EntityListBuilder {
 
     $build['#attached']['library'][] = 'display_builder_ui/instance_list';
 
-    $info = $this->t('Instances are versions of displays (entity views, page layouts, views...) currently under work.');
-    $info .= '<br>';
-    $info .= $this->t('They are created automatically from the displays and saved in the configuration when published.');
+    $info = $this->t('Instances are existing displays (entity views, page layouts, views...) from configuration or currently under work.');
 
     $build['notice'] = [
       '#type' => 'html_tag',
@@ -268,7 +267,7 @@ final class InstanceListBuilder extends EntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function getOperations(EntityInterface $entity) {
+  public function getOperations(EntityInterface $entity, ?CacheableMetadata $cacheability = NULL) {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
     /** @var \Drupal\display_builder\Plugin\Field\FieldType\PluginItem $field */
     $field = $entity->get('buildable')->first();

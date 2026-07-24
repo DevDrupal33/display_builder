@@ -6,18 +6,17 @@ variants:
     title: Default
   root:
     title: Root
-  highlighted:
-    title: Highlighted
 slots:
   content:
     title: Content
 props:
   type: object
-  properties:
-    title:
-      title: Title
-      type: string
+  properties: {}
 libraryOverrides:
+  css:
+    component:
+      dropzone.css: {}
+      variables.css: {}
   dependencies:
     - core/drupal
     - core/once

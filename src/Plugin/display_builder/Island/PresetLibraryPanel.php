@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\BlockLibrarySourceHelper;
 use Drupal\display_builder\Entity\PatternPresetInterface;
 use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\Island\IslandConfigurationFormInterface;
+use Drupal\display_builder\Island\IslandConfigurationFormTrait;
 use Drupal\display_builder\Island\IslandPluginBase;
 use Drupal\display_builder\Island\IslandType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -23,8 +26,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Presets'),
   description: new TranslatableMarkup('List of preset, already build group of components.'),
   type: IslandType::Library,
+  icon: 'boxes',
 )]
-class PresetLibraryPanel extends IslandPluginBase {
+class PresetLibraryPanel extends IslandPluginBase implements IslandConfigurationFormInterface {
+
+  use IslandConfigurationFormTrait;
 
   /**
    * The Pattern preset storage.
@@ -39,6 +45,51 @@ class PresetLibraryPanel extends IslandPluginBase {
     $instance->presetConfigStorage = $container->get('entity_type.manager')->getStorage('pattern_preset');
 
     return $instance;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration(): array {
+    return [
+      'preview' => TRUE,
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
+    $configuration = $this->getConfiguration();
+
+    $form['display'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Display'),
+    ];
+
+    $form['display']['preview'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable preview on hover'),
+      '#description' => $this->t('Enable or disable the preview of components when hovering over them.'),
+      '#default_value' => $configuration['preview'],
+    ];
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function configurationSummary(): array {
+    $configuration = $this->getConfiguration();
+
+    $summary = [];
+
+    if ($configuration['preview']) {
+      $summary[] = $this->t('Preview on hover enabled');
+    }
+
+    return $summary;
   }
 
   /**
@@ -114,6 +165,7 @@ class PresetLibraryPanel extends IslandPluginBase {
    *   Array of grouped preset plugins.
    */
   private function buildPresets(string $builder_id, array $presets): array {
+    $configuration = $this->getConfiguration();
     $build = [];
     $grouped_presets = [];
 
@@ -144,13 +196,13 @@ class PresetLibraryPanel extends IslandPluginBase {
           '#tag' => 'h4',
           '#value' => $group_data['label'],
           '#attributes' => [
-            'class' => ['db-filter-hide-on-search'],
+            'class' => ['db-placeholder__group', 'db-filter-hide-on-search'],
           ],
         ];
       }
 
       foreach ($group_data['choices'] as $preset) {
-        $build[] = $this->buildPresetItem($builder_id, $preset, TRUE);
+        $build[] = $this->buildPresetItem($builder_id, $preset, $configuration['preview']);
       }
     }
 
@@ -167,27 +219,24 @@ class PresetLibraryPanel extends IslandPluginBase {
    *   Builder ID.
    * @param \Drupal\display_builder\Entity\PatternPresetInterface $preset
    *   The preset entity.
-   * @param bool $with_preview
+   * @param bool $preview
    *   Whether to include preview attributes.
    *
    * @return array
    *   The render array for the preset item.
    */
-  private function buildPresetItem(string $builder_id, PatternPresetInterface $preset, bool $with_preview): array {
+  private function buildPresetItem(string $builder_id, PatternPresetInterface $preset, bool $preview): array {
     $keywords = \sprintf('%s %s', $preset->get('label'), $preset->get('description') ?? '');
     $vals = ['preset_id' => $preset->id()];
 
-    if ($with_preview) {
+    if ($preview) {
       $url = Url::fromRoute('display_builder.api_preset_preview', $vals);
 
-      $build = $this->buildPlaceholderButtonWithPreview($builder_id, $preset->get('label'), $vals, $url, $keywords);
+      $build = $this->buildPlaceholderListWithPreview($builder_id, $preset->get('label'), $vals, $url, $keywords);
     }
     else {
-      $build = $this->buildPlaceholderButton($preset->get('label'), $vals, $keywords);
+      $build = $this->buildPlaceholderList($preset->get('label'), $vals, $keywords);
     }
-
-    // @see https://playwright.dev/docs/locators#locate-by-test-id
-    $build['#attributes']['data-testid'][] = $preset->id();
 
     return $build;
   }

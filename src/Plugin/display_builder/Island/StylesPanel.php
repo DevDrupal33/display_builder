@@ -29,6 +29,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   description: new TranslatableMarkup('Apply style utilities to the active component or block'),
   type: IslandType::Contextual,
   modules: ['ui_styles'],
+  icon: 'palette',
 )]
 class StylesPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface, ThirdPartySettingsInterface {
 
@@ -148,16 +149,22 @@ class StylesPanel extends IslandPluginBase implements IslandWithFormInterface, R
 
   /**
    * {@inheritdoc}
+   *
+   * No-op: a freshly attached node always has a brand-new node_id, so its
+   * own contextual panel can never already be open in the second drawer for
+   * this or any other reload to target.
    */
   public function onAttachToRoot(InstanceInterface $instance, string $node_id): array {
-    return $this->reloadWithNodeData($instance, $node_id);
+    return [];
   }
 
   /**
    * {@inheritdoc}
+   *
+   * @see self::onAttachToRoot()
    */
   public function onAttachToSlot(InstanceInterface $instance, string $node_id, string $parent_id): array {
-    return $this->reloadWithNodeData($instance, $node_id);
+    return [];
   }
 
   /**

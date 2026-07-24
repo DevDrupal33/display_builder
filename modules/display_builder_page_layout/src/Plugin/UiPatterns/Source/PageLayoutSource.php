@@ -47,9 +47,9 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
     ModuleHandlerInterface $moduleHandler,
     Token $token,
     UiPatternsNormalizerInterface $normalizer,
-    private ComponentElementBuilder $componentElementBuilder,
-    private SourcePluginManager $sourceManager,
-    private ConfigFactoryInterface $configFactory,
+    protected ComponentElementBuilder $componentElementBuilder,
+    protected SourcePluginManager $sourceManager,
+    protected ConfigFactoryInterface $configFactory,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $propTypeManager, $contextRepository, $routeMatch, $sampleEntityGenerator, $moduleHandler, $token, $normalizer);
   }
@@ -192,7 +192,7 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
   }
 
   /**
-   * Wraps system_region_list().
+   * Lists a theme's visible regions.
    *
    * @param string $theme
    *   The machine name of the theme.
@@ -201,7 +201,7 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
    *   An array of region names and their human readable labels.
    */
   private function systemRegionList(string $theme): array {
-    return system_region_list($theme, REGIONS_VISIBLE);
+    return \Drupal::service('theme_handler')->getTheme($theme)->listVisibleRegions(); // @phpcs:ignore
   }
 
 }

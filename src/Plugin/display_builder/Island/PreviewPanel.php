@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\DisplayBuilderHelpers;
@@ -36,11 +37,17 @@ class PreviewPanel extends IslandPluginBase {
   protected ComponentElementBuilder $componentElementBuilder;
 
   /**
+   * The renderer.
+   */
+  protected RendererInterface $renderer;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->componentElementBuilder = $container->get('ui_patterns.component_element_builder');
+    $instance->renderer = $container->get('renderer');
 
     return $instance;
   }
@@ -69,7 +76,21 @@ class PreviewPanel extends IslandPluginBase {
 
     foreach ($data as $slot) {
       $build = $this->componentElementBuilder->buildSource([], 'content', [], $slot, $this->configuration['contexts'] ?? []);
-      $returned[] = $build['#slots']['content'][0] ?? [];
+      $build = $build['#slots']['content'][0] ?? [];
+
+      // Some sources (e.g. a comment field's "Add comment" form) throw once
+      // actually rendered rather than producing empty markup - @see
+      // RenderableBuilderTrait::isRenderEmptyOrFailing(). Unlike
+      // BuilderPanel, which already guards every source it builds the same
+      // way, nothing here previously checked this, so a throwing source
+      // shipped its #lazy_builder unresolved into the page, breaking Drupal
+      // core's own BigPipe processing of unrelated placeholders (e.g. the
+      // Navigation module's admin toolbar) later in the same request.
+      if ($this->isRenderEmptyOrFailing($this->renderer, $build)) {
+        $build = $this->buildPlaceholder($this->t('[Placeholder] No preview'));
+      }
+
+      $returned[] = $build;
     }
 
     return $returned;

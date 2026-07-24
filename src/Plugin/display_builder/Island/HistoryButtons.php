@@ -33,20 +33,22 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
     $buttons = [
       $this->isButtonEnabled('undo') ? $this->buildUndoButton($builder) : [],
       $this->isButtonEnabled('redo') ? $this->buildRedoButton($builder) : [],
-      $this->isButtonEnabled('clear') ? $this->buildClearButton($builder) : [],
     ];
+    $clear_button = $this->isButtonEnabled('clear') ? $this->buildClearButton($builder) : [];
 
     if (empty(\array_filter($buttons))) {
       return [];
     }
 
-    return [
+    $build = [
       '#type' => 'component',
       '#component' => 'display_builder:button_group',
       '#slots' => [
         'buttons' => $buttons,
       ],
     ];
+
+    return [$build, $clear_button];
   }
 
   /**
@@ -87,8 +89,8 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
       ($this->showLabel('undo') && $past) ? (string) \count($past) : '',
       'undo',
       'arrow-counterclockwise',
-      $this->t('Undo (shortcut: u)'),
-      ['u' => $this->t('Undo last change')]
+      $this->t('Undo (shortcut: Ctrl/Cmd+Z)'),
+      ['mod+z u' => $this->t('Undo last change')]
     );
 
     if (empty($past)) {
@@ -113,8 +115,8 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
       ($this->showLabel('redo') && $future) ? (string) \count($future) : '',
       'redo',
       'arrow-clockwise',
-      $this->t('Redo (shortcut: r)'),
-      ['r' => $this->t('Redo last undone change')]
+      $this->t('Redo (shortcut: Ctrl/Cmd+Shift+Z)'),
+      ['mod+shift+z r' => $this->t('Redo last undone change')]
     );
 
     if (empty($future)) {
@@ -139,7 +141,7 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
       'clear',
       $this->showIcon('clear') ? 'clock-history' : '',
       $this->t('Clear history (shortcut: Shift+C)'),
-      ['C' => $this->t('Clear all changes history (Shift+C)')]
+      ['shift+c' => $this->t('Clear all changes history')]
     );
     $clear['#props']['variant'] = 'warning';
     $clear['#attributes']['outline'] = TRUE;

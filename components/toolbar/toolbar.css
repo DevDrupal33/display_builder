@@ -1,53 +1,22 @@
-:root,
-.display-builder.sl-theme-dark {
-  --toolbar-color: var(--db-text-color);
-  --toolbar-color-border: var(--sl-color-neutral-200);
-  --toolbar-color-background: var(--sl-color-neutral-0);
-  --toolbar-z-index: calc(var(--db-z-index, 501) - 1);
-  --toolbar-z-index-fullscreen: calc(var(--db-z-index-fullscreen, 1251) + 1);
-  /* Module core navigation compatibility */
-  --toolbar-height: var(--admin-toolbar-top-bar-height, 64px);
-}
-
 .db-toolbar {
-  z-index: var(--toolbar-z-index);
+  z-index: var(--db-z-toolbar);
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: var(--toolbar-height);
-  border: 1px solid var(--admin-toolbar-color-gray-100, var(--toolbar-color-border));
+  border: 1px solid var(--toolbar-color-border);
   background-color: var(--toolbar-color-background);
-
-  &.db-toolbar-is-sticky {
-    position: fixed;
-    left: var(--drupal-displace-offset-left, var(--admin-toolbar-sidebar-width, 0));
-    width: 100%;
-    padding-right: var(--drupal-displace-offset-left, var(--admin-toolbar-sidebar-width, 0));
-    border: 0 none;
-  }
-
-  sl-tooltip::part(body) {
-    color: var(--toolbar-color);
-    border: 1px solid var(--toolbar-color-border);
-    background-color: var(--toolbar-color-background);
-  }
 }
 
-/* If second drawer is open when sticky, keep toolbar buttons visible */
-.display-builder:has(.db-toolbar-is-sticky) {
-  #db-second-drawer {
-    &::part(panel) {
-      padding-top: calc(var(--drupal-displace-offset-top, 0.01rem) + var(--toolbar-height, 0)) !important;
-    }
-    &::part(base) {
-      z-index: var(--toolbar-z-index);
-    }
-  }
-}
-.db-toolbar-sentinel {
-  height: 1px;
-  margin-top: -1px; /* Optional: ensures it sits exactly where the content starts */
-  background: transparent;
+/* Also applies to the per-island floating controls (e.g. Builder highlight) so
+   their tooltips match the toolbar's, instead of falling back to Shoelace's
+   default (dark) tooltip theme.
+   @see components/display_builder/display_builder.css */
+.db-toolbar sl-tooltip::part(body),
+.db-island-floating-controls sl-tooltip::part(body) {
+  color: var(--toolbar-color);
+  border: 1px solid var(--toolbar-color-border);
+  background-color: var(--toolbar-color-background);
 }
 
 .display-builder {
@@ -59,26 +28,67 @@
   max-width: 100%;
 }
 
+/* Sticky to the top of .display-builder's own box, which already spans the
+   full page for the full-page builder route (case 1) - .db-sidebar starts right
+   below this (@see sidebar.css). top clears whatever the classic Toolbar
+   module's fixed bar (@see core/modules/toolbar) contributes via Drupal core's
+   displace system; --drupal-displace-offset-top is 0 and changes nothing when
+   that module isn't displacing the page. */
 .db-toolbar--sticky {
   position: sticky;
+  top: var(--drupal-displace-offset-top, 0);
+}
+
+/* Case 2 (embedded builder route, e.g. an entity view display's
+   .../display-builder route) - .display-builder sits deep inside a normal
+   themed page there (below a title, breadcrumbs, other page furniture), so
+   sticky (which only pins once scrolled past its normal-flow position) isn't
+   enough to keep the toolbar visible like a real app toolbar; pin it to the
+   true viewport top instead, "not inside" the page the way case 1's
+   sticky-in-flow treatment is. left/right clear external chrome only
+   (Navigation module sidebar, admin toolbar) - the toolbar spans above both of
+   our own sidebars, not beside them, so it never needs to clear their width the
+    way .display-builder__main does (@see display_builder.css).
+   :where() keeps this whole prefix at zero specificity on purpose. Written
+   plainly, `.display-builder:not(.display-builder-page-layout)
+   .db-toolbar--sticky` is (0,3,0) and outranks the (0,2,0) expanded override
+   below - which is how the toolbar kept Navigation's
+   --drupal-displace-offset-left (264px) while expanded, sitting inset from the
+   left edge over a sidebar the rest of the builder had already covered. Any
+   future override of this rule must not have to out-specify a :not() it has
+   nothing to do with. */
+:where(.display-builder:not(.display-builder-page-layout)) .db-toolbar--sticky {
+  position: fixed;
+  top: var(--drupal-displace-offset-top, 0);
+  right: var(--drupal-displace-offset-right, 0);
+  left: var(--drupal-displace-offset-left, 0);
+}
+
+/* Expanded mode covers the full viewport, including whatever external
+   chrome --drupal-displace-offset-* normally clears - ignore it entirely
+   rather than leaving an empty gap over chrome this fullscreen overlay
+   already sits above in z-index. Applies regardless of case: expanded mode
+   escapes both case 1's sticky-in-flow and case 2's fixed-with-offsets
+   treatment above. @see assets/js/expand.js */
+.display-builder--expanded .db-toolbar--sticky {
   top: 0;
+  right: 0;
+  left: 0;
 }
 
 .db-toolbar__middle {
-  height: var(--admin-toolbar-top-bar-height, 64px);
+  height: var(--toolbar-height);
   padding: 0;
 }
 
 .db-toolbar__start,
 .db-toolbar__end {
   box-sizing: border-box;
-  height: var(--admin-toolbar-top-bar-height, 64px);
-  padding: var(--sl-spacing-small) var(--sl-spacing-small);
+  height: var(--toolbar-height);
+  padding: var(--db-space-12) var(--db-space-12);
 }
 
 .db-toolbar {
-  /* --drupal-displace-offset-top is used by toolbar, admin_toolbar & navigation */
-  top: var(--drupal-displace-offset-top, 0);
   .db-keyboard-help {
     padding-left: 0;
     list-style: none;
@@ -88,36 +98,27 @@
   }
 }
 
-.display-builder--fullscreen .db-toolbar {
-  z-index: var(--toolbar-z-index-fullscreen);
-  top: 0;
-  &.db-toolbar-is-sticky {
-    left: 0;
-    padding-right: 1rem;
-  }
-}
-
 .db-toolbar sl-tab-group {
   /* Tabs must not be taller than the available space */
-  max-height: calc(var(--admin-toolbar-top-bar-height, 64px) - var(--admin-toolbar-space-12, 12px) * 2);
+  max-height: calc(var(--toolbar-height) - var(--db-space-12) * 2);
 }
 
 .db-toolbar sl-tab::part(base) {
-  height: var(--admin-toolbar-top-bar-height, 64px);
-  padding: var(--sl-spacing-small) var(--admin-toolbar-space-12, 12px);
+  height: var(--toolbar-height);
+  padding: var(--db-space-12) var(--db-space-12);
 }
 @media (max-width: 1280px) {
   .db-toolbar sl-tab::part(base) {
-    padding: var(--sl-spacing-small) var(--admin-toolbar-space-8, 8px);
+    padding: var(--db-space-12) var(--db-space-8);
   }
 }
 
 .db-toolbar__end > .db-island:not(:first-child, dialog, :empty) {
   display: inline-block;
-  margin-left: var(--admin-toolbar-space-4, 4px);
+  margin-left: var(--db-space-4);
 }
 @media (max-width: 1280px) {
   .db-toolbar__end > .db-island:not(:first-child, dialog, :empty) {
-    margin-left: var(--admin-toolbar-space-4, 4px);
+    margin-left: var(--db-space-4);
   }
 }

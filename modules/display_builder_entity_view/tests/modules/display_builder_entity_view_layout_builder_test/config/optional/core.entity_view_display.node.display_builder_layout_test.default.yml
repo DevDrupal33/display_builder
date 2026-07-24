@@ -1,0 +1,41 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.display_builder_layout_test
+  module:
+    - display_builder_test
+    - layout_builder
+    - layout_discovery
+    - ui_patterns
+    - ui_patterns_blocks
+    - user
+id: node.display_builder_layout_test.default
+targetEntityType: node
+bundle: display_builder_layout_test
+mode: default
+content: {}
+hidden:
+  links: true
+third_party_settings:
+  layout_builder:
+    enabled: true
+    allow_custom: false
+    sections:
+      - layout_id: 'ui_patterns:display_builder_test:test_1'
+        layout_settings:
+          label: ''
+          context_mapping:
+            entity: layout_builder.entity
+          ui_patterns:
+            component_id: 'display_builder_test:test_1'
+            variant_id: null
+            props:
+              attributes:
+                source_id: attributes
+                source:
+                  value: ''
+              prop_string:
+                source_id: textfield
+                source:
+                  value: 'Layout builder config: Default'

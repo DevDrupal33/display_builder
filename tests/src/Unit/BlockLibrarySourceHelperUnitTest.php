@@ -115,7 +115,7 @@ final class BlockLibrarySourceHelperUnitTest extends UnitTestCase {
             ],
             'group' => 'Others',
             'keywords' => 'block Test source Test description',
-            'preview' => FALSE,
+            'preview' => NULL,
           ],
         ],
       ],
@@ -209,7 +209,7 @@ final class BlockLibrarySourceHelperUnitTest extends UnitTestCase {
           'source_id' => $source_id,
         ],
         'keywords' => \sprintf('%s %s %s', $source['definition']['id'], $source['definition']['label'] ?? $source_id, $source['definition']['description'] ?? ''),
-        'preview' => FALSE,
+        'preview' => NULL,
         'group' => $source['_expected_group'] ?? 'Others',
       ];
     }

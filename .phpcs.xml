@@ -33,6 +33,11 @@
     <exclude-pattern>*.test</exclude-pattern>
   </rule>
 
+  <!-- As disabled for Drupal core, often uses mixed array structures. -->
+  <rule ref="Squiz.Arrays.ArrayDeclaration.KeySpecified">
+    <severity>0</severity>
+  </rule>
+
   <!-- Ignore prefixing of class names with project name in Behat tests. -->
   <rule ref="DrupalPractice.General.ClassName.ClassPrefix">
     <exclude-pattern>*\/tests\/behat\/bootstrap/*\.php</exclude-pattern>

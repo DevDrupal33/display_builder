@@ -6,7 +6,6 @@ namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\Core\Url;
 use Drupal\display_builder\Controller\ApiController;
-use Drupal\display_builder\Entity\PatternPreset;
 use Drupal\display_builder\InstanceInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -62,7 +61,7 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
     $this->installConfig(['system', 'display_builder', 'ui_patterns', 'display_builder_test']);
 
     // Create a real builder entity.
-    $this->instance = $this->createDisplayBuilderInstance('test', 'test_instance');
+    $this->instance = $this->createDisplayBuilderInstance('test_base', 'test_instance');
     $this->instance->save();
 
     // Get the controller from the container.
@@ -143,128 +142,6 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Tests the ::delete() method.
-   */
-  public function testDelete(): void {
-    $node_id = $this->instance->attachToRoot(0, 'token', []);
-    $this->instance->save();
-
-    $url = Url::fromRoute('display_builder.api_delete', [
-      'display_builder_instance' => $this->instance->id(),
-      'node_id' => $node_id,
-    ]);
-    $request = Request::create($url->toString(), 'DELETE');
-    $response = $this->controller->delete($request, $this->instance, $node_id);
-
-    self::assertIsArray($response['history']);
-    self::assertIsArray($response['state']);
-
-    $saved = $this->loadInstance($this->instance->id());
-    self::assertEmpty($saved->getCurrentState());
-  }
-
-  /**
-   * Tests ::paste() copies a node to root with a fresh node_id.
-   */
-  public function testPasteToRoot(): void {
-    $source_node_id = $this->instance->attachToRoot(0, 'component', [
-      'component' => ['component_id' => 'display_builder_test:test_1'],
-    ]);
-    $this->instance->save();
-
-    $url = Url::fromRoute('display_builder.api_paste', [
-      'display_builder_instance' => $this->instance->id(),
-      'node_id' => $source_node_id,
-      'parent_id' => '__root__',
-      'slot_id' => '__none__',
-      'slot_position' => '0',
-    ]);
-    $request = Request::create($url->toString(), 'POST');
-    $response = $this->controller->paste($request, $this->instance, $source_node_id, '__root__', '__none__', '0');
-
-    self::assertIsArray($response['history']);
-    self::assertIsArray($response['state']);
-    self::assertIsArray($response['logs']);
-
-    $saved = $this->loadInstance($this->instance->id());
-    $state = $saved->getCurrentState();
-    // Original + pasted copy must both exist at root.
-    self::assertCount(2, $state);
-    $node_ids = \array_column($state, 'node_id');
-    // The pasted copy gets a refreshed node_id.
-    self::assertCount(2, \array_unique($node_ids), 'Pasted node must have a unique node_id.');
-    self::assertContains($source_node_id, $node_ids, 'Original node must still exist at root.');
-    // Both must share the same source_id.
-    $source_ids = \array_unique(\array_column($state, 'source_id'));
-    self::assertCount(1, $source_ids, 'Pasted node must preserve the source_id.');
-  }
-
-  /**
-   * Tests ::paste() copies a node into a slot with a fresh node_id.
-   */
-  public function testPasteToSlot(): void {
-    $container_id = $this->instance->attachToRoot(0, 'component', [
-      'component' => ['component_id' => 'display_builder_test:test_1'],
-    ]);
-    $source_node_id = $this->instance->attachToRoot(1, 'token', []);
-    $this->instance->save();
-
-    $url = Url::fromRoute('display_builder.api_paste', [
-      'display_builder_instance' => $this->instance->id(),
-      'node_id' => $source_node_id,
-      'parent_id' => $container_id,
-      'slot_id' => 'slot_1',
-      'slot_position' => '0',
-    ]);
-    $request = Request::create($url->toString(), 'POST');
-    $response = $this->controller->paste($request, $this->instance, $source_node_id, $container_id, 'slot_1', '0');
-
-    self::assertIsArray($response['history']);
-    self::assertIsArray($response['state']);
-    self::assertIsArray($response['logs']);
-
-    $saved = $this->loadInstance($this->instance->id());
-    $state = $saved->getCurrentState();
-    // Root still has both original nodes.
-    self::assertCount(2, $state);
-    // The container's slot_1 must now contain the pasted copy.
-    $container = $state[0];
-    $slot_sources = $container['source']['component']['slots']['slot_1']['sources'] ?? [];
-    self::assertNotEmpty($slot_sources, 'Pasted node must appear in target slot.');
-    // The child in the slot must have a different node_id than the source.
-    $pasted_node_id = $slot_sources[0]['node_id'] ?? NULL;
-    self::assertNotNull($pasted_node_id);
-    self::assertNotSame($source_node_id, $pasted_node_id, 'Pasted node must have a refreshed node_id.');
-  }
-
-  /**
-   * Tests the ::saveAsPreset() with non ASCII characters in entity label.
-   */
-  public function testLabelEncoding(): void {
-    $node_id = $this->instance->attachToRoot(0, 'token', []);
-    // cspell:disable-next-line
-    $iso_8859_1_characters = '¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ';
-    // cspell:disable-next-line
-    $other_characters = '€œŒ';
-    $label = $iso_8859_1_characters . $other_characters;
-    $url = Url::fromRoute('display_builder.api_save_preset', [
-      'display_builder_instance' => $this->instance->id(),
-      'node_id' => $node_id,
-    ]);
-    $request = Request::create($url->toString(), 'POST', []);
-    $request->headers->add([
-      // Browsers send HTTP headers values with the ISO-8859-1 charset.
-      'hx-prompt' => \mb_convert_encoding($label, 'ISO-8859-1'),
-    ]);
-    $this->controller->saveAsPreset($request, $this->instance, $node_id);
-    $presets = PatternPreset::loadMultiple();
-    $preset = \array_first($presets);
-    // Non ISO-8859-1 are replaced by a question mark.
-    $label = $iso_8859_1_characters . \str_repeat('?', \mb_strlen($other_characters));
-    self::assertEquals($preset->label(), $label);
-  }
-
-  /**
    * Tests that setSource() preserves slot children when updating source data.
    *
    * This verifies the A-2 fix: SourceTree stores children in its flat
@@ -298,39 +175,233 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Tests that saveAsPreset() generates a valid config-entity machine name.
-   *
-   * The ID must match [a-z0-9_], never start with a digit, and must be unique
-   * when the same label is saved twice.
+   * Test the ::get() method returns the active node payload.
    */
-  public function testSaveAsPresetGeneratesValidId(): void {
+  public function testGetReturnsTheActiveNode(): void {
     $node_id = $this->instance->attachToRoot(0, 'token', []);
+    $this->instance->save();
 
-    $url = Url::fromRoute('display_builder.api_save_preset', [
+    $response = $this->controller->get(new Request(), $this->instance, $node_id);
+
+    self::assertIsArray($response);
+    self::assertNotEmpty($response);
+  }
+
+  /**
+   * Test ::undo() and ::redo() walk the revision history.
+   *
+   * Also exercises InstanceStorage::undo()/redo(), which promote the previous
+   * or next revision to be the default one.
+   */
+  public function testUndoRedoWalkTheRevisionHistory(): void {
+    $this->attachTokenToRoot(0);
+    $this->attachTokenToRoot(1);
+    self::assertCount(2, $this->loadInstance('test_instance')->getCurrentState());
+
+    $this->controller->undo(new Request(), $this->loadInstance('test_instance'));
+    self::assertCount(
+      1,
+      $this->loadInstance('test_instance')->getCurrentState(),
+      'Undo drops the most recent attach.'
+    );
+
+    $this->controller->redo(new Request(), $this->loadInstance('test_instance'));
+    self::assertCount(
+      2,
+      $this->loadInstance('test_instance')->getCurrentState(),
+      'Redo puts it back.'
+    );
+  }
+
+  /**
+   * Test ::undo() on an instance with no history is a safe no-op.
+   */
+  public function testUndoWithoutHistoryIsNoOp(): void {
+    $response = $this->controller->undo(new Request(), $this->instance);
+
+    self::assertIsArray($response);
+    self::assertEmpty($this->loadInstance('test_instance')->getCurrentState());
+  }
+
+  /**
+   * Test ::clear() drops the history but keeps the current content.
+   */
+  public function testClearKeepsContentAndDropsHistory(): void {
+    $this->attachTokenToRoot(0);
+    $this->attachTokenToRoot(1);
+    self::assertNotEmpty($this->loadInstance('test_instance')->getPast());
+
+    $this->controller->clear(new Request(), $this->loadInstance('test_instance'));
+
+    $saved = $this->loadInstance('test_instance');
+    self::assertCount(2, $saved->getCurrentState(), 'Clearing history leaves the content alone.');
+    self::assertEmpty($saved->getPast(), 'The past is dropped.');
+  }
+
+  /**
+   * Test ::update() refuses a payload without a form ID.
+   *
+   * Asserts the effect rather than the error payload's shape: the guard exists
+   * to stop a malformed request from writing to the tree.
+   */
+  public function testUpdateWithoutFormIdLeavesTheNodeUntouched(): void {
+    $node_id = $this->instance->attachToRoot(0, 'token', []);
+    $this->instance->save();
+    $before = $this->loadInstance('test_instance')->getNode($node_id);
+
+    $url = Url::fromRoute('display_builder.api_update', [
       'display_builder_instance' => $this->instance->id(),
       'node_id' => $node_id,
     ]);
+    $request = Request::create($url->toString(), 'POST', ['source' => ['value' => 'no form id']]);
 
-    // First save with a label containing spaces and uppercase.
-    $request = Request::create($url->toString(), 'POST', []);
-    $request->headers->add(['hx-prompt' => 'My Preset']);
-    $this->controller->saveAsPreset($request, $this->instance, $node_id);
+    $response = $this->controller->update($request, $this->instance, $node_id);
 
-    // Second save with the same label must produce a different ID.
-    $request2 = Request::create($url->toString(), 'POST', []);
-    $request2->headers->add(['hx-prompt' => 'My Preset']);
-    $this->controller->saveAsPreset($request2, $this->instance, $node_id);
+    self::assertIsArray($response, 'The controller returns an error payload instead of throwing.');
+    self::assertSame(
+      $before,
+      $this->loadInstance('test_instance')->getNode($node_id),
+      'A payload without a form ID must not modify the node.'
+    );
+  }
 
-    $presets = PatternPreset::loadMultiple();
-    self::assertCount(2, $presets, 'Both presets were saved.');
+  /**
+   * Test ::thirdPartySettingsUpdate() refuses a payload without a form ID.
+   *
+   * Same guard as ::update(), asserted the same way: by its effect on the
+   * stored settings rather than by the error payload's shape.
+   */
+  public function testThirdPartySettingsUpdateWithoutFormIdChangesNothing(): void {
+    $node_id = $this->instance->attachToRoot(0, 'token', []);
+    $this->instance->save();
+    $before = $this->loadInstance('test_instance')->getNode($node_id);
 
-    foreach ($presets as $preset) {
-      $id = $preset->id();
-      self::assertMatchesRegularExpression('/^[a-z_][a-z0-9_]*$/', $id, "ID '{$id}' is a valid machine name.");
-    }
+    $request = Request::create('/', 'POST', ['some' => 'value']);
+    $response = $this->controller->thirdPartySettingsUpdate($request, $this->instance, $node_id, 'styles');
 
-    $ids = \array_keys($presets);
-    self::assertCount(2, \array_unique($ids), 'Duplicate labels produce unique IDs.');
+    self::assertIsArray($response, 'The controller returns an error payload instead of throwing.');
+    self::assertSame(
+      $before,
+      $this->loadInstance('test_instance')->getNode($node_id),
+      'A payload without a form ID must not write third party settings.'
+    );
+  }
+
+  /**
+   * Test ::reloadIsland() returns the enabled island's renderable.
+   */
+  public function testReloadIslandReturnsRenderable(): void {
+    // 'history' is enabled on the test_base profile.
+    $response = $this->controller->reloadIsland(new Request(), $this->instance, 'history');
+
+    self::assertIsArray($response);
+    self::assertNotEmpty($response);
+  }
+
+  /**
+   * Test ::reloadIsland() tags its response with the instance cache tag.
+   *
+   * This is the only GET endpoint returning rendered island markup, so it is
+   * the only island response Dynamic Page Cache can store. Without the instance
+   * cache tag the cached reload is never invalidated when the instance is
+   * saved, and the panel serves stale markup until the whole cache is flushed.
+   */
+  public function testReloadIslandCarriesInstanceCacheTag(): void {
+    $response = $this->controller->reloadIsland(new Request(), $this->instance, 'history');
+
+    self::assertContains(
+      'display_builder_instance:' . $this->instance->id(),
+      $response['#cache']['tags'] ?? [],
+    );
+  }
+
+  /**
+   * Test ::reloadIsland() refuses an island not enabled on the profile.
+   *
+   * 'tokens' is a real plugin (ui_skins is installed) but is off in test_base,
+   * so the enabled-islands guard must short-circuit to an error payload.
+   */
+  public function testReloadIslandRejectsDisabledIsland(): void {
+    $response = $this->controller->reloadIsland(new Request(), $this->instance, 'tokens');
+
+    self::assertIsArray($response, 'A disabled island yields an error payload, not a throw.');
+  }
+
+  /**
+   * Test ::attachToRoot() refuses a request carrying no content to attach.
+   */
+  public function testAttachToRootRejectsMissingContent(): void {
+    $request = Request::create('/', 'POST', ['position' => 0]);
+    $response = $this->controller->attachToRoot($request, $this->instance);
+
+    self::assertIsArray($response, 'A content less request yields an error payload.');
+    self::assertEmpty(
+      $this->loadInstance('test_instance')->getCurrentState(),
+      'Nothing is attached when the request has no source_id/node_id/preset_id.'
+    );
+  }
+
+  /**
+   * Test ::attachToSlot() refuses a request carrying no content to attach.
+   */
+  public function testAttachToSlotRejectsMissingContent(): void {
+    $parent_id = $this->instance->attachToRoot(0, 'component', [
+      'component' => ['component_id' => 'display_builder_test:test_1'],
+    ]);
+    $this->instance->save();
+
+    $request = Request::create('/', 'POST', ['position' => 0]);
+    $response = $this->controller->attachToSlot($request, $this->instance, $parent_id, 'slot_1');
+
+    self::assertIsArray($response, 'A content less request yields an error payload.');
+    $state = $this->loadInstance('test_instance')->getCurrentState();
+    self::assertArrayNotHasKey(
+      'sources',
+      $state[0]['source']['component']['slots']['slot_1'] ?? [],
+      'Nothing is attached into the slot.'
+    );
+  }
+
+  /**
+   * Test ::update() writes the validated source when given a form ID.
+   */
+  public function testUpdateWritesSourceWithFormId(): void {
+    $node_id = $this->instance->attachToRoot(0, 'textfield', ['value' => 'original']);
+    $this->instance->save();
+
+    $url = Url::fromRoute('display_builder.api_update', [
+      'display_builder_instance' => $this->instance->id(),
+      'node_id' => $node_id,
+    ]);
+    $request = Request::create($url->toString(), 'POST', [
+      'form_id' => 'display_builder_island',
+      '_drupal_ajax' => TRUE,
+      'value' => 'updated text',
+    ]);
+
+    $response = $this->controller->update($request, $this->instance, $node_id);
+    self::assertIsArray($response);
+
+    $node = $this->loadInstance('test_instance')->getNode($node_id);
+    self::assertSame('updated text', $node['source']['value'], 'The node source is updated.');
+  }
+
+  /**
+   * Attach a token to the root through the controller, building history.
+   *
+   * @param int $position
+   *   The position to attach at.
+   */
+  private function attachTokenToRoot(int $position): void {
+    $instance = $this->loadInstance('test_instance');
+    $url = Url::fromRoute('display_builder.api_root_attach', [
+      'display_builder_instance' => $instance->id(),
+    ]);
+    $request = Request::create($url->toString(), 'POST', [
+      'source_id' => 'token',
+      'position' => $position,
+    ]);
+    $this->controller->attachToRoot($request, $instance);
   }
 
 }

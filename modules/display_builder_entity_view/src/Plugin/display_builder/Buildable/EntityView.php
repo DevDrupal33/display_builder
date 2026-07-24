@@ -46,7 +46,7 @@ final class EntityView extends DisplayBuildablePluginBase {
   /**
    * The display entity.
    */
-  private ?EntityViewDisplayInterface $entity;
+  protected ?EntityViewDisplayInterface $entity;
 
   /**
    * {@inheritdoc}

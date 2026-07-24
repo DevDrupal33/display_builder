@@ -24,7 +24,7 @@ final class IslandFormBase extends FormBase {
    *   going through the container — getIslandManager() handles the fallback.
    */
   public function __construct(
-    private ?IslandPluginManagerInterface $islandManager = NULL,
+    protected ?IslandPluginManagerInterface $islandManager = NULL,
   ) {}
 
   /**

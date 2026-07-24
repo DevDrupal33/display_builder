@@ -1,0 +1,22 @@
+/* Colors live in display_builder's own variables.css alongside the rest
+   of the module's theme palette.
+   @see components/display_builder/css/variables.css */
+:root,
+.display-builder.sl-theme-dark {
+  --layer-base-padding: 0.25rem;
+  --layer-base-border-width: 2px;
+  --layer-transition: 0.2s ease-in-out;
+  --layer-gap: 0.5rem;
+  --layer-pill-padding: 0.1rem 0.5rem;
+  --layer-border-type: solid;
+  --layer-border-radius: var(--sl-border-radius-medium);
+  /* A slot dropzone's own outline - thinner and dashed, so a slot reads
+     as a container and never competes with the solid card outlines
+     nested inside it. */
+  --layer-slot-border-width: 1px;
+  --layer-slot-border-type: dashed;
+  /* Drag grip cue (@see .db-layer__header::before in layer.css). */
+  --layer-grip-width: 6px;
+  --layer-grip-opacity: 0.3;
+  --layer-grip-opacity-hover: 0.9;
+}

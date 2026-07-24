@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.display_builder_test
+    - node.type.display_builder_test
+  module:
+    - user
+id: node.display_builder_test.display_builder_test
+targetEntityType: node
+bundle: display_builder_test
+mode: display_builder_test
+content:
+  db_test_entity_type_field:
+    settings: {}
+    third_party_settings: {}
+    weight: 0
+    region: content
+  db_test_extra_field:
+    settings: {}
+    third_party_settings: {}
+    weight: 0
+    region: content
+  links:
+    settings: {}
+    third_party_settings: {}
+    weight: 100
+    region: content
+hidden: {}

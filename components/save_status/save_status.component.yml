@@ -1,0 +1,25 @@
+name: Save status
+noUi: true
+group: Display builder
+description: A small toolbar indicator confirming the last action reached the stored state.
+variants:
+  saved:
+    title: Saved
+  published:
+    title: Published
+  restored:
+    title: Restored
+  reverted:
+    title: Reverted
+props:
+  type: object
+  properties:
+    label:
+      title: Label
+      description: Human-readable name of the state the indicator settles on.
+      type: string
+    pulse:
+      title: Pulse
+      description: Play the one-shot confirmation animation, for a re-render caused by an action rather than by the initial page build.
+      type: boolean
+      default: false

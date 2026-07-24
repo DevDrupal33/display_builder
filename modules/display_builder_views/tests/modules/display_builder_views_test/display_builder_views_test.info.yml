@@ -4,3 +4,4 @@ description: 'Support module for testing Display building with views defaults.'
 package: Testing
 dependencies:
   - drupal:display_builder_views
+  - display_builder:display_builder_test

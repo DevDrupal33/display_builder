@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - display_builder.profile.test_base
+  module:
+    - system
+    - ui_patterns
+id: test_empty
+label: test_empty
+weight: -9
+conditions:
+  request_path:
+    id: request_path
+    negate: false
+    pages: /test-empty
+profile: test_base
+sources:
+  - node_id: a8383fd0878c8d63
+    source_id: page_title
+    source: {}
+    third_party_settings: null

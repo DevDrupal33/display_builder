@@ -32,11 +32,11 @@ final class ProfileIslandPluginForm extends EntityForm {
   /**
    * The island plugin.
    */
-  private ?IslandInterface $island = NULL;
+  protected ?IslandInterface $island = NULL;
 
   public function __construct(
     protected IslandPluginManagerInterface $islandPluginManager,
-    private readonly CachedDiscoveryClearerInterface $pluginCacheClearer,
+    protected CachedDiscoveryClearerInterface $pluginCacheClearer,
   ) {}
 
   /**

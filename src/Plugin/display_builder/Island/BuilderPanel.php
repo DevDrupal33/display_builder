@@ -8,6 +8,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\DisplayBuilderHtmx;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandPluginBase;
 use Drupal\display_builder\Island\IslandReloadEventsTrait;
@@ -26,7 +27,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 #[Island(
   id: 'builder',
   enabled_by_default: TRUE,
-  label: new TranslatableMarkup('Builder'),
+  label: new TranslatableMarkup('Canvas'),
   description: new TranslatableMarkup('The Display Builder main island. Build the display with dynamic preview.'),
   type: IslandType::View,
   default_region: 'main',
@@ -68,8 +69,8 @@ class BuilderPanel extends IslandPluginBase {
    */
   public static function keyboardShortcuts(): array {
     return [
-      'key' => 'b',
-      'help' => t('Show the builder'),
+      'key' => 'c',
+      'help' => t('Show the canvas'),
     ];
   }
 
@@ -77,25 +78,7 @@ class BuilderPanel extends IslandPluginBase {
    * {@inheritdoc}
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    $builder_id = (string) $builder->id();
-    $build = [
-      '#type' => 'component',
-      '#component' => 'display_builder:dropzone',
-      '#props' => [
-        'variant' => 'root',
-      ],
-      '#slots' => [
-        'content' => $this->digFromSlot($builder, $data),
-      ],
-      '#attributes' => [
-        // Required for JavaScript @see components/dropzone/dropzone.js.
-        'data-db-id' => $builder_id,
-        'data-node-title' => $this->t('Base container'),
-        'data-db-root' => TRUE,
-      ],
-    ];
-
-    return $this->htmxEvents->onRootDrop($build, $builder_id, $this->getPluginID());
+    return $this->buildRootDropzone($builder, $data);
   }
 
   /**
@@ -124,6 +107,42 @@ class BuilderPanel extends IslandPluginBase {
   }
 
   /**
+   * Builds the root dropzone render array.
+   *
+   * Split out from build() so WireframePanelBase can reuse it without also
+   * inheriting anything Builder-specific.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   The Display Builder instance.
+   * @param array $data
+   *   The current 'slice' of data.
+   *
+   * @return array
+   *   The root dropzone render array.
+   */
+  protected function buildRootDropzone(InstanceInterface $builder, array $data): array {
+    $builder_id = (string) $builder->id();
+    $build = [
+      '#type' => 'component',
+      '#component' => 'display_builder:dropzone',
+      '#props' => [
+        'variant' => 'root',
+      ],
+      '#slots' => [
+        'content' => $this->digFromSlot($builder, $data),
+      ],
+      '#attributes' => [
+        // Required for JavaScript @see components/dropzone/dropzone.js.
+        'data-db-id' => $builder_id,
+        'data-node-title' => $this->t('Root container'),
+        'data-db-root' => TRUE,
+      ],
+    ];
+
+    return $this->htmxEvents->onRootDrop($build, $builder_id, $this->getPluginID());
+  }
+
+  /**
    * Build renderable from state data.
    *
    * @param \Drupal\display_builder\InstanceInterface $instance
@@ -149,13 +168,42 @@ class BuilderPanel extends IslandPluginBase {
 
     ['component_id' => $component_id, 'label' => $label, 'instance_id' => $node_id] = $info;
 
+    return $this->buildComponentRealRender($instance, $node_id, $source, $data, $component_id, $label, $index);
+  }
+
+  /**
+   * Renders a component with its real output, slots wired as live dropzones.
+   *
+   * The Builder canvas's own rendering: the component's actual SDC/block
+   * markup, with each of its slots replaced by a real, draggable dropzone
+   * (@see buildComponentSlot()) - as opposed to WireframePanelBase's
+   * schematic card. Split out from buildSingleComponent() so ScaffoldPanel
+   * can reuse it for its own configured allowlist of "layout" components
+   * (e.g. grid rows), which render this way while everything else stays a
+   * wireframe-style card.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance ID.
+   * @param string $node_id
+   *   The tree node ID.
+   * @param \Drupal\display_builder\SourceWithSlotsInterface $source
+   *   The source plugin.
+   * @param array $data
+   *   The UI Patterns form state data.
+   * @param string $component_id
+   *   The resolved component ID (@see resolveComponentInfo()).
+   * @param string $label
+   *   The resolved label (@see resolveComponentInfo()).
+   * @param int $index
+   *   The index of the component within its parent slot/root.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function buildComponentRealRender(InstanceInterface $instance, string $node_id, SourceWithSlotsInterface $source, array $data, string $component_id, string $label, int $index): array {
     $build = $this->renderSource($data);
-    // Required for the context menu label.
-    // @see assets/js/contextual_menu.js
-    $build['#attributes']['data-node-title'] = $label;
-    $build['#attributes']['data-slot-position'] = $index;
-    // @see https://playwright.dev/docs/locators#locate-by-test-id
-    $build['#attributes']['data-testid'] = $node_id;
+    $build['#attributes'] = \array_merge($build['#attributes'] ?? [], $this->buildNodeAttributes($label, $index));
+    $build['#attributes']['data-testid'] = $component_id;
 
     foreach ($source->getSlotDefinitions() as $slot_id => $definition) {
       $slot = $this->buildComponentSlot($instance, $source, $slot_id, $definition, $node_id);
@@ -179,7 +227,7 @@ class BuilderPanel extends IslandPluginBase {
    * Resolves component ID, label, and instance ID from source and data.
    *
    * Extracts the shared preamble logic used by all buildSingleComponent()
-   * implementations across BuilderPanel, LayersPanel, and TreePanel.
+   * implementations across BuilderPanel, WireframePanelBase, and TreePanel.
    *
    * @param \Drupal\display_builder\SourceWithSlotsInterface $source
    *   The source plugin.
@@ -217,6 +265,80 @@ class BuilderPanel extends IslandPluginBase {
       'component_id' => $component_id,
       'label' => $label,
       'instance_id' => $instance_id,
+    ];
+  }
+
+  /**
+   * Stamps the node-identity attributes the contextual menu relies on.
+   *
+   * Resolves "what did I right-click" - shared across Builder, Wireframe, and
+   * Tree so a new attribute only needs to be added here once.
+   *
+   * Also stamps `data-island-id`, the island that rendered this specific
+   * node wrapper: Builder, Wireframe, and Tree all share the same Sortable
+   * group (@see components/dropzone/dropzone.js), so a node can be dragged
+   * from one panel's dropzone into another's. Sortable only relocates the
+   * existing DOM node - it never re-renders it - so after a cross-panel
+   * drop the moved element is still wearing its *source* panel's markup.
+   * `display_builder.js`'s `addVals()` reads this attribute off the
+   * dragged element to tell the server which island actually rendered it,
+   * so `ApiController::attachToRoot()/attachToSlot()` can tell a
+   * cross-panel move (destination island needs a fresh render, its own
+   * markup differs) apart from a same-panel reorder (destination is
+   * already correct, safe to skip).
+   *
+   * @param string $title
+   *   Human-readable label for the instance.
+   * @param int $index
+   *   Position within its parent slot/root.
+   * @param string|null $node_type
+   *   (Optional) The source ID, for CSS/JS targeting of a given node type.
+   *
+   * @return array
+   *   Attributes to merge into the instance wrapper's '#attributes'.
+   *
+   * @see components/contextual_menu/contextual_menu.js
+   */
+  protected function buildNodeAttributes(string $title, int $index, ?string $node_type = NULL): array {
+    $attributes = [
+      'data-node-title' => $title,
+      'data-slot-position' => $index,
+      'data-island-id' => $this->getPluginID(),
+    ];
+
+    if ($node_type !== NULL) {
+      $attributes['data-node-type'] = $node_type;
+    }
+
+    return $attributes;
+  }
+
+  /**
+   * Stamps the slot-identity attributes the contextual menu relies on.
+   *
+   * Resolves "paste/duplicate into this slot" - shared across Builder,
+   * Wireframe, and Tree so a new attribute only needs to be added here once.
+   *
+   * @param string $slot_id
+   *   The slot ID.
+   * @param string $slot_title
+   *   The slot's human-readable title.
+   * @param string $parent_node_id
+   *   The node ID of the component owning this slot.
+   * @param string $parent_title
+   *   The human-readable label of the component owning this slot.
+   *
+   * @return array
+   *   Attributes to merge into the slot dropzone/tree-item's '#attributes'.
+   *
+   * @see components/contextual_menu/contextual_menu.js
+   */
+  protected function buildSlotAttributes(string $slot_id, string $slot_title, string $parent_node_id, string $parent_title): array {
+    return [
+      'data-slot-id' => $slot_id,
+      'data-slot-title' => \ucfirst($slot_title),
+      'data-node-id' => $parent_node_id,
+      'data-node-title' => $parent_title,
     ];
   }
 
@@ -286,9 +408,6 @@ class BuilderPanel extends IslandPluginBase {
     // This is the placeholder without configuration or content yet.
     if ($this->isEmpty($build) || $is_empty) {
       $build = $this->buildPlaceholderButton($label_info['summary']);
-      // Highlight in the view to show it's a temporary block waiting for
-      // configuration.
-      $build['#attributes']['class'][] = 'db-background';
     }
     elseif (!$this->useAttributesVariable($build) || $this->hasMultipleRoot($build)) {
       $build = [
@@ -299,21 +418,13 @@ class BuilderPanel extends IslandPluginBase {
       ];
     }
 
-    // This label is used for contextual menu.
-    // @see assets/js/contextual_menu.js
-    // The 'data-node-title' attribute is expected to contain a human-readable
-    // label or summary describing the block instance. This value is usd in the
-    // contextual menu for user actions such as edit, delete. The format should
-    // be a plain string, typically the label or field summary.
-    $build['#attributes']['data-node-title'] = $label_info['summary'] ?? $data['source_id'] ?? $data['node_id'] ?? '';
-    $build['#attributes']['data-slot-position'] = $index;
-    // @see https://playwright.dev/docs/locators#locate-by-test-id
-    $build['#attributes']['data-testid'] = $node_id;
-
-    // Add data-node-type for easier identification of block types in JS or CSS.
-    if (isset($data['source_id'])) {
-      $build['#attributes']['data-node-type'] = $data['source_id'];
-    }
+    // The title is expected to contain a human-readable label or summary
+    // describing the block instance, used by the contextual menu for user
+    // actions such as edit, delete.
+    // @see components/contextual_menu/contextual_menu.js
+    $title = $label_info['label'] ?? $data['source_id'] ?? $data['node_id'] ?? '';
+    $build['#attributes'] = \array_merge($build['#attributes'] ?? [], $this->buildNodeAttributes($title, $index, $data['source_id'] ?? NULL));
+    $build['#attributes']['data-testid'] = $data['source_id'] ?? $data['node_id'] ?? '_' . $index;
 
     $build = $this->htmxEvents->onInstanceClick($build, (string) $instance->id(), $node_id, $label_info['summary'] ?? $label_info['label'] ?? '', $index);
 
@@ -357,7 +468,7 @@ class BuilderPanel extends IslandPluginBase {
       $build = $this->buildSingleBlock($instance, $node_id, $data);
     }
 
-    return $this->makeOutOfBand(
+    return DisplayBuilderHtmx::makeOutOfBand(
       $build ?? [],
       $parent_selector,
       'outerHTML'
@@ -545,21 +656,14 @@ class BuilderPanel extends IslandPluginBase {
     $dropzone = [
       '#type' => 'component',
       '#component' => 'display_builder:dropzone',
-      '#props' => [
-        'title' => $definition['title'],
-        'variant' => 'highlighted',
-      ],
-      '#attributes' => [
-        // Required for JavaScript @see components/dropzone/dropzone.js.
-        'data-db-id' => $builder_id,
-        // Slot is needed for contextual menu paste.
-        // @see assets/js/contextual_menu.js
-        'data-slot-id' => $slot_id,
-        'data-slot-title' => \ucfirst($definition['title']),
-        'data-node-id' => $node_id,
-        // @see https://playwright.dev/docs/locators#locate-by-test-id
-        'data-testid' => $node_id . '_' . $slot_id,
-      ],
+      '#attributes' => \array_merge(
+        [
+          // Required for JavaScript @see components/dropzone/dropzone.js.
+          'data-db-id' => $builder_id,
+          'data-testid' => 'dropzone_' . $slot_id,
+        ],
+        $this->buildSlotAttributes($slot_id, $definition['title'], $node_id, $source->label())
+      ),
     ];
 
     if ($sources = $source->getSlotValue($slot_id)) {

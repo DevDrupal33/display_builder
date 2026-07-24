@@ -19,7 +19,7 @@ They must not be confused with UI components:
 
 ## Create a pattern preset
 
-You can click on any element of the builder panel and select **Save as preset**:
+You can click on any element of the Canvas panel and select **Save as preset**:
 
 ![Presets menu](images/presets-menu.webp)
 

@@ -5,44 +5,26 @@ dependencies:
     - field.field.node.display_builder_test.layout_builder__layout
     - node.type.display_builder_test
   module:
-    - display_builder
-    - display_builder_test
-    - layout_builder
-    - ui_patterns
-    - ui_patterns_layouts
     - user
-third_party_settings:
-  layout_builder:
-    enabled: true
-    allow_custom: true
-    sections:
-      - layout_id: 'ui_patterns:display_builder_test:test_1'
-        layout_settings:
-          label: ''
-          context_mapping:
-            entity: layout_builder.entity
-          ui_patterns:
-            component_id: 'display_builder_test:test_1'
-            variant_id: null
-            props:
-              attributes:
-                source_id: attributes
-                source:
-                  value: ''
-              prop_string:
-                source_id: textfield
-                source:
-                  value: 'Layout builder config: Default'
-            slots: {}
-        components: {}
-        third_party_settings: {}
-  display_builder:
-    override_profile: default
 id: node.display_builder_test.default
 targetEntityType: node
 bundle: display_builder_test
 mode: default
-content: {}
+content:
+  db_test_entity_type_field:
+    settings: {}
+    third_party_settings: {}
+    weight: 0
+    region: content
+  db_test_extra_field:
+    settings: {}
+    third_party_settings: {}
+    weight: 0
+    region: content
+  links:
+    settings: {}
+    third_party_settings: {}
+    weight: 100
+    region: content
 hidden:
   layout_builder__layout: true
-  links: true

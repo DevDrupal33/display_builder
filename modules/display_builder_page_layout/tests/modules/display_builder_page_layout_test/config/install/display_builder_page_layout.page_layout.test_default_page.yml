@@ -1,0 +1,166 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+id: test_default_page
+label: test_default_page
+weight: -10
+conditions:
+  request_path:
+    id: request_path
+    negate: false
+    pages: /test-default
+profile: test_base
+sources:
+  - node_id: fe19a155723b0410
+    source_id: component
+    source:
+      component:
+        component_id: 'display_builder_theme_test:test_simple'
+        slots:
+          slot_1:
+            sources:
+              - node_id: bc2df590515613fe
+                source_id: page_title
+                source: {}
+    third_party_settings: null
+  - node_id: f537b6e76657ecb7
+    source_id: block
+    source:
+      plugin_id: local_tasks_block
+      local_tasks_block:
+        primary: true
+        secondary: false
+    third_party_settings: null
+  - node_id: 7b76704c4c7d0fc0
+    source_id: block
+    source:
+      plugin_id: local_tasks_block
+      local_tasks_block:
+        primary: false
+        secondary: true
+    third_party_settings: null
+  - node_id: 6de510c98e8b4f47
+    source_id: block
+    source:
+      plugin_id: system_breadcrumb_block
+      system_breadcrumb_block: {}
+    third_party_settings: null
+  - node_id: 0ab46d445ce58cea
+    source_id: block
+    source:
+      plugin_id: system_messages_block
+      system_messages_block: {}
+    third_party_settings: null
+  - node_id: bf60779a1c6e206e
+    source_id: textfield
+    source:
+      value: 'Text 1'
+    third_party_settings: null
+  - node_id: 40d474d4799b82ca
+    source_id: component
+    source:
+      component:
+        component_id: 'display_builder_theme_test:grid_row_3'
+        slots:
+          col_1_content:
+            sources:
+              - node_id: 8cf0fc294e1ebe80
+                source_id: component
+                source:
+                  component:
+                    component_id: 'display_builder_theme_test:test_complex'
+                    slots:
+                      slot_1:
+                        sources:
+                          - node_id: 700a37c77989fbc1
+                            source_id: block
+                            source:
+                              plugin_id: local_actions_block
+                              local_actions_block: {}
+                      slot_2:
+                        sources:
+                          - node_id: 86da304a7507e2d8
+                            source_id: main_page_content
+                            source: {}
+                      sub_slot_1_2:
+                        sources:
+                          - node_id: dd9845f0a3c4a379
+                            source_id: textfield
+                            source:
+                              value: 'Text 3'
+                      sub_slot_1_3:
+                        sources:
+                          - node_id: 23dabd77927e03f0
+                            source_id: textfield
+                            source:
+                              value: 'Text 4'
+                      sub_slot_2_2:
+                        sources:
+                          - node_id: ad09d08a993d3e8a
+                            source_id: textfield
+                            source:
+                              value: 'Text 6'
+                      sub_slot_1_1:
+                        sources:
+                          - node_id: e1cd9ccd173a5e34
+                            source_id: textfield
+                            source:
+                              value: 'Text 2'
+                      sub_slot_2_1:
+                        sources:
+                          - node_id: c6752677c7aec33c
+                            source_id: textfield
+                            source:
+                              value: 'Text 5'
+                      sub_slot_2_3:
+                        sources:
+                          - node_id: e4f1839c1ef50cdd
+                            source_id: textfield
+                            source:
+                              value: 'Text 7'
+                third_party_settings: null
+          col_2_content:
+            sources:
+              - node_id: d83d8ce44c8a8d7d
+                source_id: component
+                source:
+                  component:
+                    component_id: 'display_builder_test:test_variant'
+                    slots:
+                      slot_variant_1:
+                        sources:
+                          - node_id: 18bd390f2d50138f
+                            source_id: textfield
+                            source:
+                              value: 'Text 8'
+              - node_id: ef266d8ac0a792d4
+                source_id: textarea
+                source:
+                  value:
+                    value: |-
+                      <p>
+                          Hello <strong>there</strong>, <em>this</em> is a full HTML text
+                      </p>
+                      <blockquote>
+                          <p>
+                              With a quote
+                          </p>
+                      </blockquote>
+                    format: display_builder
+          col_3_content:
+            sources:
+              - node_id: 8410d2c03346227c
+                source_id: component
+                source:
+                  component:
+                    component_id: 'display_builder_theme_test:test_simple'
+                    slots:
+                      slot_1:
+                        sources:
+                          - node_id: 23a576d2d3b36f08
+                            source_id: textfield
+                            source:
+                              value: 'Text 9'
+    third_party_settings: null

@@ -110,8 +110,11 @@ final class BuilderPanelTest extends DisplayBuilderKernelTestBase {
   private function assertNonAltered(array $renderable): void {
     $block = $this->container->get('plugin.manager.block')->createInstance('display_builder_test_correct');
     $expectations = $block->build();
-    // We don't check #attributes because they got the HTMX additions.
-    unset($renderable['#attributes'], $expectations['#attributes']);
+    // We don't check #attributes, #attached or #cache because they got the
+    // HTMX additions (core's Htmx::applyTo() attaches the core/drupal.htmx
+    // library and cacheable metadata to every element it is applied to).
+    unset($renderable['#attributes'], $expectations['#attributes'], $renderable['#attached'], $expectations['#attached'], $renderable['#cache'], $expectations['#cache']);
+
     self::assertSame($expectations, $renderable);
   }
 

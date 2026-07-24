@@ -174,7 +174,7 @@ class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
       $this->showLabel('publish') ? $this->t('Publish') : '',
       'publish',
       $this->showIcon('publish') ? 'upload' : '',
-      $this->t('Publish this display in current state. (shortcut: P)'), ['P' => $this->t('Publish this display (shift+P)')]
+      $this->t('Publish this display in current state. (shortcut: Shift+P)'), ['shift+p' => $this->t('Publish this display')]
     );
     $button['#props']['variant'] = 'primary';
     $button['#attributes']['outline'] = TRUE;

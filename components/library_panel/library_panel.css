@@ -1,8 +1,15 @@
-.db-library-island {
+.db-library-panel {
   padding-top: 0.5rem;
 }
 
 .db-library-search-hide {
   display: none;
   visibility: hidden;
+}
+
+/* When library panels are merged into a single flat list (see
+   Profile::isLibraryFlat), each panel's own search box is redundant - a
+   single shared search box is rendered above the flat list instead. */
+.db-library-flat .db-library-panel__wrap {
+  display: none;
 }

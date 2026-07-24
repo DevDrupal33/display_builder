@@ -1,3 +1,19 @@
 .shoelace-tabs__tab--hidden {
   display: none;
 }
+
+/* Shoelace paints the active tab's label with --sl-color-primary-600, which
+   does not reach WCAG AA against the toolbar background.
+   @see components/display_builder/css/colors.css for the measurement. */
+.shoelace-tabs__tab[active]::part(base) {
+  color: var(--db-tab-color-active);
+}
+
+.shoelace-tabs__tab {
+  .with-label {
+    margin-right: 0.5rem;
+  }
+  .without-label {
+    margin-right: 0;
+  }
+}

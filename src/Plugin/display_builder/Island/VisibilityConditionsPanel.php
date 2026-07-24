@@ -27,6 +27,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Visibility'),
   description: new TranslatableMarkup('Set visibility conditions for the active component or block.'),
   type: IslandType::Contextual,
+  icon: 'eye',
 )]
 class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {
 
@@ -142,16 +143,22 @@ class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFo
 
   /**
    * {@inheritdoc}
+   *
+   * No-op: a freshly attached node always has a brand-new node_id, so its
+   * own contextual panel can never already be open in the second drawer for
+   * this or any other reload to target.
    */
   public function onAttachToRoot(InstanceInterface $instance, string $node_id): array {
-    return $this->reloadWithNodeData($instance, $node_id);
+    return [];
   }
 
   /**
    * {@inheritdoc}
+   *
+   * @see self::onAttachToRoot()
    */
   public function onAttachToSlot(InstanceInterface $instance, string $node_id, string $parent_id): array {
-    return $this->reloadWithNodeData($instance, $node_id);
+    return [];
   }
 
   /**

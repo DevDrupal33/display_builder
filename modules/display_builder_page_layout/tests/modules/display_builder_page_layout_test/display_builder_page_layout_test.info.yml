@@ -4,3 +4,4 @@ description: 'Display Builder Page Layout for testing.'
 package: Testing
 dependencies:
   - display_builder:display_builder
+  - display_builder:display_builder_test

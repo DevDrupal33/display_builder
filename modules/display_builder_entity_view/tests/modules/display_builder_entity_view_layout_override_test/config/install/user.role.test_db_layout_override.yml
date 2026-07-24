@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - display_builder.profile.test_min
+    - node.type.db_layout_override_test
+  module:
+    - display_builder
+    - display_builder_ui
+    - field_ui
+    - layout_builder
+    - node
+id: test_db_layout_override
+label: test_db_layout_override
+weight: 2
+is_admin: false
+permissions:
+  - 'administer node display'
+  - 'configure any layout'
+  - 'create db_layout_override_test content'
+  - 'edit any db_layout_override_test content'
+  - 'use display builder test_min'
+  - 'view display builder instance'

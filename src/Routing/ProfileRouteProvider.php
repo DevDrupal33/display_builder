@@ -59,7 +59,7 @@ class ProfileRouteProvider extends AdminHtmlRouteProvider {
 
       // Entity types with serial IDs can specify this in their route
       // requirements, improving the matching process.
-      if ($this->getEntityTypeIdKeyType($entity_type) === 'integer') {
+      if ($entity_type->hasIntegerId()) {
         $route->setRequirement($entity_type_id, '\d+');
       }
 

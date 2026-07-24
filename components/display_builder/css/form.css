@@ -1,0 +1,206 @@
+.display-builder.sl-theme-dark {
+  /* Some UO Styles adjustments for dark theme */
+  .form-check {
+    background-color: var(--db-form-checkbox-bg-dark) !important;
+    .form-check-label {
+      color: var(--db-form-checkbox-color-dark) !important;
+    }
+  }
+  div:has(> .ui-styles-source-toolbar-plugin[type="radio"]:checked) {
+    background-color: var(--db-form-radio-checked-bg-dark) !important;
+  }
+  .ui-styles-source-select-plugin .bg-light {
+    background-color: rgb(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+  }
+}
+
+/* Fixes trying to be as global as possible. The theme can impact our form in a lot owf ways. */
+.display-builder .db-form {
+  * {
+    font-size: var(--sl-button-font-size-medium) !important;
+  }
+
+  .shoelace-tabs {
+    margin-bottom: 0.5rem;
+  }
+
+  .description {
+    padding: var(--db-space-8);
+    font-size: var(--sl-font-size-x-small) !important;
+  }
+
+  .ui-icons-wrapper {
+    .ui-icons-select {
+      display: inline-block;
+      margin-top: 0.5rem;
+
+      .form-item--error-message {
+        display: none;
+      }
+
+      > div {
+        display: contents;
+      }
+    }
+  }
+
+  .ajax-progress-throbber {
+    display: none !important;
+  }
+
+  .ui-icons-settings-wrapper {
+    margin-top: 0.5rem;
+  }
+
+  input.form-checkbox.form-check-input {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .db-description-hide {
+    [id$="--description"],
+    .form-label,
+    .description {
+      display: none;
+    }
+    .db-description-toggle {
+      margin-top: 0.5rem;
+    }
+  }
+
+  p {
+    margin-bottom: 0.25rem;
+  }
+
+  .form-label {
+    margin-bottom: var(--db-space-8);
+  }
+
+  label[data-drupal-selector] {
+    display: none;
+  }
+
+  .form-item {
+    margin: var(--db-space-16) 0;
+  }
+
+  details > .form-item {
+    margin: var(--db-space-8);
+  }
+
+  /* Hide the last weight field on ui pattern form */
+  [id$="-sources-0-weight"] {
+    display: none;
+  }
+
+  /* Table inside a ui patterns form. */
+  .table .delta-order {
+    max-width: 4rem;
+  }
+  .table .field-multiple-drag {
+    max-width: 1.5rem;
+    padding-right: 0.125rem;
+    padding-left: 0.125rem;
+    .handle {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+    }
+  }
+  .table > caption {
+    padding: 0;
+  }
+  .table td:empty {
+    padding: 0;
+  }
+  .table > :not(caption) > * > * {
+    border-bottom-width: 0;
+    background-color: transparent;
+  }
+  .tabledrag-toggle-weight-wrapper button {
+    color: var(--db-form-toggle-color);
+  }
+
+  /* Style utilities categories (ui_styles module) use plain HTML <details>
+     for their first-level open/close; the browser default gives no clear
+     affordance, so style it to match the rest of the builder. */
+  /* Avoid theme claro for tests has it already theme details */
+  details:not(.claro-details) {
+    overflow: hidden;
+    margin: var(--db-space-8) 0;
+    border: 1px solid var(--db-form-details-border);
+    border-radius: var(--sl-border-radius-small);
+
+    > summary {
+      position: relative;
+      padding: var(--db-space-8) 2rem var(--db-space-8) var(--db-space-12);
+      list-style: none;
+      cursor: pointer;
+      user-select: none;
+      color: var(--db-text-color);
+      background-color: var(--db-form-details-bg);
+      font-weight: 600;
+      line-height: 1.25rem;
+    }
+
+    > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    > summary::after {
+      position: absolute;
+      top: 50%;
+      right: var(--db-space-12);
+      width: 0.5rem;
+      height: 0.5rem;
+      content: "";
+      transition: transform 0.15s ease;
+      transform: translateY(-75%) rotate(45deg);
+      border-inline-end: 2px solid currentColor;
+      border-block-end: 2px solid currentColor;
+    }
+
+    > *:not(summary, .mb-3) {
+      padding: 0 var(--db-space-8);
+    }
+
+    div[id$="--description"] {
+      padding-top: var(--db-space-8);
+      font-size: var(--sl-font-size-x-small) !important;
+    }
+
+    &[open] > summary {
+      border-bottom: 1px solid var(--db-form-details-border);
+    }
+
+    &[open] > summary::after {
+      transform: translateY(-25%) rotate(-135deg);
+    }
+
+    > summary:hover {
+      background-color: var(--db-form-details-hover-bg);
+    }
+
+    > summary:focus-visible {
+      outline: 2px solid var(--db-form-focus-outline);
+      outline-offset: -2px;
+    }
+  }
+
+  /* Fix ckeditor rom our textarea source */
+  .ck-editor__editable_inline {
+    min-height: 25rem;
+  }
+
+  /* Reduce toolbar size */
+  .ck.ck-button {
+    font-size: 0.7rem !important;
+  }
+  .ck.ck-icon {
+    font-size: 0.7rem !important;
+  }
+  /* Hide source label */
+  .ck-source-editing-button .ck-button__label {
+    display: none !important;
+  }
+}

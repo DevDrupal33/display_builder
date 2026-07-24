@@ -67,7 +67,7 @@ class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPlugi
   /**
    * The display buildable plugin manager.
    */
-  private DisplayBuildablePluginManager $displayBuildableManager;
+  protected DisplayBuildablePluginManager $displayBuildableManager;
 
   public function __construct(
     array $configuration,

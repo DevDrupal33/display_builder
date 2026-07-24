@@ -1,0 +1,12 @@
+name: Display Builder Entity View Layout Builder Test
+type: module
+description: 'Entity display config entities for testing with Layout Builder.'
+package: Testing
+dependencies:
+  - layout_builder:layout_builder
+  - ui_patterns:ui_patterns
+  - ui_patterns:ui_patterns_layouts
+  - ui_patterns:ui_patterns_blocks
+  - display_builder:display_builder_ui
+  - display_builder:display_builder_entity_view
+  - display_builder:display_builder_test

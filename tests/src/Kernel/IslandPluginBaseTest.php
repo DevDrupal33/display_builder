@@ -40,7 +40,7 @@ final class IslandPluginBaseTest extends DisplayBuilderKernelTestBase {
     parent::setUp();
     $this->installEntitySchema('user');
     $this->installEntitySchema('display_builder_instance');
-    $this->installConfig(['display_builder']);
+    $this->installConfig(['display_builder', 'display_builder_test']);
   }
 
   /**
@@ -303,7 +303,7 @@ final class IslandPluginBaseTest extends DisplayBuilderKernelTestBase {
 
     self::assertSame('html_tag', $result['#type']);
     self::assertSame('div', $result['#tag']);
-    self::assertSame('innerHTML:#island-my_builder-test_index_raw', $result['#attributes']['hx-swap-oob']);
+    self::assertSame('innerHTML:#island-my_builder-test_index_raw', (string) $result['#attributes']['data-hx-swap-oob']);
     self::assertArrayHasKey('content', $result);
   }
 

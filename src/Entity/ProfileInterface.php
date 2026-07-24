@@ -64,4 +64,37 @@ interface ProfileInterface extends ConfigEntityInterface {
    */
   public function getRoles(): array;
 
+  /**
+   * Whether the library panels are merged into a single flat list.
+   *
+   * @return bool
+   *   TRUE if library panels (Components, Blocks, Presets...) are merged
+   *   into a single flat list without tabs, FALSE otherwise.
+   */
+  public function isLibraryFlat(): bool;
+
+  /**
+   * How library tabs (Components, Blocks, Presets...) should be displayed.
+   *
+   * @return string
+   *   One of 'label', 'icon' or 'icon_label'.
+   */
+  public function getLibraryTabsDisplay(): string;
+
+  /**
+   * How contextual panel tabs should be displayed.
+   *
+   * @return string
+   *   One of 'label', 'icon' or 'icon_label'.
+   */
+  public function getContextualTabsDisplay(): string;
+
+  /**
+   * How View panels (main area tabs, sidebar buttons) should be displayed.
+   *
+   * @return string
+   *   One of 'label', 'icon' or 'icon_label'.
+   */
+  public function getViewPanelsDisplay(): string;
+
 }

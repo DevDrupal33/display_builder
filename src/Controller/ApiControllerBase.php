@@ -13,6 +13,8 @@ use Drupal\display_builder\Event\DisplayBuilderEvent;
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\InstanceInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -22,6 +24,23 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 abstract class ApiControllerBase extends ControllerBase {
 
   public const string SSE_COLLECTION = 'display_builder_sse';
+
+  /**
+   * Request header listing the island plugin IDs currently visible on screen.
+   *
+   * Sent as a header rather than a request parameter on purpose: update() and
+   * thirdPartySettingsUpdate() feed the whole request payload straight into
+   * FormState::setValues(), so an extra body field would become a bogus form
+   * value.
+   *
+   * When the header is absent - server-sent events, functional tests, any
+   * non-JS caller - every island is rendered, which is the behavior that
+   * predates deferral.
+   *
+   * @see components/display_builder/js/deferred_islands.js
+   * @see \Drupal\display_builder\Event\DisplayBuilderEventsSubscriber::shouldDefer()
+   */
+  public const string VISIBLE_ISLANDS_HEADER = 'X-DB-Visible-Islands';
 
   /**
    * The list of DB events which triggers SSE refresh.
@@ -52,7 +71,7 @@ abstract class ApiControllerBase extends ControllerBase {
    *
    * If not NULL, the island will be skipped from the event dispatch. Useful to
    * avoid swapping the content of an island which is already in the expected
-   * state. For examples, if we move an instance in Builder, Layers or Tree
+   * state. For examples, if we move an instance in Builder, Wireframe or Tree
    * panels, if we change the settings in InstanceForm.
    *
    * @see \Drupal\display_builder\Event\DisplayBuilderEventsSubscriber::dispatchToIslands()
@@ -72,7 +91,35 @@ abstract class ApiControllerBase extends ControllerBase {
     #[Autowire(service: 'tempstore.shared')]
     protected SharedTempStoreFactory $sharedTempStoreFactory,
     protected SessionInterface $session,
+    protected RequestStack $requestStack,
   ) {}
+
+  /**
+   * Reads the islands the client reports as currently visible.
+   *
+   * @return array|null
+   *   The island plugin IDs, or NULL when the client did not report any, in
+   *   which case no island is deferred.
+   *
+   * @see self::VISIBLE_ISLANDS_HEADER
+   */
+  protected function getVisibleIslands(): ?array {
+    $request = $this->requestStack->getCurrentRequest();
+
+    if (!$request instanceof Request || !$request->headers->has($this::VISIBLE_ISLANDS_HEADER)) {
+      return NULL;
+    }
+
+    $header = \trim((string) $request->headers->get($this::VISIBLE_ISLANDS_HEADER));
+
+    // An empty header is a valid report: the client says nothing deferrable is
+    // on screen. Distinct from an absent header, which reports nothing at all.
+    if ($header === '') {
+      return [];
+    }
+
+    return \array_values(\array_filter(\array_map(\trim(...), \explode(',', $header))));
+  }
 
   /**
    * Dispatches a display builder event.
@@ -119,7 +166,14 @@ abstract class ApiControllerBase extends ControllerBase {
    *   The event.
    */
   protected function createEventWithEnabledIsland(string $event_id, ?array $data, ?string $node_id, ?string $parent_id): DisplayBuilderEvent {
-    $event = new DisplayBuilderEvent($this->builder, $data, $node_id, $parent_id, $this->islandId);
+    $event = new DisplayBuilderEvent(
+      $this->builder,
+      $data,
+      $node_id,
+      $parent_id,
+      $this->islandId,
+      $this->getVisibleIslands(),
+    );
     $this->eventDispatcher->dispatch($event, $event_id);
 
     return $event;

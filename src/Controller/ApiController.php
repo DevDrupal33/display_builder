@@ -20,6 +20,7 @@ use Drupal\display_builder\RenderableBuilderTrait;
 use Drupal\display_builder\SourceTree;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -37,9 +38,60 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     #[Autowire(service: 'tempstore.shared')]
     protected SharedTempStoreFactory $sharedTempStoreFactory,
     protected SessionInterface $session,
+    protected RequestStack $requestStack,
     private IslandPluginManagerInterface $islandPluginManager,
   ) {
-    parent::__construct($eventDispatcher, $renderer, $time, $sharedTempStoreFactory, $session);
+    parent::__construct($eventDispatcher, $renderer, $time, $sharedTempStoreFactory, $session, $requestStack);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function reloadIsland(Request $request, InstanceInterface $display_builder_instance, string $island_id): array {
+    $profile = $display_builder_instance->getProfile();
+
+    if (!isset($profile->getEnabledIslands()[$island_id])) {
+      $message = $this->t('[reloadIsland] Island @island is not enabled on this profile', ['@island' => $island_id]);
+      $debug = [
+        'island_id' => $island_id,
+        'instance' => $display_builder_instance,
+      ];
+
+      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
+    }
+
+    $contexts = $display_builder_instance->getAvailableContexts();
+    $definitions = \array_intersect_key(
+      $this->islandPluginManager->getDefinitions(),
+      [$island_id => TRUE],
+    );
+    $islands = $this->islandPluginManager->createInstances($definitions, $contexts, $profile->getIslandConfigurations());
+    $island = $islands[$island_id] ?? NULL;
+
+    if ($island === NULL) {
+      $message = $this->t('[reloadIsland] Island @island is not available in this context', ['@island' => $island_id]);
+      $debug = [
+        'island_id' => $island_id,
+        'instance' => $display_builder_instance,
+      ];
+
+      return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
+    }
+
+    // This is the only GET endpoint that returns rendered island output, so it
+    // is the only island response Dynamic Page Cache can store. The island
+    // build reflects the instance's live working state but bubbles only the
+    // SDC/block cacheability, not the instance's own cache tag. Every mutation
+    // calls Instance::save(), which invalidates that tag, so attaching it here
+    // makes the cached reload bust on the next change instead of serving stale
+    // markup until the whole cache is flushed. Mirrors the full-page render in
+    // ProfileViewBuilder::view().
+    return [
+      $island->reload($display_builder_instance),
+      '#cache' => [
+        'tags' => $display_builder_instance->getCacheTags(),
+      ],
+    ];
   }
 
   /**
@@ -89,7 +141,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     $this->builder = $display_builder_instance;
     // Let's refresh when we add new source to get the placeholder replacement.
-    $this->islandId = $is_move ? (string) $request->query->get('from', NULL) : NULL;
+    $this->islandId = $this->resolveSkipIslandId($request, $is_move);
 
     return $this->dispatchDisplayBuilderEvent(
       $is_move ? DisplayBuilderEvents::ON_MOVE : DisplayBuilderEvents::ON_ATTACH_TO_ROOT,
@@ -151,7 +203,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
 
     $this->builder = $display_builder_instance;
     // Let's refresh when we add new source to get the placeholder replacement.
-    $this->islandId = $is_move ? (string) $request->query->get('from', NULL) : NULL;
+    $this->islandId = $this->resolveSkipIslandId($request, $is_move);
 
     return $this->dispatchDisplayBuilderEvent(
       $is_move ? DisplayBuilderEvents::ON_MOVE : DisplayBuilderEvents::ON_ATTACH_TO_SLOT,
@@ -317,103 +369,6 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * {@inheritdoc}
    */
-  public function paste(Request $request, InstanceInterface $display_builder_instance, string $node_id, string $parent_id, string $slot_id, string $slot_position): array {
-    $this->builder = $display_builder_instance;
-    $dataToCopy = $display_builder_instance->getNode($node_id);
-
-    // Keep flag for move or attach to root.
-    $is_paste_root = FALSE;
-    $new_node_id = NULL;
-
-    if (isset($dataToCopy['source_id'], $dataToCopy['source'])) {
-      $source_id = $dataToCopy['source_id'];
-      // Use reference to ensure modifications by recursiveRefreshNodeId
-      // persist.
-      $data = &$dataToCopy['source'];
-
-      // Refresh nested node_ids.
-      self::recursiveRefreshNodeId($data);
-
-      // If no parent we are on root.
-      // @todo for duplicate and not parent root seems not detected and copy is inside the slot.
-      if ($parent_id === '__root__') {
-        $is_paste_root = TRUE;
-        $new_node_id = $display_builder_instance->attachToRoot(0, $source_id, $data, $dataToCopy['third_party_settings'] ?? []);
-      }
-      else {
-        $new_node_id = $display_builder_instance->attachToSlot($parent_id, $slot_id, (int) $slot_position, $source_id, $data, $dataToCopy['third_party_settings'] ?? []);
-      }
-    }
-    $display_builder_instance->save();
-
-    $this->builder = $display_builder_instance;
-
-    return $this->dispatchDisplayBuilderEvent(
-      $is_paste_root ? DisplayBuilderEvents::ON_ATTACH_TO_ROOT : DisplayBuilderEvents::ON_ATTACH_TO_SLOT,
-      NULL,
-      $new_node_id,
-      $is_paste_root ? NULL : $parent_id,
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function delete(Request $request, InstanceInterface $display_builder_instance, string $node_id): array {
-    $parent_id = $display_builder_instance->getParentId($node_id);
-    $display_builder_instance->remove($node_id);
-    $this->builder = $display_builder_instance;
-
-    return $this->dispatchDisplayBuilderEvent(
-      DisplayBuilderEvents::ON_DELETE,
-      NULL,
-      $node_id,
-      $parent_id
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function saveAsPreset(Request $request, InstanceInterface $display_builder_instance, string $node_id): array {
-    $label = (string) $this->t('New preset');
-    $data = $display_builder_instance->getNode($node_id);
-    self::cleanPreset($data);
-
-    $preset_storage = $this->entityTypeManager()->getStorage('pattern_preset');
-    $label = $request->headers->get('hx-prompt', $label) ?: $label;
-    // In HTTP headers, only ASCII is guaranteed to work but historically,
-    // HTTP has allowed header values with the ISO-8859-1 charset.
-    $label = \mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
-
-    // Build a valid config-entity machine name from the label. Config IDs
-    // must match [a-z0-9_] and must not start with a digit.
-    $base_id = 'preset_' . \preg_replace('/[^a-z0-9_]+/', '_', \mb_strtolower($label));
-    $base_id = \trim($base_id, '_');
-    $id = $base_id;
-    $suffix = 1;
-
-    while ($preset_storage->load($id) !== NULL) {
-      $id = $base_id . '_' . $suffix++;
-    }
-
-    $preset = $preset_storage->create([
-      'id' => $id,
-      'label' => $label,
-      'status' => TRUE,
-      'description' => '',
-      'sources' => $data,
-    ]);
-    $preset->save();
-
-    $this->builder = $display_builder_instance;
-
-    return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_PRESET_SAVE);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function undo(Request $request, InstanceInterface $display_builder_instance): array {
     /** @var \Drupal\display_builder\Entity\InstanceStorage $storage */
     $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
@@ -555,6 +510,39 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   }
 
   /**
+   * Determines which island (if any) to skip from the event dispatch fan-out.
+   *
+   * Builder, Wireframe, and Tree share the same Sortable group (@see
+   * components/dropzone/dropzone.js), so an existing node can be dragged
+   * from one panel's dropzone straight into another's. Sortable only
+   * relocates the DOM node - it never re-renders it - so after a
+   * cross-panel move the dropped element is still wearing whichever
+   * panel originally rendered it (@see
+   * BuilderPanel::buildNodeAttributes(), display_builder.js's addVals()).
+   * Skipping the destination island's own re-render is only safe when the
+   * move stayed within that same island; otherwise its dropzone would be
+   * left showing another island's markup until the next full reload.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   * @param bool $is_move
+   *   Whether this attach is actually moving an existing node.
+   *
+   * @return string|null
+   *   The island ID to skip, or NULL to skip none.
+   */
+  private function resolveSkipIslandId(Request $request, bool $is_move): ?string {
+    if (!$is_move) {
+      return NULL;
+    }
+
+    $destination_island = (string) $request->query->get('from', '');
+    $source_island = (string) $request->request->get('source_island', '');
+
+    return ($source_island !== '' && $source_island === $destination_island) ? $destination_island : NULL;
+  }
+
+  /**
    * Validates an island form.
    *
    * @param string $formClass
@@ -646,62 +634,9 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       '@debug' => \print_r($debug, TRUE),
     ]);
 
-    $message = new TranslatableMarkup('Error: @error, check logs for more details.', ['@error' => $message]);
+    $message = new TranslatableMarkup('An error occurred, refresh the current page to continue from a valid state.<br>Check logs for more details.');
 
     return $this->buildError($display_builder_instance_id, $message, TRUE);
-  }
-
-  /**
-   * Recursively regenerate the node_id key.
-   *
-   * @param array $array
-   *   The array reference.
-   */
-  private static function recursiveRefreshNodeId(array &$array): void {
-    if (isset($array['node_id'])) {
-      $array['node_id'] = \bin2hex(\random_bytes(8));
-    }
-
-    foreach ($array as &$value) {
-      if (\is_array($value)) {
-        self::recursiveRefreshNodeId($value);
-      }
-    }
-  }
-
-  /**
-   * Recursively clean the node data for export or preset saving.
-   *
-   * Unset node_id and remove empty values.
-   *
-   * @param array $array
-   *   The array reference.
-   */
-  private static function cleanPreset(array &$array): void {
-    unset($array['node_id']);
-
-    foreach ($array as $key => &$value) {
-      if (\is_array($value)) {
-        self::cleanPreset($value);
-
-        // Remove empty values to reduce size and noise in the exported preset.
-        if (isset($value['source_id'], $value['source']['value']) && $value['source']['value'] === '') {
-          unset($array[$key]);
-        }
-      }
-
-      if ($key === 'extra' && empty($value)) {
-        unset($array[$key]);
-      }
-
-      if ($key === 'third_party_settings' && empty($value)) {
-        unset($array[$key]);
-      }
-
-      if ($key === 'variant_id' && $value === NULL) {
-        unset($array[$key]);
-      }
-    }
   }
 
 }

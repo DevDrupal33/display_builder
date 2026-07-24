@@ -1,0 +1,89 @@
+/**
+ * @file
+ * The save status pip - a dot and a word in the toolbar's end region,
+ * next to the history and state buttons.
+ * @see src/Plugin/display_builder/Island/SaveStatus.php
+ *
+ * It exists because nothing else confirmed that an action landed: the
+ * undo counter is a proxy that reports how much history exists (and stops
+ * being readable past a couple of digits), and the toast stack is the
+ * error channel - putting success in it would train people to stop
+ * reading the corner that carries failures.
+ *
+ * Deliberately quiet at rest and loud only for one animation frame: this
+ * sits next to Publish, which people look at on purpose, whereas the pip
+ * has to be legible from peripheral vision during a drag without
+ * competing with the canvas.
+ *
+ * Colors are named in components/display_builder/css/colors.css like
+ * every other color in the module; only the geometry and the animation
+ * live here.
+ */
+
+.db-save-status {
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+  white-space: nowrap;
+  color: var(--save-status-color-label);
+  font-size: var(--sl-font-size-small);
+  line-height: 1;
+  gap: var(--db-space-4);
+  padding-inline: var(--db-space-8);
+}
+
+.db-save-status__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--save-status-color-dot);
+}
+
+.db-save-status--published .db-save-status__dot {
+  background-color: var(--save-status-color-dot-published);
+}
+
+.db-save-status--restored .db-save-status__dot,
+.db-save-status--reverted .db-save-status__dot {
+  background-color: var(--save-status-color-dot-lifecycle);
+}
+
+/* The pulse rides on the dot's own color, so each state keeps its
+   identity instead of every action flashing the same green. */
+@keyframes db-save-status-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 currentColor;
+  }
+
+  40% {
+    transform: scale(1.6);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0.6rem transparent;
+  }
+}
+
+.db-save-status--pulse .db-save-status__dot {
+  animation: db-save-status-pulse 900ms ease-out 1;
+  color: var(--save-status-color-dot);
+}
+
+.db-save-status--pulse.db-save-status--published .db-save-status__dot {
+  color: var(--save-status-color-dot-published);
+}
+
+.db-save-status--pulse.db-save-status--restored .db-save-status__dot,
+.db-save-status--pulse.db-save-status--reverted .db-save-status__dot {
+  color: var(--save-status-color-dot-lifecycle);
+}
+
+/* The pip is redundant with the label text it sits beside, so dropping
+   the motion entirely costs no information. */
+@media (prefers-reduced-motion: reduce) {
+  .db-save-status--pulse .db-save-status__dot {
+    animation: none;
+  }
+}

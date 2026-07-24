@@ -1,0 +1,16 @@
+/* Colors live in display_builder's own variables.css alongside the rest
+   of the module's theme palette.
+   @see components/display_builder/css/variables.css */
+:root {
+  --dropzone-placeholder-min-height: 1rem;
+  --dropzone-slot-min-height: 2rem;
+  --dropzone-slot-min-width: 3rem;
+  --dropzone-slot-min-height-dragging: 3rem;
+  --dropzone-slot-min-width-dragging: 6rem;
+  --dropzone-slot-outline-type-light: dotted;
+  --dropzone-slot-outline-width-light: 1px;
+  --dropzone-slot-outline-offset-light: -1px;
+  --dropzone-label-max-width: 10rem;
+  --dropzone-space-margin: 0.75rem 0.3rem 0.3rem 0.3rem;
+  --dropzone-space-padding: 0.3rem;
+}

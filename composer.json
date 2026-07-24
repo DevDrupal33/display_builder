@@ -22,7 +22,7 @@
     "type": "drupal-module",
     "require": {
         "php": ">=8.3",
-        "drupal/core": "^11.3",
+        "drupal/core": "^11.4",
         "drupal/ui_patterns": "^2.0.17"
     },
     "require-dev": {
@@ -47,6 +47,8 @@
         "phpcbf": "composer --working-dir=$(composer run composer-root) exec phpcbf -- --standard=$(pwd)/.phpcs.xml --colors $(pwd)",
         "php-cs-fixer": "composer --working-dir=$(composer run composer-root) exec php-cs-fixer -- fix -vv --config=$(pwd)/.php-cs-fixer.php --allow-risky=yes $(pwd)",
         "phpstan": "mkdir -p test-results && COMPOSER_MEMORY_LIMIT=-1 composer --working-dir=$(composer run composer-root) exec phpstan -- --memory-limit=1G --configuration=$(pwd)/phpstan.neon --error-format=junit analyze $(pwd) > test-results/phpstan.xml || true && COMPOSER_MEMORY_LIMIT=-1 composer --working-dir=$(composer run composer-root) exec phpstan -- --memory-limit=1G --configuration=$(pwd)/phpstan.neon analyze $(pwd)",
-        "phpmd": "mkdir -p test-results && COMPOSER_MEMORY_LIMIT=-1 composer --working-dir=$(composer run composer-root) exec phpmd $(pwd) -- --exclude 'tests/*,**/tests/*,**/Hook/*,*/IslandWithFormTrait.php,*/IslandConfigurationFormTrait.php' text $(pwd)/.phpmd.xml"
+        "phpmd": "mkdir -p test-results && COMPOSER_MEMORY_LIMIT=-1 composer --working-dir=$(composer run composer-root) exec phpmd $(pwd) -- --exclude 'tests/*,**/tests/*,**/Hook/*,*/IslandWithFormTrait.php,*/IslandConfigurationFormTrait.php' text $(pwd)/.phpmd.xml",
+        "clean-tests": "rm -rf test-results playwright-report",
+        "nuke": "rm -rf test-results playwright-report node_modules package-lock.json"
     }
 }

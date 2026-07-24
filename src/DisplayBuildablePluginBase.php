@@ -218,7 +218,6 @@ abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase impleme
     $data = $tree->getTree();
     $data = [
       'id' => $this->getInstanceId(),
-      'profileId' => $this->getProfile()->id(),
       'buildable' => [
         'plugin_id' => $this->getPluginId(),
         'configuration' => $this->getConfiguration(),

@@ -1,5 +1,18 @@
 {% set attributes = attributes.addClass('db-tree') %}
-{{ include('display_builder:tree', {
-  items: items,
+<div class="db-tree-toolbar">
+  {{ include('display_builder:icon_button', {
+    icon: 'arrows-collapse',
+    label: collapse_label,
+    attributes: create_attribute({'data-tree-collapse-all': true}),
+  }, with_context: false) }}
+  {{ include('display_builder:icon_button', {
+    icon: 'arrows-expand',
+    label: expand_label,
+    attributes: create_attribute({'data-tree-expand-all': true}),
+  }, with_context: false) }}
+</div>
+{{ include('display_builder:dropzone', {
+  variant: 'root',
+  content: items,
   attributes: attributes,
 }, with_context: false) }}

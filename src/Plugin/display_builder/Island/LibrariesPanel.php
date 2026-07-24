@@ -11,7 +11,7 @@ use Drupal\display_builder\Island\IslandPluginBase;
 use Drupal\display_builder\Island\IslandType;
 
 /**
- * Layers island plugin implementation.
+ * Library island plugin implementation.
  */
 #[Island(
   id: 'library',
@@ -32,6 +32,20 @@ class LibrariesPanel extends IslandPluginBase {
       'key' => 'l',
       'help' => t('Show the libraries'),
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isDeferrable(): bool {
+    // This panel's content is not built here: ProfileViewBuilder assembles the
+    // Library islands and injects them into this pane. build() returns nothing,
+    // so a deferred reload would swap the panel's content away for an empty
+    // one. The panel is static anyway - it reflects profile configuration, not
+    // builder state, so it never goes stale and has nothing to defer.
+    //
+    // Can go once the build logic moves here, @see build().
+    return FALSE;
   }
 
   /**

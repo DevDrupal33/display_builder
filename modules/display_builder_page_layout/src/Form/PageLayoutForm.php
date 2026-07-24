@@ -23,12 +23,12 @@ final class PageLayoutForm extends EntityForm {
   use AutowireTrait;
 
   public function __construct(
-    private readonly ContextRepositoryInterface $contextRepository,
+    protected ContextRepositoryInterface $contextRepository,
     #[Autowire(service: 'plugin.manager.condition')]
-    private readonly ExecutableManagerInterface $conditionManager,
-    private readonly LanguageManagerInterface $languageManager,
+    protected ExecutableManagerInterface $conditionManager,
+    protected LanguageManagerInterface $languageManager,
     #[Autowire(service: 'plugin.manager.display_buildable')]
-    private readonly DisplayBuildablePluginManager $displayBuildableManager,
+    protected DisplayBuildablePluginManager $displayBuildableManager,
   ) {}
 
   /**

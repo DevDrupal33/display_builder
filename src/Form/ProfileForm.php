@@ -99,7 +99,8 @@ final class ProfileForm extends EntityForm {
         '#tag' => 'img',
         '#attributes' => [
           'src' => base_path() . $path . '/assets/images/islands-regions.png',
-          'width' => '1200',
+          'width' => '1122',
+          'height' => '171',
         ],
         '#prefix' => '<div style="text-align: center;">',
         '#suffix' => '</div>',
@@ -115,11 +116,14 @@ final class ProfileForm extends EntityForm {
     /** @var \Drupal\display_builder\Island\IslandPluginManagerInterface $islandPluginManager */
     $islandPluginManager = \Drupal::service('plugin.manager.db_island'); // phpcs:ignore
     $island_by_types = $islandPluginManager->getIslandsByTypes();
+
+    // Labels define the order.
     $labels = [
+      'library' => $this->t('Library panels'),
       'view' => $this->t('View panels'),
       'button' => $this->t('Toolbar buttons'),
       'contextual' => $this->t('Contextual panels'),
-      'library' => $this->t('Library panels'),
+      'floating' => $this->t('Floating controls'),
       'menu' => $this->t('Menu items'),
     ];
     // Sort the types according to the labels.
@@ -134,6 +138,48 @@ final class ProfileForm extends EntityForm {
         'content' => $this->buildIslandTypeTable(IslandType::from($type), $islands, $island_configuration),
       ];
     }
+
+    $panels_display_options = [
+      'label' => $this->t('Label'),
+      'icon' => $this->t('Icon'),
+      'icon_label' => $this->t('Icon + Label'),
+    ];
+
+    $form['islands'][IslandType::Library->value]['library_tabs_display'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Show library tabs as'),
+      '#description' => $this->t('Show the library tabs (Components, Blocks, Presets...) as label, icon, or both.'),
+      '#options' => $panels_display_options,
+      '#default_value' => $entity->getLibraryTabsDisplay(),
+      '#states' => [
+        'disabled' => [
+          'input[name="library_flat"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
+    $form['islands'][IslandType::Library->value]['library_flat'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Flatten library panels'),
+      '#description' => $this->t('<mark>Advanced</mark> Merge all enabled library panels (Components, Blocks, Presets...) into a single flat list without tabs, sharing one search box, instead of separate tabs in the builder sidebar.'),
+      '#default_value' => $entity->isLibraryFlat(),
+    ];
+
+    $form['islands'][IslandType::View->value]['view_panels_display'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Show panels as'),
+      '#description' => $this->t('Show the View panels (main area tabs and sidebar buttons) as label, icon, or both.'),
+      '#options' => $panels_display_options,
+      '#default_value' => $entity->getViewPanelsDisplay(),
+    ];
+
+    $form['islands'][IslandType::Contextual->value]['contextual_tabs_display'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Show contextual tabs as'),
+      '#description' => $this->t('Show the contextual panel tabs as label, icon, or both.'),
+      '#options' => $panels_display_options,
+      '#default_value' => $entity->getContextualTabsDisplay(),
+    ];
 
     $form['status'] = [
       '#type' => 'checkbox',

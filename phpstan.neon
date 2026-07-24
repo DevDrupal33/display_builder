@@ -40,3 +40,8 @@ parameters:
     - "#Attribute class Drupal\\\\ui_patterns\\\\.* does not exist.#"
     - "#Class .* extends unknown class Drupal\\\\ui_patterns\\\\.*#"
     - "#Parameter .* of method .* has invalid type Drupal\\\\ui_patterns\\\\.*#"
+    # EntityListBuilder subclasses must accept EntityStorageInterface to pass to
+    # parent::__construct(); this is mandated by Drupal core, not fixable.
+    -
+      identifier: drupal.entityStorageDirectInjection
+      path: '*ListBuilder.php'

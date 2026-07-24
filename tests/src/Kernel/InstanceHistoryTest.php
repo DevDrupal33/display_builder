@@ -49,7 +49,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     parent::setUp();
     $this->installEntitySchema('user');
     $this->installEntitySchema('display_builder_instance');
-    $this->installConfig(['display_builder']);
+    $this->installConfig(['display_builder', 'display_builder_test']);
     $this->storage = \Drupal::service('entity_type.manager')->getStorage('display_builder_instance');
   }
 

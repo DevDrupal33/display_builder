@@ -1,16 +1,44 @@
-.db-island-library .db-placeholder {
-  --padding: var(--sl-spacing-x-small);
-  --border-radius: var(--sl-border-radius-large);
-
-  margin-bottom: var(--sl-spacing-x-small);
+/* Not scoped to .db-island-library: while a placeholder is being dragged,
+   Sortable's cross-list group mechanics render/re parent this same element
+   live inside other islands' dropzones (e.g. the Wireframe or Builder panel)
+   before any drop is confirmed. Scoping this to .db-island-library only
+   meant the placeholder lost all its chrome (padding, hover accent) the
+   moment it was no longer a descendant of the library island, showing up
+   as bare, unstyled text during the drag. */
+.db-placeholder {
+  overflow: hidden;
+  padding: var(--sl-spacing-2x-small);
   cursor: grab;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--sl-font-size-small);
+  /* &:hover {
+    padding-left: calc(var(--sl-spacing-x-small) - 3px);
+    border-inline-start: 3px solid var(--placeholder-color-hover-border);
+    background-color: var(--placeholder-color-hover-bg);
+  } */
+}
+.db-placeholder__group {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-/* Hover effect only when in library context. */
-.db-island-library .db-placeholder:hover {
-  box-shadow: var(--sl-shadow-large);
-  &::part(base) {
-    border-color: var(--sl-color-primary-600);
-    background-color: var(--sl-color-primary-50);
-  }
+/* variant: button (@see placeholder.twig) is only ever used by
+   buildPlaceholderButton() for canvas "token" blocks whose real render
+   depends on page context unavailable in the builder tree (e.g. "[Page]
+   Title", "Block: Messages") - the sidebar library only ever uses
+   variant: list/card. Once placed, these are already-there canvas nodes
+   like any other, not something you're about to drag in, so they get
+   the plain node-hover treatment instead of the library's grab/accent
+   styling above.
+   @see components/dropzone/dropzone.css for --component-color-* */
+.db-placeholder-button {
+  cursor: default;
+
+  /* &:hover {
+    padding-left: var(--sl-spacing-2x-small);
+    border-inline-start: none;
+    background-color: color-mix(in sRGB, var(--component-color-outline) 10%, transparent);
+  } */
 }

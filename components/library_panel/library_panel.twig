@@ -1,13 +1,16 @@
-{% set id = id|default('db-library-island--' ~ random()) %}
-<div{{ attributes.addClass('db-library-island') }}>
+{% set id = id|default('db-library-panel--' ~ random()) %}
+<div{{ attributes.addClass('db-library-panel') }}>
 
   {# Class is needed for library_panel.js search filter. #}
   {# Allow auto focus when opening dialog #}
-  {# @see assets/js/search.js #}
-  <div class="db-library-island-wrap">
+  {# @see components/library_panel/search.js #}
+  <div class="db-library-panel__wrap">
+    {# label names the field for assistive tech (a placeholder cannot); it is
+       visually hidden, @see search.css #}
     {{ include('display_builder:input', {
       variant: 'search',
-      placeholder: 'Filter by name or detail'|t,
+      label: 'Search the library'|t,
+      placeholder: 'Search'|t,
       size: 'medium',
       autocomplete_off: true,
       clearable: true,
@@ -22,7 +25,7 @@
   </div>
 
   {% if tabs %}
-  <div class="db-library-island-tabs">
+  <div class="db-library-panel-tabs">
     {{ tabs }}
   </div>
   {% endif %}

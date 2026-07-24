@@ -23,7 +23,7 @@ final class InstanceAccessControlHandler extends EntityAccessControlHandler impl
    */
   public function __construct(
     EntityTypeInterface $entity_type,
-    protected readonly DisplayBuildablePluginManager $displayBuildableManager,
+    protected DisplayBuildablePluginManager $displayBuildableManager,
   ) {
     parent::__construct($entity_type);
   }
@@ -72,7 +72,7 @@ final class InstanceAccessControlHandler extends EntityAccessControlHandler impl
     }
 
     // If the profile does not exist, forbid access to this instance.
-    return AccessResult::forbidden('Invalid profileId on display_builder_instance.');
+    return AccessResult::forbidden('Invalid profile on display_builder_instance.');
   }
 
   /**

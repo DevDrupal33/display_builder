@@ -118,12 +118,12 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   /**
    * The loaded display builder instance.
    */
-  private ?InstanceInterface $instance;
+  protected ?InstanceInterface $instance;
 
   /**
    * The conditions plugins for this page.
    */
-  private ConditionPluginCollection $conditionPluginCollection;
+  protected ConditionPluginCollection $conditionPluginCollection;
 
   /**
    * {@inheritdoc}

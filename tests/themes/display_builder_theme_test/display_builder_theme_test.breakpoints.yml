@@ -7,17 +7,8 @@ display_builder_theme_test.screen-xs-max:
     - 1.5x
     - 2x
     - 3x
-display_builder_theme_test.screen-sm-min:
-  label: 'Small and larger'
-  mediaQuery: 'all and (min-width: 576px)'
-  weight: 2
-  multipliers:
-    - 1x
-    - 1.5x
-    - 2x
-    - 3x
 display_builder_theme_test.screen-sm-max:
-  label: 'Small and smaller'
+  label: 'Small'
   mediaQuery: 'all and (max-width: 767px)'
   weight: 3
   multipliers:
@@ -25,17 +16,8 @@ display_builder_theme_test.screen-sm-max:
     - 1.5x
     - 2x
     - 3x
-display_builder_theme_test.screen-md-min:
-  label: 'Medium and larger'
-  mediaQuery: 'all and (min-width: 768px)'
-  weight: 4
-  multipliers:
-    - 1x
-    - 1.5x
-    - 2x
-    - 3x
 display_builder_theme_test.screen-md-max:
-  label: 'Medium and smaller'
+  label: 'Medium'
   mediaQuery: 'all and (max-width: 991px)'
   weight: 5
   multipliers:
@@ -43,17 +25,8 @@ display_builder_theme_test.screen-md-max:
     - 1.5x
     - 2x
     - 3x
-display_builder_theme_test.screen-lg-min:
-  label: 'Large and larger'
-  mediaQuery: 'all and (min-width: 992px)'
-  weight: 6
-  multipliers:
-    - 1x
-    - 1.5x
-    - 2x
-    - 3x
 display_builder_theme_test.screen-lg-max:
-  label: 'Large and smaller'
+  label: 'Large'
   mediaQuery: 'all and (max-width: 1199px)'
   weight: 7
   multipliers:
@@ -61,28 +34,10 @@ display_builder_theme_test.screen-lg-max:
     - 1.5x
     - 2x
     - 3x
-display_builder_theme_test.screen-xl-min:
-  label: 'Extra large and larger'
-  mediaQuery: 'all and (min-width: 1200px)'
-  weight: 8
-  multipliers:
-    - 1x
-    - 1.5x
-    - 2x
-    - 3x
 display_builder_theme_test.screen-xl-max:
-  label: 'Extra large and smaller'
+  label: 'Extra large'
   mediaQuery: 'all and (max-width: 1399px)'
   weight: 9
-  multipliers:
-    - 1x
-    - 1.5x
-    - 2x
-    - 3x
-display_builder_theme_test.screen-xxl-min:
-  label: 'Extra extra large'
-  mediaQuery: 'all and (min-width: 1400px)'
-  weight: 10
   multipliers:
     - 1x
     - 1.5x

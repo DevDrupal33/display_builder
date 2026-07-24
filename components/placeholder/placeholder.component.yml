@@ -7,17 +7,13 @@ variants:
     title: Default
   button:
     title: Button
+  list:
+    title: List
 slots:
   content:
     title: Content
   image:
     title: Image
-props:
-  type: object
-  properties:
-    preview_url:
-      title: Component preview url
-      type: string
 libraryOverrides:
   dependencies:
     - core/drupal

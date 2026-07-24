@@ -1,0 +1,139 @@
+/* An ordinary flex child of .display-builder__body, stretching to that
+   row's full height (@see display_builder.css's .display-builder__body /
+   .display-builder height) rather than a position: fixed drawer pinned to
+   the true viewport edges - case 1 (full-page builder route doesn't need the
+   true-edge behavior, since .display-builder already spans the page.
+   position: relative gives .db-sidebar__resize-handle's position: absolute
+   something to anchor to. */
+.db-sidebar {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: var(--db-sidebar-width);
+  padding-left: 0.5rem;
+  transition: width 0.2s ease;
+  color: var(--db-text-color);
+  background-color: var(--toolbar-color-background);
+}
+
+/* Dragging the resize handle sets width on every mouse move - the transition
+   above is only meant for the collapse/expand toggle, so suspend it while
+   actively resizing or each update lags behind the cursor.
+   @see components/display_builder/sidebar.js */
+.db-sidebar--resizing {
+  transition: none;
+}
+
+.db-sidebar--start {
+  border-inline-end: 1px solid var(--db-sidebar-border);
+}
+
+.db-sidebar--end {
+  border-inline-start: 1px solid var(--db-sidebar-border);
+}
+
+/* Both sidebars are either fully visible or fully hidden - opened via the
+   toolbar sidebar buttons / contextual triggers, no icon-only rail state. */
+.db-sidebar.is-collapsed {
+  width: 0;
+  border-inline-end: 0 none;
+  border-inline-start: 0 none;
+}
+
+.db-sidebar.is-collapsed .db-sidebar__content,
+.db-sidebar.is-collapsed .db-sidebar__header,
+.db-sidebar.is-collapsed .db-sidebar__resize-handle {
+  display: none;
+}
+
+.db-sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--db-sidebar-header-height);
+  padding: 0 var(--db-space-8);
+  border-bottom: 1px solid var(--db-sidebar-border);
+}
+
+.db-sidebar__title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.db-sidebar__content {
+  overflow-y: auto;
+  flex: 1;
+  padding-right: var(--db-space-8);
+  padding-left: var(--db-space-8);
+  font-size: var(--sl-font-size-medium);
+}
+
+.db-sidebar__pane--hidden {
+  display: none;
+}
+
+.db-sidebar__resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 100%;
+  cursor: ew-resize;
+  background-color: var(--db-resize-handle-bg);
+}
+
+.db-sidebar__resize-handle:active,
+.db-sidebar__resize-handle:hover {
+  background-color: var(--db-resize-handle-bg-hover);
+}
+
+/* Handle on the left for the end sidebar (opens toward the left). */
+.db-sidebar--end .db-sidebar__resize-handle {
+  right: auto;
+  left: 0;
+}
+
+/* Case 2 (embedded builder route) - .display-builder
+   sits deep inside a normal themed page there, so the sidebars need to
+   reach the true viewport edges regardless of .display-builder's own
+   position, like a real off-canvas drawer, instead of the ordinary flex
+   child treatment above (which only works because case 1's
+   .display-builder already spans the page). top/bottom clear the toolbar
+   (now also fixed, @see toolbar.css) and any external top chrome;
+   left/right clear external chrome only (Navigation module sidebar, admin
+   toolbar) - same reasoning as the toolbar's own left/right. */
+.display-builder:not(.display-builder-page-layout) .db-sidebar {
+  position: fixed;
+  z-index: var(--db-z-sidebar);
+  top: calc(var(--toolbar-height, 64px) + var(--drupal-displace-offset-top, 0px));
+  bottom: 0;
+}
+
+.display-builder:not(.display-builder-page-layout) .db-sidebar--start {
+  left: var(--drupal-displace-offset-left, 0);
+}
+
+.display-builder:not(.display-builder-page-layout) .db-sidebar--end {
+  right: var(--drupal-displace-offset-right, 0);
+}
+
+.display-builder.display-builder--expanded:not(.display-builder-page-layout) .db-sidebar {
+  top: var(--toolbar-height, 64px);
+}
+
+.display-builder.display-builder--expanded:not(.display-builder-page-layout) .db-sidebar--start {
+  left: 0;
+}
+
+.display-builder.display-builder--expanded:not(.display-builder-page-layout) .db-sidebar--end {
+  right: 0;
+}
+
+/* Dim contextual content while loading, e.g. on drag, onInstanceClick... */
+.display-builder.db-htmx-before-request .db-sidebar__content {
+  opacity: var(--db-loading-opacity);
+}

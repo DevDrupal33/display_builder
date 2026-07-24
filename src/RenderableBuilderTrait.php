@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder;
 
+use Drupal\Core\Htmx\Htmx;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 
@@ -20,7 +22,7 @@ trait RenderableBuilderTrait {
    * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $message
    *   The message to display.
    * @param bool $global
-   *   (Optional) Try to use the default builder message placeholder.
+   *   (Optional) Try to use the default builder toast stack.
    * @param int|null $duration
    *   (Optional) Alert duration before closing.
    *
@@ -50,15 +52,58 @@ trait RenderableBuilderTrait {
     }
 
     if ($global) {
-      $build['#props']['id'] = \sprintf('message-%s', $builder_id);
-      $build['#attributes']['hx-swap-oob'] = 'true';
+      // Append into the builder's toast stack rather than replacing whatever
+      // is already on screen: a "beforeend" out-of-band swap keeps previous
+      // messages visible, so a burst of errors stacks instead of each one
+      // silently overwriting the last. htmx swaps the *content* of the
+      // out-of-band element for any non-inline swap style, hence the wrapper.
+      $build = [
+        '#type' => 'container',
+        'message' => $build,
+      ];
+      (new Htmx())
+        ->swapOob(\sprintf('beforeend:#message-%s', $builder_id))
+        ->applyTo($build);
     }
 
     return $build;
   }
 
   /**
-   * Build placeholder.
+   * Checks whether a renderable array is empty, or throws once rendered.
+   *
+   * Some render arrays (e.g. a comment field formatter's "Add comment" form
+   * #lazy_builder placeholder, built against an unsaved sample entity with
+   * no real ID - @see \Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityView)
+   * throw rather than produce empty markup when actually rendered. Checking
+   * with renderInIsolation() here, synchronously, keeps a bad lazy_builder
+   * from surviving unresolved into the *caller's own* render array, where -
+   * left unrendered - it would only fail later during Drupal core's own
+   * BigPipe processing, well outside of this try/catch's reach, breaking
+   * page rendering entirely instead of degrading gracefully to a
+   * placeholder.
+   *
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer.
+   * @param array $renderable
+   *   The renderable array to check.
+   *
+   * @return bool
+   *   TRUE if the renderable is empty or fails to render, FALSE otherwise.
+   */
+  protected function isRenderEmptyOrFailing(RendererInterface $renderer, array $renderable): bool {
+    try {
+      $html = $renderer->renderInIsolation($renderable);
+    }
+    catch (\Throwable $e) {
+      return TRUE;
+    }
+
+    return empty(\trim((string) $html));
+  }
+
+  /**
+   * Build placeholder component wrapper.
    *
    * @param string $label
    *   The placeholder label.
@@ -85,6 +130,21 @@ trait RenderableBuilderTrait {
       $build['#attributes']['class'][] = \sprintf('db-placeholder-%s', $vals['source_id']);
     }
 
+    $testid_source = $vals['source']['component']['component_id']
+      ?? $vals['source']['plugin_id']
+      ?? $vals['source']['derivable_context']
+      ?? NULL;
+
+    if ($testid_source !== NULL) {
+      $build['#attributes']['data-testid'] = \sprintf('placeholder-%s', \str_replace(':', '-', $testid_source));
+    }
+    elseif (isset($vals['source_id'])) {
+      $build['#attributes']['data-testid'] = \sprintf('placeholder-%s', $vals['source_id']);
+    }
+    elseif (\is_string(\reset($vals))) {
+      $build['#attributes']['data-testid'] = \sprintf('placeholder-%s', \reset($vals));
+    }
+
     if ($keywords) {
       $build['#attributes']['data-keywords'] = \trim(\strtolower($keywords));
     }
@@ -94,14 +154,34 @@ trait RenderableBuilderTrait {
     }
 
     if (!empty($vals)) {
-      $build['#attributes']['hx-vals'] = \json_encode($vals);
+      (new Htmx())->vals($vals)->applyTo($build);
     }
 
     return $build;
   }
 
   /**
-   * Build placeholder.
+   * Build placeholder as Button.
+   *
+   * @param string $label
+   *   The placeholder label.
+   * @param array $vals
+   *   (Optional) HTMX vals data when placeholder trigger something when moving.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function buildPlaceholderButton(string|TranslatableMarkup $label, array $vals = []): array {
+    $build = $this->buildPlaceholder($label, '', $vals);
+    $build['#props']['variant'] = 'button';
+    // To be able to identify the node when dragging and set the drawer title.
+    $build['#attributes']['data-node-title'] = (string) $label;
+
+    return $build;
+  }
+
+  /**
+   * Build placeholder as List.
    *
    * @param string $label
    *   The placeholder label.
@@ -113,9 +193,9 @@ trait RenderableBuilderTrait {
    * @return array
    *   A renderable array.
    */
-  protected function buildPlaceholderButton(string|TranslatableMarkup $label, array $vals = [], ?string $keywords = NULL): array {
+  protected function buildPlaceholderList(string|TranslatableMarkup $label, array $vals = [], ?string $keywords = NULL): array {
     $build = $this->buildPlaceholder($label, '', $vals);
-    $build['#props']['variant'] = 'button';
+    $build['#props']['variant'] = 'list';
     // To be able to identify the node when dragging and set the drawer title.
     $build['#attributes']['data-node-title'] = (string) $label;
 
@@ -143,28 +223,15 @@ trait RenderableBuilderTrait {
    * @return array
    *   A renderable array.
    */
-  protected function buildPlaceholderButtonWithPreview(string $builder_id, string|TranslatableMarkup $label, array $vals, Url $preview_url, ?string $keywords = NULL): array {
-    $build = $this->buildPlaceholderButton($label, $vals, $keywords);
+  protected function buildPlaceholderListWithPreview(string $builder_id, string|TranslatableMarkup $label, array $vals, Url $preview_url, ?string $keywords = NULL): array {
+    $build = $this->buildPlaceholderList($label, $vals, $keywords);
 
     // Do not include entity field previews as we don't have generated value.
     if (isset($vals['source_id']) && ($vals['source_id'] === 'entity_field' || $vals['source_id'] === 'entity_reference')) {
       return $build;
     }
 
-    $hide_script = \sprintf('Drupal.displayBuilder.hidePreview(%s)', $builder_id);
-    $attributes = [
-      'hx-get' => $preview_url->toString(),
-      'hx-target' => \sprintf('#preview-%s', $builder_id),
-      'hx-trigger' => 'mouseenter delay:250ms',
-      'hx-on:mouseenter' => \sprintf('Drupal.displayBuilder.showPreview(%s, this)', $builder_id),
-      'hx-on:focus' => \sprintf('Drupal.displayBuilder.showPreview(%s, this)', $builder_id),
-      'hx-on:mouseleave' => $hide_script,
-      'hx-on:blur' => $hide_script,
-      // Disable the preview on click for a dragging operation.
-      'hx-on:mousedown' => $hide_script,
-    ];
-
-    $build['#attributes'] = \array_merge($build['#attributes'], $attributes);
+    $this->applyPreview($build, $builder_id, $preview_url);
 
     return $build;
   }
@@ -176,8 +243,6 @@ trait RenderableBuilderTrait {
    *   The placeholder label.
    * @param array $vals
    *   HTMX vals data if the placeholder is triggering something when moving.
-   * @param \Drupal\Core\Url $preview_url
-   *   The preview_url prop value.
    * @param string|null $keywords
    *   (Optional) Keywords attributes to add used by search.
    * @param string|null $thumbnail
@@ -186,9 +251,8 @@ trait RenderableBuilderTrait {
    * @return array
    *   A renderable array.
    */
-  protected function buildPlaceholderCardWithPreview(string|TranslatableMarkup $label, array $vals, Url $preview_url, ?string $keywords = NULL, ?string $thumbnail = NULL): array {
+  protected function buildPlaceholderCard(string|TranslatableMarkup $label, array $vals, ?string $keywords = NULL, ?string $thumbnail = NULL): array {
     $build = $this->buildPlaceholder($label, '', $vals);
-    $build['#props']['preview_url'] = $preview_url;
 
     if ($thumbnail) {
       $build['#slots']['image'] = [
@@ -204,6 +268,32 @@ trait RenderableBuilderTrait {
     if ($keywords) {
       $build['#attributes']['data-keywords'] = \trim(\strtolower($keywords));
     }
+
+    return $build;
+  }
+
+  /**
+   * Build placeholder.
+   *
+   * @param string $builder_id
+   *   The builder id.
+   * @param string $label
+   *   The placeholder label.
+   * @param array $vals
+   *   HTMX vals data if the placeholder is triggering something when moving.
+   * @param \Drupal\Core\Url $preview_url
+   *   The preview_url prop value.
+   * @param string|null $keywords
+   *   (Optional) Keywords attributes to add used by search.
+   * @param string|null $thumbnail
+   *   (Optional) The thumbnail URL.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function buildPlaceholderCardWithPreview(string $builder_id, string|TranslatableMarkup $label, array $vals, Url $preview_url, ?string $keywords = NULL, ?string $thumbnail = NULL): array {
+    $build = $this->buildPlaceholderCard($label, $vals, $keywords, $thumbnail);
+    $this->applyPreview($build, $builder_id, $preview_url);
 
     return $build;
   }
@@ -253,6 +343,7 @@ trait RenderableBuilderTrait {
     // Used to ease e2e tests.
     if ($action) {
       $button['#attributes']['data-island-action'] = $action;
+      $button['#attributes']['data-testid'] = $action;
     }
 
     return $button;
@@ -271,6 +362,9 @@ trait RenderableBuilderTrait {
    *   (Optional) The icon position. Default 'prefix'.
    * @param bool $disabled
    *   (Optional) Is the menu disabled? Default no.
+   * @param array $submenu
+   *   (Optional) Nested menu item render arrays, e.g. built with this same
+   *   method, to display as a submenu. Default none.
    *
    * @return array
    *   The menu item render array.
@@ -281,8 +375,9 @@ trait RenderableBuilderTrait {
     ?string $icon = NULL,
     string $icon_position = 'prefix',
     bool $disabled = FALSE,
+    array $submenu = [],
   ): array {
-    return [
+    $build = [
       '#type' => 'component',
       '#component' => 'display_builder:menu_item',
       '#props' => [
@@ -293,9 +388,17 @@ trait RenderableBuilderTrait {
         'disabled' => $disabled,
       ],
       '#attributes' => [
+        // Attribute data-contextual-menu is important for the js mapping.
+        // @see components/contextual_menu/contextual_menu.js
         'data-contextual-menu' => TRUE,
       ],
     ];
+
+    if ($submenu) {
+      $build['#slots']['submenu'] = $submenu;
+    }
+
+    return $build;
   }
 
   /**
@@ -461,6 +564,38 @@ trait RenderableBuilderTrait {
     }
 
     return $build;
+  }
+
+  /**
+   * Make a placeholder show a preview popup on hover.
+   *
+   * Only the request is declared here. Showing, positioning and hiding the
+   * popup belongs to js/preview.js, which can act once the response is in
+   * the DOM - htmx alone can only show an empty box the moment the pointer
+   * arrives, which Floating UI then measures at the wrong size.
+   *
+   * @param array $build
+   *   The placeholder renderable, altered by reference.
+   * @param string $builder_id
+   *   The builder id, owning the popup element.
+   * @param \Drupal\Core\Url $preview_url
+   *   The URL returning the preview markup.
+   */
+  private function applyPreview(array &$build, string $builder_id, Url $preview_url): void {
+    // Marks the element for js/preview.js, whatever the placeholder variant.
+    // The URL itself lives in hx-get, JS only needs to recognize a trigger.
+    $build['#attributes']['data-preview'] = TRUE;
+
+    (new Htmx())
+      ->get($preview_url)
+      ->target(\sprintf('#preview-%s', $builder_id))
+      // Hover intent. js/preview.js cancels the request if the pointer left
+      // in the meantime, as htmx debounces but never cancels on its own.
+      // Placeholders are focusable, so keyboard users reach the preview the
+      // same way - focusin, because focus does not bubble to the delegated
+      // listener that arbitrates which trigger is the current one.
+      ->trigger('mouseenter delay:250ms, focusin delay:250ms')
+      ->applyTo($build);
   }
 
 }

@@ -132,4 +132,73 @@ final class DisplayExtenderTest extends KernelTestBase {
     self::assertStringContainsString('/admin/structure/views/view/test_view/display-builder/default', $url->toString());
   }
 
+  /**
+   * Test the set, switch and disable profile lifecycle on a view display.
+   *
+   * Deterministic, ajax-free counterpart to the Views UI profile lifecycle
+   * that was previously covered end-to-end in Playwright (views.spec.ts):
+   * selecting a profile attaches a Display Builder instance to the view
+   * display, switching keeps the same instance, and disabling deletes it.
+   */
+  public function testProfileLifecycle(): void {
+    $view = View::create([
+      'id' => 'test_lifecycle',
+      'label' => 'Test Lifecycle',
+      'base_table' => 'user',
+      'display' => [
+        'default' => [
+          'display_plugin' => 'default',
+          'id' => 'default',
+          'display_title' => 'Master',
+          'position' => 0,
+          'display_options' => [],
+        ],
+      ],
+    ]);
+    $view->save();
+
+    $viewExecutable = Views::executableFactory()->get($view);
+    $display = $viewExecutable->getDisplay();
+
+    $plugin = DisplayExtender::create(
+      \Drupal::getContainer(),
+      [],
+      'display_builder',
+      [
+        'id' => 'display_builder',
+        'title' => 'Display Builder',
+        'help' => 'Use display builder as output for this view.',
+      ]
+    );
+    $plugin->init($viewExecutable, $display);
+
+    $instance_storage = $this->container->get('entity_type.manager')->getStorage('display_builder_instance');
+    $instance_id = \sprintf('%stest_lifecycle__default', ViewDisplay::getPrefix());
+
+    $form = ['#title' => 'Test Form'];
+    $form_state = new FormState();
+    $form_state->set('section', 'display_builder');
+
+    // No profile selected yet: no instance attached.
+    self::assertNull($instance_storage->load($instance_id));
+
+    // Set: selecting a profile attaches an instance to the display.
+    $form_state->setValue(DisplayBuildableInterface::PROFILE_PROPERTY, 'test_base');
+    $plugin->submitOptionsForm($form, $form_state);
+    self::assertSame('test_base', $plugin->options[DisplayBuildableInterface::PROFILE_PROPERTY]);
+    self::assertNotNull($instance_storage->load($instance_id));
+
+    // Switch: changing the profile keeps the same instance.
+    $form_state->setValue(DisplayBuildableInterface::PROFILE_PROPERTY, 'test_builder');
+    $plugin->submitOptionsForm($form, $form_state);
+    self::assertSame('test_builder', $plugin->options[DisplayBuildableInterface::PROFILE_PROPERTY]);
+    self::assertNotNull($instance_storage->load($instance_id));
+
+    // Disable: clearing the profile deletes the instance.
+    $form_state->setValue(DisplayBuildableInterface::PROFILE_PROPERTY, '');
+    $plugin->submitOptionsForm($form, $form_state);
+    $instance_storage->resetCache([$instance_id]);
+    self::assertNull($instance_storage->load($instance_id));
+  }
+
 }

@@ -160,7 +160,6 @@ class ExtraFieldSource extends SourcePluginBase {
 
     $label = $definition['label'] ?? $this->t('No field selected');
     $build = $this->buildPlaceholderButton($this->t('Extra field: @field', ['@field' => \strip_tags((string) $label)]));
-    $build['#attributes']['class'][] = 'db-background';
 
     return $build;
   }

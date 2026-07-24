@@ -43,6 +43,16 @@ The UI is powered by a RESTful API defined in `display_builder.routing.yml`. Con
 - `createEventWithEnabledIsland(string $event_id, ...)` — typed event factory using a `match()` expression; returns the correct typed subclass per event ID
 - `buildOobResponse(DisplayBuilderEvent)` — collects island results and builds the out-of-band HTMX response
 
+The API surface is split across several controllers rather than one:
+
+| Controller | Responsibility |
+|---|---|
+| `ApiController` | attach to root/slot, get, reload island, update, third-party settings, undo, redo, clear |
+| `ApiContextualMenuController` | paste, delete, save as preset, paste and delete styles |
+| `ApiPublishingController` | publish, restore, revert |
+| `ApiPreviewController` | component, block and preset library previews |
+| `ApiSseController` | server-sent events for real-time collaboration |
+
 **Never put business logic in controllers.** Mutations belong in `InstanceInterface` methods; side effects belong in event subscribers.
 
 ## Event system

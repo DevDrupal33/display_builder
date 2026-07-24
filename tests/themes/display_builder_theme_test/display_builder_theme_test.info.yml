@@ -5,10 +5,6 @@ description: Display Builder testing theme based on claro.
 
 core_version_requirement: ^11.3
 
-dependencies:
-  - display_builder:display_builder
-  - ui_patterns:ui_patterns
-
 libraries:
   - core/drupal.message
   - core/normalize

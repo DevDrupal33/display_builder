@@ -22,17 +22,9 @@ class DisplayBuilderTestSetup implements TestSetupInterface {
     // Install required modules.
     $module_installer = \Drupal::service('module_installer');
     \assert($module_installer instanceof ModuleInstallerInterface);
-    $modules = [
-      'display_builder',
-      'display_builder_ui',
-      'display_builder_test',
-      // To have a valid instance to work with in tests.
-      'display_builder_page_layout',
-      'display_builder_page_layout_test',
-      'ui_patterns',
-      'ui_styles',
-    ];
-    $module_installer->install($modules);
+    $module_installer->install(['ui_patterns']);
+    $module_installer->install(['display_builder']);
+    $module_installer->install(['display_builder_page_layout']);
 
     // Install DB test theme and set it as the default theme.
     $theme_installer = \Drupal::service('theme_installer');
@@ -40,6 +32,13 @@ class DisplayBuilderTestSetup implements TestSetupInterface {
     $theme_installer->install(['display_builder_theme_test'], TRUE);
     $system_theme_config = \Drupal::configFactory()->getEditable('system.theme');
     $system_theme_config->set('default', 'display_builder_theme_test')->save();
+
+    $module_installer->install(['ui_styles']);
+    $module_installer->install(['display_builder_ui']);
+
+    // Enable tests modules at the end for config import.
+    $module_installer->install(['display_builder_test']);
+    $module_installer->install(['display_builder_page_layout_test']);
 
     // Set the state to use local asset libraries.
     $state = \Drupal::state();

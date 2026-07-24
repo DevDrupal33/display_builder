@@ -17,6 +17,7 @@ enum IslandType: string {
   case View = 'view';
   case Button = 'button';
   case Menu = 'menu';
+  case Floating = 'floating';
 
   /**
    * Get the string description for this enum.
@@ -34,6 +35,7 @@ enum IslandType: string {
       self::Button->value => new TranslatableMarkup('Toolbar buttons allowing direct actions in the builder.'),
       self::Contextual->value => new TranslatableMarkup('Panels visible only when the a source is selected.'),
       self::Menu->value => new TranslatableMarkup('Items available in the contextual menu.'),
+      self::Floating->value => new TranslatableMarkup('Floating controls, attached to one or more View panels, only visible while an attached panel is the active main tab.'),
       default => new TranslatableMarkup('Unknown island type.'),
     };
   }

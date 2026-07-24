@@ -1,4 +1,5 @@
-{% set attributes = variant ? attributes.addClass('db-dropzone--' ~ variant) : attributes %}
-{% set attributes = title ? attributes.setAttribute('title', title) : attributes %}
+{% if variant and variant != 'default' %}
+  {% set attributes = variant ? attributes.addClass('db-dropzone--' ~ variant) : attributes %}
+{% endif %}
 {% set attributes = attributes.setAttribute('tabIndex', 0) %}
 <div{{ attributes.addClass('db-dropzone') }}>{{ content }}</div>

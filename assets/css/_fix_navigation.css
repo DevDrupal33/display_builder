@@ -1,0 +1,26 @@
+/**
+ * @file
+ * Fixes for the Navigation module (core/modules/navigation) and its left
+ * sidebar. Split from _fix.css by which module it targets, for readability -
+ * it loads whether or not that module is installed (@see
+ * display_builder.libraries.yml), which costs nothing because every selector
+ * below is scoped to #admin-toolbar and so matches nothing at all on a site
+ * running the classic Toolbar module instead (@see _fix_toolbar.css).
+ * Keep it that way: a selector here that could match without the Navigation
+ * module would silently become a fix applied to every site.
+ */
+
+/* Expanded mode covers the whole viewport: the Navigation sidebar is not part
+   of what is being edited, and it sits above the builder's entire z-index
+   ladder in normal mode by design (@see components/display_builder/css/variables.css),
+   so it has to be taken out rather than covered.
+   Note that hiding it does *not* make Drupal core's displace system recompute
+   --drupal-displace-offset-left: it keeps the sidebar's width (264px with the
+   sidebar expanded), which is why expanded mode zeroes the offsets itself
+   rather than trusting them (@see components/toolbar/toolbar.css,
+   components/display_builder/css/sidebar.css). Getting that wrong is exactly
+   how the builder toolbar used to stay inset from the left edge while
+   expanded, over a sidebar the rest of the builder had already covered. */
+.display-builder-is-expanded #admin-toolbar {
+  display: none !important;
+}

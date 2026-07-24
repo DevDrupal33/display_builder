@@ -1,0 +1,14 @@
+name: 'Grid Row 3 Cols'
+group: Layout
+icon_map:
+  - [main, second, third]
+slots:
+  col_1_content:
+    title: 'Col 1'
+    description: 'The content of the column 1.'
+  col_2_content:
+    title: 'Col 2'
+    description: 'The content of the column 2.'
+  col_3_content:
+    title: 'Col 3'
+    description: 'The content of the column 3.'

@@ -13,6 +13,13 @@ props:
       title: ID
       $ref: ui-patterns://identifier
 libraryOverrides:
+  js:
+    library_panel.js: {}
+    search.js: {}
+  css:
+    component:
+      library_panel.css: {}
+      search.css: {}
   dependencies:
     - core/drupal
     - core/drupal.debounce

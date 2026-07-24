@@ -1,55 +1,111 @@
-:root,
-.display-builder.sl-theme-dark {
-  --tree-block-border-color: var(--sl-color-primary-700);
-}
-
 .db-tree {
-  --indent-size: var(--sl-spacing-2x-small);
-
-  ::part(label):hover {
-    color: var(--sl-color-primary-700);
-  }
-  [data-menu-type="component"] > sl-icon:not(.shoelace-tree--action) {
-    color: var(--sl-color-violet-800);
-  }
-  [data-menu-type="slot"] > sl-icon:not(.shoelace-tree--action) {
-    color: var(--sl-color-emerald-800);
-  }
-  [data-menu-type="block"] > sl-icon:not(.shoelace-tree--action) {
-    color: var(--sl-color-pink-800);
-  }
+  font-size: var(--sl-font-size-small);
 }
 
-.shoelace-tree--action {
-  position: absolute;
-  right: 0;
+.db-tree-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  padding: 0 0 0.5rem;
+}
+
+.db-tree-node__row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0;
+  cursor: pointer;
+}
+
+.db-tree-node__row:hover {
+  color: var(--tree-color-label-hover);
+}
+
+.db-tree-node__toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  border: none;
+  background: none;
+}
+
+.db-tree-node__chevron {
+  transition: transform 0.15s ease;
+}
+
+.db-tree-node[data-expanded="true"] > .db-tree-node__row .db-tree-node__chevron {
+  transform: rotate(90deg);
+}
+
+/* text-overflow only renders the ellipsis on a block-level element's own
+   text, not on the flex row above - db-tree-node__title is a plain <span>
+   wrapping the title slot for exactly this reason. */
+.db-tree-node__title {
+  overflow: hidden;
+  min-width: 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.db-tree-node__children {
+  padding-left: 0.5rem;
+}
+
+.db-tree-node[data-expanded="false"] > .db-tree-node__children {
+  display: none;
+}
+
+.db-tree-node[data-menu-type="component"] > .db-tree-node__row .db-tree-node__icon {
+  color: var(--tree-color-type-component);
+}
+
+.db-tree-node[data-menu-type="slot"] > .db-tree-node__row .db-tree-node__icon {
+  color: var(--tree-color-type-slot);
+}
+
+.db-tree-node[data-menu-type="block"] > .db-tree-node__row .db-tree-node__icon {
+  color: var(--tree-color-type-block);
+}
+
+.db-island-tree .db-dropzone {
+  min-height: calc(var(--dropzone-slot-min-height) / 2);
+}
+
+/* An empty slot's dropzone has no child node rows, so it would otherwise
+   collapse to an all-but-invisible 2rem strip (@see
+   components/dropzone/variables.css's --dropzone-slot-min-height) with no
+   hint that it's still a valid drop target. Same amber as the slot icon
+   above (@see colors.css's --tree-color-type-slot/--dropzone-color-strong,
+   also reused by the Builder "Highlight" option's own "Drop zones" dot). */
+.db-island-tree .db-dropzone:empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--dropzone-color-strong);
+  border-radius: var(--sl-border-radius-small);
+}
+
+.db-island-tree .db-dropzone:empty::after {
+  content: attr(data-empty-hint);
+  pointer-events: none;
+  color: var(--dropzone-color-strong);
+  font-size: var(--sl-font-size-x-small);
+  font-style: italic;
 }
 
 .display-builder {
-  .db-tree-selected {
+  /* Hover-triggered (@see panel_tree.js), so kept light - unlike a click
+     selection this is transient and can appear on every row moused over. */
+  .db-tree--selected {
     border-radius: var(--sl-border-radius-small);
-    outline: 0.4rem solid var(--sl-color-fuchsia-800) !important;
+    outline: 0.15rem solid var(--tree-color-selected-outline) !important;
   }
 
   .db-island-tree {
     padding-top: 0.5rem;
-    .db-dropzone {
-      display: inherit;
-    }
-
-    .db-tree__component {
-      &:hover {
-        &::part(base) {
-          cursor: move;
-          border-radius: var(--sl-border-radius-small);
-          outline: 2px dashed var(--tree-block-border-color);
-        }
-      }
-      &::part(children) {
-        margin-right: 0.25rem;
-        margin-bottom: 0.25rem;
-        margin-left: 0.25rem;
-      }
-    }
   }
 }

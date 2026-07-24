@@ -39,6 +39,20 @@ display_builder.api_get:
       display_builder_instance:
         type: 'entity:display_builder_instance'
 
+# Rebuild one island which was deferred while it was hidden.
+display_builder.api_island_reload:
+  path: '/api/display-builder/{display_builder_instance}/island/{island_id}'
+  methods: [GET]
+  defaults:
+    _controller: '\Drupal\display_builder\Controller\ApiController::reloadIsland'
+  requirements:
+    _entity_access: 'display_builder_instance.view'
+  options:
+    _htmx_route: true
+    parameters:
+      display_builder_instance:
+        type: 'entity:display_builder_instance'
+
 display_builder.api_update:
   path: '/api/display-builder/{display_builder_instance}/_node/{node_id}'
   methods: [PUT, POST]
@@ -53,10 +67,10 @@ display_builder.api_update:
         type: 'entity:display_builder_instance'
 
 display_builder.api_paste:
-  path: '/api/display-builder/{display_builder_instance}/_node/{node_id}/{parent_id}/{slot_id}/{slot_position}/paste'
+  path: '/api/display-builder/{display_builder_instance}/paste'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiController::paste'
+    _controller: '\Drupal\display_builder\Controller\ApiContextualMenuController::paste'
   requirements:
     _entity_access: 'display_builder_instance.update'
   options:
@@ -66,10 +80,10 @@ display_builder.api_paste:
         type: 'entity:display_builder_instance'
 
 display_builder.api_duplicate:
-  path: '/api/display-builder/{display_builder_instance}/_node/{node_id}/{parent_id}/{slot_id}/{slot_position}/duplicate'
+  path: '/api/display-builder/{display_builder_instance}/duplicate'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiController::paste'
+    _controller: '\Drupal\display_builder\Controller\ApiContextualMenuController::paste'
   requirements:
     _entity_access: 'display_builder_instance.update'
   options:
@@ -79,10 +93,10 @@ display_builder.api_duplicate:
         type: 'entity:display_builder_instance'
 
 display_builder.api_delete:
-  path: '/api/display-builder/{display_builder_instance}/_node/{node_id}'
-  methods: [DELETE]
+  path: '/api/display-builder/{display_builder_instance}/delete'
+  methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiController::delete'
+    _controller: '\Drupal\display_builder\Controller\ApiContextualMenuController::delete'
   requirements:
     _entity_access: 'display_builder_instance.update'
   options:
@@ -92,10 +106,36 @@ display_builder.api_delete:
         type: 'entity:display_builder_instance'
 
 display_builder.api_save_preset:
-  path: '/api/display-builder/{display_builder_instance}/_node/{node_id}/save_as_preset'
+  path: '/api/display-builder/{display_builder_instance}/save_as_preset'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiController::saveAsPreset'
+    _controller: '\Drupal\display_builder\Controller\ApiContextualMenuController::saveAsPreset'
+  requirements:
+    _entity_access: 'display_builder_instance.update'
+  options:
+    _htmx_route: true
+    parameters:
+      display_builder_instance:
+        type: 'entity:display_builder_instance'
+
+display_builder.api_paste_styles:
+  path: '/api/display-builder/{display_builder_instance}/paste-styles'
+  methods: [POST]
+  defaults:
+    _controller: '\Drupal\display_builder\Controller\ApiContextualMenuController::pasteStyles'
+  requirements:
+    _entity_access: 'display_builder_instance.update'
+  options:
+    _htmx_route: true
+    parameters:
+      display_builder_instance:
+        type: 'entity:display_builder_instance'
+
+display_builder.api_delete_styles:
+  path: '/api/display-builder/{display_builder_instance}/delete-styles'
+  methods: [POST]
+  defaults:
+    _controller: '\Drupal\display_builder\Controller\ApiContextualMenuController::deleteStyles'
   requirements:
     _entity_access: 'display_builder_instance.update'
   options:

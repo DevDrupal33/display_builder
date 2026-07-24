@@ -32,11 +32,12 @@
       animation: 150,
       sort: false,
       onUnchoose(event) {
-        // If selected is dropped out of dropzone, it is the event.item that
-        // stay in the draggable list. We do nothing to keep the preview on.
-        // If set in the dropzone, the event.clone become the one in the
-        // draggables list. Then we need to pass again through htmx to get the
-        // preview.
+        // If the item was dropped out of a dropzone it is event.item that
+        // stays in the draggable list, still htmx-processed, nothing to do.
+        // If it was dropped in, event.clone takes its place: a raw DOM copy
+        // htmx never saw, so its hx-* preview attributes are inert until we
+        // hand it back - otherwise that library item silently loses its
+        // preview for the rest of the session.
         const isInDraggables = event.item.closest('.db-draggables');
         if (!isInDraggables && typeof htmx !== 'undefined') {
           // eslint-disable-next-line no-undef
@@ -44,19 +45,17 @@
         }
       },
       onStart() {
-        // Quick fix to hide preview in case it get stuck on visible.
-        const preview = document.querySelector('.db-preview');
-        if (preview) {
-          preview.style.display = 'none';
-        }
+        // Covers the touch/fallback drag path, which never fires the
+        // mousedown that js/preview.js hides on.
+        Drupal.displayBuilder.hidePreview?.();
         draggableContainer
           .closest(`[id="${builderId}"]`)
-          .classList.add('display-builder--onDrag');
+          .classList.add('display-builder--on-drag');
       },
       onEnd() {
         draggableContainer
           .closest(`[id="${builderId}"]`)
-          .classList.remove('display-builder--onDrag');
+          .classList.remove('display-builder--on-drag');
       },
     };
 
@@ -78,6 +77,19 @@
           setDraggable(draggableContainer);
         },
       );
+
+      // Same stale-instance cleanup as the dropzones: destroy the Sortable
+      // instance of any draggables list htmx removes from the document, or
+      // it lingers in SortableJS's module-level registry forever.
+      // @see components/dropzone/dropzone.js for the full rationale.
+      once('dbDraggablesCleanup', 'body', context).forEach((body) => {
+        body.addEventListener('htmx:beforeCleanupElement', (event) => {
+          const element = event.target;
+          if (element.classList?.contains('db-draggables')) {
+            Sortable.get(element)?.destroy();
+          }
+        });
+      });
     },
   };
 })(Drupal, once, Sortable);

@@ -11,14 +11,14 @@ use Drupal\display_builder\Island\IslandType;
 use Drupal\display_builder\SourceWithSlotsInterface;
 
 /**
- * Layers island plugin implementation.
+ * Navigator island plugin implementation.
  */
 #[Island(
   id: 'tree',
-  label: new TranslatableMarkup('Tree'),
-  description: new TranslatableMarkup('Hierarchical view of components and blocks.'),
+  label: new TranslatableMarkup('Navigator'),
+  description: new TranslatableMarkup('Hierarchical schematic view of components and blocks.'),
   type: IslandType::View,
-  default_region: 'main',
+  default_region: 'sidebar',
   icon: 'bar-chart-steps',
 )]
 class TreePanel extends BuilderPanel {
@@ -28,8 +28,8 @@ class TreePanel extends BuilderPanel {
    */
   public static function keyboardShortcuts(): array {
     return [
-      'key' => 't',
-      'help' => t('Show the tree'),
+      'key' => 'n',
+      'help' => t('Show the navigator'),
     ];
   }
 
@@ -42,6 +42,10 @@ class TreePanel extends BuilderPanel {
     $build = [
       '#type' => 'component',
       '#component' => 'display_builder:panel_tree',
+      '#props' => [
+        'collapse_label' => (string) $this->t('Collapse all'),
+        'expand_label' => (string) $this->t('Expand all'),
+      ],
       '#slots' => [
         'items' => $this->digFromSlot($builder, $data),
       ],
@@ -50,11 +54,12 @@ class TreePanel extends BuilderPanel {
         'data-db-id' => $builder_id,
         'data-node-title' => $this->t('Base container'),
         'data-db-root' => TRUE,
-        // 'class' => ['db-dropzone--root', 'db-dropzone'],
+        // Shown by panel_tree.css when the dropzone is actually empty.
+        'data-empty-hint' => $this->t('Empty'),
       ],
     ];
 
-    return $build;
+    return $this->htmxEvents->onRootDrop($build, $builder_id, $this->getPluginID());
   }
 
   /**
@@ -69,44 +74,54 @@ class TreePanel extends BuilderPanel {
 
     ['label' => $label, 'instance_id' => $node_id] = $info;
 
+    $builder_id = (string) $instance->id();
     $slots = [];
 
     foreach ($source->getSlotDefinitions() as $slot_id => $definition) {
-      $items = [
+      $dropzone = [
         '#type' => 'component',
-        '#component' => 'display_builder:tree_item',
+        '#component' => 'display_builder:dropzone',
+        '#attributes' => [
+          // Required for JavaScript @see components/dropzone/dropzone.js.
+          'data-db-id' => $builder_id,
+          'data-testid' => 'dropzone_' . $slot_id,
+        ],
+      ];
+
+      if ($sources = $source->getSlotValue($slot_id)) {
+        $dropzone['#slots']['content'] = $this->digFromSlot($instance, $sources);
+      }
+      else {
+        // Shown by panel_tree.css when the dropzone is actually empty.
+        $dropzone['#attributes']['data-empty-hint'] = $this->t('Empty');
+      }
+      $dropzone = $this->htmxEvents->onSlotDrop($dropzone, $builder_id, $this->getPluginID(), $node_id, $slot_id);
+
+      $slots[] = [
+        '#type' => 'component',
+        '#component' => 'display_builder:tree_node',
         '#props' => [
           'icon' => 'box-arrow-in-right',
         ],
         '#slots' => [
           'title' => $definition['title'],
+          'children' => [$dropzone],
         ],
-        // Slot is needed for contextual menu paste.
-        // @see assets/js/contextual_menu.js
-        '#attributes' => [
-          'data-slot-id' => $slot_id,
-          'data-slot-title' => $definition['title'],
-          'data-node-id' => $node_id,
-          'data-node-title' => $label,
-          'data-menu-type' => 'slot',
-        ],
+        '#attributes' => \array_merge(
+          ['data-menu-type' => 'slot'],
+          $this->buildSlotAttributes($slot_id, $definition['title'], $node_id, $label)
+        ),
       ];
-
-      if ($sources = $source->getSlotValue($slot_id)) {
-        $items['#slots']['children'] = $this->digFromSlot($instance, $sources);
-      }
-
-      $slots[] = $items;
     }
 
-    // I f a single item, expand by default.
+    // If a single slot, expand it by default.
     if (\count($slots) === 1) {
       $slots[0]['#props']['expanded'] = TRUE;
     }
 
-    return [
+    $build = [
       '#type' => 'component',
-      '#component' => 'display_builder:tree_item',
+      '#component' => 'display_builder:tree_node',
       '#props' => [
         'expanded' => TRUE,
         'icon' => 'box',
@@ -115,16 +130,13 @@ class TreePanel extends BuilderPanel {
         'title' => $label,
         'children' => $slots,
       ],
-      // Required for the context menu label.
-      // @see assets/js/contextual_menu.js
-      '#attributes' => [
-        'data-node-id' => $node_id,
-        'data-node-title' => $label,
-        'data-slot-position' => $index,
-        'data-menu-type' => 'component',
-        // 'class' => ['db-dropzone', 'db-tree__component'],
-      ],
+      '#attributes' => \array_merge(
+        ['data-node-id' => $node_id, 'data-menu-type' => 'component'],
+        $this->buildNodeAttributes($label, $index)
+      ),
     ];
+
+    return $this->htmxEvents->onInstanceClick($build, $builder_id, $node_id, $source->label(), $index);
   }
 
   /**
@@ -138,25 +150,22 @@ class TreePanel extends BuilderPanel {
       $label['summary'] = (string) $this->t('Field: @label', ['@label' => $label['label']]);
     }
 
-    return [
+    $build = [
       '#type' => 'component',
-      '#component' => 'display_builder:tree_item',
+      '#component' => 'display_builder:tree_node',
       '#props' => [
         'icon' => 'view-list',
       ],
       '#slots' => [
         'title' => $label['summary'],
       ],
-      '#attributes' => [
-        'data-node-id' => $node_id,
-        // This label is used for contextual menu.
-        // @see assets/js/contextual_menu.js
-        'data-node-title' => $label['summary'],
-        'data-slot-position' => $index,
-        'data-menu-type' => 'block',
-        // 'class' => ['db-dropzone', 'db-tree__block'],
-      ],
+      '#attributes' => \array_merge(
+        ['data-node-id' => $node_id, 'data-menu-type' => 'block'],
+        $this->buildNodeAttributes($label['summary'], $index, $data['source_id'] ?? NULL)
+      ),
     ];
+
+    return $this->htmxEvents->onInstanceClick($build, (string) $instance->id(), $node_id, $label['summary'], $index);
   }
 
 }

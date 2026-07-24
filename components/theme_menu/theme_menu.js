@@ -20,12 +20,7 @@
    */
   function handleThemeSwitch(builder) {
     function getTheme() {
-      return (
-        Drupal.displayBuilder.LocalStorageManager.get(
-          'displayBuilder',
-          'theme',
-        ) || 'auto'
-      );
+      return Drupal.displayBuilder.LocalStorageManager.get('theme') || 'auto';
     }
 
     let theme = getTheme();
@@ -51,11 +46,7 @@
 
     function setTheme(newTheme) {
       theme = newTheme;
-      Drupal.displayBuilder.LocalStorageManager.set(
-        'displayBuilder',
-        'theme',
-        theme,
-      );
+      Drupal.displayBuilder.LocalStorageManager.set('theme', theme);
 
       // Update the UI.
       updateSelection();

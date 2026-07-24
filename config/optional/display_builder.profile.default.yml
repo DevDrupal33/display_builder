@@ -8,7 +8,8 @@ islands:
   component_library:
     status: true
     weight: -10
-    exclude: {}
+    exclude:
+      navigation: navigation
     exclude_id: ''
     component_status:
       experimental: '0'
@@ -16,22 +17,30 @@ islands:
       obsolete: '0'
     include_no_ui: false
     show: grouped
+    preview: true
   block_library:
     status: true
     weight: -9
     exclude:
       htmx: htmx
       shortcut: shortcut
+    exclude_id: "system_menu_block:admin\r\nsystem_menu_block:devel\r\nsystem_breadcrumb_block\r\nsystem_clear_cache_block\r\nlocal_actions_block\r\n"
+    preview: true
   preset_library:
     status: true
     weight: -8
+    preview: true
   builder:
     status: true
     weight: -8
     region: main
-  layers:
+  scaffold:
     status: true
-    weight: -7
+    weight: -6
+    region: main
+  logs:
+    status: false
+    weight: -4
     region: main
   preview:
     status: true
@@ -42,16 +51,12 @@ islands:
     weight: -10
     region: sidebar
   tree:
-    status: false
+    status: true
     weight: -9
     region: sidebar
-  logs:
-    status: true
-    weight: -6
-    region: main
   history:
     status: true
-    weight: -9
+    weight: -8
     region: end
     undo:
       value: icon_label
@@ -61,7 +66,7 @@ islands:
       value: hidden
   state:
     status: true
-    weight: -10
+    weight: -9
     region: end
     publish:
       value: label
@@ -71,11 +76,9 @@ islands:
       value: icon
   controls:
     status: true
-    weight: -8
+    weight: -7
     region: end
-    highlight:
-      value: icon
-    fullscreen:
+    expand:
       value: icon
     theme:
       value: hidden
@@ -88,7 +91,7 @@ islands:
     status: true
     weight: -9
   visibility_conditions:
-    status: false
+    status: true
     weight: -7
   menu:
     status: true
@@ -98,10 +101,10 @@ islands:
     weight: -9
   menu_delete:
     status: true
-    weight: -8
+    weight: -7
   collaboration:
     status: false
-    weight: -4
+    weight: -5
     region: end
   back:
     status: true
@@ -109,4 +112,24 @@ islands:
     region: end
     back:
       value: icon
+  save_status:
+    status: true
+    weight: -10
+    region: start
+  tokens:
+    status: false
+    weight: 0
+  highlight:
+    status: true
+    weight: 0
+  viewport:
+    status: false
+    weight: 0
+  menu_styles:
+    status: true
+    weight: -8
+library_flat: false
+library_tabs_display: label
+contextual_tabs_display: label
+view_panels_display: label
 weight: 0

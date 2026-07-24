@@ -58,7 +58,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
         'display_builder_theme_test',
       ]);
     $this->config('system.theme')->set('default', 'display_builder_theme_test')->save();
-    $this->installConfig(['display_builder']);
+    $this->installConfig(['display_builder', 'display_builder_test']);
     $this->installEntitySchema('display_builder_instance');
     $this->displayBuildableManager = $this->container->get('plugin.manager.display_buildable');
   }
@@ -89,7 +89,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     self::assertSame($id, $buildable->getInstanceId(), $view_mode);
     self::assertFalse($display->isDisplayBuilderEnabled());
 
-    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY, 'test')->save();
+    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY, 'test_base')->save();
 
     self::assertSame($expected, $display->isDisplayBuilderEnabled());
   }
@@ -128,7 +128,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
 
     $display = self::createTestDisplay();
 
-    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY, 'test')->save();
+    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY, 'test_base')->save();
     $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::SOURCES_PROPERTY, $sources)->save();
     $display->calculateDependencies();
 
@@ -196,10 +196,10 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $profile = $display->getDisplayBuilderOverrideProfile();
     self::assertNull($profile);
 
-    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY, 'test')->save();
+    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY, 'test_base')->save();
 
     $profile = $display->getDisplayBuilderOverrideProfile();
-    self::assertSame('test', $profile->id());
+    self::assertSame('test_base', $profile->id());
   }
 
   /**
@@ -213,10 +213,10 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $profile = $buildable->getProfile();
     self::assertNull($profile);
 
-    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY, 'test')->save();
+    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY, 'test_base')->save();
 
     $profile = $buildable->getProfile();
-    self::assertSame('test', $profile->id());
+    self::assertSame('test_base', $profile->id());
   }
 
   /**
@@ -231,7 +231,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
 
     self::assertFalse($display->isDisplayBuilderOverridable());
 
-    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY, 'test')->save();
+    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY, 'test_base')->save();
 
     self::assertTrue($display->isDisplayBuilderOverridable());
   }

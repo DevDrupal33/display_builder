@@ -1,0 +1,12 @@
+name: Display Builder Entity View Layout Override Test
+type: module
+description: 'Entity display layout override config entities for testing.'
+package: Testing
+dependencies:
+  - layout_builder:layout_builder
+  - ui_patterns:ui_patterns
+  - ui_patterns:ui_patterns_layouts
+  - ui_patterns:ui_patterns_blocks
+  - display_builder:display_builder_ui
+  - display_builder:display_builder_entity_view
+  - display_builder:display_builder_test

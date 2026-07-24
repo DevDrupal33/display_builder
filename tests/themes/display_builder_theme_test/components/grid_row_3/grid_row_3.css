@@ -1,0 +1,9 @@
+.grid-row-3 {
+  display: flex;
+  gap: 1rem;
+}
+
+.grid-row-3__col {
+  flex: 1 1 0;
+  min-width: 0;
+}

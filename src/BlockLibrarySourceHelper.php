@@ -20,6 +20,10 @@ class BlockLibrarySourceHelper {
     'page_title_block',
   ];
 
+  private const HIDE_CHOICE_ID = [
+    'field:user:user:pass',
+  ];
+
   /**
    * Get the choices grouped by category.
    *
@@ -27,12 +31,16 @@ class BlockLibrarySourceHelper {
    *   An array of all possible sources.
    * @param array $exclude_provider
    *   (Optional) An array of providers to hide.
+   * @param array $exclude_by_id
+   *   (Optional) An array of id to hide.
+   * @param bool $preview
+   *   (Default true) Whether to show preview on hover.
    *
    * @return array
    *   An array of grouped choices.
    */
-  public static function getGroupedChoices(array $sources, array $exclude_provider = []): array {
-    $choices = self::getChoices($sources, $exclude_provider);
+  public static function getGroupedChoices(array $sources, array $exclude_provider = [], array $exclude_by_id = [], bool $preview = TRUE): array {
+    $choices = self::getChoices($sources, $exclude_provider, $exclude_by_id, $preview);
     $default_category = (string) new TranslatableMarkup('Others');
 
     $categories = [];
@@ -103,11 +111,15 @@ class BlockLibrarySourceHelper {
    *   An array of all possible sources.
    * @param array $exclude_provider
    *   An array of providers to hide.
+   * @param array $exclude_by_id
+   *   (Optional) An array of id to hide.
+   * @param bool $preview
+   *   (Default true) Whether to show preview on hover.
    *
    * @return array
    *   An array of choices.
    */
-  private static function getChoices(array $sources, array $exclude_provider): array {
+  public static function getChoices(array $sources, array $exclude_provider, array $exclude_by_id = [], bool $preview = TRUE): array {
     $result_choices = [];
 
     foreach ($sources as $source_id => $source_data) {
@@ -116,6 +128,12 @@ class BlockLibrarySourceHelper {
 
       // If no choices, add the source as a single choice.
       if (!isset($source_data['choices'])) {
+        $id = $definition['id'] ?? $source_id;
+
+        if (\in_array($id, $exclude_by_id, TRUE)) {
+          continue;
+        }
+
         $label = $definition['label'] ?? $source_id;
         $keywords = \sprintf('%s %s %s', $definition['id'], $definition['label'] ?? $source_id, $definition['description'] ?? '');
 
@@ -123,7 +141,7 @@ class BlockLibrarySourceHelper {
           'label' => (string) $label,
           'data' => ['source_id' => $source_id],
           'keywords' => $keywords,
-          'preview' => FALSE,
+          'preview' => NULL,
           'group' => self::getSourceGroupLabel($definition),
         ];
 
@@ -134,13 +152,20 @@ class BlockLibrarySourceHelper {
       $choices = $source_data['choices'];
 
       foreach ($choices as $choice_id => $choice) {
+        if (\in_array($choice_id, $exclude_by_id, TRUE)) {
+          continue;
+        }
+
+        if (\in_array($choice_id, self::HIDE_CHOICE_ID, TRUE)) {
+          continue;
+        }
+
         if (!self::isChoiceValid($choice, $definition, $exclude_provider)) {
           continue;
         }
 
         $label = $choice['label'] ?? $choice_id;
         $keywords = \sprintf('%s %s %s %s', $definition['id'], $label, $definition['description'] ?? '', $choice_id);
-        $preview_url = Url::fromRoute('display_builder.api_block_preview', ['block_id' => $choice_id]);
 
         $result_choices[] = [
           'label' => (string) $label,
@@ -149,7 +174,7 @@ class BlockLibrarySourceHelper {
             'source_id' => $source_id,
             'source' => $source->getChoiceSettings($choice_id),
           ],
-          'preview' => $preview_url,
+          'preview' => $preview ? Url::fromRoute('display_builder.api_block_preview', ['block_id' => $choice_id]) : NULL,
           'group' => self::getChoiceGroupLabel($choice, $definition),
         ];
       }
@@ -236,6 +261,7 @@ class BlockLibrarySourceHelper {
 
         break;
 
+      case 'display_builder':
       case 'ui_icons_patterns':
       case 'ui_patterns':
         $group = (string) new TranslatableMarkup('Utilities');

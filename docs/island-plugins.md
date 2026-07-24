@@ -6,13 +6,14 @@
 
 Display Builder extensively uses HTMX's [out-of-band swapping](https://htmx.org/attributes/hx-swap-oob/) to allow an event triggered from an island to also update other islands.
 
-There are 5 type of islands:
+There are 6 type of islands:
 
 - `View` panels: They are displayed tabbed in the center of the toolbar, or as buttons in the start of the toolbar
 - `Button`s: they are displayed as buttons in the end of the toolbar
 - `Library` panels: They are displayed tabbed into the Library View panel
 - `Menu` items: they are displayed in the contextual menu triggered with right-click
 - `Contextual` panels: They are displayed tabbed into the contextual sidebar
+- `Floating` controls: they float over one or more `View` panels, only visible while an attached panel is the active main tab
 
 Visual positioning:
 
@@ -55,10 +56,18 @@ HTMX behavior will change according to `IslandInterface::build()` return value:
 ### Attributes
 
 - `id`: Plugin ID
-- `label`: The human-readable name of the plugin.
+- `label`: The human-readable name of the plugin. It is not derived from
+  the ID and does not have to match it: the panels shipped by default are
+  labelled Canvas (`builder`), Wireframe (`layers`) and Navigator (`tree`).
+  Always reference a panel by its **ID** in code, config and `attach_to`.
 - `description`: A brief description of the plugin.
 - `type` : The island type from enumeration.
 - `icon`: Icon for this island. Used for View panels.
+- `attach_to`: For `IslandType::Floating` islands only: the plugin IDs of
+  the View panels this floating control attaches to. It renders once per
+  listed panel, alongside that panel's own content, and is only visible
+  while that panel's main tab is active. Fixed by the plugin definition,
+  not admin-configurable.
 
 Example:
 
@@ -80,6 +89,49 @@ class BlockLibraryPanel extends IslandPluginBase {
 }
 ```
 
+A `Floating` island whose `build()` is just a small cluster of icon buttons
+can use `IslandFloatingControlsTrait::buildControlButtons()` instead of
+assembling a button group by hand:
+
+```php
+namespace Drupal\display_builder\Plugin\display_builder\Island;
+
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\Island\IslandFloatingControlsTrait;
+use Drupal\display_builder\Island\IslandPluginBase;
+use Drupal\display_builder\Island\IslandType;
+
+#[Island(
+  id: 'highlight',
+  label: new TranslatableMarkup('Highlight'),
+  description: new TranslatableMarkup('Highlight builder zones to ease drag and move around.'),
+  type: IslandType::Floating,
+  attach_to: ['builder'],
+)]
+class HighlightToggle extends IslandPluginBase {
+
+  use IslandFloatingControlsTrait;
+
+  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
+    return $this->buildControlButtons([
+      'highlight' => [
+        'icon' => 'border',
+        'tooltip' => $this->t('Highlight builder zones to ease drag and move around.'),
+        'attribute' => 'data-set-highlight',
+        'library' => 'display_builder/highlight',
+      ],
+    ]);
+  }
+
+}
+```
+
+An island needing a richer control (e.g. a dropdown) doesn't need this
+trait at all - `ProfileViewBuilder` only requires `build()` to return a
+renderable, and positions it the same way regardless.
+
 ### Keyboard support
 
 We provide a small utility to map buttons to keyboard shortcuts to ease actions in the Display Builder.
@@ -90,3 +142,28 @@ This method allow a keyboard mapping as parameter. Check the class for more info
 If your island is of type `IslandType::View`, implement the `keyboardShortcuts()` method.
 
 _Note_: There is no control on duplicate, please ensure your shortcut is not already used.
+
+A shortcut is declared as a canonical **combo** string: optional modifier tokens
+then the key, joined with `+`, in the fixed order `mod`, `alt`, `shift`, `key`
+— for example `b`, `shift+p`, `mod+z`, `mod+shift+z`, `Delete`. The `mod` token
+is the per-platform primary accelerator, **Cmd on macOS and Ctrl everywhere
+else**, so one declaration works on both an Apple and a PC keyboard
+(@see `components/display_builder/js/keyboard.js`). A single button may list
+several combos separated by spaces (e.g. `mod+z u`); the first is the one shown
+in the help dialog.
+
+Shortcuts taken by the islands shipped with the module:
+
+| Key | Island | | Key | Island |
+|---|---|---|---|---|
+| `b` | Canvas | | `mod+z` (or `u`) | Undo |
+| `w` | Wireframe | | `mod+shift+z` (or `r`) | Redo |
+| `g` | Scaffold | | `shift+c` | Clear |
+| `n` | Navigator | | `shift+p` | Publish |
+| `p` | Preview | | `shift+e` | Expand |
+| `l` | Libraries | | `mod+c` / `mod+v` / `mod+d` | Copy / Paste / Duplicate selected |
+| `o` | Logs | | `Delete` | Remove selected |
+
+The contextual shortcuts (`mod+c`/`mod+v`/`mod+d`/`Delete`) act on the currently
+selected node without opening the right-click menu; they resolve the node's slot
+context the same way the menu does (@see `components/display_builder/js/keyboard.js`).

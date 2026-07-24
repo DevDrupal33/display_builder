@@ -11,3 +11,8 @@ slots:
 props:
   type: object
   properties: {}
+libraryOverrides:
+  css:
+    component:
+      layer.css: {}
+      variables.css: {}

@@ -63,7 +63,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
 
     $this->installEntitySchema('user');
     $this->installEntitySchema('display_builder_instance');
-    $this->installConfig(['display_builder']);
+    $this->installConfig(['display_builder', 'display_builder_test']);
 
     $this->entityTypeManager = $this->container->get('entity_type.manager');
     $this->displayBuildableManager = $this->container->get('plugin.manager.display_buildable');
@@ -79,7 +79,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
       'id' => 'test_layout',
       'label' => 'Test Layout',
       'weight' => 1,
-      DisplayBuildableInterface::PROFILE_PROPERTY => 'test',
+      DisplayBuildableInterface::PROFILE_PROPERTY => 'test_base',
       DisplayBuildableInterface::SOURCES_PROPERTY => [],
       'conditions' => [],
     ]);
@@ -122,7 +122,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
       'id' => 'edit_layout',
       'label' => 'Original Label',
       'weight' => 5,
-      DisplayBuildableInterface::PROFILE_PROPERTY => 'test',
+      DisplayBuildableInterface::PROFILE_PROPERTY => 'test_base',
       DisplayBuildableInterface::SOURCES_PROPERTY => [],
       'conditions' => [],
     ]);
@@ -156,7 +156,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
       'id' => 'edit_layout',
       'label' => 'Original Label',
       'weight' => 5,
-      DisplayBuildableInterface::PROFILE_PROPERTY => 'test',
+      DisplayBuildableInterface::PROFILE_PROPERTY => 'test_base',
       DisplayBuildableInterface::SOURCES_PROPERTY => [],
       'conditions' => [],
     ]);

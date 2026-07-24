@@ -10,7 +10,7 @@ This document provides a short Quickstart, examples for local/Docker usage and t
 
 ```bash
 composer require drush/drush --dev
-composer require drupal/core-dev:^11.3 -W --dev
+composer require drupal/core-dev:^11.4 -W --dev
 ```
 
 - Node and package manager (node >= 20, npm or Yarn). From the module folder install JS deps:
@@ -103,6 +103,32 @@ specific for a theme.
 Copy and adapt the `.env.dist` file as `.env` to set your environment.
 
 There are different cases for running tests with a full installation or on a running Drupal instance to avoid the install step.
+
+## Accessibility
+
+`tests/src/Playwright/Tests/accessibility.spec.ts` runs
+[axe](https://github.com/dequelabs/axe-core-npm) (`@axe-core/playwright`, a
+devDependency) over the `.display-builder` element and fails on:
+
+- any violation whose rule id is not listed in the spec's `KNOWN_VIOLATIONS`
+  array;
+- anything of `critical` impact, listed or not.
+
+**`KNOWN_VIOLATIONS` is currently empty — the builder has zero axe
+violations.** Adding an id to it is admitting a regression: prefer fixing the
+violation, and never add an entry without a comment saying why.
+
+Two Shoelace-specific traps, both handled centrally, worth knowing before
+adding UI:
+
+- **Icon-only buttons.** `sl-button`'s focusable element is the
+  `<button part="base">` inside its shadow root, which an `aria-label` on the
+  host does *not* name. The accessible name has to come from the slotted
+  `<sl-icon label="…">` — see `components/shoelace/button/button.twig`.
+- **Inputs.** A placeholder is not a name. Pass a `label` to
+  `display_builder:input` so Shoelace renders a real `<label for>`; hide it
+  visually if the design has no room for it (see
+  `components/library_panel/search.css`).
 
 ## Docker: remote Playwright server
 

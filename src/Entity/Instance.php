@@ -102,7 +102,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   /**
    * Slot source proxy for resolving node labels.
    */
-  private SlotSourceProxy $slotSourceProxy;
+  protected SlotSourceProxy $slotSourceProxy;
 
   /**
    * Cached normalized source tree for the current present state.
@@ -110,7 +110,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * Stays valid after mutations (index=FALSE path) and is cleared on undo/redo
    * when the present pointer jumps to a different history step.
    */
-  private ?SourceTree $sourceTree = NULL;
+  protected ?SourceTree $sourceTree = NULL;
 
   /**
    * {@inheritdoc}

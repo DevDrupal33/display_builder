@@ -1,12 +1,8 @@
-:root {
-  --db-menu-z-index: 901;
-}
-
 .display-builder .db-menu {
   position: absolute;
-  z-index: var(--db-menu-z-index);
+  z-index: var(--db-z-menu);
   display: none;
-  border: 1px dashed var(--sl-color-neutral-200) !important;
+  border: 1px dashed var(--menu-color-border) !important;
   box-shadow: var(--sl-shadow-x-large);
 
   .db-menu__label::part(base) {
@@ -17,15 +13,15 @@
   .menu__item::part(checked-icon) {
     width: 0.5rem;
   }
-  .menu__item[hx-delete]::part(base) {
-    color: var(--sl-color-danger-600);
+  .menu__item[value="remove"]::part(base) {
+    color: var(--menu-color-danger);
   }
 
   pre.debug-info {
     min-width: 20rem;
     margin: 0;
     padding: 3px;
-    border: 1px solid var(--sl-color-neutral-600);
+    border: 1px solid var(--menu-color-debug-border);
     background-color: var(--db-background-color);
     font-size: 0.8rem;
   }

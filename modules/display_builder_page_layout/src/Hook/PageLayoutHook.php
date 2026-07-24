@@ -21,6 +21,9 @@ class PageLayoutHook {
    */
   #[Hook('preprocess_html')]
   public function preprocessHtml(array &$variables): void {
+    if (($variables['page']['#page_variant'] ?? NULL) !== 'display_builder_full') {
+      return;
+    }
     unset($variables['page']['content']['page_title']);
   }
 

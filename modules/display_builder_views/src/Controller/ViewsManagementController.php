@@ -18,7 +18,7 @@ use Drupal\display_builder_views\Plugin\display_builder\Buildable\ViewDisplay;
 class ViewsManagementController extends ControllerBase {
 
   public function __construct(
-    private readonly DateFormatterInterface $dateFormatter,
+    protected DateFormatterInterface $dateFormatter,
   ) {}
 
   /**

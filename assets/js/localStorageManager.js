@@ -13,12 +13,14 @@ Drupal.displayBuilder.LocalStorageManager = class {
   /**
    * Gets a value from localStorage for a specific key within a namespace.
    *
-   * @param {string} namespace - The namespace (main key) in localStorage.
    * @param {string} key - The specific key within the namespace.
    * @param {mixed|null} defaultValue - Default to return of not found.
+   * @param {string} namespace - (Optional) The namespace (main key) in
+   *   localStorage. Defaults to the global 'displayBuilder' namespace; pass
+   *   a builder id for per-instance state.
    * @return {any|null} The value associated with the key, or null if not found.
    */
-  static get(namespace, key, defaultValue = null) {
+  static get(key, defaultValue = null, namespace = 'displayBuilder') {
     const prefixedNamespace = `Drupal.${namespace}`;
     try {
       const storageString = localStorage.getItem(prefixedNamespace);
@@ -41,11 +43,13 @@ Drupal.displayBuilder.LocalStorageManager = class {
   /**
    * Sets a value in localStorage for a specific key within a namespace.
    *
-   * @param {string} namespace - The namespace (main key) in localStorage.
    * @param {string} key - The specific key within the namespace.
    * @param {any} value - The value to store.
+   * @param {string} namespace - (Optional) The namespace (main key) in
+   *   localStorage. Defaults to the global 'displayBuilder' namespace; pass
+   *   a builder id for per-instance state.
    */
-  static set(namespace, key, value) {
+  static set(key, value, namespace = 'displayBuilder') {
     const prefixedNamespace = `Drupal.${namespace}`;
     try {
       const storageString = localStorage.getItem(prefixedNamespace);
@@ -65,10 +69,12 @@ Drupal.displayBuilder.LocalStorageManager = class {
   /**
    * Removes a specific key-value pair from a namespace in localStorage.
    *
-   * @param {string} namespace - The namespace (main key) in localStorage.
    * @param {string} key - The specific key to remove.
+   * @param {string} namespace - (Optional) The namespace (main key) in
+   *   localStorage. Defaults to the global 'displayBuilder' namespace; pass
+   *   a builder id for per-instance state.
    */
-  static remove(namespace, key) {
+  static remove(key, namespace = 'displayBuilder') {
     const prefixedNamespace = `Drupal.${namespace}`;
     try {
       const storageString = localStorage.getItem(prefixedNamespace);
@@ -93,9 +99,10 @@ Drupal.displayBuilder.LocalStorageManager = class {
   /**
    * Clears all data within a specific namespace in localStorage.
    *
-   * @param {string} namespace - The namespace (main key) to clear.
+   * @param {string} namespace - (Optional) The namespace (main key) to
+   *   clear. Defaults to the global 'displayBuilder' namespace.
    */
-  static clearNamespace(namespace) {
+  static clearNamespace(namespace = 'displayBuilder') {
     const prefixedNamespace = `Drupal.${namespace}`;
     try {
       localStorage.removeItem(prefixedNamespace);

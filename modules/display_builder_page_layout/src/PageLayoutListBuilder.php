@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_page_layout;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\Entity\DraggableListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -94,7 +95,7 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function getDefaultOperations(EntityInterface $entity): array {
+  public function getDefaultOperations(EntityInterface $entity, ?CacheableMetadata $cacheability = NULL): array {
     /** @var \Drupal\display_builder_page_layout\PageLayoutInterface @page_layout */
     $page_layout = $entity;
     $manager = \Drupal::service('plugin.manager.display_buildable');

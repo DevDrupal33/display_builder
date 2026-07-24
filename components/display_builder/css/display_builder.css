@@ -1,0 +1,519 @@
+/* cspell:ignore zindex */
+
+/* Some tabs padding fix */
+.db-form .shoelace-tabs::part(nav),
+.shoelace-tabs--contextual.shoelace-tabs::part(nav) {
+  padding: 0;
+}
+
+/* Expand button toggle. No z-index here on purpose: in normal mode this
+   element is position: static, so a z-index would be inert (confirmed live)
+   while reading like the builder claims a layer of its own - it doesn't, its
+   individual parts each claim one from the ladder in css/variables.css. The
+   .display-builder--expanded rule below is what actually positions it, and
+   that one does carry a z-index. */
+.display-builder {
+  display: flex;
+  flex-direction: column;
+  color: var(--db-text-color);
+}
+
+/* Keep icon edges crisp at small/fractional sizes (e.g. toolbar/sidebar UI
+   zoom below 100%) - Shoelace exposes the inner <svg> via the `svg` part
+   for exactly this kind of external styling. */
+.display-builder sl-icon::part(svg) {
+  shape-rendering: geometricPrecision;
+}
+
+/* Case 1, full-page builder route only (page-layout builder) -
+   .display-builder is essentially the whole page there, so giving it the
+   viewport's own height lets .display-builder__body's flex:1 below fill exactly
+   what's left after the toolbar, and .db-sidebar (an ordinary flex child, @see
+   css/sidebar.css) stretch to match - the entity - embedded builder route
+   (case 2) never gets this class, and must not: there .display-builder sits
+   deep inside a normal themed page, and forcing a viewport-relative height on
+   it there would overflow past the page's own content. --drupal-displace-
+   offset-top accounts for the classic Toolbar module's fixed bar (@see
+   core/modules/toolbar), which pushes the whole page down by that same amount,
+   shrinking how much of the viewport .display-builder actually gets.
+
+   The class is on .display-builder itself, not on <body> or any ancestor: it
+   comes from the buildable plugin ID (page_layout -> display-builder-page-
+   layout, @see \Drupal\display_builder\ProfileViewBuilder and
+   components/display_builder/display_builder.twig), which is also why every
+   case-2 rule elsewhere excludes it with .display-builder:not(...) rather than
+   body:not(...). */
+.display-builder.display-builder-page-layout {
+  height: calc(100dvh - var(--drupal-displace-offset-top, 0px));
+}
+
+/* Start sidebar / main canvas / end sidebar row. */
+.display-builder__body {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Case 2 (embedded builder route) - the toolbar and
+   sidebars are position: fixed and out of flow there (@see toolbar.css,
+   sidebar.css), escaping .display-builder's own box entirely, so it might
+   look like .display-builder__body/__main need their own margin to reserve
+   space for them the way case 1's sticky toolbar + flex sidebars get for
+   free from normal flow. They don't: .dialog-off-canvas-main-canvas's own
+   padding below already pushes .display-builder's *entire* box clear of the
+   fixed chrome (top-level, for the whole page) - adding a second margin
+   here would double that offset, leaving a redundant gap between
+   .display-builder's own (already correctly shifted) top-left corner and
+   .display-builder__body/__main's content. */
+
+/* .dialog-off-canvas-main-canvas is Drupal core's standard wrapper around a
+   page's own content - kept clear of our fixed toolbar/sidebars the same way
+   core keeps it clear of an open off-canvas dialog (@see
+   core/misc/dialog/off-canvas), so they behave like a real drawer/app
+   toolbar covering whatever page furniture (site header, title, breadcrumb)
+   would otherwise sit behind them, without also visually overlapping page
+   content past their own edge - without this, the fixed toolbar/sidebars
+   cover the theme's own header/content instead of the page shifting down/
+   aside to clear them. This is the *only* place case 2 reserves that space -
+   applied once, at the top of the whole page, it also correctly clears
+   .display-builder's own box in the same stroke (@see the note on
+   .display-builder__body above), so nothing inside .display-builder needs
+   its own separate margin for the same offset.
+   margin-right/-left combine external chrome (Navigation module sidebar,
+   admin toolbar) with our own sidebar's width because this wrapper spans the
+   true viewport width regardless of where .display-builder itself sits
+   inside it - deliberately margin, not padding, here: core's own
+   admin-toolbar.css sets `margin-inline-start: var(--drupal-displace-offset-left, ...)`
+   on this same element when Navigation's sidebar is active, and
+   margin-left/margin-inline-start are "corresponding" logical/physical
+   properties that resolve to a single cascade winner, not two independent
+   values that stack - using padding here instead would sit *alongside*
+   core's margin rather than replacing it, double-offsetting .display-builder
+   away from where the (position: fixed, unaffected by any of this)
+   toolbar/sidebars actually are. Confirmed live with Navigation enabled:
+   padding-left produced exactly this double-offset bug, margin-left doesn't.
+   margin-left needs !important: core wraps that same rule in
+   `:is(#extra-specificity-hack, [data-drupal-admin-styles])` (@see
+   core/modules/navigation/css/components/admin-toolbar.css), an ID-selector
+   trick that outranks any ordinary class-based selector on our side, ours
+   included - without !important here core's rule wins outright and our
+   sidebar's own width silently drops out of the margin-left calc entirely
+   (confirmed live: dragging the start sidebar's resize handle changed
+   --db-sidebar-start-width correctly but the canvas's own margin-left never
+   moved). margin-right has no competing core rule to out-rank, so it doesn't
+   need the same treatment - if a future core version adds a matching
+   margin-inline-end override, give margin-right the same !important.
+   margin-top only needs --toolbar-height/--drupal-displace-offset-top (no
+   local counterpart to add - the toolbar spans full width above both
+   sidebars, it doesn't have a "width" of its own the way a sidebar does),
+   but stays padding-top rather than margin-top specifically: this wrapper
+   is typically the first block in <body>, so a top *margin* here collapses
+   with <body>'s own margin instead of pushing this element down (there's no
+   competing core margin-top rule on this element to replace, unlike
+   left/right, so padding doesn't cause the same double-offset problem
+   vertically) - core's own off-canvas.js sidesteps the identical collapse
+   pitfall by driving its own push via inline padding, never margin.
+   Scoped to case 2 only: in case 1 .display-builder already spans this
+   wrapper, so reserving extra space for chrome that's already normal-flow/
+   an ordinary flex child inside it (not fixed/escaping) would be
+   redundant - hence :has() on the builder rather than a body class, since
+   that is where the case-1 marker class lives. */
+.dialog-off-canvas-main-canvas:has(.display-builder:not(.display-builder-page-layout)) {
+  margin-right: calc(var(--drupal-displace-offset-right, 0px) + var(--db-sidebar-end-width, 0px));
+  margin-left: calc(var(--drupal-displace-offset-left, 0px) + var(--db-sidebar-start-width, 0px)) !important;
+  padding-top: calc(var(--toolbar-height, 64px) + var(--drupal-displace-offset-top, 0px));
+}
+
+/* UI zoom (UIControlsButtons island): toolbar, sidebars, and floating
+   controls (chrome), not the main content area being edited.
+   @see assets/js/zoom.js */
+.db-toolbar,
+.db-sidebar,
+.db-island-floating-controls {
+  zoom: var(--db-ui-zoom, 1);
+}
+
+/* Floating controls (IslandType::Floating, e.g. Highlight) each attached island
+   contributes one flex child (its own build() output), laid out in a row so
+   several unrelated controls attached to the same island don't overlap.
+   Fixed rather than sticky: whether the active main pane's own container
+   actually scrolls (vs. the whole document scrolling) varies by route, so
+   sticky's containing-block detection can't be relied on here. Being
+   position: fixed (viewport-relative) rather than a descendant of
+   .display-builder__main means it can't rely on flexbox to clear the start
+   sidebar's width the way .display-builder__main itself does - its left
+   offset combines Drupal core's --drupal-displace-offset-left (external
+   chrome only - Navigation module sidebar, admin toolbar; this component no
+   longer contributes its own sidebar's width to that, with
+   --db-sidebar-start-width, a local (non-displace)
+   custom property js/sidebar.js keeps in sync with the start sidebar's own
+   current width.
+   @see \Drupal\display_builder\ProfileViewBuilder::buildFloatingControlsRegion()
+   @see components/layer/layer.css, components/dropzone/dropzone.css */
+.db-island-floating-controls {
+  position: fixed;
+  /* @see css/variables.css for why this is the lowest chrome rung. */
+  z-index: var(--db-z-floating-controls);
+  top: calc(var(--toolbar-height, 64px) + var(--drupal-displace-offset-top, 0px) + 0.25rem);
+  left: calc(1rem + var(--drupal-displace-offset-left, 0px) + var(--db-sidebar-start-width, 0px));
+  display: flex;
+  flex-direction: row;
+  width: fit-content;
+  /* Transition smooths the left offset's sidebar-driven shift instead of
+     jumping to the target immediately while .db-sidebar is still animating
+     its own width open (@see css/sidebar.css). */
+  transition: left 0.2s ease;
+  opacity: 0.8;
+  gap: 0.5rem;
+  &:hover {
+    opacity: 1;
+  }
+}
+
+/* Expanded mode covers the full viewport, including whatever external
+   chrome (Navigation module sidebar, admin toolbar) --drupal-displace-offset-left
+   normally clears - ignore it entirely rather than leaving an empty gap over
+   chrome this fullscreen overlay already sits above in z-index, but still
+   clear the start sidebar's own width. @see assets/js/expand.js */
+.display-builder.display-builder--expanded .db-island-floating-controls {
+  top: calc(var(--toolbar-height, 64px) + 0.25rem);
+  left: calc(1rem + var(--db-sidebar-start-width, 0px));
+}
+
+.display-builder.display-builder--expanded {
+  position: fixed;
+  z-index: var(--db-z-index-expanded);
+  top: 0;
+  left: 0;
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+  background-color: var(--db-background-color);
+}
+
+/* Clear the fixed toolbar and sidebars in expanded mode, embedded route
+   (case 2) only. Case 2's toolbar and sidebars are position: fixed (@see
+   toolbar.css, sidebar.css) and normally cleared by
+   .dialog-off-canvas-main-canvas's own padding/margins (@see display_builder.css
+   above) - but expanded mode makes .display-builder itself position: fixed at
+   the viewport top-left, escaping that wrapper, so the toolbar and the open
+   sidebars would cover the panes (the sidebars are fixed overlays here, so an
+   ordinary flex child does not clear their width the way case 1's in-flow
+   sidebars give it for free). Re-create the offsets on the panes' wrapper: the
+   toolbar height at the top, and the current start/end sidebar widths
+   left/right - the same sidebar.js-driven vars the normal-mode wrapper uses, so
+   a collapsing or resizing sidebar tracks here too. External displace offsets
+   are dropped on purpose: expanded mode covers that chrome (@see the sidebars'
+   own expanded rules in sidebar.css). Deliberately on the wrapper, not per pane
+   island, so Canvas/Scaffold/Preview all clear identically. Case 1
+   (page-layout) keeps its in-flow sticky toolbar and flex sidebars, so it must
+   be excluded or it would double-offset. */
+.display-builder.display-builder--expanded:not(.display-builder-page-layout) .display-builder__main {
+  margin-right: var(--db-sidebar-end-width, 0);
+  margin-left: var(--db-sidebar-start-width, 0);
+  padding-top: var(--toolbar-height, 64px);
+}
+
+body:has(.db-htmx-before-request):has(.display-builder--expanded) {
+  > * {
+    opacity: var(--db-loading-opacity);
+  }
+}
+
+body:has(.db-htmx-before-request):not(.display-builder--expanded) {
+  .display-builder > * {
+    opacity: var(--db-loading-opacity);
+  }
+}
+
+/* A panel whose content is known to be out of date.
+   @see components/display_builder/js/deferred_islands.js */
+[data-db-stale] {
+  opacity: var(--db-island-stale-opacity);
+  filter: grayscale(var(--db-island-stale-grayscale));
+}
+
+/* Only ever set on a panel that is already off screen, so this never fades in
+where anyone can see it - the panel is simply already dimmed the moment it is
+revealed. That is the point: the user never gets a frame of stale content
+presented as current. The transition exists for the other direction, fading
+back to normal when fresh content lands. */
+[data-db-deferrable] {
+  transition:
+    opacity 0.15s ease,
+    filter 0.15s ease;
+}
+
+/* While the refresh is in flight the content on screen is known stale, so it
+must not be clickable - a click would act on nodes that may no longer exist.
+Kept separate from [data-db-stale] so a failed refresh leaves the panel usable
+(still dimmed, and retried next time it is revealed) rather than inert. */
+.db-island--loading {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-db-deferrable] {
+    transition: none;
+  }
+}
+
+.display-builder {
+  /* Avoid clipping before the web components are attached, without hiding
+  the declarative shadow dom of db-isolate */
+  :not(db-isolate, :defined) {
+    visibility: hidden;
+  }
+
+  /* Lighter global focus. */
+  *:focus {
+    outline: 2px solid transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* Disable the builder until htmx is done. */
+  /* @see assets/js/display_builder.js */
+  &.db-htmx-before-request {
+    pointer-events: none;
+  }
+
+  /* When on a viewport switch context. Only the Builder and Preview
+     main-area panes simulate a viewport. @see assets/js/viewport_switcher.js */
+  &.viewport-active {
+    .display-builder__main .db-island-builder,
+    .display-builder__main .db-island-preview {
+      /* width is set inline by JS. Auto margins centre the pane when it is
+         narrower than the main wrapper (otherwise the leftover space is never
+         claimed and the pane hugs the start sidebar); when it is wider they
+         resolve to 0 and the pane overflows to scroll (main is overflow: auto).
+         flex: none keeps the explicit width from being stretched or shrunk. */
+      flex: none;
+      margin-right: auto;
+      margin-left: auto;
+      box-shadow: var(--db-shadow-color) 0 10px 25px 0;
+    }
+    /* Viewport switch menu active state */
+    .switch-viewport {
+      .viewport-menu .active::part(label) {
+        font-weight: bold;
+      }
+    }
+    .db-island-view {
+      margin-top: 1rem;
+    }
+    .display-builder__main {
+      .db-island-view .db-dropzone--root {
+        margin: 0;
+        padding: 0;
+      }
+    }
+  }
+
+  .db-island.db-island-view.db-island-builder {
+    padding: 2rem 0.5rem 0.5rem 0.5rem;
+  }
+  .db-island.db-island-view.db-island-preview {
+    padding: 1rem;
+  }
+  .db-island.db-island-view.db-island-scaffold {
+    padding: 2rem 1rem 1rem 1rem;
+  }
+  .db-island.db-island-view .db-dropzone--root {
+    margin: var(--dropzone-root-margin);
+    padding: var(--dropzone-root-padding);
+  }
+
+  .display-builder__main {
+    overflow: auto;
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+
+    .db-island-builder,
+    .db-island-preview {
+      transition:
+        width 0.3s ease,
+        max-width 0.3s ease;
+    }
+  }
+
+  /* Toast stack, newest message pinned to the bottom left corner, older ones
+  pushed up. @see \Drupal\display_builder\RenderableBuilderTrait::buildError() */
+  .db-messages {
+    position: fixed;
+    z-index: var(--db-z-message);
+    bottom: 1rem;
+    left: calc(var(--drupal-displace-offset-left, 0px) + 1rem);
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+    align-items: start;
+    max-width: min(40rem, calc(100vw - 2rem));
+    /* The stack keeps its area even when empty, so only the messages
+    themselves may take clicks - never the gaps around them. */
+    pointer-events: none;
+
+    .db-message {
+      pointer-events: auto;
+
+      &::part(base) {
+        box-shadow: var(--db-shadow-color) 0 4px 16px 0;
+      }
+    }
+  }
+
+  &.display-builder--expanded {
+    .display-builder__body {
+      overflow: hidden;
+    }
+  }
+
+  .shoelace-tabs__tab[tabindex]:focus {
+    outline: 0 none;
+    box-shadow: unset;
+  }
+
+  /* Keyboard shortcut */
+  .db-toolbar code {
+    color: var(--db-color-danger);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+  }
+
+  /* Preview Island specific */
+  .db-preview-placeholder {
+    margin: 0.2rem 0 0.2rem 0;
+    padding: 1rem;
+    color: var(--db-text-color);
+    border-radius: 0.25rem;
+    outline: 2px dotted var(--db-preview-placeholder-outline);
+    background-image: var(--db-background-image);
+    background-size: var(--db-background-size);
+    box-shadow: var(--sl-shadow-large);
+    font-style: italic;
+  }
+
+  .db-preview-placeholder-md {
+    min-height: 10rem;
+  }
+
+  .db-preview-placeholder-lg {
+    min-height: 20rem;
+  }
+
+  /* Common hover affordance for any placed node in the Builder canvas -
+     forces cursor:pointer through descendants (a component's own
+     content commonly sets its own cursor on a link, a button, plain
+     text - which would otherwise fight this single "the whole thing is
+     clickable" cue) plus a light outline, reset with !important for the
+     same reason the click state below needs it: a component's own CSS
+     can be more specific than a plain descendant selector. Click has
+     its own, stronger version of the same outline color -
+     .db-node-contextual-open below, already toggled by
+     handleSecondDrawer()/toggleOpenClassOnClick() (@see
+     components/display_builder/js/sidebar.js) when this opens the
+     second sidebar for configuration - no JS change needed, this is
+     purely its hover counterpart.
+     Scoped to the Builder canvas and Scaffold's real-rendered "layout"
+     components, not Wireframe/Tree or Scaffold's own db-layer cards (which
+     mirror the same data-node-id but have their own separate hover
+     treatment, @see components/layer/layer.css) - same exclusions as
+     the click state below: dropzones (data-slot-id) and the contextual
+     menu itself both also carry data-node-id without being a
+     selectable node. */
+  .db-island-builder [data-node-id]:not(.db-menu, [data-slot-id]),
+  .db-island-scaffold [data-node-id]:not(.db-menu, [data-slot-id], .db-layer) {
+    cursor: pointer !important;
+
+    * {
+      cursor: pointer !important;
+    }
+
+    /* :hover is true for every ancestor of whatever the pointer is
+       literally over, not just the innermost one - a nested node (e.g.
+       a component placed inside another component's slot) would
+       otherwise outline both at once, the outer one visually
+       dominating. :has() picks out only the deepest match: highlight
+       this node on hover unless it contains another (non-dropzone,
+       non-menu) node that's *also* currently hovered - the same
+       pattern already used for the live drop target, @see
+       components/dropzone/dropzone.css's
+       `.db-dropzone:has(> .db-dropzone--ghost)`.
+       :not(.db-node-contextual-open) steps aside for the click state
+       below: this selector's own specificity (the :has() argument
+       alone repeats several classes/attributes) outweighs
+       .db-node-contextual-open's simpler one, so without this a still-
+       hovered-after-clicking node would shrink from the click state's
+       thicker outline back down to this one's thinner hover outline. */
+    &:hover:not(.db-node-contextual-open, :has([data-node-id]:not(.db-menu, [data-slot-id]):hover)) {
+      position: relative;
+      outline: 1px solid var(--db-highlight-outline) !important;
+      outline-offset: 1px !important;
+
+      /* Same hover cue, but as a small label rather than just an
+         outline - reads the node's own title (@see
+         BuilderPanel::buildNodeAttributes(), always present on a placed
+         node's root). Position/sizing follow the same convention as the
+         component/block labels in dropzone.css (top-right, capped
+         width, single-line ellipsis) so hovering a node while a
+         highlight checkbox is also active doesn't look like two
+         unrelated label styles. */
+      &::before {
+        position: absolute;
+        z-index: var(--db-z-label-node);
+        top: 0;
+        right: 0;
+        overflow: hidden;
+        max-width: var(--dropzone-label-max-width);
+        padding: 0.1rem 0.4rem;
+        content: attr(data-node-title);
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        pointer-events: none;
+        color: var(--dropzone-color-text);
+        background-color: var(--db-highlight-outline);
+        font-size: var(--sl-font-size-x-small);
+        font-weight: normal;
+        line-height: 1.4;
+      }
+    }
+  }
+
+  .db-node-contextual-open:not(.db-dropzone--chosen, .db-menu, [data-slot-id]) {
+    position: relative;
+    z-index: 1;
+    border-radius: 0.2px !important;
+    outline: 2px solid var(--db-highlight-outline) !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Table styling uses variables, so it switches automatically */
+  .db-island-logs table {
+    width: 100%;
+    border: 1px solid var(--db-table-border);
+    border-collapse: collapse;
+    background: var(--db-table-bg);
+  }
+
+  .db-island-logs th,
+  .db-island-logs td {
+    padding: 0.5rem;
+    border: 1px solid var(--db-table-border);
+  }
+
+  .db-island-logs th {
+    color: var(--db-table-header-color);
+    background: var(--db-table-header-bg);
+    font-weight: bold;
+  }
+
+  .db-island-logs tr {
+    background: var(--db-table-bg);
+  }
+
+  .db-island-logs tr:hover {
+    background: var(--db-table-row-hover);
+  }
+}

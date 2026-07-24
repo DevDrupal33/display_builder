@@ -7,6 +7,7 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Htmx\Htmx;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
@@ -168,9 +169,9 @@ class Collaboration extends IslandPluginBase implements IslandConfigurationFormI
    */
   public function alterRenderable(InstanceInterface $instance, array $build): array {
     $build['#attributes'] = [
-      'hx-ext' => 'sse',
       'sse-connect' => Url::fromRoute('display_builder.api_sse', ['display_builder_instance' => (string) $instance->id()])->toString(),
     ];
+    (new Htmx())->ext('sse')->applyTo($build);
     // We don't attach it from the ::build() because the island doesn't
     // always render something in the toolbar.
     $build['#attached']['library'][] = 'display_builder/htmx_sse';

@@ -41,7 +41,7 @@ final class DisplayBuilderSubscriberTest extends EntityKernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->installConfig(['display_builder']);
+    $this->installConfig(['display_builder', 'display_builder_test']);
     $this->installEntitySchema('display_builder_instance');
     $this->installEntitySchema('display_builder_profile');
   }
@@ -68,14 +68,13 @@ final class DisplayBuilderSubscriberTest extends EntityKernelTestBase {
    */
   public function testOnRevertNonOverrideInstanceIsNoop(): void {
     $instance = Instance::create([
-      'id' => 'standalone__test',
+      'id' => 'test__standalone',
       'label' => 'Test instance',
-      'profileId' => 'test',
       'buildable' => [
         'plugin_id' => 'test',
         'configuration' => [
-          'instance_id' => 'standalone__test',
-          'profile_id' => 'test',
+          'instance_id' => 'test__standalone',
+          'profile_id' => 'test_min',
         ],
       ],
     ]);

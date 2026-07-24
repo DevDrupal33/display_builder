@@ -1,0 +1,38 @@
+/* Dropzone and Drag related style */
+.db-island-library {
+  .db-draggable--chosen {
+    padding-left: calc(var(--sl-spacing-x-small) - 3px);
+    opacity: 0.5 !important;
+    border-inline-start: 3px solid var(--placeholder-color-hover-border);
+    background-color: var(--placeholder-color-hover-bg);
+  }
+
+  .db-draggable--drag {
+    opacity: 0 !important;
+  }
+}
+
+.db-island-builder {
+  .db-dropzone--drag {
+    opacity: 0 !important;
+  }
+
+  .db-draggable--chosen {
+    width: 100% !important;
+    height: 0.3rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--dropzone-color-target) !important;
+    border: 0 none !important;
+    outline: 0 none !important;
+    background-color: var(--dropzone-color-target) !important;
+
+    &::before {
+      opacity: 0;
+    }
+  }
+}
+
+.display-builder--on-drag .db-island-builder {
+  overflow: hidden !important;
+}

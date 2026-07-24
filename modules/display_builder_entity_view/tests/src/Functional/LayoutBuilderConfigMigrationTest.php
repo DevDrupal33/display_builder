@@ -28,7 +28,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 #[RunTestsInSeparateProcesses]
 final class LayoutBuilderConfigMigrationTest extends BrowserTestBase {
 
-  public const PROFILE_ID = 'default';
+  public const PROFILE_ID = 'test_min';
 
   /**
    * {@inheritdoc}
@@ -43,27 +43,20 @@ final class LayoutBuilderConfigMigrationTest extends BrowserTestBase {
     'display_builder',
     'display_builder_test',
     'display_builder_entity_view',
-    'display_builder_entity_view_test',
+    'display_builder_entity_view_layout_builder_test',
   ];
 
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected $defaultTheme = 'display_builder_theme_test';
 
   /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
-
-    // Create and log in user.
-    $admin_user = $this->drupalCreateUser([
-      'administer node display',
-      'access administration pages',
-      'create display_builder_test content',
-      'use display builder ' . self::PROFILE_ID,
-    ]);
+    $admin_user = $this->createUser([], 'test_db_layout', TRUE);
     $this->drupalLogin($admin_user);
   }
 
@@ -73,10 +66,10 @@ final class LayoutBuilderConfigMigrationTest extends BrowserTestBase {
   public function testLayoutBuilderConfigImport(): void {
     // Enable Display Builder.
     $edit = ['profile' => self::PROFILE_ID];
-    $this->drupalGet('admin/structure/types/manage/display_builder_test/display/display_builder_test');
+    $this->drupalGet('admin/structure/types/manage/display_builder_layout_test/display/default');
     $this->submitForm($edit, 'Save');
 
-    $this->drupalGet('admin/structure/types/manage/display_builder_test/display/display_builder_test/display-builder');
+    $this->drupalGet('admin/structure/types/manage/display_builder_layout_test/display/default/display-builder');
 
     // Test Display Builder migrated from the Layout Builder configuration.
     $this->assertSession()->elementTextContains('css', '.db-island-preview', 'Layout builder config: Default');

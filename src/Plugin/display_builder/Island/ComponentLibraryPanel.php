@@ -28,6 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Components'),
   description: new TranslatableMarkup('List of available components.'),
   type: IslandType::Library,
+  icon: 'puzzle',
 )]
 class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurationFormInterface {
 
@@ -91,11 +92,10 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     return [
       'exclude' => [],
       'exclude_id' => '',
-      'component_status' => [
-        'experimental',
-      ],
+      'component_status' => [],
       'include_no_ui' => FALSE,
       'show' => 'grouped',
+      'preview' => TRUE,
     ];
   }
 
@@ -106,22 +106,60 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     $configuration = $this->getConfiguration();
     $components = $this->sdcManager->getDefinitions();
 
-    $form['exclude'] = [
+    // Compatibility layer with previous config.
+    // @todo Remove and replace by config update on next release.
+    if (!isset($configuration['show'])) {
+      $configuration['show'] = $configuration['show_mosaic'] ? 'mosaic' : 'grouped';
+      $configuration['show'] = $configuration['show_variants'] ? 'variants' : $configuration['show'];
+      $configuration['show'] = $configuration['show_grouped'] ? 'grouped' : $configuration['show'];
+    }
+
+    $form['display'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Display'),
+    ];
+
+    $form['display']['show'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Display components as'),
+      '#default_value' => $configuration['show'],
+      '#options' => [
+        'grouped' => $this->t('grouped'),
+        'variants' => $this->t('with variants'),
+        'flat' => $this->t('flat list'),
+        'mosaic' => $this->t('thumbnails mosaic'),
+      ],
+    ];
+
+    $form['display']['preview'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable preview on hover'),
+      '#description' => $this->t('Enable or disable the preview of components when hovering over them.'),
+      '#default_value' => $configuration['preview'],
+    ];
+
+    $form['configuration'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Configuration'),
+    ];
+
+    $form['configuration']['exclude'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Exclude providers'),
+      '#description' => $this->t('Exclude components from specific providers (modules or themes).'),
       '#options' => $this->getProvidersOptions($components, $this->t('component'), $this->t('components')),
       '#default_value' => $configuration['exclude'],
     ];
 
-    $form['exclude_id'] = [
+    $form['configuration']['exclude_id'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Exclude by id'),
-      '#description' => $this->t('Provide a space separated list of components id to exclude, must be prefixed by provider. Example: "ui_suite_bootstrap:card_body<br>ui_suite_bootstrap:table_cell".'),
+      '#description' => $this->t('Provide a list of components id to exclude, one by line, must be prefixed by provider. Example: ui_suite_bootstrap:card_body<br>ui_suite_bootstrap:table_cell.'),
       '#default_value' => $configuration['exclude_id'],
     ];
 
-    // @see https://git.drupalcode.org/project/drupal/-/blob/11.x/core/assets/schemas/v1/metadata.schema.json#L217
-    $form['component_status'] = [
+    // @see https://git.drupalcode.org/project/drupal/-/blob/11.x/core/assets/schemas/v1/metadata.schema.json#L239
+    $form['configuration']['component_status'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Allowed status'),
       '#options' => [
@@ -133,31 +171,12 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
       '#default_value' => $configuration['component_status'],
     ];
 
-    // Compatibility layer with previous config.
-    // @todo Remove before 1.0.0-rc1.
-    if (!isset($configuration['show'])) {
-      $configuration['show'] = $configuration['show_mosaic'] ? 'mosaic' : 'grouped';
-      $configuration['show'] = $configuration['show_variants'] ? 'variants' : $configuration['show'];
-      $configuration['show'] = $configuration['show_grouped'] ? 'grouped' : $configuration['show'];
-    }
-
-    $form['show'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Components list'),
-      '#default_value' => $configuration['show'],
-      '#options' => [
-        'grouped' => $this->t('By group'),
-        'variants' => $this->t('With variants'),
-        'mosaic' => $this->t('Thumbnails mosaic'),
-      ],
-    ];
-
-    // Drupal 11.3+ new exclude feature.
-    // @see https://git.drupalcode.org/project/drupal/-/blob/11.x/core/assets/schemas/v1/metadata.schema.json#L228
-    $form['include_no_ui'] = [
+    // @see https://git.drupalcode.org/project/drupal/-/blob/11.x/core/assets/schemas/v1/metadata.schema.json#L250
+    // @todo remove 11.3 reference when end of support is reached.
+    $form['configuration']['include_no_ui'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Include marked as excluded from the UI'),
-      '#description' => $this->t('Components with no ui flag are meant for internal use only. Force to include them. Drupal 11.3+ only.'),
+      '#title' => $this->t('Include non UI'),
+      '#description' => $this->t('Components with `no ui` flag are meant for internal use only. Force to include them. Drupal 11.3+ only.'),
       '#default_value' => $configuration['include_no_ui'],
     ];
 
@@ -172,19 +191,31 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
 
     $summary = [];
 
+    $summary[] = $this->t('Components displayed as: <em>@list</em>', [
+      '@list' => match ($configuration['show']) {
+        'variants' => $this->t('variants'),
+        'mosaic' => $this->t('mosaic'),
+        'flat' => $this->t('flat'),
+        default => $this->t('grouped'),
+      },
+    ]);
+
+    if ($configuration['preview']) {
+      $summary[] = $this->t('Preview on hover enabled');
+    }
+
     $summary[] = $this->t('Excluded providers: @exclude', [
       '@exclude' => ($exclude = \array_filter($configuration['exclude'] ?? [])) ? \implode(', ', $exclude) : $this->t('None'),
     ]);
 
     if (\strlen($configuration['exclude_id'] ?? '') > 5) {
-      $value = \preg_split('/\s+/', \trim($configuration['exclude_id'] ?? ''));
+      $value = \preg_split('/\r\n|\r|\n|\s+/', \trim($configuration['exclude_id'] ?? ''));
 
       if ($value === FALSE) {
         $summary[] = $this->t('Component(s) excluded');
       }
       else {
-        $num = \count($value);
-        $summary[] = $this->formatPlural($num, '@count component excluded', '@count components excluded');
+        $summary[] = $this->formatPlural(\count($value), '@count component excluded', '@count components excluded by id');
       }
     }
 
@@ -192,15 +223,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
       '@status' => \implode(', ', \array_filter(\array_unique(\array_merge(['stable', 'undefined'], $configuration['component_status'] ?? []))) ?: [$this->t('stable, undefined')]),
     ]);
 
-    $summary[] = $configuration['include_no_ui'] ? $this->t('Include `no UI` components') : $this->t('Exclude `no UI` components');
-
-    $summary[] = $this->t('Components list as: @list', [
-      '@list' => match ($configuration['show']) {
-        'variants' => $this->t('variants'),
-        'mosaic' => $this->t('mosaic'),
-        default => $this->t('grouped'),
-      },
-    ]);
+    $summary[] = $configuration['include_no_ui'] ? $this->t('Include `No UI` components') : '';
 
     return $summary;
   }
@@ -223,9 +246,10 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     $this->sourcesData = $definitions['sources'] ?? [];
 
     $content = match ($configuration['show']) {
-      'mosaic' => $this->getComponentsMosaic($builder_id),
-      'variants' => $this->getComponentsVariants($builder_id),
-      default => $this->getComponentsGrouped($builder_id),
+      'mosaic' => $this->getComponentsMosaic($builder_id, (bool) $configuration['preview']),
+      'variants' => $this->getComponentsVariants($builder_id, (bool) $configuration['preview']),
+      'flat' => $this->getComponentsFlat($builder_id, (bool) $configuration['preview']),
+      default => $this->getComponentsGrouped($builder_id, (bool) $configuration['preview']),
     };
 
     return [
@@ -271,11 +295,13 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
    *
    * @param string $builder_id
    *   Builder ID.
+   * @param bool $preview
+   *   Whether to show preview on hover.
    *
    * @return array
    *   A renderable array containing the grouped components.
    */
-  private function getComponentsGrouped(string $builder_id): array {
+  private function getComponentsGrouped(string $builder_id, bool $preview): array {
     $build = [];
 
     foreach ($this->definitionsGrouped as $group_name => $group) {
@@ -284,13 +310,12 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
         '#tag' => 'h4',
         '#value' => $group_name,
         '#attributes' => [
-          'class' => ['db-filter-hide-on-search'],
+          'class' => ['db-placeholder__group', 'db-filter-hide-on-search'],
         ],
       ];
 
       foreach ($group as $component_id => $definition) {
         $component_id = (string) $component_id;
-        $component_preview_url = Url::fromRoute('display_builder.api_component_preview', ['component_id' => $component_id]);
 
         $data = [
           'source_id' => 'component',
@@ -298,7 +323,50 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
         ];
         // Used for search filter.
         $keywords = \sprintf('%s %s', $definition['label'], $definition['provider']);
-        $build[] = $this->buildPlaceholderButtonWithPreview($builder_id, $definition['annotated_name'], $data, $component_preview_url, $keywords);
+
+        if ($preview) {
+          $component_preview_url = Url::fromRoute('display_builder.api_component_preview', ['component_id' => $component_id]);
+          $build[] = $this->buildPlaceholderListWithPreview($builder_id, $definition['label'], $data, $component_preview_url, $keywords);
+        }
+        else {
+          $build[] = $this->buildPlaceholderList($definition['label'], $data, $keywords);
+        }
+      }
+    }
+
+    return $this->buildDraggables($builder_id, $build);
+  }
+
+  /**
+   * Gets the flat components view.
+   *
+   * @param string $builder_id
+   *   Builder ID.
+   * @param bool $preview
+   *   Whether to show preview on hover.
+   *
+   * @return array
+   *   A renderable array containing the grouped components.
+   */
+  private function getComponentsFlat(string $builder_id, bool $preview): array {
+    $build = [];
+
+    foreach ($this->definitionsFiltered as $component_id => $definition) {
+      $component_id = (string) $component_id;
+
+      $data = [
+        'source_id' => 'component',
+        'source' => $this->sourcesData[$component_id],
+      ];
+      // Used for search filter.
+      $keywords = \sprintf('%s %s', $definition['label'], $definition['provider']);
+
+      if ($preview) {
+        $component_preview_url = Url::fromRoute('display_builder.api_component_preview', ['component_id' => $component_id]);
+        $build[] = $this->buildPlaceholderListWithPreview($builder_id, $definition['label'], $data, $component_preview_url, $keywords);
+      }
+      else {
+        $build[] = $this->buildPlaceholderList($definition['label'], $data, $keywords);
       }
     }
 
@@ -310,19 +378,22 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
    *
    * @param string $builder_id
    *   Builder ID.
+   * @param bool $preview
+   *   Whether to show preview on hover.
    *
    * @return array
    *   A renderable array containing the variants placeholders.
    */
-  private function getComponentsVariants(string $builder_id): array {
+  private function getComponentsVariants(string $builder_id, bool $preview): array {
     $build = [];
 
     foreach ($this->definitionsFiltered as $component_id => $definition) {
       $build[] = [
         '#type' => 'html_tag',
         '#tag' => 'h4',
-        '#value' => $definition['annotated_name'],
+        '#value' => $definition['label'],
         '#attributes' => [
+          'class' => ['db-placeholder__group'],
           'data-search-section' => $definition['machineName'],
         ],
       ];
@@ -333,16 +404,18 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
       ];
 
       if (!isset($definition['variants'])) {
-        $component_preview_url = Url::fromRoute('display_builder.api_component_preview', ['component_id' => $component_id]);
         // Used for search filter.
         $keywords = \sprintf('%s %s', $definition['label'], $definition['provider']);
-        $build_variant = $this->buildPlaceholderButtonWithPreview($builder_id, $this->t('Default'), $data, $component_preview_url, $keywords);
+
+        if ($preview) {
+          $component_preview_url = Url::fromRoute('display_builder.api_component_preview', ['component_id' => $component_id]);
+          $build_variant = $this->buildPlaceholderListWithPreview($builder_id, $this->t('Default'), $data, $component_preview_url, $keywords);
+        }
+        else {
+          $build_variant = $this->buildPlaceholderList($this->t('Default'), $data, $keywords);
+        }
+
         $build_variant['#attributes']['data-filter-child'] = $definition['machineName'];
-        // Label is used by default to set drawer title when dragging. It is set
-        // on RenderableBuilderTrait::buildPlaceholderButton(), so here we need
-        // to override it to have the proper label and not the variant name.
-        // @see assets/js/db_drawer.js
-        // @see src/RenderableBuilderTrait::buildPlaceholderButton()
         $build_variant['#attributes']['data-node-title'] = $definition['label'];
 
         $build[] = $build_variant;
@@ -352,7 +425,6 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
 
       foreach ($definition['variants'] ?? [] as $variant_id => $variant) {
         $params = ['component_id' => $component_id, 'variant_id' => $variant_id];
-        $component_preview_url = Url::fromRoute('display_builder.api_component_preview', $params);
         $data['source']['component']['variant_id'] = [
           'source_id' => 'select',
           'source' => [
@@ -361,13 +433,16 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
         ];
         // Used for search filter.
         $keywords = \sprintf('%s %s %s', $definition['label'], $variant['title'], $definition['provider']);
-        $build_variant = $this->buildPlaceholderButtonWithPreview($builder_id, $variant['title'], $data, $component_preview_url, $keywords);
+
+        if ($preview) {
+          $component_preview_url = Url::fromRoute('display_builder.api_component_preview', $params);
+          $build_variant = $this->buildPlaceholderListWithPreview($builder_id, $variant['title'], $data, $component_preview_url, $keywords);
+        }
+        else {
+          $build_variant = $this->buildPlaceholderList($variant['title'], $data, $keywords);
+        }
+
         $build_variant['#attributes']['data-filter-child'] = $definition['machineName'];
-        // Label is used by default to set drawer title when dragging. It is set
-        // on RenderableBuilderTrait::buildPlaceholderButton(), so here we need
-        // to override it to have the proper label and not the variant name.
-        // @see assets/js/db_drawer.js
-        // @see src/RenderableBuilderTrait::buildPlaceholderButton()
         $build_variant['#attributes']['data-node-title'] = $definition['label'];
 
         $build[] = $build_variant;
@@ -382,17 +457,18 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
    *
    * @param string $builder_id
    *   Builder ID.
+   * @param bool $preview
+   *   Whether to show preview on hover.
    *
    * @return array
    *   A renderable array containing the mosaic view of components.
    */
-  private function getComponentsMosaic(string $builder_id): array {
+  private function getComponentsMosaic(string $builder_id, bool $preview): array {
     $components = [];
 
     foreach (\array_keys($this->definitionsFiltered) as $component_id) {
       $component_id = (string) $component_id;
       $component = $this->sdcManager->find($component_id);
-      $component_preview_url = Url::fromRoute('display_builder.api_component_preview', ['component_id' => $component_id]);
 
       $vals = [
         'source_id' => 'component',
@@ -402,12 +478,15 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
 
       // Used for search filter.
       $keywords = \sprintf('%s %s', $component->metadata->name, \str_replace(':', ' ', $component_id));
-      $build = $this->buildPlaceholderCardWithPreview($component->metadata->name, $vals, $component_preview_url, $keywords, $thumbnail);
-      // Label is used by default to set drawer title when dragging. It is set
-      // on RenderableBuilderTrait::buildPlaceholderButton(), so here we need
-      // to override it to have the proper label and not the variant name.
-      // @see assets/js/db_drawer.js
-      // @see src/RenderableBuilderTrait::buildPlaceholderButton()
+
+      if ($preview) {
+        $component_preview_url = Url::fromRoute('display_builder.api_component_preview', ['component_id' => $component_id]);
+        $build = $this->buildPlaceholderCardWithPreview($builder_id, $component->metadata->name, $vals, $component_preview_url, $keywords, $thumbnail);
+      }
+      else {
+        $build = $this->buildPlaceholderCard($component->metadata->name, $vals, $keywords, $thumbnail);
+      }
+
       $build['#attributes']['data-node-title'] = $component->metadata->name;
       $components[] = $build;
     }

@@ -1,0 +1,22 @@
+{#
+  The label is the state, the pulse is the event: the text says where the
+  display stands right now, the one-shot animation says an action just put
+  it there. A transient label (Restored, Reverted) decays to the plain
+  state label on the next re-render, which is correct - it was only ever
+  describing how the display got here.
+
+  role="status" rather than an sl-tooltip or a toast: the island's content
+  is replaced by an innerHTML out-of-band swap on every action, so a toast
+  would fire on every drag and bury the error stack it shares the screen
+  with. Note the live region is itself replaced by each swap, so assistive
+  technology announcement depends on the AT treating an inserted populated
+  region as a change - reliable in practice, but not guaranteed by spec.
+#}
+{% set attributes = attributes.addClass('db-save-status') %}
+{% set attributes = attributes.addClass('db-save-status--' ~ variant|default('saved')) %}
+{% if pulse %}
+  {% set attributes = attributes.addClass('db-save-status--pulse') %}
+{% endif %}
+<span{{ attributes.setAttribute('role', 'status') }}>
+  <span class="db-save-status__dot" aria-hidden="true" title="{{ label }}"></span>
+</span>
