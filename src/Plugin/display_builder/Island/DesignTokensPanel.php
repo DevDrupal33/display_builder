@@ -50,7 +50,7 @@ class DesignTokensPanel extends IslandPluginBase implements IslandWithFormInterf
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->cssVariablePluginManager = $container->get('plugin.manager.ui_skins.css_variable');
+    $instance->cssVariablePluginManager = $container->get(CssVariablePluginManagerInterface::class);
     $instance->moduleHandler = $container->get('module_handler');
 
     return $instance;

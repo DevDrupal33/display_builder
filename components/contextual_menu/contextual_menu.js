@@ -61,6 +61,19 @@ class ContextualMenu {
       this.handleContextMenu(event);
     });
     this.setupGlobalClickHandler();
+
+    const closeButton = this.menu.querySelector('.db-menu__close');
+    if (closeButton) {
+      closeButton.addEventListener('click', () => {
+        this.menu.style.display = 'none';
+      });
+    }
+
+    this.menu.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        this.menu.style.display = 'none';
+      }
+    });
   }
 
   /**

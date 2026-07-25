@@ -1,5 +1,12 @@
 <sl-menu{{ attributes }}>
-  <sl-menu-label class="db-menu__label">{% if label %}{{ label }}{% endif %}</sl-menu-label>
+  <div class="db-menu__header">
+    <sl-menu-label class="db-menu__label">{% if label %}{{ label }}{% endif %}</sl-menu-label>
+    {{ include('display_builder:icon_button', {
+      icon: 'x-lg',
+      label: 'Close'|t,
+      attributes: {class: 'db-menu__close'},
+    }, with_context: false) }}
+  </div>
   {% for item in items %}
     {{ item }}
   {% endfor %}

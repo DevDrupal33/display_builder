@@ -5,10 +5,19 @@
   border: 1px dashed var(--menu-color-border) !important;
   box-shadow: var(--sl-shadow-x-large);
 
+  .db-menu__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
   .db-menu__label::part(base) {
     padding-left: 0.5rem;
     color: var(--db-text-color);
     font-style: italic;
+  }
+  .db-menu__close::part(base) {
+    color: var(--db-text-color);
+    font-size: 1rem;
   }
   .menu__item::part(checked-icon) {
     width: 0.5rem;
