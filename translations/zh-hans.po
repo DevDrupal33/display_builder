@@ -1,0 +1,1916 @@
+# Simplified Chinese translation of Display Builder (1.0.0-beta4)
+# Copyright (c) 2026 by the Chinese translation team
+# Generated from files:
+#  display_builder/src/BlockLibrarySourceHelper.php: n/a
+#  display_builder/display_builder.info.yml: n/a
+#  display_builder/modules/display_builder_entity_view/display_builder_entity_view.info.yml: n/a
+#  display_builder/modules/display_builder_page_layout/display_builder_page_layout.info.yml: n/a
+#  display_builder/modules/display_builder_ui/display_builder_ui.info.yml: n/a
+#  display_builder/modules/display_builder_views/display_builder_views.info.yml: n/a
+#  display_builder/modules/display_builder_page_layout/src/Form/PageLayoutForm.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/PageLayoutListBuilder.php: n/a
+#  display_builder/modules/display_builder_ui/src/ProfileListBuilder.php: n/a
+#  display_builder/modules/display_builder_views/src/Controller/ViewsManagementController.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/MenuDelete.php: n/a
+#  display_builder/src/Controller/ApiController.php: n/a
+#  display_builder/config/schema/display_builder.schema.yml: n/a
+#  display_builder/modules/display_builder_ui/src/PatternPresetListBuilder.php: n/a
+#  display_builder/src/Form/PatternPresetForm.php: n/a
+#  display_builder/src/Form/ProfileForm.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php: n/a
+#  display_builder/modules/display_builder_ui/src/Form/InstanceListFilterForm.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/BlockLibraryPanel.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/ComponentLibraryPanel.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/ViewportSwitcher.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/LogsPanel.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/Collaboration.php: n/a
+#  display_builder/modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml: n/a
+#  display_builder/assets/js/db_drawer.js: n/a
+#  display_builder/components/display_builder/display_builder.twig: n/a
+#  display_builder/src/Plugin/display_builder/Island/BackButton.php: n/a
+#  display_builder/src/IslandPluginToolbarButtonConfigurationBase.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/PreviewPanel.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/ControlsButtons.php: n/a
+#  display_builder/config/optional/display_builder.profile.default.yml: n/a
+#  display_builder/modules/display_builder_entity_view/src/Entity/EntityViewDisplay.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/display_builder/Buildable/ViewDisplay.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/HistoryButtons.php: n/a
+#  display_builder/modules/display_builder_entity_view/src/Plugin/Derivative/EntityOverrideViewLocalTask.php: n/a
+#  display_builder/modules/display_builder_ui/src/InstanceListBuilder.php: n/a
+#  display_builder/src/Plugin/UiPatterns/Source/LayoutSource.php: n/a
+#  display_builder/src/Plugin/UiPatterns/Source/ComponentSource.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/Entity/PageLayout.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/Plugin/display_builder/Buildable/PageLayout.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/VisibilityConditionsPanel.php: n/a
+#  display_builder/components/theme_menu/theme_menu.twig: n/a
+#  display_builder/src/Plugin/display_builder/Island/StateButtons.php: n/a
+#  display_builder/src/IslandType.php: n/a
+#  display_builder/assets/js/contextual_menu.js: n/a
+#  display_builder/modules/display_builder_views/src/Hook/DisplayBuilderViewsHook.php: n/a
+#  display_builder/src/DisplayBuildablePluginBase.php: n/a
+#  display_builder/components/shoelace/drawer/drawer.twig: n/a
+#  display_builder/modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ExtraFieldSource.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/Menu.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/TreePanel.php: n/a
+#  display_builder/modules/display_builder_ui/display_builder_ui.links.task.yml: n/a
+#  display_builder/src/Plugin/display_builder/Island/MenuPreset.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/PresetLibraryPanel.php: n/a
+#  display_builder/modules/display_builder_ui/display_builder_ui.links.action.yml: n/a
+#  display_builder/modules/display_builder_ui/display_builder_ui.links.menu.yml: n/a
+#  display_builder/src/Plugin/display_builder/Island/BuilderPanel.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/LayersPanel.php: n/a
+#  display_builder/src/ProfileViewBuilder.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/StylesPanel.php: n/a
+#  display_builder/assets/js/form_description.js: n/a
+#  display_builder/modules/display_builder_entity_view/src/Hook/DisplayBuilderEntityViewHook.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/Hook/PageLayoutHook.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/LibrariesPanel.php: n/a
+#  display_builder/modules/display_builder_views/display_builder_views.routing.yml: n/a
+#  display_builder/modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityView.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/Controller/PageLayoutController.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/ContextualFormPanel.php: n/a
+#  display_builder/modules/display_builder_views/src/Form/ConfirmViewsBuilderDeleteForm.php: n/a
+#  display_builder/modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ContentEntitySource.php: n/a
+#  display_builder/modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php: n/a
+#  display_builder/modules/display_builder_ui/display_builder_ui.routing.yml: n/a
+#  display_builder/modules/display_builder_views/display_builder_views.links.menu.yml: n/a
+#  display_builder/modules/display_builder_entity_view/src/Controller/EntityViewController.php: n/a
+#  display_builder/modules/display_builder_views/display_builder_views.links.task.yml: n/a
+#  display_builder/src/Entity/PatternPreset.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/ViewsUiPatternsSourceBase.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/MainPageContentSource.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageTitleSource.php: n/a
+#  display_builder/src/Form/ProfileIslandPluginForm.php: n/a
+#  display_builder/modules/display_builder_entity_view/config/schema/display_builder_entity_view.schema.yml: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewAttachmentAfterSource.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewAttachmentBeforeSource.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewExposedSource.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewFeedIconsSource.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewHeaderSource.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewMoreSource.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewPagerSource.php: n/a
+#  display_builder/modules/display_builder_page_layout/display_builder_page_layout.links.action.yml: n/a
+#  display_builder/modules/display_builder_page_layout/display_builder_page_layout.links.menu.yml: n/a
+#  display_builder/modules/display_builder_page_layout/display_builder_page_layout.routing.yml: n/a
+#  display_builder/modules/display_builder_views/src/Controller/ViewsController.php: n/a
+#  display_builder/src/ProfilePermissions.php: n/a
+#  display_builder/modules/display_builder_views/config/schema/display_builder_views.schema.yml: n/a
+#  display_builder/modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityViewOverride.php: n/a
+#  display_builder/modules/display_builder_page_layout/src/Plugin/DisplayVariant/DisplayBuilderPageVariant.php: n/a
+#  display_builder/modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewFooterSource.php: n/a
+#  display_builder/src/Entity/Profile.php: n/a
+#  display_builder/modules/display_builder_ui/display_builder_ui.permissions.yml: n/a
+#  display_builder/src/Entity/Instance.php: n/a
+#  display_builder/src/Plugin/display_builder/Island/DesignTokensPanel.php: n/a
+#  display_builder/components/library_panel/library_panel.twig: n/a
+#  display_builder/modules/display_builder_entity_view/src/Controller/EntityViewOverridesController.php: n/a
+#  display_builder/modules/display_builder_page_layout/display_builder_page_layout.permissions.yml: n/a
+#  display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageLayoutSource.php: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Display Builder (1.0.0-beta4)\n"
+"POT-Creation-Date: 2026-06-24 14:25+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Chinese (Simplified)\n"
+"Language: zh-hans\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: src/BlockLibrarySourceHelper.php:79
+msgid "Forms"
+msgstr "表单"
+
+#: display_builder.info.yml:0; modules/display_builder_entity_view/display_builder_entity_view.info.yml:0; modules/display_builder_page_layout/display_builder_page_layout.info.yml:0; modules/display_builder_ui/display_builder_ui.info.yml:0; modules/display_builder_views/display_builder_views.info.yml:0
+msgid "User interface"
+msgstr "用户界面"
+
+#: modules/display_builder_page_layout/src/Form/PageLayoutForm.php:196
+msgid "Pages"
+msgstr "页面"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:66; modules/display_builder_ui/src/ProfileListBuilder.php:62
+# Suggestion on the localization server:
+# Statut
+msgid "Status"
+msgstr "状态"
+
+#: modules/display_builder_views/src/Controller/ViewsManagementController.php:123; src/Plugin/display_builder/Island/MenuDelete.php:19
+msgid "Delete"
+msgstr "删除"
+
+#: src/Controller/ApiController.php:697
+msgid "Submit"
+msgstr "提交"
+
+#: modules/display_builder_views/src/Controller/ViewsManagementController.php:39
+msgid "Operations"
+msgstr "操作"
+
+#: config/schema/display_builder.schema.yml:0; modules/display_builder_ui/src/PatternPresetListBuilder.php:68; src/Form/PatternPresetForm.php:54
+msgid "Group"
+msgstr "分组"
+
+#: src/Form/ProfileForm.php:221
+msgid "Actions"
+msgstr "操作"
+
+#: src/Plugin/display_builder/Island/MenuDelete.php:33
+msgid "Remove"
+msgstr "移除"
+
+#: config/schema/display_builder.schema.yml:0; modules/display_builder_ui/src/PatternPresetListBuilder.php:69; modules/display_builder_ui/src/ProfileListBuilder.php:60; src/Form/PatternPresetForm.php:47; src/Form/ProfileForm.php:61
+msgid "Description"
+msgstr "描述"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:84; modules/display_builder_ui/src/ProfileListBuilder.php:83; modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php:125
+msgid "Disabled"
+msgstr "已禁用"
+
+#: config/schema/display_builder.schema.yml:0; modules/display_builder_page_layout/src/PageLayoutListBuilder.php:84; modules/display_builder_page_layout/src/Form/PageLayoutForm.php:74; modules/display_builder_ui/src/ProfileListBuilder.php:83; src/Form/PatternPresetForm.php:68; src/Form/ProfileForm.php:140,217,280
+msgid "Enabled"
+msgstr "已启用"
+
+#: modules/display_builder_ui/src/Form/InstanceListFilterForm.php:72
+msgid "Reset"
+msgstr "重置"
+
+#: src/Plugin/display_builder/Island/BlockLibraryPanel.php:110; src/Plugin/display_builder/Island/ComponentLibraryPanel.php:212; src/Plugin/display_builder/Island/ViewportSwitcher.php:111
+# Suggestion on the localization server:
+# Aucun
+msgid "None"
+msgstr "无"
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:22
+msgid "Logs"
+msgstr "日志"
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:81
+msgid "Message"
+msgstr "消息"
+
+#: src/Plugin/display_builder/Island/Collaboration.php:83,103
+msgid "- None -"
+msgstr "- 无 -"
+
+#: config/schema/display_builder.schema.yml:0; modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0; src/Form/ProfileForm.php:222,342
+msgid "Weight"
+msgstr "权重"
+
+#: assets/js/db_drawer.js:0; components/display_builder/display_builder.twig:36
+msgid "Settings"
+msgstr "设置"
+
+#: src/Plugin/display_builder/Island/BackButton.php:38,54,20
+msgid "Back"
+msgstr "返回"
+
+#: config/schema/display_builder.schema.yml:0; modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0; modules/display_builder_page_layout/src/Form/PageLayoutForm.php:52; modules/display_builder_ui/src/PatternPresetListBuilder.php:67; modules/display_builder_ui/src/ProfileListBuilder.php:59; src/IslandPluginToolbarButtonConfigurationBase.php:42; src/Form/PatternPresetForm.php:30; src/Form/ProfileForm.php:44
+# Suggestion on the localization server:
+# Étiquette
+msgid "Label"
+msgstr "标签"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:22
+msgid "Preview"
+msgstr "预览"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:87,170
+msgid "Help"
+msgstr "帮助"
+
+#: src/Controller/ApiController.php:405
+msgid "New preset"
+msgstr "新建预设"
+
+#: config/optional/display_builder.profile.default.yml:0; modules/display_builder_entity_view/src/Entity/EntityViewDisplay.php:118,119; src/Plugin/display_builder/Island/ComponentLibraryPanel.php:414; src/Plugin/display_builder/Island/ViewportSwitcher.php:85
+# Suggestion on the localization server:
+# Défaut
+msgid "Default"
+msgstr "默认"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:43
+msgid "Icon"
+msgstr "图标"
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:79
+msgid "Time"
+msgstr "时间"
+
+#: modules/display_builder_views/src/Plugin/display_builder/Buildable/ViewDisplay.php:27; src/BlockLibrarySourceHelper.php:71,224
+msgid "Views"
+msgstr "视图"
+
+#: modules/display_builder_views/src/Controller/ViewsManagementController.php:35
+msgid "View"
+msgstr "查看"
+
+#: config/schema/display_builder.schema.yml:0
+msgid "Format"
+msgstr "格式"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:19
+msgid "History"
+msgstr "历史"
+
+#: config/schema/display_builder.schema.yml:0; src/Form/ProfileForm.php:220,301
+msgid "Region"
+msgstr "区域"
+
+#: modules/display_builder_entity_view/src/Plugin/Derivative/EntityOverrideViewLocalTask.php:58
+msgid "Display"
+msgstr "显示"
+
+#: modules/display_builder_ui/src/InstanceListBuilder.php:79; modules/display_builder_views/src/Controller/ViewsManagementController.php:37
+msgid "Updated"
+msgstr "已更新"
+
+#: modules/display_builder_ui/src/PatternPresetListBuilder.php:71; src/Plugin/display_builder/Island/ControlsButtons.php:82,150
+msgid "Theme"
+msgstr "主题"
+
+#: src/Plugin/UiPatterns/Source/LayoutSource.php:35
+msgid "Layout"
+msgstr "布局"
+
+#: src/Plugin/UiPatterns/Source/ComponentSource.php:18
+msgid "Component"
+msgstr "组件"
+
+#: config/schema/display_builder.schema.yml:0; modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0; modules/display_builder_ui/src/InstanceListBuilder.php:64
+# Suggestion on the localization server:
+# ID
+msgid "ID"
+msgstr "ID"
+
+#: src/BlockLibrarySourceHelper.php:77; src/Plugin/display_builder/Island/LogsPanel.php:80
+msgid "User"
+msgstr "用户"
+
+#: src/Form/ProfileForm.php:314
+# Suggestion on the localization server:
+# Configure
+msgid "Configure"
+msgstr "配置"
+
+#: modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0; modules/display_builder_page_layout/src/PageLayoutListBuilder.php:63; modules/display_builder_page_layout/src/Entity/PageLayout.php:27; modules/display_builder_page_layout/src/Plugin/display_builder/Buildable/PageLayout.php:25
+msgid "Page layout"
+msgstr "页面布局"
+
+#: src/BlockLibrarySourceHelper.php:70,218
+msgid "Page"
+msgstr "页面"
+
+#: src/BlockLibrarySourceHelper.php:78,235
+msgid "Utilities"
+msgstr "工具"
+
+#: src/Plugin/display_builder/Island/VisibilityConditionsPanel.php:26
+msgid "Visibility"
+msgstr "可见性"
+
+#: modules/display_builder_ui/src/ProfileListBuilder.php:61; src/Form/ProfileForm.php:72
+msgid "Roles"
+msgstr "角色"
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:78
+msgid "Published"
+msgstr "已发布"
+
+#: modules/display_builder_ui/src/Form/InstanceListFilterForm.php:66
+# Suggestion on the localization server:
+# Filtre
+msgid "Filter"
+msgstr "筛选"
+
+#: src/BlockLibrarySourceHelper.php:72,279
+msgid "Fields"
+msgstr "字段"
+
+#: modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0; modules/display_builder_page_layout/src/PageLayoutListBuilder.php:65; modules/display_builder_page_layout/src/Form/PageLayoutForm.php:138
+msgid "Conditions"
+msgstr "条件"
+
+#: components/theme_menu/theme_menu.twig:16; src/BlockLibrarySourceHelper.php:76
+msgid "System"
+msgstr "系统"
+
+#: src/Plugin/display_builder/Island/StateButtons.php:23
+msgid "State"
+msgstr "状态"
+
+#: src/IslandType.php:54
+# Suggestion on the localization server:
+# Démarrer
+msgid "Start"
+msgstr "开始"
+
+#: src/IslandType.php:55
+msgid "End"
+msgstr "结束"
+
+#: assets/js/contextual_menu.js:0
+msgid "Base"
+msgstr "基础"
+
+#: src/Form/ProfileForm.php:219
+msgid "Configuration"
+msgstr "配置"
+
+#: modules/display_builder_views/src/Hook/DisplayBuilderViewsHook.php:41
+msgid "Edit view"
+msgstr "编辑视图"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:64; modules/display_builder_ui/src/InstanceListBuilder.php:77; modules/display_builder_views/src/Controller/ViewsManagementController.php:36; src/DisplayBuildablePluginBase.php:328,401
+msgid "Profile"
+msgstr "配置档案"
+
+#: components/shoelace/drawer/drawer.twig:21
+msgid "Close"
+msgstr "关闭"
+
+#: modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0
+msgid "Condition"
+msgstr "条件"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:45
+msgid "Hidden"
+msgstr "隐藏"
+
+#: src/Form/PatternPresetForm.php:60
+msgid "Sources"
+msgstr "源"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:108,211
+msgid "Clear"
+msgstr "清除"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:98
+msgid "Undo"
+msgstr "撤销"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:19
+msgid "Controls"
+msgstr "控制"
+
+#: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ExtraFieldSource.php:23
+msgid "Entity"
+msgstr "实体"
+
+#: src/Plugin/display_builder/Island/StateButtons.php:161,252
+msgid "Revert"
+msgstr "恢复"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:85
+msgid "Empty"
+msgstr "空"
+
+#: src/IslandType.php:50
+msgid "Sidebar"
+msgstr "侧边栏"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:112; src/Plugin/display_builder/Island/Menu.php:32
+msgid "Duplicate"
+msgstr "复制"
+
+#: src/Plugin/display_builder/Island/TreePanel.php:21
+msgid "Tree"
+msgstr "树状结构"
+
+#: src/Plugin/display_builder/Island/Menu.php:39
+msgid "Copy"
+msgstr "复制"
+
+#: src/BlockLibrarySourceHelper.php:75
+msgid "Menus"
+msgstr "菜单"
+
+#: src/Plugin/display_builder/Island/StateButtons.php:153,214
+msgid "Publish"
+msgstr "发布"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:103
+msgid "Redo"
+msgstr "重做"
+
+#: modules/display_builder_ui/display_builder_ui.links.task.yml:0
+msgid "Profiles"
+msgstr "配置档案列表"
+
+#: modules/display_builder_ui/src/PatternPresetListBuilder.php:70
+msgid "Contexts"
+msgstr "上下文"
+
+#: src/Plugin/display_builder/Island/StateButtons.php:157,233
+msgid "Restore"
+msgstr "还原"
+
+#: src/Plugin/display_builder/Island/MenuPreset.php:18
+msgid "Preset"
+msgstr "预设"
+
+#: modules/display_builder_ui/src/InstanceListBuilder.php:68; modules/display_builder_ui/src/Form/InstanceListFilterForm.php:48
+msgid "Context"
+msgstr "上下文"
+
+#: modules/display_builder_ui/src/PatternPresetListBuilder.php:84; src/BlockLibrarySourceHelper.php:36,81,204,258; src/Plugin/display_builder/Island/PresetLibraryPanel.php:211
+msgid "Others"
+msgstr "其他"
+
+#: modules/display_builder_ui/src/PatternPresetListBuilder.php:96
+msgid "Any"
+msgstr "任意"
+
+#: src/Plugin/display_builder/Island/Menu.php:35
+msgid "Paste"
+msgstr "粘贴"
+
+#: src/Form/ProfileForm.php:123
+msgid "Menu items"
+msgstr "菜单项"
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:77
+msgid "Step"
+msgstr "步骤"
+
+#: modules/display_builder_ui/display_builder_ui.links.action.yml:0
+msgid "Add profile"
+msgstr "添加配置档案"
+
+#: modules/display_builder_page_layout/src/Form/PageLayoutForm.php:192
+msgid "User roles"
+msgstr "用户角色"
+
+#: config/schema/display_builder.schema.yml:0
+msgid "Debug mode"
+msgstr "调试模式"
+
+#: modules/display_builder_ui/display_builder_ui.links.task.yml:0
+msgid "Presets"
+msgstr "预设"
+
+#: modules/display_builder_ui/display_builder_ui.links.action.yml:0; modules/display_builder_ui/display_builder_ui.links.menu.yml:0
+msgid "Add preset"
+msgstr "添加预设"
+
+#: modules/display_builder_ui/display_builder_ui.links.menu.yml:0; modules/display_builder_ui/display_builder_ui.links.task.yml:0
+msgid "Instances"
+msgstr "实例"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:281
+msgid "Variants"
+msgstr "变体"
+
+#: components/theme_menu/theme_menu.twig:5
+msgid "Light"
+msgstr "浅色"
+
+#: src/Plugin/display_builder/Island/BuilderPanel.php:267; src/Plugin/display_builder/Island/LayersPanel.php:164; src/Plugin/display_builder/Island/TreePanel.php:161
+msgid "Field: @label"
+msgstr "字段：@label"
+
+#: src/ProfileViewBuilder.php:407
+msgid "Select an action"
+msgstr "选择操作"
+
+#: src/Plugin/display_builder/Island/LayersPanel.php:267
+msgid "Config"
+msgstr "配置"
+
+#: src/DisplayBuildablePluginBase.php:344
+msgid "- Disabled -"
+msgstr "- 已禁用 -"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:78,122
+msgid "Fullscreen"
+msgstr "全屏"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:144
+msgid "Experimental"
+msgstr "实验性"
+
+#: modules/display_builder_ui/src/Form/InstanceListFilterForm.php:40
+# Suggestions on the localization server:
+# - Tous -
+# - N'importe lequel -
+msgid "- Any -"
+msgstr "- 任意 -"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:86
+msgid "Compact"
+msgstr "紧凑"
+
+#: src/Plugin/display_builder/Island/LayersPanel.php:23
+msgid "Layers"
+msgstr "图层"
+
+#: src/Plugin/display_builder/Island/StylesPanel.php:66,133
+msgid "Styles"
+msgstr "样式"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:140,177
+msgid "Fluid"
+msgstr "流式"
+
+#: assets/js/form_description.js:0
+msgid "Show description"
+msgstr "显示描述"
+
+#: src/Plugin/display_builder/Island/Collaboration.php:95
+msgid "Image field"
+msgstr "图片字段"
+
+#: modules/display_builder_entity_view/src/Hook/DisplayBuilderEntityViewHook.php:77,89; modules/display_builder_page_layout/src/Hook/PageLayoutHook.php:40
+msgid "Edit display"
+msgstr "编辑显示"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:73,102
+# Suggestion on the localization server:
+# Mise en exergue (highlight)
+msgid "Highlight"
+msgstr "高亮"
+
+#: src/Plugin/display_builder/Island/LibrariesPanel.php:19
+msgid "Libraries"
+msgstr "库"
+
+#: src/Form/ProfileForm.php:120
+msgid "Toolbar buttons"
+msgstr "工具栏按钮"
+
+#: src/Plugin/display_builder/Island/Collaboration.php:110
+msgid "Image style"
+msgstr "图片样式"
+
+#: modules/display_builder_views/display_builder_views.routing.yml:0
+msgid "Confirm deletion"
+msgstr "确认删除"
+
+#: modules/display_builder_ui/display_builder_ui.links.menu.yml:0
+msgid "Preset list"
+msgstr "预设列表"
+
+#: components/theme_menu/theme_menu.twig:10
+msgid "Dark"
+msgstr "深色"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:247
+msgid "None selected"
+msgstr "未选择"
+
+#: modules/display_builder_ui/src/InstanceListBuilder.php:72; modules/display_builder_ui/src/Form/InstanceListFilterForm.php:55
+msgid "Instance"
+msgstr "实例"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:128
+msgid "component"
+msgstr "组件"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:114
+msgid "Format: @format"
+msgstr "格式：@format"
+
+#: assets/js/form_description.js:0; src/Plugin/UiPatterns/Source/ComponentSource.php:202
+msgid "Hide description"
+msgstr "隐藏描述"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:94
+msgid "breakpoint"
+msgstr "断点"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:94
+msgid "breakpoints"
+msgstr "断点"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:236
+msgid "grouped"
+msgstr "已分组"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:145
+# Suggestion on the localization server:
+#, fuzzy
+msgid "Deprecated"
+msgstr "已弃用"
+
+#: src/Plugin/display_builder/Island/BuilderPanel.php:29
+msgid "Builder"
+msgstr "构建器"
+
+#: src/BlockLibrarySourceHelper.php:80
+msgid "Lists (Views)"
+msgstr "列表（视图）"
+
+#: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ExtraFieldSource.php:19
+msgid "Extra field"
+msgstr "额外字段"
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityView.php:29
+# Suggestion on the localization server:
+#, fuzzy
+msgid "Entity view"
+msgstr "实体视图"
+
+#: modules/display_builder_page_layout/src/Controller/PageLayoutController.php:62
+msgid "Duplicate of @label"
+msgstr "@label 的副本"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:128
+msgid "components"
+msgstr "组件"
+
+#: src/Form/ProfileForm.php:218
+msgid "Island"
+msgstr "孤岛"
+
+#: src/Plugin/display_builder/Island/ContextualFormPanel.php:95
+msgid "No configuration required."
+msgstr "无需配置。"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:146
+msgid "Obsolete"
+msgstr "已弃用"
+
+#: modules/display_builder_views/src/Form/ConfirmViewsBuilderDeleteForm.php:58
+msgid "Do you want to delete %id?"
+msgstr "您确定要删除 %id 吗？"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:288
+msgid "Mosaic"
+msgstr "网格"
+
+#: src/Form/PatternPresetForm.php:105
+msgid "The import failed with the following message: %message"
+msgstr "导入失败，错误信息：%message"
+
+#: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ContentEntitySource.php:141
+msgid "Pick a display mode"
+msgstr "选择显示模式"
+
+#: src/ProfileViewBuilder.php:247
+msgid "Filter by name"
+msgstr "按名称筛选"
+
+#: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ContentEntitySource.php:22
+msgid "Content entity"
+msgstr "内容实体"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:274
+msgid "Grouped"
+msgstr "已分组"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:240
+msgid "variants"
+msgstr "变体"
+
+#: src/Plugin/UiPatterns/Source/ComponentSource.php:244
+msgid "Variant: @variant"
+msgstr "变体：@variant"
+
+#: src/Plugin/display_builder/Island/Menu.php:18
+msgid "Main menu items"
+msgstr "主菜单项"
+
+#: src/BlockLibrarySourceHelper.php:73,274
+# Suggestion on the localization server:
+#, fuzzy
+msgid "Referenced entities"
+msgstr "引用的实体"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:29
+# Suggestion on the localization server:
+#, fuzzy
+msgid "Components library"
+msgstr "组件库"
+
+#: src/Plugin/UiPatterns/Source/ComponentSource.php:19
+# Suggestion on the localization server:
+#, fuzzy
+msgid "Add a Component"
+msgstr "添加组件"
+
+#: src/Plugin/display_builder/Island/BlockLibraryPanel.php:29
+msgid "Blocks library"
+msgstr "块库"
+
+#: display_builder.info.yml:0; modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php:72,123,24
+msgid "Display Builder"
+msgstr "Display Builder"
+
+#: assets/js/contextual_menu.js:0
+msgid "Copied (!label)"
+msgstr "已复制 (!label)"
+
+#: assets/js/contextual_menu.js:0
+msgid "Copy !label"
+msgstr "复制 !label"
+
+#: assets/js/contextual_menu.js:0
+msgid "Paste !label"
+msgstr "粘贴 !label"
+
+#: assets/js/contextual_menu.js:0
+msgid "Duplicate !label"
+msgstr "复制 !label"
+
+#: assets/js/contextual_menu.js:0
+msgid "Remove !label"
+msgstr "删除 !label"
+
+#: components/display_builder/display_builder.twig:47
+msgid "Sidebar buttons"
+msgstr "侧边栏按钮"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:104,118; modules/display_builder_ui/display_builder_ui.links.menu.yml:0; modules/display_builder_ui/display_builder_ui.routing.yml:0; modules/display_builder_views/display_builder_views.links.menu.yml:0
+msgid "Display builder"
+msgstr "Display Builder"
+
+#: config/schema/display_builder.schema.yml:0
+msgid "Display builder Preset"
+msgstr "Display Builder 预设"
+
+#: modules/display_builder_ui/src/InstanceListBuilder.php:85; modules/display_builder_views/src/Controller/ViewsManagementController.php:38
+msgid "Last log"
+msgstr "最近日志"
+
+#: modules/display_builder_entity_view/display_builder_entity_view.info.yml:0
+msgid "Display Builder for entity view"
+msgstr "实体视图的 Display Builder"
+
+#: modules/display_builder_entity_view/display_builder_entity_view.info.yml:0
+msgid "Provide integration of Display Builder to entity view."
+msgstr "提供 Display Builder 与实体视图的集成。"
+
+#: modules/display_builder_entity_view/src/Controller/EntityViewController.php:36
+msgid "Display builder for @bundle, @view_mode_name"
+msgstr "@bundle 的 Display Builder，@view_mode_name"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.info.yml:0
+msgid "Display Builder for page layout"
+msgstr "页面布局的 Display Builder"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.info.yml:0
+msgid "Provide integration of Display Builder to the page layout system."
+msgstr "提供 Display Builder 与页面布局系统的集成。"
+
+#: modules/display_builder_ui/display_builder_ui.info.yml:0
+msgid "Display Builder UI"
+msgstr "Display Builder 界面"
+
+#: modules/display_builder_views/display_builder_views.links.task.yml:0
+msgid "Display builders"
+msgstr "Display Builder"
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0; src/Entity/PatternPreset.php:24,26
+msgid "Pattern presets"
+msgstr "模式预设"
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0
+msgid "Add a Pattern preset"
+msgstr "添加预设"
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0
+msgid "Edit a Pattern preset"
+msgstr "编辑预设"
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0
+msgid "Delete a Pattern preset"
+msgstr "删除预设"
+
+#: modules/display_builder_views/display_builder_views.info.yml:0
+msgid "Display Builder for Views"
+msgstr "视图的 Display Builder"
+
+#: modules/display_builder_views/display_builder_views.info.yml:0
+msgid "Associate Display Builder with Views."
+msgstr "将 Display Builder 与视图关联。"
+
+#: modules/display_builder_views/src/Plugin/ViewsUiPatternsSourceBase.php:76
+msgid "This element must be configured in the corresponding view."
+msgstr "此元素必须在相应的视图中配置。"
+
+#: modules/display_builder_views/src/Plugin/views/display_extender/DisplayExtender.php:124,25
+msgid "Use display builder as output for this view."
+msgstr "使用 Display Builder 作为此视图的输出。"
+
+#: modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/MainPageContentSource.php:21
+msgid "The Drupal `Main page content` block (system_main_block)."
+msgstr "Drupal 的`主页面内容`块 (system_main_block)。"
+
+#: modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageTitleSource.php:21
+msgid "The Drupal `Page title` block (page_title)."
+msgstr "Drupal 的`页面标题`块 (page_title)。"
+
+#: src/IslandType.php:37
+msgid "Unknown island type."
+msgstr "未知的孤岛类型。"
+
+#: src/Controller/ApiController.php:567
+msgid "[attachToRoot] Missing preset source_id data"
+msgstr "[attachToRoot] 缺少预设 source_id 数据"
+
+#: src/Controller/ApiController.php:619
+msgid "[attachToSlot] Missing preset source_id data"
+msgstr "[attachToSlot] 缺少预设 source_id 数据"
+
+#: src/Entity/PatternPreset.php:23,25
+msgid "Pattern preset"
+msgstr "模式预设"
+
+#: src/Form/ProfileForm.php:180; src/Form/ProfileIslandPluginForm.php:112
+msgid "Created new display builder config %label."
+msgstr "已创建新的 Display Builder 配置 %label。"
+
+#: src/Form/ProfileForm.php:181; src/Form/ProfileIslandPluginForm.php:113
+msgid "Updated display builder config %label."
+msgstr "已更新 Display Builder 配置 %label。"
+
+#: src/Form/PatternPresetForm.php:83
+msgid "Created new preset %label."
+msgstr "已创建新预设 %label。"
+
+#: src/Form/PatternPresetForm.php:84
+msgid "Updated preset %label."
+msgstr "已更新预设 %label。"
+
+#: src/Plugin/display_builder/Island/BuilderPanel.php:97; src/Plugin/display_builder/Island/TreePanel.php:69
+msgid "Base container"
+msgstr "基础容器"
+
+#: src/Plugin/display_builder/Island/BuilderPanel.php:204
+msgid "Empty by default. Configure it to make it visible"
+msgstr "默认为空。请进行配置以使其可见。"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:158
+msgid "Undo last change"
+msgstr "撤销上次更改"
+
+#: src/Plugin/display_builder/Island/MenuPreset.php:32
+msgid "Save as preset"
+msgstr "另存为预设"
+
+#: src/Plugin/display_builder/Island/MenuPreset.php:33
+msgid "Name of preset"
+msgstr "预设名称"
+
+#: src/Plugin/display_builder/Island/PresetLibraryPanel.php:23
+msgid "Preset library"
+msgstr "预设库"
+
+#: src/Plugin/display_builder/Island/PresetLibraryPanel.php:24
+msgid "List of preset, already build group of components."
+msgstr "预设列表，已构建的组件组列表。"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:23
+msgid "Show a real time preview of the display."
+msgstr "实时显示预览。"
+
+#: src/Plugin/display_builder/Island/StateButtons.php:236
+msgid "Restore to last saved version"
+msgstr "恢复到上次保存的版本"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:83
+msgid "Pick a theme mode as light/dark/system for the display builder."
+msgstr "为 Display Builder 选择主题模式（浅色/深色/系统）。"
+
+#: src/DisplayBuildablePluginBase.php:286
+msgid "Initialization of the display builder."
+msgstr "Display Builder 初始化。"
+
+#: modules/display_builder_entity_view/config/schema/display_builder_entity_view.schema.yml:0
+msgid "Display Builder settings"
+msgstr "Display Builder 设置"
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewAttachmentAfterSource.php:16
+msgid "[View] Attachment after"
+msgstr "[视图] 附件之后"
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewAttachmentBeforeSource.php:16
+msgid "[View] Attachment before"
+msgstr "[视图] 附件之前"
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewExposedSource.php:16
+msgid "[View] Exposed form"
+msgstr "[视图] 暴露表单"
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewFeedIconsSource.php:16
+msgid "[View] Feed icons"
+msgstr "[视图] Feed 图标"
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewHeaderSource.php:16
+msgid "[View] Header"
+msgstr "[视图] 页眉"
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewMoreSource.php:16
+msgid "[View] More"
+msgstr "[视图] 更多链接"
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewPagerSource.php:16
+msgid "[View] Pager"
+msgstr "[视图] 分页器"
+
+#: modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/MainPageContentSource.php:20
+msgid "[Page] Main content"
+msgstr "[页面] 主要内容"
+
+#: modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageTitleSource.php:20
+msgid "[Page] Title"
+msgstr "[页面] 标题"
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:23
+msgid "Logs based on changes history."
+msgstr "基于更改历史的日志。"
+
+#: config/schema/display_builder.schema.yml:0
+msgid "Island configuration"
+msgstr "孤岛配置"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.links.action.yml:0
+msgid "Add page layout"
+msgstr "添加页面布局"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.links.menu.yml:0; modules/display_builder_page_layout/display_builder_page_layout.routing.yml:0; modules/display_builder_page_layout/src/Entity/PageLayout.php:28
+msgid "Page layouts"
+msgstr "页面布局"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.links.menu.yml:0
+msgid "Manage page layouts with Display Builder."
+msgstr "使用 Display Builder 管理页面布局。"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.routing.yml:0
+msgid "Add a page layout"
+msgstr "添加页面布局"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.routing.yml:0
+msgid "Edit a page layout"
+msgstr "编辑页面布局"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.routing.yml:0
+msgid "Delete a page layout"
+msgstr "删除页面布局"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:34
+msgid ""
+"The first enabled, non-empty, applicable to a page according to its "
+"conditions, page layout will be loaded."
+msgstr ""
+"根据条件匹配页面的第一个已启用、非空且适用的页面布局将被加载。"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:51
+msgid ""
+"Without any active Page Layout, pages are managed by <a "
+"href=\"@url\">Block Layout</a>."
+msgstr ""
+"如果没有激活的页面布局，页面将由<a href=\"@url\">块布局</a>管理。"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:175
+msgid "On the following pages: @pages"
+msgstr "在以下页面上：@pages"
+
+#: modules/display_builder_page_layout/src/PageLayoutListBuilder.php:178
+msgid "Not on the following pages: @pages"
+msgstr "不在以下页面上：@pages"
+
+#: modules/display_builder_entity_view/src/Hook/DisplayBuilderEntityViewHook.php:72,84; modules/display_builder_page_layout/src/PageLayoutListBuilder.php:105; modules/display_builder_page_layout/src/Hook/PageLayoutHook.php:35; modules/display_builder_views/src/Controller/ViewsManagementController.php:116; modules/display_builder_views/src/Hook/DisplayBuilderViewsHook.php:36
+msgid "Build display"
+msgstr "构建显示"
+
+#: modules/display_builder_page_layout/src/Controller/PageLayoutController.php:26
+msgid "Build %label page layout"
+msgstr "构建 %label 页面布局"
+
+#: modules/display_builder_page_layout/src/Entity/PageLayout.php:29
+msgid "page layout"
+msgstr "页面布局"
+
+#: modules/display_builder_page_layout/src/Entity/PageLayout.php:30
+msgid "page layouts"
+msgstr "页面布局"
+
+#: modules/display_builder_page_layout/src/Form/PageLayoutForm.php:89
+msgid "Created new page layout %label."
+msgstr "已创建新的页面布局 %label。"
+
+#: modules/display_builder_page_layout/src/Form/PageLayoutForm.php:90
+msgid "Updated page layout %label."
+msgstr "已更新页面布局 %label。"
+
+#: modules/display_builder_page_layout/src/Form/PageLayoutForm.php:201
+msgid "Activate on the listed pages"
+msgstr "在列出的页面上激活"
+
+#: modules/display_builder_page_layout/src/Form/PageLayoutForm.php:202
+msgid "Skip for the listed pages"
+msgstr "跳过列出的页面"
+
+#: modules/display_builder_ui/src/ProfileListBuilder.php:80
+msgid "No roles may use this display builder"
+msgstr "没有角色可以使用此 Display Builder"
+
+#: modules/display_builder_ui/src/ProfileListBuilder.php:129
+msgid "With: @panels"
+msgstr "包含：@panels"
+
+#: modules/display_builder_views/display_builder_views.routing.yml:0
+msgid "Display builders in Views"
+msgstr "视图中的 Display Builder"
+
+#: modules/display_builder_views/src/Controller/ViewsController.php:33
+msgid "Display builder for @view @display"
+msgstr "视图 @view @display 的 Display Builder"
+
+#: modules/display_builder_views/src/Controller/ViewsManagementController.php:41
+msgid "No Display builder enabled on any view."
+msgstr "未在任何视图上启用 Display Builder。"
+
+#: modules/display_builder_views/src/Plugin/ViewsUiPatternsSourceBase.php:54
+msgid "[View] @name placeholder"
+msgstr "[视图] @name 占位符"
+
+#: src/ProfilePermissions.php:62
+msgid ""
+"Warning: This permission may have security implications depending on "
+"how the display builder is configured."
+msgstr "警告：此权限可能存在安全隐患，具体取决于 Display Builder 的配置方式。"
+
+#: src/Controller/ApiController.php:69
+msgid "[attachToRoot] moveToRoot failed with invalid data"
+msgstr "[attachToRoot] moveToRoot 因数据无效而失败"
+
+#: src/Controller/ApiController.php:290
+msgid "[thirdPartySettingsUpdate] Missing payload!"
+msgstr "[thirdPartySettingsUpdate] 缺少负载！"
+
+#: src/Form/ProfileForm.php:82
+msgid "Island configuration will be available only after saving this form."
+msgstr "孤岛配置仅在保存此表单后可用。"
+
+#: src/Plugin/display_builder/Island/Collaboration.php:124
+msgid "With @style picture."
+msgstr "使用 @style 图片。"
+
+#: src/Plugin/display_builder/Island/Collaboration.php:124
+msgid "With picture."
+msgstr "使用图片。"
+
+#: src/Plugin/display_builder/Island/Collaboration.php:127
+msgid "Without picture."
+msgstr "无图片。"
+
+#: src/Plugin/display_builder/Island/Collaboration.php:282
+msgid "at @time"
+msgstr "于 @time"
+
+#: src/Plugin/display_builder/Island/BlockLibraryPanel.php:251
+msgid "@name (@count block)"
+msgid_plural "@name (@count blocks)"
+msgstr[0] "@name（共 @count 个块）"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:142
+msgid "Allowed status"
+msgstr "允许的状态"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:148
+msgid "Components with stable or undefined status will always be available."
+msgstr "状态为稳定或未定义的组件将始终可用。"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:154
+msgid "Show components grouped"
+msgstr "按组分批显示组件"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:155
+msgid "Provide a list of grouped components for selection."
+msgstr "提供已分组的组件列表供选择。"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:161
+msgid "Show components variants"
+msgstr "显示组件变体"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:162
+msgid "Provide a list of components per variants for selection."
+msgstr "提供按变体分类的组件列表供选择。"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:168
+msgid "Show components mosaic"
+msgstr "显示组件网格"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:169
+msgid "Provide a list of mosaic components for selection."
+msgstr "提供网格视图的组件列表供选择。"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:177
+msgid "Include marked as excluded from the UI"
+msgstr "包含标记为从界面排除的组件"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:178
+msgid ""
+"Components with no ui flag are meant for internal use only. Force to "
+"include them. Drupal 11.3+ only."
+msgstr "未标记 ui 标志的组件仅供内部使用。强制包含它们。仅适用于 Drupal 11.3+。"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:197,198,199
+msgid "At least one display must be selected!"
+msgstr "至少必须选择一个显示！"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:227
+msgid "Allowed status: @status"
+msgstr "允许的状态：@status"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:228
+msgid "stable, undefined"
+msgstr "稳定，未定义"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:231
+msgid "Include `no UI` components"
+msgstr "包含`无 UI`组件"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:231
+msgid "Exclude `no UI `components"
+msgstr "排除`无 UI`组件"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:244
+msgid "mosaic"
+msgstr "网格"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:246
+msgid "Components list as: @list"
+msgstr "组件列表：@list"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:109
+msgid "A button to clear the logs history (past and future)."
+msgstr "清除日志历史（过去和将来）的按钮。"
+
+#: config/schema/display_builder.schema.yml:0; src/Form/ProfileForm.php:92
+msgid "Islands"
+msgstr "孤岛"
+
+#: config/schema/display_builder.schema.yml:0; modules/display_builder_entity_view/config/schema/display_builder_entity_view.schema.yml:0; modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0; modules/display_builder_views/config/schema/display_builder_views.schema.yml:0
+msgid "UI Patterns sources"
+msgstr "UI 模式源"
+
+#: config/schema/display_builder.schema.yml:0
+msgid "UI Styles settings"
+msgstr "UI 样式设置"
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityViewOverride.php:38
+msgid "Entity view override"
+msgstr "实体视图覆盖"
+
+#: modules/display_builder_entity_view/config/schema/display_builder_entity_view.schema.yml:0; modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0; modules/display_builder_views/config/schema/display_builder_views.schema.yml:0
+msgid "Display Builder profile"
+msgstr "Display Builder 配置档案"
+
+#: modules/display_builder_entity_view/config/schema/display_builder_entity_view.schema.yml:0
+msgid "Display Builder override profile"
+msgstr "Display Builder 覆盖配置档案"
+
+#: modules/display_builder_entity_view/config/schema/display_builder_entity_view.schema.yml:0
+msgid "Display Builder field"
+msgstr "Display Builder 字段"
+
+#: modules/display_builder_entity_view/src/Plugin/Derivative/EntityOverrideViewLocalTask.php:58
+msgid ":display display"
+msgstr ":display 显示"
+
+#: modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0
+msgid "Source: Main page content"
+msgstr "源：主页面内容"
+
+#: modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0
+msgid "Source: Page title"
+msgstr "源：页面标题"
+
+#: modules/display_builder_page_layout/src/Plugin/DisplayVariant/DisplayBuilderPageVariant.php:27
+msgid "Display Builder page"
+msgstr "Display Builder 页面"
+
+#: modules/display_builder_views/src/Plugin/UiPatterns/Source/ViewFooterSource.php:16
+msgid "[View] Footer"
+msgstr "[视图] 页脚"
+
+#: src/DisplayBuildablePluginBase.php:355
+msgid "Add and configure display builder profiles"
+msgstr "添加和配置 Display Builder 配置档案"
+
+#: src/DisplayBuildablePluginBase.php:380
+msgid "Build the display"
+msgstr "构建显示"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:518; src/Plugin/display_builder/Island/ViewportSwitcher.php:306
+msgid "@name (@type, @count @singular)"
+msgid_plural "@name (@type, @count @plural)"
+msgstr[0] "@name（@type，共 @count 个）"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:82
+msgid "Selector format"
+msgstr "选择器格式"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:83
+msgid ""
+"Choose the appearance of the selector. Normal select or a compact "
+"dropdown menu."
+msgstr ""
+"选择选择器的外观。普通选择或紧凑下拉菜单。"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:214
+msgid "Switch viewport"
+msgstr "切换视口"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:25
+msgid "Viewport switcher"
+msgstr "视口切换器"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:26
+msgid "Change main region width according to breakpoints."
+msgstr "根据断点更改主区域宽度。"
+
+#: config/optional/display_builder.profile.default.yml:0
+msgid "With sensible configuration, for the common usage."
+msgstr "采用合理的配置，适用于常规使用。"
+
+#: display_builder.info.yml:0
+msgid ""
+"An advanced Display Builder for Drupal, require to have a sub module "
+"enable to build Entity view, Page or Views."
+msgstr "适用于 Drupal 的高级 Display Builder，需要启用子模块来构建实体视图、页面或视图。"
+
+#: config/schema/display_builder.schema.yml:0; src/Entity/Profile.php:26
+msgid "Display builder profile"
+msgstr "Display Builder 配置档案"
+
+#: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ExtraFieldSource.php:64
+msgid "Extra field: @field"
+msgstr "额外字段：@field"
+
+#: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ExtraFieldSource.php:83
+msgid "⚠️ Imported but not supported"
+msgstr "⚠️ 已导入但不受支持"
+
+#: modules/display_builder_entity_view/src/Plugin/UiPatterns/Source/ExtraFieldSource.php:20
+msgid ""
+"❌ Used only for imports from Manage Display and Layout Builder. "
+"Hidden from Library."
+msgstr ""
+"❌ 仅用于从管理显示和布局构建器导入。在库中隐藏。"
+
+#: modules/display_builder_ui/display_builder_ui.info.yml:0
+msgid ""
+"Create and manage Display Builder profile, pattern preset and view "
+"instances from the UI."
+msgstr ""
+"从 UI 创建和管理 Display Builder 配置档案、模式预设和视图实例。"
+
+#: modules/display_builder_ui/display_builder_ui.links.menu.yml:0
+msgid "Available Pattern preset created."
+msgstr "可用的模式预设已创建。"
+
+#: modules/display_builder_ui/display_builder_ui.links.menu.yml:0
+msgid "Add a reusable Pattern preset."
+msgstr "添加可重复使用的模式预设。"
+
+#: modules/display_builder_ui/display_builder_ui.links.menu.yml:0
+msgid "Available display builder instances."
+msgstr "可用的 Display Builder 实例。"
+
+#: modules/display_builder_ui/display_builder_ui.permissions.yml:0
+msgid "View, edit and delete any Display Builder profile."
+msgstr "查看、编辑和删除任何 Display Builder 配置档案。"
+
+#: modules/display_builder_ui/display_builder_ui.permissions.yml:0
+msgid "View, edit and delete any pattern preset."
+msgstr "查看、编辑和删除任何模式预设。"
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0
+msgid "Add a Display Builder profile"
+msgstr "添加 Display Builder 配置档案"
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0
+msgid "Edit a Display Builder profile"
+msgstr "编辑 Display Builder 配置档案"
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0
+msgid "Delete a Display Builder profile"
+msgstr "删除 Display Builder 配置档案"
+
+#: modules/display_builder_ui/display_builder_ui.routing.yml:0
+msgid "Display Builder instances"
+msgstr "Display Builder 实例"
+
+#: modules/display_builder_views/display_builder_views.links.menu.yml:0
+msgid "Manage Display Builder instance used in Views."
+msgstr "管理视图中使用的 Display Builder 实例。"
+
+#: src/Entity/Instance.php:34
+msgid "Display Builder instance"
+msgstr "Display Builder 实例"
+
+#: src/Entity/Instance.php:35
+msgid "Display builder instances"
+msgstr "Display Builder 实例"
+
+#: src/Entity/Instance.php:36
+msgid "display builder instance"
+msgstr "display builder 实例"
+
+#: src/Entity/Instance.php:37
+msgid "display builder instances"
+msgstr "display builder 实例"
+
+#: src/Plugin/display_builder/Island/Collaboration.php:27
+msgid "Real-time collaboration"
+msgstr "实时协作"
+
+#: src/Plugin/display_builder/Island/Collaboration.php:28
+msgid "Allow concurrent editing with multiple users."
+msgstr "允许多个用户同时编辑。"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:157
+msgid "Undo (shortcut: u)"
+msgstr "撤销（快捷键：u）"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:185
+msgid "Redo (shortcut: r)"
+msgstr "重做（快捷键：r）"
+
+#: src/Plugin/display_builder/Island/StateButtons.php:255
+msgid "Revert to default display (not overridden)"
+msgstr "恢复为默认显示（未覆盖）"
+
+#: config/schema/display_builder.schema.yml:0
+msgid "Label and icon visibility"
+msgstr "标签和图标可见性"
+
+#: modules/display_builder_ui/display_builder_ui.links.menu.yml:0
+msgid "Create and manage Display Builder profiles, presets and instances."
+msgstr "创建和管理 Display Builder 配置档案、预设和实例。"
+
+#: modules/display_builder_ui/src/InstanceListBuilder.php:212
+msgid ""
+"Instances are versions of displays (entity views, page layouts, "
+"views...) currently under work."
+msgstr "实例是当前正在处理的显示版本（实体视图、页面布局、视图...）。"
+
+#: modules/display_builder_ui/src/PatternPresetListBuilder.php:125; src/Plugin/display_builder/Island/PresetLibraryPanel.php:80
+msgid "Pattern presets are reusable arrangements of components and blocks."
+msgstr "预设是可重复使用的组件和块排列。"
+
+#: modules/display_builder_ui/src/ProfileListBuilder.php:94
+msgid ""
+"Profiles define the display building experience (available features, "
+"layout arrangement) for specific user roles."
+msgstr "配置档案为特定用户角色定义显示构建体验（可用功能、布局安排）。"
+
+#: src/BlockLibrarySourceHelper.php:82,229
+msgid "Dev tools"
+msgstr "开发工具"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:44
+msgid "Icon + Label"
+msgstr "图标 + 标签"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:52
+msgid "@name button"
+msgstr "@name 按钮"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:80
+msgid "No buttons. Will not be displayed."
+msgstr "无按钮。将不会显示。"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:84
+msgid "Buttons: @buttons."
+msgstr "按钮：@buttons。"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:106
+msgid "@button (label only)"
+msgstr "@button（仅标签）"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:107
+msgid "@button (icon only)"
+msgstr "@button（仅图标）"
+
+#: src/IslandPluginToolbarButtonConfigurationBase.php:108
+msgid "@button (icon and label)"
+msgstr "@button（图标和标签）"
+
+#: src/IslandType.php:32
+msgid "Panels shown as a main area tab or as a sidebar."
+msgstr "显示为主区域选项卡或侧边栏的面板。"
+
+#: src/IslandType.php:33
+msgid "Panels available as tab in the Library panel."
+msgstr "在库面板中以选项卡形式提供的面板。"
+
+#: src/IslandType.php:34
+msgid "Toolbar buttons allowing direct actions in the builder."
+msgstr "允许在构建器中直接操作的工具栏按钮。"
+
+#: src/IslandType.php:35
+msgid "Panels visible only when the a source is selected."
+msgstr "仅在选中源时可见的面板。"
+
+#: src/IslandType.php:36
+msgid "Items available in the contextual menu."
+msgstr "上下文菜单中可用的项目。"
+
+#: src/IslandType.php:51
+msgid "Main area (Tabs)"
+msgstr "主区域（选项卡）"
+
+#: src/Controller/ApiController.php:146
+msgid "[attachToSlot] Missing content (component_id, block_id or node_id)"
+msgstr "[attachToSlot] 缺少内容（component_id、block_id 或 node_id）"
+
+#: src/Entity/Profile.php:27
+msgid "Display builder profiles"
+msgstr "Display Builder 配置档案"
+
+#: src/Entity/Profile.php:28
+msgid "display builder profile"
+msgstr "display builder 配置档案"
+
+#: src/Entity/Profile.php:29
+msgid "display builders profiles"
+msgstr "display builder 配置档案"
+
+#: src/Form/ProfileForm.php:119
+msgid "View panels"
+msgstr "查看面板"
+
+#: src/Form/ProfileForm.php:121
+msgid "Contextual panels"
+msgstr "上下文面板"
+
+#: src/Form/ProfileForm.php:122
+msgid "Library panels"
+msgstr "库面板"
+
+#: src/Plugin/display_builder/Island/BackButton.php:41
+msgid "Exit without losing any data."
+msgstr "退出而不丢失任何数据。"
+
+#: src/Plugin/display_builder/Island/BackButton.php:21
+msgid "Exit the display builder and go back to admin UI."
+msgstr "退出 Display Builder 并返回管理界面。"
+
+#: src/Plugin/display_builder/Island/BlockLibraryPanel.php:94
+msgid "Exclude modules"
+msgstr "排除模块"
+
+#: src/Plugin/display_builder/Island/BlockLibraryPanel.php:109
+msgid "Excluded modules: @exclude"
+msgstr "已排除的模块：@exclude"
+
+#: src/Plugin/display_builder/Island/BlockLibraryPanel.php:30
+msgid "List of available blocks."
+msgstr "可用块列表。"
+
+#: src/Plugin/display_builder/Island/BuilderPanel.php:76
+msgid "Show the builder"
+msgstr "显示构建器"
+
+#: src/Plugin/display_builder/Island/BuilderPanel.php:272
+msgid "Block: @label"
+msgstr "块：@label"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:127; src/Plugin/display_builder/Island/ViewportSwitcher.php:93
+msgid "Exclude providers"
+msgstr "排除提供者"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:134
+msgid "Exclude by id"
+msgstr "按 ID 排除"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:135
+msgid ""
+"Provide a space separated list of components id to exclude, must be "
+"prefixed by provider. Example: "
+"\"ui_suite_bootstrap:card_body<br>ui_suite_bootstrap:table_cell\"."
+msgstr "提供一个以空格分隔的要排除的组件 ID 列表，必须以提供者作为前缀。例如：\"ui_suite_bootstrap:card_body<br>ui_suite_bootstrap:table_cell\"。"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:211; src/Plugin/display_builder/Island/ViewportSwitcher.php:110
+msgid "Excluded providers: @exclude"
+msgstr "已排除的提供者：@exclude"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:219
+msgid "Component(s) excluded"
+msgstr "已排除的组件"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:30
+msgid "List of available components."
+msgstr "可用组件列表。"
+
+#: src/Plugin/display_builder/Island/ComponentLibraryPanel.php:223
+msgid "@count component excluded"
+msgid_plural "@count components excluded"
+msgstr[0] "已排除 @count 个组件"
+
+#: src/Plugin/display_builder/Island/ContextualFormPanel.php:26
+msgid "Contextual form"
+msgstr "上下文表单"
+
+#: src/Plugin/display_builder/Island/ContextualFormPanel.php:27
+msgid "Configure the active component or block."
+msgstr "配置当前活动的组件或块。"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:74
+msgid "Highlight builder zones to ease drag and move around."
+msgstr "高亮构建器区域以便于拖拽移动。"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:88
+msgid "Information about the available keyboard shortcuts."
+msgstr "关于可用键盘快捷键的信息。"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:105
+msgid "Highlight components. (shortcut: H)"
+msgstr "高亮组件。（快捷键：H）"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:106
+msgid "Toggle highlight (shift+H)"
+msgstr "切换高亮（Shift+H）"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:156
+msgid "Switch the display builder interface theme."
+msgstr "切换 Display Builder 界面主题。"
+
+#: src/Plugin/display_builder/Island/ControlsButtons.php:20
+msgid "Control the building experience."
+msgstr "控制构建体验。"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:99
+msgid "Undo action, icon is always visible, label is number of undo."
+msgstr "撤销操作，图标始终可见，标签显示可撤销次数。"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:104
+msgid "Redo action, icon is always visible, label is number of redo."
+msgstr "重做操作，图标始终可见，标签显示可重做次数。"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:186
+msgid "Redo last undone change"
+msgstr "重做上次撤销的更改"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:20
+msgid "Undo and redo changes."
+msgstr "撤销和重做更改。"
+
+#: src/Plugin/display_builder/Island/LayersPanel.php:58
+msgid "Show the layer"
+msgstr "显示图层"
+
+#: src/Plugin/display_builder/Island/LayersPanel.php:24
+msgid "Manage hierarchical layer view of elements without preview."
+msgstr "管理元素的层级图层视图（无预览）。"
+
+#: src/Plugin/display_builder/Island/LibrariesPanel.php:33
+msgid "Show the libraries"
+msgstr "显示库"
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:51
+msgid "Show the logs"
+msgstr "显示日志"
+
+#: src/Plugin/display_builder/Island/LogsPanel.php:234
+msgid "Saved at %time but not visible in logs"
+msgstr "已在 %time 保存但不在日志中显示"
+
+#: src/Plugin/display_builder/Island/Menu.php:19
+msgid "Copy, paste and duplicate."
+msgstr "复制、粘贴和复制。"
+
+#: src/Plugin/display_builder/Island/MenuDelete.php:20
+msgid "Remove a component or block."
+msgstr "移除组件或块。"
+
+#: src/Plugin/display_builder/Island/MenuPreset.php:19
+msgid "Save as a preset."
+msgstr "另存为预设。"
+
+#: src/Plugin/display_builder/Island/PresetLibraryPanel.php:85
+msgid "Add presets from the contextual menu."
+msgstr "从上下文菜单添加预设。"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:51
+msgid "Show the preview"
+msgstr "显示预览"
+
+#: src/Plugin/display_builder/Island/StateButtons.php:217
+msgid "Publish this display in current state. (shortcut: P)"
+msgstr "以当前状态发布此显示。（快捷键：P）"
+
+#: src/Plugin/display_builder/Island/StateButtons.php:217
+msgid "Publish this display (shift+P)"
+msgstr "发布此显示（Shift+P）"
+
+#: src/Plugin/display_builder/Island/StateButtons.php:24
+msgid "Publish and reset the display."
+msgstr "发布并重置显示。"
+
+#: src/Plugin/display_builder/Island/TreePanel.php:50
+msgid "Show the tree"
+msgstr "显示树状结构"
+
+#: src/Plugin/display_builder/Island/TreePanel.php:22
+msgid "Hierarchical view of components and blocks."
+msgstr "组件和块的层级视图。"
+
+#: src/Plugin/display_builder/Island/DesignTokensPanel.php:27
+msgid "Override CSS variables for the active component or block."
+msgstr "覆盖当前活动组件或块的 CSS 变量。"
+
+#: src/Plugin/display_builder/Island/StylesPanel.php:27
+msgid "Apply style utilities to the active component or block"
+msgstr "将样式工具应用于当前活动组件或块"
+
+#: src/Plugin/display_builder/Island/ViewportSwitcher.php:193
+msgid "Switch viewport of this display"
+msgstr "切换此显示的视口"
+
+#: src/Plugin/display_builder/Island/VisibilityConditionsPanel.php:27
+msgid "Set visibility conditions for the active component or block."
+msgstr "设置当前活动组件或块的可见性条件。"
+
+#: components/library_panel/library_panel.twig:10
+msgid "Filter by name or detail"
+msgstr "按名称或详情筛选"
+
+#: modules/display_builder_entity_view/src/Controller/EntityViewOverridesController.php:50
+msgid "Display builder for @title, @view_mode_name"
+msgstr "@title 的 Display Builder，@view_mode_name"
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityViewOverride.php:238
+msgid "Updated using Display Builder."
+msgstr "已使用 Display Builder 更新。"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.permissions.yml:0
+msgid "Administer page layouts"
+msgstr "管理页面布局"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.permissions.yml:0
+msgid "View, edit and delete any page layout."
+msgstr "查看、编辑和删除任何页面布局。"
+
+#: modules/display_builder_ui/display_builder_ui.permissions.yml:0
+msgid "Administer Display Builder profiles"
+msgstr "管理 Display Builder 配置档案"
+
+#: modules/display_builder_ui/display_builder_ui.permissions.yml:0
+msgid "Administer Display Builder presets"
+msgstr "管理 Display Builder 预设"
+
+#: modules/display_builder_ui/display_builder_ui.permissions.yml:0
+msgid "List Display Builder instances"
+msgstr "列出 Display Builder 实例"
+
+#: modules/display_builder_ui/display_builder_ui.permissions.yml:0
+msgid "View the admin page about Display Builder instances."
+msgstr "查看关于 Display Builder 实例的管理页面。"
+
+#: modules/display_builder_ui/src/Form/InstanceListFilterForm.php:56
+msgid "Contains characters..."
+msgstr "包含字符..."
+
+#: src/DisplayBuildablePluginBase.php:168
+msgid "You are not allowed to use Display Builder."
+msgstr "您无权使用 Display Builder。"
+
+#: src/DisplayBuildablePluginBase.php:329
+msgid "The profile defines the features available in the builder."
+msgstr "配置档案定义了构建器中可用的功能。"
+
+#: src/DisplayBuildablePluginBase.php:402
+msgid "You are not allowed to use Display Builder here."
+msgstr "您无权在此处使用 Display Builder。"
+
+#: src/ProfilePermissions.php:54
+msgid "Use the %label Display Builder profile"
+msgstr "使用 %label Display Builder 配置档案"
+
+#: src/Controller/ApiController.php:190
+msgid "[update] Missing payload!"
+msgstr "[update] 缺少负载！"
+
+#: src/Plugin/display_builder/Island/BuilderPanel.php:30
+msgid ""
+"The Display Builder main island. Build the display with dynamic "
+"preview."
+msgstr "Display Builder 主孤岛。通过动态预览构建显示。"
+
+#: src/Plugin/display_builder/Island/DesignTokensPanel.php:26
+msgid "Design tokens (CSS variables)"
+msgstr "设计令牌（CSS 变量）"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:214
+msgid "Clear history (shortcut: Shift+C)"
+msgstr "清除历史（快捷键：Shift+C）"
+
+#: src/Plugin/display_builder/Island/HistoryButtons.php:215
+msgid "Clear all changes history (Shift+C)"
+msgstr "清除所有更改历史（Shift+C）"
+
+#: src/Plugin/display_builder/Island/LibrariesPanel.php:20
+msgid "Pick elements from libraries and drop them in the display."
+msgstr "从库中选取元素并将其拖放到显示中。"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:131
+msgid "[Placeholder] Block messages"
+msgstr "[占位符] 块消息"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:135
+msgid "[Placeholder] Page title"
+msgstr "[占位符] 页面标题"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:139
+msgid "[Placeholder] Page content"
+msgstr "[占位符] 页面内容"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:144
+msgid "[Placeholder] View attachment before"
+msgstr "[占位符] 视图附件之前"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:149
+msgid "[Placeholder] View exposed form"
+msgstr "[占位符] 视图暴露表单"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:154
+msgid "[Placeholder] View header"
+msgstr "[占位符] 视图页眉"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:159
+msgid "[Placeholder] View rows"
+msgstr "[占位符] 视图行"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:164
+msgid "[Placeholder] View attachment after"
+msgstr "[占位符] 视图附件之后"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:169
+msgid "[Placeholder] View pager"
+msgstr "[占位符] 视图分页器"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:173
+msgid "[Placeholder] View more"
+msgstr "[占位符] 视图更多链接"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:177
+msgid "[Placeholder] View footer"
+msgstr "[占位符] 视图页脚"
+
+#: src/Plugin/display_builder/Island/PreviewPanel.php:182
+msgid "[Placeholder] View feed icons"
+msgstr "[占位符] 视图 Feed 图标"
+
+#: src/Plugin/display_builder/Island/StylesPanel.php:26
+msgid "Style utilities"
+msgstr "样式工具"
+
+#: modules/display_builder_page_layout/display_builder_page_layout.routing.yml:0
+msgid "Duplicate page layout"
+msgstr "复制页面布局"
+
+#: src/Plugin/display_builder/Island/BlockLibraryPanel.php:218; src/Plugin/display_builder/Island/BuilderPanel.php:342,452
+msgid "Invalid source found: %message"
+msgstr "发现无效源：%message"
+
+#: modules/display_builder_page_layout/config/schema/display_builder_page_layout.schema.yml:0
+msgid "Source: Page layout"
+msgstr "源：页面布局"
+
+#: modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageLayoutSource.php:29
+msgid "Page layout (from active theme)"
+msgstr "页面布局（来自当前主题）"
+
+#: modules/display_builder_ui/src/InstanceListBuilder.php:214
+msgid ""
+"They are created automatically from the displays and saved in the "
+"configuration when published."
+msgstr "它们从显示中自动创建，并在发布时保存到配置中。"
+
+#: src/Form/PatternPresetForm.php:61
+msgid ""
+"It is not recommended to manually edit a Pattern as an invalid format "
+"can lead to an error on all display."
+msgstr "不建议手动编辑模式，因为格式无效可能导致所有显示出错。"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:154,172
+msgid "Content Override"
+msgstr "内容覆盖"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:165
+msgid "Enable content overrides"
+msgstr "启用内容覆盖"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:166
+msgid "Each content will have the option to define a custom display."
+msgstr "每个内容都可以选择定义自定义显示。"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:182
+msgid "Profile for overrides"
+msgstr "覆盖配置档案"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:183
+msgid "The profile used for content overrides. Can be changed at any time."
+msgstr "用于内容覆盖的配置档案。可随时更改。"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:191
+msgid "Display Override Field"
+msgstr "显示覆盖字段"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:192
+msgid "The field where per-content display overrides are stored."
+msgstr "存储每个内容显示覆盖的字段。"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:399
+msgid "@display display override"
+msgstr "@display 显示覆盖"
+
+#: modules/display_builder_entity_view/src/Form/EntityViewDisplayFormTrait.php:122
+msgid "Enable with profile"
+msgstr "启用配置档案"
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityView.php:234
+msgid "Import from Layout Builder or Manage Display configuration."
+msgstr "从布局构建器或管理显示配置导入。"
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityView.php:237
+msgid "Initialization from existing Entity View Display configuration."
+msgstr "从现有实体视图显示配置初始化。"
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityViewOverride.php:280
+msgid "Copy from Entity View Display configuration."
+msgstr "从实体视图显示配置复制。"
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityViewOverride.php:284
+msgid "Import from Layout Builder override."
+msgstr "从布局构建器覆盖导入。"
+
+#: modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityViewOverride.php:287
+msgid "Initialization from existing content."
+msgstr "从现有内容初始化。"
+
+#: modules/display_builder_page_layout/src/Plugin/display_builder/Buildable/PageLayout.php:170
+msgid "Import from Block Layout configuration."
+msgstr "从块布局配置导入。"
+
+#: modules/display_builder_page_layout/src/Plugin/display_builder/Buildable/PageLayout.php:173
+msgid "Initialization from existing Page Layout configuration."
+msgstr "从现有页面布局配置初始化。"
+
+#: modules/display_builder_views/src/Plugin/display_builder/Buildable/ViewDisplay.php:201
+msgid "Initialization from default configuration."
+msgstr "从默认配置初始化。"
+
+#: modules/display_builder_views/src/Plugin/display_builder/Buildable/ViewDisplay.php:204
+msgid "Initialization from existing View configuration."
+msgstr "从现有视图配置初始化。"
+
+#: src/Controller/ApiController.php:127
+msgid "[attachToSlot] moveToSlot failed with invalid data"
+msgstr "[attachToSlot] moveToSlot 因数据无效而失败"
+
+#: src/Controller/ApiController.php:758
+msgid "Error: @error, check logs for more details."
+msgstr "错误：@error，请查看日志了解详情。"
+
+#: src/Controller/ApiController.php:753
+msgid "@message <pre>@debug</pre>"
+msgstr "@message <pre>@debug</pre>"
