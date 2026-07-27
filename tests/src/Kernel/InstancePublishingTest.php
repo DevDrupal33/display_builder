@@ -82,6 +82,21 @@ final class InstancePublishingTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
+   * Test the ::revert() method.
+   */
+  public function testRevert(): void {
+    $instance = $this->createDisplayBuilderInstance();
+    $testData = ['node_id' => '1', 'source_id' => 'component', 'source' => [], 'third_party_settings' => []];
+    $instance->setNewPresent([$testData], 'Initial state');
+    self::assertCount(1, $instance->getCurrentState());
+
+    $instance->revert();
+    // Base plugin revertSources() returns [], so state is cleared.
+    self::assertCount(0, $instance->getCurrentState(), 'State is cleared after revert.');
+    self::assertSame('Revert to default display.', (string) $instance->getRevisionLogMessage());
+  }
+
+  /**
    * Test the ::restore() method.
    */
   public function testRestore(): void {

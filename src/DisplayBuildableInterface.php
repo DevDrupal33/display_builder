@@ -208,4 +208,16 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, Con
    */
   public function saveSources(): void;
 
+  /**
+   * Revert sources to the default/base configuration.
+   *
+   * Clears any overridden data and returns the base sources from the default
+   * configuration. Called before the ON_REVERT event so islands receive the
+   * final instance state.
+   *
+   * @return array
+   *   The base sources from the default configuration.
+   */
+  public function revertSources(): array;
+
 }

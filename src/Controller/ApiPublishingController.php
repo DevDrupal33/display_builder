@@ -63,6 +63,8 @@ class ApiPublishingController extends ApiControllerBase {
    *   A renderable array
    */
   public function revert(Request $request, InstanceInterface $display_builder_instance): array {
+    $display_builder_instance->revert();
+
     $this->builder = $display_builder_instance;
 
     return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_REVERT);

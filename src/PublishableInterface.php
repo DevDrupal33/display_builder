@@ -61,4 +61,11 @@ interface PublishableInterface {
    */
   public function restore(): void;
 
+  /**
+   * Revert to the default/base configuration.
+   *
+   * Clears any overridden data and restores the default sources.
+   */
+  public function revert(): void;
+
 }

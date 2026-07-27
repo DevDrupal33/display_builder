@@ -209,6 +209,16 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
+  public function revertSources(): array {
+    $this->field->setValue(NULL);
+    $this->field->getEntity()->save();
+
+    return $this->display->getThirdPartySetting('display_builder', DisplayBuildableInterface::SOURCES_PROPERTY, []);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function checkAccess(string $instance_id, AccountInterface $account): AccessResultInterface {
     [, $entity_type_id, $entity_id] = \explode('__', $instance_id);
     $entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->load($entity_id);
@@ -281,11 +291,12 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
       }
 
       $entity_type = $display->getTargetEntityTypeId();
-      $field_name = $display_builder[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY] ?? NULL;
 
-      if (!$field_name) {
+      if (!isset($display_builder[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY])) {
         continue;
       }
+
+      $field_name = $display_builder[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY];
       $entity_storage[$entity_type] ??= $entityTypeManager->getStorage($entity_type);
       $entity_query[$entity_type] ??= $entity_storage[$entity_type]->getQuery()->accessCheck(FALSE);
       $instances = \array_merge($instances, self::collectInstancesByField($field_name, $display, $entity_query[$entity_type]));

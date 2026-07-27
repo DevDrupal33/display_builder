@@ -104,14 +104,16 @@ final class ApiPublishingControllerTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Tests ::revert() dispatches ON_REVERT and returns the expected shape.
+   * Tests ::revert() dispatches ON_REVERT and clears instance state.
    *
-   * For a non-override (standalone) instance the subscriber returns early,
-   * so the saved state must be identical to the state before the call.
+   * For a non-override (standalone) instance the base plugin's revertSources()
+   * returns an empty array, so the saved state must be empty after the call.
    */
   public function testRevert(): void {
-    $node_id = $this->instance->attachToRoot(0, 'token', []);
+    $this->instance->attachToRoot(0, 'token', []);
     $this->instance->save();
+    $state = $this->instance->getCurrentState();
+    self::assertCount(1, $state, 'State is modified.');
 
     $request = Request::create(
       '/api/display-builder/' . $this->instance->id() . '/revert',
@@ -123,11 +125,11 @@ final class ApiPublishingControllerTest extends DisplayBuilderKernelTestBase {
     self::assertIsArray($response['state']);
     self::assertIsArray($response['logs']);
 
-    // Non-override instance: subscriber returns early, state must be unchanged.
+    // Non-override instance: base plugin revertSources() returns [],
+    // so state is cleared.
     $saved = $this->loadInstance($this->instance->id());
     $state = $saved->getCurrentState();
-    self::assertCount(1, $state, 'State is unchanged for a non-override instance.');
-    self::assertSame($node_id, $state[0]['node_id']);
+    self::assertCount(0, $state, 'State is cleared for a non-override instance after revert.');
   }
 
 }

@@ -61,7 +61,7 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
     // - view_display (string)
     // However, this is loading a "real" View entity, as stored in config. So
     // it may miss unsaved parameters.
-    $view = View::load($configuration['view_id'] ?? '')?->getExecutable() ?? NULL;
+    $view = View::load($configuration['view_id'] ?? '')?->getExecutable();
 
     if ($view) {
       $view->setDisplay($configuration['view_display'] ?? '');

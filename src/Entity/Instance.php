@@ -392,6 +392,14 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   /**
    * {@inheritdoc}
    */
+  public function revert(): void {
+    $sources = $this->getBuildablePlugin()->revertSources();
+    $this->setNewPresent($sources, new TranslatableMarkup('Revert to default display.'));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function clear(): void {
     $this->getStorage()->clear($this);
   }

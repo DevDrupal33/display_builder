@@ -207,6 +207,13 @@ abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase impleme
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function revertSources(): array {
+    return [];
+  }
+
+  /**
    * Create a display builder instance.
    *
    * @return \Drupal\Core\Entity\EntityInterface
