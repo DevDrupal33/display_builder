@@ -31,24 +31,22 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $buttons = [
+      $this->isButtonEnabled('clear') ? $this->buildClearButton($builder) : [],
       $this->isButtonEnabled('undo') ? $this->buildUndoButton($builder) : [],
       $this->isButtonEnabled('redo') ? $this->buildRedoButton($builder) : [],
     ];
-    $clear_button = $this->isButtonEnabled('clear') ? $this->buildClearButton($builder) : [];
 
     if (empty(\array_filter($buttons))) {
       return [];
     }
 
-    $build = [
+    return [
       '#type' => 'component',
       '#component' => 'display_builder:button_group',
       '#slots' => [
         'buttons' => $buttons,
       ],
     ];
-
-    return [$build, $clear_button];
   }
 
   /**
@@ -56,6 +54,11 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
    */
   protected function hasButtons(): array {
     return [
+      'clear' => [
+        'title' => $this->t('Clear'),
+        'description' => $this->t('A button to clear the logs history (past and future).'),
+        'default' => 'hidden',
+      ],
       'undo' => [
         'title' => $this->t('Undo'),
         'description' => $this->t('Undo action, icon is always visible, label is number of undo.'),
@@ -65,11 +68,6 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
         'title' => $this->t('Redo'),
         'description' => $this->t('Redo action, icon is always visible, label is number of redo.'),
         'default' => 'icon_label',
-      ],
-      'clear' => [
-        'title' => $this->t('Clear'),
-        'description' => $this->t('A button to clear the logs history (past and future).'),
-        'default' => 'hidden',
       ],
     ];
   }

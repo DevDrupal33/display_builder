@@ -115,12 +115,12 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
   /**
    * How contextual panel tabs are displayed.
    */
-  protected string $contextual_tabs_display = 'icon';
+  protected string $contextual_tabs_display = 'label';
 
   /**
    * How View panels (main area tabs, sidebar buttons) are displayed.
    */
-  protected string $view_panels_display = 'icon_label';
+  protected string $view_panels_display = 'label';
 
   /**
    * {@inheritdoc}

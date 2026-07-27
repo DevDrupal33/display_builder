@@ -72,7 +72,7 @@ class ControlsButtons extends IslandPluginToolbarButtonConfigurationBase {
       'theme' => [
         'title' => $this->t('Theme'),
         'description' => $this->t('Pick a theme mode as light/dark/system for the display builder.'),
-        'default' => 'icon',
+        'default' => 'hidden',
       ],
       'help' => [
         'title' => $this->t('Help'),
