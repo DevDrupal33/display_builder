@@ -1,0 +1,38 @@
+.db-instances {
+  padding-top: 1rem;
+}
+
+.db-instances__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.db-instances__list li {
+  margin: 0;
+  padding: 0;
+}
+
+.db-instances__link,
+.db-instances__current {
+  display: block;
+  overflow: hidden;
+  padding: 0.25rem 0.5rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.db-instances__current {
+  font-weight: bold;
+}
+
+.db-instances__empty {
+  padding: 0.5rem;
+  opacity: 0.7;
+}
+
+.db-instances h3 {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  font-style: italic;
+}

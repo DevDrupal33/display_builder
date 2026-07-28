@@ -126,6 +126,11 @@ textarea_ckeditor:
     - core/ckeditor5.sourceEditing
     - core/ckeditor5.showBlocks
 
+instances:
+  css:
+    component:
+      ./assets/css/instances.css: {}
+
 # Global fixes meant to disappear or replaced by a cleaner solution.
 # The per-admin-chrome files are split by which module they target, for
 # readability only - both load unconditionally, since every selector in them is
