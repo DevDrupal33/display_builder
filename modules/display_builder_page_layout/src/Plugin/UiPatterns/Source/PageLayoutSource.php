@@ -10,6 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Theme\Registry;
 use Drupal\Core\Utility\Token;
 use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\ui_patterns\Attribute\Source;
@@ -26,7 +27,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 #[Source(
   id: 'page_layout',
-  label: new TranslatableMarkup('Page layout (from active theme)'),
+  label: new TranslatableMarkup('Theme page (from active theme)'),
   prop_types: ['slot'],
   context_requirements: ['page'],
   context_definitions: []
@@ -50,6 +51,7 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
     protected ComponentElementBuilder $componentElementBuilder,
     protected SourcePluginManager $sourceManager,
     protected ConfigFactoryInterface $configFactory,
+    protected Registry $themeRegistry,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $propTypeManager, $contextRepository, $routeMatch, $sampleEntityGenerator, $moduleHandler, $token, $normalizer);
   }
@@ -77,6 +79,7 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
       $container->get('ui_patterns.component_element_builder'),
       $container->get('plugin.manager.ui_patterns_source'),
       $container->get('config.factory'),
+      $container->get('theme.registry'),
     );
 
     return $instance;
@@ -86,9 +89,16 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
    * {@inheritdoc}
    */
   public function getPropValue(): mixed {
+    // Page template may have been altered in runtime by PageLayoutPageVariant
+    // or FullPageBuilderPageVariant. So, let's use the original template from
+    // the permanent registry by adding it as a new runtime entry.
+    $theme_registry = $this->themeRegistry->get();
+    $runtime = $this->themeRegistry->getRuntime();
+    $runtime->set('page_legacy', $theme_registry['page']);
+
     /** @var array<string, mixed> $page */
     $page = [
-      '#type' => 'page',
+      '#theme' => 'page_legacy',
     ];
 
     foreach ($this->getSlotValues() as $region_id => $region) {
@@ -100,6 +110,9 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
         $region_content[] = $content;
       }
 
+      // A single empty block is enough for Element::isRenderArray() to stop
+      // considering the page render element as a render array.
+      $region_content = \array_filter($region_content);
       $page[(string) $region_id] = $region_content;
     }
 
@@ -172,7 +185,7 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
    * {@inheritdoc}
    */
   public function setSlotRenderable(array $build, string $slot_id, array $slot): array {
-    $build[$slot_id] = $slot;
+    $build['content'][$slot_id] = $slot;
 
     return $build;
   }

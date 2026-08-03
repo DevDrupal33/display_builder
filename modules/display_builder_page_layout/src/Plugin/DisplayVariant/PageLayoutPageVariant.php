@@ -119,7 +119,7 @@ class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPlugi
       return [];
     }
 
-    // We alter the registry here instead of implementing
+    // We alter the registry runtime here instead of implementing
     // hook_theme_registry_alter in order keep the alteration specific to each
     // page.
     $theme_registry = $this->themeRegistry->get();
