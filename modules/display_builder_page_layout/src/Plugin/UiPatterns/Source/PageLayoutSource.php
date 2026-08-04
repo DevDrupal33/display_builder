@@ -185,7 +185,7 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
    * {@inheritdoc}
    */
   public function setSlotRenderable(array $build, string $slot_id, array $slot): array {
-    $build['content'][$slot_id] = $slot;
+    $build[$slot_id] = $slot;
 
     return $build;
   }
