@@ -108,6 +108,16 @@ final class OverridesRoutes implements EventSubscriberInterface {
       'parameters' => [
         $entity_type_id => ['type' => 'entity:' . $entity_type_id],
       ],
+      // The builder draws its own chrome. Without these it renders *inside*
+      // whichever Page Layout matches the node's canonical path, so the site
+      // header, footer and main-content placeholder wrap the editor, and a
+      // viewport switch shrinks only the preview pane inside that page.
+      // The entity view display builder has always set both; the override
+      // routes are built here and were missed.
+      // @see \Drupal\display_builder\Event\PageVariantSubscriber
+      // @see \Drupal\display_builder_entity_view\Routing\DisplayBuilderRoutes
+      '_admin_route' => FALSE,
+      '_display_builder_full_page_route' => TRUE,
     ];
 
     return (new Route($path))
