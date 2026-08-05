@@ -114,10 +114,19 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
       // A single empty block is enough for Element::isRenderArray() to stop
       // considering the page render element as a render array.
       $region_content = \array_filter($region_content);
-      $page[(string) $region_id] = $region_content;
+
+      if (!empty($region_content)) {
+        $page[(string) $region_id] = $region_content;
+      }
     }
 
-    return $page;
+    return [
+      // `page` renderable doesn't accept #attributes, so let's wrap it up to
+      // be able to apply styles and other dynamic attributes.
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      'content' => $page,
+    ];
   }
 
   /**
@@ -186,7 +195,7 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
    * {@inheritdoc}
    */
   public function setSlotRenderable(array $build, string $slot_id, array $slot): array {
-    $build[$slot_id] = $slot;
+    $build['content'][$slot_id] = $slot;
 
     return $build;
   }
