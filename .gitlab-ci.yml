@@ -6,6 +6,16 @@ include:
       - "/includes/include.drupalci.variables.yml"
       - "/includes/include.drupalci.workflows.yml"
 
+# The Drupal CI templates declare only build, validate and test, so a job in a
+# `report` stage would fail the pipeline at parse time. Redeclare the upstream
+# list and append the stage the Playwright shard merge job needs.
+# @see https://git.drupalcode.org/project/gitlab_templates/-/blob/main/includes/include.drupalci.main.yml
+stages:
+  - build
+  - validate
+  - test
+  - report
+
 variables:
   _PHPUNIT_CONCURRENT: '1'
   _PHPUNIT_TESTGROUPS: 'display_builder'
@@ -25,10 +35,45 @@ variables:
     value: 'base'
     description: "The tag to use for E2E tests. Defaults to 'base'."
   PLAYWRIGHT_TEST_WORKERS:
-    value: '4'
+    # Each worker installs its own Drupal site (the DrupalSite fixture is
+    # worker scoped), so this multiplies with `parallel:` on the shards. Keep
+    # it low now that the shards carry the parallelism.
+    value: '2'
     description: 'Number of workers for Playwright job.'
+  # Database for the E2E jobs only - phpunit keeps the Drupal CI default, which
+  # despite what its own description says is MySQL 8, not MariaDB
+  # (`_TARGET_DB_TYPE: $MYSQL_PERCONA_MARIADB` -> 'mysql').
+  # SQLite drops the per-query TCP hop to the service container, which should
+  # help since these jobs are dominated by site installs. The catch is that
+  # `.simpletest-db` hands every worker the same file,
+  # `sites/default/files/db.sqlite`, isolated only by the test-site table
+  # prefix, so the two workers of a shard serialize on one write lock. If that
+  # bites, it shows up as "database is locked" during install, not in a test.
+  # Set back to mysql / 8 to revert.
+  # @see https://git.drupalcode.org/project/gitlab_templates/-/blob/main/includes/include.drupalci.main.yml#L285
+  _E2E_DB_TYPE:
+    value: 'sqlite'
+    description: 'Database for the E2E jobs: sqlite or mysql.'
+  _E2E_DB_VERSION:
+    value: '3'
+    description: 'Database version for the E2E jobs: 3 for sqlite, 8 for mysql.'
   CI_MAIN_PROJECT_NAME: display_builder
   KUBERNETES_CPU_REQUEST: 16
+  # Front end libraries installed locally for the tests. Keep in sync with the
+  # versions declared in display_builder.libraries.yml: the CDN serves those in
+  # production, so the tests must run the same ones.
+  _SHOELACE_VERSION: '2.20.1'
+  _HTMX_SSE_VERSION: '2.2.3'
+  # Test image, @see https://github.com/DevDrupal33/playwright-drupal-tests
+  # What CI takes from it is the Playwright browsers baked at
+  # PLAYWRIGHT_BROWSERS_PATH, and those are tied to the Playwright version in
+  # package-lock.json. `main` moves on every rebuild, which can shift the browser
+  # revisions out from under the lock and make every shard re-download them, so
+  # pin the digest and bump it together with @playwright/test.
+  # Currently tag `20260805`, image commit 70420baa, Playwright 1.62.0.
+  # Read the digest of a tag with:
+  #   docker buildx imagetools inspect ghcr.io/devdrupal33/playwright-drupal-tests:main
+  _TEST_IMAGE: 'ghcr.io/devdrupal33/playwright-drupal-tests@sha256:d9065860f1d7f25c8acbf3e5861b2945d1c1e1ccfb73adf47666664fb06fe2fb'
 
 .manual-rule: &manual-rule
   - when: manual
@@ -193,9 +238,56 @@ phpmd:
       - tests/modules/*/tests/src/Playwright/Tests/*.spec.*
     when: on_success
 
+# Shoelace and the htmx SSE extension are served from the Drupal libraries
+# directory during tests, @see the `_shoelace_local` and `_htmx_sse_local`
+# libraries. Pinned to the versions the module declares, so the tests exercise
+# what the CDN serves in production, and so the cache key below only moves when
+# the module moves.
+.libraries-install:
+  script:
+    - echo -e "\e[0Ksection_start:`date +%s`:lib_install[collapsed=true]\r\e[0KNPM lib install..."
+    - if [ ! -f ${CI_PROJECT_DIR}/${_WEB_ROOT}/libraries/shoelace/node_modules/@shoelace-style/shoelace/cdn/shoelace.js ]; then
+        mkdir -p ${CI_PROJECT_DIR}/${_WEB_ROOT}/libraries/shoelace;
+        cd ${CI_PROJECT_DIR}/${_WEB_ROOT}/libraries/shoelace && npm init -y && npm install @shoelace-style/shoelace@${_SHOELACE_VERSION};
+        cd ${CI_PROJECT_DIR};
+      fi
+    - if [ ! -f ${CI_PROJECT_DIR}/${_WEB_ROOT}/libraries/htmx-ext-sse/node_modules/htmx-ext-sse/dist/sse.min.js ]; then
+        mkdir -p ${CI_PROJECT_DIR}/${_WEB_ROOT}/libraries/htmx-ext-sse;
+        cd ${CI_PROJECT_DIR}/${_WEB_ROOT}/libraries/htmx-ext-sse && npm init -y && npm install htmx-ext-sse@${_HTMX_SSE_VERSION};
+        cd ${CI_PROJECT_DIR};
+      fi
+    - echo -e "\e[0Ksection_end:`date +%s`:lib_install\r\e[0K"
+
+# The two library trees are ~37MB of pure download, and without this every
+# shard fetches them again. The `if` guards above make a cache miss harmless:
+# the job just installs as before. Browsers are deliberately not cached, they
+# are baked into the image at PLAYWRIGHT_BROWSERS_PATH. Paths are literal
+# because they are relative to CI_PROJECT_DIR: they track the `_WEB_ROOT`
+# default, and overriding it costs a cache miss, not a failure.
+.libraries-cache: &libraries-cache
+  key: "${CI_MAIN_PROJECT_NAME}-libraries-${_SHOELACE_VERSION}-${_HTMX_SSE_VERSION}"
+  paths:
+    - web/libraries/shoelace/node_modules
+    - web/libraries/htmx-ext-sse/node_modules
+
+# Populates the cache once, in `build`, alongside the much longer composer job.
+# The shards only pull it: four parallel jobs pushing the same 37MB would cost
+# more than the download it saves.
+playwright_libraries:
+  stage: build
+  image: $_TEST_IMAGE
+  needs: []
+  rules:
+    - *skip-e2e-tests-rule
+    - *playwright-tests-exist-rule
+    - *manual-rule
+  cache:
+    - *libraries-cache
+  script:
+    - !reference [.libraries-install, script]
+
 .playwright-base:
-  # @see https://github.com/devdrupal33/display_builder_test
-  image: ghcr.io/devdrupal33/display_builder_test:main
+  image: $_TEST_IMAGE
   extends: .test-variables
   stage: test
   needs: [composer]
@@ -205,7 +297,22 @@ phpmd:
     - *skip-e2e-tests-rule
     - *playwright-tests-exist-rule
     - *manual-rule
+  # Each worker installs its own Drupal site, so a shard pays two installs
+  # whatever it runs. Splitting ~20 tests four ways spends more on installing
+  # than on testing; two shards keep the ratio sane.
+  parallel: 2
+  cache:
+    - <<: *libraries-cache
+      policy: pull
   variables:
+    # Scoped here rather than globally so only the E2E jobs move: `.with-database`
+    # interpolates both into the service image name, and `.simpletest-db` reads
+    # the type to build SIMPLETEST_DB. The service container still starts on
+    # SQLite - there is a real `sqlite-3:production` image and it is a no-op -
+    # so its boot time stays in the measurement. Drop the `services:` below too
+    # if SQLite wins and the number is worth chasing.
+    _TARGET_DB_TYPE: $_E2E_DB_TYPE
+    _TARGET_DB_VERSION: $_E2E_DB_VERSION
     # Standard variables for Playwright. Mostly similar to NightwatchJS tests.
     # This is required for the job to work.
     DRUPAL_TEST_BASE_URL: "${SIMPLETEST_BASE_URL}"
@@ -224,21 +331,14 @@ phpmd:
     - export DRUPAL_TEST_DB_URL=$SIMPLETEST_DB
     - !reference [.show-environment-variables]
     - !reference [.show-context]
-    # Install local shoelace and htmx sse libraries for tests.
-    - echo -e "\e[0Ksection_start:`date +%s`:lib_install[collapsed=true]\r\e[0KNPM lib install..."
-    - if [ ! -f ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/shoelace/node_modules/@shoelace-style/shoelace/cdn/shoelace.js ]; then
-        mkdir -p ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/shoelace;
-        cd ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/shoelace && npm init -y && npm install @shoelace-style/shoelace;
-        cd ${CI_PROJECT_DIR};
-      fi
-    - if [ ! -f ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/htmx-ext-sse/node_modules/htmx-ext-sse/dist/sse.min.js ]; then
-        mkdir -p ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/htmx-ext-sse;
-        cd ${CI_PROJECT_DIR}/${DRUPAL_WEB_ROOT}/libraries/htmx-ext-sse && npm init -y && npm install htmx-ext-sse;
-        cd ${CI_PROJECT_DIR};
-      fi
-    - echo -e "\e[0Ksection_end:`date +%s`:lib_install\r\e[0K"
+    # Install local shoelace and htmx sse libraries for tests. Usually a no-op:
+    # the cache carries them in from `playwright_libraries`.
+    - !reference [.libraries-install, script]
     # Install playwright and packages, already cached in the image.
     - echo -e "\e[0Ksection_start:`date +%s`:playwright_install[collapsed=true]\r\e[0KPlaywright install..."
+    # Note: the shards and `merge_reports` have to end up on the same
+    # Playwright, a blob report cannot be merged across versions. Switch to
+    # `npm ci` if problem occur and commit package-lock.json. 
     - npm install
     - npx playwright install
     - echo -e "\e[0Ksection_end:`date +%s`:playwright_install\r\e[0K"
@@ -249,44 +349,51 @@ phpmd:
       for p in $(echo "${PLAYWRIGHT_TEST_PROJECT}" | tr ',' ' '); do
         _PROJECT_FLAGS="${_PROJECT_FLAGS} --project ${p}"
       done
-      echo -e "[cmd] npx playwright test ${_PROJECT_FLAGS} --grep @${PLAYWRIGHT_TEST_TAG} --workers ${PLAYWRIGHT_TEST_WORKERS}"
-      npx playwright test ${_PROJECT_FLAGS} --grep @${PLAYWRIGHT_TEST_TAG} --workers ${PLAYWRIGHT_TEST_WORKERS}
-  after_script:
-    - |
-      cat > ${CI_PROJECT_DIR}/test-results/links.json << EOF
-      {
-        "playwright": [
-          {
-            "external_link": {
-              "label": "Playwright report",
-              "url": "https://project.pages.drupalcode.org/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/playwright-report/index.html"
-            }
-          }
-        ]
-      }
-      EOF
+      echo -e "[cmd] npx playwright test ${_PROJECT_FLAGS} --grep @${PLAYWRIGHT_TEST_TAG} --workers ${PLAYWRIGHT_TEST_WORKERS} --shard=$CI_NODE_INDEX/$CI_NODE_TOTAL --reporter=blob"
+      npx playwright test ${_PROJECT_FLAGS} --grep @${PLAYWRIGHT_TEST_TAG} --workers ${PLAYWRIGHT_TEST_WORKERS} --shard=$CI_NODE_INDEX/$CI_NODE_TOTAL --reporter=blob
   artifacts:
-    expose_as: 'Playwright Test Reports'
+    # A shard produces no readable report of its own: the blob carries the
+    # results and the failure attachments (traces, screenshots, videos), and
+    # `merge_reports` turns the four of them into the HTML report and the link.
     when: always
-    expire_in: 3 mos
+    expire_in: 1 day
     paths:
-      - playwright-report/
-      - test-results/
-    reports:
-      junit:
-        - test-results/playwright.xml
-      annotations: test-results/links.json
+      - blob-report/
 
+# Chromium blocks every merge request: fastest engine, least flaky drag and
+# drop, and the one every reviewer is looking at anyway.
 playwright:
   extends: .playwright-base
   allow_failure: false
   variables:
-    PLAYWRIGHT_TEST_PROJECT: firefox, chromium
+    PLAYWRIGHT_TEST_PROJECT: chromium
     PLAYWRIGHT_TEST_TAG: base
 
+# Firefox is the only non-Blink engine we test, and this module leans hard on
+# `:has()`, sticky positioning, iframes and the z-index ladder, so it does
+# catch things Chromium cannot. It is too expensive for every push though: a
+# second project roughly doubles the job, worker-scoped site installs included.
+# Merge train only, still blocking, so nothing lands without it.
+playwright_firefox:
+  extends: .playwright-base
+  allow_failure: false
+  rules:
+    - *skip-e2e-tests-rule
+    - *playwright-tests-exist-rule
+    - if: $CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"
+      when: on_success
+    - *manual-rule
+  variables:
+    PLAYWRIGHT_TEST_PROJECT: firefox
+    PLAYWRIGHT_TEST_TAG: base
+
+# The heavier and timing-sensitive half: multi-session SSE, the page layout
+# submodule, the exhaustive toolbar sweep, secondary panels. Too slow for every
+# push, but blocking like the rest - a test nobody has to fix is a test nobody
+# reads.
 playwright_extra:
   extends: .playwright-base
-  allow_failure: true
+  allow_failure: false
   rules:
     - *skip-e2e-tests-rule
     - *playwright-tests-exist-rule
@@ -297,11 +404,78 @@ playwright_extra:
     PLAYWRIGHT_TEST_PROJECT: chromium
     PLAYWRIGHT_TEST_TAG: extra
 
+merge_reports:
+  # Stage declared at the top of this file, the Drupal CI templates stop at
+  # `test`.
+  stage: report
+  image: $_TEST_IMAGE
+  # Fetch the shard blobs only, instead of every artifact of the earlier
+  # stages. Naming the parent job covers all its parallel instances, and a job
+  # that was manual and never started is not an error, which is why the two
+  # merge-train-only jobs can be listed unconditionally.
+  dependencies:
+    - playwright
+    - playwright_firefox
+    - playwright_extra
+  # Runs even when a shard failed, since that is when the report is wanted.
+  # The skip rule comes first so the merge job disappears with the shards
+  # rather than looking for blobs nobody produced.
+  rules:
+    - *skip-e2e-tests-rule
+    - when: always
+  script:
+    - |
+      if [ ! -d blob-report ] || [ -z "$(ls -A blob-report 2>/dev/null)" ]; then
+        echo "[Notice] No blob report to merge, the Playwright jobs did not run."
+        exit 0
+      fi
+    # `npm ci` rather than the Playwright shipped in the image: a blob is
+    # version bound, and the shards write it with the version from
+    # package.json.
+    - npm ci
+    - mkdir -p test-results
+    # Merge all blob reports into a single HTML report. The junit reporter
+    # writes to stdout, so it takes a second pass of its own, and it is what
+    # gives Drupal CI a test report again now that the shards only emit blobs.
+    - npx playwright merge-reports --reporter=html ./blob-report
+    - npx playwright merge-reports --reporter=junit ./blob-report > test-results/playwright.xml
+    # The report is only reachable by browsing the artifacts, so expose it as a
+    # named link on the job and in the merge request widget. Points at this
+    # job's own artifacts, which is why it lives here and not on the shards.
+    # Dies with the artifacts, hence the same `expire_in` on both.
+    - |
+      cat > test-results/links.json << EOF
+      {
+        "playwright": [
+          {
+            "external_link": {
+              "label": "Playwright report",
+              "url": "https://${CI_PROJECT_ROOT_NAMESPACE}.${CI_PAGES_DOMAIN:-pages.drupalcode.org}/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/playwright-report/index.html"
+            }
+          }
+        ]
+      }
+      EOF
+  artifacts:
+    expose_as: 'Playwright Test Reports'
+    when: always
+    paths:
+      - playwright-report/
+      - test-results/
+    reports:
+      junit:
+        - test-results/playwright.xml
+      annotations: test-results/links.json
+    # The link above resolves through these artifacts, so it dies with them.
+    expire_in: 30 days
+
 ## Pages / documentation job ##
 
 pages:
   stage: build
   rules:
+    - if: '$SKIP_PAGES == "1"'
+      when: never
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       exists:
         - zensical.toml

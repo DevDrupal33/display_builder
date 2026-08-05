@@ -10,7 +10,7 @@ import config from '../playwright.config.loader'
 // enabled in test_builder alongside `state` for this.
 // @see \Drupal\display_builder\Plugin\display_builder\Island\SaveStatus
 // @see components/save_status/save_status.twig
-test('Save status pip tracks publish state', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) => {
+test('Save status pip tracks publish state', { tag: [ '@base' ] }, async ({ page, drupal, displayBuilder }) => {
   const pip = page.locator('.db-save-status')
 
   await test.step(`Create Page Layout and login`, async () => {

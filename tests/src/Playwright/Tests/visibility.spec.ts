@@ -10,7 +10,7 @@ import config from '../playwright.config.loader'
 // the control step that proves the hide was the condition, not a dead submit.
 // @see \Drupal\display_builder\Plugin\display_builder\Island\VisibilityConditionsPanel
 // @see \Drupal\display_builder\Hook\UiPatternsHooks::sourceValueAlter()
-test('A visibility condition hides a node', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) => {
+test('A visibility condition hides a node', { tag: [ '@base' ] }, async ({ page, drupal, displayBuilder }) => {
   const component = page.locator('.db-island-builder [data-test="test_simple"]')
 
   await test.step(`Create Page Layout and login`, async () => {

@@ -19,15 +19,20 @@ class DisplayBuilderTestSetup implements TestSetupInterface {
    * {@inheritdoc}
    */
   public function setup(): void {
-    // Install required modules.
+    // Install required modules. Each install() call rebuilds the container and
+    // the router, so modules are batched: the installer resolves dependency
+    // order within a batch, and only the boundaries below are ordering that
+    // actually matters.
     $module_installer = \Drupal::service('module_installer');
     \assert($module_installer instanceof ModuleInstallerInterface);
-    // Required for viewport switcher.
-    $module_installer->install(['breakpoint']);
-    // Required UI Suite modules.
-    $module_installer->install(['ui_patterns']);
-    $module_installer->install(['display_builder']);
-    $module_installer->install(['display_builder_page_layout']);
+    $module_installer->install([
+      // Required for viewport switcher.
+      'breakpoint',
+      // Required UI Suite modules.
+      'ui_patterns',
+      'display_builder',
+      'display_builder_page_layout',
+    ]);
 
     // Install DB test theme and set it as the default theme.
     $theme_installer = \Drupal::service('theme_installer');
@@ -36,12 +41,10 @@ class DisplayBuilderTestSetup implements TestSetupInterface {
     $system_theme_config = \Drupal::configFactory()->getEditable('system.theme');
     $system_theme_config->set('default', 'display_builder_theme_test')->save();
 
-    $module_installer->install(['ui_styles']);
-    $module_installer->install(['display_builder_ui']);
+    $module_installer->install(['ui_styles', 'display_builder_ui']);
 
     // Enable tests modules at the end for config import.
-    $module_installer->install(['display_builder_test']);
-    $module_installer->install(['display_builder_page_layout_test']);
+    $module_installer->install(['display_builder_test', 'display_builder_page_layout_test']);
 
     // Set the state to use local asset libraries.
     $state = \Drupal::state();

@@ -12,7 +12,7 @@ export type DrupalSite = {
   username: string
   password: string
   hasDrush: boolean
-  teardown: Promise<string>
+  teardown: () => Promise<string>
 }
 
 export type DrupalSiteInstall = {
@@ -44,7 +44,7 @@ export type DrupalSiteInstall = {
  */
 export const drupalSite = base.extend<DrupalSiteInstall>({
   drupalSite: [
-    async ({ }, use, workerInfo) => {
+    async ({ }, use) => {
       if (process.env.DRUPAL_TEST_SKIP_INSTALL && process.env.DRUPAL_TEST_SKIP_INSTALL === 'true') {
         const withDrush = await hasDrush()
         utils.info('Drupal is installed, skip installation for tests')
@@ -71,13 +71,16 @@ export const drupalSite = base.extend<DrupalSiteInstall>({
         process.env.DRUPAL_TEST_DB_URL && process.env.DRUPAL_TEST_DB_URL.length > 0
           ? `--db-url "${process.env.DRUPAL_TEST_DB_URL}"`
           : ''
-      const stdout = await exec(
-        `php ./core/scripts/test-site.php install ${setupFile} ${installProfile} ${langcodeOption} --base-url ${process.env.DRUPAL_TEST_BASE_URL} ${dbOption} --json`,
-      )
+      // hasDrush() shells out to Composer, so it rides alongside the install
+      // instead of adding its own round trip once the install has finished.
+      const [stdout, withDrush] = await Promise.all([
+        exec(
+          `php ./core/scripts/test-site.php install ${setupFile} ${installProfile} ${langcodeOption} --base-url ${process.env.DRUPAL_TEST_BASE_URL} ${dbOption} --json`,
+        ),
+        hasDrush(),
+      ])
 
       const installData = JSON.parse(stdout.toString())
-
-      const withDrush = await hasDrush()
 
       await use({
         dbPrefix: installData.db_prefix,
@@ -89,8 +92,12 @@ export const drupalSite = base.extend<DrupalSiteInstall>({
           if (process.env.PLAYWRIGHT_SKIP_TEARDOWN && process.env.PLAYWRIGHT_SKIP_TEARDOWN === 'true') {
             return Promise.resolve('')
           }
+          // Same --db-url as the install: it is the connection, and the site
+          // to drop is named by the db-prefix argument. Anything appended to
+          // the URL points the tear-down at a database that does not exist,
+          // and the test site stays behind.
           return await exec(
-            `php core/scripts/test-site.php tear-down --no-interaction --db-url ${process.env.DRUPAL_TEST_DB_URL}-${workerInfo.workerIndex} ${installData.db_prefix}`,
+            `php core/scripts/test-site.php tear-down --no-interaction ${dbOption} ${installData.db_prefix}`,
           )
         },
       })
@@ -117,8 +124,10 @@ export const beforeAllTests = base.extend<{ forEachWorker: void }>({
   forEachWorker: [
     async ({ drupalSite }, use) => {
       await use()
-      // This code runs after all the tests in the worker process.
-      drupalSite.teardown()
+      // This code runs after all the tests in the worker process. Awaited, so
+      // the tear-down is not killed with the worker before it has dropped the
+      // test site.
+      await drupalSite.teardown()
     },
     { scope: 'worker', auto: true },
   ], // automatically starts for every worker.

@@ -9,7 +9,7 @@ import config from '../playwright.config.loader'
 // re-materialises its components. Proves save -> appears-in-library -> drop-back.
 // @see \Drupal\display_builder\Plugin\display_builder\Island\MenuPreset
 // @see \Drupal\display_builder\Plugin\display_builder\Island\PresetLibraryPanel
-test('Save a preset and drop it back', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) => {
+test('Save a preset and drop it back', { tag: [ '@base' ] }, async ({ page, drupal, displayBuilder }) => {
   const components = page.locator('.db-island-builder [data-test="test_simple"]')
 
   await test.step(`Create Page Layout and login`, async () => {

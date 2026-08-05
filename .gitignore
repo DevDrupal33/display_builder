@@ -1,5 +1,7 @@
 node_modules
-package-lock.json
+# package-lock.json is committed: CI installs with `npm ci`, and Playwright
+# blob reports are version bound, so the shards and the merge job must resolve
+# the exact same version.
 .yarn/
 yarn.lock
 biome.json

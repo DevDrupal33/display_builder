@@ -9,6 +9,10 @@ import * as utils from '../utilities/utils'
 // /user/{uid}. Bound to an unrouted path a layout still renders, but on the 404
 // response, which renders the same either way and would hide a layout that
 // stopped being selected. The status is asserted for that reason.
+//
+// Every goto() here is relative, never '/path': CI serves the site from a
+// subdirectory of the base URL, and an absolute path is resolved against the
+// origin alone, so it leaves the install and hits the web server's own 404.
 // @see \Drupal\display_builder_page_layout_test\Controller\TestPageController
 // @see \Drupal\display_builder_page_layout\EventSubscriber\PageVariantSubscriber
 // @see \Drupal\display_builder_page_layout\Plugin\display_builder\Buildable\PageLayout
@@ -19,7 +23,7 @@ import * as utils from '../utilities/utils'
 test('Page layout renders its built content on the front end', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) => {
   const id = utils.createRandomString()
   const instanceId = `test_${id}`
-  const path = `/test/${id}`
+  const path = `test/${id}`
   const marker = `Rendered by the page layout ${id}`
 
   await test.step(`Login and create a page layout bound to a path`, async () => {
@@ -28,7 +32,7 @@ test('Page layout renders its built content on the front end', { tag: [ '@extra'
       php:eval "\\Drupal\\display_builder_page_layout\\Entity\\PageLayout::create([
         'id' => '${instanceId}',
         'label' => 'Test ${id}',
-        'conditions' => ['request_path' => ['id' => 'request_path', 'negate' => FALSE, 'pages' => '${path}']],
+        'conditions' => ['request_path' => ['id' => 'request_path', 'negate' => FALSE, 'pages' => '/${path}']],
         'sources' => [['source_id' => '']],
         \\Drupal\\display_builder\\DisplayBuildableInterface::PROFILE_PROPERTY => '${config.testProfileBuilderId}',
       ])->save();"
