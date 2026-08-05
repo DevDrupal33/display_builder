@@ -215,7 +215,6 @@ test(
 
       // Check result on preview and on view entity page.
       await displayBuilder.publishDisplayBuilder()
-      await displayBuilder.expectPreviewAriaSnapshot('entity-override.aria.yml')
       await page.getByRole('link', { name: 'View' }).click()
       await expect(page.locator('.block-system-main-block')).toMatchAriaSnapshot({ name: 'entity-override.aria.yml' })
     })

@@ -121,6 +121,7 @@ final class ProfileForm extends EntityForm {
     $labels = [
       'library' => $this->t('Library panels'),
       'view' => $this->t('View panels'),
+      'preview' => $this->t('Preview panels'),
       'button' => $this->t('Toolbar buttons'),
       'contextual' => $this->t('Contextual panels'),
       'floating' => $this->t('Floating controls'),

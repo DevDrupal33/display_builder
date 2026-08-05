@@ -1,0 +1,57 @@
+/**
+ * @file
+ * The Preview island's placeholder markers, for the live-preview iframe.
+ *
+ * Some sources cannot resolve outside a real page - the page title, the main
+ * content, a view's rows or pager. The Preview island swaps each one for a
+ * marker div so the preview shows where it would go instead of a gap.
+ * @see \Drupal\display_builder\Plugin\display_builder\Island\PreviewPanel::alterPreviewPlaceholder()
+ * @see \Drupal\display_builder\DisplayBuilderHelpers::findAndReplaceInArray()
+ *
+ * Deliberately its own file rather than a block in
+ * components/display_builder/css/display_builder.css, where these rules used to
+ * live. Two reasons, both fatal to reusing that file here:
+ *
+ * - Everything in it from `.display-builder {` onwards is nested inside that
+ *   selector, so the rules compile to `.display-builder .db-preview-placeholder`
+ *   and the iframe document, which has no such ancestor, could load the whole
+ *   stylesheet and still match nothing.
+ * - The iframe has neither css/colors.css nor Shoelace's theme stylesheet, so
+ *   every custom property those rules read resolves to nothing there.
+ *
+ * Hence the literal fallbacks below: the var() names are kept so the markers
+ * still follow the palette wherever it is present, and the fallback is that
+ * token's own resolved light value, taken from Shoelace 2.20.1.
+ * @see components/display_builder/css/colors.css for the palette itself.
+ *
+ * Lives in assets/css/ next to viewport_switcher.css - island CSS attached from
+ * PHP, rather than components/ where SDC attaches a component's own stylesheet.
+ */
+
+.db-preview-placeholder {
+  margin: 0.2rem 0;
+  padding: 1rem;
+  /* --sl-color-neutral-900 */
+  color: var(--db-text-color, hsl(240, 5.9%, 10%));
+  border-radius: 0.25rem;
+  /* --sl-color-neutral-400 */
+  outline: 2px dotted var(--db-preview-placeholder-outline, hsl(240, 5%, 64.9%));
+  /* Hatching, so an empty marker still reads as a deliberate placeholder rather
+     than as a blank box the display failed to fill. The fallback repeats
+     --sl-color-neutral-100's own value for the stripe. */
+  background-image: var(--db-background-image, repeating-linear-gradient(45deg, oklch(100% 0 0), oklch(100% 0 0) 13px, hsl(240, 4.8%, 95.9%) 13px, hsl(240, 4.8%, 95.9%) 14px));
+  background-size: var(--db-background-size, 40px 40px);
+  /* --sl-shadow-large */
+  box-shadow: var(--sl-shadow-large, 0 2px 8px hsl(240, 3.8%, 46.1%, 0.12));
+  font-style: italic;
+}
+
+/* Reserve roughly the room the real thing would take, so the preview's layout
+   is not wildly shorter than the page it stands for. */
+.db-preview-placeholder-md {
+  min-height: 10rem;
+}
+
+.db-preview-placeholder-lg {
+  min-height: 20rem;
+}

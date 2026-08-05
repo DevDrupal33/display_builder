@@ -13,7 +13,7 @@ conditions:
   request_path:
     id: request_path
     negate: false
-    pages: /test-empty
+    pages: /test/empty
 profile: test_base
 sources:
   - node_id: a8383fd0878c8d63

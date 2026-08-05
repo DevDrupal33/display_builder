@@ -1,0 +1,9 @@
+display_builder_page_layout_test.page:
+  path: '/test/{name}'
+  defaults:
+    _controller: '\Drupal\display_builder_page_layout_test\Controller\TestPageController::build'
+    _title: 'Page layout test'
+  requirements:
+    # The page layouts installed by this module are checked as a visitor gets
+    # them, so the pages they are bound to are open on purpose.
+    _access: 'TRUE'

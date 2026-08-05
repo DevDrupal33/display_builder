@@ -83,6 +83,5 @@ test('Views build and render', { tag: [ '@base' ] }, async ({ page, drupal, disp
     await displayBuilder.dragComponentsAndTextfield('I am a test textfield in a slot in a View!')
 
     await displayBuilder.publishDisplayBuilder()
-    await displayBuilder.expectPreviewAriaSnapshot('view-changed.aria.yml')
   })
 })

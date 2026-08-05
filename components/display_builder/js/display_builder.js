@@ -25,7 +25,7 @@
    * @listens event:click
    */
   function disableInsideLinks(element) {
-    element.querySelectorAll('a').forEach((link) => {
+    element.querySelectorAll('a[href]:not([href=""])').forEach((link) => {
       if (link.closest('div').classList === 'contextual') {
         return;
       }
@@ -176,17 +176,6 @@
           builder.setAttribute('data-active-instance', instance.dataset.nodeId);
         }
       });
-    });
-
-    // Try to disable links after swap in the builder.
-    builder.addEventListener('htmx:afterSwap', (event) => {
-      const tagName = event.detail?.elt?.tagName;
-      // Skip form and tree items to avoid breaking their internal behaviors.
-      if (!tagName || tagName === 'FORM' || tagName === 'SL-TREE-ITEM') {
-        return;
-      }
-
-      disableInsideLinks(event.detail.elt);
     });
   }
 

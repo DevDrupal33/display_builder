@@ -278,43 +278,129 @@ Kept separate from [data-db-stale] so a failed refresh leaves the panel usable
     pointer-events: none;
   }
 
-  /* When on a viewport switch context. Only the Builder and Preview
-     main-area panes simulate a viewport. @see assets/js/viewport_switcher.js */
+  /* When on a viewport switch context. The switcher sizes only the Preview
+     render (the iframe), not the pane, so the pane's header bar stays full
+     width while the iframe shrinks. The editor pane is left at its natural
+     width, which matters in split view where both are visible.
+     @see assets/js/viewport_switcher.js */
   &.viewport-active {
-    .display-builder__main .db-island-builder,
-    .display-builder__main .db-island-preview {
-      /* width is set inline by JS. Auto margins centre the pane when it is
-         narrower than the main wrapper (otherwise the leftover space is never
-         claimed and the pane hugs the start sidebar); when it is wider they
-         resolve to 0 and the pane overflows to scroll (main is overflow: auto).
-         flex: none keeps the explicit width from being stretched or shrunk. */
-      flex: none;
-      margin-right: auto;
-      margin-left: auto;
+    /* --db-preview-width is the render's own viewport width (set by the switcher
+       on the pane), so media queries reflow for real. The scale box takes the
+       visual size (width x zoom) and carries the device-frame border; it centres
+       via its auto margins and, being exactly the painted size, scrolls with no
+       empty side zones. The iframe keeps the true width and is scaled onto it.
+       @see assets/js/viewport_switcher.js */
+    .display-builder__main .db-island-preview .db-live-preview-scale {
+      width: calc(var(--db-preview-width) * var(--db-preview-zoom, 1));
+      border: 1px solid var(--preview-color-border);
       box-shadow: var(--db-shadow-color) 0 10px 25px 0;
     }
-    /* Viewport switch menu active state */
-    .switch-viewport {
-      .viewport-menu .active::part(label) {
-        font-weight: bold;
-      }
-    }
-    .db-island-view {
-      margin-top: 1rem;
-    }
-    .display-builder__main {
-      .db-island-view .db-dropzone--root {
-        margin: 0;
-        padding: 0;
-      }
+    .display-builder__main .db-island-preview .db-live-preview {
+      width: var(--db-preview-width);
     }
   }
 
   .db-island.db-island-view.db-island-builder {
-    padding: 2rem 0.5rem 0.5rem 0.5rem;
+    padding: 2rem 1rem 0.5rem 0.5rem;
   }
-  .db-island.db-island-view.db-island-preview {
+  .db-island.db-island-preview {
+    margin-top: 0;
     padding: 1rem;
+  }
+  /* Live-preview iframe: fills the pane edge to edge, and the width the viewport
+     switcher sets on it becomes the iframe's own viewport width - real
+     media-query reflow, which an in-page render can never give.
+     @see src/Plugin/display_builder/Island/PreviewPanel.php
+     @see assets/js/viewport_switcher.js */
+  /* Full class chain to out-specify the .db-island-preview padding rule above,
+     so the iframe sits flush and matches the main area.
+     :not(--hidden) keeps this off the pane while it is an inactive tab, so the
+     one-class .shoelace-tabs__tab--hidden { display: none } still wins and the
+     preview does not stack under Canvas/Scaffold. */
+  .db-island.db-island-preview:has(.db-live-preview):not(.shoelace-tabs__tab--hidden) {
+    position: relative;
+    display: flex;
+    /* Column so a pane_header bar (the viewport switcher) sits above the iframe,
+       which then fills the rest. @see src/ProfileViewBuilder.php buildPaneHeaders() */
+    flex-direction: column;
+    padding: 0;
+  }
+  /* The Preview pane's own header bar: the in-flow home of pane_header Floating
+     islands (the viewport switcher), full width above the iframe, styled like
+     the toolbar chrome. @see src/ProfileViewBuilder.php buildPaneHeaders() */
+  .db-island-pane-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    background-color: var(--toolbar-color-background);
+  }
+  /* Fills the pane below the header (flex:1) and owns the horizontal scroll: a
+     device width wider than the pane pans here. Vertical overflow is clipped
+     because the scaled iframe reserves more layout height than it paints.
+     @see js/live_preview.js and PreviewPanel::build(). */
+  .db-live-preview-frame {
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex: 1;
+    min-height: 0;
+  }
+  /* The visual box: the render's on-screen (scaled) size, centred by its auto
+     margins. Because it is exactly what gets painted, centring and scrolling
+     have no empty side zones. It clips the iframe's larger (unscaled) layout box.
+     Default (no viewport width): the frame width times the zoom. */
+  .db-live-preview-scale {
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    width: calc(100% * var(--db-preview-zoom, 1));
+    height: 100%;
+    transition: width 0.2s ease;
+    background-color: #fff;
+    margin-inline: auto;
+  }
+  .db-live-preview {
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* True (unscaled) size: the iframe's own viewport, so media queries reflow
+       for real. It is the visual box divided by the zoom, so scaling by the zoom
+       (top-left) lands the render exactly on the box.
+       @see assets/js/viewport_switcher.js */
+    width: calc(100% / var(--db-preview-zoom, 1));
+    height: calc(100% / var(--db-preview-zoom, 1));
+    transition: transform 0.2s ease;
+    transform: scale(var(--db-preview-zoom, 1));
+    transform-origin: top left;
+    border: 0;
+    background-color: #fff;
+  }
+  /* The next render loads here, invisible and stacked over the current one, and
+     is revealed (by dropping this class) only once it has loaded, so the preview
+     never blanks between edits. It shares the absolute top-left/size rules above.
+     @see js/live_preview.js */
+  .db-live-preview--buffer {
+    pointer-events: none;
+    opacity: 0;
+  }
+  /* Fill the main scroll area exactly so Fluid (Fit screen) shows no overflow.
+     Only when the builder box has a resolved height - always in page layout
+     (100dvh) and any expanded builder (position:fixed) - so .display-builder__main
+     resolves a height for the pane's 100% to fill. */
+  &.display-builder-page-layout,
+  &.display-builder--expanded {
+    .db-island.db-island-preview:has(.db-live-preview):not(.shoelace-tabs__tab--hidden) {
+      height: 100%;
+    }
+  }
+  /* A non-expanded builder embedded in a normal admin page (e.g. an entity-view
+     display) has no resolved height, so the scale box's height:100% would
+     collapse to nothing. Give it a definite viewport-based height instead so the
+     iframe's percentage height resolves; the admin page scrolls normally here
+     rather than the pane fitting a fixed main area. */
+  &:not(.display-builder-page-layout, .display-builder--expanded) .db-live-preview-scale {
+    height: 80dvh;
   }
   .db-island.db-island-view.db-island-scaffold {
     padding: 2rem 1rem 1rem 1rem;
@@ -331,11 +417,117 @@ Kept separate from [data-db-stale] so a failed refresh leaves the panel usable
     margin: 0;
     padding: 0;
 
-    .db-island-builder,
-    .db-island-preview {
+    .db-island-builder {
       transition:
-        width 0.3s ease,
-        max-width 0.3s ease;
+        width 0.2s ease,
+        max-width 0.2s ease;
+    }
+  }
+
+  /* Split view: the Preview pane sits beside the active editor pane instead of
+     replacing it. syncPanes() keeps both panes un-hidden; here they share the
+     row as equal columns that scroll on their own.
+     @see components/display_builder/js/split.js */
+  .display-builder__main--split {
+    display: flex;
+    align-items: stretch;
+
+    /* Order the two visible columns around the drag handle regardless of DOM
+       order: the active editor pane on the left, the handle, then the pinned
+       Preview pane filling the rest. @see components/display_builder/js/split.js */
+    > .db-island-view:not(.shoelace-tabs__tab--hidden, .db-island-preview) {
+      overflow: auto;
+      flex: 0 0 var(--db-split-ratio, 50%);
+      order: 1;
+      min-width: 0;
+    }
+
+    > .db-split-handle {
+      order: 2;
+    }
+
+    > .db-island-preview:not(.shoelace-tabs__tab--hidden) {
+      overflow: auto;
+      flex: 1 1 0;
+      order: 3;
+      min-width: 0;
+    }
+  }
+
+  /* The split drag handle: a thin grab bar between the two columns, hidden until
+     split mode turns on. @see components/display_builder/js/split.js */
+  .db-split-handle {
+    display: none;
+  }
+  .display-builder__main--split > .db-split-handle {
+    display: block;
+    flex: 0 0 6px;
+    align-self: stretch;
+    cursor: col-resize;
+    background-color: var(--db-resize-handle-bg);
+    touch-action: none;
+
+    &:hover,
+    &:active {
+      background-color: var(--db-resize-handle-bg-hover);
+    }
+  }
+
+  /* Preview only: the far end of the split axis, where the editor column has
+     been dragged (or collapsed) away and the real render owns the full width.
+     The main tab strip goes with it - its panes are all hidden, so the tabs
+     would switch nothing visible. The handle stays behind as a rail: drag it
+     back, double-click it, or press a View panel shortcut (which restores the
+     editor first). @see components/display_builder/js/split.js */
+  &.display-builder--preview-only {
+    .db-toolbar__middle {
+      display: none;
+    }
+
+    .display-builder__main--split > .db-island-view:not(.db-island-preview) {
+      display: none;
+    }
+
+    .display-builder__main--split > .db-split-handle {
+      position: relative;
+      flex-basis: var(--db-space-12);
+
+      /* Chevron pointing back toward the editor, so the rail reads as "pull
+         this to get it back" rather than as a stray border. */
+      &::after {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: var(--db-space-4);
+        height: var(--db-space-4);
+        content: "";
+        transform: translate(-25%, -50%) rotate(45deg);
+        opacity: 0.4;
+        border-top: 2px solid currentColor;
+        border-right: 2px solid currentColor;
+      }
+
+      &:hover::after,
+      &:focus-visible::after {
+        opacity: 1;
+      }
+    }
+  }
+
+  /* The handle is focusable (@see components/display_builder/js/split.js), so
+     tabbing to it has to show where you are. */
+  .db-split-handle:focus-visible {
+    outline: 2px solid var(--db-form-focus-outline);
+    outline-offset: -2px;
+  }
+
+  /* Keep the pointer on the handle while dragging over an iframe, and stop text
+     selection flicker mid-drag. */
+  .display-builder__main.db-split-dragging {
+    user-select: none;
+
+    iframe {
+      pointer-events: none;
     }
   }
 
@@ -382,26 +574,11 @@ Kept separate from [data-db-stale] so a failed refresh leaves the panel usable
     font-size: 14px;
   }
 
-  /* Preview Island specific */
-  .db-preview-placeholder {
-    margin: 0.2rem 0 0.2rem 0;
-    padding: 1rem;
-    color: var(--db-text-color);
-    border-radius: 0.25rem;
-    outline: 2px dotted var(--db-preview-placeholder-outline);
-    background-image: var(--db-background-image);
-    background-size: var(--db-background-size);
-    box-shadow: var(--sl-shadow-large);
-    font-style: italic;
-  }
-
-  .db-preview-placeholder-md {
-    min-height: 10rem;
-  }
-
-  .db-preview-placeholder-lg {
-    min-height: 20rem;
-  }
+  /* The Preview island's placeholder markers used to be styled here. They
+     moved to assets/css/preview_placeholder.css when the preview became an
+     iframe: these rules are nested inside .display-builder, and the iframe
+     document has no such ancestor, so nothing here could ever match them
+     again. @see \Drupal\display_builder\Plugin\display_builder\Island\PreviewPanel */
 
   /* Common hover affordance for any placed node in the Builder canvas -
      forces cursor:pointer through descendants (a component's own

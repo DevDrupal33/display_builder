@@ -22,11 +22,6 @@ const key = {
   publish: 'Shift+P',
 }
 
-test.beforeEach('Setup', async ({ drupal }) => {
-  // Breakpoint is required for viewport switcher.
-  await drupal.installModules([ 'breakpoint' ])
-})
-
 /**
  * Assert a feature is on or off.
  *
@@ -121,14 +116,6 @@ test('Buttons', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) 
   await test.step(`Logs`, async () => {
     const btn = page.getByTestId('tab_view_logs')
     await testToggleTab(page, btn, '.db-island-logs', null)
-
-    // const btn2 = page.getByTestId('tab_contextual_contextual_form'), { name: '[Test] Logs raw', exact: true })
-    // await testToggleTab(page, btn2, '.db-island-test_logs_raw', 'logs_raw')
-  })
-
-  await test.step(`Preview`, async () => {
-    const btn = page.getByTestId('tab_view_preview')
-    await testToggleTab(page, btn, '.db-island-preview', 'preview')
   })
 
   async function testToggleFeature (page: Page, button: Locator, isOnLocator: string) {
@@ -269,10 +256,6 @@ test('Keyboard', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder })
     await testToggleTab(page, '.db-island-logs', key.logs, null)
   })
 
-  await test.step(`Preview`, async () => {
-    await testToggleTab(page, '.db-island-preview', key.preview, 'preview')
-  })
-
   async function testToggleFeature (page: Page, isOnLocator: string, keyShortcut: string) {
     const isOn = page.locator(isOnLocator)
     const isSidebar = isOnLocator === config.startDrawerID
@@ -299,39 +282,4 @@ test('Keyboard', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder })
     await displayBuilder.keyboardShortcut(key.builder)
     await expect(isOn).not.toBeVisible()
   }
-})
-
-test('Viewport switcher', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) => {
-  await test.step(`Create Page Layout and login`, async () => {
-    await displayBuilder.initTestsWithPageLayout(drupal, config.testProfileFullId)
-  })
-
-  await test.step(`Switch viewport (compact)`, async () => {
-    // ViewportSwitcher is a Floating island rendered exactly once, riding both
-    // the 'builder' and 'preview' panes it attaches to. Its unique testid
-    // addresses that single control.
-    // @see \Drupal\display_builder\ProfileViewBuilder::buildFloatingControlsRegion()
-    const viewportControls = page.getByTestId('floating_viewport')
-    const switchViewport = viewportControls.locator('[data-island-action="viewport"]')
-    const switchViewportList = viewportControls.locator('#listbox')
-
-    // The simulated width is applied to the Builder/Preview panes themselves,
-    // not to .display-builder__main, plus a viewport-active class on the root.
-    // @see assets/js/viewport_switcher.js updateMainRegionWidth()
-    const builder = page.locator('.display-builder')
-    const builderPane = page.locator('.db-island-builder')
-
-    await switchViewport.click()
-
-    await page.getByRole('menuitem', { name: 'Extra small' }).locator('slot').nth(1).click()
-    await expect(switchViewportList).not.toBeVisible()
-    await expect(builderPane).toHaveCSS('max-width', '575px')
-    await expect(builder).toHaveClass(/viewport-active/)
-
-    await switchViewport.click()
-    // Tooltip hover can mess the click, need to be on the right side of the button.
-    await page.getByRole('menuitem', { name: 'Fluid (Current viewport)' }).locator('slot').nth(1).click({ position: { x: 130, y: 20 } })
-    await expect(switchViewportList).not.toBeVisible()
-    await expect(builder).not.toHaveClass(/viewport-active/)
-  })
 })

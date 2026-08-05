@@ -10,16 +10,21 @@ use Drupal\Core\Render\RenderEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Drupal should return a display builder page for any non admin route.
+ * Drupal should return a page layout page for any non admin route.
+ *
+ * Display Builder's own subscriber listens after this one and takes the
+ * decision back for the pages it renders blank - the builder UI, and the live
+ * preview of a buildable that is already a whole page.
  *
  * @code
  * route.name:
  *  ...
  *  options:
  *    _admin_route: false
- *    _display_builder_full_page_route: true
  *
  * @endcode
+ *
+ * @see \Drupal\display_builder\Event\PageVariantSubscriber
  */
 class PageVariantSubscriber implements EventSubscriberInterface {
 
@@ -55,22 +60,12 @@ class PageVariantSubscriber implements EventSubscriberInterface {
       return;
     }
 
-    // When we use Display Builder to build the full page, we don't want to have
-    // neither the theme's page.html.twig nor the page managed by Display
-    // Builder. We want a simple blank page.
-    // Example: entity.page_layout.display_builder.
-    if ($options['_display_builder_full_page_route'] ?? FALSE) {
-      $event->setPluginId('display_builder_full');
-
-      return;
-    }
-
     // Fallback to Block Layout if there is no suitable Page Layout entities.
     /** @var \Drupal\display_builder_page_layout\AccessControlHandler $access_control */
     $access_control = $this->entityTypeManager->getAccessControlHandler('page_layout');
     $page_layout = $access_control->loadCurrentPageLayout();
 
-    // In DisplayBuilderPageVariant we add PageLayout::getCacheTags() to the
+    // In PageLayoutPageVariant we add PageLayout::getCacheTags() to the
     // page renderable but it works only for the pages already managed by
     // Display Builder.
     // So let's add a custom tag for the others.

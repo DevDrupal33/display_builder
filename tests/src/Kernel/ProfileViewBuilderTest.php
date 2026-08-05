@@ -7,16 +7,20 @@ namespace Drupal\Tests\display_builder\Kernel;
 /**
  * Tests the Floating-island fan-out in ProfileViewBuilder.
  *
- * Each Floating island (Highlight, Viewport) is rendered exactly once, as a
- * child of the single `.db-island-floating-controls` region, no matter how
- * many View panes it attaches to. It carries a comma-separated
- * `data-attached-to` listing the `#id` of each attached pane that is actually
- * present in the profile, starts hidden, and is skipped entirely when none of
- * its attach_to panes are present. This is the contract every Floating island
- * relies on to show/hide in step with its panes across the Canvas / Wireframe
- * / Scaffold / Preview tabs, and it had no coverage.
+ * An overlay Floating island (e.g. Highlight) renders exactly once, as a child
+ * of the single `.db-island-floating-controls` box, no matter how many View
+ * panes it attaches to. It carries a comma-separated `data-attached-to` listing
+ * the `#id` of each attached pane present in the profile, starts hidden, and is
+ * skipped entirely when none of its attach_to panes are present - the contract
+ * it uses to show/hide in step with its panes.
+ *
+ * A pane_header Floating island (e.g. the Viewport switcher) is instead the
+ * pane's own chrome: it renders inside its attach_to pane as a header bar, not
+ * in the overlay box, and so carries no `data-attached-to` and no starts-hidden
+ * class.
  *
  * @see \Drupal\display_builder\ProfileViewBuilder::buildFloatingControlsRegion()
+ * @see \Drupal\display_builder\ProfileViewBuilder::buildPaneHeaders()
  *
  * @internal
  */
@@ -48,11 +52,11 @@ final class ProfileViewBuilderTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Each Floating island renders once, correlated to every pane it attaches to.
+   * An overlay island renders once, correlated to every pane it attaches to.
    */
   public function testFloatingIslandFanOut(): void {
-    // Highlight attaches to builder + scaffold, Viewport to builder + preview;
-    // all three panes are present, so each control lists both of its panes.
+    // Highlight (overlay) attaches to builder + scaffold, both present, so it
+    // lists both. Viewport is pane_header, so it is not in this region at all.
     $region = $this->renderFloatingRegion([
       'builder' => ['status' => TRUE, 'region' => 'main', 'weight' => -6],
       'scaffold' => ['status' => TRUE, 'region' => 'main', 'weight' => -5],
@@ -61,20 +65,19 @@ final class ProfileViewBuilderTest extends DisplayBuilderKernelTestBase {
       'viewport' => ['status' => TRUE],
     ], 'render_fanout');
 
+    // A single overlay box holding Highlight; Viewport lives in the pane header
+    // so it never appears here.
     self::assertSame('div', $region['#tag']);
     self::assertContains('db-island-floating-controls', $region['#attributes']['class']);
+    self::assertArrayHasKey('highlight', $region['children']);
+    self::assertArrayNotHasKey('viewport', $region['children']);
 
     $highlight = $region['children']['highlight'];
-    $viewport = $region['children']['viewport'];
 
     // Correlated to its panes, not duplicated per pane.
     self::assertSame(
       '#island-render_fanout-builder,#island-render_fanout-scaffold',
       $highlight['#attributes']['data-attached-to'],
-    );
-    self::assertSame(
-      '#island-render_fanout-builder,#island-render_fanout-preview',
-      $viewport['#attributes']['data-attached-to'],
     );
 
     // Unique id, addressable test id, and starts hidden like the panes.
@@ -85,12 +88,42 @@ final class ProfileViewBuilderTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
+   * A pane_header island renders inside its target pane, not the overlay box.
+   */
+  public function testPaneHeaderRendersInsidePane(): void {
+    // Viewport is pane_header attaching to preview: it lands inside the preview
+    // pane as a header and never in the floating-controls box.
+    $slots = $this->renderView([
+      'builder' => ['status' => TRUE, 'region' => 'main', 'weight' => -6],
+      'preview' => ['status' => TRUE, 'region' => 'main', 'weight' => -4],
+      'viewport' => ['status' => TRUE],
+    ], 'render_header')['#slots'];
+
+    // No overlay island enabled, so no floating-controls box at all.
+    self::assertSame([], $slots['view_floating_controls']);
+
+    // Injected as the preview pane's first child, inside a header wrapper.
+    $preview_pane = $slots['view_main']['preview'];
+    self::assertArrayHasKey('pane_header', $preview_pane);
+    $header = $preview_pane['pane_header'];
+    self::assertContains('db-island-pane-header', $header['#attributes']['class']);
+
+    $viewport = $header['children']['viewport'];
+    self::assertSame('island-render_header-viewport', $viewport['#attributes']['id']);
+    self::assertSame('floating_viewport', $viewport['#attributes']['data-testid']);
+    self::assertContains('db-island-viewport', $viewport['#attributes']['class']);
+    // Rides with the pane, so no overlay visibility plumbing.
+    self::assertArrayNotHasKey('data-attached-to', $viewport['#attributes']);
+    self::assertNotContains('shoelace-tabs__tab--hidden', $viewport['#attributes']['class']);
+  }
+
+  /**
    * A Floating island whose attach_to panes are all absent is skipped.
    */
   public function testFloatingIslandSkippedWhenNoTargetPane(): void {
     // Only Scaffold is present: Highlight (builder + scaffold) still renders on
-    // scaffold alone, but Viewport (builder + preview) has neither pane and is
-    // dropped entirely.
+    // scaffold alone. Viewport is pane_header and preview is absent, so it is
+    // dropped and the overlay box holds only Highlight.
     $region = $this->renderFloatingRegion([
       'scaffold' => ['status' => TRUE, 'region' => 'main', 'weight' => -5],
       'highlight' => ['status' => TRUE],

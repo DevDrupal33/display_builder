@@ -62,8 +62,12 @@ test('Textarea CKEditor', { tag: [ '@base' ] }, async ({ page, drupal, displayBu
   await test.step(`Rich text renders in preview`, async () => {
     await displayBuilder.publishDisplayBuilder()
 
-    await page.getByTestId('tab_view_preview').click()
-    await displayBuilder.shoelaceReady()
-    await expect(page.locator('.db-island-preview strong')).toHaveText('Bold text')
+    await expect(page.getByTestId('textarea')).toBeVisible()
+    await page.locator('[data-db-split-toggle]').click()
+    await displayBuilder.htmxReady()
+
+    const iframe = page.locator('iframe[title="Live preview"]').first().contentFrame()
+    await expect(iframe.locator('div').nth(1)).toBeVisible()
+    await expect(iframe.locator('div').nth(1)).toContainText('Bold text')
   })
 })

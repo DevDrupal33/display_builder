@@ -243,7 +243,9 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
 
     $type = $island->getTypeId();
 
-    if ($type === IslandType::View->value) {
+    // A View tab, or the Preview pane, is off screen exactly when the client
+    // does not report its plugin ID among the visible panes.
+    if ($type === IslandType::View->value || $type === IslandType::Preview->value) {
       return !\in_array($island->getPluginId(), $visible_islands, TRUE);
     }
 

@@ -281,3 +281,27 @@ display_builder.api_preset_preview:
     _role: 'authenticated'
   options:
     _htmx_route: true
+
+# Isolated live-preview of the Preview island in its own iframe, so the display
+# gets its own viewport and reflows with the viewport switcher.
+#
+# Deliberately no _display_builder_full_page_route: a fragment (entity view,
+# Views display) previews inside whatever page wrapper the site would give it,
+# to stay close to the real render, while a buildable that is already a whole
+# page previews bare. That choice is per instance, so it is made at render time.
+# @see \Drupal\display_builder\Event\PageVariantSubscriber
+# @see \Drupal\display_builder\Hook\LivePreviewChrome, which strips admin chrome
+# @see \Drupal\display_builder\Plugin\display_builder\Island\PreviewPanel::build()
+display_builder.preview_island:
+  path: '/display-builder/preview/{display_builder_instance}'
+  methods: [GET]
+  defaults:
+    _controller: '\Drupal\display_builder\Controller\ApiPreviewController::getDisplayPreview'
+  requirements:
+    _entity_access: 'display_builder_instance.view'
+  options:
+    _admin_route: false
+    no_cache: true
+    parameters:
+      display_builder_instance:
+        type: 'entity:display_builder_instance'

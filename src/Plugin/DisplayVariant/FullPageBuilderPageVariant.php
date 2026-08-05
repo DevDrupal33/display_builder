@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\display_builder_page_layout\Plugin\DisplayVariant;
+namespace Drupal\display_builder\Plugin\DisplayVariant;
 
 use Drupal\Core\Display\Attribute\PageDisplayVariant;
 use Drupal\Core\Extension\ExtensionList;
@@ -13,7 +13,7 @@ use Drupal\Core\Theme\Registry;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * A variant for pages managed by Display Builder Page Layout.
+ * A variant for Display Builder pages.
  */
 #[PageDisplayVariant(
   id: 'display_builder_full',
@@ -58,18 +58,23 @@ class FullPageBuilderPageVariant extends SimplePageVariant implements ContainerF
 
   /**
    * {@inheritdoc}
-   *
-   * @see \Drupal\display_builder_page_layout\Hook\PageLayoutHook
    */
   public function build() {
     $build = parent::build();
     $build['#page_variant'] = 'display_builder_full';
 
-    // We alter the registry runtime here instead of implementing
+    // A blank page has no room for the route's title: the builder draws its own
+    // chrome, and the isolated preview must show the display alone. Dropped
+    // here rather than in a preprocess_html hook, which would be this module's
+    // second implementation of that hook - core allows only one per module.
+    // @see \Drupal\display_builder\Hook\LivePreviewChrome
+    unset($build['content']['page_title']);
+
+    // We alter the registry here instead of implementing
     // hook_theme_registry_alter in order keep the alteration specific to each
     // page.
     $theme_registry = $this->themeRegistry->get();
-    $template_uri = $this->modules->getPath('display_builder_page_layout') . '/templates';
+    $template_uri = $this->modules->getPath('display_builder') . '/templates';
     $runtime = $this->themeRegistry->getRuntime();
     $theme_registry['page']['path'] = $template_uri;
     $runtime->set('page', $theme_registry['page']);

@@ -46,6 +46,12 @@ final class Island extends AttributeBase {
    *   - unlike default_region, this is a fixed part of the plugin
    *   definition, since a floating control is usually meaningless outside
    *   the island(s) it was built for (e.g. CSS scoped to that island).
+   * @param bool $pane_header
+   *   (Optional) For IslandType::Floating islands only: render inside the
+   *   attach_to pane as an in-flow header bar rather than as the default fixed
+   *   overlay box. Use for a control that is really the pane's own chrome (e.g.
+   *   the viewport switcher above the Preview iframe). It rides with the pane
+   *   automatically, so it needs no visibility syncing.
    */
   public function __construct(
     public readonly string $id,
@@ -58,6 +64,7 @@ final class Island extends AttributeBase {
     public readonly ?string $icon = NULL,
     public readonly array $modules = [],
     public readonly array $attach_to = [],
+    public readonly bool $pane_header = FALSE,
   ) {}
 
 }

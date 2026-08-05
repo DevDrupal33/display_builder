@@ -146,9 +146,6 @@ display_builder.islands.viewport:
       type: sequence
       sequence:
         type: string
-    format:
-      type: string
-      label: Format
 
 display_builder.islands.back:
   type: display_builder.islands

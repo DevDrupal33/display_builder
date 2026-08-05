@@ -22,6 +22,9 @@ class DisplayBuilderTestSetup implements TestSetupInterface {
     // Install required modules.
     $module_installer = \Drupal::service('module_installer');
     \assert($module_installer instanceof ModuleInstallerInterface);
+    // Required for viewport switcher.
+    $module_installer->install(['breakpoint']);
+    // Required UI Suite modules.
     $module_installer->install(['ui_patterns']);
     $module_installer->install(['display_builder']);
     $module_installer->install(['display_builder_page_layout']);

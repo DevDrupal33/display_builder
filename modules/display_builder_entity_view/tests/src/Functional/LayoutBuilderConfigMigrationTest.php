@@ -71,8 +71,12 @@ final class LayoutBuilderConfigMigrationTest extends BrowserTestBase {
 
     $this->drupalGet('admin/structure/types/manage/display_builder_layout_test/display/default/display-builder');
 
-    // Test Display Builder migrated from the Layout Builder configuration.
-    $this->assertSession()->elementTextContains('css', '.db-island-preview', 'Layout builder config: Default');
+    // Test Display Builder migrated from the Layout Builder configuration. The
+    // Preview pane is now a whole-page live-preview iframe whose content Mink
+    // does not load, so assert against the Canvas, which renders the same
+    // migrated components in-page.
+    // @see \Drupal\display_builder\Plugin\display_builder\Island\PreviewPanel::build()
+    $this->assertSession()->elementTextContains('css', '.db-island-builder', 'Layout builder config: Default');
   }
 
 }

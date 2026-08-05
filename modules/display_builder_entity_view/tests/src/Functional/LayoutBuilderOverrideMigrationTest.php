@@ -101,7 +101,7 @@ final class LayoutBuilderOverrideMigrationTest extends BrowserTestBase {
 
     // Test Display Builder migrated from the Layout Builder configuration.
     $this->drupalGet('node/' . $nid . '/display/default');
-    $this->assertSession()->elementTextContains('css', '.db-island-preview', 'Layout builder OVERRIDE config: NEW');
+    $this->assertSession()->elementTextContains('css', '.db-island-builder', 'Layout builder OVERRIDE config: NEW');
   }
 
 }

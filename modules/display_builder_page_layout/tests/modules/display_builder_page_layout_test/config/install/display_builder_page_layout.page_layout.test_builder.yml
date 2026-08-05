@@ -16,7 +16,7 @@ conditions:
   request_path:
     id: request_path
     negate: false
-    pages: /test-builder
+    pages: /test/builder
 profile: test_builder
 sources:
   - node_id: 78d0b6fedc90f3d3

@@ -35,10 +35,7 @@ islands:
     region: end
   viewport:
     status: true
-    weight: -9
-    region: start
-    exclude: {}
-    format: compact
+    weight: 0
   back:
     status: true
     weight: -6
@@ -68,7 +65,7 @@ islands:
   state:
     status: true
     weight: -8
-    region: end
+    region: start
     publish:
       value: label
     restore:
@@ -131,6 +128,10 @@ islands:
   menu_delete:
     status: true
     weight: -7
+  save_status:
+    status: true
+    weight: -10
+    region: start
   test_island_view:
     status: false
     weight: 0
@@ -177,4 +178,5 @@ islands:
 library_flat: false
 library_tabs_display: icon
 contextual_tabs_display: icon
+view_panels_display: label
 weight: 0

@@ -22,11 +22,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 #[Island(
   id: 'viewport',
-  label: new TranslatableMarkup('Responsive width'),
-  description: new TranslatableMarkup('Change main region width according to breakpoints for canvas and preview panels.'),
+  label: new TranslatableMarkup('Responsive width and Zoom'),
+  description: new TranslatableMarkup('Switch the preview between breakpoint widths to check responsive behavior.'),
   type: IslandType::Floating,
   modules: ['breakpoint'],
-  attach_to: ['builder', 'preview'],
+  attach_to: ['preview'],
+  pane_header: TRUE,
 )]
 class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFormInterface {
 
@@ -67,7 +68,6 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
   public function defaultConfiguration(): array {
     return [
       'exclude' => [],
-      'format' => 'compact',
     ];
   }
 
@@ -76,17 +76,6 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
     $configuration = $this->getConfiguration();
-
-    $form['format'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Selector format'),
-      '#description' => $this->t('Choose the appearance of the selector. Normal select or a compact dropdown menu.'),
-      '#options' => [
-        'default' => $this->t('Default'),
-        'compact' => $this->t('Compact'),
-      ],
-      '#default_value' => $configuration['format'],
-    ];
 
     $form['exclude'] = [
       '#type' => 'checkboxes',
@@ -111,10 +100,6 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
       '@exclude' => ($exclude = \array_filter($configuration['exclude'] ?? [])) ? \implode(', ', $exclude) : $this->t('None'),
     ]);
 
-    $summary[] = $this->t('Format: @format', [
-      '@format' => $configuration['format'] ?? 'default',
-    ]);
-
     return $summary;
   }
 
@@ -122,96 +107,46 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
    * {@inheritdoc}
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    $configuration = $this->getConfiguration();
-    $definitions = $this->getDefinitions();
-
     $groups = [];
 
-    foreach ($definitions as $definition) {
-      if (!isset($definition['group'])) {
-        continue;
+    foreach ($this->getDefinitions() as $definition) {
+      if (isset($definition['group'])) {
+        $groups[$definition['group']] = $definition['group'];
       }
-      $groups[$definition['group']] = $definition['group'];
     }
 
-    $options = $data = [];
-    $items = [
-      [
-        'title' => $this->t('Fluid (Current viewport)'),
-        'class' => 'active',
-      ],
-      [
-        'divider' => TRUE,
-      ],
+    $points = [];
+
+    // The default: no fixed width, so the preview fills the available pane. The
+    // empty value clears any applied width. Active on first render.
+    $buttons = [
+      $this->buildViewportButton('', $this->t('Responsive (fills the available width)'), 'aspect-ratio', TRUE),
     ];
 
     foreach ($this->getViewports($groups) as $viewport) {
-      $point_id = $viewport['id'];
-      $options[$viewport['group']][$point_id] = $viewport['label'];
-      $items[] = [
-        'title' => $viewport['label'],
-        'value' => $point_id,
-      ];
-      $data[$point_id] = $viewport['width'];
+      $points[$viewport['id']] = $viewport['width'];
+      $buttons[] = $this->buildViewportButton($viewport['id'], $viewport['label'], $viewport['icon'], FALSE);
     }
-
-    $select = [
-      '#type' => 'component',
-      '#component' => 'display_builder:select',
-      '#attached' => [
-        'library' => ['display_builder/viewport_switcher'],
-      ],
-      '#props' => [
-        'options' => $options,
-        'icon' => 'window',
-        'empty_option' => $this->t('Fluid (Current viewport)'),
-      ],
-      '#attributes' => [
-        'style' => 'display: inline-block;',
-        'data-points' => \json_encode($data),
-        'data-island-action' => 'viewport',
-      ],
-    ];
-
-    if ($configuration['format'] !== 'compact') {
-      return $select;
-    }
-
-    unset($select['#attributes']['style']);
-    $select['#props']['icon'] = NULL;
-
-    // A plain title attribute, not the dropdown's own #props.tooltip (which
-    // wraps the trigger in a Shoelace <sl-tooltip>): Floating UI computes a
-    // permanently broken position for a tooltip that's part of the
-    // server-rendered HTML inside a floating controls cluster.
-    $button = $this->buildButton('', NULL, 'display');
-    $button['#attributes']['class'] = ['switch-viewport-btn'];
-    $button['#attributes']['size'] = 'small';
-    $button['#attributes']['title'] = $this->t('Switch viewport of this display');
 
     return [
-      '#type' => 'component',
-      '#component' => 'display_builder:dropdown',
-      '#slots' => [
-        'button' => $button,
-        'content' => [
-          '#type' => 'component',
-          '#component' => 'display_builder:menu',
-          '#props' => [
-            'items' => $items,
-          ],
-          '#attributes' => [
-            'class' => ['viewport-menu', 'db-background'],
-            'data-points' => \json_encode($data),
-          ],
-        ],
-      ],
+      '#type' => 'html_tag',
+      '#tag' => 'div',
       '#attributes' => [
-        // db-background: visual surface now that this floats over the
-        // pane's own content, instead of sitting in the toolbar's chrome.
-        'class' => ['switch-viewport', 'db-background'],
-        'data-island-action' => 'viewport',
+        // Sits in the Preview pane's header bar (pane_header), which provides
+        // the surface, so no db-background of its own.
+        'class' => ['db-viewport-controls'],
       ],
+      'viewport' => [
+        '#type' => 'html_tag',
+        '#tag' => 'div',
+        '#attributes' => [
+          'class' => ['switch-viewport'],
+          'data-island-action' => 'viewport',
+          'data-points' => \json_encode($points),
+        ],
+        'buttons' => $buttons,
+      ],
+      'zoom' => $this->buildZoomControl(),
       '#attached' => [
         'library' => ['display_builder/viewport_switcher'],
       ],
@@ -274,6 +209,7 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
         [$value, $unit] = $width;
         $candidates[] = [
           'id' => $point_id,
+          'label' => (string) $point->getLabel(),
           'group' => $group_label,
           'value' => $value,
           'unit' => $unit,
@@ -300,7 +236,8 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
         'id' => $candidate['id'],
         'group' => $candidate['group'],
         'width' => $candidate['value'] . $candidate['unit'],
-        'label' => $this->getViewportLabel($candidate['value'], $candidate['unit']),
+        'label' => \sprintf('%s (%s %s)', $candidate['label'], $candidate['value'], $candidate['unit']),
+        'icon' => $this->getViewportIcon($candidate['value'], $candidate['unit']),
       ];
       $previous = $candidate;
     }
@@ -377,6 +314,32 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
   }
 
   /**
+   * Pick a device icon for a viewport width.
+   *
+   * Mirrors the width tiers of getViewportLabel() so icon and name agree.
+   *
+   * @param int $value
+   *   The numeric width.
+   * @param string $unit
+   *   The CSS length unit (px, em, ...).
+   *
+   * @return string
+   *   A Bootstrap icon name.
+   */
+  protected function getViewportIcon(int $value, string $unit): string {
+    if ($unit !== 'px') {
+      return 'aspect-ratio';
+    }
+
+    return match (TRUE) {
+      $value < 641 => 'phone',
+      $value < 1024 => 'tablet',
+      $value < 1400 => 'laptop',
+      default => 'display',
+    };
+  }
+
+  /**
    * Get providers options for select input.
    *
    * @param string|TranslatableMarkup $singular
@@ -431,6 +394,94 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
     }
 
     return $providers;
+  }
+
+  /**
+   * Build the zoom control: scale the Preview render to 25/50/75/100%.
+   *
+   * A companion to the width switcher: pick a device width, then zoom out to
+   * see it whole in a narrow split. The select acts on the iframe only (@see
+   * assets/js/viewport_switcher.js), 100% is the initial state.
+   *
+   * @return array
+   *   The zoom control render array.
+   */
+  private function buildZoomControl(): array {
+    $levels = [
+      '0.25' => '25%',
+      '0.5' => '50%',
+      '0.75' => '75%',
+      '1' => '100%',
+    ];
+
+    $options = [];
+
+    foreach ($levels as $value => $label) {
+      $options[] = [
+        '#type' => 'html_tag',
+        '#tag' => 'sl-option',
+        '#value' => $label,
+        '#attributes' => ['value' => $value],
+      ];
+    }
+
+    return [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#attributes' => [
+        'class' => ['switch-zoom'],
+      ],
+      'select' => [
+        '#type' => 'html_tag',
+        '#tag' => 'sl-select',
+        '#attributes' => [
+          'class' => ['switch-zoom-select'],
+          'data-island-action' => 'zoom',
+          // The initially selected level; 100% is full size.
+          'value' => '1',
+          'size' => 'small',
+          // Real accessible name for the control (a placeholder is not a name);
+          // hidden visually in the header bar.
+          // @see assets/css/viewport_switcher.css.
+          'label' => $this->t('Zoom the preview'),
+        ],
+        'options' => $options,
+      ],
+    ];
+  }
+
+  /**
+   * Build one device button of the viewport switcher's segmented control.
+   *
+   * Icon-only: the hover title carries the human name and exact width, and -
+   * because no `tooltip` prop is passed - it doubles as the button's accessible
+   * name (@see components/shoelace/button/button.twig). A plain title rather
+   * than a Shoelace <sl-tooltip> keeps it robust wherever the switcher renders.
+   *
+   * @param string $value
+   *   The breakpoint ID to apply, or '' for the responsive (no-width) default.
+   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $title
+   *   The hover and accessible label, e.g. "Mobile (575px)".
+   * @param string $icon
+   *   The device icon name.
+   * @param bool $active
+   *   Whether this button is the initially selected one.
+   *
+   * @return array
+   *   The button render array.
+   */
+  private function buildViewportButton(string $value, string|TranslatableMarkup $title, string $icon, bool $active): array {
+    $button = $this->buildButton('', NULL, $icon);
+    $button['#attributes']['class'] = ['switch-viewport-btn'];
+    $button['#attributes']['size'] = 'small';
+    $button['#attributes']['title'] = $title;
+    $button['#attributes']['data-viewport-value'] = $value;
+
+    if ($active) {
+      $button['#attributes']['variant'] = 'primary';
+    }
+
+    return $button;
   }
 
 }

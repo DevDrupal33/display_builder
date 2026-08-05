@@ -319,11 +319,14 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    * {@inheritdoc}
    */
   public function isDeferrable(): bool {
-    // View panels share a tab strip or a sidebar drawer and Floating controls
-    // ride along with the panel they attach to, so all of them spend most of
-    // their time off screen. Everything else is permanently visible.
+    // View panels share a tab strip or a sidebar drawer, the Preview pane is
+    // hidden until the preview toggle reveals it beside the editor, and
+    // Floating controls ride along with the panel they attach to - so all of
+    // them spend most of their time off screen. Everything else is permanently
+    // visible.
     return \in_array($this->getTypeId(), [
       IslandType::View->value,
+      IslandType::Preview->value,
       IslandType::Floating->value,
     ], TRUE);
   }

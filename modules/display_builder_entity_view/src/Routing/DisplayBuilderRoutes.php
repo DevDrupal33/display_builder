@@ -113,6 +113,12 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
 
     $options = $entity_route->getOptions();
     $options['_admin_route'] = FALSE;
+    // Render the builder as a clean full page (no site header/nav/breadcrumb),
+    // exactly like the page-layout builder. Otherwise the builder sits inside
+    // the themed admin page, and a viewport switch shrinks only the preview
+    // pane while that surrounding chrome stays desktop-width.
+    // @see \Drupal\display_builder\Event\PageVariantSubscriber
+    $options['_display_builder_full_page_route'] = TRUE;
 
     // @todo add the display builder access check
     // $requirements['_display_builder_access'] = 'view';

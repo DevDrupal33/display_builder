@@ -8,9 +8,12 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\Island\IslandPluginManagerInterface;
 use Drupal\display_builder\RenderableBuilderTrait;
 use Drupal\ui_patterns_library\StoryPluginManager;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Returns preview responses for Display builder routes.
@@ -25,7 +28,51 @@ class ApiPreviewController extends ControllerBase {
     #[Autowire(service: 'plugin.manager.sdc')]
     private ComponentPluginManager $componentManager,
     private RendererInterface $renderer,
+    private IslandPluginManagerInterface $islandPluginManager,
   ) {}
+
+  /**
+   * Renders the Preview island of an instance in isolation, for its iframe.
+   *
+   * The single endpoint every buildable previews through - a standalone
+   * component, a pattern preset, a Views display, an entity view mode, a page
+   * layout. This is what the iframe loads: just the Preview island's rendered
+   * display, on a bare full page, so it gets its own viewport (and reflows with
+   * the viewport switcher) but none of the builder or site chrome.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
+   *   The instance to preview.
+   *
+   * @return array
+   *   A render array of the previewed display.
+   *
+   * @see \Drupal\display_builder\Plugin\display_builder\Island\PreviewPanel::build()
+   */
+  public function getDisplayPreview(InstanceInterface $display_builder_instance): array {
+    $profile = $display_builder_instance->getProfile();
+
+    if ($profile === NULL || !isset($profile->getEnabledIslands()['preview'])) {
+      throw new NotFoundHttpException();
+    }
+
+    $contexts = $display_builder_instance->getAvailableContexts();
+    $definitions = \array_intersect_key($this->islandPluginManager->getDefinitions(), ['preview' => TRUE]);
+    $islands = $this->islandPluginManager->createInstances($definitions, $contexts, $profile->getIslandConfigurations());
+    $island = $islands['preview'] ?? NULL;
+
+    if ($island === NULL) {
+      throw new NotFoundHttpException();
+    }
+
+    return [
+      $island->build($display_builder_instance, $display_builder_instance->getCurrentState(), ['in_iframe' => TRUE]),
+      // The draft render is per-editor and must always be current.
+      '#cache' => [
+        'tags' => $display_builder_instance->getCacheTags(),
+        'max-age' => 0,
+      ],
+    ];
+  }
 
   /**
    * Get block preview.

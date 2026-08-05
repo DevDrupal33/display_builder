@@ -126,6 +126,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     $contextual_islands = $islands_enabled_sorted[IslandType::Contextual->value] ?? [];
     $menu_islands = $islands_enabled_sorted[IslandType::Menu->value] ?? [];
     $view_islands = $islands_enabled_sorted[IslandType::View->value] ?? [];
+    $preview_islands = $islands_enabled_sorted[IslandType::Preview->value] ?? [];
     $floating_islands = $islands_enabled_sorted[IslandType::Floating->value] ?? [];
 
     if (!empty($menu_islands)) {
@@ -141,9 +142,21 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         ];
     }
 
-    $view_islands_data = $this->prepareViewIslands($builder, $view_islands, $floating_islands);
+    $view_islands_data = $this->prepareViewIslands($builder, $view_islands, $preview_islands, $floating_islands);
     $view_sidebar = $view_islands_data['view_sidebar'];
     $view_main = $view_islands_data['view_main'];
+
+    $view_main_tabs = $view_islands_data['view_main_tabs'];
+
+    // The preview toggle is a workspace-mode toolbar button (like expand),
+    // pinning the Preview pane beside the active editor pane. It rides in the
+    // toolbar's end region next to the other action buttons. @see js/split.js.
+    $preview_toggle = $this->buildPreviewToggle($builder, $view_islands_data['view_main_islands']);
+    $end_buttons = $this->buildButtons($builder, $button_islands);
+
+    if (!empty($preview_toggle)) {
+      $end_buttons = ['preview_toggle' => $preview_toggle] + $end_buttons;
+    }
 
     // Library content can be in main or sidebar.
     // @todo Move the logic to LibrariesPanel::build().
@@ -162,11 +175,11 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     return [
       'view_sidebar_buttons' => $view_islands_data['view_sidebar_buttons'],
       'view_sidebar' => $view_sidebar,
-      'view_main_tabs' => $view_islands_data['view_main_tabs'],
+      'view_main_tabs' => $view_main_tabs,
       'view_main' => $view_main,
       'view_floating_controls' => $view_islands_data['view_floating_controls'],
       'start_buttons' => $this->buildButtons($builder, $button_islands, 'start'),
-      'end_buttons' => $this->buildButtons($builder, $button_islands),
+      'end_buttons' => $end_buttons,
       'contextual_islands' => $contextual_islands,
       'menu_islands' => $menu_islands,
     ];
@@ -264,6 +277,10 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    *   Display builder instance.
    * @param array $islands
    *   The sorted, enabled View islands.
+   * @param array $preview_islands
+   *   The sorted, enabled Preview islands. Preview is its own island type, not
+   *   a View tab: these render in the main region as hidden panes, revealed
+   *   only by the preview toggle. @see buildPreviewToggle().
    * @param array $floating_islands
    *   The sorted, enabled Floating islands, to attach to their target main
    *   View island(s), @see buildFloatingControlsRegion().
@@ -271,7 +288,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    * @return array
    *   The prepared view islands data.
    */
-  private function prepareViewIslands(InstanceInterface $builder, array $islands, array $floating_islands = []): array {
+  private function prepareViewIslands(InstanceInterface $builder, array $islands, array $preview_islands = [], array $floating_islands = []): array {
     $view_islands_sidebar = [];
     $view_islands_main = [];
     $view_sidebar_buttons = [];
@@ -294,6 +311,15 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
       }
     }
 
+    // Preview panes are a distinct island type, never a View tab. They join the
+    // main region so they render (hidden until the preview toggle reveals them.
+    // @see js/split.js, and so pane_header Floating islands like the viewport
+    // switcher, which attach to 'preview', find their target pane. They are
+    // never added to $view_main_tabs, so they get no tab of their own.
+    foreach ($preview_islands as $id => $island) {
+      $view_islands_main[$id] = $island;
+    }
+
     $view_panels_display = $this->entity->getViewPanelsDisplay();
 
     if (!empty($view_sidebar_buttons)) {
@@ -308,14 +334,80 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     $view_sidebar = $this->buildPanes($builder, $view_islands_sidebar, $builder_data);
     // Default hidden.
     $view_main = $this->buildPanes($builder, $view_islands_main, $builder_data, ['shoelace-tabs__tab--hidden']);
+
+    // pane_header Floating islands (e.g. the viewport switcher) render inside
+    // their target pane as its first child, above the pane content.
+    foreach ($this->buildPaneHeaders($builder, $view_islands_main, $floating_islands) as $pane_id => $header) {
+      if (isset($view_main[$pane_id])) {
+        $view_main[$pane_id] = ['pane_header' => $header] + $view_main[$pane_id];
+      }
+    }
+
     $view_floating_controls = $this->buildFloatingControlsRegion($builder, $view_islands_main, $floating_islands);
 
     return [
       'view_sidebar_buttons' => $view_sidebar_buttons,
       'view_main_tabs' => $view_main_tabs,
+      'view_main_islands' => $view_islands_main,
       'view_sidebar' => $view_sidebar,
       'view_main' => $view_main,
       'view_floating_controls' => $view_floating_controls,
+    ];
+  }
+
+  /**
+   * Builds the preview toggle that pins the Preview pane beside the editor.
+   *
+   * Needs a Preview pane in the main region and at least one other pane to sit
+   * next to; otherwise there is nothing to place it beside, so no toggle
+   * renders.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
+   * @param \Drupal\display_builder\Island\IslandInterface[] $view_main_islands
+   *   The enabled main-region islands (View tabs plus the Preview pane), keyed
+   *   by plugin ID.
+   *
+   * @return array
+   *   The toggle button render array, or an empty array when it does not apply.
+   *
+   * @see components/display_builder/js/split.js
+   */
+  private function buildPreviewToggle(InstanceInterface $builder, array $view_main_islands): array {
+    if (!isset($view_main_islands['preview']) || \count($view_main_islands) < 2) {
+      return [];
+    }
+
+    $island = $view_main_islands['preview'];
+    $target = '#' . $island->getHtmlId((string) $builder->id());
+
+    $attributes = [
+      'class' => ['db-split-toggle'],
+      'data-db-split-toggle' => TRUE,
+      'data-split-target' => $target,
+      'aria-pressed' => 'false',
+    ];
+
+    // Preview is neither a sidebar start button nor a main tab, so the two
+    // places that normally carry an island's shortcut never see it: this
+    // toggle is its only affordance, and therefore the only element that can
+    // carry the key. @see components/display_builder/js/keyboard.js, which
+    // maps every [data-keyboard-key] under the builder and clicks the match.
+    if ($keyboard = $island::keyboardShortcuts()) {
+      $attributes['data-keyboard-key'] = $keyboard['key'] ?? '';
+      $attributes['data-keyboard-help'] = $keyboard['help'] ?? '';
+      $attributes['aria-keyshortcuts'] = $keyboard['key'] ?? '';
+    }
+
+    return [
+      '#type' => 'component',
+      '#component' => 'display_builder:button',
+      '#props' => [
+        'id' => \sprintf('preview-toggle-%s', $builder->id()),
+        'label' => $this->t('Preview'),
+        'tooltip' => $this->t('Show the preview beside the editor'),
+        'attributes' => $attributes,
+      ],
     ];
   }
 
@@ -453,6 +545,13 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
 
     foreach ($floating_islands as $floating_island) {
       $definition = $floating_island->getPluginDefinition();
+
+      // pane_header islands are the pane's own chrome and render inside it, not
+      // in this overlay box. @see buildPaneHeaders().
+      if (\is_array($definition) && !empty($definition['pane_header'])) {
+        continue;
+      }
+
       $attach_to = \is_array($definition) ? ($definition['attach_to'] ?? []) : [];
 
       // The selectors of the panes this island attaches to that are actually
@@ -508,6 +607,80 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
       ],
       'children' => $children,
     ];
+  }
+
+  /**
+   * Builds the in-pane header bars for pane_header Floating islands.
+   *
+   * A Floating island flagged pane_header (@see
+   * \Drupal\display_builder\Attribute\Island) is the pane's own chrome rather
+   * than an overlay: it renders inside its attach_to pane as an in-flow header
+   * bar (e.g. the viewport switcher above the Preview iframe), so it rides with
+   * the pane and needs no visibility syncing - hence no `data-attached-to` or
+   * starts-hidden class here. Returned keyed by target pane plugin ID for the
+   * caller to inject as that pane's first child.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   Display builder instance.
+   * @param \Drupal\display_builder\Island\IslandInterface[] $view_islands
+   *   The enabled main-region View islands, keyed by plugin ID.
+   * @param \Drupal\display_builder\Island\IslandInterface[] $floating_islands
+   *   The sorted, enabled Floating islands.
+   *
+   * @return array
+   *   A header render array per target pane, keyed by the pane's plugin ID.
+   */
+  private function buildPaneHeaders(InstanceInterface $builder, array $view_islands, array $floating_islands): array {
+    $data = $builder->getCurrentState();
+    $headers = [];
+
+    foreach ($floating_islands as $floating_island) {
+      $definition = $floating_island->getPluginDefinition();
+
+      if (!\is_array($definition) || empty($definition['pane_header'])) {
+        continue;
+      }
+
+      $floating_island_id = $floating_island->getPluginId();
+
+      foreach (($definition['attach_to'] ?? []) as $view_island_id) {
+        if (!isset($view_islands[$view_island_id])) {
+          continue;
+        }
+
+        $headers[$view_island_id][$floating_island_id] = [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#attributes' => [
+            'id' => $floating_island->getHtmlId((string) $builder->id()),
+            // `sse-swap` attribute is used by HTMX SSE swap.
+            'sse-swap' => $floating_island->getHtmlId((string) $builder->id()),
+            'class' => [
+              'db-island',
+              \sprintf('db-island-%s', $floating_island->getTypeId()),
+              \sprintf('db-island-%s', $floating_island_id),
+            ],
+            'data-testid' => \sprintf('%s_%s', $floating_island->getTypeId(), $floating_island_id),
+          ] + $this->buildDeferrableAttribute($floating_island),
+          'children' => $floating_island->build($builder, $data),
+        ];
+      }
+    }
+
+    $result = [];
+
+    foreach ($headers as $pane_id => $children) {
+      $result[$pane_id] = [
+        '#type' => 'html_tag',
+        '#tag' => 'div',
+        '#attributes' => [
+          'class' => ['db-island-pane-header'],
+        ],
+        'children' => $children,
+      ];
+    }
+
+    return $result;
   }
 
   /**

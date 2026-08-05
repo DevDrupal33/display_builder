@@ -26,6 +26,8 @@ use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
   id: 'page_layout',
   label: new TranslatableMarkup('Page layout'),
   instance_prefix: 'page_layout__',
+  // A page layout is the page: its own sources draw the header and the footer.
+  renders_full_page: TRUE,
 )]
 final class PageLayout extends DisplayBuildablePluginBase {
 

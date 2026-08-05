@@ -64,7 +64,6 @@ islands:
   viewport:
     status: false
     weight: 0
-    region: end
   back:
     status: false
     weight: 0
@@ -72,7 +71,7 @@ islands:
   state:
     status: true
     weight: 0
-    region: end
+    region: start
   operation:
     status: false
     weight: 0
@@ -145,6 +144,10 @@ islands:
   menu_debug:
     status: true
     weight: 0
+  save_status:
+    status: true
+    weight: -10
+    region: start
   test_island_menu:
     status: false
     weight: 0
@@ -173,4 +176,5 @@ islands:
 library_flat: false
 library_tabs_display: icon
 contextual_tabs_display: icon
+view_panels_display: label
 weight: 0

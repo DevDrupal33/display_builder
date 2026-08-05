@@ -77,6 +77,9 @@
 }
 
 .db-toolbar__middle {
+  display: flex;
+  align-items: center;
+  gap: var(--db-space-8);
   height: var(--toolbar-height);
   padding: 0;
 }
@@ -100,7 +103,7 @@
 
 .db-toolbar sl-tab-group {
   /* Tabs must not be taller than the available space */
-  max-height: calc(var(--toolbar-height) - var(--db-space-12) * 2);
+  /* max-height: calc(var(--toolbar-height) - var(--db-space-12) * 2); */
 }
 
 .db-toolbar sl-tab::part(base) {

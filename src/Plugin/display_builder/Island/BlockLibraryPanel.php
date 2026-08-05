@@ -38,6 +38,7 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
     'component',
     // Token is deprecated in UI Patterns; 'Textfield' allow token.
     'token',
+    // Superseded by textarea until it works.
     'wysiwyg',
   ];
 

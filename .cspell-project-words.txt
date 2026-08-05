@@ -43,3 +43,4 @@ pwuser
 sentity
 stest
 fanout
+buildables

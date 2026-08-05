@@ -16,7 +16,7 @@ conditions:
   request_path:
     id: request_path
     negate: false
-    pages: /test-layers
+    pages: /test/layers
 profile: test_scaffold
 sources:
   - node_id: df9fe3c4ecd52b6a

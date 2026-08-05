@@ -75,15 +75,12 @@ test('Config form', { tag: [ '@base' ] }, async ({ page, drupal, displayBuilder 
   // asserting the heading text pins every value we set above without redding on
   // an unrelated markup change elsewhere in the tree.
   await test.step(`Preview reflects the config`, async () => {
-    await page.getByTestId('tab_view_preview').click()
+    await page.locator('[data-db-split-toggle]').click()
     await displayBuilder.shoelaceReady()
 
-    const heading = page.locator('.db-island-preview').getByRole('heading', { level: 2 })
+    const heading = page.locator('iframe[title="Live preview"]').first().contentFrame().getByRole('heading', { level: 2 })
     await expect(heading).toContainText('label: Test Label')
     await expect(heading).toContainText('open: false')
     await expect(heading).toContainText(/duration: \d+/)
-
-    await page.getByTestId('tab_view_builder').click()
-    await displayBuilder.shoelaceReady()
   })
 })

@@ -1,45 +1,31 @@
-display_builder_theme_test.screen-xs-max:
-  label: 'Extra small'
-  mediaQuery: 'all and (max-width: 575px)'
+display_builder_theme_test.sm:
+  label: Small
+  mediaQuery: 'all and (min-width: 640px)'
   weight: 1
   multipliers:
     - 1x
-    - 1.5x
     - 2x
-    - 3x
-display_builder_theme_test.screen-sm-max:
-  label: 'Small'
-  mediaQuery: 'all and (max-width: 767px)'
+
+display_builder_theme_test.md:
+  label: Medium
+  mediaQuery: 'all and (min-width: 768px)'
+  weight: 2
+  multipliers:
+    - 1x
+    - 2x
+
+display_builder_theme_test.lg:
+  label: Large
+  mediaQuery: 'all and (min-width: 1024px)'
   weight: 3
   multipliers:
     - 1x
-    - 1.5x
     - 2x
-    - 3x
-display_builder_theme_test.screen-md-max:
-  label: 'Medium'
-  mediaQuery: 'all and (max-width: 991px)'
-  weight: 5
+
+display_builder_theme_test.xl:
+  label: Extra Large
+  mediaQuery: 'all and (min-width: 1280px)'
+  weight: 4
   multipliers:
     - 1x
-    - 1.5x
     - 2x
-    - 3x
-display_builder_theme_test.screen-lg-max:
-  label: 'Large'
-  mediaQuery: 'all and (max-width: 1199px)'
-  weight: 7
-  multipliers:
-    - 1x
-    - 1.5x
-    - 2x
-    - 3x
-display_builder_theme_test.screen-xl-max:
-  label: 'Extra large'
-  mediaQuery: 'all and (max-width: 1399px)'
-  weight: 9
-  multipliers:
-    - 1x
-    - 1.5x
-    - 2x
-    - 3x

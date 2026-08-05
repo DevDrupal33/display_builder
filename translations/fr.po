@@ -554,8 +554,8 @@ msgid "Fluid"
 msgstr "Fluide"
 
 #: assets/js/form_description.js:0
-msgid "Show description"
-msgstr "Afficher la description"
+msgid "Show descriptions"
+msgstr "Afficher les descriptions"
 
 #: src/Plugin/display_builder/Island/Collaboration.php:95
 msgid "Image field"
@@ -612,8 +612,8 @@ msgid "Format: @format"
 msgstr "Format : @format"
 
 #: assets/js/form_description.js:0; src/Plugin/UiPatterns/Source/ComponentSource.php:202
-msgid "Hide description"
-msgstr "Masquer la description"
+msgid "Hide descriptions"
+msgstr "Masquer les descriptions"
 
 #: src/Plugin/display_builder/Island/ViewportSwitcher.php:94
 msgid "breakpoint"

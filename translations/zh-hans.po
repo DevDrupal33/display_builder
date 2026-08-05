@@ -555,7 +555,7 @@ msgid "Fluid"
 msgstr "流式"
 
 #: assets/js/form_description.js:0
-msgid "Show description"
+msgid "Show descriptions"
 msgstr "显示描述"
 
 #: src/Plugin/display_builder/Island/Collaboration.php:95
@@ -613,7 +613,7 @@ msgid "Format: @format"
 msgstr "格式：@format"
 
 #: assets/js/form_description.js:0; src/Plugin/UiPatterns/Source/ComponentSource.php:202
-msgid "Hide description"
+msgid "Hide descriptions"
 msgstr "隐藏描述"
 
 #: src/Plugin/display_builder/Island/ViewportSwitcher.php:94

@@ -54,7 +54,7 @@
    *
    * @type {string}
    */
-  const REPORTABLE = '.db-island-view, .db-island-floating';
+  const REPORTABLE = '.db-island-view, .db-island-preview, .db-island-floating';
 
   /**
    * Panes the server has marked as safe to leave stale while off screen.

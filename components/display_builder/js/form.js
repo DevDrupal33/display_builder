@@ -27,10 +27,10 @@
           );
 
           if (state) {
-            button.textContent = Drupal.t('Hide description');
+            button.textContent = Drupal.t('Hide descriptions');
             container.classList.remove('db-description-hide');
           } else {
-            button.textContent = Drupal.t('Show description');
+            button.textContent = Drupal.t('Show descriptions');
             container.classList.add('db-description-hide');
           }
 
@@ -44,10 +44,10 @@
 
             if (next) {
               container.classList.remove('db-description-hide');
-              button.textContent = Drupal.t('Hide description');
+              button.textContent = Drupal.t('Hide descriptions');
             } else {
               container.classList.add('db-description-hide');
-              button.textContent = Drupal.t('Show description');
+              button.textContent = Drupal.t('Show descriptions');
             }
           });
         },

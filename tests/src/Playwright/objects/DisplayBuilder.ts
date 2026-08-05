@@ -322,12 +322,14 @@ export class Displaybuilder {
    * @returns {Promise<void>}
    */
   async expectPreviewAriaSnapshot(snapshotName: string, locatorClass: string = '.db-island-preview'): Promise<void> {
-    await this.page.getByTestId('tab_view_preview').click()
-    await this.shoelaceReady()
-    await expect(this.page.locator(locatorClass)).toMatchAriaSnapshot({ name: snapshotName })
+    await this.page.locator('[data-db-split-toggle]').click()
+    await this.htmxReady()
 
-    await this.page.getByTestId('tab_view_builder').click()
-    await this.shoelaceReady()
+    const iframe = this.page.locator('iframe[title="Live preview"]').first().contentFrame()
+    await expect(iframe.locator(locatorClass)).toMatchAriaSnapshot({ name: snapshotName })
+
+    await this.page.locator('[data-db-split-toggle]').click()
+    await this.htmxReady()
   }
 
   /**

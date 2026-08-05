@@ -44,8 +44,16 @@ class DisplayBuilderHelpers {
    *   - 'search': An associative array with a single key-value pair to find.
    *               Example: ['plugin_id' => 'system_messages_block'].
    *   - 'new_value': The value to replace the matched element with.
+   *
+   * @return int
+   *   How many elements were replaced. The caller needs this to know whether
+   *   the markers it just inserted have to be styled.
+   *
+   *   @see \Drupal\display_builder\Plugin\display_builder\Island\PreviewPanel::renderPreviewSources()
    */
-  public static function findAndReplaceInArray(array &$array, array $replacements): void {
+  public static function findAndReplaceInArray(array &$array, array $replacements): int {
+    $replaced = 0;
+
     foreach ($array as $key => &$value) {
       if (!\is_array($value)) {
         continue;
@@ -81,6 +89,7 @@ class DisplayBuilderHelpers {
 
         if ($match) {
           $array[$key] = $newValue;
+          ++$replaced;
 
           // Item replaced, continue to next item in the main array to avoid
           // unnecessary recursion into the new value or other replacements.
@@ -89,10 +98,12 @@ class DisplayBuilderHelpers {
       }
 
       // Recurse into deeper arrays if no replacement was made at this level.
-      self::findAndReplaceInArray($value, $replacements);
+      $replaced += self::findAndReplaceInArray($value, $replacements);
     }
     // Break the reference to the last iterated value.
     unset($value);
+
+    return $replaced;
   }
 
   /**

@@ -20,6 +20,12 @@ services:
     tags:
       - { name: 'event_subscriber' }
 
+  display_builder.page_variant_subscriber:
+    class: Drupal\display_builder\Event\PageVariantSubscriber
+    arguments: ['@plugin.manager.display_buildable']
+    tags:
+      - { name: event_subscriber }
+
   plugin.manager.display_buildable:
     class: Drupal\display_builder\DisplayBuildablePluginManager
     parent: default_plugin_manager

@@ -80,8 +80,20 @@ local_storage_manager:
     ./assets/js/localStorageManager.js: {}
 
 viewport_switcher:
+  css:
+    component:
+      ./assets/css/viewport_switcher.css: {}
   js:
     ./assets/js/viewport_switcher.js: {}
+
+# The Preview island's placeholder markers. Attached by the island itself, and
+# only when it actually emitted one, because this has to load inside the
+# live-preview iframe - a document with none of the builder's own CSS.
+# @see \Drupal\display_builder\Plugin\display_builder\Island\PreviewPanel::renderPreviewSources()
+preview_placeholder:
+  css:
+    component:
+      ./assets/css/preview_placeholder.css: {}
 
 highlight:
   js:

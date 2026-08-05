@@ -35,6 +35,8 @@ libraryOverrides:
     js/deferred_islands.js: {}
     js/sidebar.js: {}
     js/preview.js: {}
+    js/live_preview.js: {}
+    js/split.js: {}
     js/keyboard.js: {}
     js/form.js: {}
   css:

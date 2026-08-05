@@ -21,7 +21,8 @@ export default defineConfig({
   /* Reporter to use. @see https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
     ? [
-      ['dot'],
+      // ['dot'],
+      ['list', { printSteps: true }],
       ['html', { open: 'never' }],
       ['junit', { outputFile: 'test-results/playwright.xml' }],
       ['./tests/src/Playwright/utilities/reporter.ts', { level: process.env?.PLAYWRIGHT_DEBUG_LEVEL || 'error' }],

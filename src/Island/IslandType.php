@@ -15,6 +15,7 @@ enum IslandType: string {
   case Library = 'library';
   case Contextual = 'contextual';
   case View = 'view';
+  case Preview = 'preview';
   case Button = 'button';
   case Menu = 'menu';
   case Floating = 'floating';
@@ -31,6 +32,7 @@ enum IslandType: string {
   public static function description(string $type): TranslatableMarkup {
     return match ($type) {
       self::View->value => new TranslatableMarkup('Panels shown as a main area tab or as a sidebar.'),
+      self::Preview->value => new TranslatableMarkup('Preview panel, meant to be a single panel.'),
       self::Library->value => new TranslatableMarkup('Panels available as tab in the Library panel.'),
       self::Button->value => new TranslatableMarkup('Toolbar buttons allowing direct actions in the builder.'),
       self::Contextual->value => new TranslatableMarkup('Panels visible only when the a source is selected.'),

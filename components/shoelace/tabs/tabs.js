@@ -6,6 +6,8 @@
  */
 
 ((Drupal, once) => {
+  Drupal.displayBuilder = Drupal.displayBuilder || {};
+
   /**
    * Synchronizes the visibility of tab panes based on active tab state.
    *
@@ -43,6 +45,35 @@
     // attached panes is one of this group's tabs), leaving another group's
     // controls to that group's own syncPanes() call.
     const root = tabArray[0]?.closest('.display-builder') ?? document;
+
+    // Split view pins a pane (the Preview) beside the active one: keep it
+    // visible whatever the active tab is, so switching tabs never hides it.
+    // @see components/display_builder/js/split.js
+    const splitMain = root.querySelector('.display-builder__main--split');
+    const pinnedTarget = splitMain?.dataset.splitTarget;
+    // The pinned pane (Preview) has no tab of its own, so it is not in
+    // groupTargets; reveal it by confirming it lives inside the split main
+    // instead. Guarding on containment also keeps other tab groups (library,
+    // contextual) from claiming a pane that is not theirs.
+    const pinnedPane = pinnedTarget
+      ? splitMain.querySelector(pinnedTarget)
+      : null;
+    if (pinnedPane) {
+      pinnedPane.classList.remove('shoelace-tabs__tab--hidden');
+      // Preview only: the editor column is collapsed away, so its pane is gone
+      // from view even though its tab is still the active one. Dropping the
+      // active targets stops that pane's floating controls (Highlight, Density)
+      // from staying behind, pinned over the Preview's own header.
+      // @see components/display_builder/js/split.js
+      if (root.classList?.contains('display-builder--preview-only')) {
+        activeTargets.clear();
+      }
+      // Count the pinned pane as active so its floating controls (e.g. the
+      // viewport switcher) ride along into the split, usable beside the editor
+      // rather than only when the pane is the active tab.
+      activeTargets.add(pinnedTarget);
+    }
+
     root.querySelectorAll('[data-attached-to]').forEach((el) => {
       const targets = el.getAttribute('data-attached-to').split(',');
 
@@ -174,6 +205,24 @@
     }
     switchTab(builderId, tabsList, tab, null, false);
   }
+
+  /**
+   * Re-run pane visibility for the main (toolbar) tab group.
+   *
+   * The split toggle lives outside the tab group, so it cannot reach syncPanes
+   * itself; it calls this to reveal or hide the pinned pane after flipping the
+   * split state. @see components/display_builder/js/split.js
+   *
+   * @param {HTMLElement} root - The .display-builder element to act within.
+   */
+  Drupal.displayBuilder.syncMainTabs = (root) => {
+    const group = (root ?? document).querySelector(
+      '.db-toolbar__middle .shoelace-tabs',
+    );
+    if (group) {
+      syncPanes(group.querySelectorAll('.shoelace-tabs__tab'));
+    }
+  };
 
   /**
    * Drupal behavior for display builder tabs.

@@ -45,7 +45,6 @@ islands:
   preview:
     status: true
     weight: -5
-    region: main
   library:
     status: true
     weight: -10
@@ -123,7 +122,7 @@ islands:
     status: true
     weight: 0
   viewport:
-    status: false
+    status: true
     weight: 0
   menu_styles:
     status: true

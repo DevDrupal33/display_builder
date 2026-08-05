@@ -1,0 +1,45 @@
+/**
+ * @file
+ * Viewport switcher: a segmented control of device buttons on a single row.
+ *
+ * @see src/Plugin/display_builder/Island/ViewportSwitcher.php
+ * @see assets/js/viewport_switcher.js
+ */
+
+.db-viewport-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.switch-viewport,
+.switch-zoom {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.125rem;
+  align-items: center;
+  padding: 0.125rem;
+}
+
+/* Keep the zoom group visually distinct from the width group. */
+.switch-zoom {
+  padding-left: 0.5rem;
+  border-left: 1px solid var(--toolbar-color-border);
+}
+
+/* Compact select that fits the header bar; the accessible label is kept in the
+   DOM for assistive tech but hidden visually. */
+.switch-zoom-select {
+  width: 6rem;
+}
+.switch-zoom-select::part(form-control-label) {
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  white-space: nowrap;
+  border: 0;
+}

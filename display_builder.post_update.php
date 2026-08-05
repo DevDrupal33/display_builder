@@ -23,7 +23,7 @@ function display_builder_post_update_1(): void {
 }
 
 /**
- * Migrate legacy profile island config from layers to scaffold.
+ * Migrate config with new values.
  */
 function display_builder_post_update_2(): void {
   $storage = \Drupal::service('entity_type.manager')->getStorage('display_builder_profile');
@@ -35,12 +35,34 @@ function display_builder_post_update_2(): void {
     }
 
     $islands = $profile->get('islands');
-    if (!is_array($islands) || !isset($islands['layers']) || isset($islands['scaffold'])) {
+    if (!is_array($islands)) {
+      continue;
+    }
+    $changed = FALSE;
+
+    // The 'layers' island is now named 'scaffold'.
+    if (isset($islands['layers']) && !isset($islands['scaffold'])) {
+      $islands['scaffold'] = $islands['layers'];
+      unset($islands['layers']);
+      $changed = TRUE;
+    }
+
+    // The viewport island has no 'format' setting anymore.
+    if (is_array($islands['viewport'] ?? NULL) && array_key_exists('format', $islands['viewport'])) {
+      unset($islands['viewport']['format']);
+      $changed = TRUE;
+    }
+
+    // The preview island is no longer a region aware View island.
+    if (is_array($islands['preview'] ?? NULL) && array_key_exists('region', $islands['preview'])) {
+      unset($islands['preview']['region']);
+      $changed = TRUE;
+    }
+
+    if (!$changed) {
       continue;
     }
 
-    $islands['scaffold'] = $islands['layers'];
-    unset($islands['layers']);
     $profile->set('islands', $islands);
     $profile->save();
   }
