@@ -15,6 +15,18 @@ use Drupal\display_builder\Entity\ProfileInterface;
 interface PageLayoutInterface extends ConfigEntityInterface, EntityWithPluginCollectionInterface {
 
   /**
+   * Returns whether this page layout is a default page layout.
+   *
+   * A default page layout has no condition plugin attached. Normally, a
+   * maximum of one page layout is expected, but this limitation is not
+   * enforced to not block unforeseen usages.
+   *
+   * @return bool
+   *   Whether the page layout is a default page layout.
+   */
+  public function isDefault(): bool;
+
+  /**
    * Get conditions plugins.
    *
    * @return \Drupal\Core\Condition\ConditionPluginCollection

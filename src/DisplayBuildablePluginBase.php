@@ -283,7 +283,7 @@ abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase impleme
     $select = [
       '#type' => 'select',
       '#title' => $title ?? $this->t('Profile'),
-      '#description' => $this->t('The profile defines the features available in the builder.'),
+      '#description' => $this->t('The profile defines the features available in the builder. It can be changed anytime after creation.'),
       '#options' => $this->getAllowedProfiles(),
     ];
 

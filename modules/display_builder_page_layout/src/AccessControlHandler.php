@@ -92,6 +92,9 @@ class AccessControlHandler extends EntityAccessControlHandler implements EntityH
     /** @var \Drupal\display_builder_page_layout\PageLayoutInterface[] $page_layouts */
     $page_layouts = $storage->loadMultiple($entity_ids);
 
+    // Check the default page layouts last.
+    \uasort($page_layouts, static fn ($a, $b) => $a->isDefault() <=> $b->isDefault());
+
     foreach ($page_layouts as $page_layout) {
       if ($this->access($page_layout, 'view')) {
         return $page_layout;

@@ -16,6 +16,7 @@ use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_page_layout\BuilderDataConverter;
 use Drupal\display_builder_page_layout\Entity\PageLayout as PageLayoutEntity;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
+use Drupal\display_builder_page_layout\StartingPointType;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 
 /**
@@ -186,43 +187,99 @@ final class PageLayout extends DisplayBuildablePluginBase {
 
   /**
    * {@inheritdoc}
+   *
+   * A layout is seeded once, when it is created, and the starting points differ
+   * on a single axis: how much of what already exists is kept. Only the theme
+   * import keeps the page template of the front-end theme.
+   *
+   * Without a starting point this is an already seeded layout, so the stored
+   * sources are the initial ones.
+   *
+   * @param \Drupal\display_builder_page_layout\StartingPointType|null $starting_point
+   *   (Optional) The way the layout is seeded.
+   *
+   * @see \Drupal\display_builder_page_layout\Form\PageLayoutForm::buildStartingPointForm()
    */
-  protected function getInitializationMessage(): TranslatableMarkup {
-    if ($this->initialDataSource === 'theme') {
-      return $this->t('Import display from Block Layout configuration');
-    }
-
-    return $this->t('Initialize display from existing Page Layout configuration');
+  public function getInitialSources(?StartingPointType $starting_point = NULL): array {
+    return match ($starting_point) {
+      StartingPointType::Theme => [$this->converter()->convertPage()],
+      StartingPointType::Minimal => $this->getMinimalSources(),
+      StartingPointType::Blank => [],
+      default => $this->getSources(),
+    };
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getInitialSources(): array {
-    $sources = $this->getSources();
+  protected function getInitializationMessage(): TranslatableMarkup {
+    return $this->t('Initialize display from existing Page Layout configuration');
+  }
 
-    if (empty($sources)) {
-      $sources = $this->converter()->convertPage();
-      // Sources root is always a list of source data structures.
-      $sources = \array_is_list($sources) ? $sources : [$sources];
-      $this->initialDataSource = 'theme';
+  /**
+   * Gets the sources of the minimal Drupal page.
+   *
+   * The theme page shell is deliberately left out: it is what makes the
+   * starting points a gradient instead of two flavors of the same thing. The
+   * cost is that a minimal page looks raw on a bare theme.
+   *
+   * @return array
+   *   A list of sources, in page order.
+   */
+  private function getMinimalSources(): array {
+    $sources = [
+      $this->buildBlockSource('system_breadcrumb_block'),
+      $this->buildBlockSource('system_messages_block'),
+    ];
+
+    if ($this->moduleHandler->moduleExists('help')) {
+      $sources[] = $this->buildBlockSource('help_block');
     }
 
+    $sources[] = ['source_id' => 'page_title', 'source' => []];
+    $sources[] = $this->buildBlockSource('local_tasks_block', [
+      'primary' => TRUE,
+      'secondary' => TRUE,
+    ]);
+    $sources[] = $this->buildBlockSource('local_actions_block');
+    $sources[] = ['source_id' => 'main_page_content', 'source' => []];
+
     return $sources;
+  }
+
+  /**
+   * Builds a block source data structure.
+   *
+   * @param string $block_id
+   *   The block plugin ID.
+   * @param array $configuration
+   *   (Optional) The block plugin configuration.
+   *
+   * @return array
+   *   A single UI Patterns source data.
+   */
+  private function buildBlockSource(string $block_id, array $configuration = []): array {
+    return [
+      'source_id' => 'block',
+      'source' => [
+        'plugin_id' => $block_id,
+        $block_id => $configuration,
+      ],
+    ];
   }
 
   /**
    * Gets the builder data converter.
    *
    * @return \Drupal\display_builder_page_layout\BuilderDataConverter
-   *   The converter service.
+   *   The builder data converter.
    */
   private function converter(): BuilderDataConverter {
     return \Drupal::service('display_builder_page_layout.builder_data_converter');
   }
 
   /**
-   * Gets the builder data converter.
+   * Gets the plugin cache clearer.
    *
    * @return \Drupal\Core\Plugin\CachedDiscoveryClearerInterface
    *   The plugin cache clearer.

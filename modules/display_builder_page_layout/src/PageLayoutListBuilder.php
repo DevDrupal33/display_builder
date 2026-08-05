@@ -32,28 +32,25 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
     $build['notice'] = [
       '#type' => 'html_tag',
       '#tag' => 'p',
-      '#value' => $this->t('The first enabled, non-empty, applicable to a page according to its conditions, page layout will be loaded.'),
+      '#value' => $this->t('A page is built by the first layout in this list whose conditions match it. Layouts that are disabled or empty are skipped. Pages matched by none of them fall through to the default layout, at the bottom of the list.'),
       '#weight' => -100,
     ];
+    $build = $this->addDefaultPageLayouts($build);
 
     return $build;
   }
 
   /**
    * {@inheritdoc}
+   *
+   * Remove default page layouts because they are not draggable and will be
+   * displayed apart.
    */
   public function load(): array {
+    /** @var \Drupal\display_builder_page_layout\PageLayoutInterface[] $entities */
     $entities = parent::load();
 
-    if ($this->countActivePageLayouts($entities) === 0) {
-      $params = [
-        '@url' => Url::fromRoute('block.admin_display')->toString(),
-      ];
-      $message = $this->t('Without any active Page Layout, pages are managed by <a href="@url">Block Layout</a>.', $params);
-      $this->messenger()->addStatus($message);
-    }
-
-    return $entities;
+    return \array_filter($entities, static fn (PageLayoutInterface $entity) => !$entity->isDefault());
   }
 
   /**
@@ -76,15 +73,15 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
     $row = [];
     /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $entity */
     $row['label'] = $entity->label();
-    $row['profile_id']['#plain_text'] = $entity->getProfile()?->label() ?? '?';
-    $row['conditions'] = [
+    $row['profile_id']['data']['#plain_text'] = $entity->getProfile()?->label() ?? '?';
+    $row['conditions']['data'] = [
       '#theme' => 'item_list',
       '#list_type' => 'ul',
       '#items' => $this->getConditionsSummary($entity),
     ];
     $status = $entity->status() ? $this->t('Enabled') : '❌ ' . $this->t('Disabled');
     $status = $entity->status() && empty($entity->getSources()) ? '❌ ' . $this->t('Empty') : $status;
-    $row['status']['#plain_text'] = $status;
+    $row['status']['data']['#plain_text'] = $status;
 
     $row = $row + parent::buildRow($entity);
     $row['#attributes']['data-id'] = $entity->id();
@@ -96,7 +93,7 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
    * {@inheritdoc}
    */
   public function getDefaultOperations(EntityInterface $entity, ?CacheableMetadata $cacheability = NULL): array {
-    /** @var \Drupal\display_builder_page_layout\PageLayoutInterface @page_layout */
+    /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $page_layout */
     $page_layout = $entity;
     $manager = \Drupal::service('plugin.manager.display_buildable');
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
@@ -134,24 +131,78 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
   }
 
   /**
-   * Count enabled and non empty Page Layout entities.
+   * Add default page layouts to the entities table footer.
    *
-   * @param array<int,mixed> $entities
-   *   The entities to process.
+   * @param array<string,mixed> $build
+   *   A renderable array.
    *
-   * @return int
-   *   The number of enabled and non empty Page Layout entities.
+   * @return array<string,mixed>
+   *   The altered renderable array.
    */
-  private function countActivePageLayouts(array $entities): int {
-    $count = 0;
+  private function addDefaultPageLayouts(array $build): array {
+    /** @var \Drupal\display_builder_page_layout\PageLayoutInterface[] $entities */
+    $entities = parent::load();
+    $default_layouts = \array_filter($entities, static fn (PageLayoutInterface $entity) => $entity->isDefault());
 
-    foreach ($entities as $entity) {
-      if ($entity->status === TRUE && !empty($entity->getSources())) {
-        ++$count;
+    foreach ($default_layouts as $entity_id => $entity) {
+      $row = $this->buildRow($entity);
+      unset($row['weight'], $row['#weight'], $row['#attributes']);
+      $build['entities']['#footer'][$entity_id]['data'] = $row;
+      $build['entities']['#footer'][$entity_id]['style'] = 'font-weight: normal';
+    }
+
+    $message = $this->getUncoveredPagesMessage($default_layouts);
+
+    if ($message !== NULL) {
+      $this->messenger()->addStatus($message);
+    }
+
+    return $build;
+  }
+
+  /**
+   * Says what still builds the pages no layout in the list matches.
+   *
+   * The UI only ever offers one default layout, but the API does not stop code
+   * from creating several, and sites in production already have. So a single
+   * working one is enough, and it is not necessarily the first.
+   *
+   * The ways to have none are worth telling apart: one is work not started, the
+   * others are work left unfinished, and each has a different next step.
+   *
+   * @param \Drupal\display_builder_page_layout\PageLayoutInterface[] $default_layouts
+   *   The page layouts carrying no condition.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
+   *   The message, or NULL when a default layout covers those pages.
+   */
+  private function getUncoveredPagesMessage(array $default_layouts): ?TranslatableMarkup {
+    $params = ['@url' => Url::fromRoute('block.admin_display')->toString()];
+
+    if ($default_layouts === []) {
+      $params['@create'] = Url::fromRoute('entity.page_layout.add_default_form')->toString();
+
+      return $this->t('Pages matched by no layout below are still built by <a href="@url">Block Layout</a>. <a href="@create">Create the default page layout</a> to take them over.', $params);
+    }
+
+    foreach ($default_layouts as $default_layout) {
+      if ($default_layout->status() && !empty($default_layout->getSources())) {
+        return NULL;
       }
     }
 
-    return $count;
+    if (\count($default_layouts) > 1) {
+      return $this->t('No default page layout is both enabled and built, so pages matched by no layout below are still built by <a href="@url">Block Layout</a>. Enable one and build its display to take them over.', $params);
+    }
+
+    $default_layout = \reset($default_layouts);
+    $params['%label'] = $default_layout->label();
+
+    if (empty($default_layout->getSources())) {
+      return $this->t('The default page layout %label is empty, so pages matched by no layout below are still built by <a href="@url">Block Layout</a>. Build its display to take them over.', $params);
+    }
+
+    return $this->t('The default page layout %label is disabled, so pages matched by no layout below are still built by <a href="@url">Block Layout</a>. Enable it to take them over.', $params);
   }
 
   /**

@@ -1,3 +1,9 @@
+entity.page_layout.add_default_form:
+  route_name: 'entity.page_layout.add_default_form'
+  title: 'Create the default page layout'
+  appears_on:
+    - entity.page_layout.collection
+
 entity.page_layout.add_form:
   route_name: 'entity.page_layout.add_form'
   title: 'Add page layout'

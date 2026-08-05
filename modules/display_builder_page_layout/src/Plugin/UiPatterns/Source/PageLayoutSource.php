@@ -28,6 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 #[Source(
   id: 'page_layout',
   label: new TranslatableMarkup('Theme page (from active theme)'),
+  description: new TranslatableMarkup('The regions of this element are rendered by the page template of the front-end theme. It is a starting point, not a permanent setup: move the contents of a region to the page root and the theme stops rendering that part.'),
   prop_types: ['slot'],
   context_requirements: ['page'],
   context_definitions: []

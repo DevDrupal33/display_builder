@@ -137,6 +137,13 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
   /**
    * {@inheritdoc}
    */
+  public function isDefault(): bool {
+    return $this->getConditions()->count() === 0;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getConditions(): ConditionPluginCollection {
     if (!isset($this->conditionPluginCollection)) {
       // Static call because EntityBase and descendants don't support

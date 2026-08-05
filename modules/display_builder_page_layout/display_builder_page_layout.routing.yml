@@ -14,6 +14,16 @@ entity.page_layout.add_form:
   requirements:
     _permission: 'administer page_layout'
 
+entity.page_layout.add_default_form:
+  path: '/admin/structure/page-layout/add-default'
+  defaults:
+    _entity_form: 'page_layout.add'
+    _title: 'Create the default page layout'
+    _page_layout_default: true
+  requirements:
+    _permission: 'administer page_layout'
+    _custom_access: '\Drupal\display_builder_page_layout\Access\DefaultPageLayoutAccess::access'
+
 entity.page_layout.edit_form:
   path: '/admin/structure/page-layout/{page_layout}'
   defaults:
