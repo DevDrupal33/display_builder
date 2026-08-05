@@ -492,7 +492,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
         'source_id' => 'textfield',
         'node_id' => \bin2hex(\random_bytes(8)),
         'source' => ['value' => $value],
-        'third_party_settings' => NULL,
+        'third_party_settings' => [],
       ],
     ];
   }
