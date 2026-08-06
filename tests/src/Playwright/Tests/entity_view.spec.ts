@@ -201,6 +201,8 @@ test(
       await page.getByRole('button', { name: 'Save' }).click()
       await drupal.expectMessage('has been created.')
 
+      const nodePath = await page.getByRole('link', { name: 'View' }).getAttribute('href') || ''
+
       await page.getByRole('link', { name: 'Default display' }).click()
       await displayBuilder.shoelaceReady()
       // Basic common drag component and textfield.
@@ -215,7 +217,7 @@ test(
 
       // Check result on preview and on view entity page.
       await displayBuilder.publishDisplayBuilder()
-      await page.goto('/node/1')
+      await page.goto(nodePath)
       await expect(page.locator('.block-system-main-block')).toMatchAriaSnapshot({ name: 'entity-override.aria.yml' })
     })
   },
