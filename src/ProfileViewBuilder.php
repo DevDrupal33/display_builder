@@ -483,7 +483,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
           '#tag' => 'h5',
           'value' => $island->label(),
           '#attributes' => [
-            'class' => ['db-island-label', 'db-island-label--' . $island->getPluginId()],
+            'class' => ['db-island-label', 'db-library-search-hide', 'db-island-label--' . $island->getPluginId()],
           ],
         ];
       }
