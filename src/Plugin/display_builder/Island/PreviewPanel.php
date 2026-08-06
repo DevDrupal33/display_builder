@@ -277,6 +277,10 @@ class PreviewPanel extends IslandPluginBase {
   private function alterPreviewPlaceholder(array &$data): int {
     $replacements = [
       [
+        'search' => ['plugin_id' => 'local_tasks_block'],
+        'new_value_title' => new TranslatableMarkup('[Placeholder] Local tasks (Tabs)'),
+      ],
+      [
         'search' => ['plugin_id' => 'system_messages_block'],
         'new_value_title' => new TranslatableMarkup('[Placeholder] Block messages'),
       ],

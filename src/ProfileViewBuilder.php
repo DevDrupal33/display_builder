@@ -301,7 +301,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
 
       $configuration = $island->getConfiguration();
 
-      if ($configuration['region'] === 'sidebar') {
+      if (isset($configuration['region']) && $configuration['region'] === 'sidebar') {
         $view_islands_sidebar[$id] = $islands[$id];
         $view_sidebar_buttons[$id] = $islands[$id];
       }

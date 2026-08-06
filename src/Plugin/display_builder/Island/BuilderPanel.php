@@ -364,9 +364,11 @@ class BuilderPanel extends IslandPluginBase {
       return NULL;
     }
 
+    $has_plugin_id = FALSE;
     $classes = ['db-block'];
 
     if (isset($data['source']['plugin_id'])) {
+      $has_plugin_id = TRUE;
       $classes[] = 'db-block-' . \strtolower(Html::cleanCssIdentifier($data['source']['plugin_id']));
     }
     else {
@@ -381,7 +383,7 @@ class BuilderPanel extends IslandPluginBase {
       }
     }
 
-    if (($data['source']['plugin_id'] ?? '') === 'system_messages_block') {
+    if ($has_plugin_id && ($data['source']['plugin_id'] === 'system_messages_block' || $data['source']['plugin_id'] === 'local_tasks_block')) {
       // system_messages_block is never empty, but often invisible.
       // See: core/modules/system/src/Plugin/Block/SystemMessagesBlock.php
       // See: core/lib/Drupal/Core/Render/Element/StatusMessages.php
