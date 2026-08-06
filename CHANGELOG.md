@@ -1,3 +1,58 @@
+## [1.0.0-beta6] - 2026-08-06
+
+### 🚀 Features
+
+- Bump max history
+- [#3613168](https://www.drupal.org/project/display_builder/issues/3613168) Add Simplified Chinese translation PO
+- [#3613169](https://www.drupal.org/project/display_builder/issues/3613169) Add close button to context menu
+- [#3542003](https://www.drupal.org/project/display_builder/issues/3542003) Responsive viewports with iframes
+- Add instances list panel
+
+### 🐛 Bug Fixes
+
+- [#3607019](https://www.drupal.org/project/display_builder/issues/3607019) 11.4 compat: ParamConverterManager lazy services are broken
+- [#3608596](https://www.drupal.org/project/display_builder/issues/3608596) Builder/Preview Island: comment form builder error if assertion enabled.
+- Clear patches and bump ui_patterns version
+- [#3613285](https://www.drupal.org/project/display_builder/issues/3613285) Time for a new beta version because 1.0.0-beta5 is breaking site
+- [#3612675](https://www.drupal.org/project/display_builder/issues/3612675) Revert is broken: PHP error + UI not refreshed
+- [#3612556](https://www.drupal.org/project/display_builder/issues/3612556) PageLayoutSource is sometimes not rendered
+- [#3542003](https://www.drupal.org/project/display_builder/issues/3542003) add missing route parameters for display builder overrides
+- [#3542003](https://www.drupal.org/project/display_builder/issues/3542003) local task placeholer
+- [#3542003](https://www.drupal.org/project/display_builder/issues/3542003) update navigation to entity view page in display builder tests
+- [#3613285](https://www.drupal.org/project/display_builder/issues/3613285) update LocalStorageManager usage to remove builder ID dependency and enhance UI elements
+- Add 'db-library-search-hide' class to island label for improved styling
+
+### 💼 Other
+
+- [#3608406](https://www.drupal.org/project/display_builder/issues/3608406) Remove metadata attribute from ExtraFieldSource
+- Task: [#3606874](https://www.drupal.org/project/display_builder/issues/3606874) Rename data-instance-id attribute to data-testid
+tests: entity type field creation require translatable flag
+- [#3576683](https://www.drupal.org/project/display_builder/issues/3576683) [meta] UX refresh
+- Set label as default, move clear before
+- [#3614776](https://www.drupal.org/project/display_builder/issues/3614776) page layout styles fail
+- [#3614540](https://www.drupal.org/project/display_builder/issues/3614540) Clarify default page layout
+- [#3614776](https://www.drupal.org/project/display_builder/issues/3614776) Make PageLayoutSource compatible with attributes
+- [#3614785](https://www.drupal.org/project/display_builder/issues/3614785) InstanceHistoryTest compatibility with UI Patterns 2.0.18
+
+### 📚 Documentation
+
+- Generate zensical doc
+
+### 🎨 Styling
+
+- Cspell typo fix
+
+### 🧪 Testing
+
+- Update entity view test to navigate using dynamic node path
+
+### ⚙️ Miscellaneous Tasks
+
+- *(patch)* Add ui_styles patch
+- [#3608519](https://www.drupal.org/project/display_builder/issues/3608519) 11.4 compat: udpate tests
+- *(patch)* Remove ui_styles patch as it is merged in dev
+- *(ci)* Enhance CI configuration and Playwright tests setup
+- Remove composer drupal/core reference, bump dev
 ## [1.0.0-beta5] - 2026-06-26
 
 ### 🚀 Features
@@ -46,6 +101,7 @@
 - [#3580549](https://www.drupal.org/project/display_builder/issues/3580549) Update documentation
 - [#3582234](https://www.drupal.org/project/display_builder/issues/3582234) fix leftover doc
 - Minor playwright test fix
+- Update changelog beta5
 
 ### 🎨 Styling
 
