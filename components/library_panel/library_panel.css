@@ -10,6 +10,22 @@
 /* When library panels are merged into a single flat list (see
    Profile::isLibraryFlat), each panel's own search box is redundant - a
    single shared search box is rendered above the flat list instead. */
+.db-library-flat .description,
 .db-library-flat .db-library-panel__wrap {
   display: none;
+}
+
+.db-library-flat .db-island-label {
+  margin: var(--sl-spacing-x-small) 0 var(--sl-spacing-x-small);
+  font-size: var(--sl-font-size-medium);
+  font-weight: bold;
+}
+
+.db-library-flat .db-island-label--component_library,
+.db-library-flat .db-island-label--block_library {
+  display: none;
+}
+
+.db-island.db-island-preset_library .db-library-panel {
+  padding-top: 0;
 }

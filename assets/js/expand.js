@@ -24,7 +24,7 @@
         button.setAttribute('variant', 'default');
       }
 
-      Drupal.displayBuilder.LocalStorageManager.remove('expand', builder.id);
+      Drupal.displayBuilder.LocalStorageManager.remove('expand');
     } else {
       document.documentElement.classList.add('display-builder-is-expanded');
       builder.classList.add('display-builder--expanded');
@@ -35,7 +35,7 @@
         button.setAttribute('variant', 'primary');
       }
       // Remember expand.
-      Drupal.displayBuilder.LocalStorageManager.set('expand', true, builder.id);
+      Drupal.displayBuilder.LocalStorageManager.set('expand', true);
     }
   }
 
@@ -45,9 +45,7 @@
    * @param {HTMLElement} builder - The builder element containing dropzone.
    */
   function restoreExpand(builder) {
-    if (
-      Drupal.displayBuilder.LocalStorageManager.get('expand', null, builder.id)
-    ) {
+    if (Drupal.displayBuilder.LocalStorageManager.get('expand', null)) {
       const button = builder.querySelector('[data-set-expand]');
       const icon = button.querySelector('sl-icon');
       setExpand(builder, icon, button);

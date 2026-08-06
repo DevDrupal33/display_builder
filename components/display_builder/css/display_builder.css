@@ -1,9 +1,9 @@
 /* cspell:ignore zindex */
 
 /* Some tabs padding fix */
-.db-form .shoelace-tabs::part(nav),
-.shoelace-tabs--contextual.shoelace-tabs::part(nav) {
-  padding: 0;
+.db-form .shoelace-tabs .shoelace-tabs__tab::part(base),
+.shoelace-tabs--contextual.shoelace-tabs .shoelace-tabs__tab::part(base) {
+  padding: 0.5rem;
 }
 
 /* Expand button toggle. No z-index here on purpose: in normal mode this
@@ -123,6 +123,16 @@
   margin-right: calc(var(--drupal-displace-offset-right, 0px) + var(--db-sidebar-end-width, 0px));
   margin-left: calc(var(--drupal-displace-offset-left, 0px) + var(--db-sidebar-start-width, 0px)) !important;
   padding-top: calc(var(--toolbar-height, 64px) + var(--drupal-displace-offset-top, 0px));
+}
+
+/* Current navigation top bar show up on entity view override and apply a margin */
+/* @see core/modules/navigation/css/components/top-bar.css [line 47] */
+:is(#extra-specificity-hack, [data-drupal-admin-styles]) {
+  &.top-bar:has(.top-bar__tools:not(:empty), .top-bar__context:not(:empty), .top-bar__actions:not(:empty)) {
+    & ~ .dialog-off-canvas-main-canvas {
+      margin-block-start: 0 !important;
+    }
+  }
 }
 
 /* UI zoom (UIControlsButtons island): toolbar, sidebars, and floating

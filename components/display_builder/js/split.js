@@ -128,7 +128,7 @@
    * @param {number} pct - The editor-column ratio, in percent.
    */
   function saveRatio(builderId, pct) {
-    Drupal.displayBuilder.LocalStorageManager.set(RATIO_KEY, pct, builderId);
+    Drupal.displayBuilder.LocalStorageManager.set(RATIO_KEY, pct);
   }
 
   /**
@@ -169,7 +169,6 @@
       Drupal.displayBuilder.LocalStorageManager.set(
         COLLAPSED_KEY,
         collapsed ? '1' : '',
-        builderId,
       );
     }
 
@@ -406,7 +405,6 @@
       Drupal.displayBuilder.LocalStorageManager.set(
         STORAGE_KEY,
         active ? '1' : '',
-        builderId,
       );
     }
 
@@ -438,7 +436,6 @@
         const savedRatio = Drupal.displayBuilder.LocalStorageManager.get(
           RATIO_KEY,
           null,
-          builderId,
         );
         if (savedRatio !== null) {
           applyRatio(main, clampRatio(Number(savedRatio)));
@@ -447,16 +444,11 @@
         const saved = Drupal.displayBuilder.LocalStorageManager.get(
           STORAGE_KEY,
           '',
-          builderId,
         );
         if (saved) {
           setSplit(builderId, main, toggle, true, false);
           if (
-            Drupal.displayBuilder.LocalStorageManager.get(
-              COLLAPSED_KEY,
-              '',
-              builderId,
-            )
+            Drupal.displayBuilder.LocalStorageManager.get(COLLAPSED_KEY, '')
           ) {
             setCollapsed(builderId, main, true, false);
           }

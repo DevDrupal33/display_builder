@@ -117,16 +117,18 @@ class PresetLibraryPanel extends IslandPluginBase implements IslandConfiguration
         [
           '#type' => 'html_tag',
           '#tag' => 'p',
-        ],
-        [
-          '#type' => 'html_tag',
-          '#tag' => 'p',
           '#value' => $this->t('Pattern presets are reusable arrangements of components and blocks.'),
+          '#attributes' => [
+            'class' => ['description'],
+          ],
         ],
         [
           '#type' => 'html_tag',
           '#tag' => 'p',
           '#value' => $this->t('Add presets from the contextual menu.'),
+          '#attributes' => [
+            'class' => ['description'],
+          ],
         ],
       ];
     }

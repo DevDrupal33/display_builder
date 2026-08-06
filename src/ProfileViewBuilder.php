@@ -231,7 +231,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         'id' => $container_id,
         'class' => ['db-library-flat'],
       ],
-      'panes' => $this->buildPanes($builder, $library_islands, $builder_data),
+      'panes' => $this->buildPanes($builder, $library_islands, $builder_data, TRUE),
     ];
 
     return [$search, $content];
@@ -264,7 +264,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     $buttons = [];
 
     if (!empty($islands)) {
-      $buttons = $this->buildPanes($builder, $islands, [], [], 'span');
+      $buttons = $this->buildPanes($builder, $islands, [], FALSE, [], 'span');
     }
 
     return $buttons;
@@ -333,7 +333,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     $builder_data = $builder->getCurrentState();
     $view_sidebar = $this->buildPanes($builder, $view_islands_sidebar, $builder_data);
     // Default hidden.
-    $view_main = $this->buildPanes($builder, $view_islands_main, $builder_data, ['shoelace-tabs__tab--hidden']);
+    $view_main = $this->buildPanes($builder, $view_islands_main, $builder_data, FALSE, ['shoelace-tabs__tab--hidden']);
 
     // pane_header Floating islands (e.g. the viewport switcher) render inside
     // their target pane as its first child, above the pane content.
@@ -456,6 +456,8 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    *   The islands to build tabs for.
    * @param array $data
    *   (Optional) The data to pass to the islands.
+   * @param bool $label
+   *   (Optional) Show label before content.
    * @param array $classes
    *   (Optional) The HTML classes to start with.
    * @param string $tag
@@ -464,7 +466,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    * @return array
    *   The tabs render array.
    */
-  private function buildPanes(InstanceInterface $builder, array $islands, array $data = [], array $classes = [], string $tag = 'div'): array {
+  private function buildPanes(InstanceInterface $builder, array $islands, array $data = [], bool $label = FALSE, array $classes = [], string $tag = 'div'): array {
     $panes = [];
 
     foreach ($islands as $island_id => $island) {
@@ -474,9 +476,22 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         \sprintf('db-island-%s', $island->getPluginId()),
       ]);
 
+      $title = '';
+      if ($label) {
+        $title = [
+          '#type' => 'html_tag',
+          '#tag' => 'h5',
+          'value' => $island->label(),
+          '#attributes' => [
+            'class' => ['db-island-label', 'db-island-label--' . $island->getPluginId()],
+          ],
+        ];
+      }
+
       $panes[$island_id] = [
         '#type' => 'html_tag',
         '#tag' => $tag,
+        'title' => $title,
         'children' => $island->build($builder, $data),
         '#attributes' => [
           // `id` attribute is used by HTMX OOB swap.

@@ -36,10 +36,28 @@
       scope.querySelectorAll('.db-island-viewport').forEach((instance) => {
         const builder = instance.closest('.display-builder');
         if (builder) {
-          applyInstanceState(instance, builder.dataset.dbViewport || '');
-          const zoom = builder.dataset.dbZoom || '1';
+          const viewport = Drupal.displayBuilder.LocalStorageManager.get(
+            'viewport',
+            builder.dataset.dbViewport || '',
+          );
+          // The buttons are only half the state: the pane width and the
+          // builder's .viewport-active class come from updateMainRegionWidth().
+          // Its breakpoint map lives on the control, which is rebuilt with the
+          // instance, so read it back here rather than caching it.
+          const control = instance.querySelector('.switch-viewport');
+          if (control?.dataset?.points) {
+            updateMainRegionWidth(viewport, control.dataset.points, builder);
+          }
+          builder.dataset.dbViewport = viewport;
+          applyInstanceState(instance, viewport);
+
+          const zoom = Drupal.displayBuilder.LocalStorageManager.get(
+            'zoom',
+            builder.dataset.dbZoom || '1',
+          );
           updatePreviewZoom(zoom, builder);
           applyZoomState(instance, zoom);
+          builder.dataset.dbZoom = zoom;
         }
       });
     },
@@ -150,6 +168,8 @@
       if (!control?.dataset?.points) return;
 
       const value = btn.dataset.viewportValue || '';
+      Drupal.displayBuilder.LocalStorageManager.set('viewport', value);
+
       updateMainRegionWidth(value, control.dataset.points, builder);
       builder.dataset.dbViewport = value;
       applyInstanceState(instance, value);
@@ -161,6 +181,7 @@
       if (!select) return;
 
       const value = select.value || '1';
+      Drupal.displayBuilder.LocalStorageManager.set('zoom', value);
       updatePreviewZoom(value, builder);
       builder.dataset.dbZoom = value;
     });
