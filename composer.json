@@ -22,20 +22,19 @@
     "type": "drupal-module",
     "require": {
         "php": ">=8.3",
-        "drupal/core": "^11.4",
         "drupal/ui_patterns": "^2.0.18"
     },
     "require-dev": {
-        "drupal/sdc_devel": "^1.0.2",
-        "drupal/ui_icons": "^1.1",
+        "drupal/sdc_devel": "^1.0.3",
+        "drupal/ui_icons": "^2.0",
         "drupal/ui_skins": "^1.2",
         "drupal/ui_styles": "^1.21",
         "drupal/display_builder_dev_tools": "*"
     },
     "suggest": {
-        "drupal/ui_styles": "Provide Styles features in Display builder",
-        "drupal/ui_icons": "Provide Icons feature in Display builder",
-        "drupal/ui_skins": "Provide CSS tokens features in Display builder"
+        "drupal/ui_styles": "Provide Styles features in Display Builder",
+        "drupal/ui_icons": "Provide Icons feature in Display Builder",
+        "drupal/ui_skins": "Provide CSS tokens features in Display Builder"
     },
     "extra": {
         "patches": {
