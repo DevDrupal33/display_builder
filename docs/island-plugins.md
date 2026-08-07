@@ -58,7 +58,7 @@ HTMX behavior will change according to `IslandInterface::build()` return value:
 - `id`: Plugin ID
 - `label`: The human-readable name of the plugin. It is not derived from
   the ID and does not have to match it: the panels shipped by default are
-  labelled Canvas (`builder`), Wireframe (`layers`) and Navigator (`tree`).
+  labelled Canvas (`builder`), Scaffold (`scaffold`) and Navigator (`tree`).
   Always reference a panel by its **ID** in code, config and `attach_to`.
 - `description`: A brief description of the plugin.
 - `type` : The island type from enumeration.

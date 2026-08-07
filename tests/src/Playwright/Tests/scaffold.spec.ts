@@ -293,7 +293,7 @@ test('Move tests', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder 
   })
 
   await test.step(`View the result page`, async () => {
-    await page.goto(`test/layers`)
+    await page.goto(`test/scaffold`)
     await expect(page.locator('.page-wrapper')).toMatchAriaSnapshot({ name: 'scaffold-result.aria.yml' })
     // await page.locator('.page-wrapper').screenshot({ path: 'final.png' })
   })

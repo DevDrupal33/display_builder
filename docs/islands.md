@@ -35,23 +35,20 @@ The Display Builder main island. Build the display with dynamic preview.
 
 ![Canvas](images/islands/builder.webp)
 
-### Wireframe
+### Scaffold
 
 Schematic hierarchical view of elements without preview.
 
-![Wireframe](images/islands/layers.webp)
+![Scaffold](images/islands/scaffold.webp)
 
-The wireframe is better for dropping components and blocks when the preview in
-the canvas panel is making things complicated.  
+The schematic view is better for dropping components and blocks when the
+preview in the canvas panel is making things complicated.  
 For examples: a modal, a sliding slider, a collapsing accordion is hard to
 manipulate when built.
 
-### Scaffold
-
-Same schematic view as the Wireframe, except that a configurable allowlist of
-layout components (e.g. Bootstrap grid rows) is rendered with its real output,
-so the actual layout nesting is visible at a glance. Everything else stays a
-plain wireframe card.
+A configurable allowlist of layout components (e.g. Bootstrap grid rows) is
+rendered with its real output instead, so the actual layout nesting is visible
+at a glance. Everything else stays a plain wireframe card.
 
 Which components count as "layout" is theme-specific, hence a configurable
 list rather than a hardcoded one — set it in the island's configuration form.

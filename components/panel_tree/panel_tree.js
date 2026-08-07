@@ -19,7 +19,7 @@
   const STATE_KEY = 'tree_collapse_state';
 
   /**
-   * Toggles the highlight on the builder/layers element matching a tree row.
+   * Toggles the highlight on the builder/scaffold element matching a tree row.
    *
    * @param {HTMLElement} node - The `.db-tree-node` (component/slot/block) element hovered.
    * @param {HTMLElement} builder - The `.display-builder` root element.

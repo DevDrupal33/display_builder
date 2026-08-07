@@ -43,7 +43,7 @@ final class ApiContextualMenuControllerTest extends DisplayBuilderKernelTestBase
     'ui_patterns',
     'ui_patterns_field',
     'ui_styles',
-    // Provides the 'test' style plugin - ON_UPDATE re-renders LayersPanel's
+    // Provides the 'test' style plugin - ON_UPDATE re-renders ScaffoldPanel's
     // third-party-settings summary, which looks up every selected style ID
     // via StylePluginManager::getDefinition(), so any style ID used in
     // these tests must resolve to a real, discovered plugin.

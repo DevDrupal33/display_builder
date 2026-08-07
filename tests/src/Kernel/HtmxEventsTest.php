@@ -60,7 +60,7 @@ final class HtmxEventsTest extends DisplayBuilderKernelTestBase {
    */
   public function testOnSlotDropTargetsTheSlotAttachRoute(): void {
     $build = [];
-    $build = $this->htmxEvents->onSlotDrop($build, 'instance_1', 'layers', 'node_1', 'slot_1');
+    $build = $this->htmxEvents->onSlotDrop($build, 'instance_1', 'scaffold', 'node_1', 'slot_1');
     $url = (string) $build['#attributes']['data-hx-post'];
 
     // The route resolves the instance, the parent node, the slot, and which
@@ -68,7 +68,7 @@ final class HtmxEventsTest extends DisplayBuilderKernelTestBase {
     self::assertStringContainsString('instance_1', $url);
     self::assertStringContainsString('node_1', $url);
     self::assertStringContainsString('slot_1', $url);
-    self::assertStringContainsString('layers', $url);
+    self::assertStringContainsString('scaffold', $url);
 
     self::assertSame('dragend consume', (string) $build['#attributes']['data-hx-trigger']);
   }
@@ -76,16 +76,16 @@ final class HtmxEventsTest extends DisplayBuilderKernelTestBase {
   /**
    * Test the originating island is carried through the drop URL.
    *
-   * The Builder and Wireframe panels drop into the same slots but must be
+   * The Canvas and Scaffold panels drop into the same slots but must be
    * distinguishable, so the island ID cannot be hardcoded.
    */
   public function testOnSlotDropKeepsTheOriginIsland(): void {
     $from_builder = $this->htmxEvents->onSlotDrop([], 'instance_1', 'builder', 'node_1', 'slot_1');
-    $from_layers = $this->htmxEvents->onSlotDrop([], 'instance_1', 'layers', 'node_1', 'slot_1');
+    $from_scaffold = $this->htmxEvents->onSlotDrop([], 'instance_1', 'scaffold', 'node_1', 'slot_1');
 
     self::assertNotSame(
       (string) $from_builder['#attributes']['data-hx-post'],
-      (string) $from_layers['#attributes']['data-hx-post'],
+      (string) $from_scaffold['#attributes']['data-hx-post'],
     );
   }
 

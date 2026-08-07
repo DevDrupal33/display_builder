@@ -172,7 +172,7 @@
       );
     }
 
-    // The editor pane's floating controls (Highlight, Density) are a separate
+    // The editor pane's floating controls (Highlight) are a separate
     // fixed box, not a child of the pane they act on, so hiding the column
     // leaves them sitting over the Preview. syncPanes() drops them once it sees
     // the collapsed root. @see components/shoelace/tabs/tabs.js

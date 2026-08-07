@@ -62,7 +62,7 @@
       pinnedPane.classList.remove('shoelace-tabs__tab--hidden');
       // Preview only: the editor column is collapsed away, so its pane is gone
       // from view even though its tab is still the active one. Dropping the
-      // active targets stops that pane's floating controls (Highlight, Density)
+      // active targets stops that pane's floating controls (Highlight)
       // from staying behind, pinned over the Preview's own header.
       // @see components/display_builder/js/split.js
       if (root.classList?.contains('display-builder--preview-only')) {
