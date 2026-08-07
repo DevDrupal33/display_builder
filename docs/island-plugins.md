@@ -156,13 +156,13 @@ Shortcuts taken by the islands shipped with the module:
 
 | Key | Island | | Key | Island |
 |---|---|---|---|---|
-| `b` | Canvas | | `mod+z` (or `u`) | Undo |
-| `w` | Wireframe | | `mod+shift+z` (or `r`) | Redo |
-| `g` | Scaffold | | `shift+c` | Clear |
-| `n` | Navigator | | `shift+p` | Publish |
-| `p` | Preview | | `shift+e` | Expand |
-| `l` | Libraries | | `mod+c` / `mod+v` / `mod+d` | Copy / Paste / Duplicate selected |
-| `o` | Logs | | `Delete` | Remove selected |
+| `c` | Canvas | | `mod+z` (or `u`) | Undo |
+| `g` | Scaffold | | `mod+shift+z` (or `r`) | Redo |
+| `n` | Navigator | | `shift+c` | Clear |
+| `p` | Preview | | `shift+p` | Publish |
+| `l` | Libraries | | `shift+e` | Expand |
+| `o` | Logs | | `mod+c` / `mod+v` / `mod+d` | Copy / Paste / Duplicate selected |
+| | | | `Delete` | Remove selected |
 
 The contextual shortcuts (`mod+c`/`mod+v`/`mod+d`/`Delete`) act on the currently
 selected node without opening the right-click menu; they resolve the node's slot
