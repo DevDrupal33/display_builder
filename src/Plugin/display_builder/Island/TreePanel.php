@@ -21,7 +21,7 @@ use Drupal\display_builder\SourceWithSlotsInterface;
   default_region: 'sidebar',
   icon: 'bar-chart-steps',
 )]
-class TreePanel extends BuilderPanel {
+class TreePanel extends ViewPanelBase {
 
   /**
    * {@inheritdoc}
@@ -65,15 +65,7 @@ class TreePanel extends BuilderPanel {
   /**
    * {@inheritdoc}
    */
-  protected function buildSingleComponent(InstanceInterface $instance, string $node_id, SourceWithSlotsInterface $source, array $data, int $index = 0): ?array {
-    $info = $this->resolveComponentInfo($source, $data, $node_id);
-
-    if ($info === NULL) {
-      return NULL;
-    }
-
-    ['label' => $label, 'instance_id' => $node_id] = $info;
-
+  protected function renderComponent(InstanceInterface $instance, string $node_id, SourceWithSlotsInterface $source, array $data, string $component_id, string $label, int $index): ?array {
     $builder_id = (string) $instance->id();
     $slots = [];
 

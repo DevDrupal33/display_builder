@@ -11,7 +11,7 @@ import config from '../playwright.config.loader'
 // reflects that nesting - not just that the rows exist.
 //
 // Rows are targeted on data-menu-type (component/slot/block) and the slot
-// identity attributes, both stamped by TreePanel::buildSingleComponent().
+// identity attributes, both stamped by TreePanel::renderComponent().
 test('Navigator panel', { tag: [ '@base' ] }, async ({ page, drupal, displayBuilder }) => {
   const tree = page.locator('.db-island-tree')
   const slot = tree.locator('[data-menu-type="slot"][data-slot-id="slot_1"]')

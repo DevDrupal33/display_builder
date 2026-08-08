@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\display_builder\Entity\Instance;
+use Drupal\display_builder\Plugin\display_builder\Island\TreePanel;
+use Drupal\display_builder\Plugin\display_builder\Island\ViewPanelBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -22,7 +24,8 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  *
  * @internal
  */
-#[CoversClass('\Drupal\display_builder\Plugin\display_builder\Island\TreePanel')]
+#[CoversClass(ViewPanelBase::class)]
+#[CoversClass(TreePanel::class)]
 #[Group('display_builder')]
 #[RunTestsInSeparateProcesses]
 final class TreePanelTest extends DisplayBuilderKernelTestBase {
@@ -64,7 +67,7 @@ final class TreePanelTest extends DisplayBuilderKernelTestBase {
   /**
    * The component tree node is keyed by its node id and owned by this panel.
    *
-   * Unlike WireframePanelBase, the Navigator does not stamp a
+   * Unlike the Scaffold, the Navigator does not stamp a
    * data-testid="layer_<source>" on component rows; it addresses them by
    * data-node-id + data-menu-type. Only the dropzone carries a testid.
    */

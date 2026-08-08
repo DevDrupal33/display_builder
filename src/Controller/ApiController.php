@@ -518,7 +518,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
    * relocates the DOM node - it never re-renders it - so after a
    * cross-panel move the dropped element is still wearing whichever
    * panel originally rendered it (@see
-   * BuilderPanel::buildNodeAttributes(), display_builder.js's addVals()).
+   * ViewPanelBase::buildNodeAttributes(), display_builder.js's addVals()).
    * Skipping the destination island's own re-render is only safe when the
    * move stayed within that same island; otherwise its dropzone would be
    * left showing another island's markup until the next full reload.

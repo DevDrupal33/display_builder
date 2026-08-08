@@ -151,7 +151,7 @@
     font-weight: var(--sl-font-weight-semibold);
   }
 
-  /* The node's config summary (@see WireframePanelBase::addComponentSettingsSummary()
+  /* The node's config summary (@see ScaffoldPanel::addComponentSettingsSummary()
      and addThirdPartySettingsSummary()) - right-aligned pills, so the
      titles stay a scannable left column however much summary each node
      carries. */
@@ -186,7 +186,7 @@
   }
 
   /* Slot titles are bare text nodes, not elements (@see
-     WireframePanelBase::buildSingleComponent(), which emits a '#plain_text'
+     ScaffoldPanel::renderSchematicComponent(), which emits a '#plain_text'
      sibling before each slot's dropzone), so they can only be styled by
      inheritance from here - and every element child has to opt back out,
      hence the reset below. */

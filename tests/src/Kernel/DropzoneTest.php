@@ -9,6 +9,7 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandInterface;
 use Drupal\display_builder\Plugin\display_builder\Island\BuilderPanel;
 use Drupal\display_builder\Plugin\display_builder\Island\ScaffoldPanel;
+use Drupal\display_builder\Plugin\display_builder\Island\ViewPanelBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -18,6 +19,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  *
  * @internal
  */
+#[CoversClass(ViewPanelBase::class)]
 #[CoversClass(BuilderPanel::class)]
 #[CoversClass(ScaffoldPanel::class)]
 #[Group('display_builder')]

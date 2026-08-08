@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\display_builder\Entity\Instance;
+use Drupal\display_builder\Plugin\display_builder\Island\BuilderPanel;
+use Drupal\display_builder\Plugin\display_builder\Island\ViewPanelBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -14,7 +16,8 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  *
  * @internal
  */
-#[CoversClass('\Drupal\display_builder\Plugin\display_builder\Island\BuilderPanel')]
+#[CoversClass(ViewPanelBase::class)]
+#[CoversClass(BuilderPanel::class)]
 #[Group('display_builder')]
 #[RunTestsInSeparateProcesses]
 final class BuilderPanelTest extends DisplayBuilderKernelTestBase {

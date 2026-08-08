@@ -20,9 +20,9 @@
    `.display-builder` element. Scoped to `.db-island-builder`: matches
    HighlightToggle's own docblock ("highlighting only has a visible
    effect [in the Builder pane]") and keeps this from leaking into the
-   Wireframe/Tree side panels, which stamp the same `data-node-title`
+   Scaffold/Navigator side panels, which stamp the same `data-node-title`
    attribute onto their own tree rows (@see
-   BuilderPanel::buildNodeAttributes(), reused by WireframePanelBase.php and
+   ViewPanelBase::buildNodeAttributes(), used by ScaffoldPanel.php and
    TreePanel.php) and already have their own separate highlight rules
    anyway (@see components/layer/layer.css).
 

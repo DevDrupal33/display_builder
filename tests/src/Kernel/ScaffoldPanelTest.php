@@ -6,6 +6,8 @@ namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\Core\Form\FormState;
 use Drupal\display_builder\Entity\Instance;
+use Drupal\display_builder\Plugin\display_builder\Island\ScaffoldPanel;
+use Drupal\display_builder\Plugin\display_builder\Island\ViewPanelBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -14,9 +16,8 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  * Test the ScaffoldPanel island build output.
  *
  * Pins the attribute contract the Scaffold panel exposes on its rows and
- * dropzones. With no components configured for real rendering, the Scaffold
- * panel produces the same schematic wireframe rows as the Wireframe panel
- * (both share WireframePanelBase). Both the drag-and-drop JavaScript and the
+ * dropzones. With no components configured for real rendering, every row is a
+ * schematic wireframe card. Both the drag-and-drop JavaScript and the
  * e2e tests select on these. Each component row carries a
  * data-testid="layer_<source_id>" so Playwright can address a specific
  * component. Asserting it here makes a silent change a red test instead of a
@@ -24,7 +25,8 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  *
  * @internal
  */
-#[CoversClass('\Drupal\display_builder\Plugin\display_builder\Island\ScaffoldPanel')]
+#[CoversClass(ViewPanelBase::class)]
+#[CoversClass(ScaffoldPanel::class)]
 #[Group('display_builder')]
 #[RunTestsInSeparateProcesses]
 final class ScaffoldPanelTest extends DisplayBuilderKernelTestBase {
@@ -97,7 +99,7 @@ final class ScaffoldPanelTest extends DisplayBuilderKernelTestBase {
    * A component on the render allowlist is rendered for real, not schematic.
    *
    * The real-render path stamps the bare component ID as the row testid
-   * (WireframePanelBase's schematic path prefixes it with "layer_"), so the two
+   * (the schematic path prefixes it with "layer_"), so the two
    * are distinguishable by that attribute alone.
    */
   public function testConfiguredComponentRendersForReal(): void {
@@ -118,7 +120,7 @@ final class ScaffoldPanelTest extends DisplayBuilderKernelTestBase {
   /**
    * A schematic layer gains an info slot from component config and styles.
    *
-   * Exercises WireframePanelBase::addComponentSettingsSummary() (the prop
+   * Exercises ScaffoldPanel::addComponentSettingsSummary() (the prop
    * summary) and ::addThirdPartySettingsSummary() (the styles summary), both of
    * which early-return on a bare node and so were otherwise never populated.
    */
