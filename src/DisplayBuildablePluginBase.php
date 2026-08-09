@@ -124,6 +124,15 @@ abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase impleme
   /**
    * {@inheritdoc}
    */
+  public function getPreviewPagePath(): ?string {
+    // Most displays are fragments that can appear on any number of pages, so
+    // they have no single page to preview against.
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildInstanceForm(bool $mandatory = TRUE, ?TranslatableMarkup $title = NULL, bool $link = TRUE): array {
     $profile = $this->getProfile();
     $allowed = $this->isAllowed();

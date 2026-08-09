@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_page_layout\Plugin\UiPatterns\Source;
 
+use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\PropTypeInterface;
@@ -22,7 +23,9 @@ use Drupal\ui_patterns\SourcePluginBase;
   prop_types: ['slot'],
   tags: [],
   context_requirements: ['page'],
-  context_definitions: []
+  context_definitions: [
+    'page' => new ContextDefinition('uri', label: new TranslatableMarkup('Page'), required: TRUE),
+  ]
 )]
 class MainPageContentSource extends SourcePluginBase {
 

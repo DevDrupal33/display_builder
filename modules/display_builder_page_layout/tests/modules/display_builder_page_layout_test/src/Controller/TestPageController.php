@@ -18,7 +18,6 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  * placeholder sharing a segment with static text never matches in Drupal.
  *
  * @see \Drupal\Core\Routing\RouteCompiler::getPatternOutline()
- *
  * @see \Drupal\display_builder_page_layout\EventSubscriber\PageVariantSubscriber
  */
 final class TestPageController {

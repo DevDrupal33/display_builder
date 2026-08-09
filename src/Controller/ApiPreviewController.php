@@ -8,12 +8,18 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ComponentPluginManager;
+use Drupal\Core\Url;
+use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandPluginManagerInterface;
 use Drupal\display_builder\RenderableBuilderTrait;
 use Drupal\ui_patterns_library\StoryPluginManager;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
  * Returns preview responses for Display builder routes.
@@ -29,6 +35,10 @@ class ApiPreviewController extends ControllerBase {
     private ComponentPluginManager $componentManager,
     private RendererInterface $renderer,
     private IslandPluginManagerInterface $islandPluginManager,
+    #[Autowire(service: 'request_stack')]
+    private RequestStack $requestStack,
+    #[Autowire(service: 'http_kernel')]
+    private HttpKernelInterface $httpKernel,
   ) {}
 
   /**
@@ -40,19 +50,32 @@ class ApiPreviewController extends ControllerBase {
    * display, on a bare full page, so it gets its own viewport (and reflows with
    * the viewport switcher) but none of the builder or site chrome.
    *
+   * A buildable pinned to one concrete page (@see
+   * DisplayBuildableInterface::getPreviewPagePath()) previews as that page,
+   * rendered by the real page pipeline through a sub-request, so the sources
+   * only the pipeline can resolve - the page's own main content and title -
+   * are real rather than placeholders.
+   *
    * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
    *   The instance to preview.
    *
-   * @return array
-   *   A render array of the previewed display.
+   * @return array|\Symfony\Component\HttpFoundation\Response
+   *   A render array of the previewed display, or the rendered page response
+   *   when the display is previewed on a real page.
    *
    * @see \Drupal\display_builder\Plugin\display_builder\Island\PreviewPanel::build()
    */
-  public function getDisplayPreview(InstanceInterface $display_builder_instance): array {
+  public function getDisplayPreview(InstanceInterface $display_builder_instance): array|Response {
     $profile = $display_builder_instance->getProfile();
 
     if ($profile === NULL || !isset($profile->getEnabledIslands()['preview'])) {
       throw new NotFoundHttpException();
+    }
+
+    $page = $this->renderOnPinnedPage($display_builder_instance);
+
+    if ($page !== NULL) {
+      return $page;
     }
 
     $contexts = $display_builder_instance->getAvailableContexts();
@@ -158,6 +181,86 @@ class ApiPreviewController extends ControllerBase {
     ];
 
     return $this->renderSource($data);
+  }
+
+  /**
+   * Render the page this instance is pinned to, serving its draft state.
+   *
+   * The sub-request is the whole point: it runs the real page pipeline for the
+   * real path, so the layout's conditions, its main content, its title and its
+   * breadcrumb are the ones the page actually gets. The instance travels as a
+   * request attribute.
+   *
+   * Known limit, accepted: a service that memoizes per-request state answers
+   * the sub-request with whatever it computed for this outer request.
+   * `PathMatcher::isFrontPage()` is the one that shows - it caches in a
+   * property with no reset, so if anything called it before this point (contrib
+   * redirect does, on kernel.request) a previewed front page gets `path-node`
+   * on the body instead of `path-frontpage`. Fixing it means decorating a core
+   * service site-wide to expose a reset, which is not worth one body class.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The instance to preview.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response|null
+   *   The rendered page, or NULL when this instance has no page to preview on
+   *   or that page did not render - in which case the caller previews the
+   *   sources on their own instead.
+   *
+   * @see \Drupal\display_builder\DisplayBuildableInterface::PREVIEW_INSTANCE_ATTRIBUTE
+   * @see \Drupal\display_builder_page_layout\Plugin\DisplayVariant\PageLayoutPageVariant::getPreviewSources()
+   */
+  private function renderOnPinnedPage(InstanceInterface $instance): ?Response {
+    $request = $this->requestStack->getCurrentRequest();
+
+    // Already rendering a preview: a display pinned to a builder screen would
+    // otherwise nest previews, and one pinned to this very route would
+    // sub-request itself until the request runs out of memory. One level of
+    // page rendering is all this is for.
+    if ($request === NULL || $request->attributes->has(DisplayBuildableInterface::PREVIEW_INSTANCE_ATTRIBUTE)) {
+      return NULL;
+    }
+
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\PluginItem|null $item */
+    $item = $instance->get('buildable')->first();
+    /** @var \Drupal\display_builder\DisplayBuildableInterface|null $buildable */
+    $buildable = $item?->getInstance();
+    $path = $buildable?->getPreviewPagePath();
+
+    if ($path === NULL) {
+      return NULL;
+    }
+
+    $url = $path === '<front>' ? Url::fromRoute('<front>') : Url::fromUserInput($path);
+
+    if (!$url->isRouted()) {
+      return NULL;
+    }
+
+    $sub_request = Request::create(
+      $url->setAbsolute()->toString(),
+      'GET',
+      [],
+      $request->cookies->all(),
+      [],
+      $request->server->all()
+    );
+
+    // Sub-requests skip the session middleware, so the editor's session has to
+    // be carried over by hand - without it the page renders as anonymous and
+    // the variant's access check on the draft fails.
+    if ($request->hasSession()) {
+      $sub_request->setSession($request->getSession());
+    }
+    $sub_request->attributes->set(DisplayBuildableInterface::PREVIEW_INSTANCE_ATTRIBUTE, (string) $instance->id());
+
+    $response = $this->httpKernel->handle($sub_request, HttpKernelInterface::SUB_REQUEST);
+
+    // A redirect would take the iframe to the public URL, where the saved
+    // display renders instead of the draft; an error page previews nothing.
+    // Either way the sources on their own are a better preview than the
+    // response.
+    return $response->isSuccessful() ? $response : NULL;
   }
 
   /**

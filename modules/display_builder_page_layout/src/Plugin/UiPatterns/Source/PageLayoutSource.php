@@ -7,6 +7,7 @@ namespace Drupal\display_builder_page_layout\Plugin\UiPatterns\Source;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -31,7 +32,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   description: new TranslatableMarkup('The regions of this element are rendered by the page template of the front-end theme. It is a starting point, not a permanent setup: move the contents of a region to the page root and the theme stops rendering that part.'),
   prop_types: ['slot'],
   context_requirements: ['page'],
-  context_definitions: []
+  context_definitions: [
+    'page' => new ContextDefinition('uri', label: new TranslatableMarkup('Page'), required: TRUE),
+  ]
 )]
 class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterface {
 

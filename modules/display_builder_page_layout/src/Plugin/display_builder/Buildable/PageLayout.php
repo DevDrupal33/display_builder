@@ -7,6 +7,9 @@ namespace Drupal\display_builder_page_layout\Plugin\display_builder\Buildable;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Plugin\CachedDiscoveryClearerInterface;
+use Drupal\Core\Plugin\Context\Context;
+use Drupal\Core\Plugin\Context\ContextDefinition;
+use Drupal\Core\Path\CurrentPathStack;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
@@ -122,6 +125,43 @@ final class PageLayout extends DisplayBuildablePluginBase {
 
   /**
    * {@inheritdoc}
+   *
+   * A page layout has no canonical URL - it is applied to pages by conditions.
+   * Only when a single, concrete request_path pins it to one page is there an
+   * unambiguous page to preview it on.
+   */
+  public function getPreviewPagePath(): ?string {
+    $conditions = $this->entity->getConditions();
+
+    // Conditions are keyed by plugin ID, so there is at most one of these. The
+    // others (role, language, ...) don't constrain the path.
+    if (!$conditions->has('request_path')) {
+      return NULL;
+    }
+    $condition = $conditions->get('request_path');
+
+    if ($condition->isNegated()) {
+      // "Not on this page" gives no page to preview on.
+      return NULL;
+    }
+    $lines = \preg_split('/\R/', (string) ($condition->getConfiguration()['pages'] ?? ''), -1, \PREG_SPLIT_NO_EMPTY) ?: [];
+    $paths = \array_values(\array_filter(\array_map('trim', $lines)));
+
+    if (\count($paths) !== 1) {
+      return NULL;
+    }
+    $path = $paths[0];
+
+    // Wildcards and non-rooted paths are not a single addressable page.
+    if ($path !== '<front>' && (\str_contains($path, '*') || !\str_starts_with($path, '/'))) {
+      return NULL;
+    }
+
+    return $path;
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function getSources(): array {
     // We reload because the Drupal cache is very strong on this data.
@@ -183,6 +223,13 @@ final class PageLayout extends DisplayBuildablePluginBase {
   public function getRuntimeContexts(array $unqualified_context_ids): array {
     $contexts = [];
     $contexts = RequirementsContext::addToContext(['page'], $contexts);
+    // UI Patterns is replacing context_requirements with real contexts, matched
+    // by array key against the sources' context_definitions. Both are provided
+    // until the requirement is dropped upstream. Nothing reads the value yet,
+    // and its URI form is not settled upstream either.
+    //
+    // @see https://www.drupal.org/i/3608162
+    $contexts['page'] = new Context(new ContextDefinition('uri', new TranslatableMarkup('Page')), $this->currentPath()->getPath());
 
     return $contexts;
   }
@@ -278,6 +325,16 @@ final class PageLayout extends DisplayBuildablePluginBase {
    */
   private function converter(): BuilderDataConverter {
     return \Drupal::service('display_builder_page_layout.builder_data_converter');
+  }
+
+  /**
+   * Gets the current path stack.
+   *
+   * @return \Drupal\Core\Path\CurrentPathStack
+   *   The current path stack.
+   */
+  private function currentPath(): CurrentPathStack {
+    return \Drupal::service('path.current');
   }
 
   /**

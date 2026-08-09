@@ -26,6 +26,11 @@ services:
     tags:
       - { name: event_subscriber }
 
+  display_builder.deny_preview_sub_request:
+    class: Drupal\display_builder\PageCache\DenyPreviewSubRequest
+    tags:
+      - { name: dynamic_page_cache_request_policy }
+
   plugin.manager.display_buildable:
     class: Drupal\display_builder\DisplayBuildablePluginManager
     parent: default_plugin_manager

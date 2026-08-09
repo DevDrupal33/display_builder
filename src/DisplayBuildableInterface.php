@@ -34,6 +34,14 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, Con
   // This will we used in some schema.yml, careful if you change it.
   public const SOURCES_PROPERTY = 'sources';
 
+  // Request attribute naming the instance whose unsaved draft state a preview
+  // sub-request must render (@see ::getPreviewPagePath()). Deliberately a
+  // request attribute and never a query argument: an attribute exists only in
+  // memory, for the duration of one sub-request issued from an access-checked
+  // admin route, so the previewed page's public URL gains no second rendering
+  // mode and no cache entry can ever key on it.
+  public const PREVIEW_INSTANCE_ATTRIBUTE = '_display_builder_preview_instance';
+
   /**
    * Returns the translated plugin label.
    */
@@ -171,6 +179,27 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, Con
    *   A list of nestable sources.
    */
   public function getSources(): array;
+
+  /**
+   * Get the site path this display can be previewed on, when there is one.
+   *
+   * Some sources only resolve inside a real page request: the page's own main
+   * content and title are substituted by the page pipeline, not by the source
+   * plugin, so a preview rendering sources on their own can only show a
+   * placeholder for them. A buildable that is pinned to one concrete page can
+   * name it here, and the preview renders that page instead - through the real
+   * pipeline, serving this instance's draft state.
+   *
+   * Only a single, unambiguous path qualifies. A display that can appear on
+   * many pages has no one page to preview against and must return NULL.
+   *
+   * @return string|null
+   *   A path ('<front>' or '/some/path'), or NULL to preview the sources on
+   *   their own.
+   *
+   * @see \Drupal\display_builder\Controller\ApiPreviewController::getDisplayPreview()
+   */
+  public function getPreviewPagePath(): ?string;
 
   /**
    * Get display builder instance URL from an instance ID.

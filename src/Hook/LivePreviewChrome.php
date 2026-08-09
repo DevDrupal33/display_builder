@@ -44,7 +44,11 @@ class LivePreviewChrome {
    */
   #[Hook('preprocess_html')]
   public function preprocessHtml(array &$variables): void {
-    $request = $this->requestStack->getCurrentRequest();
+    // The main request, not the current one: a preview of a display pinned to a
+    // real page renders that page in a sub-request, whose own route is the
+    // page's. The preview route is only ever the outer one.
+    // @see \Drupal\display_builder\Controller\ApiPreviewController::renderOnPinnedPage()
+    $request = $this->requestStack->getMainRequest();
 
     if (!$request || $request->attributes->get('_route') !== 'display_builder.preview_island') {
       return;
