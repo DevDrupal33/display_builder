@@ -24,7 +24,7 @@ test('Contextual duplicate and remove', { tag: [ '@base' ] }, async ({ page, dru
 
   await test.step(`Duplicate it`, async () => {
     await components.first().click({ button: 'right', position: { x: 5, y: 5 } })
-    await page.getByRole('menuitemcheckbox', { name: 'Duplicate Test simple' }).locator('slot').nth(1).click()
+    await page.getByRole('menuitemcheckbox', { name: 'Duplicate' }).locator('slot').nth(1).click()
     await displayBuilder.shoelaceReady()
     await expect(components).toHaveCount(2)
   })

@@ -126,6 +126,44 @@ test('Move within the Navigator', { tag: [ '@base' ] }, async ({ page, drupal, d
   })
 })
 
+// Every Navigator row carries a three-dot button opening the same contextual
+// menu as a right click, which is the only other way to reach it and is not
+// discoverable. It works by replaying a `contextmenu` event on the row (@see
+// components/panel_tree/panel_tree.js), so the assertion that matters is that
+// the menu opens *for that row* - hence acting on the item rather than just
+// checking the menu is visible.
+test('Navigator row actions button opens the contextual menu', { tag: [ '@base' ] }, async ({ page, drupal, displayBuilder }) => {
+  const tree = page.locator('.db-island-tree')
+  const components = tree.locator('[data-menu-type="component"]')
+
+  await test.step(`Create Page Layout and login`, async () => {
+    await displayBuilder.initTestsWithPageLayout(drupal, config.testProfileTreeId)
+  })
+
+  await test.step(`Drop a component`, async () => {
+    await displayBuilder.dragElementFromLibraryById(
+      'component',
+      'test_simple',
+      page.locator('.db-island-builder > div.db-dropzone').first(),
+      { x: 40, y: 15 },
+    )
+  })
+
+  await test.step(`Open the Navigator`, async () => {
+    await page.getByRole('button', { name: 'Navigator' }).click()
+    await displayBuilder.shoelaceReady()
+    await expect(components).toHaveCount(1)
+  })
+
+  await test.step(`The button duplicates through the menu`, async () => {
+    await components.first().locator('.db-tree-node__actions').first().click()
+    await expect(page.locator('.db-menu')).toBeVisible()
+    await page.getByRole('menuitemcheckbox', { name: 'Duplicate' }).locator('slot').nth(1).click()
+    await displayBuilder.shoelaceReady()
+    await expect(components).toHaveCount(2)
+  })
+})
+
 // The Navigator remembers the single global "Collapse all" state (per builder,
 // in localStorage - @see components/panel_tree/panel_tree.js) and reapplies it
 // whenever the tree is re-rendered. The trap this guards: a Canvas move

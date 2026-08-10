@@ -1,12 +1,15 @@
-{% set attributes = attributes.addClass('menu__item') %}
-{% set attributes = (variant and variant != 'default') ? attributes.setAttribute('variant', variant) : attributes %}
-{% set attributes = disabled ? attributes.setAttribute('disabled', true) : attributes %}
-{% set attributes = attributes.setAttribute('type', 'checkbox') %}
-{% set attributes = value ? attributes.setAttribute('value', value) : attributes %}
-
 {% if variant == 'divider' %}
   <sl-divider></sl-divider>
+{% elseif variant == 'label' %}
+  {# A heading inside a menu: not selectable, and deliberately without the
+     menu__item class, which marks the items contextual_menu.js updates. #}
+  <sl-menu-label{{ attributes }}>{{ title }}</sl-menu-label>
 {% else %}
+  {% set attributes = attributes.addClass('menu__item') %}
+  {% set attributes = (variant and variant != 'default') ? attributes.setAttribute('variant', variant) : attributes %}
+  {% set attributes = disabled ? attributes.setAttribute('disabled', true) : attributes %}
+  {% set attributes = attributes.setAttribute('type', 'checkbox') %}
+  {% set attributes = value ? attributes.setAttribute('value', value) : attributes %}
   <sl-menu-item{{ attributes }}>
     {{ title }}
     {% if icon %}

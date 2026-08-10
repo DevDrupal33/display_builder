@@ -1,7 +1,14 @@
+/* Capped because two things in here are as long as the content makes them:
+   the path label, which grows with nesting depth, and the paste/merge items,
+   which carry whatever the copied element is called. Shoelace already truncates
+   its own menu item labels, so the cap is all they need; the path label is
+   ours and gets the same treatment below. Both keep the full text on
+   a title attribute. */
 .display-builder .db-menu {
   position: absolute;
   z-index: var(--db-z-menu);
   display: none;
+  max-width: 24rem;
   border: 1px dashed var(--menu-color-border) !important;
   box-shadow: var(--sl-shadow-x-large);
 
@@ -10,20 +17,58 @@
     align-items: center;
     justify-content: space-between;
   }
+  /* A flex item does not shrink below its content without both of these, so
+     the ellipsis on the part below would never get the chance to apply. */
+  .db-menu__label {
+    overflow: hidden;
+    min-width: 0;
+  }
+  /* Shoelace ships this part as an inline-block, which sizes to its text and
+     so gets hard-clipped by the host above instead of truncated. */
   .db-menu__label::part(base) {
+    display: block;
     padding-left: 0.5rem;
     color: var(--db-text-color);
+  }
+  /* Two lines: what you clicked, then where it sits. The name is what the
+     user recognizes, so it gets the weight; the path only disambiguates. */
+  .db-menu__name,
+  .db-menu__path {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .db-menu__name {
+    font-weight: var(--sl-font-weight-semibold);
+  }
+  .db-menu__path {
+    color: var(--menu-color-path);
+    font-size: var(--sl-font-size-x-small);
     font-style: italic;
   }
   .db-menu__close::part(base) {
     color: var(--db-text-color);
     font-size: 1rem;
   }
+  /* Narrower than Shoelace's own gutter, but wide enough for the check itself:
+     it marks the element currently on the clipboard (@see
+     contextual_menu.js's updateMenuItems), so it does render, and clipping it
+     would read as a rendering fault rather than as state. */
   .menu__item::part(checked-icon) {
-    width: 0.5rem;
+    width: 1rem;
+    font-size: 0.8rem;
   }
   .menu__item[value="remove"]::part(base) {
     color: var(--menu-color-danger);
+  }
+  /* Shoelace gives both of these a `:host { display: block }`, which is an
+     author rule and so outranks the user agent's own `[hidden]` rule - the
+     attribute alone hides nothing. The Styles submenu toggles two entries
+     this way, @see contextual_menu.js's updateStylesSource(). */
+  sl-menu-item[hidden],
+  sl-menu-label[hidden] {
+    display: none;
   }
 
   pre.debug-info {

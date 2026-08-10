@@ -32,6 +32,22 @@ class MenuStyles extends IslandPluginBase {
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $builder_id = (string) $builder->id();
 
+    // Names the copied element once, at the top, so Paste and Merge below
+    // stay plain verbs instead of each repeating where the styles came from.
+    // Carries no text of its own: contextual_menu.js writes the name in and
+    // reveals it, since only the client knows what is on the clipboard.
+    $source = [
+      '#type' => 'component',
+      '#component' => 'display_builder:menu_item',
+      '#props' => [
+        'variant' => 'label',
+      ],
+      '#attributes' => [
+        'class' => ['db-menu__styles-source'],
+        'hidden' => TRUE,
+      ],
+    ];
+
     $copy = $this->buildMenuItem($this->t('Copy'), 'copy_styles');
 
     $paste = $this->buildMenuItem($this->t('Paste'), 'paste_styles');
@@ -40,10 +56,20 @@ class MenuStyles extends IslandPluginBase {
     $merge = $this->buildMenuItem($this->t('Merge'), 'merge_styles');
     $merge = $this->htmxEvents->onClickPasteStyles($merge, $builder_id);
 
-    $delete = $this->buildMenuItem($this->t('Delete'), 'delete_styles');
-    $delete = $this->htmxEvents->onClickDeleteStyles($delete, $builder_id);
+    // "Clear", not "Delete": it empties this element's styles, and sits one
+    // menu away from "Remove", which deletes the element itself. The value
+    // stays delete_styles - it is what binds the item to its route.
+    $clear = $this->buildMenuItem($this->t('Clear'), 'delete_styles');
+    $clear = $this->htmxEvents->onClickDeleteStyles($clear, $builder_id);
 
-    $styles = $this->buildMenuItem($this->t('Styles'), '', submenu: [$copy, $paste, $merge, $delete]);
+    // Empties the styles clipboard. Purely client-side, hence no htmx event:
+    // the clipboard is a localStorage entry (@see contextual_menu.js). Shown
+    // only once there is something to forget, like the label above.
+    $forget = $this->buildMenuItem($this->t('Forget copied styles'), 'forget_styles');
+    $forget['#attributes']['class'][] = 'db-menu__styles-forget';
+    $forget['#attributes']['hidden'] = TRUE;
+
+    $styles = $this->buildMenuItem($this->t('Styles'), '', submenu: [$source, $copy, $paste, $merge, $clear, $forget]);
 
     return [
       $this->buildMenuDivider(),

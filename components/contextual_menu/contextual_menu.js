@@ -61,6 +61,7 @@ class ContextualMenu {
       this.handleContextMenu(event);
     });
     this.setupGlobalClickHandler();
+    this.setupEscapeHandler();
 
     const closeButton = this.menu.querySelector('.db-menu__close');
     if (closeButton) {
@@ -68,12 +69,37 @@ class ContextualMenu {
         this.menu.style.display = 'none';
       });
     }
+  }
 
-    this.menu.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
+  /**
+   * Closes the menu on Escape, ahead of everything else Escape closes.
+   *
+   * Escape already walks a chain - Settings drawer, then Libraries drawer
+   * (@see components/display_builder/js/sidebar.js) - and the menu belongs at
+   * the head of it: it is the most recent thing the user opened and the one
+   * they mean to dismiss. Hence a capture-phase listener on `document`, which
+   * runs before any bubble-phase handler there whatever order they registered
+   * in, and stops the event only when there is actually a menu to close, so
+   * an Escape with the menu shut still reaches the drawers.
+   *
+   * Bound on `document` rather than on the menu: nothing focuses the menu
+   * when it opens, so a listener on the menu itself only ever fired for a
+   * user who had arrow-keyed into the items.
+   *
+   * @listens event:keydown
+   */
+  setupEscapeHandler() {
+    document.addEventListener(
+      'keydown',
+      (event) => {
+        if (event.key !== 'Escape') return;
+        if (this.menu.style.display !== 'block') return;
+
         this.menu.style.display = 'none';
-      }
-    });
+        event.stopPropagation();
+      },
+      true,
+    );
   }
 
   /**
@@ -91,7 +117,8 @@ class ContextualMenu {
     this.setupMenuSelectHandler();
 
     const slotData = this.getSlotData(event.target, instance);
-    this.setMenuLabel(this.getPathLabel(event.target));
+    const { name, path } = this.getPathParts(event.target);
+    this.setMenuLabel(name, path);
 
     const copyInstance = Drupal.displayBuilder.LocalStorageManager.get(
       'copy',
@@ -205,16 +232,39 @@ class ContextualMenu {
   }
 
   /**
-   * Sets the text content of the menu label element.
+   * Sets the two lines of the menu header: the element, then where it sits.
    *
-   * @param {string} dataLabel
-   *   The label text to display in the menu.
+   * Both grow with the content - a node title is free text and the path grows
+   * with nesting depth - so CSS truncates them with an ellipsis and the whole
+   * of both is kept on the title attribute.
+   *
+   * @param {string} name
+   *   The name of the element the menu acts on.
+   * @param {string} path
+   *   Its location in the hierarchy.
    */
-  setMenuLabel(dataLabel) {
+  setMenuLabel(name, path) {
     const menuLabel = this.menu.querySelector('.db-menu__label');
-    if (menuLabel) {
-      menuLabel.textContent = dataLabel;
-    }
+    if (!menuLabel) return;
+
+    const nameElement = menuLabel.querySelector('.db-menu__name');
+    const pathElement = menuLabel.querySelector('.db-menu__path');
+    if (nameElement) nameElement.textContent = name;
+    if (pathElement) pathElement.textContent = path;
+    menuLabel.title = `${name}\n${path}`;
+  }
+
+  /**
+   * Labels a menu item, keeping the full text reachable when it is truncated.
+   *
+   * @param {HTMLElement} item
+   *   The `<sl-menu-item>` to label.
+   * @param {string} label
+   *   The label text.
+   */
+  setItemLabel(item, label) {
+    item.textContent = label;
+    item.title = label;
   }
 
   /**
@@ -222,7 +272,8 @@ class ContextualMenu {
    *
    * - Enables or disables the "copy" and "paste" menu items depending on the state of the copy instance.
    * - Sets various data attributes on each menu item for use in event handlers or UI updates.
-   * - Updates the text content of menu items to reflect the current action and instance.
+   * - Names the clipboard contents on the paste and merge items, and the
+   *   target on the destructive one.
    *
    * @param {Object} instance
    *   The current instance object.
@@ -255,6 +306,7 @@ class ContextualMenu {
       : '';
 
     this.menu.setAttribute('data-node-id', instance.id);
+    this.updateStylesSource(copyStylesInstance);
 
     this.menu.querySelectorAll('.menu__item').forEach((item) => {
       item.setAttribute('data-node-title', this.formatName(instance.title));
@@ -272,62 +324,74 @@ class ContextualMenu {
         item.setAttribute('data-copy-styles-node-id', copyStylesInstance.id);
       }
 
+      // The header already names the element every action applies to, so the
+      // items keep the plain verb the plugin rendered (@see
+      // src/Plugin/display_builder/Island/Menu.php and its siblings). Only
+      // two are rewritten: paste, which acts on what is on the clipboard
+      // rather than on anything visible, and remove, the single destructive
+      // action, where spelling out the target is worth the width it costs.
+      // The Styles submenu names its own clipboard once in its heading
+      // instead, @see updateStylesSource().
       switch (item.value) {
-        case 'copy':
-          if (copyMenu.disabled) {
-            item.textContent = Drupal.t('Copied (!label)', {
-              '!label': this.formatName(instance.title),
-            });
-          } else {
-            item.textContent = Drupal.t('Copy !label', {
-              '!label': this.formatName(instance.title),
-            });
-          }
-          break;
         case 'paste':
-          if (copyInstance?.id) {
-            item.textContent = Drupal.t('Paste !label', {
-              '!label': this.formatName(copyInstance.title),
-            });
-          }
-          break;
-        case 'duplicate':
-          item.textContent = Drupal.t('Duplicate !label', {
-            '!label': this.formatName(instance.title),
-          });
+          this.setItemLabel(
+            item,
+            copyInstance?.id
+              ? Drupal.t('Paste !label', {
+                  '!label': this.formatName(copyInstance.title),
+                })
+              : Drupal.t('Paste'),
+          );
           break;
         case 'remove':
-          item.textContent = Drupal.t('Remove !label', {
-            '!label': this.formatName(instance.title),
-          });
-          break;
-        case 'copy_styles':
-          item.textContent = copyStylesMenu.disabled
-            ? Drupal.t('Copied')
-            : Drupal.t('Copy');
-          break;
-        case 'paste_styles':
-          if (copyStylesInstance?.id) {
-            item.textContent = Drupal.t('Paste !label', {
-              '!label': this.formatName(copyStylesInstance.title),
-            });
-          }
-          break;
-        case 'merge_styles':
-          if (copyStylesInstance?.id) {
-            item.textContent = Drupal.t('Merge !label', {
-              '!label': this.formatName(copyStylesInstance.title),
-            });
-          }
-          break;
-        case 'delete_styles':
-          item.textContent = Drupal.t('Delete');
+          this.setItemLabel(
+            item,
+            Drupal.t('Remove !label', {
+              '!label': this.formatName(instance.title),
+            }),
+          );
           break;
         default:
           break;
       }
-      item.checked = false;
+
+      // Which element is on the clipboard, shown as state rather than by
+      // renaming a command while the user is reading it: the two copy items
+      // are disabled precisely when they are the source, so the check mark
+      // marks that one and nothing else. Every other item is left unchecked -
+      // a checked item is how the select handler recognizes an action.
+      item.checked =
+        item.disabled &&
+        (item.value === 'copy' || item.value === 'copy_styles');
     });
+  }
+
+  /**
+   * Names the styles clipboard in the Styles submenu, or hides that it exists.
+   *
+   * Both entries ship hidden from the server (@see MenuStyles::build()): the
+   * clipboard lives in localStorage, so whether there is anything to paste is
+   * only knowable here, at the moment the menu opens.
+   *
+   * @param {Object} copyStylesInstance
+   *   The instance whose styles are on the clipboard, if any.
+   */
+  updateStylesSource(copyStylesInstance) {
+    const source = this.menu.querySelector('.db-menu__styles-source');
+    const forget = this.menu.querySelector('.db-menu__styles-forget');
+    const copied = Boolean(copyStylesInstance?.id);
+
+    if (source) {
+      source.textContent = copied
+        ? Drupal.t('Copied from !label', {
+            '!label': this.formatName(copyStylesInstance.title),
+          })
+        : '';
+      source.hidden = !copied;
+    }
+    if (forget) {
+      forget.hidden = !copied;
+    }
   }
 
   /**
@@ -361,6 +425,14 @@ class ContextualMenu {
             this.builderId,
           );
         }
+        // Nothing to ask the server: the styles clipboard is this entry and
+        // nothing else, so forgetting it is removing it.
+        if (item.value === 'forget_styles') {
+          Drupal.displayBuilder.LocalStorageManager.remove(
+            'copyStyles',
+            this.builderId,
+          );
+        }
         this.menu.style.display = 'none';
         item.checked = false;
       }
@@ -370,14 +442,24 @@ class ContextualMenu {
   /**
    * Set up a global click handler to close the context menu.
    *
+   * Bound in the capture phase, so the menu closes even for a click an island
+   * swallows before it can bubble up to here - the Navigator does exactly that
+   * (@see components/panel_tree/panel_tree.js, which stops row clicks in
+   * capture to keep them away from HTMX). Capture runs outermost first, so
+   * `document` is reached before any island listener regardless.
+   *
    * @listens event:click
    */
   setupGlobalClickHandler() {
-    document.addEventListener('click', (event) => {
-      if (!event.target.dataset.nodeId) {
-        this.menu.style.display = 'none';
-      }
-    });
+    document.addEventListener(
+      'click',
+      (event) => {
+        if (!event.target.dataset.nodeId) {
+          this.menu.style.display = 'none';
+        }
+      },
+      true,
+    );
   }
 
   // --- Utility and data extraction methods below ---
@@ -393,31 +475,38 @@ class ContextualMenu {
   // it with per-case fallback chains.
 
   /**
-   * Generates a hierarchical label path for a given DOM target element based
-   * on its data attributes and its relationship to parent elements.
+   * Names a target element and locates it in the hierarchy.
+   *
+   * The two are returned apart because the menu header shows them as two
+   * lines: what you clicked, then where it sits. The position closes the
+   * path rather than joining the name - among identical siblings it is the
+   * only thing that tells them apart, and that is a fact about the place,
+   * not about the element.
    *
    * @param {HTMLElement} target
-   *   The DOM element for which to generate the path label.
-   * @return {string}
-   *   The formatted path label representing the element's hierarchy.
+   *   The DOM element for which to generate the label.
+   * @return {Object}
+   *   `{name, path}`, both already formatted for display.
    */
-  getPathLabel(target) {
+  getPathParts(target) {
     const node = target.closest('[data-node-id]');
     const slot = node?.closest('[data-slot-title]');
-    const name = [];
+    const path = [];
 
-    name.push(
+    path.push(
       slot ? this.formatName(slot.dataset.nodeTitle) : Drupal.t('Base'),
     );
-    if (slot?.dataset.slotTitle) name.push(slot.dataset.slotTitle);
-    if (node?.dataset.nodeTitle) {
-      name.push(this.formatName(node.dataset.nodeTitle));
-    }
+    if (slot?.dataset.slotTitle) path.push(slot.dataset.slotTitle);
     if (node?.dataset.slotPosition) {
-      name.push(parseInt(node.dataset.slotPosition, 10) + 1);
+      path.push(parseInt(node.dataset.slotPosition, 10) + 1);
     }
 
-    return name.join(' / ');
+    return {
+      name: node?.dataset.nodeTitle
+        ? this.formatName(node.dataset.nodeTitle)
+        : Drupal.t('Element'),
+      path: path.join(' / '),
+    };
   }
 
   /**

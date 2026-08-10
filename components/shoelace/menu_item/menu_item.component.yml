@@ -9,6 +9,8 @@ variants:
     title: Default
   divider:
     title: Divider
+  label:
+    title: Label
 slots:
   title:
     title: Title

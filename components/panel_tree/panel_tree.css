@@ -21,7 +21,8 @@
   color: var(--tree-color-label-hover);
 }
 
-.db-tree-node__toggle {
+.db-tree-node__toggle,
+.db-tree-node__actions {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
@@ -49,6 +50,24 @@
   min-width: 0;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+/* Opens the same contextual menu as a right click (@see panel_tree.js), which
+   is otherwise undiscoverable. Pinned to the row's trailing edge, and dimmed
+   rather than hover-revealed: the sidebar is narrow and every title above is
+   already truncated with an ellipsis, so a button that only appears on hover
+   would leave the one affordance for the menu invisible on the rows that need
+   it most. It shares the toggle's reset above, which is what keeps it from
+   shrinking with the title. */
+.db-tree-node__actions {
+  margin-left: auto;
+  opacity: 0.6;
+}
+
+.db-tree-node__actions:hover,
+.db-tree-node__actions:focus-visible {
+  opacity: 1;
+  color: var(--tree-color-label-hover);
 }
 
 .db-tree-node__children {

@@ -11,6 +11,9 @@
       <sl-icon name="{{ icon }}" class="db-tree-node__icon"></sl-icon>
     {% endif %}
     <span class="db-tree-node__title">{{ title }}</span>
+    <button type="button" class="db-tree-node__actions">
+      <sl-icon name="three-dots-vertical" label="{{ 'Actions'|t }}"></sl-icon>
+    </button>
   </div>
   {% if has_children %}
     <div class="db-tree-node__children">

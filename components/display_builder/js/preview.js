@@ -244,11 +244,26 @@ Drupal.displayBuilder = Drupal.displayBuilder || {};
     document.addEventListener(type, hidePreview, true);
   });
 
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      hidePreview();
-    }
-  });
+  // Escape is how a keyboard user dismisses this: they reach a placeholder
+  // through focusin, not the pointer, so none of the mousedown/dragstart
+  // hides above will ever fire for them.
+  //
+  // Capture phase, and it stops nothing. Escape walks a chain of things to
+  // close - contextual menu, then Settings drawer, then Libraries drawer
+  // (@see components/contextual_menu/contextual_menu.js and js/sidebar.js) -
+  // and the first of those does stop the event once it acts. This popup is
+  // not part of that chain: it is non-interactive informational chrome
+  // (pointer-events: none), not a mode the user is in, so it should go on
+  // any Escape rather than wait its turn behind one.
+  document.addEventListener(
+    'keydown',
+    (event) => {
+      if (event.key === 'Escape') {
+        hidePreview();
+      }
+    },
+    true,
+  );
 
   // htmx's trigger `delay:` debounces the request, it does not cancel it -
   // without this every placeholder swept over would still fetch and swap.

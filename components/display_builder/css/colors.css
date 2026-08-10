@@ -87,6 +87,7 @@
   --menu-color-border: var(--sl-color-neutral-200);
   --menu-color-danger: var(--sl-color-danger-600);
   --menu-color-debug-border: var(--sl-color-neutral-600);
+  --menu-color-path: var(--sl-color-neutral-600);
 
   /* Dropzone */
   /* Small visual highlight */

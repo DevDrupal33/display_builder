@@ -48,6 +48,81 @@
   }
 
   /**
+   * Scrolls the canvas to the element matching a tree node and highlights it.
+   *
+   * @param {HTMLElement} node - The `.db-tree-node` to locate on the canvas.
+   * @param {HTMLElement} builder - The `.display-builder` root element.
+   */
+  function scrollToNodeAndHighlight(node, builder) {
+    const { nodeId, slotId } = node.dataset;
+    if (!nodeId) return;
+
+    // Match all non-tree view panels, then pick the actually visible one.
+    // The shoelace tabs hide inactive panes via CSS class (display: none)
+    // not the [hidden] attribute, so :not([hidden]) would not filter them.
+    const scope = '.db-island-view:not(.db-island-tree)';
+    const selector = slotId
+      ? `${scope} [data-slot-id="${slotId}"][data-node-id="${nodeId}"]`
+      : `${scope} [data-node-id="${nodeId}"]:not([data-slot-id])`;
+
+    let target = null;
+    builder.querySelectorAll(selector).forEach((elt) => {
+      if (!target && elt.offsetParent !== null) target = elt;
+    });
+
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    highlightInstance(node, builder, true);
+    setTimeout(() => highlightInstance(node, builder, false), 2000);
+  }
+
+  /**
+   * Programmatically triggers the HTMX request and opens the settings sidebar
+   * for a tree node, as if the user had single-clicked it.
+   *
+   * @param {HTMLElement} node - The `.db-tree-node` element.
+   * @param {HTMLElement} builder - The `.display-builder` root element.
+   */
+  function triggerSingleClick(node, builder) {
+    const url = node.getAttribute('data-hx-get');
+    if (url) {
+      htmx.ajax('GET', url, { source: node, swap: 'none' });
+    }
+    Drupal.displayBuilder.handleSecondDrawer(builder, node, null, 'click');
+  }
+
+  /**
+   * Opens the contextual menu for a row, as if it had been right-clicked.
+   *
+   * The menu is driven by a single `contextmenu` listener bound on the island
+   * (@see components/contextual_menu/contextual_menu.js), which resolves the
+   * node, its slot and the menu position from the event alone - so replaying
+   * that event on the row is the whole integration, and the three-dot button
+   * never has to know what the menu will offer.
+   *
+   * @param {HTMLElement} button - The `.db-tree-node__actions` button clicked.
+   */
+  function openContextualMenu(button) {
+    const row = button.closest('.db-tree-node__row');
+    if (!row) return;
+
+    // Anchored under the button rather than at the pointer: the menu is
+    // positioned from the coordinates carried by the event, and a click can
+    // land anywhere inside the button.
+    const rect = button.getBoundingClientRect();
+    row.dispatchEvent(
+      new MouseEvent('contextmenu', {
+        bubbles: true,
+        cancelable: true,
+        clientX: rect.left,
+        clientY: rect.bottom,
+      }),
+    );
+  }
+
+  /**
    * Expands or collapses every collapsible node in a tree at once.
    *
    * @param {HTMLElement} tree - The `.db-tree` root element.
@@ -193,6 +268,73 @@
         row.addEventListener('mouseleave', () => {
           highlightInstance(node, builder, false);
         });
+      });
+
+      // Double-click detection on tree nodes.
+      // Uses a capture-phase click listener to intercept events before HTMX
+      // processes them (HTMX registers its own click listeners on each
+      // `.db-tree-node` via data-hx-trigger). On first click we start a 200ms
+      // timer; if a second click on the same node arrives before the timer
+      // fires, it is treated as a double-click – scroll the canvas to that
+      // node and highlight it. Otherwise the timer fires and we trigger the
+      // regular single-click behavior (HTMX request + settings sidebar).
+      once('dbTreeDblClick', '.db-tree', context).forEach((tree) => {
+        let pendingClick = null;
+        const cancelPendingClick = () => {
+          if (!pendingClick) return;
+          clearTimeout(pendingClick.timer);
+          pendingClick = null;
+        };
+
+        tree.addEventListener(
+          'click',
+          (event) => {
+            const row = event.target.closest('.db-tree-node__row');
+            if (!row) return;
+            if (event.target.closest('.db-tree-node__toggle')) return;
+
+            const treeNode = row.closest('.db-tree-node');
+            if (!treeNode) return;
+
+            event.stopImmediatePropagation();
+            event.preventDefault();
+
+            const builder = tree.closest('.display-builder');
+            if (!builder) return;
+
+            // The three-dot button is the discoverable equivalent of a right
+            // click, so it opens the menu straight away - no single/double
+            // click arbitration, and no pending selection left to fire under
+            // the menu that just opened.
+            const actions = event.target.closest('.db-tree-node__actions');
+            if (actions) {
+              cancelPendingClick();
+              openContextualMenu(actions);
+              return;
+            }
+
+            if (pendingClick && pendingClick.node === treeNode) {
+              cancelPendingClick();
+              scrollToNodeAndHighlight(treeNode, builder);
+              return;
+            }
+
+            cancelPendingClick();
+
+            pendingClick = {
+              node: treeNode,
+              timer: setTimeout(() => {
+                pendingClick = null;
+                if (treeNode.dataset.menuType === 'slot') {
+                  toggleNode(treeNode);
+                } else {
+                  triggerSingleClick(treeNode, builder);
+                }
+              }, 200),
+            };
+          },
+          true,
+        );
       });
     },
   };
