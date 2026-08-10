@@ -476,22 +476,9 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         \sprintf('db-island-%s', $island->getPluginId()),
       ]);
 
-      $title = '';
-      if ($label) {
-        $title = [
-          '#type' => 'html_tag',
-          '#tag' => 'h5',
-          'value' => $island->label(),
-          '#attributes' => [
-            'class' => ['db-island-label', 'db-library-search-hide', 'db-island-label--' . $island->getPluginId()],
-          ],
-        ];
-      }
-
       $panes[$island_id] = [
         '#type' => 'html_tag',
         '#tag' => $tag,
-        'title' => $title,
         'children' => $island->build($builder, $data),
         '#attributes' => [
           // `id` attribute is used by HTMX OOB swap.
@@ -502,6 +489,17 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
           'data-testid' => \sprintf('%s_%s', $island->getTypeId(), $island->getPluginId()),
         ] + $this->buildDeferrableAttribute($island),
       ];
+
+      if ($label) {
+        $panes[$island_id]['title'] = [
+          '#type' => 'html_tag',
+          '#tag' => 'h5',
+          'value' => $island->label(),
+          '#attributes' => [
+            'class' => ['db-island-label', 'db-library-search-hide', 'db-island-label--' . $island->getPluginId()],
+          ],
+        ];
+      }
     }
 
     return $panes;

@@ -77,19 +77,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   public AccountInterface $currentUser;
 
   /**
-   * Path index.
-   *
-   * A mapping where each key is an slot source node ID and each value has
-   * two properties:
-   * - path: the path
-   * - parent: the node ID of the parent. This is necessary because not every
-   *   SourceWithSlotsInterface implementations has the same "deepness". For
-   *   example, ComponentSource has 4 levels (component, slots, slot_id,
-   *   'sources), LayoutSource has 2 levels (regions, slot_id), etc.
-   */
-  protected array $pathIndex = [];
-
-  /**
    * Entity type manager.
    */
   protected EntityTypeManagerInterface $entityTypeManager;
