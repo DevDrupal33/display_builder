@@ -54,39 +54,6 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test the ::clear() method.
-   */
-  public function testClear(): void {
-    $instance = $this->createDisplayBuilderInstance();
-    self::assertEmpty($instance->getCurrentState());
-
-    // Create some history.
-    $state1 = $this->makeSource('state_1');
-    $state2 = $this->makeSource('state_2');
-
-    $instance->setNewPresent($state1, 'State 1');
-    self::assertEquals($state1, $instance->getCurrentState());
-    $instance->setNewPresent($state2, 'State 2');
-    self::assertEquals($state2, $instance->getCurrentState());
-
-    // Undo once to create future history.
-    $instance = $this->storage->undo($instance);
-    self::assertEquals($state1, $instance->getCurrentState());
-
-    // Verify we have history.
-    self::assertSame(0, \count($instance->getPast()));
-    self::assertSame(1, \count($instance->getFuture()));
-
-    // Clear history.
-    $instance->clear();
-
-    // Verify history is cleared but current state remains.
-    self::assertEquals($state1, $instance->getCurrentState());
-    self::assertSame(0, \count($instance->getPast()));
-    self::assertSame(0, \count($instance->getFuture()));
-  }
-
-  /**
    * Test the ::getFuture() method.
    *
    * Tests that future array is properly managed during history operations.

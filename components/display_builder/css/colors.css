@@ -86,6 +86,9 @@
   /* Contextual menu */
   --menu-color-border: var(--sl-color-neutral-200);
   --menu-color-danger: var(--sl-color-danger-600);
+  /* One step darker than the danger token above, which sits at 600: amber
+     text at 600 is 3.2:1 on the menu background, below the 4.5:1 axe wants. */
+  --menu-color-warning: var(--sl-color-warning-700);
   --menu-color-debug-border: var(--sl-color-neutral-600);
   --menu-color-path: var(--sl-color-neutral-600);
 

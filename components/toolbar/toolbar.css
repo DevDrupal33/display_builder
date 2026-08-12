@@ -125,3 +125,33 @@
     margin-left: var(--db-space-4);
   }
 }
+
+/* The dropdown half of the split state button, holding Restore and Revert
+   (@see \Drupal\display_builder\Plugin\display_builder\Island\StateButtons).
+   Kept at least as wide as the split button it hangs from - a menu narrower
+   than its own trigger reads as a different, unrelated control. */
+.db-state-menu {
+  min-width: 7.4rem;
+  border: 1px solid var(--toolbar-color-border);
+  border-radius: var(--sl-border-radius-medium);
+}
+
+/* Nothing in here is ever checked - these are actions, not toggles - so
+   Shoelace's check gutter only indents the two labels away from the edge the
+   menu shares with the button above it. The contextual menu keeps its own
+   (@see components/contextual_menu/contextual_menu.css): there the check
+   marks what is on the clipboard. */
+.db-state-menu .menu__item::part(checked-icon) {
+  display: none;
+}
+
+/* How destructive each action is, in text rather than in a full button
+   variant: this is a menu, and a menu item painted like a button reads as a
+   different control again. */
+.db-state-menu .menu__item[value="restore"]::part(base) {
+  color: var(--menu-color-warning);
+}
+
+.db-state-menu .menu__item[value="revert"]::part(base) {
+  color: var(--menu-color-danger);
+}

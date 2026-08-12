@@ -386,13 +386,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
 
   /**
    * {@inheritdoc}
-   */
-  public function clear(): void {
-    $this->getStorage()->clear($this);
-  }
-
-  /**
-   * {@inheritdoc}
    *
    * @see \Drupal\display_builder\HistoryInterface
    */

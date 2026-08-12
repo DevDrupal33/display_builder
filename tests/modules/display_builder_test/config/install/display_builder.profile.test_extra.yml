@@ -67,7 +67,7 @@ islands:
   state:
     status: true
     weight: 0
-    region: start
+    region: end
     publish:
       value: label
     restore:

@@ -35,12 +35,4 @@ test('History undo redo clear', { tag: [ '@base' ] }, async ({ page, drupal, dis
     await redo.click(position)
     await expect(textfields).toHaveCount(3)
   })
-
-  await test.step(`Clear empties the history without touching the content`, async () => {
-    await clear.click(position)
-    await expect(textfields).toHaveCount(3)
-    await expect(undo).toBeVisible()
-    await expect(redo).toBeVisible()
-    await expect(clear).toBeHidden()
-  })
 })

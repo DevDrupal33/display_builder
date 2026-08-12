@@ -136,17 +136,4 @@ interface ApiControllerInterface {
    */
   public function redo(Request $request, InstanceInterface $display_builder_instance): array;
 
-  /**
-   * Clear history.
-   *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   HTTP Request.
-   * @param \Drupal\display_builder\InstanceInterface $display_builder_instance
-   *   Display builder instance.
-   *
-   * @return array
-   *   A renderable array
-   */
-  public function clear(Request $request, InstanceInterface $display_builder_instance): array;
-
 }

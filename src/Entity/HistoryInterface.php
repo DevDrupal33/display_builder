@@ -54,9 +54,4 @@ interface HistoryInterface {
    */
   public function getFuture(): array;
 
-  /**
-   * Reset history to the current state.
-   */
-  public function clear(): void;
-
 }

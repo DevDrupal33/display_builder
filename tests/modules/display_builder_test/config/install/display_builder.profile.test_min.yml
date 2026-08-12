@@ -55,15 +55,13 @@ islands:
     weight: 0
     region: end
     undo:
-      value: icon_label
+      value: icon
     redo:
-      value: icon_label
-    clear:
-      value: icon_label
+      value: icon
   state:
     status: false
     weight: 0
-    region: start
+    region: end
   controls:
     status: false
     weight: 0

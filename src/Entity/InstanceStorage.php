@@ -76,27 +76,6 @@ class InstanceStorage extends SqlContentEntityStorage {
   }
 
   /**
-   * Delete all revisions except the default one.
-   *
-   * @param \Drupal\Core\Entity\RevisionableInterface $entity
-   *   A revisionable entity.
-   */
-  public function clear(RevisionableInterface $entity): void {
-    $query = $this->getAllRevisionsQuery($entity);
-    $query->condition('revision', (int) $entity->getRevisionId(), '<>');
-    // QueryInterface::execute() returns an integer for count queries or an
-    // array of ids.
-    /** @var array $revisions */
-    $revisions = $query->execute();
-
-    foreach (\array_keys($revisions) as $vid) {
-      $this->deleteRevision($vid);
-    }
-
-    $entity->save();
-  }
-
-  /**
    * Get the past revisions.
    *
    * @param \Drupal\Core\Entity\RevisionableInterface $entity

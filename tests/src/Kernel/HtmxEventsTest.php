@@ -250,7 +250,6 @@ final class HtmxEventsTest extends DisplayBuilderKernelTestBase {
       // onRevert is deliberately absent: display_builder.api_revert carries
       // `_module_dependencies: display_builder_entity_view`, so the route does
       // not exist unless that submodule is installed. Covered there instead.
-      'onClear' => 'clear',
       'onPublish' => 'publish',
     ];
   }

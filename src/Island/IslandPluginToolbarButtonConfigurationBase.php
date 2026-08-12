@@ -46,11 +46,21 @@ abstract class IslandPluginToolbarButtonConfigurationBase extends IslandPluginBa
     ];
 
     foreach ($this->hasButtons() as $button_id => $button) {
+      $button_options = isset($button['options'])
+        ? \array_intersect_key($options, \array_flip($button['options']))
+        : $options;
       $default_value = $configuration[$button_id][self::KEY_VALUE] ?? $button['default'] ?? 'hidden';
+
+      // A mode the button no longer offers, kept in an older stored profile,
+      // would render the select with nothing selected.
+      if (!isset($button_options[$default_value])) {
+        $default_value = $button['default'] ?? 'hidden';
+      }
+
       $form[$button_id][self::KEY_VALUE] = [
         '#type' => 'select',
         '#title' => $this->t('@name button', ['@name' => $button['title']]),
-        '#options' => $options,
+        '#options' => $button_options,
         '#default_value' => $default_value,
         '#description' => $button['description'] ?? '',
       ];
@@ -158,14 +168,18 @@ abstract class IslandPluginToolbarButtonConfigurationBase extends IslandPluginBa
   /**
    * Returns the list of buttons provided by this plugin.
    *
-   * Each button is an array with two keys: 'label' and 'icon', both boolean.
-   * The keys indicate if the label or icon can be configured to be shown.
-   * For example:
+   * Each button is an array with a 'title', an optional 'default' display
+   * mode, an optional 'description' for its form item, and an optional
+   * 'options' restricting the display modes it offers. For example:
    *
    * @code
    * return [
-   *  'my_button_id' => ['label' => TRUE, 'icon' => FALSE],
-   * 'my_other_button_id' => ['label' => TRUE, 'icon'=> TRUE],
+   *   'my_button_id' => ['title' => $this->t('My button')],
+   *   'my_other_button_id' => [
+   *     'title' => $this->t('My other button'),
+   *     'default' => 'label',
+   *     'options' => ['label', 'hidden'],
+   *   ],
    * ];
    *
    * @endcode

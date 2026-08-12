@@ -510,30 +510,6 @@ class HtmxEvents {
   }
 
   /**
-   * When the history clear button is clicked.
-   *
-   * @param array $build
-   *   The render array.
-   * @param string $builder_id
-   *   The instance entity ID.
-   *
-   * @return array
-   *   The render array.
-   */
-  public function onClear(array $build, string $builder_id): array {
-    $url = new Url(
-      'display_builder.api_clear',
-      [
-        'display_builder_instance' => $builder_id,
-      ]
-    );
-
-    DisplayBuilderHtmx::request('post', $url, self::HTMX_REQUEST)->applyTo($build);
-
-    return $build;
-  }
-
-  /**
    * When the save button is clicked.
    *
    * @param array $build

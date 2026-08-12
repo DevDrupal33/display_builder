@@ -58,9 +58,9 @@ islands:
     weight: -8
     region: end
     undo:
-      value: icon_label
+      value: icon
     redo:
-      value: icon_label
+      value: icon
     clear:
       value: hidden
   state:
@@ -70,9 +70,9 @@ islands:
     publish:
       value: label
     restore:
-      value: icon
+      value: label
     revert:
-      value: icon
+      value: label
   controls:
     status: true
     weight: -7

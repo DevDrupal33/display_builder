@@ -20,8 +20,8 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  * mocking the query builder would assert the mock, not the ordering.
  *
  * ApiControllerTest drives undo()/redo() incidentally. This covers the rules
- * that class does not reach: the history cap, the redo-stack discard, clear(),
- * and getUsers().
+ * that class does not reach: the history cap, the redo-stack discard and
+ * getUsers().
  *
  * @internal
  */
@@ -133,24 +133,6 @@ final class InstanceStorageTest extends DisplayBuilderKernelTestBase {
 
     self::assertSame($instance->getRevisionId(), $this->storage->undo($instance)->getRevisionId());
     self::assertSame($instance->getRevisionId(), $this->storage->redo($instance)->getRevisionId());
-  }
-
-  /**
-   * Test clear() drops every revision but the current one.
-   */
-  public function testClearKeepsOnlyTheDefaultRevision(): void {
-    $this->addRevision('one');
-    $this->addRevision('two');
-    self::assertNotEmpty($this->reload()->getPast());
-
-    $current = $this->reload();
-    $revision_id = $current->getRevisionId();
-    $this->storage->clear($current);
-
-    $after = $this->reload();
-    self::assertEmpty($after->getPast(), 'The past is gone.');
-    self::assertEmpty($after->getFuture(), 'The future too.');
-    self::assertSame($revision_id, $after->getRevisionId(), 'The current revision survives.');
   }
 
   /**

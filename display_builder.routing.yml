@@ -223,19 +223,6 @@ display_builder.api_revert:
       display_builder_instance:
         type: 'entity:display_builder_instance'
 
-display_builder.api_clear:
-  path: '/api/display-builder/{display_builder_instance}/clear'
-  methods: [POST]
-  defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiController::clear'
-  requirements:
-    _entity_access: 'display_builder_instance.update'
-  options:
-    _htmx_route: true
-    parameters:
-      display_builder_instance:
-        type: 'entity:display_builder_instance'
-
 # Display Builder SSE API.
 display_builder.api_sse:
   path: '/api/display-builder/{display_builder_instance}/sse'

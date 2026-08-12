@@ -224,21 +224,6 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Test ::clear() drops the history but keeps the current content.
-   */
-  public function testClearKeepsContentAndDropsHistory(): void {
-    $this->attachTokenToRoot(0);
-    $this->attachTokenToRoot(1);
-    self::assertNotEmpty($this->loadInstance('test_instance')->getPast());
-
-    $this->controller->clear(new Request(), $this->loadInstance('test_instance'));
-
-    $saved = $this->loadInstance('test_instance');
-    self::assertCount(2, $saved->getCurrentState(), 'Clearing history leaves the content alone.');
-    self::assertEmpty($saved->getPast(), 'The past is dropped.');
-  }
-
-  /**
    * Test ::update() refuses a payload without a form ID.
    *
    * Asserts the effect rather than the error payload's shape: the guard exists

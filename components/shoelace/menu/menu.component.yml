@@ -7,6 +7,10 @@ links:
 slots:
   label:
     title: Label
+  content:
+    title: Content
+    description: Menu items built as components, for entries the items prop
+      cannot express, such as an item carrying htmx attributes.
 props:
   type: object
   properties:

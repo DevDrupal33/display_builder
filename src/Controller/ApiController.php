@@ -395,18 +395,6 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function clear(Request $request, InstanceInterface $display_builder_instance): array {
-    $display_builder_instance->clear();
-    $display_builder_instance->save();
-
-    $this->builder = $display_builder_instance;
-
-    return $this->dispatchDisplayBuilderEvent(DisplayBuilderEvents::ON_HISTORY_CHANGE);
-  }
-
-  /**
    * Attach a pattern preset to root.
    *
    * Presets are "resolved" after attachment, so they are never moved around.
