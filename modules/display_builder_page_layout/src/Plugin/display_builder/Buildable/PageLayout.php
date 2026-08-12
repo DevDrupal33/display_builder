@@ -6,10 +6,10 @@ namespace Drupal\display_builder_page_layout\Plugin\display_builder\Buildable;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
+use Drupal\Core\Path\CurrentPathStack;
 use Drupal\Core\Plugin\CachedDiscoveryClearerInterface;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
-use Drupal\Core\Path\CurrentPathStack;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
@@ -17,10 +17,10 @@ use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_page_layout\BuilderDataConverter;
-use Drupal\display_builder_page_layout\Entity\PageLayout as PageLayoutEntity;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
 use Drupal\display_builder_page_layout\StartingPointType;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the display_buildable.
@@ -35,29 +35,55 @@ use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 final class PageLayout extends DisplayBuildablePluginBase {
 
   /**
-   * The page layout entity storing the display.
+   * The page layout entity, once passed in or loaded by ::getEntity().
    */
-  public ?PageLayoutInterface $entity = NULL;
+  protected ?PageLayoutInterface $entity = NULL;
+
+  /**
+   * The builder data converter.
+   */
+  protected BuilderDataConverter $dataConverter;
+
+  /**
+   * The current path stack.
+   */
+  protected CurrentPathStack $currentPath;
+
+  /**
+   * The plugin cache clearer.
+   */
+  protected CachedDiscoveryClearerInterface $pluginCacheClearer;
 
   /**
    * {@inheritdoc}
+   *
+   * Configuration, as stored in the Instance entity:
+   * - entity_id (string): Page layout entity ID.
+   *
+   * The page layout itself may also be passed as 'entity', to work on an
+   * object the caller already holds rather than a reloaded copy of it.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
-    if (isset($configuration['entity'])) {
-      $this->entity = $configuration['entity'];
-      // Configuration to store in the Instance entity.
-      unset($this->configuration['entity']);
-      $this->configuration['entity_id'] = $this->entity->id();
-
+    if (!isset($configuration['entity'])) {
       return;
     }
+    $this->entity = $configuration['entity'];
+    unset($this->configuration['entity']);
+    $this->configuration['entity_id'] = $this->entity->id();
+  }
 
-    // Configuration stored in Instance entity:
-    // - entity_id (string): Page layout entity ID.
-    // No dependency injection in plugin constructors.
-    $this->entity = PageLayoutEntity::load($configuration['entity_id']);
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->dataConverter = $container->get('display_builder_page_layout.builder_data_converter');
+    $instance->currentPath = $container->get('path.current');
+    $instance->pluginCacheClearer = $container->get('plugin.cache_clearer');
+
+    return $instance;
   }
 
   /**
@@ -78,7 +104,7 @@ final class PageLayout extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   public function getBuilderUrl(): Url {
-    return Url::fromRoute('entity.page_layout.display_builder', ['page_layout' => $this->entity->id()]);
+    return Url::fromRoute('entity.page_layout.display_builder', ['page_layout' => $this->getEntity()->id()]);
   }
 
   /**
@@ -120,7 +146,7 @@ final class PageLayout extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   public function getProfile(): ?ProfileInterface {
-    return $this->entity?->getProfile();
+    return $this->getEntity()?->getProfile();
   }
 
   /**
@@ -131,7 +157,7 @@ final class PageLayout extends DisplayBuildablePluginBase {
    * unambiguous page to preview it on.
    */
   public function getPreviewPagePath(): ?string {
-    $conditions = $this->entity->getConditions();
+    $conditions = $this->getEntity()->getConditions();
 
     // Conditions are keyed by plugin ID, so there is at most one of these. The
     // others (role, language, ...) don't constrain the path.
@@ -164,23 +190,23 @@ final class PageLayout extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   public function getSources(): array {
-    // We reload because the Drupal cache is very strong on this data.
-    /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $entity */
-    $entity = $this->entityTypeManager->getStorage('page_layout')->load($this->entity->id());
-    $this->entity = $entity;
+    // Drop the memoized entity so ::getEntity() reloads it: the Drupal cache
+    // is very strong on this data.
+    $this->entity = NULL;
 
-    return $this->entity->getSources();
+    return $this->getEntity()->getSources();
   }
 
   /**
    * {@inheritdoc}
    */
   public function saveSources(): void {
-    $this->entity->setSources($this->getInstance()->getCurrentState());
-    $this->entity->save();
+    $entity = $this->getEntity();
+    $entity->setSources($this->getInstance()->getCurrentState());
+    $entity->save();
     // Clearing plugin cache seems enough to get the new layout.
     // @todo It looks very costly. Check if it is still needed.
-    $this->pluginCacheClearer()->clearCachedDefinitions();
+    $this->pluginCacheClearer->clearCachedDefinitions();
   }
 
   /**
@@ -210,11 +236,11 @@ final class PageLayout extends DisplayBuildablePluginBase {
    */
   public function getInstanceId(): ?string {
     // Usually an entity is new if no ID exists for it yet.
-    if ($this->entity->isNew()) {
+    if ($this->getEntity()->isNew()) {
       return NULL;
     }
 
-    return \sprintf('%s%s', self::getPrefix(), $this->entity->id());
+    return \sprintf('%s%s', self::getPrefix(), $this->getEntity()->id());
   }
 
   /**
@@ -229,7 +255,7 @@ final class PageLayout extends DisplayBuildablePluginBase {
     // and its URI form is not settled upstream either.
     //
     // @see https://www.drupal.org/i/3608162
-    $contexts['page'] = new Context(new ContextDefinition('uri', new TranslatableMarkup('Page')), $this->currentPath()->getPath());
+    $contexts['page'] = new Context(new ContextDefinition('uri', new TranslatableMarkup('Page')), $this->currentPath->getPath());
 
     return $contexts;
   }
@@ -251,11 +277,32 @@ final class PageLayout extends DisplayBuildablePluginBase {
    */
   public function getInitialSources(?StartingPointType $starting_point = NULL): array {
     return match ($starting_point) {
-      StartingPointType::Theme => [$this->converter()->convertPage()],
+      StartingPointType::Theme => [$this->dataConverter->convertPage()],
       StartingPointType::Minimal => $this->getMinimalSources(),
       StartingPointType::Blank => [],
       default => $this->getSources(),
     };
+  }
+
+  /**
+   * Gets the page layout entity this plugin builds.
+   *
+   * Loaded on demand: the constructor runs before ::create() has injected the
+   * entity type manager.
+   *
+   * @return \Drupal\display_builder_page_layout\PageLayoutInterface|null
+   *   The page layout, or NULL if the configured one no longer exists.
+   */
+  protected function getEntity(): ?PageLayoutInterface {
+    if ($this->entity === NULL) {
+      /** @var \Drupal\display_builder_page_layout\PageLayoutInterface|null $entity */
+      $entity = $this->entityTypeManager
+        ->getStorage('page_layout')
+        ->load($this->configuration['entity_id'] ?? '');
+      $this->entity = $entity;
+    }
+
+    return $this->entity;
   }
 
   /**
@@ -315,36 +362,6 @@ final class PageLayout extends DisplayBuildablePluginBase {
         $block_id => $configuration,
       ],
     ];
-  }
-
-  /**
-   * Gets the builder data converter.
-   *
-   * @return \Drupal\display_builder_page_layout\BuilderDataConverter
-   *   The builder data converter.
-   */
-  private function converter(): BuilderDataConverter {
-    return \Drupal::service('display_builder_page_layout.builder_data_converter');
-  }
-
-  /**
-   * Gets the current path stack.
-   *
-   * @return \Drupal\Core\Path\CurrentPathStack
-   *   The current path stack.
-   */
-  private function currentPath(): CurrentPathStack {
-    return \Drupal::service('path.current');
-  }
-
-  /**
-   * Gets the plugin cache clearer.
-   *
-   * @return \Drupal\Core\Plugin\CachedDiscoveryClearerInterface
-   *   The plugin cache clearer.
-   */
-  private function pluginCacheClearer(): CachedDiscoveryClearerInterface {
-    return \Drupal::service('plugin.cache_clearer');
   }
 
 }

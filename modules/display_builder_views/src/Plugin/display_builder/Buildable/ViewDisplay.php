@@ -18,7 +18,6 @@ use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
-use Drupal\views\Entity\View;
 use Drupal\views\Plugin\views\PluginBase;
 
 /**
@@ -32,50 +31,41 @@ use Drupal\views\Plugin\views\PluginBase;
 final class ViewDisplay extends DisplayBuildablePluginBase {
 
   /**
-   * View display extender plugin.
+   * View display extender plugin, once passed in or loaded by ::getExtender().
    */
-  protected PluginBase $extender;
+  protected ?PluginBase $extender = NULL;
 
   /**
    * {@inheritdoc}
+   *
+   * Configuration, as stored in the Instance entity:
+   * - view_id (string)
+   * - view_display (string)
+   *
+   * It is better to take the extender plugin from configuration, as
+   * 'extender', when available: it manipulates the view "executable" from the
+   * tempstore, so we have access to the state not yet saved in config.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
-    // It is better to take the plugin from configuration when available in
-    // order to manipulate the view "executable" from the tempstore.  So, we
-    // have access to the state not yet saved in config.
-    if (isset($configuration['extender'])) {
-      $this->extender = $configuration['extender'];
-      // Configuration to store in the Instance entity.
-      unset($this->configuration['extender']);
-      $this->configuration['view_id'] = $this->extender->view->id();
-      $this->configuration['view_display'] = $this->extender->view->current_display;
-
+    if (!isset($configuration['extender'])) {
       return;
     }
-
-    // If extender plugin is not directly passed, we can get it from the
-    // configuration data (as stored in Instance entity):
-    // - view_id (string)
-    // - view_display (string)
-    // However, this is loading a "real" View entity, as stored in config. So
-    // it may miss unsaved parameters.
-    $view = View::load($configuration['view_id'] ?? '')?->getExecutable();
-
-    if ($view) {
-      $view->setDisplay($configuration['view_display'] ?? '');
-      $this->extender = $view->getDisplay()->getExtenders()['display_builder'];
-    }
+    $this->extender = $configuration['extender'];
+    unset($this->configuration['extender']);
+    $this->configuration['view_id'] = $this->extender->view->id();
+    $this->configuration['view_display'] = $this->extender->view->current_display;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getBuilderUrl(): Url {
+    $view = $this->getExtender()->view;
     $params = [
-      'view' => $this->extender->view->id(),
-      'display' => $this->extender->view->current_display,
+      'view' => $view->id(),
+      'display' => $view->current_display,
     ];
 
     return Url::fromRoute('display_builder_views.views.manage', $params);
@@ -135,7 +125,7 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   public function getProfile(): ?ProfileInterface {
-    $display_builder_id = $this->extender->options[DisplayBuildableInterface::PROFILE_PROPERTY] ?? NULL;
+    $display_builder_id = $this->getExtender()->options[DisplayBuildableInterface::PROFILE_PROPERTY] ?? NULL;
 
     if ($display_builder_id === NULL && $this->getInstance()) {
       return $this->getInstance()->getProfile();
@@ -156,7 +146,7 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   public function getSources(): array {
-    return $this->extender->options[DisplayBuildableInterface::SOURCES_PROPERTY] ?? [];
+    return $this->getExtender()->options[DisplayBuildableInterface::SOURCES_PROPERTY] ?? [];
   }
 
   /**
@@ -164,25 +154,29 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
    */
   public function saveSources(): void {
     $sources = $this->getInstance()->getCurrentState();
+    $extender = $this->getExtender();
     // First, we save in the "live" object.
-    $this->extender->options[DisplayBuildableInterface::SOURCES_PROPERTY] = $sources;
+    $extender->options[DisplayBuildableInterface::SOURCES_PROPERTY] = $sources;
     // Then, we save in the permanent storage.
-    $displays = $this->extender->view->storage->get('display');
-    $display_id = $this->extender->view->current_display;
+    $storage = $extender->view->storage;
+    $displays = $storage->get('display');
+    $display_id = $extender->view->current_display;
     // It is risky to alter a View like that. We need to be careful to not
     // break the storage integrity, but we didn't find a better way.
     $displays[$display_id]['display_options']['display_extenders']['display_builder'][DisplayBuildableInterface::SOURCES_PROPERTY] = $sources;
-    $this->extender->view->storage->set('display', $displays);
-    $this->extender->view->storage->save();
+    $storage->set('display', $displays);
+    $storage->save();
     // @todo Test if we still need to invalidate the cache manually here.
-    $this->extender->view->storage->invalidateCaches();
+    $storage->invalidateCaches();
   }
 
   /**
    * {@inheritdoc}
    */
   public function getInstanceId(): string {
-    return \sprintf('%s%s__%s', self::getPrefix(), $this->extender->view->id(), $this->extender->view->current_display);
+    $view = $this->getExtender()->view;
+
+    return \sprintf('%s%s__%s', self::getPrefix(), $view->id(), $view->current_display);
   }
 
   /**
@@ -227,13 +221,41 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
     // Buildable plugin by overriding this method.
     // @todo filter by $unqualified_context_ids.
     $contexts = [];
-    $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($this->extender->view->storage);
+    $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($this->getExtender()->view->storage);
     // Needed by ui_patterns_views's ViewRowsSource.
     // Will be filled by \Drupal\display_builder_views\Hook\PreprocessViewsView.
     $contexts['ui_patterns_views:rows'] = new Context(new ContextDefinition('any'), []);
     $contexts = RequirementsContext::addToContext(['views:style'], $contexts);
 
     return $contexts;
+  }
+
+  /**
+   * Gets the display extender plugin this plugin builds.
+   *
+   * Loaded on demand: the constructor runs before ::create() has injected the
+   * entity type manager. The fallback loads a "real" View entity, as stored in
+   * config, so it may miss unsaved parameters.
+   *
+   * @return \Drupal\views\Plugin\views\PluginBase|null
+   *   The extender, or NULL if the configured view no longer exists.
+   */
+  protected function getExtender(): ?PluginBase {
+    if ($this->extender !== NULL) {
+      return $this->extender;
+    }
+    /** @var \Drupal\views\ViewEntityInterface|null $view_entity */
+    $view_entity = $this->entityTypeManager
+      ->getStorage('view')
+      ->load($this->configuration['view_id'] ?? '');
+    $view = $view_entity?->getExecutable();
+
+    if ($view) {
+      $view->setDisplay($this->configuration['view_display'] ?? '');
+      $this->extender = $view->getDisplay()->getExtenders()['display_builder'];
+    }
+
+    return $this->extender;
   }
 
   /**

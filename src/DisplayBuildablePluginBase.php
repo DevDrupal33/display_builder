@@ -46,6 +46,23 @@ abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase impleme
 
   /**
    * {@inheritdoc}
+   *
+   * Services are assigned after the constructor has run, so a subclass needing
+   * more of them overrides this method and assigns them on the parent result:
+   *
+   * @code
+   * public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+   *   $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+   *   $instance->myService = $container->get('my.service');
+   *
+   *   return $instance;
+   * }
+   *
+   * @endcode
+   *
+   * The ordering is why a constructor must never resolve the display it wraps:
+   * nothing is injected yet at that point. Keep the identifier the plugin was
+   * built with in ::$configuration and load lazily from an accessor instead.
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = new static($configuration, $plugin_id, $plugin_definition);

@@ -7,7 +7,6 @@ namespace Drupal\display_builder_entity_view\Plugin\display_builder\Buildable;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
-use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
@@ -22,6 +21,7 @@ use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the display_buildable.
@@ -44,30 +44,39 @@ final class EntityView extends DisplayBuildablePluginBase {
   protected BuilderDataConverter $dataConverter;
 
   /**
-   * The display entity.
+   * The display entity, once passed in or loaded by ::getDisplay().
    */
-  protected ?EntityViewDisplayInterface $entity;
+  protected ?EntityViewDisplayInterface $entity = NULL;
+
+  /**
+   * {@inheritdoc}
+   *
+   * Configuration, as stored in the Instance entity:
+   * - display_id (string)
+   *
+   * The display itself may also be passed as 'display', to work on an object
+   * the caller already holds rather than a reloaded copy of it.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+
+    if (!isset($configuration['display'])) {
+      return;
+    }
+    $this->entity = $configuration['display'];
+    unset($this->configuration['display']);
+    $this->configuration['display_id'] = $this->entity->id();
+  }
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->sampleEntityGenerator = \Drupal::service('ui_patterns.sample_entity_generator');
-    $this->dataConverter = \Drupal::service('display_builder_entity_view.builder_data_converter');
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->sampleEntityGenerator = $container->get('ui_patterns.sample_entity_generator');
+    $instance->dataConverter = $container->get('display_builder_entity_view.builder_data_converter');
 
-    if (isset($configuration['display'])) {
-      $this->entity = $configuration['display'];
-      unset($this->configuration['display']);
-      $this->configuration['display_id'] = $this->entity->id();
-
-      return;
-    }
-
-    // Configuration (as stored in Instance entity):
-    // - display_id (string)
-    // No dependency injection in plugin constructors.
-    $this->entity = EntityViewDisplay::load($configuration['display_id'] ?? '');
+    return $instance;
   }
 
   /**
@@ -100,13 +109,15 @@ final class EntityView extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   public function getBuilderUrl(): Url {
-    $fieldable_entity_type = $this->entityTypeManager->getDefinition($this->entity->getTargetEntityTypeId());
+    $display = $this->getDisplay();
+    $entity_type_id = $display->getTargetEntityTypeId();
+    $fieldable_entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
     $bundle_parameter_key = $fieldable_entity_type->getBundleEntityType() ?: 'bundle';
     $parameters = [
-      $bundle_parameter_key => $this->entity->getTargetBundle(),
-      'view_mode_name' => $this->entity->getMode(),
+      $bundle_parameter_key => $display->getTargetBundle(),
+      'view_mode_name' => $display->getMode(),
     ];
-    $route_name = \sprintf('display_builder_entity_view.%s', $this->entity->getTargetEntityTypeId());
+    $route_name = \sprintf('display_builder_entity_view.%s', $entity_type_id);
 
     return Url::fromRoute($route_name, $parameters);
   }
@@ -135,7 +146,7 @@ final class EntityView extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   public function getProfile(): ?ProfileInterface {
-    $profile_id = $this->entity->getThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY);
+    $profile_id = $this->getDisplay()->getThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY);
 
     if ($profile_id === NULL) {
       return NULL;
@@ -151,7 +162,7 @@ final class EntityView extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   public function getSources(): array {
-    return $this->entity->getThirdPartySetting('display_builder', DisplayBuildableInterface::SOURCES_PROPERTY, []);
+    return $this->getDisplay()->getThirdPartySetting('display_builder', DisplayBuildableInterface::SOURCES_PROPERTY, []);
   }
 
   /**
@@ -159,20 +170,23 @@ final class EntityView extends DisplayBuildablePluginBase {
    */
   public function saveSources(): void {
     $data = $this->getInstance()->getCurrentState();
-    $this->entity->setThirdPartySetting('display_builder', DisplayBuildableInterface::SOURCES_PROPERTY, $data);
-    $this->entity->save();
+    $display = $this->getDisplay();
+    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::SOURCES_PROPERTY, $data);
+    $display->save();
   }
 
   /**
    * {@inheritdoc}
    */
   public function getInstanceId(): ?string {
+    $display = $this->getDisplay();
+
     // Usually an entity is new if no ID exists for it yet.
-    if ($this->entity->isNew()) {
+    if ($display->isNew()) {
       return NULL;
     }
 
-    return \sprintf('%s%s', self::getPrefix(), \str_replace('.', '__', (string) $this->entity->id()));
+    return \sprintf('%s%s', self::getPrefix(), \str_replace('.', '__', (string) $display->id()));
   }
 
   /**
@@ -211,11 +225,12 @@ final class EntityView extends DisplayBuildablePluginBase {
     // Contexts not needed by Display Builder but expected by UiPatterns source
     // plugins.
     $contexts = [];
-    $entity_type_id = $this->entity->getTargetEntityTypeId();
-    $bundle = $this->entity->getTargetBundle();
+    $display = $this->getDisplay();
+    $entity_type_id = $display->getTargetEntityTypeId();
+    $bundle = $display->getTargetBundle();
     $sampleEntity = $this->sampleEntityGenerator->get($entity_type_id, $bundle);
     $contexts['entity'] = EntityContext::fromEntity($sampleEntity);
-    $contexts['view_mode'] = new Context(ContextDefinition::create('string'), $this->entity->getMode());
+    $contexts['view_mode'] = new Context(ContextDefinition::create('string'), $display->getMode());
     $contexts['bundle'] = new Context(ContextDefinition::create('string'), $bundle);
     $contexts = RequirementsContext::addToContext(['entity'], $contexts);
 
@@ -234,7 +249,7 @@ final class EntityView extends DisplayBuildablePluginBase {
       // - EntityViewDisplay::initialImport()
       // - LayoutBuilderEntityViewDisplay::initialImport()
       /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface $display */
-      $display = $this->entity;
+      $display = $this->getDisplay();
 
       if ($display instanceof LayoutBuilderEntityViewDisplay && $display->getThirdPartySetting('layout_builder', 'enabled')) {
         $sections = $display->getThirdPartySetting('layout_builder', 'sections', []);
@@ -268,6 +283,27 @@ final class EntityView extends DisplayBuildablePluginBase {
     }
 
     return $this->t('Initialize display from existing Entity View Display configuration');
+  }
+
+  /**
+   * Gets the entity view display this plugin builds.
+   *
+   * Loaded on demand: the constructor runs before ::create() has injected the
+   * entity type manager.
+   *
+   * @return \Drupal\Core\Entity\Display\EntityViewDisplayInterface|null
+   *   The display, or NULL if the configured one no longer exists.
+   */
+  protected function getDisplay(): ?EntityViewDisplayInterface {
+    if ($this->entity === NULL) {
+      /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface|null $display */
+      $display = $this->entityTypeManager
+        ->getStorage('entity_view_display')
+        ->load($this->configuration['display_id'] ?? '');
+      $this->entity = $display;
+    }
+
+    return $this->entity;
   }
 
   /**

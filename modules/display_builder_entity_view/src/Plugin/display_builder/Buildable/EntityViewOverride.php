@@ -9,7 +9,6 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
-use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Core\Entity\RevisionableEntityBundleInterface;
@@ -29,6 +28,7 @@ use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the display_buildable.
@@ -43,7 +43,7 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
   /**
    * The time service.
    */
-  protected ?TimeInterface $time;
+  protected TimeInterface $time;
 
   /**
    * The data converter from Manage Display and Layout Builder.
@@ -51,7 +51,7 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
   protected BuilderDataConverter $dataConverter;
 
   /**
-   * The field items where the override is stored.
+   * The field items where the override is stored, once ::getField() ran.
    */
   protected ?FieldItemListInterface $field = NULL;
 
@@ -61,61 +61,68 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
   protected DisplayBuildablePluginManager $displayBuildableManager;
 
   /**
-   * The overridden display.
+   * The fieldable entity owning the override field, when passed in.
    */
-  protected ?DisplayBuilderEntityDisplayInterface $display;
+  protected ?ContentEntityInterface $entity = NULL;
+
+  /**
+   * The overridden display, once passed in or loaded by ::getDisplay().
+   */
+  protected ?DisplayBuilderEntityDisplayInterface $display = NULL;
 
   /**
    * {@inheritdoc}
+   *
+   * Configuration, as stored in the Instance entity:
+   * - display_id (string)
+   * - entity_id (string)
+   *
+   * The display and the overriding entity may also be passed as 'display' and
+   * 'entity', to work on objects the caller already holds rather than reloaded
+   * copies of them.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
-    $this->display = $configuration['display'] ?? NULL;
-
-    if ($this->display === NULL) {
-      // No dependency injection in plugin constructors.
-      /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface|null $display */
-      $display = EntityViewDisplay::load($configuration['display_id']);
-      $this->display = $display;
+    if (isset($configuration['display'])) {
+      $this->display = $configuration['display'];
+      unset($this->configuration['display']);
+      $this->configuration['display_id'] = $this->display->id();
     }
 
-    $entity = $configuration['entity'] ?? NULL;
-
-    // The fieldable content entity owning the override field.
-    if ($entity === NULL) {
-      // No dependency injection in plugin constructors.
-      $storage = \Drupal::service('entity_type.manager')->getStorage(
-        $this->display->getTargetEntityTypeId());
-      /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-      $entity = $storage->load($this->configuration['entity_id']);
+    if (isset($configuration['entity'])) {
+      $this->entity = $configuration['entity'];
+      unset($this->configuration['entity']);
+      $this->configuration['entity_id'] = $this->entity->id();
     }
+  }
 
-    // Configuration to store in the Instance entity.
-    // - display_id (string)
-    // - entity_id (string)
-    unset($this->configuration['display']);
-    $this->configuration['display_id'] = $this->display->id();
-    unset($this->configuration['entity']);
-    $this->configuration['entity_id'] = $entity->id();
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->time = $container->get('datetime.time');
+    $instance->dataConverter = $container->get('display_builder_entity_view.builder_data_converter');
+    $instance->displayBuildableManager = $container->get('plugin.manager.display_buildable');
 
-    $field_name = $this->display->getDisplayBuilderOverrideField();
-    $this->field = $entity->get($field_name);
+    return $instance;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getBuilderUrl(): Url {
-    \assert(\is_string($this->field->getName()));
-    $entity = $this->field->getEntity();
-    $entity_type_id = $this->display->getTargetEntityTypeId();
+    $field = $this->getField();
+    $display = $this->getDisplay();
+    \assert(\is_string($field->getName()));
+    $entity_type_id = $display->getTargetEntityTypeId();
     $parameters = [
-      $entity_type_id => $entity->id(),
-      'view_mode_name' => $this->display->getMode(),
+      $entity_type_id => $field->getEntity()->id(),
+      'view_mode_name' => $display->getMode(),
     ];
 
-    return Url::fromRoute(\sprintf('entity.%s.display_builder.%s', $entity_type_id, $this->display->getMode()), $parameters);
+    return Url::fromRoute(\sprintf('entity.%s.display_builder.%s', $entity_type_id, $display->getMode()), $parameters);
   }
 
   /**
@@ -172,7 +179,7 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   public function getProfile(): ?ProfileInterface {
-    $profile_id = $this->display->getThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY);
+    $profile_id = $this->getDisplay()->getThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY);
 
     if ($profile_id === NULL) {
       return NULL;
@@ -188,7 +195,7 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   public function getSources(): array {
-    return $this->field->getValue();
+    return $this->getField()->getValue();
   }
 
   /**
@@ -196,24 +203,26 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
    */
   public function saveSources(): void {
     $data = $this->getInstance()->getCurrentState();
-    $entity = $this->field->getEntity();
+    $field = $this->getField();
+    $entity = $field->getEntity();
 
     if ($entity instanceof ContentEntityInterface) {
       $this->setRevision($entity);
     }
     $entity->save();
-    $this->field->setValue($data);
-    $this->field->getEntity()->save();
+    $field->setValue($data);
+    $entity->save();
   }
 
   /**
    * {@inheritdoc}
    */
   public function revertSources(): array {
-    $this->field->setValue(NULL);
-    $this->field->getEntity()->save();
+    $field = $this->getField();
+    $field->setValue(NULL);
+    $field->getEntity()->save();
 
-    return $this->display->getThirdPartySetting('display_builder', DisplayBuildableInterface::SOURCES_PROPERTY, []);
+    return $this->getDisplay()->getThirdPartySetting('display_builder', DisplayBuildableInterface::SOURCES_PROPERTY, []);
   }
 
   /**
@@ -234,19 +243,20 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   public function getInstanceId(): ?string {
+    $field = $this->getField();
+    $entity = $field->getEntity();
+
     // Usually an entity is new if no ID exists for it yet.
-    if ($this->field->getEntity()->isNew()) {
+    if ($entity->isNew()) {
       return NULL;
     }
-
-    $entity = $this->field->getEntity();
 
     return \sprintf(
       '%s%s__%s__%s',
       self::getPrefix(),
       $entity->getEntityTypeId(),
       $entity->id(),
-      $this->field->getName()
+      $field->getName()
     );
   }
 
@@ -269,7 +279,7 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
 
     if ($entity instanceof RevisionLogInterface) {
       $entity->setRevisionLogMessage($this->t('Updated using Display Builder.')->render());
-      $entity->setRevisionCreationTime($this->time()->getCurrentTime());
+      $entity->setRevisionCreationTime($this->time->getCurrentTime());
     }
   }
 
@@ -360,12 +370,57 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
    */
   public function getRuntimeContexts(array $unqualified_context_ids): array {
     $contexts = [];
-    $contexts['entity'] = EntityContext::fromEntity($this->field->getEntity());
-    $contexts['view_mode'] = new Context(ContextDefinition::create('string'), $this->display->getMode());
-    $contexts['bundle'] = new Context(ContextDefinition::create('string'), $this->field->getEntity()->bundle());
+    $entity = $this->getField()->getEntity();
+    $contexts['entity'] = EntityContext::fromEntity($entity);
+    $contexts['view_mode'] = new Context(ContextDefinition::create('string'), $this->getDisplay()->getMode());
+    $contexts['bundle'] = new Context(ContextDefinition::create('string'), $entity->bundle());
     $contexts = RequirementsContext::addToContext(['content'], $contexts);
 
     return $contexts;
+  }
+
+  /**
+   * Gets the overridden entity view display.
+   *
+   * Loaded on demand: the constructor runs before ::create() has injected the
+   * entity type manager.
+   *
+   * @return \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface|null
+   *   The display, or NULL if the configured one no longer exists.
+   */
+  protected function getDisplay(): ?DisplayBuilderEntityDisplayInterface {
+    if ($this->display === NULL) {
+      /** @var \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface|null $display */
+      $display = $this->entityTypeManager
+        ->getStorage('entity_view_display')
+        ->load($this->configuration['display_id'] ?? '');
+      $this->display = $display;
+    }
+
+    return $this->display;
+  }
+
+  /**
+   * Gets the field items holding the override.
+   *
+   * @return \Drupal\Core\Field\FieldItemListInterface|null
+   *   The field items, or NULL if the overriding entity no longer exists.
+   */
+  protected function getField(): ?FieldItemListInterface {
+    if ($this->field !== NULL) {
+      return $this->field;
+    }
+    $display = $this->getDisplay();
+    $entity = $this->entity ?? $this->entityTypeManager
+      ->getStorage($display->getTargetEntityTypeId())
+      ->load($this->configuration['entity_id']);
+
+    if (!$entity instanceof ContentEntityInterface) {
+      return NULL;
+    }
+    $this->field = $entity->get($display->getDisplayBuilderOverrideField());
+
+    return $this->field;
   }
 
   /**
@@ -398,8 +453,8 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
     // There is always a single Layout Builder override per bundle: `default`.
     // There could be many Display Builder overrides per bundle, one for each
     // display, so we need to check.
-    if ($this->display->getMode() === 'default') {
-      $entity = $this->field->getEntity();
+    if ($this->getDisplay()->getMode() === 'default') {
+      $entity = $this->getField()->getEntity();
       // @see: use Drupal\layout_builder\Plugin\SectionStorage\OverridesSectionStorage::$FIELD_NAME
       $field_name = 'layout_builder__layout';
 
@@ -407,14 +462,14 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
         $content = $entity->get($field_name)->first()->getValue();
         $this->initialDataSource = 'layout_builder_override';
 
-        return $this->dataConverter()->convertFromLayoutBuilder($content);
+        return $this->dataConverter->convertFromLayoutBuilder($content);
       }
     }
 
     // 3. Copy entity view display value.
-    \assert(\is_string($this->field->getName()));
+    \assert(\is_string($this->getField()->getName()));
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $this->displayBuildableManager()->createInstance('entity_view', ['display' => $this->display]);
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $this->getDisplay()]);
 
     if ($buildable->getProfile() !== NULL) {
       $sources = $buildable->getSources();
@@ -461,46 +516,6 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
     }
 
     return $instances;
-  }
-
-  /**
-   * Get the time service.
-   *
-   * @return \Drupal\Component\Datetime\TimeInterface
-   *   The time service.
-   */
-  protected function time(): TimeInterface {
-    return $this->time ??= \Drupal::service('datetime.time');
-  }
-
-  /**
-   * Get the entity type manager.
-   *
-   * @return \Drupal\Core\Entity\EntityTypeManagerInterface
-   *   The entity type manager.
-   */
-  protected function entityTypeManager(): EntityTypeManagerInterface {
-    return $this->entityTypeManager ??= \Drupal::service('entity_type.manager');
-  }
-
-  /**
-   * Gets the display buildable manager.
-   *
-   * @return \Drupal\display_builder\DisplayBuildablePluginManager
-   *   The manager for display buildable.
-   */
-  protected function displayBuildableManager(): DisplayBuildablePluginManager {
-    return $this->displayBuildableManager ??= \Drupal::service('plugin.manager.display_buildable');
-  }
-
-  /**
-   * Get the data converter from Manage Display and Layout Builder.
-   *
-   * @return \Drupal\display_builder_entity_view\BuilderDataConverter
-   *   The converter.
-   */
-  protected function dataConverter(): BuilderDataConverter {
-    return $this->dataConverter ??= \Drupal::service('display_builder_entity_view.builder_data_converter');
   }
 
   /**
