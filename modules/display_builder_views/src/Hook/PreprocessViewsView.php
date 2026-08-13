@@ -71,6 +71,13 @@ class PreprocessViewsView {
     // @see \Drupal\display_builder_views\Plugin\views\display_extender\DisplayExtender::preExecute()
     $variables['content'] = $fake_build['#slots']['content'] ?? [];
     $variables['content']['#cache'] = $fake_build['#cache'] ?? [];
+
+    // Honor the "Hide block if the view output is empty" setting: when the
+    // view has no result, do not render the Display Builder layout. Cache
+    // metadata is preserved so the empty state stays correctly cached.
+    if (!empty($view->getDisplay()->getOption('block_hide_empty')) && empty($view->result)) {
+      $variables['content'] = ['#cache' => $variables['content']['#cache']];
+    }
   }
 
 }
