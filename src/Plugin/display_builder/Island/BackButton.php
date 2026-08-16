@@ -22,7 +22,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Back'),
   description: new TranslatableMarkup('Exit the display builder and go back to admin UI.'),
   type: IslandType::Button,
-  default_region: 'end',
+  region: 'end',
 )]
 class BackButton extends IslandPluginToolbarButtonConfigurationBase {
 

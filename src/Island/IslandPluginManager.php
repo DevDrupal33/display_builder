@@ -69,6 +69,32 @@ final class IslandPluginManager extends DefaultPluginManager implements IslandPl
 
   /**
    * {@inheritdoc}
+   *
+   * @param mixed $definition
+   *   The plugin definition to process.
+   * @param string $plugin_id
+   *   The plugin ID.
+   */
+  public function processDefinition(&$definition, $plugin_id): void {
+    parent::processDefinition($definition, $plugin_id);
+
+    if (!\is_array($definition)) {
+      return;
+    }
+
+    // Resolve the region once, so every read is a plain definition lookup and
+    // a plugin declaring a region its type does not have still lands in a
+    // real one. @see \Drupal\display_builder\Island\IslandType::regions()
+    $type = $definition['type'] instanceof IslandType ? $definition['type']->value : '';
+    $region = $definition['region'] ?? NULL;
+
+    if (!\is_string($region) || !\array_key_exists($region, IslandType::regions($type))) {
+      $definition['region'] = IslandType::defaultRegion($type);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
    */
   protected function findDefinitions() {
     $definitions = $this->getDiscovery()->getDefinitions();

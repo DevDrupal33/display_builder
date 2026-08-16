@@ -27,7 +27,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Instances'),
   description: new TranslatableMarkup('List all displays available to build and jump to any of them.'),
   type: IslandType::View,
-  default_region: 'sidebar',
+  region: 'sidebar',
   icon: 'files',
 )]
 class InstancesPanel extends IslandPluginBase {

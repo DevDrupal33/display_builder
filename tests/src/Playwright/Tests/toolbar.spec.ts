@@ -18,7 +18,6 @@ const key = {
   expand: config.keyExpand,
   undo: 'ControlOrMeta+z',
   redo: 'ControlOrMeta+Shift+z',
-  clear: 'Shift+C',
   publish: 'Shift+P',
 }
 
@@ -206,12 +205,9 @@ test('Keyboard', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder })
     await displayBuilder.keyboardShortcut(key.redo)
 
     await expect(builderTextfield).toHaveCount(4)
-    await displayBuilder.keyboardShortcut(key.clear)
 
-    await expect(builderTextfield).toHaveCount(4)
     await expect(page.locator('[data-island-action="undo"]')).toBeVisible()
     await expect(page.locator('[data-island-action="redo"]')).toBeVisible()
-    await expect(page.locator('[data-island-action="clear"]')).toBeHidden()
   })
 
   // This is helping next tests.

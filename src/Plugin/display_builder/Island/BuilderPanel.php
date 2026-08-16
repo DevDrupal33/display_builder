@@ -22,7 +22,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Canvas'),
   description: new TranslatableMarkup('The Display Builder main island. Build the display with dynamic preview.'),
   type: IslandType::View,
-  default_region: 'main',
+  region: 'main',
   icon: 'tools',
 )]
 class BuilderPanel extends ViewPanelBase {

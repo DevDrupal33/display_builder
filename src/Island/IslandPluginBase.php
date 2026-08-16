@@ -192,6 +192,15 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * {@inheritdoc}
    */
+  public function getRegionId(): ?string {
+    $definition = (array) $this->getPluginDefinition();
+
+    return $definition['region'] ?? NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getHtmlId(string $builder_id): string {
     return \implode('-', ['island', $builder_id, $this->pluginDefinition['id']]);
   }

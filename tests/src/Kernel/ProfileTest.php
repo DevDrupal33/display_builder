@@ -137,7 +137,6 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
       $islandId => [
         'status' => TRUE,
         'weight' => 0,
-        'region' => 'main',
         'string_value' => 'test value',
         'bool_value' => 1,
         'string_array' => ['foo' => 'value1', 'bar' => 'value2'],
@@ -150,7 +149,6 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
     self::assertNotEmpty($islandConfig);
     self::assertTrue($islandConfig['status']);
     self::assertSame(0, $islandConfig['weight']);
-    self::assertSame('main', $islandConfig['region']);
 
     // Test custom configuration values.
     self::assertSame('test value', $islandConfig['string_value'], 'String value is correctly stored');
@@ -161,7 +159,6 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
     $newConfig = [
       'status' => FALSE,
       'weight' => 10,
-      'region' => 'sidebar',
       'string_value' => 'updated value',
       'bool_value' => 0,
       'string_array' => ['foo' => 'new1', 'bar' => 'new2'],
@@ -174,13 +171,12 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
     $updatedConfig = $updated->getIslandConfiguration($islandId);
     self::assertFalse($updatedConfig['status']);
     self::assertSame(10, $updatedConfig['weight']);
-    self::assertSame('sidebar', $updatedConfig['region']);
+
     // Verify updated configuration including custom values.
     $updated = Profile::load('test_islands');
     $updatedConfig = $updated->getIslandConfiguration($islandId);
     self::assertFalse($updatedConfig['status']);
     self::assertSame(10, $updatedConfig['weight']);
-    self::assertSame('sidebar', $updatedConfig['region']);
 
     // Verify updated custom configuration values.
     self::assertSame('updated value', $updatedConfig['string_value'], 'Updated string value is correctly stored');
@@ -218,12 +214,10 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
         'layers' => [
           'status' => TRUE,
           'weight' => -4,
-          'region' => 'main',
         ],
         'builder' => [
           'status' => TRUE,
           'weight' => -5,
-          'region' => 'main',
         ],
       ],
     ]);
@@ -242,10 +236,12 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
     self::assertSame([
       'status' => TRUE,
       'weight' => -4,
-      'region' => 'main',
     ], $islands['scaffold']);
     self::assertArrayNotHasKey('layers', $islands);
-    self::assertArrayHasKey('builder', $islands);
+    self::assertSame([
+      'status' => TRUE,
+      'weight' => -5,
+    ], $islands['builder']);
   }
 
   /**

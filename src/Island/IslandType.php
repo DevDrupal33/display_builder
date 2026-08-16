@@ -43,10 +43,20 @@ enum IslandType: string {
   }
 
   /**
-   * Get the available regions by type.
+   * Get the regions a type is split into.
+   *
+   * Placement is structural, owned by the plugin 'region' attribute, never a
+   * profile level preference: the regions of a type are built differently from
+   * one another (a narrow sidebar drawer versus a full width tab), so an
+   * island belongs to one of them the way it belongs to its type. This list
+   * exists to group them for display, not to offer a choice.
+   *
+   * @param string $type
+   *   The island type value.
    *
    * @return array
-   *   The type regions as key => description.
+   *   The type regions as key => description, empty for a type with a single
+   *   region.
    */
   public static function regions(string $type): array {
     return match ($type) {
@@ -59,6 +69,23 @@ enum IslandType: string {
         'end' => new TranslatableMarkup('End'),
       ],
       default => [],
+    };
+  }
+
+  /**
+   * Get the region an island of this type lands in without declaring one.
+   *
+   * @param string $type
+   *   The island type value.
+   *
+   * @return string|null
+   *   The fallback region, NULL for a type with a single region.
+   */
+  public static function defaultRegion(string $type): ?string {
+    return match ($type) {
+      self::View->value => 'main',
+      self::Button->value => 'end',
+      default => NULL,
     };
   }
 

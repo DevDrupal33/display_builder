@@ -32,8 +32,12 @@ final class Island extends AttributeBase {
    *   (Optional) The deriver class.
    * @param \Drupal\display_builder\Island\IslandType|null $type
    *   (Optional) The island type from enumeration.
-   * @param string|null $default_region
-   *   (Optional) The island default region, if applicable.
+   * @param string|null $region
+   *   (Optional) The region the island renders in, for the types split into
+   *   several: 'sidebar' or 'main' for IslandType::View, 'start' or 'end' for
+   *   IslandType::Button, as listed by IslandType::regions(). Not
+   *   admin-configurable. Omitting it, or naming a region the type does not
+   *   have, falls back to IslandType::defaultRegion().
    * @param string|null $icon
    *   (Optional) Icon for this island.
    * @param array $modules
@@ -42,10 +46,9 @@ final class Island extends AttributeBase {
    *   (Optional) For IslandType::Floating islands only: the plugin IDs of
    *   the View islands this floating control attaches to. It renders once
    *   per listed island, alongside that island's own content, and is only
-   *   visible while that island's main tab is active. Not admin-configurable
-   *   - unlike default_region, this is a fixed part of the plugin
-   *   definition, since a floating control is usually meaningless outside
-   *   the island(s) it was built for (e.g. CSS scoped to that island).
+   *   visible while that island's main tab is active. Not admin-configurable,
+   *   since a floating control is usually meaningless outside the island(s) it
+   *   was built for (e.g. CSS scoped to that island).
    * @param bool $pane_header
    *   (Optional) For IslandType::Floating islands only: render inside the
    *   attach_to pane as an in-flow header bar rather than as the default fixed
@@ -60,7 +63,7 @@ final class Island extends AttributeBase {
     public readonly ?TranslatableMarkup $description = NULL,
     public readonly ?string $deriver = NULL,
     public readonly ?IslandType $type = NULL,
-    public readonly ?string $default_region = NULL,
+    public readonly ?string $region = NULL,
     public readonly ?string $icon = NULL,
     public readonly array $modules = [],
     public readonly array $attach_to = [],

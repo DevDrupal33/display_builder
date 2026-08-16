@@ -7,13 +7,16 @@ display_builder.islands.test_island_view:
     weight:
       type: weight
       label: Weight
-    region:
-      type: machine_name
-      label: Region
     string_value:
       type: string
     bool_value:
       type: integer
+    # A pair of interchangeable keys, so a config migration test has somewhere
+    # to move a value to. @see \Drupal\display_builder\Update\ProfileIslandsUpdater
+    legacy_setting:
+      type: string
+    setting:
+      type: string
     string_array:
       type: mapping
       mapping:

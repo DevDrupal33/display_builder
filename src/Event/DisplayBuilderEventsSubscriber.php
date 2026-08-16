@@ -220,12 +220,9 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
    * that cannot survive a standalone reload can decline. This method only
    * decides whether an eligible island is currently off screen.
    *
-   * The region is deliberately not consulted: IslandType::regions() offers a
-   * View island only 'main' and 'sidebar', both of which show one panel at a
-   * time, so every View island qualifies. Testing the region would also be
-   * wrong, since it is only stored on the profile when explicitly configured
-   * (@see \Drupal\display_builder\Entity\Profile::setIslandConfiguration()) -
-   * an island left at its default would fall through and never be deferred.
+   * The region is deliberately not consulted: a View island sits either in the
+   * tabbed main area or in the sidebar drawer, both of which show one panel at
+   * a time, so every View island qualifies.
    *
    * @param \Drupal\display_builder\Island\IslandInterface $island
    *   The island to test.

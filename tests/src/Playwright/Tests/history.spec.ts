@@ -14,7 +14,6 @@ test('History undo redo clear', { tag: [ '@base' ] }, async ({ page, drupal, dis
   const textfields = page.locator(`.db-island-builder [data-node-type="textfield"]`)
   const undo = page.locator('[data-island-action="undo"]')
   const redo = page.locator('[data-island-action="redo"]')
-  const clear = page.locator('[data-island-action="clear"]')
 
   await test.step(`Create Page Layout and login`, async () => {
     await displayBuilder.initTestsWithPageLayout(drupal, config.testProfileMinId)

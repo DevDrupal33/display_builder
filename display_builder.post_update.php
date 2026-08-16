@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-use Drupal\display_builder\Entity\ProfileInterface;
+use Drupal\display_builder\Update\ProfileIslandsUpdater;
 
 /**
  * Delete all states after ContentEntityType migration.
@@ -26,44 +26,22 @@ function display_builder_post_update_1(): void {
  * Migrate config with new values.
  */
 function display_builder_post_update_2(): void {
-  $storage = \Drupal::service('entity_type.manager')->getStorage('display_builder_profile');
-  $profiles = $storage->loadMultiple();
-
-  foreach ($profiles as $profile) {
-    if (!$profile instanceof ProfileInterface) {
-      continue;
-    }
-
-    $islands = $profile->get('islands');
-    if (!is_array($islands)) {
-      continue;
-    }
-    $changed = FALSE;
-
+  ProfileIslandsUpdater::create()
     // The 'layers' island is now named 'scaffold'.
-    if (isset($islands['layers']) && !isset($islands['scaffold'])) {
-      $islands['scaffold'] = $islands['layers'];
-      unset($islands['layers']);
-      $changed = TRUE;
-    }
-
+    ->renameIsland('layers', 'scaffold')
     // The viewport island has no 'format' setting anymore.
-    if (is_array($islands['viewport'] ?? NULL) && array_key_exists('format', $islands['viewport'])) {
-      unset($islands['viewport']['format']);
-      $changed = TRUE;
-    }
+    ->removeKey('format', ['viewport'])
+    ->save();
+}
 
-    // The preview island is no longer a region aware View island.
-    if (is_array($islands['preview'] ?? NULL) && array_key_exists('region', $islands['preview'])) {
-      unset($islands['preview']['region']);
-      $changed = TRUE;
-    }
-
-    if (!$changed) {
-      continue;
-    }
-
-    $profile->set('islands', $islands);
-    $profile->save();
-  }
+/**
+ * Migrate config with new values.
+ */
+function display_builder_post_update_3(): void {
+  ProfileIslandsUpdater::create()
+    // Placement is structural for every island type now, owned by the plugin
+    // 'region' attribute, so no island stores a region anymore.
+    // @see \Drupal\display_builder\Island\IslandType::regions()
+    ->removeKey('region')
+    ->save();
 }

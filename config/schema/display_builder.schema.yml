@@ -43,9 +43,6 @@ display_builder.islands:
     weight:
       type: weight
       label: Weight
-    region:
-      type: machine_name
-      label: Region
 
 display_builder.islands.*:
   type: display_builder.islands
@@ -66,8 +63,6 @@ display_builder.islands.history:
     undo:
       type: display_builder.toolbar.button
     redo:
-      type: display_builder.toolbar.button
-    clear:
       type: display_builder.toolbar.button
 
 display_builder.islands.controls:

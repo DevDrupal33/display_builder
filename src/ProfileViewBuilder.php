@@ -152,7 +152,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     // pinning the Preview pane beside the active editor pane. It rides in the
     // toolbar's end region next to the other action buttons. @see js/split.js.
     $preview_toggle = $this->buildPreviewToggle($builder, $view_islands_data['view_main_islands']);
-    $end_buttons = $this->buildButtons($builder, $button_islands);
+    $end_buttons = $this->buildButtons($builder, $button_islands, 'end');
 
     if (!empty($preview_toggle)) {
       $end_buttons = ['preview_toggle' => $preview_toggle] + $end_buttons;
@@ -250,13 +250,11 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    * @return array
    *   The buttons.
    */
-  private function buildButtons(InstanceInterface $builder, array $buttonIslands, string $region = 'end'): array {
+  private function buildButtons(InstanceInterface $builder, array $buttonIslands, string $region): array {
     $islands = [];
 
     foreach ($buttonIslands as $id => $island) {
-      $islandRegion = $island->getConfiguration()['region'] ?? 'end';
-
-      if ($islandRegion === $region) {
+      if ($island->getRegionId() === $region) {
         $islands[$id] = $island;
       }
     }
@@ -299,9 +297,8 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         continue;
       }
 
-      $configuration = $island->getConfiguration();
-
-      if (isset($configuration['region']) && $configuration['region'] === 'sidebar') {
+      // Placement is owned by the plugin, @see IslandType::regions().
+      if ($island->getRegionId() === 'sidebar') {
         $view_islands_sidebar[$id] = $islands[$id];
         $view_sidebar_buttons[$id] = $islands[$id];
       }

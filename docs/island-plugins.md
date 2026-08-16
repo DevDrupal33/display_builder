@@ -63,6 +63,11 @@ HTMX behavior will change according to `IslandInterface::build()` return value:
 - `description`: A brief description of the plugin.
 - `type` : The island type from enumeration.
 - `icon`: Icon for this island. Used for View panels.
+- `region`: The region the island renders in, for the types split into
+  several: `sidebar` or `main` for `IslandType::View`, `start` or `end` for
+  `IslandType::Button`. Structural, never a profile preference, since the
+  regions of a type are built differently from one another. An island omitting
+  it falls back to `IslandType::defaultRegion()`, `main` and `end`.
 - `attach_to`: For `IslandType::Floating` islands only: the plugin IDs of
   the View panels this floating control attaches to. It renders once per
   listed panel, alongside that panel's own content, and is only visible
@@ -154,15 +159,20 @@ in the help dialog.
 
 Shortcuts taken by the islands shipped with the module:
 
-| Key | Island | | Key | Island |
-|---|---|---|---|---|
-| `c` | Canvas | | `mod+z` (or `u`) | Undo |
-| `g` | Scaffold | | `mod+shift+z` (or `r`) | Redo |
-| `n` | Navigator | | `shift+c` | Clear |
-| `p` | Preview | | `shift+p` | Publish |
-| `l` | Libraries | | `shift+e` | Expand |
-| `o` | Logs | | `mod+c` / `mod+v` / `mod+d` | Copy / Paste / Duplicate selected |
-| | | | `Delete` | Remove selected |
+| Key | Island |
+|---|---|
+| `c` | Canvas |
+| `g` | Scaffold |
+| `n` | Navigator |
+| `p` | Preview |
+| `l` | Libraries |
+| `o` | Logs |
+| `mod+z` (or `u`) | Undo |
+| `mod+shift+z` (or `r`) | Redo |
+| `shift+p` | Publish |
+| `shift+e` | Expand |
+| `mod+c` / `mod+v` / `mod+d` | Copy / Paste / Duplicate selected |
+| `Delete` | Remove selected |
 
 The contextual shortcuts (`mod+c`/`mod+v`/`mod+d`/`Delete`) act on the currently
 selected node without opening the right-click menu; they resolve the node's slot

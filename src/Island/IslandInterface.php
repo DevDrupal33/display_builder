@@ -70,6 +70,20 @@ interface IslandInterface extends ConfigurableInterface, ContainerFactoryPluginI
   public function getTypeId(): string;
 
   /**
+   * Get the region this island renders in.
+   *
+   * Structural, owned by the plugin, never a profile level preference. The
+   * value is resolved at discovery, so it is always one of the regions the
+   * island type has, or NULL for a type with a single region.
+   *
+   * @return string|null
+   *   The resolved region attribute value.
+   *
+   * @see \Drupal\display_builder\Island\IslandPluginManager::processDefinition()
+   */
+  public function getRegionId(): ?string;
+
+  /**
    * Get HTML ID.
    *
    * This ID is used to update an interactive island.

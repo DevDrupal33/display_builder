@@ -6,6 +6,7 @@ namespace Drupal\display_builder\Form;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\SortArray;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityInterface;
@@ -257,43 +258,36 @@ final class ProfileForm extends EntityForm {
    */
   protected function buildIslandTypeTable(IslandType $type, array $islands, array $configuration): array {
     $type = $type->value;
-    $table = [
-      '#type' => 'table',
-      '#header' => [
-        'drag' => '',
-        'status' => $this->t('Enabled'),
-        'name' => $this->t('Island'),
-        'summary' => $this->t('Configuration'),
-        'region' => empty(IslandType::regions($type)) ? '' : $this->t('Region'),
-        'actions' => $this->t('Actions'),
-        'weight' => $this->t('Weight'),
-      ],
-      '#attributes' => ['id' => 'db-islands-' . $type],
-      '#tabledrag' => [
-        [
-          'action' => 'order',
-          'relationship' => 'sibling',
-          'group' => 'draggable-weight-' . $type,
-        ],
-      ],
-      // We don't want to submit the island type level. We already know the
-      // type of each islands thanks to IslandInterface::getTypeId() so let's
-      // keep the storage flat.
-      '#parents' => ['islands'],
-    ];
+    $regions = IslandType::regions($type);
 
-    foreach ($islands as $id => $island) {
-      $table[$id] = $this->buildIslandRow($island, $configuration[$id] ?? []);
+    if (empty($regions)) {
+      return $this->buildIslandTable($type, $islands, $configuration);
     }
 
-    // Order rows by weight.
-    \uasort($table, static function ($a, $b) {
-      if (isset($a['#weight'], $b['#weight'])) {
-        return (int) $a['#weight'] - (int) $b['#weight'];
-      }
-    });
+    // A type split into several regions gets one table per region: an island
+    // belongs to its region the way it belongs to its type, so it can be
+    // reordered inside it but never moved out of it.
+    $build = [];
 
-    return $table;
+    foreach ($regions as $region => $label) {
+      $region_islands = \array_filter(
+        $islands,
+        static fn (IslandInterface $island): bool => $island->getRegionId() === $region
+      );
+
+      // The region name goes in the table's own caption rather than a sibling
+      // heading, so assistive tech ties the two together. It still needs to
+      // read as a section heading.
+      $caption = [
+        '#type' => 'html_tag',
+        '#tag' => 'h3',
+        '#value' => $label,
+      ];
+
+      $build[$region] = $this->buildIslandTable($type . '-' . $region, $region_islands, $configuration, $caption);
+    }
+
+    return $build;
   }
 
   /**
@@ -303,14 +297,15 @@ final class ProfileForm extends EntityForm {
    *   Island plugin.
    * @param array $configuration
    *   Configuration of this specific island.
+   * @param string $group
+   *   The identity of the table holding the row, @see buildIslandTable().
    *
    * @return array
    *   A renderable array.
    */
-  protected function buildIslandRow(IslandInterface $island, array $configuration): array {
+  protected function buildIslandRow(IslandInterface $island, array $configuration, string $group): array {
     $id = $island->getPluginId();
     $definition = (array) $island->getPluginDefinition();
-    $type = $island->getTypeId();
     /** @var \Drupal\display_builder\Island\IslandPluginManagerInterface $islandPluginManager */
     $islandPluginManager = \Drupal::service('plugin.manager.db_island'); // phpcs:ignore
     /** @var \Drupal\display_builder\Island\IslandConfigurationFormInterface $instance */
@@ -339,21 +334,6 @@ final class ProfileForm extends EntityForm {
     $row['summary'] = [
       '#markup' => \implode('<br>', $instance->configurationSummary()),
     ];
-
-    $regions = IslandType::regions($type);
-
-    if (!empty($regions)) {
-      $row['region'] = [
-        '#type' => 'radios',
-        '#title' => $this->t('Region'),
-        '#title_display' => 'invisible',
-        '#options' => $regions,
-        '#default_value' => $configuration['region'] ?? $definition['default_region'] ?? NULL,
-      ];
-    }
-    else {
-      $row['region'] = [];
-    }
 
     if ($island instanceof PluginFormInterface && !$this->entity->isNew()) {
       $row['actions'] = [
@@ -389,7 +369,7 @@ final class ProfileForm extends EntityForm {
       '#title' => $this->t('Weight'),
       '#title_display' => 'invisible',
       '#attributes' => [
-        'class' => ['draggable-weight-' . $type],
+        'class' => ['draggable-weight-' . $group],
       ],
     ];
 
@@ -426,6 +406,61 @@ final class ProfileForm extends EntityForm {
    */
   protected function moduleExtensionList(): ModuleExtensionList {
     return $this->moduleExtensionList ??= \Drupal::service('extension.list.module'); // phpcs:ignore
+  }
+
+  /**
+   * Build a draggable table of islands.
+   *
+   * @param string $group
+   *   The table identity, an island type or an island type and region. Two
+   *   tables on the same page must not share it, or dragging a row in one
+   *   rewrites the weights the other is driving.
+   * @param array $islands
+   *   List of island plugins.
+   * @param array $configuration
+   *   Configuration of all islands from this type.
+   * @param array|null $caption
+   *   (Optional) The region name, for a type split into several.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  private function buildIslandTable(string $group, array $islands, array $configuration, ?array $caption = NULL): array {
+    $table = [
+      '#type' => 'table',
+      '#caption' => $caption,
+      '#header' => [
+        'drag' => '',
+        'status' => $this->t('Enabled'),
+        'name' => $this->t('Island'),
+        'summary' => $this->t('Configuration'),
+        'actions' => $this->t('Actions'),
+        'weight' => $this->t('Weight'),
+      ],
+      '#empty' => $this->t('No island here.'),
+      '#attributes' => ['id' => 'db-islands-' . $group],
+      '#tabledrag' => [
+        [
+          'action' => 'order',
+          'relationship' => 'sibling',
+          'group' => 'draggable-weight-' . $group,
+        ],
+      ],
+      // We don't want to submit the island type level. We already know the
+      // type of each islands thanks to IslandInterface::getTypeId() so let's
+      // keep the storage flat.
+      '#parents' => ['islands'],
+    ];
+
+    $rows = [];
+
+    foreach ($islands as $id => $island) {
+      $rows[$id] = $this->buildIslandRow($island, $configuration[$id] ?? [], $group);
+    }
+
+    \uasort($rows, [SortArray::class, 'sortByWeightProperty']);
+
+    return $table + $rows;
   }
 
 }

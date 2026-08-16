@@ -58,9 +58,9 @@ final class ProfileViewBuilderTest extends DisplayBuilderKernelTestBase {
     // Highlight (overlay) attaches to builder + scaffold, both present, so it
     // lists both. Viewport is pane_header, so it is not in this region at all.
     $region = $this->renderFloatingRegion([
-      'builder' => ['status' => TRUE, 'region' => 'main', 'weight' => -6],
-      'scaffold' => ['status' => TRUE, 'region' => 'main', 'weight' => -5],
-      'preview' => ['status' => TRUE, 'region' => 'main', 'weight' => -4],
+      'builder' => ['status' => TRUE, 'weight' => -6],
+      'scaffold' => ['status' => TRUE, 'weight' => -5],
+      'preview' => ['status' => TRUE, 'weight' => -4],
       'highlight' => ['status' => TRUE],
       'viewport' => ['status' => TRUE],
     ], 'render_fanout');
@@ -94,8 +94,8 @@ final class ProfileViewBuilderTest extends DisplayBuilderKernelTestBase {
     // Viewport is pane_header attaching to preview: it lands inside the preview
     // pane as a header and never in the floating-controls box.
     $slots = $this->renderView([
-      'builder' => ['status' => TRUE, 'region' => 'main', 'weight' => -6],
-      'preview' => ['status' => TRUE, 'region' => 'main', 'weight' => -4],
+      'builder' => ['status' => TRUE, 'weight' => -6],
+      'preview' => ['status' => TRUE, 'weight' => -4],
       'viewport' => ['status' => TRUE],
     ], 'render_header')['#slots'];
 
@@ -125,7 +125,7 @@ final class ProfileViewBuilderTest extends DisplayBuilderKernelTestBase {
     // scaffold alone. Viewport is pane_header and preview is absent, so it is
     // dropped and the overlay box holds only Highlight.
     $region = $this->renderFloatingRegion([
-      'scaffold' => ['status' => TRUE, 'region' => 'main', 'weight' => -5],
+      'scaffold' => ['status' => TRUE, 'weight' => -5],
       'highlight' => ['status' => TRUE],
       'viewport' => ['status' => TRUE],
     ], 'render_skip');
@@ -143,7 +143,7 @@ final class ProfileViewBuilderTest extends DisplayBuilderKernelTestBase {
    */
   public function testNoFloatingRegionWithoutFloatingIslands(): void {
     $region = $this->renderFloatingRegion([
-      'builder' => ['status' => TRUE, 'region' => 'main', 'weight' => -6],
+      'builder' => ['status' => TRUE, 'weight' => -6],
     ], 'render_none');
 
     self::assertSame([], $region);
@@ -158,13 +158,13 @@ final class ProfileViewBuilderTest extends DisplayBuilderKernelTestBase {
    */
   public function testViewBuildsAllRegions(): void {
     $build = $this->renderView([
-      'library' => ['status' => TRUE, 'region' => 'sidebar', 'weight' => -10],
-      'tree' => ['status' => TRUE, 'region' => 'sidebar', 'weight' => -7],
-      'builder' => ['status' => TRUE, 'region' => 'main', 'weight' => -6],
+      'library' => ['status' => TRUE, 'weight' => -10],
+      'tree' => ['status' => TRUE, 'weight' => -7],
+      'builder' => ['status' => TRUE, 'weight' => -6],
       'component_library' => ['status' => TRUE, 'weight' => -9],
       'block_library' => ['status' => TRUE, 'weight' => -8],
-      'controls' => ['status' => TRUE, 'region' => 'end', 'weight' => 0],
-      'state' => ['status' => TRUE, 'region' => 'end', 'weight' => 0],
+      'controls' => ['status' => TRUE, 'weight' => 0],
+      'state' => ['status' => TRUE, 'weight' => 0],
       'menu' => ['status' => TRUE, 'weight' => 0],
       'menu_delete' => ['status' => TRUE, 'weight' => 0],
       'contextual_form' => ['status' => TRUE, 'weight' => 0],
@@ -180,12 +180,42 @@ final class ProfileViewBuilderTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
+   * The plugin owns the region, for every type, and a profile stores none.
+   *
+   * Placement is structural: a sidebar panel is built as a narrow drawer, a
+   * main panel as a full width tab, so a profile cannot swap them. Toolbar
+   * buttons work the same way since #3614990.
+   *
+   * @see \Drupal\display_builder\Island\IslandType::regions()
+   */
+  public function testRegionIsOwnedByThePlugin(): void {
+    $slots = $this->renderView([
+      'tree' => ['status' => TRUE, 'weight' => -10],
+      'builder' => ['status' => TRUE, 'weight' => -6],
+      'save_status' => ['status' => TRUE, 'weight' => 0],
+      'state' => ['status' => TRUE, 'weight' => 0],
+    ], 'render_region')['#slots'];
+
+    self::assertArrayHasKey('tree', $slots['view_sidebar'], 'Navigator stays in the sidebar.');
+    self::assertArrayNotHasKey('tree', $slots['view_main'], 'Navigator is not a main pane.');
+
+    self::assertArrayHasKey('builder', $slots['view_main'], 'Canvas stays in the main region.');
+    self::assertArrayNotHasKey('builder', $slots['view_sidebar'], 'Canvas is not a sidebar pane.');
+
+    self::assertArrayHasKey('save_status', $slots['start_buttons'], 'Save status opens the toolbar.');
+    self::assertArrayNotHasKey('save_status', $slots['end_buttons']);
+
+    self::assertArrayHasKey('state', $slots['end_buttons'], 'State buttons close the toolbar.');
+    self::assertArrayNotHasKey('state', $slots['start_buttons']);
+  }
+
+  /**
    * The flat-library option builds a single merged panel with one search box.
    */
   public function testFlatLibraryPanels(): void {
     $build = $this->renderView([
-      'library' => ['status' => TRUE, 'region' => 'sidebar', 'weight' => -10],
-      'builder' => ['status' => TRUE, 'region' => 'main', 'weight' => -6],
+      'library' => ['status' => TRUE, 'weight' => -10],
+      'builder' => ['status' => TRUE, 'weight' => -6],
       'component_library' => ['status' => TRUE, 'weight' => -9],
       'block_library' => ['status' => TRUE, 'weight' => -8],
     ], 'render_flat', ['library_flat' => TRUE]);

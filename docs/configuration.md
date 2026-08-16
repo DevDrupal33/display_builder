@@ -46,20 +46,21 @@ Configuration happens in a modal:
 
 ![Islands modal](images/config-modal.webp)
 
-Some islands can be moved between 2 different regions. For example, View Panels can be:
-
-- tabbed in the center of the toolbar
-- or as buttons in the start of the toolbar
-
-And Toolbar Buttons can be moved from one side to the other of the toolbar.
-
 ![Islands configuration](images/config-2.webp)
 
-`Floating` controls are the exception: which panel(s) they attach to is
-fixed by the plugin itself (not admin-configurable, since a floating
-control is usually built for a specific panel's own layout/CSS) - no
-region choice, just enable/disable and (if two or more attach to the same
-panel) reordering.
+Islands have no region choice: whether a `View` panel is a main area tab or a
+sidebar drawer, and whether a `Button` sits at the start or the end of the
+toolbar, is fixed by the plugin itself, because the regions of a type are built
+differently from one another (a narrow drawer versus a full width tab), not
+because one is preferred over the other.
+
+A type split into several regions is configured as one table per region: an
+island can be reordered inside its region, never moved out of it.
+
+`Floating` controls are the same: which panel(s) they attach to is fixed by the
+plugin itself (not admin-configurable, since a floating control is usually
+built for a specific panel's own layout/CSS) - no region choice, just
+enable/disable and (if two or more attach to the same panel) reordering.
 
 ## Access & permissions
 

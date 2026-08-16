@@ -29,7 +29,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Real-time collaboration'),
   description: new TranslatableMarkup('Allow concurrent editing with multiple users.'),
   type: IslandType::Button,
-  default_region: 'end',
+  region: 'end',
 )]
 class Collaboration extends IslandPluginBase implements IslandConfigurationFormInterface {
 

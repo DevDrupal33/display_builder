@@ -8,42 +8,33 @@ islands:
   library:
     status: true
     weight: -10
-    region: sidebar
   tree:
     status: false
     weight: -9
-    region: sidebar
   builder:
     status: true
     weight: -8
-    region: main
   scaffold:
     status: true
     weight: -7
-    region: main
   logs:
     status: true
     weight: -6
-    region: main
   preview:
     status: true
     weight: -5
-    region: main
   collaboration:
     status: false
     weight: -5
-    region: end
   viewport:
     status: true
     weight: 0
   back:
     status: true
     weight: -6
-    region: end
   controls:
     status: true
     weight: 0
-    region: end
     highlight:
       value: label
     expand:
@@ -55,7 +46,6 @@ islands:
   history:
     status: true
     weight: -7
-    region: end
     undo:
       value: icon
     redo:
@@ -63,7 +53,6 @@ islands:
   state:
     status: true
     weight: -8
-    region: end
     publish:
       value: label
     restore:
@@ -73,11 +62,9 @@ islands:
   operation:
     status: false
     weight: -4
-    region: end
   reset_button:
     status: false
     weight: -3
-    region: end
   visibility_conditions:
     status: true
     weight: -8
@@ -129,15 +116,12 @@ islands:
   save_status:
     status: true
     weight: -10
-    region: start
   test_island_view:
     status: false
     weight: 0
-    region: null
   test_island_button:
     status: false
     weight: 0
-    region: null
   test_island_contextual:
     status: false
     weight: 0
@@ -150,26 +134,21 @@ islands:
   test_index_raw:
     status: true
     weight: -4
-    region: main
   test_logs_raw:
     status: true
     weight: -3
-    region: main
   state_debug:
     status: false
     weight: -2
-    region: null
   index_debug:
     status: false
     weight: -1
-    region: null
   menu_debug:
     status: false
     weight: 0
   test_minimal:
     status: false
     weight: 0
-    region: null
   highlight:
     status: true
     weight: 0

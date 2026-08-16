@@ -34,7 +34,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Scaffold'),
   description: new TranslatableMarkup('Schematic hierarchical view, with configured components (e.g. grid rows) rendered with their real output.'),
   type: IslandType::View,
-  default_region: 'main',
+  region: 'main',
   icon: 'grid-3x3-gap',
 )]
 class ScaffoldPanel extends ViewPanelBase implements IslandConfigurationFormInterface {

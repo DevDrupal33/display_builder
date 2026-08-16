@@ -33,40 +33,34 @@ islands:
   builder:
     status: true
     weight: -8
-    region: main
   scaffold:
     status: true
     weight: -6
-    region: main
   logs:
     status: false
     weight: -4
-    region: main
   preview:
     status: true
     weight: -5
-  library:
+  instances:
     status: true
     weight: -10
-    region: sidebar
-  tree:
+  library:
     status: true
     weight: -9
-    region: sidebar
+  tree:
+    status: true
+    weight: -8
   history:
     status: true
     weight: -8
-    region: end
     undo:
       value: icon
     redo:
       value: icon
-    clear:
-      value: hidden
   state:
     status: true
     weight: -9
-    region: end
     publish:
       value: label
     restore:
@@ -76,7 +70,6 @@ islands:
   controls:
     status: true
     weight: -7
-    region: end
     expand:
       value: icon
     theme:
@@ -104,21 +97,21 @@ islands:
   collaboration:
     status: false
     weight: -5
-    region: end
   back:
     status: true
     weight: -6
-    region: end
     back:
       value: icon
   save_status:
     status: true
     weight: -10
-    region: start
   tokens:
     status: false
     weight: 0
   highlight:
+    status: true
+    weight: 0
+  scaffold_options:
     status: true
     weight: 0
   viewport:

@@ -41,7 +41,7 @@ use Drupal\display_builder\Island\IslandType;
   label: new TranslatableMarkup('Save status'),
   description: new TranslatableMarkup('A small indicator confirming the last action reached the stored state.'),
   type: IslandType::Button,
-  default_region: 'end',
+  region: 'start',
 )]
 class SaveStatus extends IslandPluginBase {
 
