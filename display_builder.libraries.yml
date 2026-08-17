@@ -130,6 +130,11 @@ instances:
   css:
     component:
       ./assets/css/instances.css: {}
+  js:
+    ./assets/js/instances.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
 
 # Global fixes meant to disappear or replaced by a cleaner solution.
 # The per-admin-chrome files are split by which module they target, for

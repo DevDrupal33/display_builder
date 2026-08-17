@@ -16,9 +16,11 @@ use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\DisplayBuilderHelpers;
+use Drupal\display_builder\DisplayReference;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\views\Plugin\views\PluginBase;
+use Drupal\views\ViewExecutable;
 
 /**
  * Plugin implementation of the display_buildable.
@@ -56,6 +58,29 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
     unset($this->configuration['extender']);
     $this->configuration['view_id'] = $this->extender->view->id();
     $this->configuration['view_display'] = $this->extender->view->current_display;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDisplayLabel(): ?string {
+    // Through ::getExtender(), not the property: the plugin only carries an
+    // extender when one was passed in, and a caller holding nothing but a view
+    // id and a display id is the normal case, not a broken one.
+    $extender = $this->getExtender();
+
+    // NULL when the view cannot be loaded, or when the display extender is not
+    // registered in views settings.
+    if ($extender === NULL) {
+      return NULL;
+    }
+    $view = $extender->view;
+    $display_id = (string) $view->current_display;
+
+    return $this->composeDisplayLabel(
+      (string) $view->storage->label(),
+      (string) ($view->storage->getDisplay($display_id)['display_title'] ?? $display_id),
+    );
   }
 
   /**
@@ -182,10 +207,8 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public static function collectInstances(): array {
-    $entityTypeManager = \Drupal::service('entity_type.manager');
-    $displayBuildableManager = \Drupal::service('plugin.manager.display_buildable');
-    $storage = $entityTypeManager->getStorage('view');
+  public function collectInstances(): array {
+    $storage = $this->entityTypeManager->getStorage('view');
     $instances = [];
 
     foreach ($storage->loadMultiple() as $view) {
@@ -198,7 +221,7 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
         }
         $instance_id = \sprintf('%s%s__%s', self::getPrefix(), $view->id(), $display_id);
         /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-        $buildable = $displayBuildableManager->createInstance('view_display',
+        $buildable = $this->displayBuildableManager->createInstance('view_display',
           [
             'view_id' => $view->id(),
             'view_display' => $display_id,
@@ -211,6 +234,65 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
     }
 
     return $instances;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Every display of every view, not only the ones already carrying a profile.
+   * A view display that is not built with Display Builder is still a level a
+   * page can be assembled from, and hiding it is what leaves users concluding
+   * it does not exist.
+   */
+  public function collectDisplays(array $options = []): array {
+    $references = [];
+
+    /** @var \Drupal\views\ViewEntityInterface $view */
+    foreach ($this->entityTypeManager->getStorage('view')->loadMultiple() as $view) {
+      if (!$view->status()) {
+        continue;
+      }
+      $view_id = (string) $view->id();
+      $executable = $view->getExecutable();
+
+      foreach (\array_keys($view->get('display') ?? []) as $display_id) {
+        $display_id = (string) $display_id;
+
+        if (!$this->isDisplayBuildable($executable, $display_id)) {
+          continue;
+        }
+
+        $extender = $view->getDisplay($display_id)['display_options']['display_extenders']['display_builder'] ?? [];
+        $built = !empty($extender[DisplayBuildableInterface::PROFILE_PROPERTY] ?? NULL);
+
+        /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+        $buildable = $this->displayBuildableManager->createInstance('view_display', [
+          'view_id' => $view_id,
+          'view_display' => $display_id,
+        ]);
+        // A NULL name means the display extender is not registered, and
+        // ::getInstanceId() reads straight through it, so stop here.
+        $label = $buildable->getDisplayLabel();
+
+        if ($label === NULL) {
+          continue;
+        }
+        $instance_id = $buildable->getInstanceId();
+        $settings_url = self::viewEditUrl($view_id, $display_id);
+
+        $references[] = new DisplayReference(
+          instanceId: $instance_id,
+          kind: $buildable->label(),
+          label: $label,
+          url: $built ? $buildable->getBuilderUrl() : $settings_url,
+          built: $built,
+          empty: $built && empty($extender[DisplayBuildableInterface::SOURCES_PROPERTY] ?? []),
+          settingsUrl: $settings_url,
+        );
+      }
+    }
+
+    return $references;
   }
 
   /**
@@ -252,7 +334,7 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
 
     if ($view) {
       $view->setDisplay($this->configuration['view_display'] ?? '');
-      $this->extender = $view->getDisplay()->getExtenders()['display_builder'];
+      $this->extender = $view->getDisplay()->getExtenders()['display_builder'] ?? NULL;
     }
 
     return $this->extender;
@@ -283,6 +365,69 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
     }
 
     return $sources;
+  }
+
+  /**
+   * Check if the view display can be built with display builder.
+   *
+   * @param \Drupal\views\ViewExecutable $executable
+   *   View executable.
+   * @param string $display_id
+   *   View display ID.
+   *
+   * @return bool
+   *   Is the view display buildable or not.
+   */
+  private function isDisplayBuildable(ViewExecutable $executable, string $display_id): bool {
+    $executable->setDisplay($display_id);
+    $display = $executable->getDisplay();
+
+    if (!$display->isEnabled()) {
+      return FALSE;
+    }
+
+    if (\str_starts_with($display->getOption('path') ?? '', 'admin/')) {
+      return FALSE;
+    }
+
+    if ($display->getOption('use_admin_theme')) {
+      return FALSE;
+    }
+
+    /** @var array $definition */
+    $definition = $display->getPluginDefinition();
+
+    if ($definition['no_ui']) {
+      return FALSE;
+    }
+
+    if (!isset($definition['theme'])) {
+      return FALSE;
+    }
+
+    return TRUE;
+  }
+
+  /**
+   * The Views UI edit URL for a display not built with Display Builder.
+   *
+   * @param string $view_id
+   *   The view id.
+   * @param string $display_id
+   *   The display id within the view.
+   *
+   * @return \Drupal\Core\Url
+   *   The URL, falling back to the instance collection without views_ui.
+   */
+  private static function viewEditUrl(string $view_id, string $display_id): Url {
+    if (!self::routeExists('entity.view.edit_display_form')) {
+      return Url::fromRoute('entity.display_builder_instance.collection');
+    }
+
+    return Url::fromRoute('entity.view.edit_display_form', [
+      'view' => $view_id,
+      'display_id' => $display_id,
+    ]);
   }
 
 }

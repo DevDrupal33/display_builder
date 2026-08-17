@@ -9,13 +9,12 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Hook\Order\OrderAfter;
-use Drupal\display_builder\DisplayBuildableInterface;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay;
 use Drupal\display_builder_entity_view\Form\EntityViewDisplayForm;
 use Drupal\display_builder_entity_view\Form\LayoutBuilderEntityViewDisplayForm;
-use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
 
 /**
  * Hook implementations for display_builder_entity_view.
@@ -25,6 +24,7 @@ class DisplayBuilderEntityViewHook {
   public function __construct(
     protected ModuleHandlerInterface $moduleHandler,
     protected EntityTypeManagerInterface $entityTypeManager,
+    protected DisplayBuildablePluginManager $displayBuildableManager,
   ) {}
 
   /**
@@ -72,29 +72,29 @@ class DisplayBuilderEntityViewHook {
       'bundle' => $entity->bundle(),
     ]);
 
-    $storage = $this->entityTypeManager->getStorage('display_builder_instance');
+    $instances = [];
 
     foreach ($displays as $display) {
       // @phpstan-ignore-next-line
       if (!$display->getDisplayBuilderOverrideField()) {
         continue;
       }
-      $field_name = $display->getThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY);
+      // Through the plugin rather than by composing the instance ID here: the
+      // ID format is the plugin's business, and it already holds both halves.
+      /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+      $buildable = $this->displayBuildableManager->createInstance('entity_view_override', [
+        'display' => $display,
+        'entity' => $entity,
+      ]);
+      $instance = $buildable->getInstance();
 
-      $instance_id = \sprintf(
-        '%s%s__%s__%s',
-        EntityViewOverride::getPrefix(),
-        $entity_type_id,
-        $entity->id(),
-        $field_name,
-      );
-
-      $instance = $storage->load($instance_id);
-
-      if (!$instance) {
-        return;
+      if ($instance) {
+        $instances[] = $instance;
       }
-      $storage->delete([$instance]);
+    }
+
+    if ($instances) {
+      $this->entityTypeManager->getStorage('display_builder_instance')->delete($instances);
     }
   }
 

@@ -1,14 +1,25 @@
 <?xml version="1.0"?>
 <phpmd-baseline>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="/builds/project/display_builder/display_builder.post_update.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_entity_view/src/Hook/TemplateOverride.php"/>
+  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="/builds/project/display_builder/modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityViewOverride.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/MainPageContentSource.php"/>
+  <violation rule="PHPMD\Rule\Design\LongParameterList" file="/builds/project/display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageLayoutSource.php" method="__construct"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/PageTitleSource.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_ui/src/Form/InstanceListFilterForm.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Controller/ApiPublishingController.php"/>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/src/DisplayBuilderHelpers.php" method="findAndReplaceInArray"/>
+  <violation rule="PHPMD\Rule\Design\EmptyCatchBlock" file="/builds/project/display_builder/src/DisplayBuilderHelpers.php"/>
+  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="/builds/project/display_builder/src/Entity/Instance.php"/>
+  <violation rule="PHPMD\Rule\Design\LongMethod" file="/builds/project/display_builder/src/Form/ProfileForm.php" method="form"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Hook/UiPatternsHooks.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Island/IslandConfigurationFormTrait.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Island/IslandPluginBase.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Island/IslandWithFormTrait.php"/>
+  <violation rule="PHPMD\Rule\Design\LongParameterList" file="/builds/project/display_builder/src/Plugin/UiPatterns/Source/LayoutSource.php" method="__construct"/>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/src/Plugin/display_builder/Island/BuilderPanel.php" method="buildSingleBlock"/>
+  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="/builds/project/display_builder/src/Plugin/display_builder/Island/BuilderPanel.php" method="buildSingleBlock"/>
+  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="/builds/project/display_builder/src/Plugin/display_builder/Island/ContextualFormPanel.php"/>
+  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="/builds/project/display_builder/src/ProfileViewBuilder.php"/>
+  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="/builds/project/display_builder/src/SourceTree.php"/>
 </phpmd-baseline>

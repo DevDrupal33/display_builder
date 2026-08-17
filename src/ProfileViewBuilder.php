@@ -402,7 +402,10 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
       '#props' => [
         'id' => \sprintf('preview-toggle-%s', $builder->id()),
         'label' => $this->t('Preview'),
-        'tooltip' => $this->t('Show the preview beside the editor'),
+        // The workflow sentence, worded identically here, in the Help dialog
+        // and in docs/how-displays-nest.md. Preview is the only surface that
+        // shows the real nesting, so it is where the answer belongs.
+        'tooltip' => $this->t('Build one display at a time. Use Preview to see how they assemble on a real page.'),
         'attributes' => $attributes,
       ],
     ];

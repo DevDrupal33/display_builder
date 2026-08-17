@@ -1,0 +1,9 @@
+{% set attributes = attributes.addClass('shoelace-checkbox') %}
+{% set attributes = id ? attributes.setAttribute('id', 'checkbox-' ~ id) : attributes %}
+{% set attributes = checked ? attributes.setAttribute('checked', true) : attributes %}
+
+{# Shoelace reflects `checked` back to the host, so the state is readable from
+   CSS as sl-checkbox[checked] and a purely declarative toggle needs no
+   JavaScript. Before the element upgrades there is no attribute, which is the
+   unchecked state - so give it a default nobody has to correct on load. #}
+<sl-checkbox{{ attributes }} size="{{ size|default('medium') }}">{{ label }}</sl-checkbox>

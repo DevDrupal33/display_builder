@@ -8,6 +8,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuildableInterface;
+use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder_views\Plugin\display_builder\Buildable\ViewDisplay;
@@ -19,6 +20,7 @@ class ViewsManagementController extends ControllerBase {
 
   public function __construct(
     protected DateFormatterInterface $dateFormatter,
+    protected DisplayBuildablePluginManager $displayBuildableManager,
   ) {}
 
   /**
@@ -41,7 +43,10 @@ class ViewsManagementController extends ControllerBase {
       '#empty' => $this->t('No Display builder enabled on any view.'),
     ];
 
-    foreach (ViewDisplay::collectInstances() as $instance_id => $instance) {
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('view_display', []);
+
+    foreach ($buildable->collectInstances() as $instance_id => $instance) {
       $build['display_builder_table']['#rows'][$instance_id] = $this->buildRow($instance);
     }
     $build['pager'] = ['#type' => 'pager'];

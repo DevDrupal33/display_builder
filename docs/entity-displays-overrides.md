@@ -1,5 +1,12 @@
 # Entity view displays overrides with Display Builder
 
+> A page is assembled from several levels at once: a page layout places the
+> page's main content. What fills it is a display: an entity's view display,
+> or a Views display. A display can itself place another display, by
+> rendering a reference field with a view mode.
+>
+> See [How displays nest](how-displays-nest.md).
+
 ## Activate
 
 You need `display_builder_entity_view` module and `ui_patterns_field` sub-module from [UI Patterns 2](https://www.drupal.org/project/ui_patterns) project.

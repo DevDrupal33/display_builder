@@ -44,7 +44,11 @@
   border: 0 none;
 }
 
-.db-search-library {
+/* Both classes the shared filter binds to, so a panel that is not a library
+   gets the same box rather than a second look at the same control.
+   @see search.js */
+.db-search-library,
+.db-search-filter {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
@@ -55,7 +59,8 @@
    panel this narrow, so it is hidden the way Drupal core hides one
    (@see core/misc/components/visually-hidden.module.css). If the label should
    become visible one day, delete this rule - nothing else depends on it. */
-.db-search-library::part(form-control-label) {
+.db-search-library::part(form-control-label),
+.db-search-filter::part(form-control-label) {
   position: absolute !important;
   overflow: hidden;
   clip: rect(1px, 1px, 1px, 1px);

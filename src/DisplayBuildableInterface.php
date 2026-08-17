@@ -48,6 +48,26 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, Con
   public function label(): string;
 
   /**
+   * Returns the human name of the specific display being built.
+   *
+   * ::label() answers "what kind of thing is this?" and is the same for every
+   * display of a plugin. This answers "which one?", and is built from the
+   * config or content entity the plugin wraps.
+   *
+   * The format is '<subject> (<display>)', with no separator invented per
+   * plugin: 'Article (Teaser)', 'My node title (Full)', 'Frontpage (Page)'.
+   * The subject comes first because it is what a list is scanned for.
+   * Implementations compose it with
+   * DisplayBuildablePluginBase::composeDisplayLabel(), never by hand.
+   *
+   * @return string|null
+   *   The display name, or NULL when the plugin has no specific name to give,
+   *   or when the entity it wraps is gone. Callers fall back to their own
+   *   naming then, they never print an empty label.
+   */
+  public function getDisplayLabel(): ?string;
+
+  /**
    * Build form for integration with Display Builder.
    *
    * @param bool $mandatory
@@ -94,10 +114,56 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, Con
   /**
    * Collect instances related to this buildable.
    *
+   * Answered by a plugin built with no configuration: it is a question about
+   * the kind of display, not about one of them. Not static, so the services
+   * doing the collecting are the injected ones.
+   *
    * @return array<string, \Drupal\display_builder\InstanceInterface>
    *   A associative array of Instance entities.
    */
-  public static function collectInstances(): array;
+  public function collectInstances(): array;
+
+  /**
+   * Collect every display this buildable could build, built or not.
+   *
+   * Unlike ::collectInstances(), which only sees displays that already have an
+   * Instance entity, this lists the displays a user might need to travel to.
+   * The nesting chain usually runs through one that is not built with Display
+   * Builder yet, and a navigation panel that hides those fails exactly when it
+   * is needed.
+   *
+   * Implementations must be read-only: no ::initInstanceIfMissing(), no
+   * Instance entity loading, nothing written to storage. Rendering a
+   * navigation panel used to create and save rows nobody asked for.
+   *
+   * Implementations of unbounded collections must honor 'limit' rather than
+   * returning everything: a site with a few thousand overridden nodes must not
+   * try to list a few thousand rows.
+   *
+   * Answered by a plugin built with no configuration, @see
+   * ::collectInstances().
+   *
+   * @param array $options
+   *   (Optional) Supported keys:
+   *   - limit (int): maximum rows for collections that have no natural bound.
+   *
+   * @return \Drupal\display_builder\DisplayReference[]
+   *   The displays, in no particular order.
+   */
+  public function collectDisplays(array $options = []): array;
+
+  /**
+   * What ::collectDisplays() left out, in words, for the user to read.
+   *
+   * A bounded collection is a lie unless it says it is bounded: a user who
+   * cannot find their override in a list that silently stops at a limit
+   * concludes the panel is broken, or worse, that the override is gone.
+   * Implementations that return everything they have say nothing.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
+   *   A short sentence naming the bound, or NULL when the listing is complete.
+   */
+  public function collectDisplaysBound(): ?TranslatableMarkup;
 
   /**
    * Get profiles allowed for the user.
@@ -153,14 +219,6 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, Con
    *   The instance ID for the display builder, or NULL if the entity is new.
    */
   public function getInstanceId(): ?string;
-
-  /**
-   * Get the instance prefix.
-   *
-   * @return string
-   *   The instance prefix.
-   */
-  public static function getPrefix(): string;
 
   /**
    * Get display builder profile config entity.

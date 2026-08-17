@@ -15,6 +15,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildablePluginBase;
+use Drupal\display_builder\DisplayReference;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_page_layout\BuilderDataConverter;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
@@ -98,6 +99,23 @@ final class PageLayout extends DisplayBuildablePluginBase {
     return [
       'page_layout' => $page_layout,
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * A page layout has no parent to disambiguate it: its own label is already
+   * the whole name.
+   */
+  public function getDisplayLabel(): ?string {
+    // Through ::getEntity(), not the property: the layout is resolved lazily,
+    // so reading it raw only names a plugin somebody handed the object to. A
+    // plugin built from a stored entity_id - which is how Instance::label()
+    // builds it - would fall back to the ID-derived name for a layout that is
+    // right there in config.
+    $label = $this->getEntity()?->label();
+
+    return $label === NULL ? NULL : (string) $label;
   }
 
   /**
@@ -212,23 +230,54 @@ final class PageLayout extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public static function collectInstances(): array {
-    $entityTypeManager = \Drupal::service('entity_type.manager');
-    $displayBuildableManager = \Drupal::service('plugin.manager.display_buildable');
-
+  public function collectInstances(): array {
     $instances = [];
-    $entities = $entityTypeManager->getStorage('page_layout')->loadMultiple();
+    $entities = $this->entityTypeManager->getStorage('page_layout')->loadMultiple();
 
     foreach ($entities as $page_layout) {
       /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $page_layout */
       /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-      $buildable = $displayBuildableManager->createInstance('page_layout', ['entity' => $page_layout]);
+      $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $page_layout]);
       $buildable->initInstanceIfMissing();
       $instance_id = $buildable->getInstanceId();
       $instances[$instance_id] = $buildable->getInstance();
     }
 
     return $instances;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * A page layout is always a Display Builder display, so there is no
+   * "not built" case here. Sources are read off the entity rather than through
+   * ::getSources(), which reloads from storage on every call.
+   */
+  public function collectDisplays(array $options = []): array {
+    $references = [];
+
+    foreach ($this->entityTypeManager->getStorage('page_layout')->loadMultiple() as $page_layout) {
+      /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $page_layout */
+      /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+      $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $page_layout]);
+      $instance_id = $buildable->getInstanceId();
+
+      if ($instance_id === NULL) {
+        continue;
+      }
+
+      $references[] = new DisplayReference(
+        instanceId: $instance_id,
+        kind: $buildable->label(),
+        label: $buildable->getDisplayLabel() ?? $instance_id,
+        url: $buildable->getBuilderUrl(),
+        empty: empty($page_layout->getSources()),
+        disabled: !$page_layout->status(),
+        settingsUrl: self::getDisplayUrlFromInstanceId($instance_id),
+      );
+    }
+
+    return $references;
   }
 
   /**

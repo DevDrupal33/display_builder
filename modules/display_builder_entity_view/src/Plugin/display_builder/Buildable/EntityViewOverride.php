@@ -9,7 +9,9 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Core\Entity\RevisionableEntityBundleInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
@@ -23,10 +25,11 @@ use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
-use Drupal\display_builder\DisplayBuildablePluginManager;
+use Drupal\display_builder\DisplayReference;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
+use Drupal\display_builder_entity_view\EntityDisplayLabelTrait;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -39,6 +42,16 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   instance_prefix: 'entity_override__',
 )]
 final class EntityViewOverride extends DisplayBuildablePluginBase {
+
+  use EntityDisplayLabelTrait;
+
+  /**
+   * How many recent overrides a listing returns per display, by default.
+   *
+   * Nobody navigates to an override through a panel, they arrive from the
+   * node, so this is a "did I leave one somewhere" list, not an index.
+   */
+  private const DEFAULT_LIMIT = 25;
 
   /**
    * The time service.
@@ -54,11 +67,6 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
    * The field items where the override is stored, once ::getField() ran.
    */
   protected ?FieldItemListInterface $field = NULL;
-
-  /**
-   * The display buildable plugin manager.
-   */
-  protected DisplayBuildablePluginManager $displayBuildableManager;
 
   /**
    * The fieldable entity owning the override field, when passed in.
@@ -104,9 +112,41 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->time = $container->get('datetime.time');
     $instance->dataConverter = $container->get('display_builder_entity_view.builder_data_converter');
-    $instance->displayBuildableManager = $container->get('plugin.manager.display_buildable');
+    $instance->bundleInfo = $container->get('entity_type.bundle.info');
+    $instance->entityDisplayRepository = $container->get('entity_display.repository');
 
     return $instance;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Named after the entity, not just its bundle: two overrides of the same
+   * view mode share a bundle and a view mode, so the entity's ID and label are
+   * the only things telling them apart in a listing. The bundle still leads,
+   * so overrides of the same type sort and scan together.
+   */
+  public function getDisplayLabel(): ?string {
+    // Through ::getField(), not the property: the field is resolved lazily, so
+    // reading it raw only works when something else happened to resolve it
+    // first. ::collectDisplays() asks for the instance ID before the label and
+    // hid this for a while.
+    $entity = $this->getField()?->getEntity();
+
+    if (!$entity || !$this->display) {
+      return NULL;
+    }
+
+    $subject = \sprintf(
+      '%s [%s]',
+      $this->getBundleLabel($entity->getEntityTypeId(), $entity->bundle()),
+      (string) $entity->id(),
+    );
+
+    return $this->composeDisplayLabel(
+      $subject,
+      $this->getViewModeLabel($this->display->getTargetEntityTypeId(), $this->display->getMode()),
+    );
   }
 
   /**
@@ -286,10 +326,9 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public static function collectInstances(): array {
+  public function collectInstances(): array {
     $instances = [];
-    $entityTypeManager = \Drupal::service('entity_type.manager');
-    $storage = $entityTypeManager->getStorage('entity_view_display');
+    $storage = $this->entityTypeManager->getStorage('entity_view_display');
     $entity_query = $entity_storage = [];
 
     foreach ($storage->loadMultiple() as $display) {
@@ -307,12 +346,104 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
       }
 
       $field_name = $display_builder[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY];
-      $entity_storage[$entity_type] ??= $entityTypeManager->getStorage($entity_type);
+      $entity_storage[$entity_type] ??= $this->entityTypeManager->getStorage($entity_type);
       $entity_query[$entity_type] ??= $entity_storage[$entity_type]->getQuery()->accessCheck(FALSE);
-      $instances = \array_merge($instances, self::collectInstancesByField($field_name, $display, $entity_query[$entity_type]));
+      $instances = \array_merge($instances, $this->collectInstancesByField($field_name, $display, $entity_query[$entity_type]));
     }
 
     return $instances;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Bounded, unlike ::collectInstances(): that one queries every entity
+   * carrying an override field with access checks off and loads each result,
+   * so a site with a few thousand overridden nodes tries to list a few
+   * thousand rows in a sidebar.
+   *
+   * Here the query is capped, ordered newest first where the entity type has a
+   * changed field, and access checked. The result is "recent overrides", which
+   * ::collectDisplaysBound() is what tells the user.
+   */
+  public function collectDisplays(array $options = []): array {
+    $limit = (int) ($options['limit'] ?? self::DEFAULT_LIMIT);
+    $references = [];
+
+    foreach ($this->entityTypeManager->getStorage('entity_view_display')->loadMultiple() as $display) {
+      /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display */
+      $settings = $display->getThirdPartySettings('display_builder');
+
+      if (!isset($settings[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY], $settings[DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY])) {
+        continue;
+      }
+
+      $entity_type_id = $display->getTargetEntityTypeId();
+      $field_name = $settings[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY];
+      $storage = $this->entityTypeManager->getStorage($entity_type_id);
+      $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
+
+      $query = $storage->getQuery()
+        ->accessCheck(TRUE)
+        ->exists($field_name)
+        ->range(0, $limit);
+
+      // The bundle key is named after the entity type, and some types have no
+      // bundles at all.
+      $bundle_key = $entity_type->getKey('bundle');
+
+      if ($bundle_key) {
+        $query->condition($bundle_key, $display->getTargetBundle());
+      }
+
+      // Newest first, so a capped list is the useful half rather than an
+      // arbitrary one. Not every entity type records a change date, so fall
+      // back to the id, which at least correlates with creation order.
+      $changed = $entity_type->entityClassImplements(EntityChangedInterface::class);
+      $query->sort($changed ? 'changed' : (string) $entity_type->getKey('id'), 'DESC');
+
+      /** @var array $ids */
+      $ids = $query->execute();
+
+      /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
+      foreach ($storage->loadMultiple($ids) as $entity) {
+        /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+        $buildable = $this->displayBuildableManager->createInstance('entity_view_override', [
+          'display' => $display,
+          'entity' => $entity,
+        ]);
+        $instance_id = $buildable->getInstanceId();
+
+        if ($instance_id === NULL) {
+          continue;
+        }
+
+        $references[] = new DisplayReference(
+          instanceId: $instance_id,
+          kind: $buildable->label(),
+          label: $buildable->getDisplayLabel() ?? $instance_id,
+          url: $buildable->getBuilderUrl(),
+          empty: $entity->get($field_name)->isEmpty(),
+          settingsUrl: self::entityEditUrl($entity),
+          // The label names the bundle and the entity id, and an id tells a
+          // human nothing about which node this is.
+          detail: (string) $entity->label(),
+        );
+      }
+    }
+
+    return $references;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * The only bounded collection: one row per overridden entity is the one
+   * count here that follows content rather than configuration, so it is the
+   * one listing that cannot promise to be complete.
+   */
+  public function collectDisplaysBound(): TranslatableMarkup {
+    return new TranslatableMarkup('Most recent @count per display.', ['@count' => self::DEFAULT_LIMIT]);
   }
 
   /**
@@ -492,8 +623,7 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
    * @return \Drupal\display_builder\InstanceInterface[]
    *   A associative array of Instance entities.
    */
-  protected static function collectInstancesByField(string $field_name, EntityViewDisplayInterface $display, QueryInterface $entity_query): array {
-    $displayBuildableManager = \Drupal::service('plugin.manager.display_buildable');
+  protected function collectInstancesByField(string $field_name, EntityViewDisplayInterface $display, QueryInterface $entity_query): array {
     $instances = [];
     $entity_query->exists($field_name);
     // QueryInterface::execute() returns an integer for count queries or an
@@ -503,7 +633,7 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
 
     foreach ($ids as $id) {
       /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-      $buildable = $displayBuildableManager->createInstance(
+      $buildable = $this->displayBuildableManager->createInstance(
         'entity_view_override',
         [
           'entity_id' => $id,
@@ -516,6 +646,32 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
     }
 
     return $instances;
+  }
+
+  /**
+   * Where an override is configured: the entity's own edit form.
+   *
+   * An override belongs to one piece of content, so the page that owns it is
+   * that content's edit form, not the parent display's Manage display. Manage
+   * display is where somebody enabled the override field once; nobody returns
+   * there holding a single node.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   The overridden entity.
+   *
+   * @return \Drupal\Core\Url|null
+   *   The URL, or NULL when the entity type has no edit form or this user may
+   *   not open it.
+   */
+  private static function entityEditUrl(FieldableEntityInterface $entity): ?Url {
+    if (!$entity->getEntityType()->hasLinkTemplate('edit-form')) {
+      return NULL;
+    }
+
+    // The listing query is access checked for viewing, which says nothing
+    // about editing: seeing an override in the panel and being allowed to
+    // change the node it lives on are two different permissions.
+    return $entity->access('update') ? $entity->toUrl('edit-form') : NULL;
   }
 
   /**

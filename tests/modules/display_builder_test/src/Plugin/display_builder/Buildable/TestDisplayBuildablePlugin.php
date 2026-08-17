@@ -50,7 +50,9 @@ final class TestDisplayBuildablePlugin extends DisplayBuildablePluginBase {
     $this->state = \Drupal::state();
     // Because there is no proper Drupal integration to rely on, we set the
     // instance ID and the profile entity themselves as plugin configuration.
-    $this->instanceId = $configuration['instance_id'];
+    // Nullable because ::collectDisplays() is answered by a plugin built with
+    // no configuration at all.
+    $this->instanceId = $configuration['instance_id'] ?? NULL;
     $this->profile = Profile::load($configuration['profile_id'] ?? '');
   }
 
@@ -132,7 +134,7 @@ final class TestDisplayBuildablePlugin extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public static function collectInstances(): array {
+  public function collectInstances(): array {
     return [];
   }
 

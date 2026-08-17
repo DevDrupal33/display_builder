@@ -21,6 +21,13 @@
   const hideClass = 'db-library-search-hide';
 
   /**
+   * The class marking a filtered container while a query is active.
+   *
+   * @type {string}
+   */
+  const activeClass = 'db-library-search-active';
+
+  /**
    * The class of elements to hide during search.
    *
    * @type {string}
@@ -50,16 +57,22 @@
       });
 
       // Search for the library, should be drawer start (left).
+      // The behavior is entirely driven by the data attributes below, so any
+      // panel with a list to narrow can opt in with .db-search-filter rather
+      // than claiming to be a library.
       // @see components/library_panel/library_panel.twig
-      once('dbLibrarySearch', '.db-search-library', context).forEach(
-        (filterInput) => {
-          // Debounce to wait for tipping ad not throw too much search.
-          const eventHandler = debounce((event) => {
-            triggerLibrarySearch(context, event.target);
-          }, 300);
-          filterInput.addEventListener('sl-input', eventHandler);
-        },
-      );
+      // @see \Drupal\display_builder\Plugin\display_builder\Island\InstancesPanel::buildSearch()
+      once(
+        'dbLibrarySearch',
+        '.db-search-library, .db-search-filter',
+        context,
+      ).forEach((filterInput) => {
+        // Debounce to wait for tipping ad not throw too much search.
+        const eventHandler = debounce((event) => {
+          triggerLibrarySearch(context, event.target);
+        }, 300);
+        filterInput.addEventListener('sl-input', eventHandler);
+      });
     },
   };
 
@@ -87,6 +100,12 @@
 
     // If no query, reset search.
     const query = input.value.trim().toLowerCase();
+    // Flagged here rather than on the input event, so a panel that hides rows
+    // of its own can step aside in the same frame the filter runs in. Doing it
+    // on every keystroke instead would uncover them 300ms before the filter
+    // gets round to narrowing them down again.
+    parentList.classList.toggle(activeClass, query.length > minimumQueryLength);
+
     if (query.length <= minimumQueryLength) {
       resetLibrarySearch(parentList);
       return;

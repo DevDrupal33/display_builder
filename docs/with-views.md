@@ -5,6 +5,13 @@ building. Display Builder focuses on the display building aspect, providing a
 more intuitive interface for organizing and configuring the view's display
 regions.
 
+> A page is assembled from several levels at once: a page layout places the
+> page's main content. What fills it is a display: an entity's view display,
+> or a Views display. A display can itself place another display, by
+> rendering a reference field with a view mode.
+>
+> See [How displays nest](how-displays-nest.md).
+
 ## Overview
 
 Display Builder provides a nicer way of using, positioning & configuring View's

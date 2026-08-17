@@ -128,6 +128,12 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function label() {
+    $label = $this->getDisplayLabel();
+
+    if ($label !== NULL && $label !== '') {
+      return $label;
+    }
+
     // Extract a human readable name from an instance id.
     // Example: "provider__my_display" -> "My display".
     $parts = \explode('__', (string) $this->id());
@@ -513,6 +519,28 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     $data = self::normalizeRootLevel($data);
 
     return \crc32((string) \serialize($data));
+  }
+
+  /**
+   * Ask the buildable what this display is called, tolerantly.
+   *
+   * An instance outlives the display it was built from: the plugin's module
+   * can be uninstalled and the entity it wraps can be deleted while this
+   * entity still exists. Every other caller of the plugin is doing real work
+   * and should fail loudly; a listing row only needs a name, and has ::label()
+   * to fall back on.
+   *
+   * @return string|null
+   *   The display name, or NULL when the plugin cannot be built or has no
+   *   specific name to give.
+   */
+  private function getDisplayLabel(): ?string {
+    try {
+      return $this->getBuildablePlugin()->getDisplayLabel();
+    }
+    catch (\Throwable) {
+      return NULL;
+    }
   }
 
   /**

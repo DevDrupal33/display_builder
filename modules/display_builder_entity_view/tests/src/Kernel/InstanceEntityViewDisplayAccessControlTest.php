@@ -6,7 +6,6 @@ namespace Drupal\Tests\display_builder_entity_view\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\display_builder\InstanceAccessControlHandler;
-use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityView;
 use Drupal\Tests\display_builder\Kernel\AccessControlTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -23,6 +22,13 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 #[Group('display_builder_entity_view')]
 #[RunTestsInSeparateProcesses]
 final class InstanceEntityViewDisplayAccessControlTest extends AccessControlTestBase {
+
+  /**
+   * The instance ID prefix of the buildable under test.
+   *
+   * @see \Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityView
+   */
+  private const PREFIX = 'entity_view__';
 
   /**
    * {@inheritdoc}
@@ -91,7 +97,7 @@ final class InstanceEntityViewDisplayAccessControlTest extends AccessControlTest
     $user = $this->setUpCurrentUser([], $permissions ?? []);
 
     // Create the instance with profile and instance id.
-    $instance = $this->createDisplayBuilderInstance($data['instance_use_profile_id'] ?? NULL, EntityView::getPrefix() . 'user__user__default');
+    $instance = $this->createDisplayBuilderInstance($data['instance_use_profile_id'] ?? NULL, self::PREFIX . 'user__user__default');
 
     // Test the expected results.
     if ($expect['view']) {

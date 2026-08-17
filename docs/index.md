@@ -10,6 +10,10 @@ Display Builder provides sub-modules for each Drupal Core's display building nee
 - [Page layout](page-layout.md) (`display_builder_page_layout`)
 - [Views](with-views.md) (`display_builder_views`)
 
+A page is assembled from several of these at once, each edited in its own
+builder. Start with [How displays nest](how-displays-nest.md) to know which one
+owns what.
+
 Follow us on slack [#display_builder](https://drupal.slack.com/archives/C092EUNPCRW)
 
 ## For contributors

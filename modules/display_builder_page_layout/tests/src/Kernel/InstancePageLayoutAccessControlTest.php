@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder_page_layout\Kernel;
 
 use Drupal\display_builder\InstanceAccessControlHandler;
-use Drupal\display_builder_page_layout\Plugin\display_builder\Buildable\PageLayout;
 use Drupal\Tests\display_builder\Kernel\AccessControlTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -22,6 +21,13 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 #[Group('display_builder_page_layout')]
 #[RunTestsInSeparateProcesses]
 final class InstancePageLayoutAccessControlTest extends AccessControlTestBase {
+
+  /**
+   * The instance ID prefix of the buildable under test.
+   *
+   * @see \Drupal\display_builder_page_layout\Plugin\display_builder\Buildable\PageLayout
+   */
+  private const PREFIX = 'page_layout__';
 
   /**
    * {@inheritdoc}
@@ -72,7 +78,7 @@ final class InstancePageLayoutAccessControlTest extends AccessControlTestBase {
     $user = $this->setUpCurrentUser([], $permissions ?? []);
 
     // Create the instance with profile and instance id.
-    $instance = $this->createDisplayBuilderInstance($data['instance_use_profile_id'] ?? NULL, PageLayout::getPrefix() . 'test_access');
+    $instance = $this->createDisplayBuilderInstance($data['instance_use_profile_id'] ?? NULL, self::PREFIX . 'test_access');
 
     // Test the expected results.
     if ($expect['view']) {

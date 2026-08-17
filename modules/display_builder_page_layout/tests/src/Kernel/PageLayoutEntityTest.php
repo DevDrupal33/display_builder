@@ -25,6 +25,13 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 final class PageLayoutEntityTest extends KernelTestBase {
 
   /**
+   * The instance ID prefix of the buildable under test.
+   *
+   * @see \Drupal\display_builder_page_layout\Plugin\display_builder\Buildable\PageLayout
+   */
+  private const PREFIX = 'page_layout__';
+
+  /**
    * {@inheritdoc}
    */
   protected static $modules = [
@@ -70,6 +77,30 @@ final class PageLayoutEntityTest extends KernelTestBase {
   }
 
   /**
+   * Test the ::getDisplayLabel method.
+   *
+   * A page layout has no parent to disambiguate it, so there is no
+   * '<specific> (<parent>)' pair here, only the entity label.
+   */
+  public function testGetDisplayLabel(): void {
+    /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $entity */
+    $entity = PageLayout::create([
+      'id' => 'test_label',
+      'label' => 'Test Layout',
+      DisplayBuildableInterface::PROFILE_PROPERTY => 'test_base',
+      DisplayBuildableInterface::SOURCES_PROPERTY => [],
+      'conditions' => [],
+    ]);
+    $entity->setStatus(TRUE)->save();
+
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $entity]);
+
+    self::assertSame('Page layout', $buildable->label());
+    self::assertSame('Test Layout', $buildable->getDisplayLabel());
+  }
+
+  /**
    * Test basic CRUD operations for the PageLayout config entity.
    */
   public function testPageLayoutEntityCrud(): void {
@@ -99,7 +130,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
     $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $loaded]);
 
     // Test getInstanceId().
-    $id = \sprintf('%s%s', $buildable::getPrefix(), 'test_layout');
+    $id = self::PREFIX . 'test_layout';
     self::assertSame($id, $buildable->getInstanceId());
 
     $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($buildable->getInstanceId());

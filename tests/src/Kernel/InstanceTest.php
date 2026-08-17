@@ -54,6 +54,24 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
+   * Test ::label() when the buildable cannot be built.
+   *
+   * An instance outlives the display it was built from, so a listing page must
+   * still render a row for it.
+   */
+  public function testLabelWithoutBuildable(): void {
+    $instance = Instance::create([
+      'id' => 'gone__my_display',
+      'buildable' => [
+        'plugin_id' => 'no_such_plugin',
+        'configuration' => [],
+      ],
+    ]);
+
+    self::assertSame('My display', $instance->label());
+  }
+
+  /**
    * Test the ::getProfile() methods.
    */
   public function testProfile(): void {

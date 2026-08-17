@@ -13,8 +13,16 @@
    slotted into that button and renders as role="img" with the label as its
    accessible text - this is Shoelace's documented approach for icon-only
    buttons. Buttons keeping their visible label are left alone: that text already
-   names them, and a second name here could contradict it. #}
-{% set icon_label = label ? '' : (tooltip|default(attributes['title'])) %}
+   names them, and a second name here could contradict it.
+
+   Unless they ask for it: a caller passing icon_label has a visible label that
+   does not tell its button apart from the identical ones beside it - a column
+   of "Settings" links, one per row - and the icon carries what does. The name
+   then reads as the two of them, icon first, so the row's subject comes before
+   the action. #}
+{% if not icon_label %}
+  {% set icon_label = label ? '' : (tooltip|default(attributes['title'])) %}
+{% endif %}
 
 {% if tooltip %}
   {# Below, not Shoelace's default "top": buttons carrying a tooltip are
@@ -29,7 +37,7 @@
 {% endif %}
 <sl-button{{ attributes }}>
   {% if icon %}
-    <sl-icon name="{{ icon }}"{% if icon_label %} label="{{ icon_label }}"{% endif %}></sl-icon>
+    <sl-icon name="{{ icon }}"{% if icon_position %} slot="{{ icon_position }}"{% endif %}{% if icon_label %} label="{{ icon_label }}"{% endif %}></sl-icon>
   {% endif %}
   {{ label }}
 </sl-button>

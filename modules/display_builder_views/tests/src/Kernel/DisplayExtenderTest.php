@@ -28,6 +28,13 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 final class DisplayExtenderTest extends KernelTestBase {
 
   /**
+   * The instance ID prefix of the buildable under test.
+   *
+   * @see \Drupal\display_builder_views\Plugin\display_builder\Buildable\ViewDisplay
+   */
+  private const PREFIX = 'views__';
+
+  /**
    * The display buildable manager.
    */
   protected DisplayBuildablePluginManager $displayBuildableManager;
@@ -121,15 +128,99 @@ final class DisplayExtenderTest extends KernelTestBase {
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
     $buildable = $this->displayBuildableManager->createInstance('view_display', ['extender' => $plugin]);
     $instance_id = $buildable->getInstanceId();
-    self::assertStringStartsWith(ViewDisplay::getPrefix(), $instance_id);
+    self::assertStringStartsWith(self::PREFIX, $instance_id);
 
     // Test static checkInstanceId and getUrlFromInstanceId.
-    $id = \sprintf('%stest_view__default', ViewDisplay::getPrefix());
+    $id = \sprintf('%stest_view__default', self::PREFIX);
     $parsed = ViewDisplay::checkInstanceId($id);
     self::assertSame(['view' => 'test_view', 'display' => 'default'], $parsed);
 
     $url = ViewDisplay::getUrlFromInstanceId($id);
     self::assertStringContainsString('/admin/structure/views/view/test_view/display-builder/default', $url->toString());
+  }
+
+  /**
+   * Test the ::getDisplayLabel method.
+   */
+  public function testGetDisplayLabel(): void {
+    $view = View::create([
+      'id' => 'frontpage_test',
+      'label' => 'Frontpage',
+      'base_table' => 'user',
+      'display' => [
+        'default' => [
+          'display_plugin' => 'default',
+          'id' => 'default',
+          'display_title' => 'Master',
+          'position' => 0,
+          'display_options' => [],
+        ],
+        'page_1' => [
+          'display_plugin' => 'page',
+          'id' => 'page_1',
+          'display_title' => 'Page',
+          'position' => 1,
+          'display_options' => [],
+        ],
+      ],
+    ]);
+    $view->save();
+
+    $viewExecutable = Views::executableFactory()->get($view);
+    $viewExecutable->setDisplay('page_1');
+
+    $plugin = DisplayExtender::create(
+      \Drupal::getContainer(),
+      [],
+      'display_builder',
+      [
+        'id' => 'display_builder',
+        'title' => 'Display Builder',
+        'help' => 'Use display builder as output for this view.',
+      ]
+    );
+    $plugin->init($viewExecutable, $viewExecutable->getDisplay());
+
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('view_display', ['extender' => $plugin]);
+
+    self::assertSame('Views', $buildable->label());
+    self::assertSame('Frontpage (Page)', $buildable->getDisplayLabel());
+  }
+
+  /**
+   * Test the plugin is constructible for a display with no extender.
+   *
+   * The extender is absent whenever Display Builder is not registered as a
+   * views display extender. Constructing must not fatal there, so that the
+   * tolerant callers (::getDisplayLabel(), Instance::label()) can answer
+   * "no name" instead of taking the page down.
+   */
+  public function testConstructWithoutExtender(): void {
+    $view = View::create([
+      'id' => 'no_extender',
+      'label' => 'No Extender',
+      'base_table' => 'user',
+      'display' => [
+        'default' => [
+          'display_plugin' => 'default',
+          'id' => 'default',
+          'display_title' => 'Master',
+          'position' => 0,
+          'display_options' => [],
+        ],
+      ],
+    ]);
+    $view->save();
+
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('view_display', [
+      'view_id' => 'no_extender',
+      'view_display' => 'default',
+    ]);
+
+    self::assertSame('Views', $buildable->label());
+    self::assertNull($buildable->getDisplayLabel());
   }
 
   /**
@@ -173,7 +264,7 @@ final class DisplayExtenderTest extends KernelTestBase {
     $plugin->init($viewExecutable, $display);
 
     $instance_storage = $this->container->get('entity_type.manager')->getStorage('display_builder_instance');
-    $instance_id = \sprintf('%stest_lifecycle__default', ViewDisplay::getPrefix());
+    $instance_id = \sprintf('%stest_lifecycle__default', self::PREFIX);
 
     $form = ['#title' => 'Test Form'];
     $form_state = new FormState();

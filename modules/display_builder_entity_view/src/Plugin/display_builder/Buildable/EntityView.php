@@ -16,9 +16,11 @@ use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
+use Drupal\display_builder\DisplayReference;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay;
+use Drupal\display_builder_entity_view\EntityDisplayLabelTrait;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -32,6 +34,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   instance_prefix: 'entity_view__',
 )]
 final class EntityView extends DisplayBuildablePluginBase {
+
+  use EntityDisplayLabelTrait;
 
   /**
    * The sample entity generator.
@@ -75,6 +79,8 @@ final class EntityView extends DisplayBuildablePluginBase {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->sampleEntityGenerator = $container->get('ui_patterns.sample_entity_generator');
     $instance->dataConverter = $container->get('display_builder_entity_view.builder_data_converter');
+    $instance->bundleInfo = $container->get('entity_type.bundle.info');
+    $instance->entityDisplayRepository = $container->get('entity_display.repository');
 
     return $instance;
   }
@@ -103,6 +109,28 @@ final class EntityView extends DisplayBuildablePluginBase {
     $permission = 'administer ' . $params['entity'] . ' display';
 
     return $account->hasPermission($permission) ? AccessResult::allowed() : AccessResult::forbidden();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDisplayLabel(): ?string {
+    // Through ::getDisplay(), not the property: the display is resolved
+    // lazily, so reading it raw only names a plugin somebody already handed
+    // the object to. A plugin built from a stored display_id - which is how
+    // Instance::label() builds it - would answer NULL for a display that is
+    // right there in config.
+    $display = $this->getDisplay();
+
+    if (!$display) {
+      return NULL;
+    }
+    $entity_type_id = $display->getTargetEntityTypeId();
+
+    return $this->composeDisplayLabel(
+      $this->getBundleLabel($entity_type_id, $display->getTargetBundle()),
+      $this->getViewModeLabel($entity_type_id, $display->getMode()),
+    );
   }
 
   /**
@@ -192,12 +220,9 @@ final class EntityView extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public static function collectInstances(): array {
-    $entityTypeManager = \Drupal::service('entity_type.manager');
-    $displayBuildableManager = \Drupal::service('plugin.manager.display_buildable');
-
+  public function collectInstances(): array {
     $instances = [];
-    $storage = $entityTypeManager->getStorage('entity_view_display');
+    $storage = $this->entityTypeManager->getStorage('entity_view_display');
 
     foreach ($storage->loadMultiple() as $display) {
       /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display */
@@ -205,7 +230,7 @@ final class EntityView extends DisplayBuildablePluginBase {
 
       if (!empty($display_builder[DisplayBuildableInterface::PROFILE_PROPERTY] ?? NULL)) {
         /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-        $buildable = $displayBuildableManager->createInstance(
+        $buildable = $this->displayBuildableManager->createInstance(
           'entity_view',
           ['display' => $display]
         );
@@ -216,6 +241,61 @@ final class EntityView extends DisplayBuildablePluginBase {
     }
 
     return $instances;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Every enabled display is listed, not only the ones already built with
+   * Display Builder: the nesting chain a user is chasing usually runs through
+   * a display that is still a plain formatter display, and hiding those is
+   * what made the panel fail at the moment it was needed.
+   *
+   * Disabled displays are skipped because a disabled display is not what
+   * renders: core falls back to the bundle's default. So is the '_custom' mode,
+   * which exists to render fields in isolation and is never a page level.
+   */
+  public function collectDisplays(array $options = []): array {
+    $references = [];
+
+    foreach ($this->entityTypeManager->getStorage('entity_view_display')->loadMultiple() as $display) {
+      /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display */
+      if (!$display->status() || \str_starts_with($display->getMode(), '_')) {
+        continue;
+      }
+
+      /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+      $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $display]);
+      $instance_id = $buildable->getInstanceId();
+
+      if ($instance_id === NULL) {
+        continue;
+      }
+
+      $settings = $display->getThirdPartySettings('display_builder');
+      $built = !empty($settings[DisplayBuildableInterface::PROFILE_PROPERTY] ?? NULL);
+      // Read from config, never from an Instance entity: this listing must not
+      // touch instance storage.
+      $empty = empty($settings[DisplayBuildableInterface::SOURCES_PROPERTY] ?? []);
+      $settings_url = self::manageDisplayUrl($instance_id);
+      $url = $built ? $buildable->getBuilderUrl() : $settings_url;
+
+      if ($url === NULL) {
+        continue;
+      }
+
+      $references[] = new DisplayReference(
+        instanceId: $instance_id,
+        kind: $buildable->label(),
+        label: $buildable->getDisplayLabel() ?? $instance_id,
+        url: $url,
+        built: $built,
+        empty: $built && $empty,
+        settingsUrl: $settings_url,
+      );
+    }
+
+    return $references;
   }
 
   /**
@@ -304,6 +384,21 @@ final class EntityView extends DisplayBuildablePluginBase {
     }
 
     return $this->entity;
+  }
+
+  /**
+   * The core Manage display URL, when field_ui provides the route.
+   *
+   * @param string $instance_id
+   *   The builder instance ID.
+   *
+   * @return \Drupal\Core\Url|null
+   *   The URL, or NULL when field_ui is not installed, and its routes with it.
+   */
+  private static function manageDisplayUrl(string $instance_id): ?Url {
+    $url = self::getDisplayUrlFromInstanceId($instance_id);
+
+    return self::routeExists($url->getRouteName()) ? $url : NULL;
   }
 
   /**

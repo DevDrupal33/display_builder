@@ -357,8 +357,11 @@ final class InstanceListBuilder extends EntityListBuilder {
   private function getInstancesFromProviders(): array {
     $instances = [];
 
-    foreach ($this->providers as $provider_id => $provider) {
-      foreach ($provider['class']::collectInstances($this->entityTypeManager) as $instance_id => $instance) {
+    foreach (\array_keys($this->providers) as $provider_id) {
+      /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+      $buildable = $this->displayBuildableManager->createInstance((string) $provider_id, []);
+
+      foreach ($buildable->collectInstances() as $instance_id => $instance) {
         $instances[$instance_id] = [
           'id' => $instance_id,
           'instance' => $instance,

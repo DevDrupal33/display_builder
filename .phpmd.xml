@@ -7,10 +7,19 @@
          xsi:noNamespaceSchemaLocation="
                      http://pmd.sf.net/ruleset_xml_schema.xsd">
     <description>
-        Display Builder PHPMD Rules
+        Display Builder PHPMD Rules.
+
+        Deliberately not a full ruleset. Much of PHPMD predates PHP 8 and
+        assumes Java idioms, so what is enabled below is the subset that
+        survives contact with Drupal. Every threshold is set explicitly, even
+        where it matches the stock value, so this file documents its own
+        intent rather than deferring to a default that can move.
+
+        What is excluded, and why, is listed at the bottom. Read it before
+        adding a rule back.
     </description>
 
-    <!-- Import the entire unused code rule set -->
+    <!-- Dead code. Free signal, no false positive worth the name. -->
     <rule ref="rulesets/unusedcode.xml">
       <!-- Excluded to use it with a different configuration. -->
       <exclude name="UnusedLocalVariable" />
@@ -20,13 +29,106 @@
         <property name="allow-unused-foreach-variables" value="true" />
       </properties>
     </rule>
+
     <!--
-        Import the entire cyclomatic complexity rule and
-        customize the rule configuration.
+        Branching. 12 rather than the stock 10: nullable storage loads, render
+        array defaults and type guards all cost branches Drupal cannot avoid,
+        and guard clauses raise this number while lowering nesting, which is
+        the shape we want people writing. Fires at greater-or-equal, so this
+        allows 11. Do not raise it further; past about 15 it catches nothing.
+        Treat a hit as a question - does this method do two jobs? - rather
+        than as something to suppress.
     -->
     <rule ref="rulesets/codesize.xml/CyclomaticComplexity">
         <properties>
             <property name="reportLevel" value="12" />
         </properties>
     </rule>
+
+    <!--
+        Execution paths through a method. Catches the combinatorial case
+        CyclomaticComplexity misses, and stays quiet on a flat chain of early
+        returns.
+    -->
+    <rule ref="rulesets/codesize.xml/NPathComplexity">
+        <properties>
+            <property name="minimum" value="200" />
+        </properties>
+    </rule>
+
+    <!--
+        Size. Raised over stock: a method assembling a render array is long
+        without being complex, and a plugin class carries its attribute, its
+        create() and a whole interface in one file.
+    -->
+    <rule ref="rulesets/codesize.xml/ExcessiveMethodLength">
+        <properties>
+            <property name="minimum" value="120" />
+        </properties>
+    </rule>
+    <rule ref="rulesets/codesize.xml/ExcessiveClassLength">
+        <properties>
+            <property name="minimum" value="1200" />
+        </properties>
+    </rule>
+    <rule ref="rulesets/codesize.xml/ExcessiveClassComplexity">
+        <properties>
+            <property name="maximum" value="60" />
+        </properties>
+    </rule>
+    <rule ref="rulesets/codesize.xml/ExcessiveParameterList">
+        <properties>
+            <property name="minimum" value="12" />
+        </properties>
+    </rule>
+
+    <!-- Things that are never right in a Drupal module. -->
+    <rule ref="rulesets/design.xml/ExitExpression" />
+    <rule ref="rulesets/design.xml/EvalExpression" />
+    <rule ref="rulesets/design.xml/GotoStatement" />
+    <!-- Swallowing a throwable is sometimes correct here, saying why is not
+         optional. @see ViewPanelBase::createSlotSource(), which logs. -->
+    <rule ref="rulesets/design.xml/EmptyCatchBlock" />
+
+    <!-- Cheap correctness. -->
+    <rule ref="rulesets/cleancode.xml/DuplicatedArrayKey" />
+    <rule ref="rulesets/cleancode.xml/ErrorControlOperator" />
+
+    <!--
+        Deliberately excluded. Do not add one back without reading this.
+
+        cleancode/StaticAccess - \Drupal::, Url::fromRoute(),
+          Html::cleanCssIdentifier(). Drupal is built on static access.
+        cleancode/BooleanArgumentFlag - core signatures are full of
+          bool $reset = FALSE, and ours match core on purpose.
+        cleancode/ElseExpression - bans else outright. Dogma, not signal.
+        design/CouplingBetweenObjects - a plugin importing fifteen core
+          classes is normal, not coupled.
+        design/DepthOfInheritance - plugin hierarchies are several levels
+          deep before our own code starts.
+        codesize/TooManyPublicMethods - an interface is allowed to be wide.
+          @see DisplayBuildableInterface.
+        codesize/TooManyFields - one property per injected service.
+        naming/* - LongVariable against $target_entity_type_id,
+          ShortVariable against $e in every catch block.
+        controversial/* - the CamelCase rules fire on every hook in a
+          .module file.
+
+        Two more, tried against this codebase and dropped on the numbers:
+        cleancode/IfStatementAssignment fires 20 times. `if ($x = foo())` is
+          used deliberately and consistently here, so the rule buys 20
+          permanent baseline entries and changes nothing.
+        design/DevelopmentCodeFragment fires 3 times, every one of them a
+          print_r($x, TRUE) building a watchdog message. The rule cannot tell
+          a logged dump from a forgotten one.
+
+        Two judgment calls, left off rather than half-adopted:
+        cleancode/MissingImport is good hygiene but fires on inline
+        \Throwable, which we use. codesize/TooManyMethods is real signal for
+        a god class but costs baseline entries on day one.
+
+        PHPMD will never catch the duplication this codebase actually grows:
+        the same small helper written twice in two plugin classes. phpcpd
+        covers that, configured in .phpqa.yml.
+    -->
 </ruleset>

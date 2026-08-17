@@ -1,29 +1,230 @@
+/* Nothing here styles an `a`, a `button`, a `ul` or an `input`: every
+   interactive part of a row is a Shoelace element, so its chrome lives in a
+   shadow root an admin theme cannot reach. What is left is the row's own
+   layout, and the `::part()` openings Shoelace leaves for it.
+   @see \Drupal\display_builder\Plugin\display_builder\Island\InstancesPanel */
+
+/* The query container for the rows, so what they answer to is the width the
+   user gave this sidebar. @see .db-instances__action */
 .db-instances {
-  padding-top: 1rem;
+  container-type: inline-size;
 }
 
-.db-instances__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+/* One row: the name, and the status word or action when the display needs one.
+   It stays one line. Wrapping the status underneath was tried and is worse: in
+   a list this dense a word on its own line reads as belonging to the name below
+   it, and the action pointed at the wrong display. */
+.db-instances__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
 }
 
-.db-instances__list li {
-  margin: 0;
-  padding: 0;
+/* Hidden by the shared filter behavior.
+   @see components/library_panel/search.js */
+.db-instances__item.db-library-search-hide {
+  display: none;
 }
 
-.db-instances__link,
-.db-instances__current {
+/* Past the group's cap, until View more asks for it. Entity overrides are one
+   row per entity, so this group alone runs to hundreds on a real site.
+   The cap stands aside while a query is active: the filter runs over these
+   rows too, and a match it cannot show is a search that looks broken.
+   @see components/library_panel/search.js */
+.db-instances__item--over-cap {
+  display: none;
+}
+
+.db-library-search-active .db-instances__item--over-cap:not(.db-library-search-hide) {
+  display: flex;
+}
+
+/* The heading, and beside it the note about what the listing left out. */
+.db-instances__title {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Quieter than the heading it qualifies, and it must not push it around:
+   whether a group has one is a property of the provider, not of the row
+   count, so headings with and without still line up. */
+.db-instances__bound {
+  flex: none;
+  opacity: 0.6;
+  font-size: var(--sl-font-size-small);
+}
+
+.db-instances__bound sl-icon {
   display: block;
+  cursor: help;
+}
+
+/* Displays not built with Display Builder are listed but hidden until asked
+   for: they are what makes the panel useful when the chain runs through one,
+   and on a real site they outnumber the built ones several times over.
+   Shoelace reflects `checked` onto the host, so the state is legible from CSS
+   and there is no JS and nothing to restore after a pane is rebuilt
+   off-screen. */
+.db-instances__toggle {
+  display: block;
+  padding: 0.25rem var(--sl-spacing-x-small) 0.5rem;
+}
+
+.db-instances:has(.db-instances__toggle:not([checked])) .db-instances__item--not-built {
+  display: none;
+}
+
+/* A group whose every row is hidden goes with them, heading included: without
+   this a "Views" heading survives with nothing under it and reads as an empty
+   section rather than as no match. Two rules, because what counts as hidden
+   depends on the toggle: with it off, the not-built rows are gone too. */
+.db-instances__group:not(:has(.db-instances__item:not(.db-library-search-hide))) {
+  display: none;
+}
+
+.db-instances:has(.db-instances__toggle:not([checked])) .db-instances__group:not(:has(.db-instances__item:not(.db-library-search-hide, .db-instances__item--not-built))) {
+  display: none;
+}
+
+/* The size a library row is, so the two panels read as one list style. A
+   button of this size is a step smaller by default, which would make this the
+   one list in the sidebar with its own type scale.
+   @see components/placeholder/placeholder.css */
+.db-instances__link::part(base),
+.db-instances__action::part(base),
+.db-instances__more::part(base) {
+  font-size: var(--sl-font-size-small);
+}
+
+/* The name takes the row, and gives it back to whatever the row still owes
+   room to. A button lays its label out centered, which in a list of names
+   is a column with no left edge to read down. */
+.db-instances__link {
   overflow: hidden;
-  padding: 0.25rem 0.5rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.db-instances__link::part(base) {
+  overflow: hidden;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 0 var(--sl-spacing-x-small);
+}
+
+.db-instances__link::part(label) {
+  overflow: hidden;
+  padding: 0;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
+/* Not a link, so it must not read as one: this display has no builder to open
+   yet, and its only action is the button at the end of the row. The two
+   share the button's own metrics so a list mixing them still lines up. */
+.db-instances__current,
+.db-instances__label {
+  display: block;
+  overflow: hidden;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 var(--sl-spacing-x-small);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--sl-font-size-small);
+  line-height: var(--sl-input-height-small);
+}
+
+.db-instances__label {
+  opacity: 0.7;
+}
+
 .db-instances__current {
   font-weight: bold;
+}
+
+/* A word, not an icon: this has to be readable by assistive tech without
+   extra plumbing, and there are only ever two of them. */
+.db-instances__status {
+  flex: none;
+  padding-right: 0.5rem;
+  opacity: 0.7;
+  /* A token, not an em: the row is already the small size, and a second
+     relative step compounds into something nobody can read. */
+  font-size: var(--sl-font-size-x-small);
+  font-style: italic;
+}
+
+/* The end of the row is where it leaves the builder: to Manage display to
+   enable one, or to wherever a built display is configured. Quieter than the
+   name beside it, which is what the user came for. */
+.db-instances__action {
+  flex: none;
+}
+
+.db-instances__action::part(base) {
+  padding: 0 var(--sl-spacing-2x-small);
+  opacity: 0.6;
+  color: inherit;
+}
+
+.db-instances__action::part(base):hover,
+.db-instances__action::part(base):focus-visible {
+  opacity: 1;
+}
+
+/* An icon is a guess until something names it, and this sidebar is resizable,
+   so the room to stop guessing is one drag away. A container query, not a
+   media query: what decides is the width of this panel, which is the width of
+   a sidebar the user set, not the width of the screen.
+
+   Clipped rather than removed: the word is half of the button's accessible
+   name at every width, and `display: none` would take it out of the tree and
+   leave a set of identical icons named only by the display they act on.
+   @see \Drupal\display_builder\Plugin\display_builder\Island\InstancesPanel::buildAction() */
+.db-instances__action::part(label) {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+@container (min-width: 260px) {
+  .db-instances__action::part(label) {
+    position: static;
+    overflow: visible;
+    width: auto;
+    height: auto;
+    padding-left: var(--sl-spacing-3x-small);
+    clip-path: none;
+    font-size: var(--sl-font-size-x-small);
+  }
+}
+
+/* An aside under the rows, not another row: it reveals what the group is
+   holding back, and must not compete with the displays it hides. */
+.db-instances__more {
+  display: block;
+  width: 100%;
+}
+
+.db-instances__more::part(base) {
+  justify-content: flex-start;
+  width: 100%;
+  padding: 0 var(--sl-spacing-x-small);
+  opacity: 0.7;
+  color: inherit;
+  font-style: italic;
+}
+
+.db-instances__more::part(base):hover,
+.db-instances__more::part(base):focus-visible {
+  opacity: 1;
 }
 
 .db-instances__empty {
@@ -31,8 +232,10 @@
   opacity: 0.7;
 }
 
-.db-instances h3 {
-  margin-top: 0.5rem;
-  font-size: 1rem;
-  font-style: italic;
+/* Same heading as the library panel's groups, down to the token.
+   @see components/draggables/draggables.css */
+.db-instances__title h4 {
+  margin: var(--sl-spacing-x-small) 0;
+  font-size: var(--sl-font-size-medium);
+  font-weight: bold;
 }

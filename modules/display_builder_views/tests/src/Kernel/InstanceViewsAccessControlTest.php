@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder_views\Kernel;
 
 use Drupal\display_builder\InstanceAccessControlHandler;
-use Drupal\display_builder_views\Plugin\display_builder\Buildable\ViewDisplay;
 use Drupal\Tests\display_builder\Kernel\AccessControlTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -22,6 +21,13 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 #[Group('display_builder_views')]
 #[RunTestsInSeparateProcesses]
 final class InstanceViewsAccessControlTest extends AccessControlTestBase {
+
+  /**
+   * The instance ID prefix of the buildable under test.
+   *
+   * @see \Drupal\display_builder_views\Plugin\display_builder\Buildable\ViewDisplay
+   */
+  private const PREFIX = 'views__';
 
   /**
    * {@inheritdoc}
@@ -75,7 +81,7 @@ final class InstanceViewsAccessControlTest extends AccessControlTestBase {
     $user = $this->setUpCurrentUser([], $permissions ?? []);
 
     // Create the instance with profile and instance id.
-    $instance = $this->createDisplayBuilderInstance($data['instance_use_profile_id'] ?? NULL, ViewDisplay::getPrefix() . 'test__test');
+    $instance = $this->createDisplayBuilderInstance($data['instance_use_profile_id'] ?? NULL, self::PREFIX . 'test__test');
 
     // Test the expected results.
     if ($expect['view']) {

@@ -11,6 +11,7 @@ nav = [
   { "Installation" = "install.md" },
   { "Update" = "update.md" },
   { "Using Display Builder" = [
+    { "How displays nest" = "how-displays-nest.md" },
     { "For entity displays" = "entity-displays.md" },
     { "For entity displays overrides" = "entity-displays-overrides.md" },
     { "For page layout" = "page-layout.md" },

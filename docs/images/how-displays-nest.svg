@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" width="640" height="420" role="img" aria-labelledby="title desc">
+  <title id="title">How displays nest</title>
+  <desc id="desc">Four nested boxes. Page layout contains Main content, which contains Display, which contains a display placed by a reference field. Each box is labelled with where it is stored.</desc>
+
+  <style>
+    .box { fill: none; stroke-width: 2; }
+    .l1 { stroke: #0f766e; }
+    .l2 { stroke: #b45309; }
+    .l3 { stroke: #7c3aed; }
+    .l4 { stroke: #be185d; }
+    .fill1 { fill: #0f766e; }
+    .fill2 { fill: #b45309; }
+    .fill3 { fill: #7c3aed; }
+    .fill4 { fill: #be185d; }
+    .name { font: 600 15px system-ui, sans-serif; }
+    .note { font: 400 12px system-ui, sans-serif; opacity: 0.75; }
+    .num { font: 700 12px system-ui, sans-serif; fill: #fff; }
+  </style>
+
+  <!-- 1. Page layout -->
+  <rect class="box l1" x="12" y="12" width="616" height="396" rx="8"/>
+  <circle class="fill1" cx="34" cy="38" r="11"/>
+  <text class="num" x="34" y="42" text-anchor="middle">1</text>
+  <text class="name fill1" x="54" y="36">Page layout</text>
+  <text class="note fill1" x="54" y="54">Header, footer, containers. Stored as a page_layout config entity.</text>
+
+  <!-- 2. Main content -->
+  <rect class="box l2" x="40" y="76" width="560" height="316" rx="8"/>
+  <circle class="fill2" cx="62" cy="102" r="11"/>
+  <text class="num" x="62" y="106" text-anchor="middle">2</text>
+  <text class="name fill2" x="82" y="100">Main content</text>
+  <text class="note fill2" x="82" y="118">Filled at render time. Which display fills it depends on the page.</text>
+
+  <!-- 3. Display -->
+  <rect class="box l3" x="68" y="140" width="504" height="236" rx="8"/>
+  <circle class="fill3" cx="90" cy="166" r="11"/>
+  <text class="num" x="90" y="170" text-anchor="middle">3</text>
+  <text class="name fill3" x="110" y="164">Display</text>
+  <text class="note fill3" x="110" y="182">An entity view display, or a Views display.</text>
+  <text class="note fill3" x="110" y="200">Stored on the display config entity, or in the view.</text>
+
+  <!-- 4. Display placed by a reference field -->
+  <rect class="box l4" x="96" y="222" width="448" height="132" rx="8"/>
+  <circle class="fill4" cx="118" cy="248" r="11"/>
+  <text class="num" x="118" y="252" text-anchor="middle">4</text>
+  <text class="name fill4" x="138" y="246">Display placed by a reference field</text>
+  <text class="note fill4" x="138" y="264">A reference field rendered with a view mode:</text>
+  <text class="note fill4" x="138" y="282">the Articles field pulls in Article - Teaser.</text>
+  <text class="note fill4" x="138" y="308">An override replaces this one for a single entity.</text>
+  <text class="note fill4" x="138" y="332">Each level renders the one inside it.</text>
+</svg>

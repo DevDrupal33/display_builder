@@ -109,8 +109,15 @@
               return;
 
             const helpKeyboard = event.target.querySelector('sl-tooltip > div');
+            // One sentence naming the workflow, then the shortcuts. The same
+            // sentence appears in docs/how-displays-nest.md and on the Preview
+            // toggle: a page is assembled from several displays, and this is
+            // the answer to "why can I only edit one of them here?".
+            const workflow = Drupal.t(
+              'Build one display at a time. Use Preview to see how they assemble on a real page.',
+            );
             // Build the list from keyboardHelp values.
-            helpKeyboard.innerHTML = `<ul class="db-keyboard-help">${Object.values(
+            helpKeyboard.innerHTML = `<p class="db-help-workflow">${workflow}</p><ul class="db-keyboard-help">${Object.values(
               keyboardHelp,
             )
               .map((item) => `<li>${item}</li>`)

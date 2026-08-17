@@ -1,0 +1,29 @@
+name: Checkbox
+noUi: true
+group: Form
+description: Checkboxes allow the user to toggle an option on or off.
+links:
+  - https://shoelace.style/components/checkbox
+props:
+  type: object
+  properties:
+    id:
+      title: Id
+      type: string
+    label:
+      title: Label
+      type: string
+    checked:
+      title: Checked
+      type: boolean
+    size:
+      title: Size
+      type: string
+      enum:
+        - small
+        - medium
+        - large
+      default: medium
+libraryOverrides:
+  dependencies:
+    - display_builder/shoelace

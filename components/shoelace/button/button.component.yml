@@ -17,6 +17,8 @@ variants:
     title: Warning
   danger:
     title: Danger
+  text:
+    title: Text
 props:
   type: object
   properties:
@@ -31,6 +33,17 @@ props:
       type: string
     icon:
       title: Icon name
+      type: string
+    icon_position:
+      title: Icon position
+      description: "Left out, the icon shares the default slot with the label, which is Shoelace's own layout for a button and what every button here has always done. Name a slot when the two have to be styled apart - hiding the word at a narrow width, say, which the default slot cannot do without taking the icon with it."
+      type: string
+      enum:
+        - prefix
+        - suffix
+    icon_label:
+      title: Accessible name carried by the icon
+      description: 'Names the button from inside its shadow root, which an aria-label on the host cannot reach. Only for a button that has a visible label too and still needs a fuller name: a set of identical icons in a list, where the visible word alone tells none of them apart. Left empty, an icon-only button falls back to its tooltip or title.'
       type: string
 libraryOverrides:
   dependencies:

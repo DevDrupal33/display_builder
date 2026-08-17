@@ -31,6 +31,13 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 final class EntityViewDisplayTest extends EntityKernelTestBase {
 
   /**
+   * The instance ID prefix of the buildable under test.
+   *
+   * @see \Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityView
+   */
+  private const PREFIX = 'entity_view__';
+
+  /**
    * The display buildable manager.
    */
   protected DisplayBuildablePluginManager $displayBuildableManager;
@@ -85,7 +92,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $display]);
 
     self::assertSame($view_mode, $display->getMode());
-    $id = \sprintf('%sentity_test__entity_test__%s', EntityView::getPrefix(), $view_mode);
+    $id = \sprintf('%sentity_test__entity_test__%s', self::PREFIX, $view_mode);
     self::assertSame($id, $buildable->getInstanceId(), $view_mode);
     self::assertFalse($display->isDisplayBuilderEnabled());
 
@@ -161,7 +168,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
    * Test the ::getUrlFromInstanceId method.
    */
   public function testGetUrlFromInstanceId(): void {
-    $id = \sprintf('%sentity_test__entity_test__default', EntityView::getPrefix());
+    $id = \sprintf('%sentity_test__entity_test__default', self::PREFIX);
     $url = EntityView::getUrlFromInstanceId($id);
 
     self::assertSame('display_builder_entity_view.entity_test', $url->getRouteName());
@@ -284,6 +291,44 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
   }
 
   /**
+   * Test the ::getDisplayLabel method.
+   */
+  public function testGetDisplayLabel(): void {
+    $display = self::createTestDisplay();
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $display]);
+
+    // ::label() stays the kind, ::getDisplayLabel() names the one. The
+    // 'default' view mode has no entity_view_mode config entity to read a
+    // name from, so it is the one mode named in code.
+    self::assertSame('Entity view', $buildable->label());
+    self::assertSame('Entity Test Bundle (Default)', $buildable->getDisplayLabel());
+
+    EntityViewMode::create([
+      'id' => 'entity_test.teaser',
+      'label' => 'Teaser',
+      'targetEntityType' => 'entity_test',
+    ])->save();
+    $display = self::createTestDisplay('teaser');
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $display]);
+
+    self::assertSame('Entity Test Bundle (Teaser)', $buildable->getDisplayLabel());
+  }
+
+  /**
+   * Test ::getDisplayLabel() when the display it names is gone.
+   */
+  public function testGetDisplayLabelWithoutDisplay(): void {
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', [
+      'display_id' => 'entity_test.entity_test.deleted',
+    ]);
+
+    self::assertNull($buildable->getDisplayLabel());
+  }
+
+  /**
    * Test the ::initInstanceIfMissing method.
    */
   public function testInitInstanceIfMissing(): void {
@@ -295,7 +340,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($buildable->getInstanceId());
 
     self::assertNotNull($instance);
-    $id = \sprintf('%sentity_test__entity_test__default', EntityView::getPrefix());
+    $id = \sprintf('%sentity_test__entity_test__default', self::PREFIX);
     self::assertSame($id, $instance->id());
   }
 
