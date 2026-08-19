@@ -120,9 +120,9 @@ final class ScaffoldPanelTest extends DisplayBuilderKernelTestBase {
   /**
    * A schematic layer gains an info slot from component config and styles.
    *
-   * Exercises ScaffoldPanel::addComponentSettingsSummary() (the prop
-   * summary) and ::addThirdPartySettingsSummary() (the styles summary), both of
-   * which early-return on a bare node and so were otherwise never populated.
+   * Exercises the two groups SummaryCollector::collect() returns for a
+   * component node - the source's own settings and the styles island's - which
+   * a bare node has neither of, and so were otherwise never populated.
    */
   public function testLayerInfoSummaries(): void {
     $instance = Instance::create(['id' => 'test_instance', 'label' => 'Test Instance']);

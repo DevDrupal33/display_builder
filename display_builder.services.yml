@@ -8,6 +8,11 @@ services:
     parent: default_plugin_manager
   Drupal\display_builder\Island\IslandPluginManagerInterface: '@plugin.manager.db_island'
 
+  display_builder.summary_collector:
+    class: Drupal\display_builder\SummaryCollector
+    arguments:
+      - '@plugin.manager.db_island'
+
   display_builder.slot_sources_proxy:
     class: Drupal\display_builder\SlotSourceProxy
     arguments:

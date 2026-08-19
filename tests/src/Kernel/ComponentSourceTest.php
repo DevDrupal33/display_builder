@@ -32,6 +32,10 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
     'ui_patterns',
     'ui_patterns_field',
     'ui_styles',
+    // Provides the 'test' style plugin, and the source plugin whose own
+    // ::settingsSummary() resolves it.
+    'ui_styles_test',
+    'ui_styles_ui_patterns',
     'display_builder',
     'display_builder_test',
   ];
@@ -280,28 +284,46 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
       ],
     ];
 
-    yield 'ui_styles property' => [
+    // phpcs:disable
+    // The style option label is resolved by the ui_styles_attributes source
+    // plugin itself, not here.
+    // @todo enable when https://www.drupal.org/node/3568363
+    // yield 'ui_styles property' => [
+    //   'settings' => [
+    //     'component' => [
+    //       'component_id' => 'display_builder_test:test_1',
+    //       'props' => [
+    //         'attributes' => [
+    //           'source_id' => 'ui_styles_attributes',
+    //           'source' => [
+    //             'styles' => [
+    //               'selected' => [
+    //                 'test' => 'test',
+    //               ],
+    //             ],
+    //           ],
+    //         ],
+    //       ],
+    //     ],
+    //   ],
+    //   'expectedSummary' => [
+    //     'Attributes: Test',
+    //   ],
+    // ];
+    // phpcs:enable
+
+    yield 'property never configured' => [
       'settings' => [
         'component' => [
           'component_id' => 'display_builder_test:test_1',
           'props' => [
-            'attributes' => [
-              'source_id' => 'ui_styles_attributes',
-              'source' => [
-                'styles' => [
-                  'selected' => [
-                    'style_1' => 'style_1',
-                    'style_2' => 'style_2',
-                  ],
-                ],
-              ],
+            'prop_string' => [
+              'source_id' => '',
             ],
           ],
         ],
       ],
-      'expectedSummary' => [
-        'Attributes - style_1',
-      ],
+      'expectedSummary' => [],
     ];
 
     yield 'property with no value' => [
@@ -321,6 +343,9 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
       'expectedSummary' => [],
     ];
 
+    // A textfield never stores an array, and its source says nothing about
+    // one. A source storing structured values (icon, link) summarizes it
+    // itself, instead of being flattened from the outside.
     yield 'property with array value' => [
       'settings' => [
         'component' => [
@@ -335,9 +360,7 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
           ],
         ],
       ],
-      'expectedSummary' => [
-        'Title: Hello, World',
-      ],
+      'expectedSummary' => [],
     ];
 
     yield 'property with empty array value' => [
@@ -357,41 +380,45 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
       'expectedSummary' => [],
     ];
 
-    yield 'mixed properties' => [
-      'settings' => [
-        'component' => [
-          'component_id' => 'display_builder_test:test_1',
-          'props' => [
-            'prop_string' => [
-              'source_id' => 'textfield',
-              'source' => [
-                'value' => 'Hello World',
-              ],
-            ],
-            'attributes' => [
-              'source_id' => 'ui_styles_attributes',
-              'source' => [
-                'styles' => [
-                  'selected' => [
-                    'style_1' => 'style_1',
-                  ],
-                ],
-              ],
-            ],
-            'extra' => [
-              'source_id' => 'textfield',
-              'source' => [
-                'value' => '',
-              ],
-            ],
-          ],
-        ],
-      ],
-      'expectedSummary' => [
-        'Title: Hello World',
-        'Attributes - style_1',
-      ],
-    ];
+    // phpcs:disable
+    // @todo enable when https://www.drupal.org/node/3568363
+    // yield 'mixed properties' => [
+    //   'settings' => [
+    //     'component' => [
+    //       'component_id' => 'display_builder_test:test_1',
+    //       'props' => [
+    //         'prop_string' => [
+    //           'source_id' => 'textfield',
+    //           'source' => [
+    //             'value' => 'Hello World',
+    //           ],
+    //         ],
+    //         'attributes' => [
+    //           'source_id' => 'ui_styles_attributes',
+    //           'source' => [
+    //             'styles' => [
+    //               'selected' => [
+    //                 'test' => 'test',
+    //               ],
+    //             ],
+    //           ],
+    //         ],
+    //         'extra' => [
+    //           'source_id' => 'textfield',
+    //           'source' => [
+    //             'value' => '',
+    //           ],
+    //         ],
+    //       ],
+    //     ],
+    //   ],
+    //   'expectedSummary' => [
+    //     'Title: Hello World',
+    //     'Attributes: Test',
+    //   ],
+    // ];
+
+    // phpcs:enable
 
     yield 'no component definition' => [
       'settings' => [

@@ -104,47 +104,18 @@ class StylesPanel extends IslandPluginBase implements IslandWithFormInterface, R
   /**
    * {@inheritdoc}
    */
-  public function getSummary(): ?array {
-    if (empty($this->data['selected'])) {
-      // We do not cover 'extra'.
-      return NULL;
-    }
-
+  public function getSummary(): array {
     $items = [];
 
+    // We do not cover 'extra'.
     foreach ($this->data['selected'] ?? [] as $style_id => $option_key) {
       $style = $this->stylesManager->getDefinition($style_id);
       $options = $style->getOptionsAsOptions();
       $option = $options[$option_key] ?? $option_key;
-      $item = \sprintf('%s %s', $option, \strtolower((string) $style->getLabel()));
-      $items[] = [
-        '#type' => 'html_tag',
-        '#tag' => 'li',
-        '#value' => $item,
-      ];
+      $items[] = \sprintf('%s %s', $option, \strtolower((string) $style->getLabel()));
     }
 
-    if (empty($items)) {
-      return NULL;
-    }
-
-    $summary = [
-      [
-        '#type' => 'html_tag',
-        '#tag' => 'em',
-        '#value' => new TranslatableMarkup('Styles'),
-      ],
-      [
-        '#type' => 'html_tag',
-        '#tag' => 'ul',
-        '#attributes' => [
-          'class' => ['summary'],
-        ],
-        0 => $items,
-      ],
-    ];
-
-    return $summary;
+    return $items;
   }
 
   /**

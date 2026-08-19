@@ -4,11 +4,23 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\UiPatterns\Source;
 
+use Drupal\Component\Plugin\Exception\PluginException;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Utility\Token;
 use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\ui_patterns\Attribute\Source;
+use Drupal\ui_patterns\ComponentPluginManager;
+use Drupal\ui_patterns\Element\ComponentElementBuilder;
+use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\UiPatterns\Source\ComponentSource as UpstreamComponentSource;
+use Drupal\ui_patterns\PropTypePluginManager;
+use Drupal\ui_patterns\SourcePluginManager;
+use Drupal\ui_patterns\UiPatternsNormalizerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the source.
@@ -20,6 +32,56 @@ use Drupal\ui_patterns\Plugin\UiPatterns\Source\ComponentSource as UpstreamCompo
   prop_types: ['slot']
 )]
 class ComponentSource extends UpstreamComponentSource implements SourceWithSlotsInterface {
+
+  /**
+   * {@inheritdoc}
+   *
+   * The source plugin manager is appended to the upstream signature, so an
+   * upstream change is a merge conflict rather than a silent reorder.
+   */
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    PropTypePluginManager $propTypeManager,
+    ContextRepositoryInterface $contextRepository,
+    RouteMatchInterface $routeMatch,
+    SampleEntityGeneratorInterface $sampleEntityGenerator,
+    ModuleHandlerInterface $moduleHandler,
+    Token $token,
+    UiPatternsNormalizerInterface $normalizer,
+    ComponentElementBuilder $componentElementBuilder,
+    ComponentPluginManager $componentManager,
+    protected SourcePluginManager $sourceManager,
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $propTypeManager, $contextRepository, $routeMatch, $sampleEntityGenerator, $moduleHandler, $token, $normalizer, $componentElementBuilder, $componentManager);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(
+    ContainerInterface $container,
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+  ) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('plugin.manager.ui_patterns_prop_type'),
+      $container->get('context.repository'),
+      $container->get('current_route_match'),
+      $container->get('ui_patterns.sample_entity_generator'),
+      $container->get('module_handler'),
+      $container->get('token'),
+      $container->get('ui_patterns.normalizer'),
+      $container->get('ui_patterns.component_element_builder'),
+      $container->get('plugin.manager.sdc'),
+      $container->get('plugin.manager.ui_patterns_source'),
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -107,10 +169,6 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
       return [];
     }
 
-    if (empty($data['props']) && empty($data['variant_id'])) {
-      return [];
-    }
-
     try {
       $component = $this->componentManager->getDefinition($data['component_id']);
     }
@@ -118,12 +176,10 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
       return [];
     }
 
-    $variant = $this->buildVariantSummary($component, $data);
-    $props = $this->buildPropsSummary($component, $data);
-
-    $items = \array_merge($variant, $props);
-
-    return $items;
+    return \array_merge(
+      $this->buildVariantSummary($component, $data),
+      $this->buildPropsSummary($component, $data),
+    );
   }
 
   /**
@@ -245,7 +301,7 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
   }
 
   /**
-   * Builds props summary items.
+   * Builds props summary items, from each prop source's own summary.
    *
    * @param array $component
    *   The component definition.
@@ -256,168 +312,34 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
    *   Summary items for props.
    */
   private function buildPropsSummary(array $component, array $data): array {
-    if (empty($data['props'])) {
-      return [];
-    }
-
     $items = [];
-    $propertyConfigs = $component['props']['properties'] ?? [];
+    $properties = $component['props']['properties'] ?? [];
 
-    foreach ($data['props'] as $sourceId => $sourceConfig) {
-      $summaryItem = $this->processProperty(
-        $sourceConfig,
-        $propertyConfigs[$sourceId] ?? NULL,
-        $sourceId
-      );
+    foreach ($data['props'] ?? [] as $prop_id => $prop_data) {
+      // A prop with no source ID was never configured. Resolving it anyway
+      // would summarize the prop definition's default value, which the user
+      // did not choose.
+      if (empty($prop_data['source_id'])) {
+        continue;
+      }
 
-      if ($summaryItem) {
-        $items[] = $summaryItem;
+      try {
+        $source = $this->sourceManager->getSource($prop_id, $properties[$prop_id] ?? [], $prop_data, $this->context);
+      }
+      catch (PluginException $exception) {
+        // The source plugin's module is gone, but the stored config remains.
+        continue;
+      }
+
+      foreach ($source?->settingsSummary() ?? [] as $item) {
+        $items[] = new TranslatableMarkup('@prop: @value', [
+          '@prop' => $properties[$prop_id]['title'] ?? $prop_id,
+          '@value' => $item,
+        ]);
       }
     }
 
     return $items;
-  }
-
-  /**
-   * Processes a property configuration to generate a summary string.
-   *
-   * @param array $sourceConfig
-   *   The source configuration array.
-   * @param array|null $propertyConfig
-   *   The property configuration array or NULL if not available.
-   * @param string $sourceId
-   *   The source identifier.
-   *
-   * @return string|null
-   *   The formatted summary string or NULL if no value is available.
-   */
-  private function processProperty(array $sourceConfig, ?array $propertyConfig, string $sourceId): ?string {
-    if ($this->isUiStyleAttribute($sourceConfig)) {
-      return $this->formatUiStyleSummary($sourceConfig, $propertyConfig);
-    }
-
-    return $this->processStandardProperty($sourceConfig, $propertyConfig, $sourceId);
-  }
-
-  /**
-   * Checks if the source configuration is for UI style attributes.
-   *
-   * @param array $sourceConfig
-   *   The source configuration array.
-   *
-   * @return bool
-   *   TRUE if it's a UI style attribute configuration, FALSE otherwise.
-   */
-  private function isUiStyleAttribute(array $sourceConfig): bool {
-    return ($sourceConfig['source_id'] ?? NULL) === 'ui_styles_attributes'
-          && isset($sourceConfig['source']['styles']['selected']);
-  }
-
-  /**
-   * Formats a UI style summary string.
-   *
-   * @param array $sourceConfig
-   *   The source configuration array.
-   * @param array|null $propertyConfig
-   *   The property configuration array or NULL if not available.
-   *
-   * @return string|null
-   *   The formatted style summary or NULL if no styles are selected.
-   */
-  private function formatUiStyleSummary(array $sourceConfig, ?array $propertyConfig): ?string {
-    $selectedStyles = $sourceConfig['source']['styles']['selected'];
-
-    if (empty($selectedStyles)) {
-      return NULL;
-    }
-
-    $mainLabel = $propertyConfig['title'] ?? '';
-    $firstStyle = \array_key_first($selectedStyles);
-
-    return $firstStyle ? \sprintf('%s - %s', $mainLabel, $firstStyle) : NULL;
-  }
-
-  /**
-   * Processes a standard property configuration to generate a summary string.
-   *
-   * @param array $sourceConfig
-   *   The source configuration array.
-   * @param array|null $propertyConfig
-   *   The property configuration array or NULL if not available.
-   * @param string $sourceId
-   *   The source identifier.
-   *
-   * @return string|null
-   *   The formatted summary string or NULL if no value is available.
-   */
-  private function processStandardProperty(array $sourceConfig, ?array $propertyConfig, string $sourceId): ?string {
-    if (!isset($sourceConfig['source']['value'])) {
-      return NULL;
-    }
-
-    $value = $sourceConfig['source']['value'];
-    $processedValue = self::normalizeValue($value);
-
-    if ($processedValue === NULL) {
-      return NULL;
-    }
-
-    $label = $propertyConfig['title'] ?? $sourceId;
-
-    return \sprintf('%s: %s', $label, $processedValue);
-  }
-
-  /**
-   * Normalizes a value to a string representation.
-   *
-   * @param mixed $value
-   *   The value to normalize (array or string).
-   *
-   * @return string|null
-   *   The normalized string value or NULL if empty/invalid.
-   */
-  private static function normalizeValue($value): ?string {
-    if (\is_array($value)) {
-      $str = self::flattenArrayToString($value);
-
-      return $str !== '' ? $str : NULL;
-    }
-
-    return \is_string($value) && $value !== '' ? $value : NULL;
-  }
-
-  /**
-   * Utility to stringify a nested array.
-   *
-   * @param array $array
-   *   The $array to normalize (array or string).
-   *
-   * @return string
-   *   The flatten string.
-   */
-  private static function flattenArrayToString(array $array): string {
-    $result = [];
-
-    foreach ($array as $key => $value) {
-      if (\is_array($value)) {
-        if (\is_int($key)) {
-          $result[] = self::flattenArrayToString($value);
-        }
-        else {
-          $result[] = $key . ': {' . self::flattenArrayToString($value) . '}';
-        }
-      }
-      elseif (!empty($value)) {
-        if (\is_int($key)) {
-          $result[] = (string) $value;
-        }
-        else {
-          $result[] = "{$key}: {$value}";
-        }
-      }
-    }
-
-    return \implode(', ', $result);
   }
 
 }

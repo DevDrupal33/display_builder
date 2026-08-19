@@ -10,11 +10,10 @@ use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandConfigurationFormInterface;
 use Drupal\display_builder\Island\IslandConfigurationFormTrait;
-use Drupal\display_builder\Island\IslandPluginManagerInterface;
 use Drupal\display_builder\Island\IslandType;
 use Drupal\display_builder\Island\RealRenderTrait;
 use Drupal\display_builder\SourceWithSlotsInterface;
-use Drupal\display_builder\ThirdPartySettingsInterface;
+use Drupal\display_builder\SummaryCollector;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -43,9 +42,9 @@ class ScaffoldPanel extends ViewPanelBase implements IslandConfigurationFormInte
   use RealRenderTrait;
 
   /**
-   * Island plugins manager.
+   * The node settings summary collector.
    */
-  protected IslandPluginManagerInterface $islandManager;
+  protected SummaryCollector $summaryCollector;
 
   /**
    * Configured component IDs to render for real, as a set. Keys are the IDs.
@@ -59,7 +58,7 @@ class ScaffoldPanel extends ViewPanelBase implements IslandConfigurationFormInte
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $instance->islandManager = $container->get('plugin.manager.db_island');
+    $instance->summaryCollector = $container->get('display_builder.summary_collector');
     // The only panel besides the Canvas that renders anything for real, and
     // only for its configured allowlist. @see ::renderComponent().
     $instance->initRealRender($container);
@@ -176,7 +175,7 @@ class ScaffoldPanel extends ViewPanelBase implements IslandConfigurationFormInte
       return $build;
     }
 
-    $build = $this->addThirdPartySettingsSummary($data, $build);
+    $build = $this->addSummary($build, $this->summaryCollector->collect($data));
 
     $build['#attributes'] = $this->buildNodeAttributes($label['summary'], $index, $data['source_id'] ?? NULL);
     $build['#attributes']['data-testid'] = $label['label'] ?? '_' . $index;
@@ -235,92 +234,44 @@ class ScaffoldPanel extends ViewPanelBase implements IslandConfigurationFormInte
       ),
     ];
 
-    $build = $this->addThirdPartySettingsSummary($data, $build);
-    $build = $this->addComponentSettingsSummary($source, $build);
+    $build = $this->addSummary($build, $this->summaryCollector->collect($data, $source));
 
     return $this->htmxEvents->onInstanceClick($build, (string) $instance->id(), $node_id, $source->label(), $index);
   }
 
   /**
-   * Add third party settings summary to layer's info slot.
+   * Add the node's summary groups to the layer's info slot.
    *
-   * @param array $data
-   *   The node data.
    * @param array $build
    *   The layer component renderable array.
+   * @param array $groups
+   *   The summary groups.
    *
    * @return array
    *   The layer component renderable array.
-   */
-  private function addThirdPartySettingsSummary(array $data, array $build): array {
-    if (!isset($data['third_party_settings'])) {
-      return $build;
-    }
-
-    foreach ($data['third_party_settings'] as $provider => $settings) {
-      // In Display Builder, third_party_settings providers can be:
-      // - an island plugin ID (our 'normal' way)
-      // - a Drupal module name (the Drupal way, found in displays imported and
-      // converted, not leveraged by us for now but we may do it later).
-      // So, let's check the plugin ID exists before running logic.
-      if (!$this->islandManager->hasDefinition($provider)) {
-        continue;
-      }
-      $island = $this->islandManager->createInstance($provider, $settings);
-
-      if ($island instanceof ThirdPartySettingsInterface && $summary = $island->getSummary()) {
-        $build['#slots']['info'] = \array_merge($build['#slots']['info'] ?? [], $summary);
-      }
-    }
-
-    return $build;
-  }
-
-  /**
-   * Add config settings summary to layer's info slot.
    *
-   * @param \Drupal\display_builder\SourceWithSlotsInterface $source
-   *   The source plugin.
-   * @param array $build
-   *   The layer component renderable array.
-   *
-   * @return array
-   *   The layer component renderable array.
+   * @see \Drupal\display_builder\SummaryCollector::collect()
    */
-  private function addComponentSettingsSummary(SourceWithSlotsInterface $source, array $build): array {
-    $items = [];
-
-    foreach ($source->settingsSummary() as $item) {
-      if ($item !== NULL) {
-        $items[] = [
-          '#type' => 'html_tag',
-          '#tag' => 'li',
-          '#value' => $item,
-        ];
-      }
-    }
-
-    if (empty($items)) {
-      return $build;
-    }
-
-    $summary = [
-      [
+  private function addSummary(array $build, array $groups): array {
+    foreach ($groups as $group) {
+      $build['#slots']['info'][] = [
         '#type' => 'html_tag',
         '#tag' => 'em',
-        '#value' => new TranslatableMarkup('Config'),
-      ],
-      [
+        '#value' => $group['label'],
+      ];
+      $build['#slots']['info'][] = [
         '#type' => 'html_tag',
         '#tag' => 'ul',
         '#attributes' => [
           'class' => ['summary'],
         ],
-        0 => $items,
-      ],
-    ];
-
-    $build['#slots']['info'] = \array_merge($build['#slots']['info'] ?? [], $summary);
+        0 => \array_map(static fn ($item): array => [
+          '#type' => 'html_tag',
+          '#tag' => 'li',
+          '#value' => $item,
+        ], $group['items']),
+      ];
+    }
 
     return $build;
   }

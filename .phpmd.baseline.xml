@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <phpmd-baseline>
-  <violation rule="PHPMD\Rule\Design\NpathComplexity" file="/builds/project/display_builder/display_builder.post_update.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_entity_view/src/Hook/TemplateOverride.php"/>
   <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="/builds/project/display_builder/modules/display_builder_entity_view/src/Plugin/display_builder/Buildable/EntityViewOverride.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/modules/display_builder_page_layout/src/Plugin/UiPatterns/Source/MainPageContentSource.php"/>
@@ -16,10 +15,10 @@
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Island/IslandConfigurationFormTrait.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Island/IslandPluginBase.php"/>
   <violation rule="PHPMD\Rule\UnusedFormalParameter" file="/builds/project/display_builder/src/Island/IslandWithFormTrait.php"/>
+  <violation rule="PHPMD\Rule\Design\LongParameterList" file="/builds/project/display_builder/src/Plugin/UiPatterns/Source/ComponentSource.php" method="__construct"/>
   <violation rule="PHPMD\Rule\Design\LongParameterList" file="/builds/project/display_builder/src/Plugin/UiPatterns/Source/LayoutSource.php" method="__construct"/>
   <violation rule="PHPMD\Rule\CyclomaticComplexity" file="/builds/project/display_builder/src/Plugin/display_builder/Island/BuilderPanel.php" method="buildSingleBlock"/>
   <violation rule="PHPMD\Rule\Design\NpathComplexity" file="/builds/project/display_builder/src/Plugin/display_builder/Island/BuilderPanel.php" method="buildSingleBlock"/>
-  <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="/builds/project/display_builder/src/Plugin/display_builder/Island/ContextualFormPanel.php"/>
   <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="/builds/project/display_builder/src/ProfileViewBuilder.php"/>
   <violation rule="PHPMD\Rule\Design\WeightedMethodCount" file="/builds/project/display_builder/src/SourceTree.php"/>
 </phpmd-baseline>

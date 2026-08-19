@@ -10,11 +10,15 @@ namespace Drupal\display_builder;
 interface ThirdPartySettingsInterface {
 
   /**
-   * Get settings summary renderable.
+   * Get settings summary items.
    *
-   * @return array|null
-   *   The renderable summary including translations.
+   * Plain items, no markup: what to do with them is the caller's business.
+   *
+   * @return array<string|\Stringable>
+   *   The summary items, empty when there is nothing to say.
+   *
+   * @see \Drupal\display_builder\SummaryCollector
    */
-  public function getSummary(): ?array;
+  public function getSummary(): array;
 
 }
