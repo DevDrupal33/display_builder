@@ -132,7 +132,7 @@ final class DisplayExtender extends DisplayExtenderPluginBase {
     // view.
     $view = $this->view;
     // Theme hook suggestion of the current view display.
-    $suggestion = \implode('__', ['views_view', $view->id(), $view->getDisplay()->getPluginId()]);
+    $suggestion = \implode('__', ['views_view', $view->id(), $view->current_display]);
     $entry = $this->buildThemeRegistryEntry();
     $this->themeRegistry->getRuntime()->set($suggestion, $entry);
   }
