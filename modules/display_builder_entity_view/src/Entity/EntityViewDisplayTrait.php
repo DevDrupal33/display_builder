@@ -13,6 +13,7 @@ use Drupal\Core\Plugin\Context\ContextRepositoryInterface;
 use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\DisplayBuildableInterface;
+use Drupal\display_builder\DisplayBuildableOverrideInterface;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
@@ -129,7 +130,7 @@ trait EntityViewDisplayTrait {
    * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface
    */
   public function getDisplayBuilderOverrideField(): ?string {
-    return $this->getThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY);
+    return $this->getThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY);
   }
 
   /**
@@ -141,7 +142,7 @@ trait EntityViewDisplayTrait {
    * @see \Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface
    */
   public function getDisplayBuilderOverrideProfile(): ?ProfileInterface {
-    $display_builder_id = $this->getThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY);
+    $display_builder_id = $this->getThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY);
 
     if ($display_builder_id === NULL) {
       return NULL;

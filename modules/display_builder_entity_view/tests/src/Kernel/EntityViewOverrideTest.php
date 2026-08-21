@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder_entity_view\Kernel;
 
 use Drupal\Core\Entity\Entity\EntityViewMode;
-use Drupal\display_builder\DisplayBuildableInterface;
+use Drupal\display_builder\DisplayBuildableOverrideInterface;
 use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
@@ -93,8 +93,8 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
     ]);
     $display
       ->setStatus(TRUE)
-      ->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY, self::OVERRIDE_FIELD)
-      ->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY, 'test_base')
+      ->setThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY, self::OVERRIDE_FIELD)
+      ->setThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY, 'test_base')
       ->save();
 
     $entity = EntityTest::create([

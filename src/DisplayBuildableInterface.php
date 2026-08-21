@@ -14,17 +14,9 @@ use Drupal\Core\Url;
 use Drupal\display_builder\Entity\ProfileInterface;
 
 /**
- * Interface for entities or plugins natively embedding a display builder.
+ * Interface for plugins managing a buildable display.
  */
 interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, ContextProviderInterface, PluginInspectionInterface {
-
-  // Storage property for of the override field.
-  // This will we used in some schema.yml, careful if you change it.
-  public const OVERRIDE_FIELD_PROPERTY = 'override_field';
-
-  // Storage property for the overridden profile config entity ID.
-  // This will we used in some schema.yml, careful if you change it.
-  public const OVERRIDE_PROFILE_PROPERTY = 'override_profile';
 
   // Storage property for the profile config entity ID.
   // This will we used in some schema.yml, careful if you change it.
@@ -294,17 +286,5 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, Con
    * Save sources tree retrieved from the Instance entity to config or content.
    */
   public function saveSources(): void;
-
-  /**
-   * Revert sources to the default/base configuration.
-   *
-   * Clears any overridden data and returns the base sources from the default
-   * configuration. Called before the ON_REVERT event so islands receive the
-   * final instance state.
-   *
-   * @return array
-   *   The base sources from the default configuration.
-   */
-  public function revertSources(): array;
 
 }

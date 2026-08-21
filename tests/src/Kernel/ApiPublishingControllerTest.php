@@ -104,10 +104,7 @@ final class ApiPublishingControllerTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Tests ::revert() dispatches ON_REVERT and clears instance state.
-   *
-   * For a non-override (standalone) instance the base plugin's revertSources()
-   * returns an empty array, so the saved state must be empty after the call.
+   * Tests ::revert() dispatches ON_REVERT.
    */
   public function testRevert(): void {
     $this->instance->attachToRoot(0, 'token', []);
@@ -125,11 +122,10 @@ final class ApiPublishingControllerTest extends DisplayBuilderKernelTestBase {
     self::assertIsArray($response['state']);
     self::assertIsArray($response['logs']);
 
-    // Non-override instance: base plugin revertSources() returns [],
-    // so state is cleared.
+    // Non-override instance: nothing is happening.
     $saved = $this->loadInstance($this->instance->id());
-    $state = $saved->getCurrentState();
-    self::assertCount(0, $state, 'State is cleared for a non-override instance after revert.');
+    $saved_state = $saved->getCurrentState();
+    self::assertSame($saved_state, $state);
   }
 
 }

@@ -11,6 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\DisplayBuildableInterface;
+use Drupal\display_builder\DisplayBuildableOverrideInterface;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -40,21 +41,21 @@ trait EntityViewDisplayFormTrait {
     if (empty($profile)) {
       $this->setOverrideFieldLocked(FALSE);
       $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY);
-      $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY);
-      $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY);
+      $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY);
+      $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY);
     }
     else {
       $this->entity->setThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY, $profile);
     }
 
     if ($override_status) {
-      $profile_override = $form_state->getValue(DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY, NULL);
+      $profile_override = $form_state->getValue(DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY, NULL);
 
       if ($profile_override) {
-        $this->entity->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY, $profile_override);
+        $this->entity->setThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY, $profile_override);
       }
 
-      $override_field = $form_state->getValue(DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY, NULL);
+      $override_field = $form_state->getValue(DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY, NULL);
 
       if (!$override_field) {
         $field_name = \sprintf('display_%s', $this->entity->getMode());
@@ -65,13 +66,13 @@ trait EntityViewDisplayFormTrait {
       }
       // In case of field change, need to unlock the previous field.
       $this->setOverrideFieldLocked(FALSE);
-      $this->entity->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY, $field_name);
+      $this->entity->setThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY, $field_name);
       $this->setOverrideFieldLocked(TRUE);
     }
     else {
       $this->setOverrideFieldLocked(FALSE);
-      $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY);
-      $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY);
+      $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY);
+      $this->entity->unsetThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY);
     }
 
     $this->entity->save();
@@ -176,7 +177,7 @@ trait EntityViewDisplayFormTrait {
       ],
     ];
 
-    $form['override']['settings'][DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY] = [
+    $form['override']['settings'][DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY] = [
       '#type' => 'select',
       '#title' => $this->t('Profile for overrides'),
       '#description' => $this->t('The profile used for content overrides. Can be changed at any time.'),
@@ -185,7 +186,7 @@ trait EntityViewDisplayFormTrait {
     ];
 
     if (!empty($options)) {
-      $form['override']['settings'][DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY] = [
+      $form['override']['settings'][DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY] = [
         '#type' => 'select',
         '#title' => $this->t('Display Override Field'),
         '#description' => $this->t('The field where per-content display overrides are stored.'),
@@ -196,8 +197,8 @@ trait EntityViewDisplayFormTrait {
 
     if (!$this->displayBuildable()->isAllowed()) {
       $form['override']['override_status']['#disabled'] = TRUE;
-      $form['override']['settings'][DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY]['#disabled'] = TRUE;
-      $form['override']['settings'][DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY]['#disabled'] = TRUE;
+      $form['override']['settings'][DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY]['#disabled'] = TRUE;
+      $form['override']['settings'][DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY]['#disabled'] = TRUE;
     }
 
     return $form;

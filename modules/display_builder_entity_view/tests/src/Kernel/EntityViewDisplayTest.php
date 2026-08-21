@@ -8,6 +8,7 @@ use Drupal\Component\Render\MarkupInterface;
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Entity\Entity\EntityViewMode;
 use Drupal\display_builder\DisplayBuildableInterface;
+use Drupal\display_builder\DisplayBuildableOverrideInterface;
 use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplayTrait;
@@ -188,7 +189,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $field = $display->getDisplayBuilderOverrideField();
     self::assertNull($field);
 
-    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY, 'foo')->save();
+    $display->setThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY, 'foo')->save();
 
     $field = $display->getDisplayBuilderOverrideField();
     self::assertSame('foo', $field);
@@ -203,7 +204,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $profile = $display->getDisplayBuilderOverrideProfile();
     self::assertNull($profile);
 
-    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY, 'test_base')->save();
+    $display->setThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY, 'test_base')->save();
 
     $profile = $display->getDisplayBuilderOverrideProfile();
     self::assertSame('test_base', $profile->id());
@@ -234,11 +235,11 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
 
     self::assertFalse($display->isDisplayBuilderOverridable());
 
-    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY, 'foo')->save();
+    $display->setThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY, 'foo')->save();
 
     self::assertFalse($display->isDisplayBuilderOverridable());
 
-    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY, 'test_base')->save();
+    $display->setThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY, 'test_base')->save();
 
     self::assertTrue($display->isDisplayBuilderOverridable());
   }

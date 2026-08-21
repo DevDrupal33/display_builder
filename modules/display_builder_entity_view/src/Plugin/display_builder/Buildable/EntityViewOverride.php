@@ -24,6 +24,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildableInterface;
+use Drupal\display_builder\DisplayBuildableOverrideInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\DisplayReference;
 use Drupal\display_builder\Entity\ProfileInterface;
@@ -41,7 +42,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Entity view override'),
   instance_prefix: 'entity_override__',
 )]
-final class EntityViewOverride extends DisplayBuildablePluginBase {
+final class EntityViewOverride extends DisplayBuildablePluginBase implements DisplayBuildableOverrideInterface {
 
   use EntityDisplayLabelTrait;
 
@@ -219,7 +220,7 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
    * {@inheritdoc}
    */
   public function getProfile(): ?ProfileInterface {
-    $profile_id = $this->getDisplay()->getThirdPartySetting('display_builder', DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY);
+    $profile_id = $this->getDisplay()->getThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY);
 
     if ($profile_id === NULL) {
       return NULL;
@@ -257,7 +258,20 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function revertSources(): array {
+  public function getOverridden(): DisplayBuildableInterface {
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance(
+      'entity_view',
+      ['display' => $this->getDisplay()]
+    );
+
+    return $buildable;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function revert(): array {
     $field = $this->getField();
     $field->setValue(NULL);
     $field->getEntity()->save();
@@ -307,6 +321,10 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
    *   The entity to set revision if appropriate.
    */
   public function setRevision(ContentEntityInterface $entity): void {
+    if (!$entity->getEntityType()->isRevisionable()) {
+      return;
+    }
+
     $bundle = $entity->getBundleEntity();
 
     if ($bundle instanceof RevisionableEntityBundleInterface
@@ -335,17 +353,17 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
       /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display */
       $display_builder = $display->getThirdPartySettings('display_builder');
 
-      if (!isset($display_builder[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY], $display_builder[DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY])) {
+      if (!isset($display_builder[DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY], $display_builder[DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY])) {
         continue;
       }
 
       $entity_type = $display->getTargetEntityTypeId();
 
-      if (!isset($display_builder[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY])) {
+      if (!isset($display_builder[DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY])) {
         continue;
       }
 
-      $field_name = $display_builder[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY];
+      $field_name = $display_builder[DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY];
       $entity_storage[$entity_type] ??= $this->entityTypeManager->getStorage($entity_type);
       $entity_query[$entity_type] ??= $entity_storage[$entity_type]->getQuery()->accessCheck(FALSE);
       $instances = \array_merge($instances, $this->collectInstancesByField($field_name, $display, $entity_query[$entity_type]));
@@ -374,12 +392,12 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
       /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display */
       $settings = $display->getThirdPartySettings('display_builder');
 
-      if (!isset($settings[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY], $settings[DisplayBuildableInterface::OVERRIDE_PROFILE_PROPERTY])) {
+      if (!isset($settings[DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY], $settings[DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY])) {
         continue;
       }
 
       $entity_type_id = $display->getTargetEntityTypeId();
-      $field_name = $settings[DisplayBuildableInterface::OVERRIDE_FIELD_PROPERTY];
+      $field_name = $settings[DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY];
       $storage = $this->entityTypeManager->getStorage($entity_type_id);
       $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
 
@@ -600,7 +618,7 @@ final class EntityViewOverride extends DisplayBuildablePluginBase {
     // 3. Copy entity view display value.
     \assert(\is_string($this->getField()->getName()));
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $this->getDisplay()]);
+    $buildable = $this->getOverridden();
 
     if ($buildable->getProfile() !== NULL) {
       $sources = $buildable->getSources();

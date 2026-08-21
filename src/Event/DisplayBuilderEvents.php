@@ -55,15 +55,15 @@ final class DisplayBuilderEvents {
   public const ON_RESTORE = 'onRestore';
 
   /**
-   * Fired when an entity view override is reverted to the base display config.
+   * Fired when an entity view override is reverted to the base display.
    *
-   * Handled by display_builder_entity_view; clears the field override and
+   * Handled by DisplayBuildableOverrideInterface; clears the override and
    * reloads sources from the entity view display configuration.
    */
   public const ON_REVERT = 'onRevert';
 
   /**
-   * Fired when the builder state is saved to the backing config entity.
+   * Fired when the builder state is saved to the permanent storage.
    */
   public const ON_PUBLISH = 'onPublish';
 

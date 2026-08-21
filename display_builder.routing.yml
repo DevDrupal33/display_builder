@@ -216,7 +216,6 @@ display_builder.api_revert:
     _controller: '\Drupal\display_builder\Controller\ApiPublishingController::revert'
   requirements:
     _entity_access: 'display_builder_instance.update'
-    _module_dependencies: 'display_builder_entity_view'
   options:
     _htmx_route: true
     parameters:

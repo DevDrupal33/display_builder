@@ -17,6 +17,7 @@ use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\DisplayBuildableInterface;
+use Drupal\display_builder\DisplayBuildableOverrideInterface;
 use Drupal\display_builder\Exception\InvalidNodeException;
 use Drupal\display_builder\InstanceAccessControlHandler;
 use Drupal\display_builder\InstanceInterface;
@@ -385,8 +386,12 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function revert(): void {
-    $sources = $this->getBuildablePlugin()->revertSources();
-    $this->setNewPresent($sources, new TranslatableMarkup('Revert to default display.'));
+    $buildable = $this->getBuildablePlugin();
+
+    if ($buildable instanceof DisplayBuildableOverrideInterface) {
+      $sources = $buildable->revert();
+      $this->setNewPresent($sources, new TranslatableMarkup('Revert to default display.'));
+    }
   }
 
   /**
