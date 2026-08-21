@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Form;
 
-use Drupal\Component\Serialization\Exception\InvalidDataTypeException;
-use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Entity\EntityForm;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\display_builder\Entity\PatternPreset;
 
@@ -55,14 +52,6 @@ final class PatternPresetForm extends EntityForm {
       '#default_value' => $entity->get('group'),
     ];
 
-    $form['sources'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Sources'),
-      '#description' => $this->t('It is not recommended to manually edit a Pattern as an invalid format can lead to an error on all display.'),
-      '#default_value' => Yaml::encode($entity->get('sources') ?? []),
-      '#rows' => 16,
-    ];
-
     $form['status'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enabled'),
@@ -88,25 +77,6 @@ final class PatternPresetForm extends EntityForm {
     $form_state->setRedirectUrl($this->entity->toUrl('collection'));
 
     return $result;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state): void {
-    $sources = $form_state->getValue('sources');
-
-    try {
-      $sources = \is_string($sources) ? Yaml::decode($sources) : $sources;
-    }
-    catch (InvalidDataTypeException $e) {
-      // We do it here instead of FormInterface::validateForm() because it is
-      // the earliest call of EntityInterface::set().
-      $form_state->setErrorByName('sources', $this->t('The import failed with the following message: %message', ['%message' => $e->getMessage()]));
-    }
-    $form_state->setValue('sources', $sources);
-
-    parent::copyFormValuesToEntity($entity, $form, $form_state);
   }
 
 }

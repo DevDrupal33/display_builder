@@ -55,8 +55,6 @@ interface PageLayoutInterface extends ConfigEntityInterface, EntityWithPluginCol
   /**
    * Save sources tree retrieved from the Instance entity to config or content.
    *
-   * Triggered by a DisplayBuilderEvents::ON_PUBLISH event.
-   *
    * @param array $sources
    *   A list of nestable sources.
    */

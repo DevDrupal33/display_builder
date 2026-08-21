@@ -84,8 +84,8 @@ final class PatternPresetListBuilder extends DraggableListBuilder {
     $row['group']['data']['#plain_text'] = $entity->getGroup() ?? $this->t('Others');
     $row['description']['data']['#plain_text'] = $entity->get('description') ?: $entity->getSummary();
 
-    if ($entity->getContexts()) {
-      $row['contexts']['data']['#plain_text'] = self::prettyPrintContexts($entity->getContexts());
+    if ($entity->getContextDefinitions()) {
+      $row['contexts']['data']['#plain_text'] = self::prettyPrintContexts($entity->getContextDefinitions());
     }
     else {
       $row['contexts']['data']['#plain_text'] = '';

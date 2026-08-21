@@ -51,7 +51,7 @@ interface PatternPresetInterface extends ConfigEntityInterface {
    * @return \Drupal\Core\Plugin\Context\ContextDefinition[]
    *   Context definitions of the sources.
    */
-  public function getContexts(): array;
+  public function getContextDefinitions(): array;
 
   /**
    * Check if the pattern context is compatible with the display.

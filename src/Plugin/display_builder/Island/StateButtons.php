@@ -59,10 +59,6 @@ class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
    * {@inheritdoc}
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    if (!$builder->isPublishable()) {
-      return [];
-    }
-
     $buttons = $this->buildStateButtons($builder);
 
     if (empty($buttons)) {

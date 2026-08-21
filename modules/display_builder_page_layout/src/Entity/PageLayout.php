@@ -221,13 +221,13 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
    * {@inheritdoc}
    */
   public function getProfile(): ?ProfileInterface {
-    $storage = $this->entityTypeManager()->getStorage('display_builder_profile');
     $profile_id = $this->get(DisplayBuildableInterface::PROFILE_PROPERTY);
 
     if (!$profile_id) {
       return NULL;
     }
 
+    $storage = $this->entityTypeManager()->getStorage('display_builder_profile');
     /** @var \Drupal\display_builder\Entity\ProfileInterface $builder */
     $builder = $storage->load($profile_id);
 

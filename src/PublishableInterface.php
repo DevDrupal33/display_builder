@@ -10,14 +10,6 @@ namespace Drupal\display_builder;
 interface PublishableInterface {
 
   /**
-   * Check display has required context, meaning it can save value.
-   *
-   * @return bool
-   *   True if required, False otherwise.
-   */
-  public function isPublishable(): bool;
-
-  /**
    * If display builder has been saved.
    *
    * @return bool

@@ -187,7 +187,7 @@ class SaveStatus extends IslandPluginBase {
   private function restingStatus(InstanceInterface $builder): string {
     // isPublishedPresent() resolves the buildable plugin's sources to hash
     // them, so it is only worth asking where publishing is a thing at all.
-    if ($builder->isPublishable() && $builder->isPublishedPresent()) {
+    if ($builder->isPublishedPresent()) {
       return self::STATUS_PUBLISHED;
     }
 

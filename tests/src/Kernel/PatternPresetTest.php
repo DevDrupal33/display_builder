@@ -67,7 +67,7 @@ final class PatternPresetTest extends KernelTestBase {
     $patternPreset->save();
 
     $loaded = PatternPreset::load('test_preset_contexts');
-    $contexts = $loaded->getContexts();
+    $contexts = $loaded->getContextDefinitions();
     self::assertEmpty($contexts);
   }
 
@@ -198,7 +198,7 @@ final class PatternPresetTest extends KernelTestBase {
     ]);
     $preset->save();
     $loaded = PatternPreset::load($preset->id());
-    self::assertEmpty($loaded->getContexts());
+    self::assertEmpty($loaded->getContextDefinitions());
   }
 
   /**
@@ -238,7 +238,7 @@ final class PatternPresetTest extends KernelTestBase {
       'source' => [],
     ]);
 
-    self::assertEmpty($loaded->getContexts());
+    self::assertEmpty($loaded->getContextDefinitions());
   }
 
   /**
@@ -254,7 +254,7 @@ final class PatternPresetTest extends KernelTestBase {
     ]);
     $preset->save();
     $loaded = PatternPreset::load('test_preset_ctx_defs');
-    $contexts = $loaded->getContexts();
+    $contexts = $loaded->getContextDefinitions();
     // Only required contexts are returned; optional ones are filtered out.
     self::assertArrayHasKey('entity', $contexts);
     self::assertTrue($contexts['entity']->isRequired());
@@ -274,7 +274,7 @@ final class PatternPresetTest extends KernelTestBase {
     ]);
     $preset->save();
     $loaded = PatternPreset::load('test_preset_ctx_slot_empty');
-    self::assertEmpty($loaded->getContexts());
+    self::assertEmpty($loaded->getContextDefinitions());
   }
 
   /**
@@ -299,7 +299,7 @@ final class PatternPresetTest extends KernelTestBase {
     ]);
     $preset->save();
     $loaded = PatternPreset::load('test_preset_ctx_slot_props');
-    $contexts = $loaded->getContexts();
+    $contexts = $loaded->getContextDefinitions();
     self::assertArrayHasKey('entity', $contexts);
     self::assertTrue($contexts['entity']->isRequired());
   }
@@ -323,7 +323,7 @@ final class PatternPresetTest extends KernelTestBase {
     ]);
     $preset->save();
     $loaded = PatternPreset::load($preset->id());
-    self::assertEmpty($loaded->getContexts());
+    self::assertEmpty($loaded->getContextDefinitions());
   }
 
   /**

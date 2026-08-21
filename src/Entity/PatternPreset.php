@@ -168,10 +168,8 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
 
   /**
    * {@inheritdoc}
-   *
-   * @see \Drupal\Core\Config\Entity\ConfigEntityInterface
    */
-  public function getContexts(): array {
+  public function getContextDefinitions(): array {
     // The root level is a single nestable source plugin.
     if (!isset($this->sources['source_id']) || !isset($this->sources['source'])) {
       return [];
@@ -223,7 +221,7 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
    * {@inheritdoc}
    */
   public function areContextsSatisfied(array $contexts): bool {
-    $context_definitions = $this->getContexts();
+    $context_definitions = $this->getContextDefinitions();
 
     if (empty($context_definitions)) {
       return TRUE;
@@ -283,11 +281,9 @@ final class PatternPreset extends ConfigEntityBase implements PatternPresetInter
   private function getContextsFromSlots(SourceWithSlotsInterface $source): array {
     $contexts = [];
 
-    if (\is_iterable($source)) {
-      foreach ($source as $slot) {
-        foreach (\is_array($slot) ? ($slot['sources'] ?? []) : [] as $source_item) {
-          $contexts = \array_merge($contexts, $this->getContextsFromSourceItem($source_item));
-        }
+    foreach ($source->getSlotValues() as $sources) {
+      foreach ($sources as $source_item) {
+        $contexts = \array_merge($contexts, $this->getContextsFromSourceItem($source_item));
       }
     }
 

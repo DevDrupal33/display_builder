@@ -24,7 +24,6 @@ use Drupal\display_builder\SlotSourceProxy;
 use Drupal\display_builder\SourceTree;
 use Drupal\display_builder_ui\InstanceListBuilder;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
-use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 
 /**
  * Defines the display builder instance entity class.
@@ -413,20 +412,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function getUsers(): array {
     return $this->getStorage()->getUsers($this);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function isPublishable(): bool {
-    $contexts = $this->getAvailableContexts();
-
-    if (!\array_key_exists('context_requirements', $contexts)
-      || !($contexts['context_requirements'] instanceof RequirementsContext)) {
-      return FALSE;
-    }
-
-    return TRUE;
   }
 
   /**
