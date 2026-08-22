@@ -74,7 +74,7 @@ class LogsPanel extends IslandPluginBase {
 
     return [
       $table,
-      $published_hash ? $this->printSaveAlert($builder) : [],
+      $published_hash ? $this->printSaveAlert($builder, $published_hash) : [],
     ];
   }
 
@@ -154,16 +154,21 @@ class LogsPanel extends IslandPluginBase {
    *
    * @param \Drupal\display_builder\InstanceInterface $builder
    *   The instance entity.
+   * @param int $published_hash
+   *   The hash of the published content.
    *
    * @return array
    *   A renderable array.
    */
-  private function printSaveAlert(InstanceInterface $builder): array {
+  private function printSaveAlert(InstanceInterface $builder, int $published_hash): array {
     $steps = \array_merge($builder->getPast(), [$builder], $builder->getFuture());
 
+    // Every step is a revision of the same instance, so they all share the
+    // published hash resolved by the caller. Asking each one for it again
+    // would rebuild the buildable plugin once per step.
     foreach ($steps as $step) {
       /** @var \Drupal\display_builder\InstanceInterface $step */
-      if ($step->isPublishedPresent()) {
+      if ($step->getHash() === $published_hash) {
         return [];
       }
     }

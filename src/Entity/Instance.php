@@ -100,6 +100,16 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   protected ?SourceTree $sourceTree = NULL;
 
   /**
+   * The hash of the published data, memoized for the request.
+   *
+   * Resolving it means asking the buildable plugin for the stored sources and
+   * hashing them, and several islands ask for it while building one screen.
+   * NULL means either "not resolved yet" or "nothing published"; both cases
+   * are cheap to answer again once the plugin itself is memoized.
+   */
+  protected ?int $publishedHash = NULL;
+
+  /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
@@ -370,6 +380,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function publish(): void {
     $this->getBuildablePlugin()->saveSources();
+    $this->publishedHash = NULL;
     $this->set('published', \Drupal::time()->getRequestTime());
     $this->setNewRevision(FALSE);
     $this->save();
@@ -390,6 +401,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
 
     if ($buildable instanceof DisplayBuildableOverrideInterface) {
       $sources = $buildable->revert();
+      $this->publishedHash = NULL;
       $this->setNewPresent($sources, new TranslatableMarkup('Revert to default display.'));
     }
   }
@@ -423,9 +435,13 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function getPublishedHash(): ?int {
+    if ($this->publishedHash !== NULL) {
+      return $this->publishedHash;
+    }
+
     $published_data = $this->getBuildablePlugin()->getSources();
 
-    return $published_data ? self::getUniqId($published_data) : NULL;
+    return $this->publishedHash = $published_data ? self::getUniqId($published_data) : NULL;
   }
 
   /**

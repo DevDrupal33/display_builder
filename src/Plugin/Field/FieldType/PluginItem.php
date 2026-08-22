@@ -24,6 +24,14 @@ use Drupal\Core\TypedData\MapDataDefinition;
 class PluginItem extends FieldItemBase {
 
   /**
+   * The plugin instance, memoized for the lifetime of this field item.
+   *
+   * Creating the plugin and letting it load what it wraps costs far more than
+   * the calls made on it, and callers ask for it several times per request.
+   */
+  protected ?object $instance = NULL;
+
+  /**
    * {@inheritdoc}
    */
   public static function defaultFieldSettings() {
@@ -72,14 +80,29 @@ class PluginItem extends FieldItemBase {
    *   An instantiated plugin instance.
    */
   public function getInstance(): object {
+    if ($this->instance !== NULL) {
+      return $this->instance;
+    }
+
     $service_id = $this->getSetting('plugin_manager_id');
     /** @var \Drupal\Component\Plugin\PluginManagerInterface $service */
     $service = \Drupal::service($service_id);
 
-    return $service->createInstance(
+    return $this->instance = $service->createInstance(
       $this->get('plugin_id')->getString(),
       $this->get('configuration')->getValue() ?? [],
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setValue(mixed $values, mixed $notify = TRUE): void {
+    // The memoized plugin was built from the previous plugin ID and
+    // configuration.
+    $this->instance = NULL;
+
+    parent::setValue($values, $notify);
   }
 
 }
