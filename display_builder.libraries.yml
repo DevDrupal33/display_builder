@@ -136,6 +136,15 @@ instances:
     - core/drupal
     - core/once
 
+# Barrier against the active front-end theme's CSS, which shares the document
+# with the chrome because the Canvas renders real theme output inline. In the
+# `base` group so every other stylesheet of ours loads after it and wins the
+# ties. @see assets/css/_reset.css for what it does and does not cover.
+_reset:
+  css:
+    base:
+      ./assets/css/_reset.css: {}
+
 # Global fixes meant to disappear or replaced by a cleaner solution.
 # The per-admin-chrome files are split by which module they target, for
 # readability only - both load unconditionally, since every selector in them is

@@ -7,8 +7,10 @@
   <div class="db-library-panel__wrap">
     {# label names the field for assistive tech (a placeholder cannot); it is
        visually hidden, @see search.css #}
+    {# Not 'search': Shoelace reflects `type` onto the host, where a theme's
+       `[type=search]` rule reaches it. @see assets/css/_reset.css #}
     {{ include('display_builder:input', {
-      variant: 'search',
+      variant: 'text',
       label: 'Search the library'|t,
       placeholder: 'Search'|t,
       size: 'medium',

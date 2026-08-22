@@ -1,0 +1,67 @@
+/* What the active front-end theme is allowed to reach in the builder chrome.
+
+   The Canvas renders real theme output inline, so the front-end theme's
+   stylesheet is in the same document as the chrome no matter what the admin
+   theme is set to - measured on a site whose admin theme is Default Admin,
+   where uswds.css was on the page anyway, attached by the Canvas render
+   (@see \Drupal\display_builder_page_layout\BuilderDataConverter). That is by
+   design and cannot be undone here. What can be undone is the damage the
+   theme does on the way past.
+
+   Shadow DOM is not the answer, and moving more of the chrome to web
+   components would not have helped: the chrome already is web components,
+   and it still bleeds. A Shoelace component's internals are protected; its
+   *host* is not. The host sits in the light DOM, and Shoelace reflects
+   `type` onto it (SlInput, SlButton and SlMenuItem all declare it
+   `property({ reflect: true })`), so a bare `[type=...]` selector in a theme
+   styles the chrome directly. Measured with ui_suite_uswds:
+   `[type=search] { float: left; height: 2rem }` floated the library and
+   instance filters out of the sidebar flow. The call sites now ask for
+   `text` rather than `search` for that reason, but `type` is reflected
+   whatever its value, so the attribute itself is not something a call site
+   can decline to expose.
+
+   The surface is small, which is worth knowing before extending this file.
+   Of the 245 Shoelace hosts in the toolbar, the two sidebars and the
+   contextual menu, USWDS reached exactly one element - `sl-input` - through
+   exactly one selector. Class selectors never reach the chrome, because the
+   chrome does not use a theme's classes; only element and attribute
+   selectors do. Hence a reset on hosts, and nothing on the `db-*` wrappers.
+
+   Deliberately not `all: revert`. A component's own `:host` rules are author
+   origin too, so `all: revert` discards them: confirmed live, `sl-input`
+   collapses from `display: block` to `display: inline` with
+   `box-sizing: content-box`, and the toolbar buttons lose their layout. Only
+   the box model and decoration properties a theme's form normalization
+   touches are reset, each to `revert` rather than to a value of ours, so
+   what is left is the user-agent default and not a second opinion.
+
+   Specificity is (0,2,0): `:where()` keeps the element list weightless, so
+   the two classes carry the whole weight. That clears a theme's element and
+   attribute selectors, while any rule of ours written as
+   `.display-builder .db-*` ties and wins on source order - this file is in
+   the `base` group (CSS_BASE, -200), so every other stylesheet of ours loads
+   after it. A rule of ours *below* (0,2,0) would lose instead; the two in
+   components/library_panel/search.css that set the filter's margins were
+   raised to match rather than left to be silently overridden.
+
+   Scope is the chrome only. The Canvas and the Preview are left alone on
+   purpose: they render real theme output and must keep the theme's CSS. The
+   Drupal form markup inside .db-form is left alone too - it is themed by the
+   active theme's own form templates, which is a different problem from this
+   one, and resetting it here would leave those forms unstyled. */
+.display-builder :is(.db-toolbar, .db-sidebar, .db-menu) :where(sl-input, sl-select, sl-button, sl-icon-button, sl-checkbox, sl-menu-item) {
+  float: revert;
+  clear: revert;
+  height: revert;
+  min-height: revert;
+  max-height: revert;
+  margin: revert;
+  padding: revert;
+  border: revert;
+  border-radius: revert;
+  outline-offset: revert;
+  background: revert;
+  box-shadow: revert;
+  appearance: revert;
+}

@@ -206,7 +206,9 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
       '#type' => 'component',
       '#component' => 'display_builder:input',
       '#props' => [
-        'variant' => 'search',
+        // Not 'search': Shoelace reflects `type` onto the host, where a
+        // theme's `[type=search]` rule reaches it. @see assets/css/_reset.css.
+        'variant' => 'text',
         // Names the field for assistive tech, which a placeholder cannot do.
         // Visually hidden, @see components/library_panel/search.css.
         'label' => $this->t('Search the library'),
@@ -429,7 +431,9 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
       return [];
     }
 
-    $filter = $this->buildInput((string) $builder->id(), '', 'search', 'medium', 'off', $this->t('Search'), TRUE, 'search');
+    // 'text', not 'search': Shoelace reflects `type` onto the host, where a
+    // theme's `[type=search]` rule reaches it. @see assets/css/_reset.css
+    $filter = $this->buildInput((string) $builder->id(), '', 'text', 'medium', 'off', $this->t('Search'), TRUE, 'search');
     // @see components/library_panel/search.js
     $filter['#attributes']['class'] = ['db-search-instance'];
 

@@ -184,51 +184,83 @@ class ContextualMenu {
   }
 
   /**
-   * Compensates for a Shoelace `<sl-menu-item>` submenu positioning bug.
+   * Compensates for how Floating UI detects a containing block.
    *
-   * Confirmed live, not assumed: a submenu's `<sl-popup>` (internal to
-   * `<sl-menu-item>`, used for any menu item rendered with a `submenu`
-   * slot, e.g. "Styles" - @see components/shoelace/menu_item/menu_item.twig)
-   * computes its horizontal position as if it needed to subtract
-   * `.display-builder`'s own X offset from the viewport's left edge (the
-   * Drupal admin sidebar's width), then applies the result as
-   * `position: fixed` (genuinely viewport-relative, confirmed no
-   * transform/filter/zoom anywhere in the ancestor chain that would
-   * legitimately justify that). The two don't match: the computed
-   * coordinate assumes one reference frame, the applied positioning
-   * strategy uses another - a real Shoelace quirk with this specific
-   * doubly-nested-in-shadow-DOM submenu structure, not something in this
-   * module's own CSS. Confirmed via direct measurement: the error is
-   * always exactly `.display-builder`'s own `getBoundingClientRect().x`
-   * (272px in one measured case, matched to the sub-pixel against the
-   * known-correct position) - not a guess or approximation.
+   * A submenu's `<sl-popup>` - internal to `<sl-menu-item>`, used for any
+   * item rendered with a `submenu` slot, e.g. "Styles", @see
+   * components/shoelace/menu_item/menu_item.twig - is hardcoded
+   * `strategy="fixed"` by Shoelace's SubmenuController.
    *
-   * Fix works *with* Shoelace's own calculation instead of patching the
-   * DOM after the fact: `<sl-popup>`'s own `distance` property is a
-   * normal input to its internal Floating UI `offset` middleware
-   * (added on top of whatever the base placement computes, right or
-   * wrong) - setting it to `.display-builder`'s current X offset cancels
-   * the bug at the source. Verified stable across 5 repeated
-   * `.reposition()` calls (Shoelace's own `autoUpdate` continuously
-   * recomputes position on resize/scroll) - a post-hoc DOM patch
-   * instead would have been overwritten by the very next recompute
-   * tick, fighting that loop instead of feeding it a correct input.
+   * Floating UI's `isContainingBlock()` treats any element with
+   * `container-type` other than `normal` as a containing block for fixed
+   * descendants, and subtracts its offset from the coordinates it returns.
+   * `.display-builder` carries `container-type: inline-size` (@see
+   * components/toolbar/toolbar.css). The browser disagrees: measured with a
+   * `position: fixed; top: 0; left: 0` probe appended to `.display-builder`,
+   * which renders at viewport 0,0 - so it resolves the popup's `left`/`top`
+   * against the viewport after all. The submenu therefore lands short by
+   * exactly `.display-builder`'s own `getBoundingClientRect()`, on both
+   * axes, and the fix is to add that back.
    *
-   * Applied fresh on every menu open (not once at setup) since
-   * `.display-builder`'s own offset can change between openings - the
-   * Drupal admin sidebar can be toggled collapsed/expanded.
+   * Do not "fix" this by dropping the `container-type`. That was tried and
+   * reverted: it is load-bearing for drag and drop. Without it Firefox
+   * failed 11 Playwright drag tests deterministically while Chromium passed
+   * them all, because a dropzone was no longer the topmost element at the
+   * drop point. Neither `isolation: isolate` nor `position: relative` nor
+   * `contain: layout` nor `contain: inline-size` substitutes - each was
+   * measured against that suite and left it red. Switching the popup to
+   * `strategy="absolute"` does not position correctly either.
+   *
+   * The compensation is a `translate` on the popup, and both halves matter:
+   *
+   * - *A transform, not `distance`/`skidding`.* Those two are Floating UI
+   *   offsets along the placement's own main and cross axes, so their sign
+   *   follows the placement. The submenu flips to `left-start` when it is
+   *   near the right edge of the viewport, and a compensation expressed that
+   *   way flips with it, landing the submenu twice as far off in the
+   *   opposite direction - which is exactly how this was found. `translate`
+   *   is in absolute page axes and is unaffected by the flip.
+   * - *Re-applied on `sl-reposition`.* `<sl-popup>` runs Floating UI's
+   *   `autoUpdate`, which recomputes `left`/`top` on every scroll and
+   *   resize, and emits that event once it has. `.display-builder`'s own
+   *   offset changes on exactly those occasions, so the correction has to be
+   *   recomputed with them or the submenu drifts away as the page scrolls
+   *   under an open menu. Shoelace never writes `translate`, so this does
+   *   not fight `autoUpdate`: it rides it.
+   *
+   * The listener is attached once per popup and left in place - the menu is
+   * a single element reused for every right-click, so there is nothing to
+   * tear down and no accumulation.
    */
   fixSubmenuPositioning() {
-    const displayBuilder = this.island.closest('.display-builder');
-    if (!displayBuilder) return;
-
-    const offsetX = displayBuilder.getBoundingClientRect().x;
-
     this.menu.querySelectorAll('sl-menu-item').forEach((item) => {
       if (!item.querySelector('sl-menu[slot="submenu"]')) return;
       const popup = item.shadowRoot?.querySelector('sl-popup');
-      if (popup) popup.distance = offsetX;
+      if (!popup) return;
+
+      if (!popup.dataset.dbOffsetFix) {
+        popup.dataset.dbOffsetFix = 'true';
+        popup.addEventListener('sl-reposition', () =>
+          this.offsetSubmenuPopup(popup),
+        );
+      }
+      this.offsetSubmenuPopup(popup);
     });
+  }
+
+  /**
+   * Adds back the offset Floating UI wrongly subtracted from one submenu.
+   *
+   * @param {HTMLElement} popup
+   *   The `<sl-popup>` inside a menu item's shadow root.
+   */
+  offsetSubmenuPopup(popup) {
+    const displayBuilder = this.island.closest('.display-builder');
+    const inner = popup.shadowRoot?.querySelector('[part~="popup"]');
+    if (!displayBuilder || !inner) return;
+
+    const { x, y } = displayBuilder.getBoundingClientRect();
+    inner.style.translate = `${x}px ${y}px`;
   }
 
   /**

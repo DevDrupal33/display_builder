@@ -14,7 +14,10 @@
 .display-builder .db-form:has(.shoelace-tabs [active][data-target$="skins"]) .db-search-instance {
   display: block;
 }
-.db-search-instance {
+/* Two classes deep, to clear the chrome reset - it sets `margin: revert` on
+   Shoelace hosts at (0,2,0), and this rule is one of them.
+   @see assets/css/_reset.css */
+.display-builder .db-search-instance {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
@@ -47,8 +50,10 @@
 /* Both classes the shared filter binds to, so a panel that is not a library
    gets the same box rather than a second look at the same control.
    @see search.js */
-.db-search-library,
-.db-search-filter {
+/* Two classes deep for the same reason as .db-search-instance above.
+   @see assets/css/_reset.css */
+.display-builder .db-search-library,
+.display-builder .db-search-filter {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }

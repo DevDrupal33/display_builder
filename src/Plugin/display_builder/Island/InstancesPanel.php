@@ -166,7 +166,9 @@ class InstancesPanel extends IslandPluginBase {
       '#type' => 'component',
       '#component' => 'display_builder:input',
       '#props' => [
-        'variant' => 'search',
+        // Not 'search': Shoelace reflects `type` onto the host, where a
+        // theme's `[type=search]` rule reaches it. @see assets/css/_reset.css.
+        'variant' => 'text',
         // A placeholder is not an accessible name.
         'label' => $this->t('Filter the displays'),
         'placeholder' => $this->t('Filter displays'),
