@@ -9,7 +9,7 @@ use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\Island\IslandPluginToolbarButtonConfigurationBase;
+use Drupal\display_builder\Island\IslandPluginBase;
 use Drupal\display_builder\Island\IslandType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   type: IslandType::Button,
   region: 'end',
 )]
-class BackButton extends IslandPluginToolbarButtonConfigurationBase {
+class BackButton extends IslandPluginBase {
 
   /**
    * The display buildable plugin manager.
@@ -47,31 +47,19 @@ class BackButton extends IslandPluginToolbarButtonConfigurationBase {
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
     $url = $this->findParentDisplayFromId((string) $builder->id());
 
-    if (!$url || !$this->isButtonEnabled('back')) {
+    if (!$url) {
       return [];
     }
 
     $button = $this->buildButton(
-      ($this->showLabel('back')) ? $this->t('Back') : '',
+      '',
       'back',
-      $this->showIcon('back') ? 'box-arrow-up-right' : '',
+      'box-arrow-up-right',
       $this->t('Exit without losing any data.'),
     );
     $button['#attributes']['href'] = $url->toString();
 
     return $button;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function hasButtons(): array {
-    return [
-      'back' => [
-        'title' => $this->t('Back'),
-        'default' => 'icon',
-      ],
-    ];
   }
 
   /**

@@ -62,7 +62,6 @@ HTMX behavior will change according to `IslandInterface::build()` return value:
   Always reference a panel by its **ID** in code, config and `attach_to`.
 - `description`: A brief description of the plugin.
 - `type` : The island type from enumeration.
-- `icon`: Icon for this island. Used for View panels.
 - `region`: The region the island renders in, for the types split into
   several: `sidebar` or `main` for `IslandType::View`, `start` or `end` for
   `IslandType::Button`. Structural, never a profile preference, since the

@@ -68,22 +68,6 @@ final class IslandPluginBaseTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
-   * Tests the ::getIcon() method when an icon is defined.
-   */
-  public function testGetIconReturnsDefinedIcon(): void {
-    $plugin = $this->createIsland('test_minimal');
-    self::assertSame('test-icon', $plugin->getIcon());
-  }
-
-  /**
-   * Tests the ::getIcon() method returns NULL when no icon is defined.
-   */
-  public function testGetIconReturnsNullWhenNotDefined(): void {
-    $plugin = $this->createIsland('test_index_raw');
-    self::assertNull($plugin->getIcon());
-  }
-
-  /**
    * Tests the ::keyboardShortcuts() method.
    */
   public function testKeyboardShortcutsReturnsEmptyArray(): void {

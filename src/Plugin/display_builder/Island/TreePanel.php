@@ -19,7 +19,6 @@ use Drupal\display_builder\SourceWithSlotsInterface;
   description: new TranslatableMarkup('Hierarchical schematic view of components and blocks.'),
   type: IslandType::View,
   region: 'sidebar',
-  icon: 'bar-chart-steps',
 )]
 class TreePanel extends ViewPanelBase {
 

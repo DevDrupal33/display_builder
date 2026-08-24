@@ -208,13 +208,6 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
   /**
    * {@inheritdoc}
    */
-  public function getIcon(): ?string {
-    return $this->pluginDefinition['icon'] ?? NULL;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function onAttachToRoot(InstanceInterface $instance, string $node_id): array {
     return [];
   }

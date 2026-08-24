@@ -137,7 +137,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
       $library_islands = $this->entity->isLibraryFlat()
         ? $this->buildFlatLibraryPanels($builder, $library_islands, $builder_data)
         : [
-          $this->buildDynamicTabs($builder, $library_islands, TRUE, $this->entity->getLibraryTabsDisplay()),
+          $this->buildDynamicTabs($builder, $library_islands, TRUE),
           $this->buildPanes($builder, $library_islands, $builder_data),
         ];
     }
@@ -319,14 +319,12 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
       $view_islands_main[$id] = $island;
     }
 
-    $view_panels_display = $this->entity->getViewPanelsDisplay();
-
     if (!empty($view_sidebar_buttons)) {
-      $view_sidebar_buttons = $this->buildStartButtons($builder, $view_sidebar_buttons, $view_panels_display);
+      $view_sidebar_buttons = $this->buildStartButtons($builder, $view_sidebar_buttons);
     }
 
     if (!empty($view_main_tabs)) {
-      $view_main_tabs = $this->buildDynamicTabs($builder, $view_main_tabs, FALSE, $view_panels_display);
+      $view_main_tabs = $this->buildDynamicTabs($builder, $view_main_tabs);
     }
 
     $builder_data = $builder->getCurrentState();
@@ -445,7 +443,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         'id' => \sprintf('%s-contextual', $builder->id()),
         'class' => ['db-form'],
       ],
-      'tabs' => $this->buildDynamicTabs($builder, $contextual_islands, FALSE, $this->entity->getContextualTabsDisplay()),
+      'tabs' => $this->buildDynamicTabs($builder, $contextual_islands),
       'filter' => $filter,
       'panes' => $this->buildPanes($builder, $contextual_islands, $builder->getCurrentState()),
     ];
@@ -707,16 +705,12 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    *   Display builder instance.
    * @param \Drupal\display_builder\Island\IslandInterface[] $islands
    *   An array of island objects for which buttons will be created.
-   * @param string $display
-   *   (Optional) How to show each island: 'label', 'icon' or 'icon_label'.
-   *   Default 'icon_label'.
    *
    * @return array
    *   An array of render arrays for the drawer buttons.
    */
-  private function buildStartButtons(InstanceInterface $builder, array $islands, string $display = 'icon_label'): array {
+  private function buildStartButtons(InstanceInterface $builder, array $islands): array {
     $build = [];
-    ['icon' => $show_icon, 'label' => $show_label] = self::resolvePanelDisplay($display);
 
     foreach ($islands as $island) {
       $island_id = $island->getPluginId();
@@ -726,9 +720,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         '#component' => 'display_builder:button',
         '#props' => [
           'id' => \sprintf('start-btn-%s-%s', $builder->id(), $island_id),
-          'label' => $show_label ? (string) $island->label() : '',
-          'icon' => $show_icon ? $island->getIcon() : NULL,
-          'tooltip' => $show_label ? NULL : (string) $island->label(),
+          'label' => (string) $island->label(),
           'attributes' => [
             'data-open-first-drawer' => TRUE,
             'data-target' => $island_id,
@@ -755,18 +747,14 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    *   The islands to build tabs for.
    * @param bool $contextual
    *   (Optional) Is the tabs contextual? See component for details. Default no.
-   * @param string $display
-   *   (Optional) How to show each island: 'label', 'icon' or 'icon_label'.
-   *   Default 'label'.
    *
    * @return array
    *   The tabs render array.
    */
-  private function buildDynamicTabs(InstanceInterface $builder, array $islands, bool $contextual = FALSE, string $display = 'label'): array {
+  private function buildDynamicTabs(InstanceInterface $builder, array $islands, bool $contextual = FALSE): array {
     // Global id is based on last island.
     $id = '';
     $tabs = [];
-    ['icon' => $show_icon, 'label' => $show_label] = self::resolvePanelDisplay($display);
 
     foreach ($islands as $island) {
       $id = $island_id = $island->getHtmlId((string) $builder->id());
@@ -784,29 +772,11 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
         'title' => $island->label(),
         'url' => '#' . $island_id,
         'attributes' => $attributes,
-        'icon' => $show_icon ? $island->getIcon() : NULL,
-        'show_label' => $show_label,
       ];
     }
 
     // Id is needed for storage tabs state, @see component tabs.js file.
     return $this->buildTabs($id, $tabs, $contextual);
-  }
-
-  /**
-   * Resolves a 'label'/'icon'/'icon_label' display mode into show flags.
-   *
-   * @param string $display
-   *   One of 'label', 'icon' or 'icon_label'.
-   *
-   * @return array
-   *   An associative array with 'icon' and 'label' boolean flags.
-   */
-  private static function resolvePanelDisplay(string $display): array {
-    return [
-      'icon' => \in_array($display, ['icon', 'icon_label'], TRUE),
-      'label' => \in_array($display, ['label', 'icon_label'], TRUE),
-    ];
   }
 
   /**

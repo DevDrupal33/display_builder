@@ -20,15 +20,6 @@ display_builder.profile.*:
     library_flat:
       type: boolean
       label: 'Flatten library panels'
-    library_tabs_display:
-      type: display_builder.panels_display
-      label: 'Show library tabs as'
-    contextual_tabs_display:
-      type: display_builder.panels_display
-      label: 'Show contextual tabs as'
-    view_panels_display:
-      type: display_builder.panels_display
-      label: 'Show View panels as'
     weight:
       type: weight
       label: Weight
@@ -50,32 +41,9 @@ display_builder.islands.*:
 display_builder.islands.state:
   type: display_builder.islands
   mapping:
-    publish:
-      type: display_builder.toolbar.button
-    restore:
-      type: display_builder.toolbar.button
     revert:
-      type: display_builder.toolbar.button
-
-display_builder.islands.history:
-  type: display_builder.islands
-  mapping:
-    undo:
-      type: display_builder.toolbar.button
-    redo:
-      type: display_builder.toolbar.button
-
-display_builder.islands.controls:
-  type: display_builder.islands
-  mapping:
-    highlight:
-      type: display_builder.toolbar.button
-    expand:
-      type: display_builder.toolbar.button
-    theme:
-      type: display_builder.toolbar.button
-    help:
-      type: display_builder.toolbar.button
+      type: boolean
+      label: 'Offer revert'
 
 display_builder.islands.component_library:
   type: display_builder.islands
@@ -142,12 +110,6 @@ display_builder.islands.viewport:
       sequence:
         type: string
 
-display_builder.islands.back:
-  type: display_builder.islands
-  mapping:
-    back:
-      type: display_builder.toolbar.button
-
 display_builder.islands.scaffold:
   type: display_builder.islands
   mapping:
@@ -188,27 +150,3 @@ ui_patterns_slot_source.third_party_setting.styles:
   mapping:
     styles:
       type: ui_styles.selected_mapping
-
-display_builder.panels_display:
-  type: string
-  label: 'Panels display'
-  constraints:
-    Choice:
-      - label
-      - icon
-      - icon_label
-    FullyValidatable: ~
-
-display_builder.toolbar.button:
-  label: 'Label and icon visibility'
-  type: mapping
-  mapping:
-    value:
-      type: string
-      constraints:
-        Choice:
-          - label
-          - icon
-          - icon_label
-          - hidden
-      FullyValidatable: ~

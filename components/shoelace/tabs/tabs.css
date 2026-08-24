@@ -8,12 +8,3 @@
 .shoelace-tabs__tab[active]::part(base) {
   color: var(--db-tab-color-active);
 }
-
-.shoelace-tabs__tab {
-  .with-label {
-    margin-right: 0.5rem;
-  }
-  .without-label {
-    margin-right: 0;
-  }
-}

@@ -97,14 +97,6 @@ interface IslandInterface extends ConfigurableInterface, ContainerFactoryPluginI
   public function getHtmlId(string $builder_id): string;
 
   /**
-   * Returns the icon if any.
-   *
-   * @return string
-   *   The icon string.
-   */
-  public function getIcon(): ?string;
-
-  /**
    * Determine if the Island plugin is applicable.
    *
    * @return bool

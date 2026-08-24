@@ -27,7 +27,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Visibility'),
   description: new TranslatableMarkup('Set visibility conditions for the active component or block.'),
   type: IslandType::Contextual,
-  icon: 'eye',
 )]
 class VisibilityConditionsPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {
 

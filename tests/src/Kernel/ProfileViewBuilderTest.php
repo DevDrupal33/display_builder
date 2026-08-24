@@ -163,7 +163,7 @@ final class ProfileViewBuilderTest extends DisplayBuilderKernelTestBase {
       'builder' => ['status' => TRUE, 'weight' => -6],
       'component_library' => ['status' => TRUE, 'weight' => -9],
       'block_library' => ['status' => TRUE, 'weight' => -8],
-      'controls' => ['status' => TRUE, 'weight' => 0],
+      'expand' => ['status' => TRUE, 'weight' => 0],
       'state' => ['status' => TRUE, 'weight' => 0],
       'menu' => ['status' => TRUE, 'weight' => 0],
       'menu_delete' => ['status' => TRUE, 'weight' => 0],

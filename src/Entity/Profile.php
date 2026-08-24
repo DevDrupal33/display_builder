@@ -67,9 +67,6 @@ use Drupal\user\RoleInterface;
     'description',
     'islands',
     'library_flat',
-    'library_tabs_display',
-    'contextual_tabs_display',
-    'view_panels_display',
     'weight',
   ],
 )]
@@ -106,21 +103,6 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
    * Whether library panels are merged into a single flat list.
    */
   protected bool $library_flat = FALSE;
-
-  /**
-   * How library tabs (Components, Blocks, Presets...) are displayed.
-   */
-  protected string $library_tabs_display = 'label';
-
-  /**
-   * How contextual panel tabs are displayed.
-   */
-  protected string $contextual_tabs_display = 'label';
-
-  /**
-   * How View panels (main area tabs, sidebar buttons) are displayed.
-   */
-  protected string $view_panels_display = 'label';
 
   /**
    * {@inheritdoc}
@@ -191,27 +173,6 @@ final class Profile extends ConfigEntityBase implements ProfileInterface {
    */
   public function isLibraryFlat(): bool {
     return $this->library_flat;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getLibraryTabsDisplay(): string {
-    return $this->library_tabs_display;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getContextualTabsDisplay(): string {
-    return $this->contextual_tabs_display;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getViewPanelsDisplay(): string {
-    return $this->view_panels_display;
   }
 
   /**

@@ -23,7 +23,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   description: new TranslatableMarkup('The Display Builder main island. Build the display with dynamic preview.'),
   type: IslandType::View,
   region: 'main',
-  icon: 'tools',
 )]
 class BuilderPanel extends ViewPanelBase {
 

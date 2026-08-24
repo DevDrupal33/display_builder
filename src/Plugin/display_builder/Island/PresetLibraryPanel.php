@@ -26,7 +26,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Presets'),
   description: new TranslatableMarkup('List of preset, already build group of components.'),
   type: IslandType::Library,
-  icon: 'boxes',
 )]
 class PresetLibraryPanel extends IslandPluginBase implements IslandConfigurationFormInterface {
 

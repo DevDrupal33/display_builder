@@ -8,7 +8,12 @@
 
 Drupal.displayBuilder = Drupal.displayBuilder || {};
 
-const START_DEFAULT_WIDTH = 200;
+// Keep in step with --db-sidebar-width (20rem): this is the width the drawer
+// actually opens at, and the library tabs are labels only, so a narrower
+// default overflows them into sl-tab-group's scroll buttons - which Shoelace
+// renders aria-hidden around a focusable shadow button (axe: aria-hidden-focus).
+// @see components/display_builder/css/variables.css
+const START_DEFAULT_WIDTH = 320;
 const END_DEFAULT_WIDTH = 270;
 const MIN_WIDTH = 150;
 

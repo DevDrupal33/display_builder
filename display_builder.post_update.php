@@ -96,3 +96,94 @@ function display_builder_post_update_4(): void {
     $profile->save();
   }
 }
+
+/**
+ * Drop the label/icon display options and split the Controls island.
+ */
+function display_builder_post_update_5(): void {
+  $config_factory = \Drupal::configFactory();
+
+  foreach ($config_factory->listAll('display_builder.profile.') as $name) {
+    $config = $config_factory->getEditable($name);
+    $islands = $config->get('islands');
+
+    if (!\is_array($islands)) {
+      continue;
+    }
+
+    $islands = _display_builder_post_update_split_controls($islands);
+
+    // Revert is the only button left with a say in whether it shows, and it is
+    // a boolean now: a profile that had hidden it keeps it hidden.
+    if (isset($islands['state'])) {
+      $islands['state']['revert'] = ($islands['state']['revert']['value'] ?? 'label') !== 'hidden';
+    }
+
+    $config->set('islands', _display_builder_post_update_drop_button_values($islands));
+    // Panels and tabs are labels only, so nothing stores how to show them.
+    $config->clear('library_tabs_display')
+      ->clear('contextual_tabs_display')
+      ->clear('view_panels_display')
+      ->save();
+  }
+}
+
+/**
+ * Turns the Controls island of a profile into one island per button.
+ *
+ * A site that turned a button off keeps it off through the island status of
+ * that button rather than through a 'hidden' display value. The whole island
+ * being disabled beats any per-button value it stored.
+ *
+ * @param array $islands
+ *   The profile islands map.
+ *
+ * @return array
+ *   The islands map, with 'controls' replaced by 'expand', 'theme' and 'help'.
+ */
+function _display_builder_post_update_split_controls(array $islands): array {
+  if (!isset($islands['controls'])) {
+    return $islands;
+  }
+
+  $controls = $islands['controls'];
+  $enabled = !empty($controls['status']);
+
+  foreach (['expand', 'theme', 'help'] as $button) {
+    $islands[$button] ??= [
+      'status' => $enabled && ($controls[$button]['value'] ?? 'hidden') !== 'hidden',
+      'weight' => $controls['weight'] ?? 0,
+    ];
+  }
+
+  unset($islands['controls']);
+
+  return $islands;
+}
+
+/**
+ * Drops every stored toolbar button display value.
+ *
+ * No button reads one anymore: every toolbar button is its label.
+ *
+ * @param array $islands
+ *   The profile islands map.
+ *
+ * @return array
+ *   The islands map without the '{button}: {value: …}' entries.
+ */
+function _display_builder_post_update_drop_button_values(array $islands): array {
+  foreach ($islands as $island_id => $configuration) {
+    if (!\is_array($configuration)) {
+      continue;
+    }
+
+    foreach ($configuration as $key => $value) {
+      if (\is_array($value) && \array_keys($value) === ['value']) {
+        unset($islands[$island_id][$key]);
+      }
+    }
+  }
+
+  return $islands;
+}

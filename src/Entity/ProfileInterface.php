@@ -73,28 +73,4 @@ interface ProfileInterface extends ConfigEntityInterface {
    */
   public function isLibraryFlat(): bool;
 
-  /**
-   * How library tabs (Components, Blocks, Presets...) should be displayed.
-   *
-   * @return string
-   *   One of 'label', 'icon' or 'icon_label'.
-   */
-  public function getLibraryTabsDisplay(): string;
-
-  /**
-   * How contextual panel tabs should be displayed.
-   *
-   * @return string
-   *   One of 'label', 'icon' or 'icon_label'.
-   */
-  public function getContextualTabsDisplay(): string;
-
-  /**
-   * How View panels (main area tabs, sidebar buttons) should be displayed.
-   *
-   * @return string
-   *   One of 'label', 'icon' or 'icon_label'.
-   */
-  public function getViewPanelsDisplay(): string;
-
 }

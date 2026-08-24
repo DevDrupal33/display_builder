@@ -28,7 +28,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Components'),
   description: new TranslatableMarkup('List of available components.'),
   type: IslandType::Library,
-  icon: 'puzzle',
 )]
 class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurationFormInterface {
 

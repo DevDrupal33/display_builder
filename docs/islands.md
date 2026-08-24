@@ -75,12 +75,11 @@ Logs based on changes history.
 
 ## Buttons
 
-When a buttons island is made of proper button component it is possible to configure for each of them:
-
-- to be displayed with label and icon
-- to be displayed with label only
-- to be displayed with icon only
-- to not be displayed
+How a toolbar button looks is fixed by the island that builds it, not by the
+profile: Back, Expand, Theme, Help, Undo and Redo are icons, everything else
+is a label. Whether a button shows is the status of the island providing it, so an
+action nobody should reach is turned off in one place instead of being hidden
+in the interface while its endpoint stays open.
 
 ### History
 
@@ -102,11 +101,22 @@ With 3 available buttons:
 - Restore (Restore to last published version)
 - Revert (for entity view override only, revert to default display for this entity)
 
-### Controls
+Revert is the one the profile can turn off, being a power user action.
 
-Control the building experience.
+### Expand
+
+Expand the builder to cover the current viewport.
 
 ![Controls](images/islands/controls.webp)
+
+### Theme
+
+Pick a theme mode as light/dark/system for the display builder. Disabled by
+default.
+
+### Help
+
+Information about the available keyboard shortcuts.
 
 ### Real-time collaboration
 

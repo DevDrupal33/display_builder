@@ -3,22 +3,13 @@
 <sl-tab-group{{ attributes }}>
   {% for tab in tabs %}
     {% set url = tab.url|default(id ~ '-' ~ loop.index) %}
-    {% set icon_only = tab.icon and not tab.show_label %}
-    {% set tab_content %}
-      {% if tab.icon %}
-        <sl-icon name="{{ tab.icon }}" class="{{ tab.show_label ? 'with-label' : 'without-label' }}"></sl-icon>
-      {% endif %}
-      {% if not tab.icon or tab.show_label %}
-        {{ tab.title }}
-      {% endif %}
-    {% endset %}
     {% if loop.first %}
-    <sl-tab slot="nav" class="shoelace-tabs__tab shoelace-tabs__tab--active" data-target="{{ url }}" active{% if icon_only %} title="{{ tab.title }}" aria-label="{{ tab.title }}"{% endif %}{{ tab.attributes }}>
-      {{ tab_content }}
+    <sl-tab slot="nav" class="shoelace-tabs__tab shoelace-tabs__tab--active" data-target="{{ url }}" active{{ tab.attributes }}>
+      {{ tab.title }}
     </sl-tab>
     {% else %}
-    <sl-tab slot="nav" class="shoelace-tabs__tab" data-target="{{ url }}"{% if icon_only %} title="{{ tab.title }}" aria-label="{{ tab.title }}"{% endif %}{{ tab.attributes }}>
-      {{ tab_content }}
+    <sl-tab slot="nav" class="shoelace-tabs__tab" data-target="{{ url }}"{{ tab.attributes }}>
+      {{ tab.title }}
     </sl-tab>
     {% endif %}
   {% endfor %}

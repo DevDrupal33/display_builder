@@ -44,14 +44,16 @@ islands:
   history:
     status: true
     weight: 0
-    undo:
-      value: icon
-    redo:
-      value: icon
   state:
     status: false
     weight: 0
-  controls:
+  expand:
+    status: false
+    weight: 0
+  theme:
+    status: false
+    weight: 0
+  help:
     status: false
     weight: 0
   collaboration:
@@ -91,7 +93,4 @@ islands:
     status: true
     weight: -10
 library_flat: false
-library_tabs_display: icon
-contextual_tabs_display: icon
-view_panels_display: label
 weight: 0

@@ -141,46 +141,11 @@ final class ProfileForm extends EntityForm {
       ];
     }
 
-    $panels_display_options = [
-      'label' => $this->t('Label'),
-      'icon' => $this->t('Icon'),
-      'icon_label' => $this->t('Icon + Label'),
-    ];
-
-    $form['islands'][IslandType::Library->value]['library_tabs_display'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Show library tabs as'),
-      '#description' => $this->t('Show the library tabs (Components, Blocks, Presets...) as label, icon, or both.'),
-      '#options' => $panels_display_options,
-      '#default_value' => $entity->getLibraryTabsDisplay(),
-      '#states' => [
-        'disabled' => [
-          'input[name="library_flat"]' => ['checked' => TRUE],
-        ],
-      ],
-    ];
-
     $form['islands'][IslandType::Library->value]['library_flat'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Flatten library panels'),
       '#description' => $this->t('<mark>Advanced</mark> Merge all enabled library panels (Components, Blocks, Presets...) into a single flat list without tabs, sharing one search box, instead of separate tabs in the builder sidebar.'),
       '#default_value' => $entity->isLibraryFlat(),
-    ];
-
-    $form['islands'][IslandType::View->value]['view_panels_display'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Show panels as'),
-      '#description' => $this->t('Show the View panels (main area tabs and sidebar buttons) as label, icon, or both.'),
-      '#options' => $panels_display_options,
-      '#default_value' => $entity->getViewPanelsDisplay(),
-    ];
-
-    $form['islands'][IslandType::Contextual->value]['contextual_tabs_display'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Show contextual tabs as'),
-      '#description' => $this->t('Show the contextual panel tabs as label, icon, or both.'),
-      '#options' => $panels_display_options,
-      '#default_value' => $entity->getContextualTabsDisplay(),
     ];
 
     $form['status'] = [

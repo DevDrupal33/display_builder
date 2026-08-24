@@ -38,8 +38,6 @@ final class Island extends AttributeBase {
    *   IslandType::Button, as listed by IslandType::regions(). Not
    *   admin-configurable. Omitting it, or naming a region the type does not
    *   have, falls back to IslandType::defaultRegion().
-   * @param string|null $icon
-   *   (Optional) Icon for this island.
    * @param array $modules
    *   (Optional) List of other modules required for this Island.
    * @param array $attach_to
@@ -64,7 +62,6 @@ final class Island extends AttributeBase {
     public readonly ?string $deriver = NULL,
     public readonly ?IslandType $type = NULL,
     public readonly ?string $region = NULL,
-    public readonly ?string $icon = NULL,
     public readonly array $modules = [],
     public readonly array $attach_to = [],
     public readonly bool $pane_header = FALSE,

@@ -35,17 +35,15 @@ islands:
   collaboration:
     status: false
     weight: 0
-  controls:
+  expand:
     status: true
     weight: 0
-    highlight:
-      value: label
-    expand:
-      value: label
-    theme:
-      value: hidden
-    help:
-      value: hidden
+  theme:
+    status: false
+    weight: 0
+  help:
+    status: false
+    weight: 0
   history:
     status: false
     weight: 0
@@ -152,7 +150,4 @@ islands:
     status: false
     weight: 0
 library_flat: false
-library_tabs_display: icon
-contextual_tabs_display: icon
-view_panels_display: label
 weight: 0

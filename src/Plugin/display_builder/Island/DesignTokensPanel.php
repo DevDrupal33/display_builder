@@ -29,7 +29,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   description: new TranslatableMarkup('Override CSS variables for the active component or block.'),
   type: IslandType::Contextual,
   modules: ['ui_skins'],
-  icon: 'braces',
 )]
 class DesignTokensPanel extends IslandPluginBase implements IslandWithFormInterface, RenderableAltererInterface {
 

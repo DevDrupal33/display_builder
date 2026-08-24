@@ -28,7 +28,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   label: new TranslatableMarkup('Blocks'),
   description: new TranslatableMarkup('List of available blocks.'),
   type: IslandType::Library,
-  icon: 'bricks',
 )]
 class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationFormInterface {
 

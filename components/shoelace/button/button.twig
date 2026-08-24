@@ -2,9 +2,9 @@
 {% set attributes = (variant and variant != 'default') ? attributes.setAttribute('variant', variant) : attributes %}
 {% set attributes = id ? attributes.setAttribute('id', 'button-' ~ id) : attributes %}
 
-{# An icon-only button - the profile's display mode hides the label and moves it
-   to the tooltip instead (@see ProfileViewBuilder::buildStartButtons()) - has no
-   accessible name of its own: a tooltip only ever describes, it never names, so
+{# An icon-only button - one passing an icon and no label, leaving the tooltip to
+   say what it does - has no accessible name of its own: a tooltip only ever
+   describes, it never names, so
    it is announced as bare "button" and axe reports button-name / link-name
    (critical). The name has to come from *inside* the button: what actually takes
    focus is the <button part="base"> in sl-button's shadow root, which an

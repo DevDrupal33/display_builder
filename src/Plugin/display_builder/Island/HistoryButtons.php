@@ -7,7 +7,7 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\Island\IslandPluginToolbarButtonConfigurationBase;
+use Drupal\display_builder\Island\IslandPluginBase;
 use Drupal\display_builder\Island\IslandReloadEventsTrait;
 use Drupal\display_builder\Island\IslandType;
 
@@ -22,7 +22,7 @@ use Drupal\display_builder\Island\IslandType;
   type: IslandType::Button,
   region: 'end',
 )]
-class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
+class HistoryButtons extends IslandPluginBase {
 
   use IslandReloadEventsTrait;
 
@@ -30,38 +30,14 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
    * {@inheritdoc}
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    $buttons = [
-      $this->isButtonEnabled('undo') ? $this->buildUndoButton($builder) : [],
-      $this->isButtonEnabled('redo') ? $this->buildRedoButton($builder) : [],
-    ];
-
-    if (empty(\array_filter($buttons))) {
-      return [];
-    }
-
     return [
       '#type' => 'component',
       '#component' => 'display_builder:button_group',
       '#slots' => [
-        'buttons' => $buttons,
-      ],
-    ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function hasButtons(): array {
-    return [
-      'undo' => [
-        'title' => $this->t('Undo'),
-        'description' => $this->t('Undo action.'),
-        'default' => 'icon',
-      ],
-      'redo' => [
-        'title' => $this->t('Redo'),
-        'description' => $this->t('Redo action.'),
-        'default' => 'icon',
+        'buttons' => [
+          $this->buildUndoButton($builder),
+          $this->buildRedoButton($builder),
+        ],
       ],
     ];
   }
@@ -78,7 +54,7 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
   private function buildUndoButton(InstanceInterface $builder): array {
     $past = $builder->getPast();
     $undo = $this->buildButton(
-      $this->showLabel('undo') ? $this->t('Undo') : '',
+      '',
       'undo',
       'arrow-counterclockwise',
       $this->t('Undo (shortcut: Ctrl/Cmd+Z)'),
@@ -104,7 +80,7 @@ class HistoryButtons extends IslandPluginToolbarButtonConfigurationBase {
   private function buildRedoButton(InstanceInterface $builder): array {
     $future = $builder->getFuture();
     $redo = $this->buildButton(
-      $this->showLabel('redo') ? $this->t('Redo') : '',
+      '',
       'redo',
       'arrow-clockwise',
       $this->t('Redo (shortcut: Ctrl/Cmd+Shift+Z)'),

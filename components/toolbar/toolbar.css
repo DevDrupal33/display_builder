@@ -101,11 +101,6 @@
   }
 }
 
-.db-toolbar sl-tab-group {
-  /* Tabs must not be taller than the available space */
-  /* max-height: calc(var(--toolbar-height) - var(--db-space-12) * 2); */
-}
-
 .db-toolbar sl-tab::part(base) {
   height: var(--toolbar-height);
   padding: var(--db-space-12) var(--db-space-12);
@@ -124,6 +119,19 @@
   .db-toolbar__end > .db-island:not(:first-child, dialog, :empty) {
     margin-left: var(--db-space-4);
   }
+}
+
+.db-island-state sl-dropdown > sl-button::part(base) {
+  border-left: 0 none;
+}
+
+.db-state-menu {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.db-state-menu ::part(label) {
+  margin-left: var(--db-space-4);
 }
 
 /* The dropdown half of the split state button, holding Restore and Revert

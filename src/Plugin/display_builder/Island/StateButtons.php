@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
 use Drupal\display_builder\DisplayBuildableOverrideInterface;
 use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\Island\IslandPluginToolbarButtonConfigurationBase;
+use Drupal\display_builder\Island\IslandConfigurationFormInterface;
+use Drupal\display_builder\Island\IslandConfigurationFormTrait;
+use Drupal\display_builder\Island\IslandPluginBase;
 use Drupal\display_builder\Island\IslandReloadEventsTrait;
 use Drupal\display_builder\Island\IslandType;
 
@@ -33,25 +36,52 @@ use Drupal\display_builder\Island\IslandType;
   type: IslandType::Button,
   region: 'end',
 )]
-class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
+class StateButtons extends IslandPluginBase implements IslandConfigurationFormInterface {
 
+  use IslandConfigurationFormTrait;
   use IslandReloadEventsTrait;
 
   /**
    * {@inheritdoc}
    */
+  public function defaultConfiguration(): array {
+    return ['revert' => TRUE];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
+    $form['revert'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Offer revert'),
+      '#description' => $this->t('Revert drops the override and puts the display back on its default. A power user action: turn it off on profiles where losing an override by accident is worse than having to rebuild it.'),
+      '#default_value' => $this->offersRevert(),
+    ];
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function configurationSummary(): array {
+    return [
+      $this->offersRevert()
+        ? $this->t('Publish, Restore and Revert.')
+        : $this->t('Publish and Restore.'),
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    $buttons = $this->buildStateButtons($builder);
-
-    if (empty($buttons)) {
-      return [];
-    }
-
     return [
       '#type' => 'component',
       '#component' => 'display_builder:button_group',
       '#slots' => [
-        'buttons' => $buttons,
+        'buttons' => $this->buildStateButtons($builder),
       ],
     ];
   }
@@ -74,57 +104,36 @@ class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
    */
   protected function buildStateButtons(InstanceInterface $instance): array {
     $instance_id = (string) $instance->id();
-    $buttons = [];
     $saveIsCurrent = $instance->isPublishedPresent();
-
-    if ($this->isButtonEnabled('publish')) {
-      $buttons[] = $this->htmxEvents->onPublish($this->buildPublishButton($saveIsCurrent), $instance_id);
-    }
-
-    $hasRestore = $this->isButtonEnabled('restore');
-    $hasRevert = $this->isButtonEnabled('revert');
+    $buttons = [
+      $this->htmxEvents->onPublish($this->buildPublishButton($saveIsCurrent), $instance_id),
+    ];
     $items = [];
 
-    if ($hasRestore && !$saveIsCurrent) {
+    if (!$saveIsCurrent) {
       $items[] = $this->htmxEvents->onReset($this->buildRestoreItem(), $instance_id);
     }
 
-    if ($hasRevert && $this->isOverridden($instance)) {
+    if ($this->offersRevert() && $this->isOverridden($instance)) {
       $items[] = $this->htmxEvents->onRevert($this->buildRevertItem(), $instance_id);
     }
 
     // Availability changes with the state, the profile configuration does
-    // not: the caret is there whenever either action is turned on, so the
-    // group keeps one shape and only its two halves gray out.
-    if ($hasRestore || $hasRevert) {
-      $buttons[] = $this->buildStateDropdown($items);
-    }
+    // not: the caret is always there, so the group keeps one shape and only
+    // its two halves gray out.
+    $buttons[] = $this->buildStateDropdown($items);
 
     return $buttons;
   }
 
   /**
-   * {@inheritdoc}
+   * Whether the profile offers the revert action.
+   *
+   * @return bool
+   *   TRUE when Revert is listed in the dropdown, FALSE otherwise.
    */
-  protected function hasButtons(): array {
-    return [
-      'publish' => [
-        'title' => $this->t('Publish'),
-        'default' => 'label',
-      ],
-      'restore' => [
-        'title' => $this->t('Restore'),
-        'default' => 'label',
-        'options' => ['label', 'hidden'],
-        'description' => $this->t('Shown in the dropdown next to Publish, which is too narrow to read an icon on its own.'),
-      ],
-      'revert' => [
-        'title' => $this->t('Revert'),
-        'default' => 'label',
-        'options' => ['label', 'hidden'],
-        'description' => $this->t('Shown in the dropdown next to Publish, which is too narrow to read an icon on its own.'),
-      ],
-    ];
+  protected function offersRevert(): bool {
+    return (bool) ($this->getConfiguration()['revert'] ?? TRUE);
   }
 
   /**
@@ -160,9 +169,9 @@ class StateButtons extends IslandPluginToolbarButtonConfigurationBase {
    */
   private function buildPublishButton(bool $published): array {
     $button = $this->buildButton(
-      $this->showLabel('publish') ? $this->t('Publish') : '',
+      $this->t('Publish'),
       'publish',
-      $this->showIcon('publish') ? 'upload' : '',
+      NULL,
       $published ? $this->t('This display is already published in its current state.') : $this->t('Publish this display in current state. (shortcut: Shift+P)'),
       // No shortcut while there is nothing to publish: keyboard.js works by
       // clicking the element, and the help overlay would otherwise advertise

@@ -21,7 +21,6 @@ use Drupal\display_builder\Island\IslandType;
   label: new TranslatableMarkup('[Test] Minimal'),
   description: new TranslatableMarkup('Minimal island for testing base class behavior.'),
   type: IslandType::View,
-  icon: 'test-icon',
 )]
 class TestMinimalIsland extends IslandPluginBase {
 

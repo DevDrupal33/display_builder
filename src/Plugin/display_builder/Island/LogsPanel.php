@@ -23,7 +23,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   description: new TranslatableMarkup('Logs based on changes history.'),
   type: IslandType::View,
   region: 'main',
-  icon: 'list-columns-reverse',
 )]
 class LogsPanel extends IslandPluginBase {
 

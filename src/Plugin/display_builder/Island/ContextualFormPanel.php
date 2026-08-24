@@ -24,7 +24,6 @@ use Drupal\display_builder\SourceWithSlotsInterface;
   label: new TranslatableMarkup('Config'),
   description: new TranslatableMarkup('Configure the active component or block.'),
   type: IslandType::Contextual,
-  icon: 'sliders',
 )]
 class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInterface {
 
