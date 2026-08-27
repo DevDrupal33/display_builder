@@ -1,6 +1,6 @@
 name: Link wrapper
 description: A hyperlink to anything a URL can address.
-status: experimental
+status: deprecated
 group: Generic
 slots:
   content:

@@ -2,7 +2,7 @@ name: Inline text
 description: Define the meaning, structure, or style of a word, line, or any arbitrary piece of text.
 links:
   - 'https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Content_categories#phrasing_content'
-status: experimental
+status: deprecated
 group: Generic
 props:
   type: object

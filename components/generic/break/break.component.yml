@@ -1,6 +1,6 @@
 name: Break
 description: Insert a break in text.
-status: experimental
+status: deprecated
 group: Generic
 props:
   type: object

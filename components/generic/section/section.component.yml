@@ -1,6 +1,6 @@
 name: Section
 description: Organize the document content into logical pieces.
-status: experimental
+status: deprecated
 group: Generic
 slots:
   content:
