@@ -29,6 +29,8 @@ The field can be changed later:
 
 ![Activate 2](images/overrides-activate-2.webp)
 
+The field cardinality is limiting the number of sources we can put at the display root level.
+
 It is not possible to pick the same field in different displays.
 
 ## Use Display Builder in the content

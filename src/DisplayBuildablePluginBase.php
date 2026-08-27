@@ -263,6 +263,15 @@ abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase impleme
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getRootCardinality(): int {
+    // By default, buildables allow an unlimited number of sources at the
+    // root level.
+    return self::CARDINALITY_UNLIMITED;
+  }
+
+  /**
    * Get the instance ID prefix this plugin's IDs start with.
    *
    * Static, and staying that way until there is a manager to ask: every

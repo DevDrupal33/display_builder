@@ -14,6 +14,11 @@ use Drupal\ui_patterns\SourceInterface;
  */
 interface SourceWithSlotsInterface extends SourceInterface {
 
+  // Value indicating a slot accepts an unlimited number of values.
+  // @see \Drupal\Core\Field\FieldStorageDefinitionInterface
+  // @see \Drupal\display_builder\DisplayBuildableInterface
+  public const CARDINALITY_UNLIMITED = -1;
+
   /**
    * Gets information about the slots.
    *
@@ -53,6 +58,14 @@ interface SourceWithSlotsInterface extends SourceInterface {
    *   A list of slot sources.
    */
   public function getSlotValue(string $slot_id): array;
+
+  /**
+   * Get the maximum number of sources which can be put in the slot.
+   *
+   * @return int
+   *   Any number which is not a strictly positive integer means 'unlimited'.
+   */
+  public function getSlotCardinality(string $slot_id): int;
 
   /**
    * Set slot values.

@@ -195,6 +195,10 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       return FALSE;
     }
 
+    if (!$tree->isNodeInRoot($node_id) && $this->isRootFull()) {
+      throw new \OutOfRangeException();
+    }
+
     if (!$tree->moveToRoot($node_id, $position)) {
       return FALSE;
     }
@@ -216,11 +220,16 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       return FALSE;
     }
 
+    $parentData = $tree->getNode($parent_id);
+
+    if ($parentData && !$tree->isNodeInSlot($node_id, $parent_id, $slot_id) && $tree->isSlotFull($parentData, $slot_id)) {
+      throw new \OutOfRangeException();
+    }
+
     if (!$tree->moveToSlot($node_id, $parent_id, $slot_id, $position)) {
       return FALSE;
     }
 
-    $parentData = $tree->getNodeData($parent_id);
     $log = new TranslatableMarkup('Move @label to slot @slot_id in @parent_label', [
       '@label' => $this->nodeLabel($data),
       '@slot_id' => $slot_id,
@@ -236,6 +245,10 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function attachToRoot(int $position, string $source_id, array $data, array $third_party_settings = []): string {
+    if ($this->isRootFull()) {
+      throw new \OutOfRangeException();
+    }
+
     $tree = $this->getSourceTree();
     $node_id = $tree->attachToRoot($position, $source_id, $data);
 
@@ -257,6 +270,12 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   public function attachToSlot(string $parent_id, string $slot_id, int $position, string $source_id, array $data, array $third_party_settings = []): string {
     $tree = $this->getSourceTree();
+    $parentData = $tree->getNode($parent_id);
+
+    if ($parentData && $tree->isSlotFull($parentData, $slot_id)) {
+      throw new \OutOfRangeException();
+    }
+
     $node_id = $tree->attachToSlot($parent_id, $slot_id, $position, $source_id, $data);
 
     if (!$node_id) {
@@ -270,7 +289,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     }
 
     $nodeData = $tree->getNodeData($node_id);
-    $parentData = $tree->getNodeData($parent_id);
     $log = new TranslatableMarkup('Attach @label to slot @slot_id in @parent_label', [
       '@label' => $this->nodeLabel($nodeData ?? []),
       '@slot_id' => $slot_id,
@@ -525,6 +543,22 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     $data = self::normalizeRootLevel($data);
 
     return \crc32((string) \serialize($data));
+  }
+
+  /**
+   * Is the root full?
+   *
+   * @return bool
+   *   Is it full or not?
+   */
+  private function isRootFull(): bool {
+    $cardinality = $this->getBuildablePlugin()->getRootCardinality();
+
+    if ($cardinality < 0) {
+      return FALSE;
+    }
+
+    return \count($this->getCurrentState()) >= $cardinality;
   }
 
   /**

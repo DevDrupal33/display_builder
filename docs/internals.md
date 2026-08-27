@@ -96,9 +96,10 @@ Overview:
 
 Display Builder integration with Page Layouts is a `ContextProvider` for Source plugins:
 
-| Context             | Type                 |
-| ------------------- | -------------------- |
-| context_requirement | "page" literal       |
+| Context             | Type           |
+| ------------------- | -------------- |
+| page                | `url`          |
+| context_requirement | "page" literal |
 
 ### Permanent storage
 

@@ -141,6 +141,33 @@
   }
 
   /**
+   * Check if the dropzone is full according to constraints.
+   *
+   * @param {HTMLElement} element - The dropzone element.
+   *
+   * @return {boolean} Is the dropzone full or not.
+   */
+  function isDropzoneFull(element) {
+    if ('maxItems' in element.dataset) {
+      return element.children.length >= parseInt(element.dataset.maxItems, 10);
+    }
+    return false;
+  }
+
+  /**
+   * Check if the dropzone is locked.
+   *
+   * @param {HTMLElement} element - The dropzone element.
+   *
+   * @return {boolean} Is the dropzone locked or not.
+   */
+  function isDropzoneLocked(element) {
+    // There will be other mechanisms locking the dropzone (lock panel, SDC
+    // expected constraint...)
+    return isDropzoneFull(element);
+  }
+
+  /**
    * Set up sortable dropzone for the display builder.
    *
    * @param {HTMLElement} dropzoneRoot - The element containing dropzone.
@@ -185,7 +212,9 @@
         // and its rows can't be dragged out either. `put: true` would accept
         // from any group regardless of name, which is exactly what let a
         // Canvas node drop into the tree before.
-        put: (to, from) => to.options.group.name === from.options.group.name,
+        put: (to, from) =>
+          to.options.group.name === from.options.group.name &&
+          !isDropzoneLocked(to.el),
       },
       // Built-in scroll is off: it can't handle this builder's three different
       // scroll containers. We drive autoscroll ourselves from the drag pointer

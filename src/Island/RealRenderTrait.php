@@ -207,6 +207,8 @@ trait RealRenderTrait {
       $dropzone['#slots']['content'] = $this->digFromSlot($instance, $sources);
     }
 
+    $dropzone = $this->addDropzoneConstraints($dropzone, $source, $slot_id);
+
     return $this->htmxEvents->onSlotDrop($dropzone, $builder_id, $this->getPluginID(), $node_id, $slot_id);
   }
 

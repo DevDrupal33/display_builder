@@ -111,7 +111,14 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     if ($request->request->has('node_id')) {
       $node_id = (string) $request->request->get('node_id');
 
-      if (!$display_builder_instance->moveToRoot($node_id, $position)) {
+      try {
+        $success = $display_builder_instance->moveToRoot($node_id, $position);
+      }
+      catch (\OutOfRangeException) {
+        return $this->respondCardinalityFull($display_builder_instance, $request, $this->t('[attachToRoot] root is full'));
+      }
+
+      if (!$success) {
         $message = $this->t('[attachToRoot] moveToRoot failed with invalid data');
         $debug = [
           'request' => $request->request->all(),
@@ -126,7 +133,13 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     elseif ($request->request->has('source_id')) {
       $source_id = (string) $request->request->get('source_id');
       $data = $request->request->has('source') ? \json_decode((string) $request->request->get('source'), TRUE) : [];
-      $node_id = $display_builder_instance->attachToRoot($position, $source_id, $data);
+
+      try {
+        $node_id = $display_builder_instance->attachToRoot($position, $source_id, $data);
+      }
+      catch (\OutOfRangeException) {
+        return $this->respondCardinalityFull($display_builder_instance, $request, $this->t('[attachToRoot] root is full'));
+      }
     }
     else {
       $message = '[attachToRoot] Missing content (source_id, node_id or preset_id)';
@@ -169,7 +182,17 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     if ($request->request->has('node_id')) {
       $node_id = (string) $request->request->get('node_id');
 
-      if (!$display_builder_instance->moveToSlot($node_id, $parent_id, $slot, $position)) {
+      try {
+        $success = $display_builder_instance->moveToSlot($node_id, $parent_id, $slot, $position);
+      }
+      catch (\OutOfRangeException) {
+        return $this->respondCardinalityFull($display_builder_instance, $request, $this->t('[attachToSlot] slot is full'), [
+          'node_id' => $node_id,
+          'slot' => $slot,
+        ]);
+      }
+
+      if (!$success) {
         $message = $this->t('[attachToSlot] moveToSlot failed with invalid data');
         $debug = [
           'node_id' => $node_id,
@@ -186,7 +209,15 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     elseif ($request->request->has('source_id')) {
       $source_id = (string) $request->request->get('source_id');
       $data = $request->request->has('source') ? \json_decode((string) $request->request->get('source'), TRUE) : [];
-      $node_id = $display_builder_instance->attachToSlot($parent_id, $slot, $position, $source_id, $data);
+
+      try {
+        $node_id = $display_builder_instance->attachToSlot($parent_id, $slot, $position, $source_id, $data);
+      }
+      catch (\OutOfRangeException) {
+        return $this->respondCardinalityFull($display_builder_instance, $request, $this->t('[attachToSlot] slot is full'), [
+          'slot' => $slot,
+        ]);
+      }
     }
     else {
       $message = $this->t('[attachToSlot] Missing content (component_id, block_id or node_id)');
@@ -211,6 +242,18 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       $node_id,
       $parent_id,
     );
+  }
+
+  /**
+   * Builds the error response for a root or slot cardinality limit.
+   */
+  private function respondCardinalityFull(InstanceInterface $display_builder_instance, Request $request, TranslatableMarkup $message, array $extra_debug = []): array {
+    $debug = $extra_debug + [
+      'request' => $request->request->all(),
+      'instance' => $display_builder_instance,
+    ];
+
+    return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
   }
 
   /**

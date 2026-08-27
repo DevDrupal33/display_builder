@@ -43,6 +43,11 @@ final class TestDisplayBuildablePlugin extends DisplayBuildablePluginBase {
   private ?string $instanceId;
 
   /**
+   * Cardinality.
+   */
+  private int $cardinality = self::CARDINALITY_UNLIMITED;
+
+  /**
    * {@inheritdoc}
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition) {
@@ -54,6 +59,8 @@ final class TestDisplayBuildablePlugin extends DisplayBuildablePluginBase {
     // no configuration at all.
     $this->instanceId = $configuration['instance_id'] ?? NULL;
     $this->profile = Profile::load($configuration['profile_id'] ?? '');
+    // For ApiControllerConstraintsTest.
+    $this->cardinality = $configuration['cardinality'] ?? self::CARDINALITY_UNLIMITED;
   }
 
   /**
@@ -143,6 +150,13 @@ final class TestDisplayBuildablePlugin extends DisplayBuildablePluginBase {
    */
   public function getRuntimeContexts(array $unqualified_context_ids): array {
     return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRootCardinality(): int {
+    return $this->cardinality;
   }
 
 }

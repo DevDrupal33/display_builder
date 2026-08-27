@@ -197,6 +197,14 @@ class PageLayoutSource extends SourcePluginBase implements SourceWithSlotsInterf
   /**
    * {@inheritdoc}
    */
+  public function getSlotCardinality(string $slot_id): int {
+    // This source doesn't manage slot cardinality.
+    return self::CARDINALITY_UNLIMITED;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function setSlotRenderable(array $build, string $slot_id, array $slot): array {
     $build['content'][$slot_id] = $slot;
 

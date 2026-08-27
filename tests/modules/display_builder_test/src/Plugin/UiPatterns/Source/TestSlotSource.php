@@ -70,6 +70,14 @@ class TestSlotSource extends SourcePluginBase implements SourceWithSlotsInterfac
   /**
    * {@inheritdoc}
    */
+  public function getSlotCardinality(string $slot_id): int {
+    // This source doesn't manage slot cardinality.
+    return self::CARDINALITY_UNLIMITED;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function setSlotValue(string $slot_id, array $slot): array {
     return $this->settings;
   }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
+use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuilderHtmx;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandPluginBase;
@@ -179,7 +180,41 @@ abstract class ViewPanelBase extends IslandPluginBase {
       ],
     ];
 
+    // For root dropzone, constraints can come from the buildable plugin.
+    // Example: the cardinality of the field storage in EntityViewOverride.
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\PluginItem $field */
+    $field = $builder->get('buildable')->first();
+
+    if (!empty($field->getString())) {
+      /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+      $buildable = $field->getInstance();
+      $build = $this->addDropzoneConstraints($build, $buildable, '');
+    }
+
     return $this->htmxEvents->onRootDrop($build, $builder_id, $this->getPluginID());
+  }
+
+  /**
+   * Add dropzone constraints.
+   *
+   * @param array $dropzone
+   *   The already built dropzone render array.
+   * @param \Drupal\display_builder\DisplayBuildableInterface|\Drupal\display_builder\SourceWithSlotsInterface $source
+   *   The source or the buildable.
+   * @param string $slot_id
+   *   Slot id.
+   *
+   * @return array
+   *   The altered dropzone render array.
+   */
+  protected function addDropzoneConstraints(array $dropzone, DisplayBuildableInterface|SourceWithSlotsInterface $source, string $slot_id): array {
+    $cardinality = ($source instanceof DisplayBuildableInterface) ? $source->getRootCardinality() : $source->getSlotCardinality($slot_id);
+
+    if ($cardinality >= 0) {
+      $dropzone['#attributes']['data-max-items'] = $cardinality;
+    }
+
+    return $dropzone;
   }
 
   /**
@@ -354,7 +389,7 @@ abstract class ViewPanelBase extends IslandPluginBase {
     $component_id = $source->getPluginID();
     $label = $source->label();
 
-    if ($source instanceof SourceWithChoicesInterface) {
+    if (($source instanceof SourceWithChoicesInterface) && isset($data['source'])) {
       $component_id = $source->getChoice($data['source']);
       $result = $this->slotSourceProxy->getLabelWithSummary($data, [], TRUE);
       $label = $result['label'] ?? $source->label();

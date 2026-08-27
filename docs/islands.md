@@ -17,7 +17,19 @@ Display Builder is shipped with those ones by default:
 
 ## View panels
 
-### Libraries
+### For the sidebar
+
+#### Instances
+
+List all displays available to build and jump to any of them.
+
+#### Navigator
+
+Hierarchical view of components and blocks.
+
+![Navigator](images/islands/tree.webp)
+
+#### Libraries
 
 Pick elements from libraries and drop them in the display.
 
@@ -29,13 +41,15 @@ By default, 3 libraries are available:
 
 ![Library](images/islands/library.webp)
 
-### Canvas
+### For the main area
+
+#### Canvas
 
 The Display Builder main island. Build the display with dynamic preview.
 
 ![Canvas](images/islands/builder.webp)
 
-### Scaffold
+#### Scaffold
 
 Schematic hierarchical view of elements without preview.
 
@@ -53,25 +67,19 @@ at a glance. Everything else stays a plain wireframe card.
 Which components count as "layout" is theme-specific, hence a configurable
 list rather than a hardcoded one — set it in the island's configuration form.
 
-### Navigator
-
-Hierarchical view of components and blocks.
-
-![Navigator](images/islands/tree.webp)
-
-### Preview
-
-Show a real time preview of the display.
-
-![Preview](images/islands/preview.webp)
-
-### Logs
+#### Logs
 
 Logs based on changes history.
 
 ![Logs](images/islands/logs.webp)
 
-> 🚧 2025-11-09: History steps are currently limited to 10.
+> 🚧 2026-08-25: Revisions are currently limited to 20.
+
+## Preview
+
+Show a real time preview of the display.
+
+![Preview](images/islands/preview.webp)
 
 ## Buttons
 
@@ -81,15 +89,23 @@ is a label. Whether a button shows is the status of the island providing it, so 
 action nobody should reach is turned off in one place instead of being hidden
 in the interface while its endpoint stays open.
 
-### History
+### At the start of the toolbar
+
+#### Save status
+
+A small indicator confirming the last action reached the stored state.
+
+### At the end of the toolbar
+
+#### History
 
 Undo and redo changes.
 
 ![History](images/islands/history.webp)
 
-> 🚧 2025-11-09: History steps are currently limited to 10.
+> 🚧 2026-08-25: Revisions are currently limited to 20.
 
-### State
+#### State
 
 Publish and reset the display.
 
@@ -103,28 +119,28 @@ With 3 available buttons:
 
 Revert is the one the profile can turn off, being a power user action.
 
-### Expand
+#### Expand
 
 Expand the builder to cover the current viewport.
 
 ![Controls](images/islands/controls.webp)
 
-### Theme
+#### Theme
 
 Pick a theme mode as light/dark/system for the display builder. Disabled by
 default.
 
-### Help
+#### Help
 
 Information about the available keyboard shortcuts.
 
-### Real-time collaboration
+#### Real-time collaboration
 
 See [real-time collaboration documentation](realtime-collaboration.md).
 
 ![Preview](images/islands/back.webp)
 
-### Back
+#### Back
 
 Exit the display builder and go back to admin UI.
 

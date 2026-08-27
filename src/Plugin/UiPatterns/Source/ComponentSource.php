@@ -144,6 +144,26 @@ class ComponentSource extends UpstreamComponentSource implements SourceWithSlots
   /**
    * {@inheritdoc}
    */
+  public function getSlotCardinality(string $slot_id): int {
+    $component_id = $this->settings['component']['component_id'] ?? '';
+
+    if (!$component_id) {
+      return self::CARDINALITY_UNLIMITED;
+    }
+
+    try {
+      $definition = $this->componentManager->getDefinition($component_id);
+    }
+    catch (\Throwable $th) {
+      return self::CARDINALITY_UNLIMITED;
+    }
+
+    return $definition['slots'][$slot_id]['maxItems'] ?? self::CARDINALITY_UNLIMITED;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function setSlotRenderable(array $build, string $slot_id, array $slot): array {
     $build['#slots'][$slot_id] = $slot;
     // Prevent the slot to be generated again.

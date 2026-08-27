@@ -152,6 +152,40 @@ final class SourceTree {
   }
 
   /**
+   * Is this node in the tree root?
+   *
+   * @param string $node_id
+   *   The node ID.
+   *
+   * @return bool
+   *   In the slot or not.
+   */
+  public function isNodeInRoot(string $node_id): bool {
+    return isset($this->structure[$node_id])
+      && ($this->structure[$node_id]['parent'] === NULL)
+      && ($this->structure[$node_id]['slot'] === NULL);
+  }
+
+  /**
+   * Is this node in this slot?
+   *
+   * @param string $node_id
+   *   The node ID.
+   * @param string $parent_id
+   *   The parent node ID.
+   * @param string $slot_id
+   *   The slot.
+   *
+   * @return bool
+   *   In the slot or not.
+   */
+  public function isNodeInSlot(string $node_id, string $parent_id, string $slot_id): bool {
+    return isset($this->structure[$node_id])
+      && ($this->structure[$node_id]['parent'] === $parent_id)
+      && ($this->structure[$node_id]['slot'] === $slot_id);
+  }
+
+  /**
    * Attach a new source to a slot.
    *
    * @param string $parent_id
@@ -385,6 +419,35 @@ final class SourceTree {
     $this->nodes[$node_id]['third_party_settings'][$island_id] = $data;
 
     return TRUE;
+  }
+
+  /**
+   * Is the slot full?
+   *
+   * @param array $data
+   *   The source data from the tree.
+   * @param string $slot_id
+   *   The slot to check.
+   *
+   * @return bool
+   *   Is the slot full or not?
+   */
+  public function isSlotFull(array $data, string $slot_id): bool {
+    if (!isset($data['source_id'])) {
+      return FALSE;
+    }
+    $source = $this->getSourcePlugin($data['source_id'], $data['source'] ?? []);
+
+    if (!($source instanceof SourceWithSlotsInterface)) {
+      return FALSE;
+    }
+    $cardinality = $source->getSlotCardinality($slot_id);
+
+    if ($cardinality < 0) {
+      return FALSE;
+    }
+
+    return \count($source->getSlotValue($slot_id)) >= $cardinality;
   }
 
   /**

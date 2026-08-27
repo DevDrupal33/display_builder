@@ -282,6 +282,19 @@ final class EntityViewOverride extends DisplayBuildablePluginBase implements Dis
   /**
    * {@inheritdoc}
    */
+  public function getRootCardinality(): int {
+    $field = $this->getField();
+
+    if (!$field) {
+      return self::CARDINALITY_UNLIMITED;
+    }
+
+    return $field->getFieldDefinition()->getFieldStorageDefinition()->getCardinality();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function checkAccess(string $instance_id, AccountInterface $account): AccessResultInterface {
     [, $entity_type_id, $entity_id] = \explode('__', $instance_id);
     $entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->load($entity_id);

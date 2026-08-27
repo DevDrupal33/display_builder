@@ -53,7 +53,89 @@ final class DropzoneTest extends DisplayBuilderKernelTestBase {
    */
   public function testBuild(): void {
     $node_id = \bin2hex(\random_bytes(8));
+    $instance = $this->createInstance();
+    $builder_panel = $this->createIslandPlugin('builder');
+    $this->testBuildInPanel($builder_panel, $instance, $node_id);
+    $scaffold = $this->createIslandPlugin('scaffold');
+    $this->testBuildInPanel($scaffold, $instance, $node_id);
+  }
+
+  /**
+   * Test the ::build() method when buildable plugin has constraints.
+   */
+  public function testConstraintsOnRoot(): void {
     $instance = Instance::create([
+      'id' => 'test_instance',
+      // Because there is no proper Drupal integration to rely on, we set the
+      // instance ID and the profile entity themselves as plugin configuration.
+      'buildable' => [
+        'plugin_id' => 'test',
+        'configuration' => [
+          'instance_id' => 'test_instance',
+          // This is what we are testing.
+          'cardinality' => 2,
+        ],
+      ],
+    ]);
+    $panel = $this->createIslandPlugin('builder');
+    $build = $panel->build($instance, [], []);
+    self::assertSame(2, $build['#attributes']['data-max-items']);
+
+    $panel = $this->createIslandPlugin('scaffold');
+    $build = $panel->build($instance, [], []);
+    self::assertSame(2, $build['#attributes']['data-max-items']);
+  }
+
+  /**
+   * Test the ::build() method when component have constraint.
+   */
+  public function testConstraintsOnSlots(): void {
+    $instance = $this->createInstance();
+    $node_id = \bin2hex(\random_bytes(8));
+    $data = [
+      [
+        'source_id' => 'component',
+        'node_id' => $node_id,
+        'source' => [
+          'component' => [
+            'component_id' => 'display_builder_test:test_slot_constraints',
+            'slots' => [
+              'slot_1' => [
+                'sources' => [
+                  [
+                    'source_id' => 'component',
+                    'node_id' => $node_id . '_1',
+                    'source' => [
+                      'component' => [
+                        'component_id' => 'display_builder_test:slot_1',
+                        'slots' => [],
+                      ],
+                    ],
+                  ],
+                ],
+              ],
+            ],
+          ],
+        ],
+      ],
+    ];
+
+    $panel = $this->createIslandPlugin('builder');
+    $build = $panel->build($instance, $data, []);
+    $slot_1_dropzone = $build['#slots']['content'][0]['#slots']['slot_1'];
+    self::assertSame(2, $slot_1_dropzone['#attributes']['data-max-items']);
+
+    $panel = $this->createIslandPlugin('scaffold');
+    $build = $panel->build($instance, $data, []);
+    $slot_1_dropzone = $build['#slots']['content'][0]['#slots']['children'][0][1];
+    self::assertSame(2, $slot_1_dropzone['#attributes']['data-max-items']);
+  }
+
+  /**
+   * Create instance with a test buildable.
+   */
+  private function createInstance(): InstanceInterface {
+    return Instance::create([
       'id' => 'test_instance',
       // Because there is no proper Drupal integration to rely on, we set the
       // instance ID and the profile entity themselves as plugin configuration.
@@ -64,11 +146,6 @@ final class DropzoneTest extends DisplayBuilderKernelTestBase {
         ],
       ],
     ]);
-
-    $builder_panel = $this->createIslandPlugin('builder');
-    $this->testBuildInPanel($builder_panel, $instance, $node_id);
-    $scaffold = $this->createIslandPlugin('scaffold');
-    $this->testBuildInPanel($scaffold, $instance, $node_id);
   }
 
   /**

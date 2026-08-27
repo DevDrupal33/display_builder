@@ -34,6 +34,12 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, Con
   // mode and no cache entry can ever key on it.
   public const PREVIEW_INSTANCE_ATTRIBUTE = '_display_builder_preview_instance';
 
+  // Value indicating a buildable tree root accepts an unlimited number of
+  // values.
+  // @see \Drupal\Core\Field\FieldStorageDefinitionInterface
+  // @see \Drupal\display_builder\SourceWithSlotsInterface
+  public const CARDINALITY_UNLIMITED = -1;
+
   /**
    * Returns the translated plugin label.
    */
@@ -286,5 +292,17 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, Con
    * Save sources tree retrieved from the Instance entity to config or content.
    */
   public function saveSources(): void;
+
+  /**
+   * Get the maximum number of sources which can be put at the root level.
+   *
+   * Some buildables have such restrictions, like EntityViewOverride according
+   * to field storage cardinality, or the single root source of Pattern
+   * Presets.
+   *
+   * @return int
+   *   Any number which is not a strictly positive integer means 'unlimited'.
+   */
+  public function getRootCardinality(): int;
 
 }

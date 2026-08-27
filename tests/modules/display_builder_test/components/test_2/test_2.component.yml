@@ -1,5 +1,6 @@
 name: Test 2
 description: 'Used for testing Display Builder.'
+tags: ['foo']
 slots:
   slot_2_1:
     title: Slot 1

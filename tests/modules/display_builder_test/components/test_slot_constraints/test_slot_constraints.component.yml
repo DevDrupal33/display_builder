@@ -1,0 +1,20 @@
+name: Test slot constraints
+description: 'Used for testing cardinality & suggested components constraints for slots'
+slots:
+  slot_1:
+    title: Slot with 2 items max
+    maxItems: 2
+  slot_2:
+    title: Slot with expected components and tags
+    expected:
+      - 'display_builder_test:test_1'
+      - 'foo'
+  slot_3:
+    title: Slot with both
+    maxItems: 2
+    expected:
+      - 'display_builder_test:test_1'
+      - 'foo'
+props:
+  type: object
+  properties: {}
