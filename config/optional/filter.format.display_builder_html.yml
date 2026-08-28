@@ -11,7 +11,7 @@ filters:
     status: true
     weight: -10
     settings:
-      allowed_html: "<a href hreflang class> <em class> <strong class> <ul type class> <ol start type='1 A I' class> <li class> <h2 id class> <h3 id class> <h4 id class> <h5 id class> <h6 id class> <drupal-icon data-icon-id data-icon-settings class role aria-label aria-hidden>"
+      allowed_html: "<a href hreflang class> <em class> <i class> <strong class> <ul type class> <ol start type='1 A I' class> <li class> <h2 id class> <h3 id class> <h4 id class> <h5 id class> <h6 id class> <drupal-icon data-icon-id data-icon-settings class role aria-label aria-hidden>"
       filter_html_help: true
       filter_html_nofollow: false
   filter_htmlcorrector:
