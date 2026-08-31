@@ -83,6 +83,8 @@ class PreviewPanel extends IslandPluginBase {
       'display_builder_instance' => $builder->id(),
     ]);
 
+    $with_chrome = $builder->previewWithChrome();
+
     // A persistent iframe plus a hidden refresh token. On every change the
     // token's content is bumped out of band (@see reloadWithGlobalData())
     // rather than the iframe being rebuilt - replacing the iframe reloads it
@@ -104,7 +106,7 @@ class PreviewPanel extends IslandPluginBase {
       'frame' => [
         '#type' => 'html_tag',
         '#tag' => 'div',
-        '#attributes' => ['class' => ['db-live-preview-frame']],
+        '#attributes' => ['class' => ['db-live-preview-frame', $with_chrome ? 'db-live-preview-chrome' : '']],
         'scale' => [
           '#type' => 'html_tag',
           '#tag' => 'div',

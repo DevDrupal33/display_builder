@@ -40,9 +40,7 @@ class ChromeIndicator extends IslandPluginBase {
    * {@inheritdoc}
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    $with_chrome = $builder->previewWithChrome();
-
-    if (!$with_chrome) {
+    if (!$builder->previewWithChrome()) {
       return [];
     }
 

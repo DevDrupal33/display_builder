@@ -320,7 +320,7 @@ Kept separate from [data-db-stale] so a failed refresh leaves the panel usable
     /* Always on all page layout */
     &.display-builder-page-layout .db-live-preview-scale,
     /* Preview of a chrome display */
-    .display-builder__main .db-island-preview:has(.db-chrome-indicator) .db-live-preview-scale {
+    .db-live-preview-chrome .db-live-preview-scale {
       border: 1px solid var(--sl-color-neutral-400);
       border-radius: 0.25rem;
       box-shadow: var(--db-shadow-color) 0 10px 25px 0;
