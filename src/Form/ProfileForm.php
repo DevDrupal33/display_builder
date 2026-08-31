@@ -99,7 +99,7 @@ final class ProfileForm extends EntityForm {
         '#type' => 'html_tag',
         '#tag' => 'img',
         '#attributes' => [
-          'src' => base_path() . $path . '/assets/images/islands-regions.png',
+          'src' => \base_path() . $path . '/assets/images/islands-regions.png',
           'width' => '1122',
           'height' => '171',
         ],
@@ -169,7 +169,7 @@ final class ProfileForm extends EntityForm {
 
     if ($permission = $entity->getPermissionName()) {
       foreach ($form_state->getValue('roles') ?? [] as $rid => $enabled) {
-        user_role_change_permissions($rid, [$permission => $enabled]);
+        \user_role_change_permissions($rid, [$permission => $enabled]);
       }
     }
 

@@ -35,9 +35,7 @@ final class PageLayoutListBuilder extends DraggableListBuilder {
       '#value' => $this->t('A page is built by the first layout in this list whose conditions match it. Layouts that are disabled or empty are skipped. Pages matched by none of them fall through to the default layout, at the bottom of the list.'),
       '#weight' => -100,
     ];
-    $build = $this->addDefaultPageLayouts($build);
-
-    return $build;
+    return $this->addDefaultPageLayouts($build);
   }
 
   /**

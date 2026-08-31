@@ -44,7 +44,7 @@ class BuilderPanel extends ViewPanelBase {
   public static function keyboardShortcuts(): array {
     return [
       'key' => 'c',
-      'help' => t('Show the canvas'),
+      'help' => \t('Show the canvas'),
     ];
   }
 
@@ -117,9 +117,7 @@ class BuilderPanel extends ViewPanelBase {
     $build['#attributes'] = \array_merge($build['#attributes'] ?? [], $this->buildNodeAttributes($title, $index, $data['source_id'] ?? NULL));
     $build['#attributes']['data-testid'] = $data['source_id'] ?? $data['node_id'] ?? '_' . $index;
 
-    $build = $this->htmxEvents->onInstanceClick($build, (string) $instance->id(), $node_id, $label_info['summary'] ?? $label_info['label'] ?? '', $index);
-
-    return $build;
+    return $this->htmxEvents->onInstanceClick($build, (string) $instance->id(), $node_id, $label_info['summary'] ?? $label_info['label'] ?? '', $index);
   }
 
 }

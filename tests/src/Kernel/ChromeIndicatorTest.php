@@ -63,7 +63,6 @@ final class ChromeIndicatorTest extends DisplayBuilderKernelTestBase {
     else {
       self::assertEmpty($build);
     }
-
   }
 
   /**

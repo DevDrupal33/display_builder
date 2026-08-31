@@ -71,7 +71,7 @@ class ScaffoldPanel extends ViewPanelBase implements IslandConfigurationFormInte
   public static function keyboardShortcuts(): array {
     return [
       'key' => 'g',
-      'help' => t('Show the scaffold'),
+      'help' => \t('Show the scaffold'),
     ];
   }
 

@@ -57,7 +57,7 @@ class PreviewPanel extends IslandPluginBase {
   public static function keyboardShortcuts(): array {
     return [
       'key' => 'p',
-      'help' => t('Show the preview'),
+      'help' => \t('Show the preview'),
     ];
   }
 

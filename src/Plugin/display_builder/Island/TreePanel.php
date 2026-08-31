@@ -28,7 +28,7 @@ class TreePanel extends ViewPanelBase {
   public static function keyboardShortcuts(): array {
     return [
       'key' => 'n',
-      'help' => t('Show the navigator'),
+      'help' => \t('Show the navigator'),
     ];
   }
 

@@ -269,9 +269,7 @@ class BuilderDataConverter {
       $data['source']['regions'] = $slots;
     }
 
-    $data = $this->extractThirdPartySettings($data, $section);
-
-    return $data;
+    return $this->extractThirdPartySettings($data, $section);
   }
 
   /**

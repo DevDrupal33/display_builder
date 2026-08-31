@@ -326,9 +326,7 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
     // Needed by ui_patterns_views's ViewRowsSource.
     // Will be filled by \Drupal\display_builder_views\Hook\PreprocessViewsView.
     $contexts['ui_patterns_views:rows'] = new Context(new ContextDefinition('any'), []);
-    $contexts = RequirementsContext::addToContext(['views:style'], $contexts);
-
-    return $contexts;
+    return RequirementsContext::addToContext(['views:style'], $contexts);
   }
 
   /**

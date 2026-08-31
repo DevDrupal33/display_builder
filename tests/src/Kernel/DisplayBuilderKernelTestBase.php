@@ -33,7 +33,7 @@ abstract class DisplayBuilderKernelTestBase extends KernelTestBase {
     $instance_id = $instance_id ?? $this->randomMachineName();
     $profile_id = $profile_id ?? $this->randomMachineName();
     $this->createDisplayBuilderProfile($profile_id);
-    $instance = Instance::create([
+    return Instance::create([
       'id' => $instance_id,
       // Because there is no proper Drupal integration to rely on, we set the
       // instance ID and the profile entity themselves as plugin configuration.
@@ -45,8 +45,6 @@ abstract class DisplayBuilderKernelTestBase extends KernelTestBase {
         ],
       ],
     ]);
-
-    return $instance;
   }
 
   /**

@@ -226,7 +226,7 @@ final class ProfileTest extends DisplayBuilderKernelTestBase {
     $module_path = \Drupal::service('extension.list.module')->getPath('display_builder');
 
     require_once \Drupal::root() . '/' . $module_path . '/display_builder.post_update.php';
-    display_builder_post_update_2();
+    \display_builder_post_update_2();
 
     $profile = $profile_storage->load('legacy_layers_profile');
     self::assertNotNull($profile);

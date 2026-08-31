@@ -324,9 +324,7 @@ final class EntityView extends DisplayBuildablePluginBase {
     $contexts['entity'] = EntityContext::fromEntity(DisplayBuilderHelpers::markSampleEntity($sampleEntity));
     $contexts['view_mode'] = new Context(ContextDefinition::create('string'), $display->getMode());
     $contexts['bundle'] = new Context(ContextDefinition::create('string'), $bundle);
-    $contexts = RequirementsContext::addToContext(['entity'], $contexts);
-
-    return $contexts;
+    return RequirementsContext::addToContext(['entity'], $contexts);
   }
 
   /**

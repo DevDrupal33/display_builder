@@ -522,8 +522,8 @@ final class EntityViewOverride extends DisplayBuildablePluginBase implements Dis
 
       $entity_type_id = $display->getTargetEntityTypeId();
       $view_mode = $view_mode_storage->load(\sprintf('%s.%s', $entity_type_id, $display->getMode()));
-      $tabs_info[$entity_type_id]['modes'][$display->getMode()] = $view_mode?->label() ?? t('Default');
-      $tabs_info[$entity_type_id]['bundles'][$display->getTargetBundle()][$display->getMode()] = $view_mode?->label() ?? t('Default');
+      $tabs_info[$entity_type_id]['modes'][$display->getMode()] = $view_mode?->label() ?? \t('Default');
+      $tabs_info[$entity_type_id]['bundles'][$display->getTargetBundle()][$display->getMode()] = $view_mode?->label() ?? \t('Default');
     }
 
     return $tabs_info;
@@ -547,9 +547,7 @@ final class EntityViewOverride extends DisplayBuildablePluginBase implements Dis
     $contexts['entity'] = EntityContext::fromEntity($entity);
     $contexts['view_mode'] = new Context(ContextDefinition::create('string'), $this->getDisplay()->getMode());
     $contexts['bundle'] = new Context(ContextDefinition::create('string'), $entity->bundle());
-    $contexts = RequirementsContext::addToContext(['content'], $contexts);
-
-    return $contexts;
+    return RequirementsContext::addToContext(['content'], $contexts);
   }
 
   /**

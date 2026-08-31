@@ -8,9 +8,9 @@ biome.json
 
 .env
 .auth/
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/.php-cs-fixer.cache
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+.php-cs-fixer.cache
 .claude/
