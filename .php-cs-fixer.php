@@ -11,11 +11,13 @@ use drupol\PhpCsFixerConfigsDrupal\Config\Drupal8;
 $finder = PhpCsFixer\Finder::create()
   ->in(__DIR__)
   // CI builds the Drupal site next to the module sources.
-  ->exclude(['web', 'node_modules'])
+  ->exclude('web')
+  ->exclude('vendor')
+  ->exclude('node_modules')
   ->name('*.module')
-  ->notName('display_builder.post_update.php')
   ->notPath('*.md')
   ->notPath('*.info.yml')
+  ->notName('display_builder.post_update.php')
 ;
 
 $config = new Drupal8();
