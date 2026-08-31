@@ -24,6 +24,18 @@ interface InstanceInterface extends ContentEntityInterface, ContextProviderInter
   public function getProfile(): ?ProfileInterface;
 
   /**
+   * Whether this instance's live preview should be wrapped in site chrome.
+   *
+   * @return bool
+   *   TRUE to wrap the preview in the site's page chrome, FALSE to preview it
+   *   bare.
+   *
+   * @see \Drupal\display_builder\DisplayBuildableInterface::previewWithChrome()
+   * @see \Drupal\display_builder\Event\PageVariantSubscriber
+   */
+  public function previewWithChrome(): bool;
+
+  /**
    * Move a source to root.
    *
    * @param string $node_id

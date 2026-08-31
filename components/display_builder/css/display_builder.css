@@ -288,7 +288,7 @@ Kept separate from [data-db-stale] so a failed refresh leaves the panel usable
     pointer-events: none;
   }
 
-  /* When on a viewport switch context. The switcher sizes only the Preview
+  /* When on a  viewport switch context. The switcher sizes only the Preview
      render (the iframe), not the pane, so the pane's header bar stays full
      width while the iframe shrinks. The editor pane is left at its natural
      width, which matters in split view where both are visible.
@@ -296,17 +296,34 @@ Kept separate from [data-db-stale] so a failed refresh leaves the panel usable
   &.viewport-active {
     /* --db-preview-width is the render's own viewport width (set by the switcher
        on the pane), so media queries reflow for real. The scale box takes the
-       visual size (width x zoom) and carries the device-frame border; it centres
-       via its auto margins and, being exactly the painted size, scrolls with no
-       empty side zones. The iframe keeps the true width and is scaled onto it.
+       visual size (width x zoom) and centres via its auto margins, and, being
+       exactly the painted size, scrolls with no empty side zones. The iframe
+       keeps the true width and is scaled onto it.
        @see assets/js/viewport_switcher.js */
     .display-builder__main .db-island-preview .db-live-preview-scale {
       width: calc(var(--db-preview-width) * var(--db-preview-zoom, 1));
-      border: 1px solid var(--preview-color-border);
-      box-shadow: var(--db-shadow-color) 0 10px 25px 0;
     }
     .display-builder__main .db-island-preview .db-live-preview {
       width: var(--db-preview-width);
+    }
+  }
+  /* Set a border and background highlight when a viewport is selected like
+     placeholder */
+  .db-island.db-island-preview {
+    background-image: var(--db-background-image, repeating-linear-gradient(45deg, oklch(100% 0 0), oklch(100% 0 0) 13px, hsl(240, 4.8%, 95.9%) 13px, hsl(240, 4.8%, 95.9%) 14px));
+    background-size: var(--db-background-size, 40px 40px);
+  }
+  &.viewport-active {
+    .db-live-preview-frame {
+      padding: 0.25rem 0;
+    }
+    /* Always on all page layout */
+    &.display-builder-page-layout .db-live-preview-scale,
+    /* Preview of a chrome display */
+    .display-builder__main .db-island-preview:has(.db-chrome-indicator) .db-live-preview-scale {
+      border: 1px solid var(--sl-color-neutral-400);
+      border-radius: 0.25rem;
+      box-shadow: var(--db-shadow-color) 0 10px 25px 0;
     }
   }
 
@@ -344,7 +361,17 @@ Kept separate from [data-db-stale] so a failed refresh leaves the panel usable
     gap: 0.5rem;
     align-items: center;
     padding: 0.25rem 0.5rem;
-    background-color: var(--toolbar-color-background);
+    /* background-color: var(--toolbar-color-background); */
+  }
+  /* Chrome-status icon: the only place an editor learns whether this preview
+     renders wrapped in the site's real chrome.
+     @see src/Plugin/display_builder/Island/ChromeIndicator.php */
+  .db-chrome-indicator {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0.25rem;
+    color: var(--sl-color-neutral-600);
+    font-size: 1.1rem;
   }
   /* Fills the pane below the header (flex:1) and owns the horizontal scroll: a
      device width wider than the pane pans here. Vertical overflow is clipped
@@ -359,7 +386,9 @@ Kept separate from [data-db-stale] so a failed refresh leaves the panel usable
   /* The visual box: the render's on-screen (scaled) size, centred by its auto
      margins. Because it is exactly what gets painted, centring and scrolling
      have no empty side zones. It clips the iframe's larger (unscaled) layout box.
-     Default (no viewport width): the frame width times the zoom. */
+     Default (no viewport width, 100% zoom): the frame width exactly, with no
+     device-frame border - see the .viewport-active / [data-db-zoom] rule
+     above, which is the only state where the box is narrower than the pane. */
   .db-live-preview-scale {
     position: relative;
     overflow: hidden;
@@ -405,12 +434,42 @@ Kept separate from [data-db-stale] so a failed refresh leaves the panel usable
     }
   }
   /* A non-expanded builder embedded in a normal admin page (e.g. an entity-view
-     display) has no resolved height, so the scale box's height:100% would
-     collapse to nothing. Give it a definite viewport-based height instead so the
-     iframe's percentage height resolves; the admin page scrolls normally here
-     rather than the pane fitting a fixed main area. */
-  &:not(.display-builder-page-layout, .display-builder--expanded) .db-live-preview-scale {
-    height: 80dvh;
+     display) has no resolved height, so the split row's align-items: stretch
+     would otherwise stretch the pane to match a tall Canvas - leaving the
+     actual render pinned at a fixed height with a large empty tail below it
+     once Canvas's content outgrows one screen. Sticky keeps the pane in view
+     as the (window-scrolling) admin page scrolls past it instead, matching
+     Canvas for as long as Canvas has content left to show.
+     align-self overrides that inherited stretch, which would otherwise
+     re-expand the pane back to Canvas's full height regardless of max-height.
+     top mirrors the toolbar-offset formula .dialog-off-canvas-main-canvas
+     already uses for its own padding-top, so the pane sticks right below the
+     fixed admin toolbar rather than under it.
+     height stays definite (not max-height): align-self: flex-start already
+     stops the pane growing past its own box, and a flex column only hands its
+     flex:1 child (.db-live-preview-frame) real space to grow into when the
+     column itself has a definite height to grow within - a mere cap on an
+     otherwise intrinsic (shrink-to-fit) size leaves nothing to distribute,
+     collapsing the frame and the scale box inside it toward zero. */
+  &:not(.display-builder-page-layout, .display-builder--expanded) {
+    .db-island.db-island-preview:has(.db-live-preview):not(.shoelace-tabs__tab--hidden) {
+      position: sticky;
+      top: calc(var(--toolbar-height, 64px) + var(--drupal-displace-offset-top, 0px));
+      align-self: flex-start;
+      height: 80dvh;
+    }
+
+    /* .display-builder__main's own overflow: auto (below) never actually
+       scrolls here - the box always grows to match content, since this case
+       has no resolved height for it to be bounded by - but overflow: auto
+       still counts as a scroll container for position: sticky purposes,
+       which makes the pane above stick to *this* box's (permanently zero)
+       scroll offset instead of the real, window-level scroll the admin page
+       does. Only the actual scroller may sit between a sticky element and the
+       viewport for it to track that scroll. */
+    .display-builder__main {
+      overflow: visible;
+    }
   }
   .db-island.db-island-view.db-island-scaffold {
     padding: 2rem 1rem 1rem 1rem;

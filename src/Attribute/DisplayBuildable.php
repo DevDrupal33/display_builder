@@ -10,8 +10,8 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 /**
  * The display_buildable attribute.
  *
- * @see \Drupal\display_builder\Event\PageVariantSubscriber
- *   Reads $renders_full_page to decide how a live preview is wrapped.
+ * @see \Drupal\display_builder\DisplayBuildableInterface::previewWithChrome()
+ *   Decides, per instance, how a live preview is wrapped.
  */
 #[\Attribute(\Attribute::TARGET_CLASS)]
 final class DisplayBuildable extends AttributeBase {
@@ -28,19 +28,11 @@ final class DisplayBuildable extends AttributeBase {
    *   (optional) The human-readable name of the plugin..
    * @param string $instance_prefix
    *   Instance prefix, for consistent storage ID.
-   * @param bool $renders_full_page
-   *   (optional) Whether this buildable's display is a whole page by itself,
-   *   header and footer included, rather than something a page wraps around.
-   *   A live preview of a fragment is rendered inside whatever page wrapper the
-   *   site would give it (a Page Layout, or the theme's page template), so the
-   *   preview stays close to the real render; a whole page is previewed bare,
-   *   since wrapping it would show the site's header and footer twice.
    */
   public function __construct(
     public readonly string $id,
     public readonly ?TranslatableMarkup $label,
     public readonly string $instance_prefix,
-    public readonly bool $renders_full_page = FALSE,
   ) {}
 
 }

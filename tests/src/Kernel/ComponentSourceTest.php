@@ -155,9 +155,20 @@ final class ComponentSourceTest extends DisplayBuilderKernelTestBase {
   public function testSettingsFormPropsOnly(): void {
     // settingsFormPropsOnly() returns the built form; ensure keys are present
     // and '#render_slots' gets set to FALSE when a component_id exists.
+    //
+    // @todo Drop the 'prop_definition' override once
+    //   https://www.drupal.org/i/3619960 is fixed upstream. Without it,
+    //   SourcePluginBase::$propDefinition is never initialized (only
+    //   SourcePluginBase::buildConfiguration() sets it, and $this->source is
+    //   built without going through it), and settingsForm() ->
+    //   getExpectedComponentIds() -> getPropDefinition() throws.
+    $configuration = $this->source->getConfiguration();
+    $configuration['prop_definition'] = [];
+    $source = $this->sourceManager->createInstance('component', $configuration);
+
     $form = [];
     $form_state = new FormState();
-    $built = $this->source->settingsFormPropsOnly($form, $form_state);
+    $built = $source->settingsFormPropsOnly($form, $form_state);
 
     self::assertIsArray($built);
     self::assertArrayHasKey('component', $built);

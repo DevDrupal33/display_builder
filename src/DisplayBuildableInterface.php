@@ -294,6 +294,25 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, Con
   public function saveSources(): void;
 
   /**
+   * Whether the live preview should be wrapped in the site's chrome.
+   *
+   * "Chrome" here means the theme's own page wrapper - header, footer, region
+   * blocks - as opposed to the bare 'display_builder_full' variant. A
+   * fragment (a Views block, a teaser view mode) never appears as a page by
+   * itself, so wrapping its preview in the site chrome shows it close to how
+   * it really renders. A buildable that is a whole page by itself (a Page
+   * Layout) draws that chrome itself, so wrapping its preview in another
+   * page's chrome would show it twice.
+   *
+   * @return bool
+   *   TRUE to wrap the preview in the site's page chrome, FALSE to preview it
+   *   bare.
+   *
+   * @see \Drupal\display_builder\Event\PageVariantSubscriber
+   */
+  public function previewWithChrome(): bool;
+
+  /**
    * Get the maximum number of sources which can be put at the root level.
    *
    * Some buildables have such restrictions, like EntityViewOverride according

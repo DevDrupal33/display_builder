@@ -227,6 +227,29 @@ final class PageLayoutEntityTest extends KernelTestBase {
   }
 
   /**
+   * Test the ::previewWithChrome() method.
+   *
+   * A page layout draws its own header and footer; wrapping its preview in
+   * another page would show both twice.
+   */
+  public function testPreviewWithChromeIsAlwaysFalse(): void {
+    /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $entity */
+    $entity = PageLayout::create([
+      'id' => 'test_chrome',
+      'label' => 'Test Chrome',
+      DisplayBuildableInterface::PROFILE_PROPERTY => 'test_base',
+      DisplayBuildableInterface::SOURCES_PROPERTY => [],
+      'conditions' => [],
+    ]);
+    $entity->setStatus(TRUE)->save();
+
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $entity]);
+
+    self::assertFalse($buildable->previewWithChrome());
+  }
+
+  /**
    * Recursively remove the _node_id key.
    *
    * @param array $array

@@ -13,7 +13,7 @@
    default (dark) tooltip theme.
    @see components/display_builder/display_builder.css */
 .db-toolbar sl-tooltip::part(body),
-.db-island-floating-controls sl-tooltip::part(body) {
+.db-island sl-tooltip::part(body) {
   color: var(--toolbar-color);
   border: 1px solid var(--toolbar-color-border);
   background-color: var(--toolbar-color-background);

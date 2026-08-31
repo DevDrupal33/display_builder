@@ -6,8 +6,6 @@ namespace Drupal\display_builder\Event;
 
 use Drupal\Core\Render\PageDisplayVariantSelectionEvent;
 use Drupal\Core\Render\RenderEvents;
-use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\InstanceInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -20,9 +18,12 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * - Any route opting in with the route option below: the builder UI itself,
  *   which draws its own chrome and would otherwise sit inside the themed admin
  *   page, shrinking only the preview pane on a viewport switch.
- * - The isolated live preview, but only of a buildable that already renders a
- *   whole page. Everything else previews inside the page wrapper the site would
- *   really give it. @see ::onSelectPageDisplayVariant()
+ * - The isolated live preview, but only when the previewed instance itself
+ *   says it should not be wrapped in chrome. Everything else previews inside
+ *   the page wrapper the site would really give it.
+ *
+ *   @see ::onSelectPageDisplayVariant()
+ *   @see \Drupal\display_builder\DisplayBuildableInterface::previewWithChrome()
  *
  * Lives in the main module rather than in Display Builder Page Layout because
  * the entity view, Views and isolated-preview routes all rely on it, on sites
@@ -44,10 +45,6 @@ class PageVariantSubscriber implements EventSubscriberInterface {
    */
   private const PREVIEW_ROUTE = 'display_builder.preview_island';
 
-  public function __construct(
-    private DisplayBuildablePluginManager $displayBuildableManager,
-  ) {}
-
   /**
    * {@inheritdoc}
    */
@@ -67,14 +64,12 @@ class PageVariantSubscriber implements EventSubscriberInterface {
   /**
    * Selects the page display variant.
    *
-   * The live preview is the interesting half. An entity view or a Views display
-   * is a fragment: on the real site it appears inside a page, so its preview is
-   * left to the normal variant selection and comes out wrapped in whichever
-   * Page Layout matches - or, failing that, the theme's page template. That is
-   * the point of the preview, to be close to the real render.
-   *
-   * A page layout is not a fragment. It draws the header and the footer itself,
-   * so wrapping its preview in another page would show both twice.
+   * The live preview is the interesting half. Whether it gets the site's
+   * chrome (header, footer, region blocks) around it, or renders bare, is the
+   * previewed instance's own answer to
+   * \Drupal\display_builder\DisplayBuildableInterface::previewWithChrome() -
+   * a per-instance decision, since the same buildable can be a page-worthy
+   * fragment for one entity type and view mode and a bare one for another.
    *
    * @param \Drupal\Core\Render\PageDisplayVariantSelectionEvent $event
    *   The event to process.
@@ -88,38 +83,14 @@ class PageVariantSubscriber implements EventSubscriberInterface {
       return;
     }
 
-    if ($route_match->getRouteName() === self::PREVIEW_ROUTE && $this->rendersFullPage($route_match)) {
-      $event->setPluginId('display_builder_full');
+    if ($route_match->getRouteName() !== self::PREVIEW_ROUTE) {
+      return;
     }
-  }
-
-  /**
-   * Tells whether the previewed instance is a whole page by itself.
-   *
-   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
-   *   The current route match, carrying the previewed instance.
-   *
-   * @return bool
-   *   TRUE when the buildable behind the instance renders a full page.
-   *
-   * @see \Drupal\display_builder\Attribute\DisplayBuildable::$renders_full_page
-   */
-  private function rendersFullPage(RouteMatchInterface $route_match): bool {
     $instance = $route_match->getParameter('display_builder_instance');
 
-    if (!$instance instanceof InstanceInterface) {
-      return FALSE;
+    if ($instance instanceof InstanceInterface && !$instance->previewWithChrome()) {
+      $event->setPluginId('display_builder_full');
     }
-    $instance_id = (string) $instance->id();
-
-    foreach ($this->displayBuildableManager->getDefinitions() as $definition) {
-      if (\str_starts_with($instance_id, $definition['instance_prefix'])) {
-        return (bool) ($definition['renders_full_page'] ?? FALSE);
-      }
-    }
-
-    // An instance with no provider (a demo, a test) is not a page.
-    return FALSE;
   }
 
 }

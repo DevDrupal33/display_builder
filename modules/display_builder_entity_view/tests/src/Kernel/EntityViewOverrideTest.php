@@ -14,6 +14,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -80,16 +81,66 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
    * entity ID and label are the only things telling them apart in a listing.
    */
   public function testGetDisplayLabel(): void {
+    [$entity, $buildable] = $this->createOverrideFixture('full');
+
+    self::assertSame('Entity view override', $buildable->label());
+    self::assertSame(
+      \sprintf('Entity Test Bundle [%s] (Full)', $entity->id()),
+      $buildable->getDisplayLabel(),
+    );
+  }
+
+  /**
+   * Test the ::previewWithChrome() method.
+   *
+   * Delegates to the same entity-type/view-mode check as ::EntityView,
+   * exercised here through the override plugin to prove the wiring, not the
+   * rule itself.
+   *
+   * @see \Drupal\Tests\display_builder_entity_view\Kernel\EntityViewDisplayTest::testPreviewWithChrome()
+   */
+  #[DataProvider('providerTestPreviewWithChrome')]
+  public function testPreviewWithChrome(bool $expected, string $view_mode): void {
+    \Drupal::service('router.builder')->rebuild();
+
+    [, $buildable] = $this->createOverrideFixture($view_mode);
+
+    self::assertSame($expected, $buildable->previewWithChrome());
+  }
+
+  /**
+   * Provides test data for ::testPreviewWithChrome().
+   *
+   * @return array
+   *   The data to test.
+   */
+  public static function providerTestPreviewWithChrome(): array {
+    return [
+      'full view mode gets chrome' => [TRUE, 'full'],
+      'teaser view mode is bare' => [FALSE, 'teaser'],
+    ];
+  }
+
+  /**
+   * Creates an entity, its override display and the buildable built from it.
+   *
+   * @param string $view_mode
+   *   The view mode machine name.
+   *
+   * @return array{0: \Drupal\entity_test\Entity\EntityTest, 1: \Drupal\display_builder\DisplayBuildableInterface}
+   *   The entity and the buildable wrapping it.
+   */
+  private function createOverrideFixture(string $view_mode): array {
     EntityViewMode::create([
-      'id' => 'entity_test.full',
-      'label' => 'Full',
+      'id' => 'entity_test.' . $view_mode,
+      'label' => \ucfirst($view_mode),
       'targetEntityType' => 'entity_test',
     ])->save();
 
     $display = EntityViewDisplay::create([
       'targetEntityType' => 'entity_test',
       'bundle' => 'entity_test',
-      'mode' => 'full',
+      'mode' => $view_mode,
     ]);
     $display
       ->setStatus(TRUE)
@@ -109,11 +160,7 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
       'entity' => $entity,
     ]);
 
-    self::assertSame('Entity view override', $buildable->label());
-    self::assertSame(
-      \sprintf('Entity Test Bundle [%s] (Full)', $entity->id()),
-      $buildable->getDisplayLabel(),
-    );
+    return [$entity, $buildable];
   }
 
 }

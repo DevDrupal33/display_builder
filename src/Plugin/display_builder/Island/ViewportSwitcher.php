@@ -281,42 +281,7 @@ class ViewportSwitcher extends IslandPluginBase implements IslandConfigurationFo
   }
 
   /**
-   * Build a friendly device label for a viewport width.
-   *
-   * A breakpoint's own label ("Large and smaller") reads awkwardly in a device
-   * picker, so a width-bucketed device name is synthesized instead and the
-   * exact width shown alongside it. Non-pixel units keep their raw value.
-   *
-   * @param int $value
-   *   The numeric width.
-   * @param string $unit
-   *   The CSS length unit (px, em, ...).
-   *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
-   *   The label, e.g. "Mobile (575px)".
-   */
-  protected function getViewportLabel(int $value, string $unit): TranslatableMarkup {
-    if ($unit !== 'px') {
-      return $this->t('@width', ['@width' => $value . $unit]);
-    }
-
-    $device = match (TRUE) {
-      $value < 576 => $this->t('Mobile'),
-      $value < 992 => $this->t('Tablet'),
-      $value < 1400 => $this->t('Desktop'),
-      default => $this->t('Large desktop'),
-    };
-
-    return $this->t('@device (@width)', [
-      '@device' => $device,
-      '@width' => $value . $unit,
-    ]);
-  }
-
-  /**
    * Pick a device icon for a viewport width.
-   *
-   * Mirrors the width tiers of getViewportLabel() so icon and name agree.
    *
    * @param int $value
    *   The numeric width.

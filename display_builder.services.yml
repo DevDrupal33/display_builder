@@ -27,7 +27,6 @@ services:
 
   display_builder.page_variant_subscriber:
     class: Drupal\display_builder\Event\PageVariantSubscriber
-    arguments: ['@plugin.manager.display_buildable']
     tags:
       - { name: event_subscriber }
 

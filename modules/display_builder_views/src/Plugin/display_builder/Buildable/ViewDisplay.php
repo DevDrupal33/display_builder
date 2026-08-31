@@ -19,6 +19,7 @@ use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\DisplayReference;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
+use Drupal\views\Plugin\views\display\DisplayRouterInterface;
 use Drupal\views\Plugin\views\PluginBase;
 use Drupal\views\ViewExecutable;
 
@@ -293,6 +294,24 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
     }
 
     return $references;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * A page display registers its own route - visited for real, it appears
+   * inside a page. A block, attachment or embed display never does; it only
+   * ever renders embedded in something else, so its preview must not be
+   * wrapped in chrome either.
+   */
+  public function previewWithChrome(): bool {
+    $extender = $this->getExtender();
+
+    if ($extender === NULL) {
+      return TRUE;
+    }
+
+    return $extender->view->getDisplay() instanceof DisplayRouterInterface;
   }
 
   /**

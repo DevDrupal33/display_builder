@@ -245,18 +245,6 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   }
 
   /**
-   * Builds the error response for a root or slot cardinality limit.
-   */
-  private function respondCardinalityFull(InstanceInterface $display_builder_instance, Request $request, TranslatableMarkup $message, array $extra_debug = []): array {
-    $debug = $extra_debug + [
-      'request' => $request->request->all(),
-      'instance' => $display_builder_instance,
-    ];
-
-    return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function get(Request $request, InstanceInterface $display_builder_instance, string $node_id): array {
@@ -538,6 +526,18 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       NULL,
       $node_id,
     );
+  }
+
+  /**
+   * Builds the error response for a root or slot cardinality limit.
+   */
+  private function respondCardinalityFull(InstanceInterface $display_builder_instance, Request $request, TranslatableMarkup $message, array $extra_debug = []): array {
+    $debug = $extra_debug + [
+      'request' => $request->request->all(),
+      'instance' => $display_builder_instance,
+    ];
+
+    return $this->responseMessageError((string) $display_builder_instance->id(), $message, $debug);
   }
 
   /**

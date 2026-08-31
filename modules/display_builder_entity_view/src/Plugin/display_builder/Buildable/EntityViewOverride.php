@@ -30,6 +30,7 @@ use Drupal\display_builder\DisplayReference;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
+use Drupal\display_builder_entity_view\EntityCanonicalRouteTrait;
 use Drupal\display_builder_entity_view\EntityDisplayLabelTrait;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -45,6 +46,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 final class EntityViewOverride extends DisplayBuildablePluginBase implements DisplayBuildableOverrideInterface {
 
   use EntityDisplayLabelTrait;
+  use EntityCanonicalRouteTrait;
 
   /**
    * How many recent overrides a listing returns per display, by default.
@@ -525,6 +527,15 @@ final class EntityViewOverride extends DisplayBuildablePluginBase implements Dis
     }
 
     return $tabs_info;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function previewWithChrome(): bool {
+    $display = $this->getDisplay();
+
+    return $this->previewsFullPage($display->getTargetEntityTypeId(), $display->getTargetBundle(), $display->getMode());
   }
 
   /**

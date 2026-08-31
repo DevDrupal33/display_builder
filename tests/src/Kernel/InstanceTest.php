@@ -72,6 +72,33 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
+   * Test the ::previewWithChrome() method delegates to the buildable plugin.
+   */
+  public function testPreviewWithChrome(): void {
+    $instance = $this->createDisplayBuilderInstance(NULL, 'foo__test_instance');
+
+    self::assertTrue($instance->previewWithChrome());
+  }
+
+  /**
+   * Test ::previewWithChrome() when the buildable cannot be built.
+   *
+   * An instance outlives the display it was built from. With no plugin to
+   * ask, it is treated like any other fragment: wrapped in chrome, not bare.
+   */
+  public function testPreviewWithChromeWithoutBuildable(): void {
+    $instance = Instance::create([
+      'id' => 'gone__my_display',
+      'buildable' => [
+        'plugin_id' => 'no_such_plugin',
+        'configuration' => [],
+      ],
+    ]);
+
+    self::assertTrue($instance->previewWithChrome());
+  }
+
+  /**
    * Test the ::getProfile() methods.
    */
   public function testProfile(): void {

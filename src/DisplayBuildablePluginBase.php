@@ -264,6 +264,16 @@ abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase impleme
 
   /**
    * {@inheritdoc}
+   *
+   * A buildable that has not thought about the question is assumed to be a
+   * fragment, previewed inside the site's normal page wrapper.
+   */
+  public function previewWithChrome(): bool {
+    return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function getRootCardinality(): int {
     // By default, buildables allow an unlimited number of sources at the

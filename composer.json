@@ -22,7 +22,7 @@
     "type": "drupal-module",
     "require": {
         "php": ">=8.3",
-        "drupal/ui_patterns": "^2.0.18"
+        "drupal/ui_patterns": "^2.0.20"
     },
     "require-dev": {
         "drupal/sdc_devel": "^1.0.3",

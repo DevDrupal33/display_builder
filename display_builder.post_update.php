@@ -187,3 +187,31 @@ function _display_builder_post_update_drop_button_values(array $islands): array 
 
   return $islands;
 }
+
+/**
+ * Enable the chrome indicator on profiles that predate it.
+ *
+ * ::getEnabledIslands() only reads a profile's own stored config - it has no
+ * fallback to the plugin's enabled_by_default, which only ever fires as the
+ * admin form's initial checkbox value. A profile saved before this island
+ * existed simply has no entry for it, so without this it would stay invisible
+ * on every existing site regardless of enabled_by_default.
+ */
+function display_builder_post_update_6(): void {
+  $storage = \Drupal::service('entity_type.manager')->getStorage('display_builder_profile');
+
+  foreach ($storage->loadMultiple() as $profile) {
+    if (!$profile instanceof ProfileInterface) {
+      continue;
+    }
+
+    $islands = $profile->get('islands');
+    if (!is_array($islands) || isset($islands['chrome_indicator'])) {
+      continue;
+    }
+
+    $islands['chrome_indicator'] = ['status' => TRUE];
+    $profile->set('islands', $islands);
+    $profile->save();
+  }
+}

@@ -129,6 +129,73 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
   }
 
   /**
+   * Test the ::previewWithChrome() method.
+   *
+   * Entity Test uses core's DefaultHtmlRouteProvider, so its canonical route
+   * genuinely renders the entity (an '_entity_view' route default) - the same
+   * shape node, taxonomy term and user use. Only the view mode canonical
+   * actually renders ('full', with 'default' as its practical stand-in when no
+   * distinct 'full' display is configured) previews with chrome; every other
+   * view mode is a fragment that never appears as a page by itself.
+   *
+   * @see \Drupal\display_builder\Event\PageVariantSubscriber
+   */
+  #[DataProvider('providerTestPreviewWithChrome')]
+  public function testPreviewWithChrome(bool $expected, string $view_mode): void {
+    \Drupal::service('router.builder')->rebuild();
+
+    if ($view_mode !== 'default') {
+      EntityViewMode::create([
+        'id' => 'entity_test.' . $view_mode,
+        'label' => $view_mode,
+        'targetEntityType' => 'entity_test',
+      ])->save();
+    }
+    $display = self::createTestDisplay($view_mode);
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $display]);
+
+    self::assertSame($expected, $buildable->previewWithChrome());
+  }
+
+  /**
+   * Provides test data for ::testPreviewWithChrome().
+   *
+   * @return array
+   *   The data to test.
+   */
+  public static function providerTestPreviewWithChrome(): array {
+    return [
+      'default view mode gets chrome' => [TRUE, 'default'],
+      'full view mode gets chrome' => [TRUE, 'full'],
+      'teaser view mode is bare' => [FALSE, 'teaser'],
+    ];
+  }
+
+  /**
+   * Test that 'default' loses chrome once a distinct 'full' display exists.
+   *
+   * A route always renders the 'full' view mode. 'default' only stands in for
+   * it when the bundle has no separate 'full' display configured - once one
+   * exists and is enabled, 'default' is never what the canonical route shows.
+   */
+  public function testPreviewWithChromeDefaultBareWhenDistinctFullDisplayExists(): void {
+    \Drupal::service('router.builder')->rebuild();
+
+    EntityViewMode::create([
+      'id' => 'entity_test.full',
+      'label' => 'Full',
+      'targetEntityType' => 'entity_test',
+    ])->save();
+    self::createTestDisplay('full');
+    $default_display = self::createTestDisplay('default');
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $default_display]);
+
+    self::assertFalse($buildable->previewWithChrome());
+  }
+
+  /**
    * Test the ::calculateDependencies method.
    */
   public function testCalculateDependencies(): void {

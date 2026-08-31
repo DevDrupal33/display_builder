@@ -244,4 +244,16 @@ final class DisplayBuildablePluginTest extends DisplayBuilderKernelTestBase {
     ];
   }
 
+  /**
+   * Test the ::previewWithChrome() default implementation.
+   *
+   * A buildable that has not thought about the question is assumed to be a
+   * fragment, previewed inside the site's normal page wrapper.
+   */
+  public function testPreviewWithChromeDefaultsToTrue(): void {
+    $plugin = \Drupal::service('plugin.manager.display_buildable')->createInstance('test', []);
+
+    self::assertTrue($plugin->previewWithChrome());
+  }
+
 }

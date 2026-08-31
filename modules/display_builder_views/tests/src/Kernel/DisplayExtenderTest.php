@@ -13,6 +13,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\views\Entity\View;
 use Drupal\views\Views;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -290,6 +291,72 @@ final class DisplayExtenderTest extends KernelTestBase {
     $plugin->submitOptionsForm($form, $form_state);
     $instance_storage->resetCache([$instance_id]);
     self::assertNull($instance_storage->load($instance_id));
+  }
+
+  /**
+   * Test the ::previewWithChrome() method.
+   *
+   * A page display registers its own route - visited for real, it appears
+   * inside a page. A block display never does; it only ever renders embedded
+   * in something else, so its preview must not be wrapped in chrome either.
+   */
+  #[DataProvider('providerTestPreviewWithChrome')]
+  public function testPreviewWithChrome(bool $expected, string $display_plugin, string $display_id): void {
+    $view = View::create([
+      'id' => 'test_chrome_view',
+      'label' => 'Test Chrome View',
+      'base_table' => 'user',
+      'display' => [
+        'default' => [
+          'display_plugin' => 'default',
+          'id' => 'default',
+          'display_title' => 'Master',
+          'position' => 0,
+          'display_options' => [],
+        ],
+        $display_id => [
+          'display_plugin' => $display_plugin,
+          'id' => $display_id,
+          'display_title' => 'Test display',
+          'position' => 1,
+          'display_options' => [],
+        ],
+      ],
+    ]);
+    $view->save();
+
+    $viewExecutable = Views::executableFactory()->get($view);
+    $viewExecutable->setDisplay($display_id);
+
+    $plugin = DisplayExtender::create(
+      \Drupal::getContainer(),
+      [],
+      'display_builder',
+      [
+        'id' => 'display_builder',
+        'title' => 'Display Builder',
+        'help' => 'Use display builder as output for this view.',
+      ]
+    );
+    $plugin->init($viewExecutable, $viewExecutable->getDisplay());
+
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('view_display', ['extender' => $plugin]);
+
+    self::assertSame($expected, $buildable->previewWithChrome());
+  }
+
+  /**
+   * Provides test data for ::testPreviewWithChrome().
+   *
+   * @return array
+   *   The data to test.
+   */
+  public static function providerTestPreviewWithChrome(): array {
+    return [
+      'page display gets chrome' => [TRUE, 'page', 'page_1'],
+      'block display is bare' => [FALSE, 'block', 'block_1'],
+    ];
   }
 
 }

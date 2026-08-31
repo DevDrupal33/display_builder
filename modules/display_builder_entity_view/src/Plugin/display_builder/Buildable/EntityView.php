@@ -20,6 +20,7 @@ use Drupal\display_builder\DisplayReference;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay;
+use Drupal\display_builder_entity_view\EntityCanonicalRouteTrait;
 use Drupal\display_builder_entity_view\EntityDisplayLabelTrait;
 use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
@@ -36,6 +37,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 final class EntityView extends DisplayBuildablePluginBase {
 
   use EntityDisplayLabelTrait;
+  use EntityCanonicalRouteTrait;
 
   /**
    * The sample entity generator.
@@ -296,6 +298,15 @@ final class EntityView extends DisplayBuildablePluginBase {
     }
 
     return $references;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function previewWithChrome(): bool {
+    $display = $this->getDisplay();
+
+    return $this->previewsFullPage($display->getTargetEntityTypeId(), $display->getTargetBundle(), $display->getMode());
   }
 
   /**

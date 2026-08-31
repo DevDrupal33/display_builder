@@ -30,8 +30,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   id: 'page_layout',
   label: new TranslatableMarkup('Page layout'),
   instance_prefix: 'page_layout__',
-  // A page layout is the page: its own sources draw the header and the footer.
-  renders_full_page: TRUE,
 )]
 final class PageLayout extends DisplayBuildablePluginBase {
 
@@ -202,6 +200,16 @@ final class PageLayout extends DisplayBuildablePluginBase {
     }
 
     return $path;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * A page layout draws its own header and footer; wrapping its preview in
+   * another page's chrome would show both twice.
+   */
+  public function previewWithChrome(): bool {
+    return FALSE;
   }
 
   /**

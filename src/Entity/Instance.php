@@ -186,6 +186,23 @@ class Instance extends ContentEntityBase implements InstanceInterface {
 
   /**
    * {@inheritdoc}
+   *
+   * An instance outlives the display it was built from, so a preview route
+   * must still resolve to something rather than fatal.
+   */
+  public function previewWithChrome(): bool {
+    try {
+      return $this->getBuildablePlugin()->previewWithChrome();
+    }
+    catch (\Throwable) {
+      // An instance with no resolvable provider (a demo, a test) is not a
+      // page: wrap it in chrome like any other fragment.
+      return TRUE;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function moveToRoot(string $node_id, int $position): bool {
     $tree = $this->getSourceTree();

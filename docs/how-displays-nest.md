@@ -75,6 +75,29 @@ Three things do the navigating:
   really give it, so an entity or Views display previews with the real page
   around it.
 
+  !!!note
+      Known gap: this is decided by inspecting the entity's canonical route, so
+      it misses the case where a View has taken over that route and still
+      renders the entity inside it. Taxonomy terms hit this by default: core's
+      "Taxonomy term" view owns `/taxonomy/term/{term}` and renders the term's
+      `full` display in a header, but the route itself no longer says so.
+      Preview shows that display bare instead of wrapped.
+
+      Two other entity types get the right answer from the same route check,
+      but for reasons specific enough to each that they are worth knowing
+      about rather than assuming they follow the general rule:
+
+      - **Comment.** Its canonical link exists but the route is a hand-written
+        redirect to the node it belongs to, so it never gets `_entity_view`
+        and always previews bare - correct, but only because a comment is a
+        strange exception among content entities, not because the rule was
+        built with it in mind.
+      - **Media.** Its canonical route only carries `_entity_view` when the
+        'Standalone media URL' setting is enabled for that media type;
+        otherwise canonical points at the edit form instead. The chrome
+        decision for media therefore depends entirely on a per-bundle setting
+        this module does not otherwise look at.
+
 ## What a placeholder in the builder means
 
 Some things on a page only exist while a real request is being served, so no
