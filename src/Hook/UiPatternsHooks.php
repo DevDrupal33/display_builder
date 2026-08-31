@@ -82,6 +82,10 @@ class UiPatternsHooks {
   #[Hook('ui_patterns_source_info_alter')]
   public function sourceInfoAlter(array &$definitions): void {
     $definitions['component']['class'] = 'Drupal\display_builder\Plugin\UiPatterns\Source\ComponentSource';
+    // Swapping the class rather than adding a source keeps one source ID per
+    // block, so a stored display keeps working either way. Ours only differs
+    // inside a builder.
+    $definitions['block']['class'] = 'Drupal\display_builder\Plugin\UiPatterns\Source\BlockSource';
   }
 
 }

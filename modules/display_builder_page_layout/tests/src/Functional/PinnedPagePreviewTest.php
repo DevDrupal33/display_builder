@@ -43,9 +43,13 @@ final class PinnedPagePreviewTest extends BrowserTestBase {
   /**
    * The main content placeholder a source-only preview emits.
    *
-   * @see \Drupal\display_builder\Plugin\display_builder\Island\PreviewPanel::alterPreviewPlaceholder()
+   * Its help sentence, not its name: assertions on page text are case
+   * insensitive, and "Main content" matches core's own "Skip to main content"
+   * link on every page, which would pass and fail this for the wrong reason.
+   *
+   * @see \Drupal\display_builder_page_layout\Plugin\UiPatterns\Source\MainPageContentSource
    */
-  private const PLACEHOLDER = '[Placeholder] Page content';
+  private const PLACEHOLDER = 'This placeholder will be replaced by the page value.';
 
   /**
    * The main content the pinned page really serves.

@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\display_builder\Unit;
 
+use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\GeneratedUrl;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
@@ -35,10 +38,24 @@ final class RenderableBuilderTraitUnitTest extends UnitTestCase {
   private object $host;
 
   /**
+   * The channel a swallowed render failure is reported on.
+   */
+  private LoggerChannelInterface $logger;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
+
+    // The trait reaches for the logger statically, the way SourceTree and
+    // PatternPreset already do, so a container has to exist even here.
+    $this->logger = $this->createMock(LoggerChannelInterface::class);
+    $factory = $this->createMock(LoggerChannelFactoryInterface::class);
+    $factory->method('get')->with('display_builder')->willReturn($this->logger);
+    $container = new ContainerBuilder();
+    $container->set('logger.factory', $factory);
+    \Drupal::setContainer($container);
 
     $this->host = new class() {
 
@@ -339,15 +356,26 @@ final class RenderableBuilderTraitUnitTest extends UnitTestCase {
   }
 
   /**
-   * Test a renderable that throws is reported as empty.
+   * Test a renderable that throws is reported as empty, and logged.
    *
    * This is the whole point of the check: a bad #lazy_builder must be caught
    * here, synchronously, rather than surviving into the caller's render array
    * to fatal later inside BigPipe, well outside any try/catch.
+   *
+   * The log line is the other half. "Rendered nothing" and "blew up" reach
+   * every caller as the same TRUE, so without it a component vanishing from
+   * the Preview leaves no trace anywhere to find it by.
    */
   public function testFailingRenderableIsTreatedAsEmpty(): void {
     $renderer = $this->createMock(RendererInterface::class);
     $renderer->method('renderInIsolation')->willThrowException(new \RuntimeException('No entity ID.'));
+
+    $this->logger->expects(self::once())
+      ->method('warning')
+      ->with(self::anything(), [
+        '@class' => \RuntimeException::class,
+        '@message' => 'No entity ID.',
+      ]);
 
     self::assertTrue($this->host->isRenderEmptyOrFailing($renderer, ['#markup' => 'ignored']));
   }

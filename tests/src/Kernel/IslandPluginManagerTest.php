@@ -166,7 +166,7 @@ final class IslandPluginManagerTest extends DisplayBuilderKernelTestBase {
     $islands = $this->manager->getIslandsByTypes($contexts);
 
     $configuration = $islands[IslandType::View->value]['test_minimal']->getConfiguration();
-    self::assertSame($contexts, $configuration['contexts']);
+    self::assertSame('a context', $configuration['contexts']['display_builder']);
   }
 
 }

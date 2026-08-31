@@ -160,7 +160,9 @@ final class IslandPluginBaseTest extends DisplayBuilderKernelTestBase {
    */
   public function testGetConfigurationReturnsMergedConfiguration(): void {
     $plugin = $this->createIsland('test_minimal', ['foo' => 'bar']);
-    self::assertSame(['foo' => 'bar'], $plugin->getConfiguration());
+    $configuration = $plugin->getConfiguration();
+    self::assertSame('bar', $configuration['foo']);
+    self::assertSame(['foo', 'contexts'], \array_keys($configuration));
   }
 
   /**

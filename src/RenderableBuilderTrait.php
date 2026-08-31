@@ -96,10 +96,52 @@ trait RenderableBuilderTrait {
       $html = $renderer->renderInIsolation($renderable);
     }
     catch (\Throwable $e) {
+      // "Rendered nothing" and "blew up" both leave here as TRUE, so this is
+      // the only trace the failure ever leaves. Log it in the catch branch
+      // only: the method runs for every node the Canvas draws.
+      \Drupal::logger('display_builder')->warning(
+        'Render failed, node treated as empty: @class: @message',
+        ['@class' => \get_class($e), '@message' => $e->getMessage()]
+      );
+
       return TRUE;
     }
 
     return empty(\trim((string) $html));
+  }
+
+  /**
+   * Whether a node showed nothing, and so needs a placeholder or dropping.
+   *
+   * Canvas and Preview draw the same display and must agree on what is empty,
+   * or the two disagree about a node the user can see in one and not the
+   * other. They only part on what they do about it: the Canvas keeps the node
+   * selectable behind a placeholder, the Preview shows the nothing the visitor
+   * would get.
+   *
+   * A source that can never resolve here is not this question: it has already
+   * answered for itself and does not render empty.
+   *
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer.
+   * @param array $data
+   *   The UI Patterns form state data.
+   * @param array $build
+   *   What the source rendered, which is what decides emptiness.
+   *
+   * @return bool
+   *   TRUE when the node has nothing to show.
+   *
+   * @see \Drupal\display_builder\Plugin\UiPatterns\Source\BlockSource
+   */
+  protected function needsPlaceholder(RendererInterface $renderer, array $data, array $build): bool {
+    // A token resolving to nothing keeps the wrapper renderSource() gave it,
+    // so the renderer sees markup where the user sees an empty box.
+    if (($data['source_id'] ?? NULL) === 'token' && isset($build['content']) && empty($build['content'])) {
+      return TRUE;
+    }
+
+    return $this->isRenderEmptyOrFailing($renderer, $build);
   }
 
   /**
@@ -204,6 +246,70 @@ trait RenderableBuilderTrait {
     }
 
     return $build;
+  }
+
+  /**
+   * Build placeholder standing for a whole page region.
+   *
+   * A region is not a control. It stands for an area another level of the page
+   * fills, so it renders as a hatched box carrying a name and a sentence
+   * saying what fills it, instead of the one-line chip a control gets. Same
+   * shape the Preview island gives the same slots, so the two agree on sight
+   * as well as in words.
+   *
+   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $label
+   *   The region name: its job, never a plugin id.
+   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $help
+   *   One sentence saying what fills it, and where.
+   * @param string $size
+   *   (Optional) 'md' for a strip, 'lg' for a page's whole content area.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function buildPlaceholderRegion(string|TranslatableMarkup $label, string|TranslatableMarkup $help, string $size = 'md'): array {
+    $build = $this->buildPlaceholder($label);
+    $build['#props']['variant'] = 'region';
+    $build['#attributes']['class'][] = 'db-placeholder-region--' . $size;
+    // To be able to identify the node when dragging and set the drawer title.
+    $build['#attributes']['data-node-title'] = (string) $label;
+    $build['#slots']['content'] = [
+      'title' => [
+        '#type' => 'html_tag',
+        '#tag' => 'span',
+        '#value' => $label,
+        '#attributes' => ['class' => ['db-placeholder__region-title']],
+      ],
+      'help' => [
+        '#type' => 'html_tag',
+        '#tag' => 'span',
+        '#value' => $help,
+        '#attributes' => ['class' => ['db-placeholder__region-help']],
+      ],
+    ];
+
+    return $build;
+  }
+
+  /**
+   * Placeholder standing for a node that rendered nothing.
+   *
+   * The other half of ::buildPlaceholderRegion()'s two sentences, and the
+   * reason they share a shape: from the outside both are an area with no
+   * markup in it, and the only thing the user needs to tell apart is whether
+   * the page will fill it or they have to.
+   *
+   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $label
+   *   What the node is, so it stays recognizable while showing nothing.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function buildEmptyPlaceholder(string|TranslatableMarkup $label): array {
+    return $this->buildPlaceholderRegion(
+      $label,
+      new TranslatableMarkup('Empty. Configure it to make it visible.'),
+    );
   }
 
   /**

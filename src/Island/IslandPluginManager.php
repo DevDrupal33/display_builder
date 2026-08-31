@@ -6,6 +6,8 @@ namespace Drupal\display_builder\Island;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Plugin\Context\Context;
+use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\display_builder\Attribute\Island;
 
@@ -13,6 +15,15 @@ use Drupal\display_builder\Attribute\Island;
  * Island plugin manager.
  */
 final class IslandPluginManager extends DefaultPluginManager implements IslandPluginManagerInterface {
+
+  /**
+   * UI Patterns source context telling a source it renders a preview.
+   *
+   * Spelled out here because UI Patterns keeps its own constant protected.
+   *
+   * @see \Drupal\ui_patterns\Element\ComponentElementBuilder::isInPreview()
+   */
+  public const IN_PREVIEW_CONTEXT = 'ui_patterns:in_preview';
 
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
     parent::__construct('Plugin/display_builder/Island', $namespaces, $module_handler, IslandInterface::class, Island::class);
@@ -65,6 +76,26 @@ final class IslandPluginManager extends DefaultPluginManager implements IslandPl
       },
       $definitions,
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Every island renders inside a builder, by definition, and a source has no
+   * other way to tell that it is being edited rather than viewed. Marking the
+   * contexts here rather than in ::createInstances() covers the islands built
+   * one at a time too, and UI Patterns carries a context down to every source
+   * it resolves, however deeply nested.
+   *
+   * @see \Drupal\display_builder\Plugin\UiPatterns\Source\BlockSource
+   */
+  public function createInstance($plugin_id, array $configuration = []) {
+    $configuration['contexts'][self::IN_PREVIEW_CONTEXT] = new Context(
+      new ContextDefinition('boolean'),
+      TRUE,
+    );
+
+    return parent::createInstance($plugin_id, $configuration);
   }
 
   /**

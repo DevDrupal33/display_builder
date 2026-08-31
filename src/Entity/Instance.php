@@ -18,6 +18,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildableOverrideInterface;
+use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\Exception\InvalidNodeException;
 use Drupal\display_builder\InstanceAccessControlHandler;
 use Drupal\display_builder\InstanceInterface;
@@ -726,7 +727,9 @@ class Instance extends ContentEntityBase implements InstanceInterface {
           $entity = $this->entityTypeManager()->getStorage($entity->getEntityTypeId())->load($entity->id());
         }
         else {
-          $entity = $this->sampleEntityGenerator()->get($entity->getEntityTypeId(), $entity->bundle());
+          $entity = DisplayBuilderHelpers::markSampleEntity(
+            $this->sampleEntityGenerator()->get($entity->getEntityTypeId(), $entity->bundle())
+          );
         }
 
         // Edge case when the parent entity is deleted but not the builder

@@ -79,7 +79,7 @@
 
   /* Misc */
   --db-color-danger: var(--sl-color-danger-400);
-  --db-preview-placeholder-outline: var(--sl-color-neutral-400);
+  --db-placeholder-outline: var(--sl-color-neutral-400);
   --db-shadow-color: rgb(27, 31, 35, 0.15);
   --db-highlight-outline: var(--sl-color-purple-700);
 

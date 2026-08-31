@@ -6,6 +6,7 @@ namespace Drupal\display_builder;
 
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Render\Markup;
@@ -31,79 +32,35 @@ class DisplayBuilderHelpers {
   }
 
   /**
-   * Recursively search and replace values in a multi-dimensional array.
+   * Marks a sample entity as a preview, the way core's own previews do.
    *
-   * This function traverses an array and replaces elements based on a set of
-   * search criteria. It's optimized to perform multiple replacements in a
-   * single pass.
+   * A sample entity is never saved, so it has no ID, and a formatter that
+   * needs one has nothing to work with: the comment field's "Add comment"
+   * form loads the commented entity by ID and asserts its way out on NULL,
+   * taking down the render of everything around it. `in_preview` is the flag
+   * core already uses to say "not a real page, stand down" - node preview
+   * sets it, and comment, history and content_moderation all check it.
    *
-   * @param array &$array
-   *   The array to search and replace in (passed by reference).
-   * @param array $replacements
-   *   An array of replacement rules. Each rule is an associative array with:
-   *   - 'search': An associative array with a single key-value pair to find.
-   *               Example: ['plugin_id' => 'system_messages_block'].
-   *   - 'new_value': The value to replace the matched element with.
+   * Only sample entities get it. A display bound to a real entity is a real
+   * page and must render like one.
    *
-   * @return int
-   *   How many elements were replaced. The caller needs this to know whether
-   *   the markers it just inserted have to be styled.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity, saved or sample.
    *
-   *   @see \Drupal\display_builder\Plugin\display_builder\Island\PreviewPanel::renderPreviewSources()
+   * @return \Drupal\Core\Entity\EntityInterface
+   *   The same entity, for chaining into a context.
+   *
+   * @see \Drupal\comment\Plugin\Field\FieldFormatter\CommentDefaultFormatter::viewElements()
    */
-  public static function findAndReplaceInArray(array &$array, array $replacements): int {
-    $replaced = 0;
-
-    foreach ($array as $key => &$value) {
-      if (!\is_array($value)) {
-        continue;
-      }
-
-      foreach ($replacements as $replacement) {
-        $search = $replacement['search'];
-        $class = $replacement['new_value_class'] ?? '';
-        $newValue = [
-          'source_id' => 'token',
-          'source' => [
-            'value' => Markup::create('<div class="db-background db-preview-placeholder ' . $class . '">' . $replacement['new_value_title'] . '</div>'),
-          ],
-        ];
-        $searchKey = \array_key_first($search);
-        $searchValue = $search[$searchKey] ?? NULL;
-
-        $match = FALSE;
-
-        // Match "source_id" directly on the child.
-        if ($searchKey === 'source_id' && isset($value['source_id']) && $value['source_id'] === $searchValue) {
-          $match = TRUE;
-        }
-        // Match "plugin_id" either directly on the child or inside its 'source'
-        // sub-array.
-        elseif ($searchKey === 'plugin_id') {
-          if ((isset($value['plugin_id']) && $value['plugin_id'] === $searchValue)
-            || (isset($value['source']) && \is_array($value['source']) && isset($value['source']['plugin_id']) && $value['source']['plugin_id'] === $searchValue)
-          ) {
-            $match = TRUE;
-          }
-        }
-
-        if ($match) {
-          $array[$key] = $newValue;
-          ++$replaced;
-
-          // Item replaced, continue to next item in the main array to avoid
-          // unnecessary recursion into the new value or other replacements.
-          continue 2;
-        }
-      }
-
-      // Recurse into deeper arrays if no replacement was made at this level.
-      $replaced += self::findAndReplaceInArray($value, $replacements);
+  public static function markSampleEntity(EntityInterface $entity): EntityInterface {
+    if ($entity->id() === NULL) {
+      // Undeclared on purpose, by core: `in_preview` is a plain dynamic
+      // property that NodeForm and CommentForm set the same way.
+      // @phpstan-ignore property.notFound
+      $entity->in_preview = TRUE;
     }
-    // Break the reference to the last iterated value.
-    unset($value);
 
-    return $replaced;
+    return $entity;
   }
 
   /**

@@ -9,6 +9,8 @@ variants:
     title: Button
   list:
     title: List
+  region:
+    title: Region
 slots:
   content:
     title: Content

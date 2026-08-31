@@ -6,15 +6,22 @@ namespace Drupal\display_builder_page_layout\Plugin\UiPatterns\Source;
 
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\display_builder_page_layout\Plugin\PageRegionSourceBase;
 use Drupal\ui_patterns\Attribute\Source;
-use Drupal\ui_patterns\PropTypeInterface;
-use Drupal\ui_patterns\SourcePluginBase;
 
 /**
  * Plugin implementation of the source.
  *
  * Slot is explicitly added to prop_types to allow getPropValue
  * to return a renderable array in case of slot prop type.
+ *
+ * The placeholder never reaches a real page. PageLayoutPageVariant::build()
+ * replaces the whole `main_page_content` source node with the render array
+ * from ::setMainContent() before any source plugin runs, so it only appears
+ * where no page is being rendered: the builder, and the page layout's own
+ * Preview.
+ *
+ * @see \Drupal\display_builder_page_layout\Plugin\DisplayVariant\PageLayoutPageVariant::replaceTitleAndContent()
  */
 #[Source(
   id: 'main_page_content',
@@ -27,25 +34,22 @@ use Drupal\ui_patterns\SourcePluginBase;
     'page' => new ContextDefinition('uri', label: new TranslatableMarkup('Page'), required: TRUE),
   ]
 )]
-class MainPageContentSource extends SourcePluginBase {
+class MainPageContentSource extends PageRegionSourceBase {
 
   /**
    * {@inheritdoc}
    */
-  public function getPropValue(): mixed {
-    $isSlot = ($this->propDefinition['ui_patterns']['type_definition']->getPluginId() === 'slot');
-
-    return $isSlot ? [] : '';
+  protected function regionLabel(): TranslatableMarkup {
+    return new TranslatableMarkup('Main content');
   }
 
   /**
-   * Get the value from settings.
+   * {@inheritdoc}
    *
-   * @param \Drupal\ui_patterns\PropTypeInterface|null $prop_type
-   *   The prop type.
+   * The single most important region on the page, so it gets the room.
    */
-  public function getValue(?PropTypeInterface $prop_type = NULL): mixed {
-    return $this->configuration['settings'];
+  protected function regionSize(): string {
+    return 'lg';
   }
 
 }

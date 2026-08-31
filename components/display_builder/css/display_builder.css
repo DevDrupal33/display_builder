@@ -643,12 +643,6 @@ Kept separate from [data-db-stale] so a failed refresh leaves the panel usable
     font-size: 14px;
   }
 
-  /* The Preview island's placeholder markers used to be styled here. They
-     moved to assets/css/preview_placeholder.css when the preview became an
-     iframe: these rules are nested inside .display-builder, and the iframe
-     document has no such ancestor, so nothing here could ever match them
-     again. @see \Drupal\display_builder\Plugin\display_builder\Island\PreviewPanel */
-
   /* Common hover affordance for any placed node in the Builder canvas -
      forces cursor:pointer through descendants (a component's own
      content commonly sets its own cursor on a link, a button, plain

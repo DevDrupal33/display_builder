@@ -17,6 +17,7 @@ use Drupal\Core\Theme\Registry;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\DisplayBuilderHelpers;
+use Drupal\display_builder_page_layout\Plugin\PageRegionSourceBase;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -244,6 +245,11 @@ class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPlugi
   /**
    * Replace title and content blocks.
    *
+   * Both payloads are wrapped in PageRegionSourceBase::PAGE_PROVIDED. The
+   * source cannot tell "the page gave me nothing" from "nobody injected
+   * anything" by looking at the payload, and the two want opposite renders,
+   * so the wrapper is the signal and the payload is free to be empty.
+   *
    * @param array $data
    *   The Display Builder data to alter.
    * @param mixed $title
@@ -255,25 +261,28 @@ class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPlugi
    */
   private function replaceTitleAndContent(array &$data, mixed $title, ?array $content): void {
     if ($content !== NULL) {
-      DisplayBuilderHelpers::findArrayReplaceSource($data, ['source_id' => self::SOURCE_CONTENT_ID], $content);
+      DisplayBuilderHelpers::findArrayReplaceSource($data, ['source_id' => self::SOURCE_CONTENT_ID], [PageRegionSourceBase::PAGE_PROVIDED => $content]);
     }
 
     // Try to handle specific title cases.
-    if (\is_string($title)) {
-      $title = $title;
-    }
-    elseif ($title instanceof MarkupInterface) {
+    if ($title instanceof MarkupInterface) {
       $title = (string) $title;
     }
-    elseif (isset($title['#markup'])) {
-      $title = $title['#markup'];
+    elseif (\is_array($title) && isset($title['#markup'])) {
+      $title = (string) $title['#markup'];
     }
 
-    if ($title !== NULL && \is_string($title)) {
+    if (\is_string($title)) {
       // @todo avoid arbitrary classes.
       $title = ['#markup' => '<h1 class="title page-title">' . $title . '</h1>'];
-      DisplayBuilderHelpers::findArrayReplaceSource($data, ['source_id' => self::SOURCE_TITLE_ID], $title);
     }
+
+    // Unconditionally, including for a title none of the above turned into
+    // markup: a title callback is free to return any render array, and the
+    // wrapper is the only thing telling the source a page filled it. Leave it
+    // off and the title node falls back to the builder's placeholder, which
+    // on a real page is a fatal render error, not just the wrong words.
+    DisplayBuilderHelpers::findArrayReplaceSource($data, ['source_id' => self::SOURCE_TITLE_ID], [PageRegionSourceBase::PAGE_PROVIDED => $title]);
   }
 
 }

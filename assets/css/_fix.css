@@ -38,9 +38,16 @@
   }
 }
 
-/* Display Views, page and Entity block as block */
-.db-island-builder .db-placeholder:not([data-node-type="token"]),
-.db-island-preview .db-placeholder:not([data-node-type="token"]) {
+/* Display Views, page and Entity block as block.
+   Scoped to the button variant, which is what those three are: naming the
+   shape this rule means beats subtracting the shapes it does not, which grows
+   a :not() every time a new placeholder variant appears in the canvas. Region
+   placeholders (variant region) are a padded box with a name and a sentence, and
+   keep their own box model without having to be excluded here.
+   @see components/placeholder/placeholder.twig, which stamps the variant class
+   @see \Drupal\display_builder\RenderableBuilderTrait::buildPlaceholderRegion() */
+.db-island-builder .db-placeholder-button:not([data-node-type="token"]),
+.db-island-preview .db-placeholder-button:not([data-node-type="token"]) {
   display: block;
   width: 100%;
   padding: 0;

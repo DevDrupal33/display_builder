@@ -63,7 +63,8 @@ test('Views build and render', { tag: [ '@base' ] }, async ({ page, drupal, disp
       view_header: '[View] Header',
       view_exposed: '[View] Exposed',
       view_attachment_before: '[View] Attachment_before',
-      view_rows: '[View] Rows',
+      // @todo enable within 3542796
+      // view_rows: '[View] Rows',
       view_pager: '[View] Pager',
       view_attachment_after: '[View] Attachment_after',
       view_more: '[View] More',

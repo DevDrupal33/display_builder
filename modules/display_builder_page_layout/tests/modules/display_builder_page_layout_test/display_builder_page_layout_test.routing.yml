@@ -7,3 +7,17 @@ display_builder_page_layout_test.page:
     # The page layouts installed by this module are checked as a visitor gets
     # them, so the pages they are bound to are open on purpose.
     _access: 'TRUE'
+
+# Same layout, but a title that is a render array rather than a string. A
+# _title_callback may return anything renderable, and the page pipeline has to
+# hand that to the layout as the page's own title all the same.
+display_builder_page_layout_test.array_title:
+  path: '/test/array-title'
+  defaults:
+    _controller: '\Drupal\display_builder_page_layout_test\Controller\TestPageController::build'
+    _title_callback: '\Drupal\display_builder_page_layout_test\Controller\TestPageController::arrayTitle'
+    name: 'array-title'
+  requirements:
+    # Open for the same reason as the route above: the layout bound to this
+    # path is checked as a visitor gets it.
+    _access: 'TRUE'

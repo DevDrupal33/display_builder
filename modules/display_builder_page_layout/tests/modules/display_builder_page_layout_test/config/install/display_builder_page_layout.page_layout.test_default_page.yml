@@ -10,7 +10,7 @@ conditions:
   request_path:
     id: request_path
     negate: false
-    pages: /test/default
+    pages: "/test/default\n/test/array-title"
 profile: test_base
 sources:
   - node_id: fe19a155723b0410

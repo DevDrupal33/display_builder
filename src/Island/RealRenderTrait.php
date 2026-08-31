@@ -84,9 +84,8 @@ trait RealRenderTrait {
     }
 
     if ($this->isRenderEmptyOrFailing($this->renderer, $build)) {
-      // Keep the placeholder if the component is not renderable.
-      $message = $component_id . ': ' . $this->t('Empty by default. Configure it to make it visible');
-      $build = $this->buildPlaceholder($message);
+      // Keep the node selectable even though it shows nothing.
+      $build = $this->buildEmptyPlaceholder($label);
     }
 
     if (!$this->useAttributesVariable($build)) {

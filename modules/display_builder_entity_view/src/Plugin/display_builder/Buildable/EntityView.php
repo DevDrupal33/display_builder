@@ -16,6 +16,7 @@ use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
+use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\DisplayReference;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
@@ -320,7 +321,7 @@ final class EntityView extends DisplayBuildablePluginBase {
     $entity_type_id = $display->getTargetEntityTypeId();
     $bundle = $display->getTargetBundle();
     $sampleEntity = $this->sampleEntityGenerator->get($entity_type_id, $bundle);
-    $contexts['entity'] = EntityContext::fromEntity($sampleEntity);
+    $contexts['entity'] = EntityContext::fromEntity(DisplayBuilderHelpers::markSampleEntity($sampleEntity));
     $contexts['view_mode'] = new Context(ContextDefinition::create('string'), $display->getMode());
     $contexts['bundle'] = new Context(ContextDefinition::create('string'), $bundle);
     $contexts = RequirementsContext::addToContext(['entity'], $contexts);

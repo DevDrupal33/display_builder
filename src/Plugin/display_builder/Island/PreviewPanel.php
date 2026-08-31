@@ -8,7 +8,6 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
-use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\DisplayBuilderHtmx;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandPluginBase;
@@ -194,36 +193,27 @@ class PreviewPanel extends IslandPluginBase {
       return [];
     }
 
-    $placeholders = $this->alterPreviewPlaceholder($data);
-
     $returned = [];
 
     foreach ($data as $slot) {
       $build = $this->componentElementBuilder->buildSource([], 'content', [], $slot, $this->configuration['contexts'] ?? []);
       $build = $build['#slots']['content'][0] ?? [];
 
-      // Some sources (e.g. a comment field's "Add comment" form) throw once
-      // actually rendered rather than producing empty markup - @see
-      // RenderableBuilderTrait::isRenderEmptyOrFailing(). Unlike
-      // BuilderPanel, which already guards every source it builds the same
-      // way, nothing here previously checked this, so a throwing source
-      // shipped its #lazy_builder unresolved into the page, breaking Drupal
-      // core's own BigPipe processing of unrelated placeholders (e.g. the
-      // Navigation module's admin toolbar) later in the same request.
-      if ($this->isRenderEmptyOrFailing($this->renderer, $build)) {
-        $build = $this->buildPlaceholder($this->t('[Placeholder] No preview'));
+      // Whatever shows nothing here shows nothing to the visitor, so the
+      // Preview drops it rather than standing something in its place: a
+      // source that the page *will* fill has already answered for itself and
+      // never renders empty. Dropping it also settles a second problem - some
+      // sources (e.g. a comment field's "Add comment" form) throw once
+      // actually rendered rather than producing empty markup, and a throwing
+      // source left in ships its #lazy_builder unresolved into the page,
+      // breaking Drupal core's own BigPipe processing of unrelated
+      // placeholders (e.g. the Navigation module's admin toolbar) later in
+      // the same request.
+      if ($this->needsPlaceholder($this->renderer, $slot, $build)) {
+        continue;
       }
 
       $returned[] = $build;
-    }
-
-    if ($placeholders > 0) {
-      // The markers are raw markup inside a token source, so they carry no
-      // library of their own. Attach it here instead - and only here, because
-      // this render is what the live-preview iframe loads, a document with none
-      // of the builder's own CSS to inherit from.
-      // @see assets/css/preview_placeholder.css
-      $returned['#attached']['library'][] = 'display_builder/preview_placeholder';
     }
 
     return $returned;
@@ -257,86 +247,6 @@ class PreviewPanel extends IslandPluginBase {
       // always be current; never let the pane markup itself be cached.
       '#cache' => ['max-age' => 0],
     ];
-  }
-
-  /**
-   * Replace placeholder for preview.
-   *
-   * Some block source will not be created, create a simple placeholder to have
-   * a preview instead of nothing.
-   *
-   * @todo move as an issue to UI Patterns?
-   *
-   * @param array $data
-   *   The instance data to replace.
-   *
-   * @return int
-   *   How many sources were replaced by a marker.
-   */
-  private function alterPreviewPlaceholder(array &$data): int {
-    $replacements = [
-      [
-        'search' => ['plugin_id' => 'local_tasks_block'],
-        'new_value_title' => new TranslatableMarkup('[Placeholder] Local tasks (Tabs)'),
-      ],
-      [
-        'search' => ['plugin_id' => 'system_messages_block'],
-        'new_value_title' => new TranslatableMarkup('[Placeholder] Block messages'),
-      ],
-      [
-        'search' => ['source_id' => 'page_title'],
-        'new_value_title' => new TranslatableMarkup('[Placeholder] Page title'),
-      ],
-      [
-        'search' => ['source_id' => 'main_page_content'],
-        'new_value_title' => new TranslatableMarkup('[Placeholder] Page content'),
-        'new_value_class' => 'db-preview-placeholder-lg',
-      ],
-      [
-        'search' => ['source_id' => 'view_attachment_before'],
-        'new_value_title' => new TranslatableMarkup('[Placeholder] View attachment before'),
-        'new_value_class' => 'db-preview-placeholder-md',
-      ],
-      [
-        'search' => ['source_id' => 'view_exposed'],
-        'new_value_title' => new TranslatableMarkup('[Placeholder] View exposed form'),
-        'new_value_class' => 'db-preview-placeholder-md',
-      ],
-      [
-        'search' => ['source_id' => 'view_header'],
-        'new_value_title' => new TranslatableMarkup('[Placeholder] View header'),
-        'new_value_class' => 'db-preview-placeholder-md',
-      ],
-      [
-        'search' => ['source_id' => 'view_rows'],
-        'new_value_title' => new TranslatableMarkup('[Placeholder] View rows'),
-        'new_value_class' => 'db-preview-placeholder-lg',
-      ],
-      [
-        'search' => ['source_id' => 'view_attachment_after'],
-        'new_value_title' => new TranslatableMarkup('[Placeholder] View attachment after'),
-        'new_value_class' => 'db-preview-placeholder-md',
-      ],
-      [
-        'search' => ['source_id' => 'view_pager'],
-        'new_value_title' => new TranslatableMarkup('[Placeholder] View pager'),
-      ],
-      [
-        'search' => ['source_id' => 'view_more'],
-        'new_value_title' => new TranslatableMarkup('[Placeholder] View more'),
-      ],
-      [
-        'search' => ['source_id' => 'view_footer'],
-        'new_value_title' => new TranslatableMarkup('[Placeholder] View footer'),
-        'new_value_class' => 'db-preview-placeholder-md',
-      ],
-      [
-        'search' => ['source_id' => 'view_feed_icons'],
-        'new_value_title' => new TranslatableMarkup('[Placeholder] View feed icons'),
-      ],
-    ];
-
-    return DisplayBuilderHelpers::findAndReplaceInArray($data, $replacements);
   }
 
 }

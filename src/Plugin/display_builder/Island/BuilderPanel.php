@@ -72,33 +72,15 @@ class BuilderPanel extends ViewPanelBase {
       return NULL;
     }
 
-    $has_plugin_id = FALSE;
     $classes = ['db-block'];
 
     if (isset($data['source']['plugin_id'])) {
-      $has_plugin_id = TRUE;
       $classes[] = 'db-block-' . \strtolower(Html::cleanCssIdentifier($data['source']['plugin_id']));
     }
     else {
       $classes[] = 'db-block-' . \strtolower(Html::cleanCssIdentifier($data['source_id']));
     }
     $build = $this->renderSource($data, $classes);
-    $is_empty = FALSE;
-
-    if (isset($data['source_id']) && $data['source_id'] === 'token') {
-      if (isset($build['content']) && empty($build['content'])) {
-        $is_empty = TRUE;
-      }
-    }
-
-    if ($has_plugin_id && ($data['source']['plugin_id'] === 'system_messages_block' || $data['source']['plugin_id'] === 'local_tasks_block')) {
-      // system_messages_block is never empty, but often invisible.
-      // See: core/modules/system/src/Plugin/Block/SystemMessagesBlock.php
-      // See: core/lib/Drupal/Core/Render/Element/StatusMessages.php
-      // Let's always display it in a placeholder.
-      $is_empty = TRUE;
-    }
-
     $label_info = $this->slotSourceProxy->getLabelWithSummary($data, $this->configuration['contexts'] ?? []);
 
     if (isset($data['source_id'])) {
@@ -115,9 +97,8 @@ class BuilderPanel extends ViewPanelBase {
       }
     }
 
-    // This is the placeholder without configuration or content yet.
-    if ($this->isRenderEmptyOrFailing($this->renderer, $build) || $is_empty) {
-      $build = $this->buildPlaceholderButton($label_info['summary']);
+    if ($this->needsPlaceholder($this->renderer, $data, $build)) {
+      $build = $this->buildEmptyPlaceholder($label_info['summary']);
     }
     elseif (!$this->useAttributesVariable($build) || $this->hasMultipleRoot($build)) {
       $build = [

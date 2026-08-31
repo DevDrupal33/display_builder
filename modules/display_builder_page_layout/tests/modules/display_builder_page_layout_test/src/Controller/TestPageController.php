@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder_page_layout_test\Controller;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Url;
 
 /**
  * Serves the pages the test page layouts are bound to.
@@ -36,6 +37,20 @@ final class TestPageController {
   public function build(string $name): array {
     return [
       '#markup' => $this->t('Page layout test page: @name', ['@name' => $name]),
+    ];
+  }
+
+  /**
+   * Builds a page title that is a render array, not a string.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  public function arrayTitle(): array {
+    return [
+      '#type' => 'link',
+      '#title' => $this->t('Linked page title'),
+      '#url' => Url::fromRoute('<front>'),
     ];
   }
 

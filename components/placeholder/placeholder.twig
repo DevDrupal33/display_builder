@@ -7,7 +7,7 @@
     attributes: attributes,
     label: content,
   }, with_context: false) }}
-{% elseif variant == 'list' %}
+{% elseif variant == 'list' or variant == 'region' %}
   <div{{ attributes }}>{{ content }}</div>
 {% else %}
   {{ include('display_builder:card', {

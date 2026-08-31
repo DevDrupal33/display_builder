@@ -1,3 +1,7 @@
+.db-placeholder {
+  font-size: var(--sl-font-size-small);
+}
+
 /* Not scoped to .db-island-library: while a placeholder is being dragged,
    Sortable's cross-list group mechanics render/re parent this same element
    live inside other islands' dropzones (e.g. the Wireframe or Builder panel)
@@ -5,13 +9,18 @@
    meant the placeholder lost all its chrome (padding, hover accent) the
    moment it was no longer a descendant of the library island, showing up
    as bare, unstyled text during the drag. */
-.db-placeholder {
+/* The one-line chip shape lives on the two variants that are one: the
+   library's list rows and the canvas token buttons. Deliberately not on
+   .db-placeholder itself, so the region variant is a padded box with a
+   wrapping sentence without having to undo any of this.
+   @see \Drupal\display_builder\RenderableBuilderTrait::buildPlaceholderRegion() */
+.db-placeholder-list,
+.db-placeholder-button {
   overflow: hidden;
   padding: var(--sl-spacing-2x-small);
   cursor: grab;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-size: var(--sl-font-size-small);
   /* &:hover {
     padding-left: calc(var(--sl-spacing-x-small) - 3px);
     border-inline-start: 3px solid var(--placeholder-color-hover-border);
@@ -41,4 +50,60 @@
     border-inline-start: none;
     background-color: color-mix(in sRGB, var(--component-color-outline) 10%, transparent);
   } */
+}
+
+/* A placeholder standing for a whole page region rather than one element: the
+   page layout's main content and title slots, the page chrome blocks, and any
+   source the Preview island could not resolve.
+   @see \Drupal\display_builder\RenderableBuilderTrait::buildPlaceholderRegion()
+
+   Here rather than in components/display_builder/css/display_builder.css
+   because this is the stylesheet that follows the component: SDC attaches it
+   wherever the placeholder renders, the live-preview iframe included. That
+   document has neither the builder's own CSS nor Shoelace's theme, so every
+   custom property below carries the resolved light value of the token it
+   names, taken from Shoelace 2.20.1.
+   @see components/display_builder/css/colors.css for the palette itself. */
+/* Grid with place-items rather than flex: UI Patterns wraps slot content, so
+   the box has one child, not two, and centering the children directly would
+   depend on markup this file does not own. */
+.db-placeholder-region {
+  display: grid;
+  place-items: center;
+  padding: var(--db-space-12, 12px);
+  cursor: default;
+  text-align: center;
+  border-radius: 0.25rem;
+  outline: 2px dotted var(--db-placeholder-outline, hsl(240, 5%, 64.9%));
+  /* Hatching, so an empty box still reads as a deliberate placeholder rather
+     than as an area the display failed to fill. */
+  background-image: var(--db-background-image, repeating-linear-gradient(45deg, oklch(100% 0 0), oklch(100% 0 0) 13px, hsl(240, 4.8%, 95.9%) 13px, hsl(240, 4.8%, 95.9%) 14px));
+  background-size: var(--db-background-size, 40px 40px);
+}
+
+/* A floor, not a height: the box grows to fit its sentence either way. md is
+   a strip, so the floor only bites on a short sentence. lg stands for a page's
+   whole content area. */
+.db-placeholder-region--md {
+  min-height: 2rem;
+}
+
+.db-placeholder-region--lg {
+  min-height: 20rem;
+}
+
+.db-placeholder__region-title {
+  display: block;
+  margin-bottom: var(--db-space-4, 4px);
+  font-weight: var(--sl-font-weight-semibold, 600);
+}
+
+.db-placeholder__region-help {
+  /* Block, or the measure below is inert: max-width does nothing to a
+     non-replaced inline element, and the sentence runs the full box width. */
+  display: block;
+  max-width: 200ch;
+  opacity: 0.75;
+  font-size: var(--sl-font-size-small, 0.875rem);
+  font-style: italic;
 }

@@ -1,7 +1,7 @@
 - button "[View] Header placeholder"
 - button "[View] Exposed placeholder"
 - button "[View] Attachment_before placeholder"
-- button "[View] Rows"
+- text: "[View] Rows Empty. Configure it to make it visible."
 - button "[View] Pager placeholder"
 - button "[View] Attachment_after placeholder"
 - button "[View] More placeholder"
