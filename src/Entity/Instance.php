@@ -424,8 +424,16 @@ class Instance extends ContentEntityBase implements InstanceInterface {
 
   /**
    * {@inheritdoc}
+   *
+   * No-op when nothing is published: after a revert on an override, the
+   * buildable plugin holds no published data any more, and restoring from it
+   * would otherwise empty the display instead of leaving it untouched.
    */
   public function restore(): void {
+    if (!$this->isPublished()) {
+      return;
+    }
+
     $this->setNewPresent($this->getBuildablePlugin()->getSources(), new TranslatableMarkup('Restore published data.'));
   }
 

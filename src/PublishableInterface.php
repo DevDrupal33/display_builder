@@ -50,6 +50,9 @@ interface PublishableInterface {
 
   /**
    * Restore to the last published state.
+   *
+   * No-op when nothing is published, so it never empties a display that
+   * has no published state to restore to.
    */
   public function restore(): void;
 

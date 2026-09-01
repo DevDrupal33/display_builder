@@ -110,7 +110,7 @@ class StateButtons extends IslandPluginBase implements IslandConfigurationFormIn
     ];
     $items = [];
 
-    if (!$saveIsCurrent) {
+    if ($instance->isPublished() && !$saveIsCurrent) {
       $items[] = $this->htmxEvents->onReset($this->buildRestoreItem(), $instance_id);
     }
 
