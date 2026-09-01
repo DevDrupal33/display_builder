@@ -69,4 +69,22 @@ class DisplayBuilderViewsHook {
     }
   }
 
+  /**
+   * Implements hook_ui_patterns_source_info_alter().
+   *
+   * @param array $definitions
+   *   An array of all the existing plugin definitions, passed by reference.
+   */
+  #[Hook('ui_patterns_source_info_alter')]
+  public function sourceInfoAlter(array &$definitions): void {
+    // Both plugins belong to ui_patterns_views; ours add the display context
+    // it does not model yet, and a placeholder for when there is no view to
+    // run. Swapping the class rather than adding a plugin keeps one source id
+    // per area, so a stored display keeps working either way.
+    // @todo Remove once the UI Patterns context system has been revamped,
+    // #3608162.
+    $definitions['view_rows']['class'] = 'Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewRowsSource';
+    $definitions['view_title']['class'] = 'Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewTitleSource';
+  }
+
 }

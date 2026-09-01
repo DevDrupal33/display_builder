@@ -296,6 +296,11 @@ export class Displaybuilder {
   /**
    * Test the blocks tab to ensure context blocks are available in library.
    *
+   * In the builder the node is matched on `data-node-title` rather than on a
+   * role: a source with nothing to resolve to renders as a region placeholder,
+   * a div, and one that resolves renders as whatever its own output is. The
+   * title attribute is what every node carries either way.
+   *
    * @async
    * @param {Object} blocks - The list of expected blocks in library and in the builder.
    * @param {boolean} builder - Check in the builder as well..
@@ -308,7 +313,7 @@ export class Displaybuilder {
     for (const [source, label] of Object.entries(blocks)) {
       await expect(this.page.locator(`.db-island-block_library [data-hx-vals*="${source}"]`)).toHaveCount(1)
       if (builder) {
-        await expect(this.page.locator('.db-island-builder').getByRole('button', { name: label })).toHaveCount(1)
+        await expect(this.page.locator(`.db-island-builder [data-node-title="${label}"]`)).toHaveCount(1)
       }
     }
   }
@@ -316,12 +321,16 @@ export class Displaybuilder {
   /**
    * Test the preview tab with an Aria snapshot and go back to the builder.
    *
+   * The default locator is the iframe's own body: what the live-preview route
+   * renders is the preview island's content with no builder chrome around it,
+   * so there is no `.db-island-preview` wrapper inside the frame.
+   *
    * @async
    * @param {string} snapshotName - The expected Aria snapshot string.
-   * @param {string} locatorClass - The locator parameter, default '.db-island-preview'.
+   * @param {string} locatorClass - The locator parameter, default 'body'.
    * @returns {Promise<void>}
    */
-  async expectPreviewAriaSnapshot(snapshotName: string, locatorClass: string = '.db-island-preview'): Promise<void> {
+  async expectPreviewAriaSnapshot(snapshotName: string, locatorClass: string = 'body'): Promise<void> {
     await this.page.locator('[data-db-split-toggle]').click()
     await this.htmxReady()
 

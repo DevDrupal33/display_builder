@@ -321,11 +321,23 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
     // Contexts needed by UI Patterns Source can be added by each Display
     // Buildable plugin by overriding this method.
     // @todo filter by $unqualified_context_ids.
+    $extender = $this->getExtender();
+
+    // NULL when the view cannot be loaded, or when the display extender is not
+    // registered in views settings. Sources answer for themselves when the
+    // contexts they need are missing.
+    if ($extender === NULL) {
+      return [];
+    }
     $contexts = [];
-    $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($this->getExtender()->view->storage);
-    // Needed by ui_patterns_views's ViewRowsSource.
-    // Will be filled by \Drupal\display_builder_views\Hook\PreprocessViewsView.
+    $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($extender->view->storage);
+    // Display (string) context is not managed yet by UI Patterns but it will
+    // be. We are a bit ahead here but we already need it on our side.
+    $contexts['display'] = new Context(ContextDefinition::create('string'), $extender->view->current_display);
+    // Still expected by ui_patterns_views source plugins.
+    // @todo Remove once the UI Patterns contexts system is cleaned.
     $contexts['ui_patterns_views:rows'] = new Context(new ContextDefinition('any'), []);
+
     return RequirementsContext::addToContext(['views:style'], $contexts);
   }
 

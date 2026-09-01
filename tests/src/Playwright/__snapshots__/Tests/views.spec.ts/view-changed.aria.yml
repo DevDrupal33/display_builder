@@ -1,4 +1,0 @@
-- 'heading "label: none" [level=5]'
-- text: I am a test textfield in a slot in a View!
-- button "Click me"
-- text: "[Placeholder] View header [Placeholder] View exposed form [Placeholder] View attachment before [Placeholder] View rows [Placeholder] View pager [Placeholder] View attachment after [Placeholder] View more [Placeholder] View footer [Placeholder] View feed icons"

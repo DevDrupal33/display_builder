@@ -11,6 +11,12 @@ import { Drupal } from '../objects/Drupal'
 // is left below: opening the builder for a view display, and the drag/render.
 // The view is seeded from a config template (display_builder_views_test) and
 // duplicated per test, so no Views UI ajax is involved in the setup.
+//
+// The Preview of this display is deliberately not asserted here. It renders
+// the display on its own page through a sub-request, two page pipelines deep,
+// which this runner resolves inconsistently under parallel load, and
+// ViewPagePreviewTest already pins the behavior that matters: the draft shows
+// in the preview and never leaks to an ordinary visitor.
 
 /**
  * Duplicate the template view under a unique id, keeping its Display Builder
@@ -59,17 +65,20 @@ test('Views build and render', { tag: [ '@base' ] }, async ({ page, drupal, disp
 
     // Test the proper blocks are available for Views context.
     // @todo check the proper views row.
+    // The exact node titles, which are the source plugin labels. They used to
+    // be matched loosely, by accessible name, which is a substring match - so
+    // '[View] Attachment_before' passed against a node actually titled
+    // '[View] Attachment before'.
     const sources = {
       view_header: '[View] Header',
-      view_exposed: '[View] Exposed',
-      view_attachment_before: '[View] Attachment_before',
-      // @todo enable within 3542796
-      // view_rows: '[View] Rows',
+      view_exposed: '[View] Exposed form',
+      view_attachment_before: '[View] Attachment before',
+      view_rows: '[View] Rows',
       view_pager: '[View] Pager',
-      view_attachment_after: '[View] Attachment_after',
+      view_attachment_after: '[View] Attachment after',
       view_more: '[View] More',
       view_footer: '[View] Footer',
-      view_feed_icons: '[View] Feed_icons',
+      view_feed_icons: '[View] Feed icons',
     }
     await displayBuilder.expectBlocksAvailable(sources)
 
