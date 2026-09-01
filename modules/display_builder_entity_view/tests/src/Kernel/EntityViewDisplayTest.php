@@ -13,6 +13,7 @@ use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplayTrait;
 use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityView;
+use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -433,6 +434,47 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     self::removeNodeId($actual);
 
     self::assertSame($expected, $actual);
+  }
+
+  /**
+   * Verifies deactivating restores the formatter table, data intact.
+   *
+   * Deactivation only unsets the `display_builder` third-party settings
+   * (`EntityViewDisplayFormTrait::submitForm()`); the classic per-field
+   * `content`/`hidden` component configuration that the formatter table
+   * reads and writes is never touched by Display Builder, active or not, so
+   * it survives the round trip untouched. `::buildMultiple()` must also
+   * route back to the classic per-field render once deactivated, not keep
+   * building from `sources`.
+   */
+  public function testDeactivateRestoresFormatterTableDataIntact(): void {
+    $display = self::createTestDisplay();
+    $display->setComponent('name', ['type' => 'string', 'label' => 'above', 'weight' => 0])->save();
+    $original_component = $display->getComponent('name');
+
+    $entity = EntityTest::create(['type' => 'entity_test', 'name' => 'Test entity']);
+    $entity->save();
+
+    self::assertFalse($display->isDisplayBuilderEnabled());
+    self::assertArrayHasKey('name', $display->buildMultiple([$entity->id() => $entity])[$entity->id()]);
+
+    // Activate Display Builder.
+    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY, 'test_base')->save();
+    self::assertTrue($display->isDisplayBuilderEnabled());
+    $build = $display->buildMultiple([$entity->id() => $entity])[$entity->id()];
+    self::assertArrayHasKey('content', $build);
+    self::assertArrayNotHasKey('name', $build);
+    // The classic component is untouched while active.
+    self::assertSame($original_component, EntityViewDisplay::load($display->id())->getComponent('name'));
+
+    // Deactivate the way the form does.
+    $display->unsetThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY);
+    $display->save();
+
+    $reloaded = EntityViewDisplay::load($display->id());
+    self::assertFalse($reloaded->isDisplayBuilderEnabled());
+    self::assertSame($original_component, $reloaded->getComponent('name'));
+    self::assertArrayHasKey('name', $reloaded->buildMultiple([$entity->id() => $entity])[$entity->id()]);
   }
 
   /**

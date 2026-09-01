@@ -28,6 +28,8 @@ Once your Display Builder selection is submitted, you will have access to two li
 
 ![Activated](images/entity-view-activate-2.webp)
 
+Deactivating Display Builder for a display brings the field formatter table back. This does not touch the display's own field formatter configuration: Display Builder only stores what it needs (its profile, its sources) as separate settings alongside it, never inside the formatter table's own data. Whatever the formatter table showed before activation is exactly what it shows again after deactivation.
+
 Slot sources specific to the Entity Display context will show up in the **Block Library** panel:
 
 ![Entity sources](images/entity-display-sources.webp)
