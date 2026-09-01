@@ -50,6 +50,32 @@
     margin 0.15s ease;
 }
 
+/* At rest, an empty root dropzone has nothing but the base
+   --dropzone-slot-min-height strip to show for itself - same problem
+   the Navigator's own empty-slot rule solves (@see panel_tree.css),
+   applied here to the one root dropzone Canvas and Scaffold share
+   (@see ViewPanelBase::buildRootDropzone()). Unscoped: both panels
+   render the same `.db-dropzone--root`, so one rule covers both. */
+.db-dropzone--root:empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--dropzone-root-empty-min-height);
+  border: 1px dashed var(--root-color-border);
+  border-radius: var(--sl-border-radius-small);
+}
+
+.db-dropzone--root:empty::after {
+  content: attr(data-empty-hint);
+  max-width: 20rem;
+  padding: 0 1rem;
+  pointer-events: none;
+  color: var(--root-color-border);
+  text-align: center;
+  font-size: var(--sl-font-size-x-small);
+  font-style: italic;
+}
+
 .display-builder--on-drag,
 .display-builder--on-move {
   /* Empty canvas has nothing to give it height - grow it for the

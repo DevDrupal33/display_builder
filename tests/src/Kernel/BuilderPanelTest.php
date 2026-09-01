@@ -116,6 +116,25 @@ final class BuilderPanelTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
+   * An empty Canvas carries the empty-state hint on its root dropzone.
+   *
+   * The attribute is always stamped (the CSS `:empty::after` rule is what
+   * gates visibility, @see components/dropzone/dropzone.css), same pattern
+   * as the Navigator's own empty-slot hint.
+   */
+  public function testEmptyCanvasCarriesEmptyHint(): void {
+    $instance = Instance::create([
+      'id' => 'test_instance_empty',
+      'label' => 'Test Instance',
+    ]);
+
+    $build = $this->createIslandPlugin('builder')->build($instance, [], []);
+
+    self::assertArrayHasKey('data-empty-hint', $build['#attributes']);
+    self::assertNotEmpty((string) $build['#attributes']['data-empty-hint']);
+  }
+
+  /**
    * A forced block is replaced even though its render is not empty.
    *
    * Local_tasks_block emits a wrapper with nothing in it, so the emptiness

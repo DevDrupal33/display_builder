@@ -177,6 +177,8 @@ abstract class ViewPanelBase extends IslandPluginBase {
         'data-db-id' => $builder_id,
         'data-node-title' => $this->t('Root container'),
         'data-db-root' => TRUE,
+        // Shown by dropzone.css when the dropzone is actually empty.
+        'data-empty-hint' => $this->t('Nothing built yet. Open the Library (shortcut: l) and drop a component here.'),
       ],
     ];
 

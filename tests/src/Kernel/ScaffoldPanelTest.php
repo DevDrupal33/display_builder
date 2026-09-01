@@ -159,6 +159,24 @@ final class ScaffoldPanelTest extends DisplayBuilderKernelTestBase {
   }
 
   /**
+   * An empty Scaffold carries the empty-state hint on its root dropzone.
+   *
+   * Same attribute, same shared `ViewPanelBase::buildRootDropzone()`, as
+   * the Canvas panel - fixing the empty state once covers both.
+   */
+  public function testEmptyScaffoldCarriesEmptyHint(): void {
+    $instance = Instance::create([
+      'id' => 'test_instance_empty',
+      'label' => 'Test Instance',
+    ]);
+
+    $build = $this->createIslandPlugin('scaffold')->build($instance, [], []);
+
+    self::assertArrayHasKey('data-empty-hint', $build['#attributes']);
+    self::assertNotEmpty((string) $build['#attributes']['data-empty-hint']);
+  }
+
+  /**
    * The configuration summary counts the components rendered for real.
    */
   public function testConfigurationSummary(): void {

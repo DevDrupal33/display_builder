@@ -4,6 +4,7 @@
 :root {
   --dropzone-placeholder-min-height: 1rem;
   --dropzone-slot-min-height: 2rem;
+  --dropzone-root-empty-min-height: 4rem;
   --dropzone-slot-min-width: 3rem;
   --dropzone-slot-min-height-dragging: 3rem;
   --dropzone-slot-min-width-dragging: 6rem;

@@ -56,7 +56,11 @@ Schematic hierarchical view of elements without preview.
 ![Scaffold](images/islands/scaffold.webp)
 
 The schematic view is better for dropping components and blocks when the
-preview in the canvas panel is making things complicated.  
+preview in the canvas panel is making things complicated.
+
+Both Canvas and Scaffold share the same root dropzone. When nothing has
+been built yet, it shows a hint pointing to the Library panel instead of
+sitting there as a near-invisible empty strip.
 For examples: a modal, a sliding slider, a collapsing accordion is hard to
 manipulate when built.
 
