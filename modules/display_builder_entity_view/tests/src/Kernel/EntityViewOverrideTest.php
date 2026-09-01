@@ -156,6 +156,44 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
   }
 
   /**
+   * Verifies a new override starts from the default display, not blank.
+   *
+   * ::getInitialSources() copies the underlying entity_view buildable's
+   * sources on first creation, so an editor overriding a display that was
+   * itself built with Display Builder sees that arrangement already in
+   * place rather than an empty canvas.
+   */
+  public function testOverrideStartsFromDefaultDisplay(): void {
+    $defaultSources = [
+      ['node_id' => 'default', 'source_id' => 'component', 'source' => [], 'third_party_settings' => []],
+    ];
+    [, $buildable] = $this->createOverrideFixture('full', $defaultSources, 'test_base');
+    $buildable->initInstanceIfMissing();
+    $instance = $buildable->getInstance();
+
+    self::assertSame($defaultSources, $instance->getCurrentState());
+  }
+
+  /**
+   * Verifies the other half: no default profile, no sources to copy.
+   *
+   * The copy step is gated on the underlying display carrying a Display
+   * Builder profile. A display Display Builder never built has nothing to
+   * copy, so the override legitimately starts blank rather than pulling in
+   * unrelated third-party setting data.
+   */
+  public function testOverrideStartsBlankWithoutDefaultProfile(): void {
+    $defaultSources = [
+      ['node_id' => 'default', 'source_id' => 'component', 'source' => [], 'third_party_settings' => []],
+    ];
+    [, $buildable] = $this->createOverrideFixture('full', $defaultSources);
+    $buildable->initInstanceIfMissing();
+    $instance = $buildable->getInstance();
+
+    self::assertSame([], $instance->getCurrentState());
+  }
+
+  /**
    * Creates an entity, its override display and the buildable built from it.
    *
    * @param string $view_mode
@@ -164,11 +202,15 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
    *   Sources third-party setting on the display, standing in for the
    *   display's default content. Empty by default, matching displays with
    *   no default content configured.
+   * @param string|null $default_profile_id
+   *   Profile third-party setting on the display, standing in for the
+   *   default display having been built with Display Builder. NULL by
+   *   default, matching a display Display Builder never touched.
    *
    * @return array{0: \Drupal\entity_test\Entity\EntityTest, 1: \Drupal\display_builder\DisplayBuildableInterface}
    *   The entity and the buildable wrapping it.
    */
-  private function createOverrideFixture(string $view_mode, array $default_sources = []): array {
+  private function createOverrideFixture(string $view_mode, array $default_sources = [], ?string $default_profile_id = NULL): array {
     EntityViewMode::create([
       'id' => 'entity_test.' . $view_mode,
       'label' => \ucfirst($view_mode),
@@ -184,8 +226,12 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
       ->setStatus(TRUE)
       ->setThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY, self::OVERRIDE_FIELD)
       ->setThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY, 'test_base')
-      ->setThirdPartySetting('display_builder', DisplayBuildableInterface::SOURCES_PROPERTY, $default_sources)
-      ->save();
+      ->setThirdPartySetting('display_builder', DisplayBuildableInterface::SOURCES_PROPERTY, $default_sources);
+
+    if ($default_profile_id !== NULL) {
+      $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::PROFILE_PROPERTY, $default_profile_id);
+    }
+    $display->save();
 
     $entity = EntityTest::create([
       'type' => 'entity_test',
