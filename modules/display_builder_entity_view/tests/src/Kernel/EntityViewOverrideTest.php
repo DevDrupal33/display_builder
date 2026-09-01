@@ -11,6 +11,7 @@ use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\entity_test\Entity\EntityTestRev;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
@@ -235,6 +236,79 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
 
     $reloadedBuildable->initInstanceIfMissing();
     self::assertSame($originalDefault, $reloadedBuildable->getInstance()->getCurrentState());
+  }
+
+  /**
+   * Verifies an override's data travels with the host entity's revisions.
+   *
+   * ::EntityViewOverride::saveSources() starts a new host-entity revision on
+   * publish, when the entity type is revisionable, so the override field is
+   * a normal revisionable field like any other. Loading an older entity
+   * revision must return that revision's own override data, not always
+   * whatever is current.
+   */
+  public function testOverrideTravelsWithEntityRevisions(): void {
+    $this->installEntitySchema('entity_test_rev');
+
+    EntityViewMode::create([
+      'id' => 'entity_test_rev.full',
+      'label' => 'Full',
+      'targetEntityType' => 'entity_test_rev',
+    ])->save();
+
+    FieldStorageConfig::create([
+      'field_name' => self::OVERRIDE_FIELD,
+      'entity_type' => 'entity_test_rev',
+      'type' => 'ui_patterns_source',
+    ])->save();
+    FieldConfig::create([
+      'field_name' => self::OVERRIDE_FIELD,
+      'entity_type' => 'entity_test_rev',
+      'bundle' => 'entity_test_rev',
+      'label' => 'Display Builder override',
+    ])->save();
+
+    $display = EntityViewDisplay::create([
+      'targetEntityType' => 'entity_test_rev',
+      'bundle' => 'entity_test_rev',
+      'mode' => 'full',
+    ]);
+    $display
+      ->setStatus(TRUE)
+      ->setThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_FIELD_PROPERTY, self::OVERRIDE_FIELD)
+      ->setThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY, 'test_base')
+      ->save();
+
+    $entity = EntityTestRev::create(['type' => 'entity_test_rev', 'name' => 'Revisionable test entity']);
+    $entity->save();
+
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('entity_view_override', [
+      'display' => $display,
+      'entity' => $entity,
+    ]);
+    $buildable->initInstanceIfMissing();
+    $instance = $buildable->getInstance();
+
+    $storage = \Drupal::entityTypeManager()->getStorage('entity_test_rev');
+
+    $sourcesA = [['node_id' => 'a', 'source_id' => 'component', 'source' => [], 'third_party_settings' => []]];
+    $instance->setNewPresent($sourcesA, 'Version A');
+    $instance->publish();
+    $revisionIdA = $storage->loadUnchanged($entity->id())->getRevisionId();
+
+    $sourcesB = [['node_id' => 'b', 'source_id' => 'other_component', 'source' => [], 'third_party_settings' => []]];
+    $instance->setNewPresent($sourcesB, 'Version B');
+    $instance->publish();
+    $entityAfterB = $storage->loadUnchanged($entity->id());
+    self::assertNotSame($revisionIdA, $entityAfterB->getRevisionId());
+    self::assertSame($sourcesB, $entityAfterB->get(self::OVERRIDE_FIELD)->getValue());
+
+    // The earlier revision must still show version A, not the now-current
+    // version B: the override rides along with the revision it was
+    // published into, rather than always reflecting the latest.
+    $revisionA = $storage->loadRevision($revisionIdA);
+    self::assertSame($sourcesA, $revisionA->get(self::OVERRIDE_FIELD)->getValue());
   }
 
   /**

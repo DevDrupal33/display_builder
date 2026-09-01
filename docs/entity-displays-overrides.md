@@ -57,6 +57,8 @@ That copy is a one-time snapshot, not a live link: an override stores its own ar
 
 The **Publish** button stores the display in the content field. The **Restore** button loads the display from the content field.
 
+Because it lives in a content field, the override travels with the content's own revisions on entities that support them: publishing starts a new entity revision carrying that override, the same as any other field change. Viewing an older revision of the content shows what the override looked like at that point, not always the latest.
+
 !!!tip
     Content editors can override the display once per configured display (default, teaser, etc.). This gives you granular control over how content appears in different contexts.
 
