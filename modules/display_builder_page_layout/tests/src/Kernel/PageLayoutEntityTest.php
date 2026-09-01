@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder_page_layout\Kernel;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Render\PageDisplayVariantSelectionEvent;
+use Drupal\Core\Routing\RouteMatch;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder_page_layout\Entity\PageLayout;
+use Drupal\display_builder_page_layout\EventSubscriber\PageVariantSubscriber;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Symfony\Component\Routing\Route;
 
 /**
  * Kernel test for the PageLayout config entity and its form.
@@ -247,6 +251,48 @@ final class PageLayoutEntityTest extends KernelTestBase {
     $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $entity]);
 
     self::assertFalse($buildable->previewWithChrome());
+  }
+
+  /**
+   * Verifies disabling a page layout returns the theme's own regions.
+   *
+   * ::AccessControlHandler::checkAccess() denies 'view' access to a disabled
+   * page layout, so ::PageVariantSubscriber finds nothing to select and
+   * leaves the page display variant plugin untouched - letting core's
+   * default (Block Layout, the theme's own regions) stand rather than
+   * forcing `display_builder_page_layout`.
+   */
+  public function testDisablingReturnsThemeRegions(): void {
+    /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $entity */
+    $entity = PageLayout::create([
+      'id' => 'test_disable',
+      'label' => 'Test Disable',
+      DisplayBuildableInterface::PROFILE_PROPERTY => 'test_base',
+      DisplayBuildableInterface::SOURCES_PROPERTY => [
+        ['source_id' => 'component', 'source' => [], 'third_party_settings' => []],
+      ],
+      'conditions' => [],
+    ]);
+    $entity->setStatus(TRUE)->save();
+
+    $subscriber = new PageVariantSubscriber($this->entityTypeManager);
+    $routeMatch = new RouteMatch('test.route', new Route('/test-path', [], [], ['_admin_route' => FALSE]));
+
+    $event = new PageDisplayVariantSelectionEvent('block_page', $routeMatch);
+    $subscriber->onSelectPageDisplayVariant($event);
+    self::assertSame('display_builder_page_layout', $event->getPluginId());
+
+    $entity->setStatus(FALSE)->save();
+    // A real disable and a real subsequent pageview are two separate HTTP
+    // requests, each with its own access control handler. Reset the
+    // handler's static per-request access cache to match that, rather than
+    // exercising the same-request staleness Drupal's access system is known
+    // to have (see EntityAccessControlHandler::$accessCache).
+    $this->entityTypeManager->getAccessControlHandler('page_layout')->resetCache();
+
+    $event = new PageDisplayVariantSelectionEvent('block_page', $routeMatch);
+    $subscriber->onSelectPageDisplayVariant($event);
+    self::assertSame('block_page', $event->getPluginId());
   }
 
   /**

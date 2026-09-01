@@ -86,3 +86,5 @@ the bottom.
     be at the bottom as fallbacks.
 
 If no Page layout matches, _Block Layout_ still manage the page.
+
+Disabling a page layout is one way to stop it matching: the pages it used to cover fall back to the next matching layout below it, or to _Block Layout_ and the theme's own regions if none do. Nothing about the previously overridden pages is lost by disabling; it only stops taking them over.
