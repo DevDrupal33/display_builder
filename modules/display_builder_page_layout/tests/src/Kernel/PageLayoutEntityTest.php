@@ -296,6 +296,66 @@ final class PageLayoutEntityTest extends KernelTestBase {
   }
 
   /**
+   * Verifies building a layout while disabled, then enabling it, works.
+   *
+   * Only the 'view' operation is status-gated
+   * (::AccessControlHandler::checkAccess()); editing and publishing content
+   * go through the entity's own save, untouched by status. So a page layout
+   * can be built out fully while disabled - kept off visitors, as the test
+   * above confirms - and enabling it afterward is what makes it live, with
+   * none of the content built while disabled lost or reset.
+   */
+  public function testBuildingWhileDisabledThenEnabling(): void {
+    /** @var \Drupal\display_builder_page_layout\PageLayoutInterface $entity */
+    $entity = PageLayout::create([
+      'id' => 'test_build_disabled',
+      'label' => 'Test Build Disabled',
+      DisplayBuildableInterface::PROFILE_PROPERTY => 'test_base',
+      DisplayBuildableInterface::SOURCES_PROPERTY => [],
+      'conditions' => [],
+    ]);
+    $entity->setStatus(FALSE)->save();
+
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $entity]);
+    $buildable->initInstanceIfMissing();
+    $instance = $buildable->getInstance();
+
+    $built = [
+      ['source_id' => 'component', 'source' => [], 'third_party_settings' => []],
+    ];
+    $instance->setNewPresent($built, 'Draft build');
+    $instance->publish();
+
+    // ::publish() saves through the Instance's own resolved buildable
+    // plugin, a separate PHP object loaded fresh from storage - not the
+    // $entity handle above. Reload before mutating it further, or this
+    // would save $entity's stale empty sources right back over what
+    // ::publish() just wrote.
+    $entity = PageLayout::load('test_build_disabled');
+
+    $subscriber = new PageVariantSubscriber($this->entityTypeManager);
+    $routeMatch = new RouteMatch('test.route', new Route('/test-path', [], [], ['_admin_route' => FALSE]));
+
+    // Still not exposed to visitors while disabled, even with content built.
+    $event = new PageDisplayVariantSelectionEvent('block_page', $routeMatch);
+    $subscriber->onSelectPageDisplayVariant($event);
+    self::assertSame('block_page', $event->getPluginId());
+
+    $entity->setStatus(TRUE)->save();
+    $this->entityTypeManager->getAccessControlHandler('page_layout')->resetCache();
+
+    // Enabling makes it live, and the content built while disabled is intact.
+    $event = new PageDisplayVariantSelectionEvent('block_page', $routeMatch);
+    $subscriber->onSelectPageDisplayVariant($event);
+    self::assertSame('display_builder_page_layout', $event->getPluginId());
+
+    $actual = PageLayout::load('test_build_disabled')->getSources();
+    self::removeNodeId($actual);
+    self::assertSame($built, $actual);
+  }
+
+  /**
    * Recursively remove the _node_id key.
    *
    * @param array $array

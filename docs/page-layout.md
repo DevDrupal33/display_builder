@@ -88,3 +88,5 @@ the bottom.
 If no Page layout matches, _Block Layout_ still manage the page.
 
 Disabling a page layout is one way to stop it matching: the pages it used to cover fall back to the next matching layout below it, or to _Block Layout_ and the theme's own regions if none do. Nothing about the previously overridden pages is lost by disabling; it only stops taking them over.
+
+You can build a page layout entirely while it is disabled, then enable it once it is ready: only viewing a page is gated by the enabled status, editing and publishing the display are not. This is a normal, supported way to prepare a layout without exposing an unfinished one to visitors.
