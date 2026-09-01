@@ -194,6 +194,50 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
   }
 
   /**
+   * Verifies changing the default display later does not affect an override.
+   *
+   * The default display's sources are only ever copied once, into a new
+   * override's own instance and field data (see the "starts from the
+   * default display" test above). Neither ::EntityViewOverride::getSources()
+   * nor the persisted instance ever read the default display's third-party
+   * settings again afterward, so changing what the default display looks
+   * like later - even to something structurally unrelated - must not reach
+   * an override that already has its own instance.
+   */
+  public function testOverrideIsUnaffectedByLaterDefaultDisplayChanges(): void {
+    $originalDefault = [
+      ['node_id' => 'default', 'source_id' => 'component', 'source' => [], 'third_party_settings' => []],
+    ];
+    [$entity, $buildable, $display] = $this->createOverrideFixture('full', $originalDefault, 'test_base');
+    $buildable->initInstanceIfMissing();
+    $instance = $buildable->getInstance();
+    self::assertSame($originalDefault, $instance->getCurrentState());
+    $instance->publish();
+
+    // The default display changes later, to a structurally unrelated
+    // arrangement.
+    $changedDefault = [
+      ['node_id' => 'changed', 'source_id' => 'other_component', 'source' => [], 'third_party_settings' => []],
+    ];
+    $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::SOURCES_PROPERTY, $changedDefault)->save();
+
+    // A fresh buildable and instance, built from a freshly loaded entity as a
+    // new request would, must still see the override's own published data,
+    // unaffected by the default display change: reusing the in-memory
+    // $buildable here would only prove PHP object caching, not persistence.
+    $reloadedEntity = \Drupal::entityTypeManager()->getStorage('entity_test')->loadUnchanged($entity->id());
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $reloadedBuildable */
+    $reloadedBuildable = $this->displayBuildableManager->createInstance('entity_view_override', [
+      'display' => $display,
+      'entity' => $reloadedEntity,
+    ]);
+    self::assertSame($originalDefault, $reloadedBuildable->getSources());
+
+    $reloadedBuildable->initInstanceIfMissing();
+    self::assertSame($originalDefault, $reloadedBuildable->getInstance()->getCurrentState());
+  }
+
+  /**
    * Creates an entity, its override display and the buildable built from it.
    *
    * @param string $view_mode
@@ -207,8 +251,8 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
    *   default display having been built with Display Builder. NULL by
    *   default, matching a display Display Builder never touched.
    *
-   * @return array{0: \Drupal\entity_test\Entity\EntityTest, 1: \Drupal\display_builder\DisplayBuildableInterface}
-   *   The entity and the buildable wrapping it.
+   * @return array{0: \Drupal\entity_test\Entity\EntityTest, 1: \Drupal\display_builder\DisplayBuildableInterface, 2: \Drupal\display_builder_entity_view\Entity\EntityViewDisplay}
+   *   The entity, the buildable wrapping it, and the display itself.
    */
   private function createOverrideFixture(string $view_mode, array $default_sources = [], ?string $default_profile_id = NULL): array {
     EntityViewMode::create([
@@ -245,7 +289,7 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
       'entity' => $entity,
     ]);
 
-    return [$entity, $buildable];
+    return [$entity, $buildable, $display];
   }
 
 }

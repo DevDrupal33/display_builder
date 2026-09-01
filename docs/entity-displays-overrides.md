@@ -53,6 +53,8 @@ The builder is a regular one with the same sources as Entity View Display plus s
 
 The first time you open the override, it does not start blank. If the underlying display (the one picked when Content Overrides was activated) was itself built with Display Builder, its arrangement is copied in as the starting point, once, on the override's first creation. Only a display Display Builder never built, with nothing to copy, starts empty.
 
+That copy is a one-time snapshot, not a live link: an override stores its own arrangement in its content field, independent of the underlying display from then on. Changing the underlying display later, even substantially, does not reach into or break an override that already exists.
+
 The **Publish** button stores the display in the content field. The **Restore** button loads the display from the content field.
 
 !!!tip
