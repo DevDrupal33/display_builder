@@ -7,10 +7,8 @@ namespace Drupal\display_builder_entity_view\Plugin\Derivative;
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
-use Drupal\Core\Routing\RouteProviderInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
-use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -22,8 +20,6 @@ class EntityOverrideViewLocalTask extends DeriverBase implements ContainerDerive
   use StringTranslationTrait;
 
   public function __construct(
-    protected RouteProviderInterface $routeProvider,
-    protected ComponentPluginManager $componentPluginManager,
     protected EntityTypeManagerInterface $entityTypeManager,
     TranslationInterface $stringTranslation,
   ) {
@@ -35,8 +31,6 @@ class EntityOverrideViewLocalTask extends DeriverBase implements ContainerDerive
    */
   public static function create(ContainerInterface $container, $base_plugin_id): static {
     return new static(
-      $container->get('router.route_provider'),
-      $container->get('plugin.manager.sdc'),
       $container->get('entity_type.manager'),
       $container->get('string_translation')
     );
@@ -50,26 +44,18 @@ class EntityOverrideViewLocalTask extends DeriverBase implements ContainerDerive
     $display_infos = EntityViewOverride::getDisplayInfos($this->entityTypeManager);
 
     foreach ($display_infos as $entity_type_id => $display_info) {
-      $forward = \sprintf('entity.%s.display_builder.forward', $entity_type_id);
-      // We add the "Display" tab alongside View, Edit, Delete, Revisions...
-      $this->derivatives[$forward] = [
-        'route_name' => $forward,
-        'base_route' => \sprintf('entity.%s.canonical', $entity_type_id),
-        'title' => \count($display_info['modes']) === 1 ? $this->t(':display display', [':display' => \reset($display_info['modes'])]) : $this->t('Display'),
-        // In-between 'Edit' and 'Delete'.
-        'weight' => 10,
-      ];
+      $base_route = \sprintf('entity.%s.canonical', $entity_type_id);
 
-      // Second level: each tab is a display override.
-      $parent_id = \sprintf('display_builder_entity_view.display_builder_tabs:entity.%s.display_builder.forward', $entity_type_id);
-
+      // Every overridable display is its own tab, flat alongside View, Edit,
+      // Delete, Revisions.
       foreach ($display_info['modes'] as $view_mode => $view_mode_label) {
         $route = \sprintf('entity.%s.display_builder.%s', $entity_type_id, $view_mode);
         $this->derivatives[$route] = [
           'route_name' => $route,
-          'base_route' => $forward,
-          'title' => $view_mode_label,
-          'parent_id' => $parent_id,
+          'base_route' => $base_route,
+          'title' => $this->t('Display: :display', [':display' => $view_mode_label]),
+          // In-between 'Edit' and 'Delete'.
+          'weight' => 10,
         ];
       }
     }

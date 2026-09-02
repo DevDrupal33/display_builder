@@ -39,13 +39,12 @@ Any user with both the permission to edit the content and the one to use the dis
 
 A mechanism similar to Layout Builder's overrides, but not limited to the default display.
 
-If the user can override at least one display, a *Display* tab is added in the content edit tabs:
+Each overridable display gets its own tab, named after the display it opens, added flat alongside View, Edit, Delete and Revisions in the content edit tabs - e.g. *Display: Full content* and *Display: Teaser*:
 
 ![Tabs](images/overrides-tabs.webp)
 
-If the user can override only one display, this tab is a direct link to this display. If the user can override many, a second row of tabs is visible:
-
-![Sub tabs](images/overrides-tabs-2.webp)
+> 🚧 2026-09-02: Screenshot predates the flat, per-display tab naming above
+> (it still shows a single generic "Display" tab) - needs retaking.
 
 The builder is a regular one with the same sources as Entity View Display plus some sources only available when editing a content:
 

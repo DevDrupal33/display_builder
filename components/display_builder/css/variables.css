@@ -130,4 +130,16 @@
   &:has(.toolbar-horizontal) {
     --db-z-index: 401;
   }
+
+  /* With core Navigation. Its top bar (<aside class="top-bar">) renders at
+     --admin-toolbar-z-index-top-bar (490), a lower, separate rung from the
+     501 above - which belongs to #admin-toolbar, the sidebar, not the top
+     bar. Left uncompensated, --db-z-toolbar (calc(501 - 4) = 497) sits above
+     the top bar's own stacking context and covers everything inside it,
+     dropdowns included, no matter their own z-index - a stacking context
+     only wins or loses as a whole against its siblings.
+     @see web/core/modules/navigation/css/base/variables.pcss.css */
+  &:has(.top-bar) {
+    --db-z-index: 480;
+  }
 }

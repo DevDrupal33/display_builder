@@ -203,7 +203,7 @@ test(
 
       const nodePath = await page.getByRole('link', { name: 'View' }).getAttribute('href') || ''
 
-      await page.getByRole('link', { name: 'Default display' }).click()
+      await page.getByRole('link', { name: 'Display: Default' }).click()
       await displayBuilder.shoelaceReady()
       // Basic common drag component and textfield.
       await displayBuilder.dragComponentsAndTextfield('I am a test textfield in a slot in an Entity view override!')

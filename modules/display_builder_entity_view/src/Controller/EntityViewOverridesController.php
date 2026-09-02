@@ -147,13 +147,11 @@ final class EntityViewOverridesController extends IntegrationControllerBase {
     $entity_type_id = $route_match->getParameter('entity_type_id');
     /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
     $entity = $route_match->getParameter($entity_type_id);
-    $view_mode = $this->getFirstOverridableViewMode($entity, $account);
+    $cacheability = new CacheableMetadata();
+    $view_mode = $this->getFirstOverridableViewMode($entity, $account, $cacheability);
+    $access = $view_mode ? AccessResult::allowed() : AccessResult::forbidden();
 
-    if ($view_mode) {
-      return AccessResult::allowed()->addCacheContexts(['route']);
-    }
-
-    return AccessResult::forbidden()->addCacheContexts(['route']);
+    return $access->addCacheableDependency($cacheability)->addCacheContexts(['route']);
   }
 
   /**
@@ -163,16 +161,22 @@ final class EntityViewOverridesController extends IntegrationControllerBase {
    *   The entity to check.
    * @param \Drupal\Core\Session\AccountInterface $account
    *   The user account.
+   * @param \Drupal\Core\Cache\CacheableMetadata|null $cacheability
+   *   Collects the cacheability of every view mode checked, allowed or not,
+   *   so a caller answering a route's own access question does not lose the
+   *   dependencies (the display config, the permission) that the decision
+   *   actually rests on.
    *
    * @return string|null
    *   The first overridable view mode name, or NULL if none is found.
    */
-  protected function getFirstOverridableViewMode(EntityInterface $entity, AccountInterface $account): ?string {
+  protected function getFirstOverridableViewMode(EntityInterface $entity, AccountInterface $account, ?CacheableMetadata $cacheability = NULL): ?string {
     $display_infos = EntityViewOverride::getDisplayInfos($this->entityTypeManager());
     $view_modes = $display_infos[$entity->getEntityTypeId()]['bundles'][$entity->bundle()] ?? [];
 
     foreach (\array_keys($view_modes) as $view_mode) {
       $access = $this->overrideBuilderAccessResult($account, $entity, (string) $view_mode);
+      $cacheability?->addCacheableDependency($access);
 
       if ($access->isAllowed()) {
         return (string) $view_mode;
@@ -223,30 +227,32 @@ final class EntityViewOverridesController extends IntegrationControllerBase {
    *   The access result.
    */
   protected function overrideBuilderAccessResult(AccountInterface $account, EntityInterface $entity, ?string $view_mode_name): AccessResultInterface {
-    $forbidden = AccessResult::forbidden()->addCacheContexts(['route']);
-
     if ($view_mode_name === NULL) {
-      return $forbidden;
+      return AccessResult::forbidden()->addCacheContexts(['route']);
     }
 
     $display = self::getEntityViewDisplay($entity->getEntityTypeId(), $entity->bundle(), $view_mode_name);
 
     if (!$display instanceof DisplayBuilderEntityDisplayInterface) {
-      return $forbidden;
+      return AccessResult::forbidden()->addCacheContexts(['route']);
     }
 
+    // From here on the display config is what the decision rests on, so a
+    // forbidden result must depend on it too - otherwise turning "Enable
+    // content overrides" on later does not invalidate a page cached while it
+    // was still off, and the shortcut never reappears.
     if (!$display->isDisplayBuilderOverridable()) {
-      return $forbidden;
+      return AccessResult::forbidden()->addCacheableDependency($display)->addCacheContexts(['route']);
     }
 
     $permission = $display->getDisplayBuilderOverrideProfile()->getPermissionName();
 
     // This is the expected check.
     if (!$account->hasPermission($permission)) {
-      return $forbidden;
+      return AccessResult::forbidden()->addCacheableDependency($display)->addCacheContexts(['route', 'user.permissions']);
     }
 
-    return AccessResult::allowed()->addCacheableDependency($display)->addCacheContexts(['route']);
+    return AccessResult::allowed()->addCacheableDependency($display)->addCacheContexts(['route', 'user.permissions']);
   }
 
 }
