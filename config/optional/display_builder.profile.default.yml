@@ -24,7 +24,7 @@ islands:
     exclude:
       htmx: htmx
       shortcut: shortcut
-    exclude_id: "system_menu_block:admin\r\nsystem_menu_block:devel\r\nsystem_clear_cache_block\r\nlocal_actions_block\r\n"
+    exclude_id: "system_menu_block:admin\r\nsystem_menu_block:devel\r\nsystem_clear_cache_block\r\n"
     preview: true
   preset_library:
     status: true

@@ -213,9 +213,23 @@ final class EntityViewOverride extends DisplayBuildablePluginBase implements Dis
 
   /**
    * {@inheritdoc}
+   *
+   * An override has no config entity of its own to point back to - the
+   * closest equivalent is the entity it overrides.
    */
   public static function getDisplayUrlFromInstanceId(string $instance_id): Url {
-    return Url::fromRoute('<front>');
+    $params = self::checkInstanceId($instance_id);
+
+    if (!$params) {
+      return Url::fromRoute('entity.display_builder_instance.collection');
+    }
+    $entity = \Drupal::entityTypeManager()->getStorage($params['entity_type_id'])->load($params['entity_id']);
+
+    if (!$entity || !$entity->hasLinkTemplate('canonical')) {
+      return Url::fromRoute('entity.display_builder_instance.collection');
+    }
+
+    return $entity->toUrl('canonical');
   }
 
   /**

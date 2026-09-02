@@ -239,6 +239,22 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
   }
 
   /**
+   * The Exit button must return to the overridden entity, not the front page.
+   *
+   * ::getDisplayUrlFromInstanceId() has no config entity of its own to point
+   * back to - unlike EntityView, PageLayout and ViewDisplay, all three of
+   * which own a config entity edit form. The override's own instance ID is
+   * the only handle back to the entity it belongs to.
+   */
+  public function testGetDisplayUrlFromInstanceIdReturnsEntityCanonicalUrl(): void {
+    [$entity, $buildable] = $this->createOverrideFixture('full');
+
+    $url = EntityViewOverride::getDisplayUrlFromInstanceId((string) $buildable->getInstanceId());
+
+    self::assertSame($entity->toUrl('canonical')->toString(), $url->toString());
+  }
+
+  /**
    * Verifies an override's data travels with the host entity's revisions.
    *
    * ::EntityViewOverride::saveSources() starts a new host-entity revision on

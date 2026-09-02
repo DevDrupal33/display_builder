@@ -54,10 +54,12 @@ View Title source is also available for string prop:
 ![Views title](images/views-title.webp)
 
 !!!note
-    Previews and source configuration directly from Display Builder are still being
-    developed. See the related issues for updates on these features.
+    Source configuration directly from Display Builder is still being
+    developed. See the related issue for updates on this feature.
 
-> 🚧 2025-08-26: Previews are not working yet. See [#3542796](https://www.drupal.org/i/3542796)
+> ✅ 2026-09-01: Views sources render for real wherever a page context is
+> available - Preview, and the live page - the same placeholder-in-the-raw-builder
+> split every page-only source already uses. [#3542796](https://www.drupal.org/i/3542796)
 
 > 🚧 2025-08-26: We are not able to configure the sources directly from Display Builder yet. See [#3533043](https://www.drupal.org/i/3533043)
 

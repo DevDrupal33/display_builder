@@ -273,8 +273,8 @@ class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPlugi
     }
 
     if (\is_string($title)) {
-      // @todo avoid arbitrary classes.
-      $title = ['#markup' => '<h1 class="title page-title">' . $title . '</h1>'];
+      // Themeable element from page-title.html.twig.
+      $title = ['#type' => 'page_title', '#title' => $title];
     }
 
     // Unconditionally, including for a title none of the above turned into
