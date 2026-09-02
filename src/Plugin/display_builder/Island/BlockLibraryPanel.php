@@ -201,7 +201,7 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
       );
 
       foreach ($choices as $choice) {
-        if ($configuration['preview']) {
+        if ($configuration['preview'] && $choice['preview']) {
           $build[] = $this->buildPlaceholderListWithPreview($builder_id, $choice['label'], $data, $choice['preview'], $choice['keywords']);
         }
         else {
