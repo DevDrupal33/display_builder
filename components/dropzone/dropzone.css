@@ -66,12 +66,12 @@
 }
 
 .db-dropzone--root:empty::after {
-  content: attr(data-empty-hint);
   max-width: 20rem;
   padding: 0 1rem;
+  content: attr(data-empty-hint);
+  text-align: center;
   pointer-events: none;
   color: var(--root-color-border);
-  text-align: center;
   font-size: var(--sl-font-size-x-small);
   font-style: italic;
 }
