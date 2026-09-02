@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\display_builder\Kernel;
 
 use Drupal\Core\Url;
-use Drupal\display_builder\Controller\ApiContextualMenuController;
+use Drupal\display_builder\Controller\ApiActionsController;
 use Drupal\display_builder\Entity\PatternPreset;
 use Drupal\display_builder\InstanceInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -14,19 +14,19 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Test the ApiContextualMenuController class.
+ * Test the ApiActionsController class.
  *
  * @internal
  */
-#[CoversClass(ApiContextualMenuController::class)]
+#[CoversClass(ApiActionsController::class)]
 #[Group('display_builder')]
 #[RunTestsInSeparateProcesses]
-final class ApiContextualMenuControllerTest extends DisplayBuilderKernelTestBase {
+final class ApiActionsControllerTest extends DisplayBuilderKernelTestBase {
 
   /**
    * The controller to test.
    */
-  protected ApiContextualMenuController $controller;
+  protected ApiActionsController $controller;
 
   /**
    * The builder instance entity.
@@ -71,7 +71,7 @@ final class ApiContextualMenuControllerTest extends DisplayBuilderKernelTestBase
     $this->instance->save();
 
     // Get the controller from the container.
-    $this->controller = $this->container->get('class_resolver')->getInstanceFromDefinition(ApiContextualMenuController::class);
+    $this->controller = $this->container->get('class_resolver')->getInstanceFromDefinition(ApiActionsController::class);
   }
 
   /**
@@ -310,6 +310,37 @@ final class ApiContextualMenuControllerTest extends DisplayBuilderKernelTestBase
     $styles = $saved->getNode($target_id)['third_party_settings']['styles'];
     self::assertSame(['test' => 'source-option'], $styles['selected'], 'Source overrides target on a shared style category.');
     self::assertSame('target-extra source-extra', $styles['extra']);
+  }
+
+  /**
+   * Tests ::pasteStyles() refuses a paste whose source node no longer exists.
+   *
+   * The source node may have been deleted (or moved) after being copied to
+   * the clipboard - silently saving blank styles would look like a
+   * successful paste of nothing.
+   */
+  public function testPasteStylesRejectsDeletedSource(): void {
+    $target_id = $this->instance->attachToRoot(0, 'token', []);
+    $this->instance->setThirdPartySettings($target_id, 'styles', [
+      'selected' => ['test' => 'target-option'],
+      'extra' => 'target-extra',
+    ]);
+    $this->instance->save();
+
+    $url = Url::fromRoute('display_builder.api_paste_styles', [
+      'display_builder_instance' => $this->instance->id(),
+    ]);
+    $request = Request::create($url->toString(), 'POST', [
+      'node_id' => $target_id,
+      'source_node_id' => 'deleted_node_id',
+    ]);
+    $response = $this->controller->pasteStyles($request, $this->instance);
+
+    self::assertArrayNotHasKey('history', $response, 'A rejected paste is an error message, not a dispatch response.');
+
+    $saved = $this->loadInstance($this->instance->id());
+    $styles = $saved->getNode($target_id)['third_party_settings']['styles'];
+    self::assertSame(['test' => 'target-option'], $styles['selected'], 'Target styles are untouched by the rejected paste.');
   }
 
   /**

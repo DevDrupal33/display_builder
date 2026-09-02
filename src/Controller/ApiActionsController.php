@@ -6,12 +6,15 @@ namespace Drupal\display_builder\Controller;
 
 use Drupal\display_builder\Event\DisplayBuilderEvents;
 use Drupal\display_builder\InstanceInterface;
+use Drupal\display_builder\RenderableBuilderTrait;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Returns responses for the Display Builder contextual menu routes.
  */
-class ApiContextualMenuController extends ApiControllerBase implements ApiContextualMenuControllerInterface {
+class ApiActionsController extends ApiControllerBase implements ApiActionsControllerInterface {
+
+  use RenderableBuilderTrait;
 
   /**
    * {@inheritdoc}
@@ -127,6 +130,18 @@ class ApiContextualMenuController extends ApiControllerBase implements ApiContex
 
     $default_styles = ['selected' => [], 'extra' => ''];
     $source = $display_builder_instance->getNode($source_node_id);
+
+    if (empty($source)) {
+      // The copied node was deleted (or moved to another instance) since it
+      // was put on the clipboard: silently pasting blank styles would look
+      // like a successful paste of nothing, so refuse it instead.
+      return $this->buildError(
+        (string) $display_builder_instance->id(),
+        $this->t('Cannot paste: the copied styles no longer exist.'),
+        TRUE,
+      );
+    }
+
     $styles = $source['third_party_settings']['styles'] ?? $default_styles;
 
     if ($mode === 'merge') {

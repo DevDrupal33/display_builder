@@ -31,6 +31,43 @@
   }
 
   /**
+   * Blocks real navigation inside a preview iframe.
+   *
+   * The Preview panel is a read-only rendering of the current display, not a
+   * page to browse from: following a link inside it - to another page on the
+   * site, or off it entirely - replaces the whole preview with unrelated
+   * content, with no way back except an edit triggering a refresh.
+   * preventDefault() alone (no stopPropagation()) still lets a delegated
+   * Bootstrap handler run its own collapse/carousel logic on the same click,
+   * and leaves a plain same-page anchor (href="#foo") free to scroll.
+   *
+   * @param {HTMLIFrameElement} iframe - The preview iframe, already loaded.
+   */
+  function blockNavigation(iframe) {
+    let doc;
+    try {
+      doc = iframe.contentDocument;
+    } catch {
+      // Cross-origin: nothing reachable to attach to, and so nothing to
+      // block either.
+      return;
+    }
+    if (!doc) return;
+
+    doc.addEventListener(
+      'click',
+      (event) => {
+        const link = event.target.closest?.('a[href]');
+        if (!link) return;
+        const href = link.getAttribute('href') || '';
+        if (href === '' || href.startsWith('#')) return;
+        event.preventDefault();
+      },
+      true,
+    );
+  }
+
+  /**
    * Load the current render into an off-screen buffer, then swap it in.
    *
    * @param {HTMLElement} pane - The preview pane.
@@ -58,6 +95,7 @@
     buffer.addEventListener(
       'load',
       () => {
+        blockNavigation(buffer);
         // Promote the buffer, drop the previous render(s).
         pane
           .querySelectorAll('.db-live-preview:not(.db-live-preview--buffer)')
@@ -86,6 +124,16 @@
    */
   Drupal.behaviors.displayBuilderLivePreview = {
     attach(context) {
+      once('dbLivePreviewLinks', '.db-live-preview', context).forEach(
+        (iframe) => {
+          if (iframe.contentDocument?.readyState === 'complete') {
+            blockNavigation(iframe);
+          } else {
+            iframe.addEventListener('load', () => blockNavigation(iframe));
+          }
+        },
+      );
+
       once('dbLivePreview', '.db-live-preview-refresh', context).forEach(
         (token) => {
           const pane = token.closest('.db-island-preview');

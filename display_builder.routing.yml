@@ -70,7 +70,7 @@ display_builder.api_paste:
   path: '/api/display-builder/{display_builder_instance}/paste'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiContextualMenuController::paste'
+    _controller: '\Drupal\display_builder\Controller\ApiActionsController::paste'
   requirements:
     _entity_access: 'display_builder_instance.update'
   options:
@@ -83,7 +83,7 @@ display_builder.api_duplicate:
   path: '/api/display-builder/{display_builder_instance}/duplicate'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiContextualMenuController::paste'
+    _controller: '\Drupal\display_builder\Controller\ApiActionsController::paste'
   requirements:
     _entity_access: 'display_builder_instance.update'
   options:
@@ -96,7 +96,7 @@ display_builder.api_delete:
   path: '/api/display-builder/{display_builder_instance}/delete'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiContextualMenuController::delete'
+    _controller: '\Drupal\display_builder\Controller\ApiActionsController::delete'
   requirements:
     _entity_access: 'display_builder_instance.update'
   options:
@@ -109,7 +109,7 @@ display_builder.api_save_preset:
   path: '/api/display-builder/{display_builder_instance}/save_as_preset'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiContextualMenuController::saveAsPreset'
+    _controller: '\Drupal\display_builder\Controller\ApiActionsController::saveAsPreset'
   requirements:
     _entity_access: 'display_builder_instance.update'
   options:
@@ -122,7 +122,7 @@ display_builder.api_paste_styles:
   path: '/api/display-builder/{display_builder_instance}/paste-styles'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiContextualMenuController::pasteStyles'
+    _controller: '\Drupal\display_builder\Controller\ApiActionsController::pasteStyles'
   requirements:
     _entity_access: 'display_builder_instance.update'
   options:
@@ -135,7 +135,7 @@ display_builder.api_delete_styles:
   path: '/api/display-builder/{display_builder_instance}/delete-styles'
   methods: [POST]
   defaults:
-    _controller: '\Drupal\display_builder\Controller\ApiContextualMenuController::deleteStyles'
+    _controller: '\Drupal\display_builder\Controller\ApiActionsController::deleteStyles'
   requirements:
     _entity_access: 'display_builder_instance.update'
   options:

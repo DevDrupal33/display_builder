@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * HTTP controller for contextual menu actions (paste, delete, save preset).
  */
-interface ApiContextualMenuControllerInterface {
+interface ApiActionsControllerInterface {
 
   /**
    * Paste a source.
