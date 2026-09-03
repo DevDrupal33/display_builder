@@ -51,17 +51,76 @@
 
 .db-sidebar__header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: var(--db-sidebar-header-height);
+  flex-direction: column;
   padding: 0 var(--db-space-8);
   border-bottom: 1px solid var(--db-sidebar-border);
 }
 
+/* The title/pin/close row, its own fixed height - the header itself grows
+   to fit .db-sidebar__path above it, only when that ancestor breadcrumb has
+   content. @see components/display_builder/js/sidebar.js */
+.db-sidebar__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--db-sidebar-header-height);
+}
+
 .db-sidebar__title {
   overflow: hidden;
+  flex: 1;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+/* Pinned state, toggled by handleSecondDrawer()'s pin button
+   (@see components/display_builder/js/sidebar.js). Icon and accessible
+   name (label) both swap in JS; only the color is CSS. */
+.db-sidebar__pin--active::part(base) {
+  color: var(--db-sidebar-pin-color-active);
+}
+
+/* Ancestor breadcrumb: rebuilt client-side per node activation
+   (@see components/display_builder/js/sidebar.js), so it collapses to
+   nothing (and takes no space) for a root-level node instead of leaving an
+   empty strip under the title. */
+.db-sidebar__path:empty {
+  display: none;
+}
+
+.db-sidebar__path {
+  padding: var(--db-space-8) 0;
+  font-size: var(--sl-font-size-small);
+}
+
+/* sl-breadcrumb has no wrap/scroll option of its own (only a `label` prop) -
+   its internal <nav> is hardcoded to flex-wrap: wrap. Force a single
+   horizontally-scrollable line instead, so a deep chain stays one compact
+   strip rather than pushing the header taller. */
+.db-sidebar__path sl-breadcrumb::part(base) {
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+
+/* Shoelace hides the last item's separator, on the assumption it is the
+   current page. The chain here never includes the current node - it is
+   named by .db-sidebar__title, right below - so a trailing separator is
+   correct: it signals there's a selected node past the last ancestor shown. */
+.db-sidebar__path sl-breadcrumb-item:last-of-type::part(separator) {
+  display: inline-flex;
+}
+
+/* Shoelace only colors a breadcrumb item as a link when it is not the last
+   one, on the assumption the last item is inert "current page" text. Every
+   item here is a real, clickable ancestor - the current node is never in
+   the chain, it is named by .db-sidebar__title instead - so all of them
+   need the link color, not just the non-last ones. */
+.db-sidebar__path sl-breadcrumb-item::part(label) {
+  color: var(--db-sidebar-path-color);
+}
+
+.db-sidebar__path sl-breadcrumb-item::part(label):hover {
+  color: var(--sl-color-primary-500);
 }
 
 .db-sidebar__content {

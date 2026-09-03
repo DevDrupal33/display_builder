@@ -35,11 +35,8 @@
   /* Toolbar row height. */
   --toolbar-height: var(--admin-toolbar-top-bar-height, calc(4 * var(--db-space-16)));
 
-  /* Sidebar header row height - same row as the toolbar when Navigation's
-     own value is available (matching --toolbar-height above), but a
-     shorter fallback than --toolbar-height's when it isn't - pre-existing
-     choice, preserved as-is. */
-  --db-sidebar-header-height: var(--admin-toolbar-top-bar-height, 38px);
+  /* Sidebar header row height. */
+  --db-sidebar-header-height: 2rem;
 
   /* Sidebar width. Wide enough for the library tabs, which are labels only
      since icons stopped being an option. */

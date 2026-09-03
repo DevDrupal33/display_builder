@@ -68,6 +68,7 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger, event, type) => {
 
   const title = secondDrawer.querySelector('.db-sidebar__title');
   const isOpen = () => !secondDrawer.classList.contains('is-collapsed');
+  const isPinned = () => secondDrawer.dataset.pinned === 'true';
   const open = () => {
     secondDrawer.classList.remove('is-collapsed');
     const width =
@@ -87,6 +88,78 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger, event, type) => {
     if (title) title.textContent = value;
   };
 
+  const pathContainer = secondDrawer.querySelector('.db-sidebar__path');
+
+  /**
+   * Walk a node trigger's real DOM ancestors, root-first.
+   *
+   * Every panel (Canvas, Scaffold, Navigator) wraps each logical node in its
+   * own `[data-node-id]` element, nested to match the tree - including the
+   * Scaffold's schematic (non-real-render) path - so climbing `.closest()`
+   * from the trigger reaches the same chain the server tree would, with no
+   * request needed. A slot wrapper carries its owning node's own
+   * `data-node-id`/`data-node-title` too (@see BuilderPanel::buildSlotAttributes()),
+   * so matching one still yields the correct ancestor id - the `:not(...)`
+   * exclusion, same technique as ContextualMenu.closestOtherNode() in
+   * contextual_menu.js, is what keeps re-matching the same id from looping
+   * forever. Its title is not always trustworthy though: a slot wrapper deep
+   * in a real render can fall back to the source plugin's generic label
+   * (e.g. "Component") instead of the resolved one (@see
+   * RealRenderTrait::digFromSlot()) - so once an ancestor id is known, its
+   * title is looked up on that id's own trigger (`[data-hx-get]`), the one
+   * element every panel keeps accurate, rather than trusted off whichever
+   * `[data-node-id]` element `.closest()` happened to match.
+   *
+   * @param {HTMLElement} nodeTrigger
+   *   The clicked node's own trigger element.
+   *
+   * @return {{nodeId: string, title: string}[]}
+   *   Ancestors from the outermost root down to the immediate parent.
+   */
+  const getAncestorChain = (nodeTrigger) => {
+    const chain = [];
+    let excludeId = nodeTrigger.dataset.nodeId;
+    let ancestor = nodeTrigger.parentElement?.closest(
+      `[data-node-id]:not([data-node-id="${excludeId}"])`,
+    );
+    while (ancestor) {
+      const nodeId = ancestor.dataset.nodeId;
+      const owner =
+        builder.querySelector(`[data-node-id="${nodeId}"][data-hx-get]`) ??
+        ancestor;
+      chain.unshift({ nodeId, title: owner.dataset.nodeTitle ?? '' });
+      excludeId = nodeId;
+      ancestor = ancestor.parentElement?.closest(
+        `[data-node-id]:not([data-node-id="${excludeId}"])`,
+      );
+    }
+
+    return chain;
+  };
+
+  /**
+   * Render the ancestor breadcrumb for the node whose settings just opened.
+   *
+   * @param {HTMLElement} nodeTrigger
+   *   The clicked node's own trigger element.
+   */
+  const renderNodePath = (nodeTrigger) => {
+    if (!pathContainer) return;
+    pathContainer.replaceChildren();
+    const chain = getAncestorChain(nodeTrigger);
+    if (!chain.length) return;
+
+    const breadcrumb = document.createElement('sl-breadcrumb');
+    breadcrumb.setAttribute('label', Drupal.t('Ancestors'));
+    chain.forEach(({ nodeId, title: ancestorTitle }) => {
+      const item = document.createElement('sl-breadcrumb-item');
+      item.dataset.nodeId = nodeId;
+      item.textContent = ancestorTitle;
+      breadcrumb.append(item);
+    });
+    pathContainer.append(breadcrumb);
+  };
+
   // Handle 'close' type. Used when contextual menu > delete is used, and by
   // initSecondDrawer()'s own collapse() (close button, Escape key).
   if (type === 'close') {
@@ -94,6 +167,7 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger, event, type) => {
       close();
       secondDrawer.removeAttribute('data-trigger-node-id');
       setTitle(Drupal.t('Settings'));
+      pathContainer?.replaceChildren();
       Drupal.displayBuilder.LocalStorageManager.remove(
         'secondDrawerActiveNodeId',
         builder.id,
@@ -148,6 +222,7 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger, event, type) => {
     if (!isOpen()) {
       setTitle(trigger.dataset.nodeTitle);
       secondDrawer.setAttribute('data-trigger-node-id', triggerId);
+      renderNodePath(trigger);
       open();
       toggleOpenClassOnClick(triggerId);
       Drupal.displayBuilder.LocalStorageManager.set(
@@ -156,7 +231,11 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger, event, type) => {
         builder.id,
       );
     } else if (triggerNodeId === triggerId) {
-      // Second case is closing the sidebar.
+      // Second case is closing the sidebar - a no-op while pinned, so
+      // re-clicking the same node doesn't collapse a sidebar the user
+      // pinned open. Switching to a different node (third case, below)
+      // still works while pinned.
+      if (isPinned()) return;
       close();
       secondDrawer.removeAttribute('data-trigger-node-id');
       toggleOpenClassOnClick(triggerId);
@@ -170,6 +249,7 @@ Drupal.displayBuilder.handleSecondDrawer = (builder, trigger, event, type) => {
       if (previousTriggerId) toggleOpenClassOnClick(previousTriggerId, true);
       setTitle(trigger.dataset.nodeTitle);
       secondDrawer.setAttribute('data-trigger-node-id', triggerId);
+      renderNodePath(trigger);
       toggleOpenClassOnClick(triggerId);
       Drupal.displayBuilder.LocalStorageManager.set(
         'secondDrawerActiveNodeId',
@@ -477,6 +557,53 @@ Drupal.displayBuilder.initDrawer = (builder) => {
       if (event.target.closest('#db-second-drawer-close')) {
         collapse();
       }
+    });
+
+    // Pinning only changes what a second click on the already-open node does
+    // (@see handleSecondDrawer()'s isPinned() check) - the close button and
+    // Escape still close the sidebar regardless. Persisted per builder.id,
+    // like secondDrawerActiveNodeId below.
+    const pinButton = secondDrawer.querySelector('#db-second-drawer-pin');
+    const setPinned = (pinned) => {
+      secondDrawer.dataset.pinned = pinned ? 'true' : 'false';
+      if (pinButton) {
+        pinButton.name = pinned ? 'pin-angle-fill' : 'pin-angle';
+        pinButton.label = pinned
+          ? Drupal.t('Unpin sidebar')
+          : Drupal.t('Pin sidebar open');
+        pinButton.classList.toggle('db-sidebar__pin--active', pinned);
+      }
+    };
+    setPinned(
+      Drupal.displayBuilder.LocalStorageManager.get(
+        'secondDrawerPinned',
+        false,
+        builder.id,
+      ),
+    );
+    builder.addEventListener('click', (event) => {
+      if (!event.target.closest('#db-second-drawer-pin')) return;
+      const pinned = secondDrawer.dataset.pinned !== 'true';
+      setPinned(pinned);
+      Drupal.displayBuilder.LocalStorageManager.set(
+        'secondDrawerPinned',
+        pinned,
+        builder.id,
+      );
+    });
+
+    // Ancestor breadcrumb (@see handleSecondDrawer()'s renderNodePath()) has
+    // no hx-get of its own - clicking a segment re-clicks that ancestor's
+    // real trigger element already in the tree panel, the same way
+    // secondDrawerActiveNodeId restoration below does.
+    builder.addEventListener('click', (event) => {
+      const segment = event.target.closest('sl-breadcrumb-item');
+      if (!segment || !secondDrawer.contains(segment)) return;
+      const ancestorId = segment.dataset.nodeId;
+      const trigger = builder.querySelector(
+        `[data-node-id="${ancestorId}"][data-hx-get]`,
+      );
+      if (trigger) trigger.click();
     });
 
     // Restore whichever node's settings (if any) were open before the last

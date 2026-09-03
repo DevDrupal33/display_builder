@@ -40,12 +40,24 @@
     <aside id="db-second-drawer" class="db-sidebar db-sidebar--end db-background is-collapsed">
       <div class="db-sidebar__resize-handle"></div>
       <div class="db-sidebar__header">
-        <span class="db-sidebar__title">{{ 'Settings'|t }}</span>
-        {{ include('display_builder:icon_button', {
-          icon: 'x-lg',
-          label: 'Close'|t,
-          attributes: {id: 'db-second-drawer-close', class: 'db-sidebar__close'},
-        }, with_context: false) }}
+        {# Ancestor breadcrumb, built client-side from the clicked node's own
+           DOM ancestors (real trigger elements, no server round trip).
+           Empty (and CSS-hidden) for a root-level node.
+           @see components/display_builder/js/sidebar.js #}
+        <div class="db-sidebar__path"></div>
+        <div class="db-sidebar__heading">
+          <span class="db-sidebar__title">{{ 'Settings'|t }}</span>
+          {{ include('display_builder:icon_button', {
+            icon: 'pin-angle',
+            label: 'Pin sidebar open'|t,
+            attributes: {id: 'db-second-drawer-pin', class: 'db-sidebar__pin'},
+          }, with_context: false) }}
+          {{ include('display_builder:icon_button', {
+            icon: 'x-lg',
+            label: 'Close'|t,
+            attributes: {id: 'db-second-drawer-close', class: 'db-sidebar__close'},
+          }, with_context: false) }}
+        </div>
       </div>
       <div class="db-sidebar__content">
         {{ contextual_islands }}

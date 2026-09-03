@@ -61,6 +61,8 @@
   --db-sidebar-border: var(--sl-color-neutral-200);
   --db-resize-handle-bg: rgb(0, 0, 0, 0.1);
   --db-resize-handle-bg-hover: var(--sl-color-primary-400, rgb(45, 25, 90, 0.2));
+  --db-sidebar-pin-color-active: var(--sl-color-primary-700);
+  --db-sidebar-path-color: var(--sl-color-primary-700);
 
   /* Preview island */
   --preview-color-background: var(--sl-color-neutral-0);
