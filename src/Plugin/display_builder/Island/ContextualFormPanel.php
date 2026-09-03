@@ -13,6 +13,7 @@ use Drupal\display_builder\Island\IslandPluginBase;
 use Drupal\display_builder\Island\IslandType;
 use Drupal\display_builder\Island\IslandWithFormInterface;
 use Drupal\display_builder\Island\IslandWithFormTrait;
+use Drupal\display_builder\SourceProcessingDataInterface;
 use Drupal\display_builder\SourceWithSlotsInterface;
 
 /**
@@ -55,6 +56,24 @@ class ContextualFormPanel extends IslandPluginBase implements IslandWithFormInte
         '@node_id' => $this->data['node_id'] ?? 'unknown',
         '@message' => $e->getMessage(),
       ]);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * A source owning values stored elsewhere validates them here, while form
+   * validation is still running, so an error stops the save.
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    if (!isset($this->data['node_id'])) {
+      return;
+    }
+    $contexts = $form_state->getBuildInfo()['args'][1] ?? [];
+    $source = $this->sourceManager->getSource($this->data['node_id'], [], $this->data, $contexts);
+
+    if ($source instanceof SourceProcessingDataInterface) {
+      $source->validateFormData($form, $form_state);
     }
   }
 

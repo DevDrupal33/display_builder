@@ -301,14 +301,19 @@ trait RenderableBuilderTrait {
    *
    * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $label
    *   What the node is, so it stays recognizable while showing nothing.
+   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup|null $help
+   *   (Optional) Why it can render empty, when the default sentence would be
+   *   misleading for this source.
+   *
+   * @see \Drupal\display_builder\EmptyPlaceholderHelpInterface
    *
    * @return array
    *   A renderable array.
    */
-  protected function buildEmptyPlaceholder(string|TranslatableMarkup $label): array {
+  protected function buildEmptyPlaceholder(string|TranslatableMarkup $label, string|TranslatableMarkup|null $help = NULL): array {
     return $this->buildPlaceholderRegion(
       $label,
-      new TranslatableMarkup('Empty. Configure it to make it visible.'),
+      $help ?? new TranslatableMarkup('Empty. Configure it to make it visible.'),
     );
   }
 

@@ -38,4 +38,11 @@ class ViewRowsSource extends ViewsUiPatternsSourceBase {
     return 'lg';
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function getViewsPluginType(): ?string {
+    return 'style';
+  }
+
 }

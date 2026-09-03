@@ -10,6 +10,7 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandPluginBase;
 use Drupal\display_builder\Island\IslandReloadEventsTrait;
 use Drupal\display_builder\SlotSourceProxy;
+use Drupal\display_builder\SourceProcessingDataInterface;
 use Drupal\display_builder\SourceWithSlotsInterface;
 use Drupal\ui_patterns\SourcePluginBase;
 use Drupal\ui_patterns\SourceWithChoicesInterface;
@@ -66,6 +67,10 @@ abstract class ViewPanelBase extends IslandPluginBase {
    * {@inheritdoc}
    */
   public function onUpdate(InstanceInterface $instance, string $node_id): array {
+    if ($this->hasSourceOutsideTree($instance, $node_id)) {
+      return $this->reloadWithGlobalData($instance);
+    }
+
     return $this->replaceNode($instance, $node_id);
   }
 
@@ -371,6 +376,33 @@ abstract class ViewPanelBase extends IslandPluginBase {
     }
 
     return $renderable;
+  }
+
+  /**
+   * Does the node store part of its configuration outside the source tree?
+   *
+   * A views source writes to the view display, which every other source of
+   * the same view reads: cutting the pager changes what the rows render. Only
+   * a full reload shows that, so those nodes give up the cheap single-node
+   * swap.
+   *
+   * @param \Drupal\display_builder\InstanceInterface $instance
+   *   The Display Builder instance.
+   * @param string $node_id
+   *   The tree node ID.
+   *
+   * @return bool
+   *   TRUE when the node's source stores data shared with its siblings.
+   */
+  private function hasSourceOutsideTree(InstanceInterface $instance, string $node_id): bool {
+    $source_id = $instance->getNode($node_id)['source_id'] ?? NULL;
+
+    if (!\is_string($source_id)) {
+      return FALSE;
+    }
+    $definition = $this->sourceManager->getDefinition($source_id, FALSE);
+
+    return \is_subclass_of($definition['class'] ?? '', SourceProcessingDataInterface::class);
   }
 
   /**

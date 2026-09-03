@@ -34,4 +34,11 @@ class ViewPagerSource extends ViewsUiPatternsSourceBase {
     return $view->getPager()->render($view->getExposedInput());
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function getViewsPluginType(): ?string {
+    return 'pager';
+  }
+
 }

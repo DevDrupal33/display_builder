@@ -17,7 +17,9 @@ use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandPluginManagerInterface;
 use Drupal\display_builder\Plugin\display_builder\Island\ContextualFormPanel;
 use Drupal\display_builder\RenderableBuilderTrait;
+use Drupal\display_builder\SourceProcessingDataInterface;
 use Drupal\display_builder\SourceTree;
+use Drupal\ui_patterns\SourcePluginManager;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -40,6 +42,8 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     protected SessionInterface $session,
     protected RequestStack $requestStack,
     private IslandPluginManagerInterface $islandPluginManager,
+    #[Autowire(service: 'plugin.manager.ui_patterns_source')]
+    private SourcePluginManager $sourceManager,
   ) {
     parent::__construct($eventDispatcher, $renderer, $time, $sharedTempStoreFactory, $session, $requestStack);
   }
@@ -287,15 +291,16 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     }
     $form_state = new FormState();
     // Default values are the existing values from the state.
+    $contexts = $display_builder_instance->getAvailableContexts();
     $form_state->addBuildInfo('args', [
       [
         'island_id' => 'contextual_form',
         'builder_id' => (string) $display_builder_instance->id(),
         'instance' => $node,
       ],
-      $display_builder_instance->getAvailableContexts(),
+      $contexts,
     ]);
-    $form_state->setTemporaryValue('gathered_contexts', $display_builder_instance->getAvailableContexts());
+    $form_state->setTemporaryValue('gathered_contexts', $contexts);
     // The body received corresponds to raw form values.
     // We need to set them in the form state to properly
     // take them into account.
@@ -311,6 +316,11 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     catch (FormAjaxException $e) {
       throw $e;
     }
+    catch (FormValidationException $e) {
+      // A rejected value is the user's, not a system failure: show what the
+      // form itself said, so it can be corrected without reading watchdog.
+      return $this->buildError((string) $display_builder_instance->id(), $e->getMessage(), TRUE);
+    }
     catch (\Exception $e) {
       $debug = [
         'node_id' => $node_id,
@@ -321,6 +331,15 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
       ];
 
       return $this->responseMessageError((string) $display_builder_instance->id(), $e->getMessage(), $debug);
+    }
+
+    // A source may own only part of what its form collects: the views sources
+    // hand the view's own options back to the view. Give it the chance to
+    // divert them before the rest lands in the tree.
+    $source = $this->sourceManager->getSource($node_id, [], $node, $contexts);
+
+    if ($source instanceof SourceProcessingDataInterface) {
+      $data['source'] = $source->processFormData($data['source'], $form_state);
     }
 
     $display_builder_instance->setSource($node_id, $node['source_id'], $data['source']);

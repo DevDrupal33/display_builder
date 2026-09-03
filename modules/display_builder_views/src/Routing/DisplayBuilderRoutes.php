@@ -53,6 +53,12 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
     /** @var \Symfony\Component\Routing\RouteCollection $collection */
     $collection = $event->getRouteCollection();
     $route = $collection->get('display_builder_views.views.manage');
+
+    // The route is declared by this module, but views_ui may be absent, in
+    // which case the routing subsystem never provides it.
+    if ($route === NULL) {
+      return;
+    }
     $parameters = $route->getOption('parameters');
     $parameters['view']['converter'] = 'drupal.proxy_original_service.paramconverter.views_ui';
     $route->setOption('parameters', $parameters);

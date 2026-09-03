@@ -7,6 +7,7 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
+use Drupal\display_builder\EmptyPlaceholderHelpInterface;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandType;
 use Drupal\display_builder\Island\RealRenderTrait;
@@ -98,7 +99,9 @@ class BuilderPanel extends ViewPanelBase {
     }
 
     if ($this->needsPlaceholder($this->renderer, $data, $build)) {
-      $build = $this->buildEmptyPlaceholder($label_info['summary']);
+      $source = $this->sourceManager->getSource($data['node_id'] ?? '', [], $data, $this->configuration['contexts'] ?? []);
+      $help = $source instanceof EmptyPlaceholderHelpInterface ? $source->emptyPlaceholderHelp() : NULL;
+      $build = $this->buildEmptyPlaceholder($label_info['summary'], $help);
     }
     elseif (!$this->useAttributesVariable($build) || $this->hasMultipleRoot($build)) {
       $build = [

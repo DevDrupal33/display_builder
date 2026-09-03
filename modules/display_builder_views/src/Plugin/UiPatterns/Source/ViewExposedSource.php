@@ -61,4 +61,11 @@ class ViewExposedSource extends ViewsUiPatternsSourceBase {
     return $build;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function getViewsPluginType(): ?string {
+    return 'exposed_form';
+  }
+
 }
