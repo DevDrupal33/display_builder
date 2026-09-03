@@ -10,6 +10,7 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\ComponentPluginManager;
 use Drupal\Core\Url;
 use Drupal\display_builder\DisplayBuildableInterface;
+use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandPluginManagerInterface;
 use Drupal\display_builder\RenderableBuilderTrait;
@@ -208,7 +209,7 @@ class ApiPreviewController extends ControllerBase {
    *   sources on their own instead.
    *
    * @see \Drupal\display_builder\DisplayBuildableInterface::PREVIEW_INSTANCE_ATTRIBUTE
-   * @see \Drupal\display_builder_page_layout\Plugin\DisplayVariant\PageLayoutPageVariant::getPreviewSources()
+   * @see \Drupal\display_builder\DisplayBuildablePluginBase::getSourcesForRender()
    */
   private function renderOnPinnedPage(InstanceInterface $instance): ?Response {
     $request = $this->requestStack->getCurrentRequest();
@@ -217,7 +218,7 @@ class ApiPreviewController extends ControllerBase {
     // otherwise nest previews, and one pinned to this very route would
     // sub-request itself until the request runs out of memory. One level of
     // page rendering is all this is for.
-    if ($request === NULL || $request->attributes->has(DisplayBuildableInterface::PREVIEW_INSTANCE_ATTRIBUTE)) {
+    if ($request === NULL || DisplayBuilderHelpers::previewedInstanceId($request) !== NULL) {
       return NULL;
     }
 

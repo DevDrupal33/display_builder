@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder\PageCache;
 
 use Drupal\Core\PageCache\RequestPolicyInterface;
-use Drupal\display_builder\DisplayBuildableInterface;
+use Drupal\display_builder\DisplayBuilderHelpers;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -32,9 +32,7 @@ class DenyPreviewSubRequest implements RequestPolicyInterface {
    * {@inheritdoc}
    */
   public function check(Request $request): ?string {
-    return $request->attributes->has(DisplayBuildableInterface::PREVIEW_INSTANCE_ATTRIBUTE)
-      ? self::DENY
-      : NULL;
+    return DisplayBuilderHelpers::previewedInstanceId($request) === NULL ? NULL : self::DENY;
   }
 
 }

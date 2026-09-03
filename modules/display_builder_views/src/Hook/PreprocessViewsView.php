@@ -41,7 +41,8 @@ class PreprocessViewsView {
     $extender = $extenders['display_builder'];
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
     $buildable = $this->displayBuildableManager->createInstance('view_display', ['extender' => $extender]);
-    $sources = $buildable->getSources();
+
+    $sources = $buildable->getSourcesForRender();
 
     // We fallback on normal View if Display Builder is empty or disabled!
     if (empty($sources) || !$buildable->getProfile()) {

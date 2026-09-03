@@ -160,6 +160,41 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
 
   /**
    * {@inheritdoc}
+   *
+   * A view display is a fragment unless it owns a route. A `page` display
+   * does, and previewing on it beats every other option: it is the real views
+   * pipeline, inside the real page, with the Page Layout the path actually
+   * resolves to. Nothing rebuilt by hand gets closer.
+   *
+   * Only `page`. A `feed` display also carries a path and is the one other
+   * display type that does, but it renders a feed document rather than a page,
+   * so there is nothing to preview there.
+   */
+  public function getPreviewPagePath(): ?string {
+    $extender = $this->getExtender();
+
+    if ($extender === NULL) {
+      return NULL;
+    }
+    $display = $extender->view->getDisplay();
+
+    if ($display->getPluginId() !== 'page') {
+      return NULL;
+    }
+    $path = \trim((string) ($display->getOption('path') ?? ''));
+
+    // An argument placeholder makes this a family of pages, not one page, and
+    // there is nothing to fill it with here.
+    if ($path === '' || \str_contains($path, '%')) {
+      return NULL;
+    }
+
+    // Views stores paths without a leading slash.
+    return '/' . \ltrim($path, '/');
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function getProfile(): ?ProfileInterface {
     $display_builder_id = $this->getExtender()->options[DisplayBuildableInterface::PROFILE_PROPERTY] ?? NULL;

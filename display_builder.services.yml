@@ -35,6 +35,11 @@ services:
     tags:
       - { name: dynamic_page_cache_request_policy }
 
+  display_builder.preview_render_cache:
+    class: Drupal\display_builder\Render\PreviewRenderCache
+    decorates: render_cache
+    arguments: ['@.inner', '@request_stack']
+
   plugin.manager.display_buildable:
     class: Drupal\display_builder\DisplayBuildablePluginManager
     parent: default_plugin_manager

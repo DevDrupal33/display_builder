@@ -249,6 +249,43 @@ final class EntityViewOverride extends DisplayBuildablePluginBase implements Dis
 
   /**
    * {@inheritdoc}
+   *
+   * An override belongs to one entity, so the entity's own page is the page it
+   * appears on. That gives the preview the Page Layout the canonical path
+   * really resolves to, the real title and breadcrumb, and the real entity
+   * template - none of which a display rendered on its own can produce.
+   *
+   * Only what @see ::previewWithChrome() also treats as a full page. Every
+   * other mode is a fragment shown inside some other page (a teaser in a
+   * listing, a card in a block), and the canonical page never renders it, so
+   * previewing it there would show the wrong display and claim it was right.
+   */
+  public function getPreviewPagePath(): ?string {
+    $display = $this->getDisplay();
+
+    if ($display === NULL || !$this->previewsFullPage($display->getTargetEntityTypeId(), $display->getTargetBundle(), $display->getMode())) {
+      return NULL;
+    }
+    $entity = $this->getField()?->getEntity();
+
+    if (!$entity instanceof ContentEntityInterface || $entity->isNew()) {
+      return NULL;
+    }
+
+    if (!$entity->getEntityType()->hasLinkTemplate('canonical')) {
+      return NULL;
+    }
+    $url = $entity->toUrl('canonical');
+
+    // The internal path, not ::toString(): the contract is a site path, and
+    // the caller resolves it with Url::fromUserInput(), which measures from
+    // the site root. A base path baked in here routes nowhere on a
+    // subdirectory install.
+    return $url->isRouted() ? '/' . $url->getInternalPath() : NULL;
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function getProfile(): ?ProfileInterface {
     $profile_id = $this->getDisplay()->getThirdPartySetting('display_builder', DisplayBuildableOverrideInterface::OVERRIDE_PROFILE_PROPERTY);

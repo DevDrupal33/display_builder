@@ -14,13 +14,11 @@ use Drupal\Core\Extension\ExtensionList;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\Registry;
-use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder_page_layout\Plugin\PageRegionSourceBase;
 use Drupal\ui_patterns\Element\ComponentElementBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * A variant for pages managed by Display Builder Page Layout.
@@ -72,11 +70,6 @@ class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPlugi
    */
   protected DisplayBuildablePluginManager $displayBuildableManager;
 
-  /**
-   * The request stack.
-   */
-  protected RequestStack $requestStack;
-
   public function __construct(
     array $configuration,
     $plugin_id,
@@ -86,7 +79,6 @@ class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPlugi
     Registry $theme_registry,
     ExtensionList $modules,
     DisplayBuildablePluginManager $display_buildable_manager,
-    RequestStack $request_stack,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->componentElementBuilder = $component_element_builder;
@@ -94,7 +86,6 @@ class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPlugi
     $this->themeRegistry = $theme_registry;
     $this->modules = $modules;
     $this->displayBuildableManager = $display_buildable_manager;
-    $this->requestStack = $request_stack;
   }
 
   /**
@@ -110,7 +101,6 @@ class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPlugi
       $container->get('theme.registry'),
       $container->get('extension.list.module'),
       $container->get('plugin.manager.display_buildable'),
-      $container->get('request_stack'),
     );
   }
 
@@ -152,10 +142,7 @@ class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPlugi
     $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $page_layout]);
     $instance_id = $buildable->getInstanceId();
 
-    // A preview sub-request for this layout renders its in-progress (unsaved)
-    // builder state instead of the saved configuration.
-    $preview_sources = $this->getPreviewSources($buildable);
-    $sources = $preview_sources ?? $page_layout->getSources();
+    $sources = $buildable->getSourcesForRender();
     $this->replaceTitleAndContent($sources, $this->title, $this->mainContent);
 
     $data = $contexts = [];
@@ -176,11 +163,6 @@ class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPlugi
     // See also: PageLayout::postSave().
     // See also: PageVariantSubscriber::onSelectPageDisplayVariant()
     $cache->addCacheTags($page_layout->getCacheTags());
-
-    if ($preview_sources !== NULL) {
-      // Per-editor draft content: always current, never cached.
-      $cache->setCacheMaxAge(0);
-    }
 
     $build = [
       'display_builder_content' => [
@@ -210,36 +192,6 @@ class PageLayoutPageVariant extends VariantBase implements ContainerFactoryPlugi
     $this->title = $title ?? '';
 
     return $this;
-  }
-
-  /**
-   * Gets the unsaved draft sources when this render is a preview.
-   *
-   * The preview iframe loads an admin route, which sub-requests this layout's
-   * pinned page with a request attribute naming an instance (@see
-   * \Drupal\display_builder\DisplayBuildableInterface::PREVIEW_INSTANCE_ATTRIBUTE).
-   * When that attribute matches this layout's instance, the in-progress builder
-   * state is served instead of the saved configuration.
-   *
-   * @param \Drupal\display_builder\DisplayBuildableInterface $buildable
-   *   The page layout buildable for the current page.
-   *
-   * @return array|null
-   *   The draft sources, or NULL when this is not a preview of this layout.
-   */
-  protected function getPreviewSources(DisplayBuildableInterface $buildable): ?array {
-    $requested = $this->requestStack->getCurrentRequest()?->attributes->get(DisplayBuildableInterface::PREVIEW_INSTANCE_ATTRIBUTE);
-
-    // Every front-end page rendered by a layout comes through here, so leave
-    // before asking the buildable anything when this is not a preview at all.
-    if ($requested === NULL || $requested !== $buildable->getInstanceId()) {
-      return NULL;
-    }
-    $instance = $buildable->getInstance();
-
-    // The attribute crosses a kernel boundary, so the draft is re-authorized
-    // here rather than trusting whoever set it.
-    return $instance?->access('view') ? $instance->getCurrentState() : NULL;
   }
 
   /**

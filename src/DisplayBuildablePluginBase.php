@@ -16,6 +16,7 @@ use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 /**
@@ -46,6 +47,11 @@ abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase impleme
    * building a plugin per row, so every implementation needs this by contract.
    */
   protected DisplayBuildablePluginManager $displayBuildableManager;
+
+  /**
+   * The request stack, to spot a preview sub-request.
+   */
+  protected RequestStack $requestStack;
 
   /**
    * A tiny hint to remember where the initial data comes from.
@@ -80,6 +86,7 @@ abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase impleme
     $instance->currentUser = $container->get('current_user');
     $instance->moduleHandler = $container->get('module_handler');
     $instance->displayBuildableManager = $container->get('plugin.manager.display_buildable');
+    $instance->requestStack = $container->get('request_stack');
 
     return $instance;
   }
@@ -180,6 +187,26 @@ abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase impleme
   public function getBuilderUrl(): Url {
     // Plugins will override this method.
     return Url::fromRoute('<front>');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSourcesForRender(): array {
+    $requested = DisplayBuilderHelpers::previewedInstanceId($this->requestStack->getCurrentRequest());
+
+    // On the hot path for every front-end render, so leave before loading the
+    // instance whenever this is not a preview of this very display. The left
+    // operand is what buys that: it fails without calling ::getInstanceId(),
+    // which is not free in every implementation.
+    if ($requested === NULL || $requested !== $this->getInstanceId()) {
+      return $this->getSources();
+    }
+    $instance = $this->getInstance();
+
+    // The attribute crosses a kernel boundary, so the draft is re-authorized
+    // here rather than trusting whoever set it.
+    return $instance?->access('view') ? $instance->getCurrentState() : $this->getSources();
   }
 
   /**

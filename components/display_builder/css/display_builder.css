@@ -396,7 +396,7 @@ Kept separate from [data-db-stale] so a failed refresh leaves the panel usable
     width: calc(100% * var(--db-preview-zoom, 1));
     height: 100%;
     transition: width 0.2s ease;
-    background-color: #fff;
+    background-color: var(--db-background-color, #fff);
     margin-inline: auto;
   }
   .db-live-preview {
@@ -413,7 +413,7 @@ Kept separate from [data-db-stale] so a failed refresh leaves the panel usable
     transform: scale(var(--db-preview-zoom, 1));
     transform-origin: top left;
     border: 0;
-    background-color: #fff;
+    background-color: var(--db-background-color, #fff);
   }
   /* The next render loads here, invisible and stacked over the current one, and
      is revealed (by dropping this class) only once it has loaded, so the preview

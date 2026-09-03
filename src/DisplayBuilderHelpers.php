@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Helpers related class for Display builder.
@@ -29,6 +30,29 @@ class DisplayBuilderHelpers {
   public static function isDisplayBuilderEntityType(EntityTypeInterface $entityType): bool {
     return $entityType->entityClassImplements(FieldableEntityInterface::class)
       && $entityType->hasViewBuilderClass();
+  }
+
+  /**
+   * The display a request is a preview sub-request for, if it is one.
+   *
+   * Four things need to know: the controller opening the sub-request guards
+   * against nesting, two caches refuse to serve or store it, and the display
+   * being previewed swaps its saved sources for the draft. They all read the
+   * one attribute, so they read it here.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request|null $request
+   *   The request, usually the current one. NULL is answered, not guarded
+   *   against, because the request stack is empty outside a request.
+   *
+   * @return string|null
+   *   The previewed instance ID, or NULL when this is an ordinary request.
+   *
+   * @see \Drupal\display_builder\Controller\ApiPreviewController::renderOnPinnedPage()
+   */
+  public static function previewedInstanceId(?Request $request): ?string {
+    $instance_id = $request?->attributes->get(DisplayBuildableInterface::PREVIEW_INSTANCE_ATTRIBUTE);
+
+    return \is_string($instance_id) ? $instance_id : NULL;
   }
 
   /**

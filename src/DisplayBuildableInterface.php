@@ -260,6 +260,27 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, Con
   public function getSources(): array;
 
   /**
+   * Get the sources to render, saved or draft.
+   *
+   * The same as ::getSources(), except while previewing this very display on
+   * its own page (@see ::getPreviewPagePath()), where it is the unsaved
+   * builder state instead. That preview is a sub-request for the real page,
+   * carrying ::PREVIEW_INSTANCE_ATTRIBUTE, and every front-end render of
+   * every display reaches here, so all but the one being previewed get the
+   * saved sources.
+   *
+   * This is what a render path wants, and ::getSources() is not: rendering
+   * the saved display looks right and is wrong, because the editor sees none
+   * of the edits they are making.
+   *
+   * @return array
+   *   A list of nestable sources.
+   *
+   * @see \Drupal\display_builder\Controller\ApiPreviewController::renderOnPinnedPage()
+   */
+  public function getSourcesForRender(): array;
+
+  /**
    * Get the site path this display can be previewed on, when there is one.
    *
    * Some sources only resolve inside a real page request: the page's own main

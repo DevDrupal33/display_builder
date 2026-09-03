@@ -232,7 +232,7 @@ trait EntityViewDisplayTrait {
           'entity_view_override',
           ['display' => $this, 'entity' => $entity]
         );
-        $sources = $buildable->getSources();
+        $sources = $buildable->getSourcesForRender();
       }
 
       // If the overridden field is empty fallback to the entity view.
