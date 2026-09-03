@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder\Plugin\display_builder\Island;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
@@ -67,12 +68,18 @@ class InstancesPanel extends IslandPluginBase {
   protected AccountInterface $currentUser;
 
   /**
+   * The display_builder_instance storage.
+   */
+  protected EntityStorageInterface $instanceStorage;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->displayBuildableManager = $container->get('plugin.manager.display_buildable');
     $instance->currentUser = $container->get('current_user');
+    $instance->instanceStorage = $container->get('entity_type.manager')->getStorage('display_builder_instance');
 
     return $instance;
   }
@@ -91,7 +98,7 @@ class InstancesPanel extends IslandPluginBase {
       // service it needs to answer.
       /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
       $buildable = $this->displayBuildableManager->createInstance((string) $plugin_id, []);
-      [$items, $capped] = $this->buildProviderItems($buildable, $current_id);
+      [$items, $capped] = $this->buildProviderItems($buildable, $builder);
 
       if (empty($items)) {
         continue;
@@ -103,7 +110,7 @@ class InstancesPanel extends IslandPluginBase {
       $group = [
         '#type' => 'container',
         '#attributes' => ['class' => ['db-instances__group']],
-        'title' => $this->buildGroupTitle($definition['label'], $buildable->collectDisplaysBound()),
+        'title' => $this->buildGroupTitle($definition['label'], $buildable->collectDisplaysBound(), $buildable->getCollectionUrl(), $buildable->getAddUrl()),
         // A div with a role, not a ul: an admin theme has opinions about every
         // list on the page, and none of them are about this one. The role
         // keeps what the markup gave away, so a screen reader still counts
@@ -223,14 +230,16 @@ class InstancesPanel extends IslandPluginBase {
    *
    * @param \Drupal\display_builder\DisplayBuildableInterface $buildable
    *   The buildable plugin, built with no configuration, doing the listing.
-   * @param string $current_id
-   *   The ID of the instance currently being built, rendered without a link.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   The instance currently being built, rendered without a link. Its own
+   *   ::getHash() answers the current row's save status with no extra load.
    *
    * @return array{0: array, 1: int}
    *   The renderable list items sorted by label, and how many of them were
    *   capped out of sight past ::VISIBLE_COUNT.
    */
-  protected function buildProviderItems(DisplayBuildableInterface $buildable, string $current_id): array {
+  protected function buildProviderItems(DisplayBuildableInterface $buildable, InstanceInterface $builder): array {
+    $current_id = (string) $builder->id();
     $references = [];
 
     foreach ($buildable->collectDisplays() as $reference) {
@@ -243,15 +252,202 @@ class InstancesPanel extends IslandPluginBase {
 
     \usort($references, static fn ($a, $b): int => \strnatcasecmp($a->label, $b->label));
 
+    $hashes = $this->loadCurrentHashes($references, $current_id);
     $items = [];
     $shown = 0;
 
     foreach ($references as $reference) {
       $over_cap = $reference->built && ++$shown > self::VISIBLE_COUNT;
-      $items[] = $this->buildItem($reference, $reference->instanceId === $current_id, $over_cap);
+      $is_current = $reference->instanceId === $current_id;
+      $issues = $this->resolveRowIssues($reference, $is_current, $builder, $hashes);
+      $items[] = $this->buildItem($reference, $is_current, $over_cap, $issues);
     }
 
     return [$items, \max(0, $shown - self::VISIBLE_COUNT)];
+  }
+
+  /**
+   * Batch-load the current ::hash of every built, non-current reference.
+   *
+   * One query for the whole list via ::loadMultiple(), not one per row: the
+   * N+1 pattern this avoids is exactly what #3616451 flags elsewhere in this
+   * area of the module.
+   *
+   * @param \Drupal\display_builder\DisplayReference[] $references
+   *   The references this group is about to render.
+   * @param string $current_id
+   *   The instance id being built right now, excluded - its hash is read
+   *   live off $builder instead, @see ::hasUnpublishedChanges().
+   *
+   * @return array<string, int|null>
+   *   Instance id to its stored ::getHash(), for every loaded instance.
+   */
+  protected function loadCurrentHashes(array $references, string $current_id): array {
+    $ids = [];
+
+    foreach ($references as $reference) {
+      if ($reference->built && $reference->instanceId !== $current_id) {
+        $ids[] = $reference->instanceId;
+      }
+    }
+
+    if ($ids === []) {
+      return [];
+    }
+
+    $hashes = [];
+
+    /** @var \Drupal\display_builder\InstanceInterface $instance */
+    foreach ($this->instanceStorage->loadMultiple($ids) as $instance) {
+      $hashes[(string) $instance->id()] = $instance->getHash();
+    }
+
+    return $hashes;
+  }
+
+  /**
+   * Whether a row's saved state has not been published yet.
+   *
+   * The published state itself is not an issue: it is the common case, and a
+   * mark on every row that is fine would be noise, not signal.
+   *
+   * @param \Drupal\display_builder\DisplayReference $reference
+   *   The display the row is for.
+   * @param bool $is_current
+   *   Whether this is the display being edited right now.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   The instance currently being built.
+   * @param array<string, int|null> $hashes
+   *   Instance id to stored hash, from ::loadCurrentHashes().
+   *
+   * @return bool
+   *   TRUE when the display is built, has a saved hash, and that hash
+   *   differs from what is published.
+   */
+  protected function hasUnpublishedChanges(DisplayReference $reference, bool $is_current, InstanceInterface $builder, array $hashes): bool {
+    if (!$reference->built) {
+      return FALSE;
+    }
+
+    $hash = $is_current ? $builder->getHash() : ($hashes[$reference->instanceId] ?? NULL);
+
+    return $hash !== NULL && $hash !== $reference->publishedHash;
+  }
+
+  /**
+   * Every issue a row has right now, in priority order.
+   *
+   * One dot, not two mechanisms: this used to be a save-status dot plus a
+   * separate italic status word for 'disabled'/'empty', two different visual
+   * languages for what is really one question - does this row need a look?
+   * Everything answering that question is collected here, so ::buildItem()
+   * has exactly one thing to render for it. The order returned is also the
+   * priority order ::buildStatusDot() reads its color from: 'disabled'
+   * (nobody can reach this at all) and 'empty' (built but nothing published)
+   * come from the same status, since a display is never both; 'unpublished'
+   * can join either, or stand alone.
+   *
+   * @param \Drupal\display_builder\DisplayReference $reference
+   *   The display the row is for.
+   * @param bool $is_current
+   *   Whether this is the display being edited right now.
+   * @param \Drupal\display_builder\InstanceInterface $builder
+   *   The instance currently being built.
+   * @param array<string, int|null> $hashes
+   *   Instance id to stored hash, from ::loadCurrentHashes().
+   *
+   * @return string[]
+   *   Issue keys ('disabled', 'empty', 'unpublished'), most severe first.
+   */
+  protected function resolveRowIssues(DisplayReference $reference, bool $is_current, InstanceInterface $builder, array $hashes): array {
+    $issues = [];
+
+    // 'empty' is read from saved config, and the one display whose saved
+    // config the user is busy changing is this one, so the word would be
+    // stale from the first edit until the next full page load: it would
+    // announce "empty" over a display that was just published. 'disabled'
+    // has no such problem - it is the page layout entity's own enabled bit,
+    // untouched by editing the tree - so it stays visible on the current row.
+    $status = $reference->status();
+
+    if ($status !== NULL && !($is_current && $status === 'empty')) {
+      $issues[] = $status;
+    }
+
+    if ($this->hasUnpublishedChanges($reference, $is_current, $builder, $hashes)) {
+      $issues[] = 'unpublished';
+    }
+
+    return $issues;
+  }
+
+  /**
+   * The sentence explaining one issue, for the status dot's tooltip.
+   *
+   * @param string $issue
+   *   An issue key from ::resolveRowIssues().
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The sentence.
+   */
+  protected static function issueSentence(string $issue): TranslatableMarkup {
+    // Every real arm named; the default only satisfies match's exhaustiveness
+    // check against $issue's plain `string` type - ::resolveRowIssues() is
+    // this method's one caller and never emits a fourth key, so this never
+    // actually throws, it just refuses to silently print nothing for one.
+    return match ($issue) {
+      'disabled' => new TranslatableMarkup('This page layout is disabled: nobody can see it.'),
+      'empty' => new TranslatableMarkup('Nothing is published here yet.'),
+      'unpublished' => new TranslatableMarkup('Saved but not published: this draft differs from what is live.'),
+      default => throw new \InvalidArgumentException(\sprintf('Unknown instances panel issue key "%s".', $issue)),
+    };
+  }
+
+  /**
+   * Build the dot prefixed to a row's name.
+   *
+   * Red, not amber, when 'disabled' is among the issues: disabled is the one
+   * case nobody can reach the display at all, which reads as a different
+   * order of problem than "reachable but not quite there yet" - amber covers
+   * both 'empty' and 'unpublished' rather than adding a third hue, since
+   * telling those two apart only matters once you are already reading the
+   * tooltip. Not the toolbar save_status pip's green either: that pip fires
+   * once, as feedback that an action just succeeded, and green fits
+   * confirming that - this dot sits at rest in a list scanned from a
+   * distance, saying "this one needs a look", which green would read
+   * backwards for.
+   *
+   * @param string[] $issues
+   *   Issue keys from ::resolveRowIssues(), most severe first.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function buildStatusDot(array $issues): array {
+    $output = [
+      '#type' => 'html_tag',
+      '#tag' => 'span',
+      '#attributes' => [
+        'class' => ['db-instances__status-dot'],
+      ],
+    ];
+
+    if ($issues === []) {
+      return $output;
+    }
+
+    $severity = \in_array('disabled', $issues, TRUE) ? 'danger' : 'warning';
+    $sentences = \array_map(static fn (string $issue): string => (string) self::issueSentence($issue), $issues);
+    $label = \implode(' ', $sentences);
+
+    $output['#attributes'] = [
+      'class' => ['db-instances__status-dot', 'db-instances__status-dot--' . $severity],
+      'role' => 'img',
+      'aria-label' => $label,
+      'title' => $label,
+    ];
+
+    return $output;
   }
 
   /**
@@ -264,31 +460,16 @@ class InstancesPanel extends IslandPluginBase {
    * @param bool $over_cap
    *   Whether this row sits past ::VISIBLE_COUNT, and so starts out hidden
    *   behind the group's View more button.
+   * @param string[] $issues
+   *   Issue keys from ::resolveRowIssues(), most severe first.
    *
    * @return array
    *   A renderable array.
    */
-  protected function buildItem(DisplayReference $reference, bool $is_current, bool $over_cap = FALSE): array {
-    $classes = ['db-instances__item'];
+  protected function buildItem(DisplayReference $reference, bool $is_current, bool $over_cap = FALSE, array $issues = []): array {
+    $build = $this->buildItemContainer($reference, $over_cap, $is_current);
 
-    if (!$reference->built) {
-      // What the toggle hides. @see ::buildNotBuiltToggle().
-      $classes[] = 'db-instances__item--not-built';
-    }
-
-    if ($over_cap) {
-      // What View more reveals. @see ::buildMoreButton().
-      $classes[] = 'db-instances__item--over-cap';
-    }
-
-    $build = [
-      '#type' => 'container',
-      '#attributes' => [
-        'class' => $classes,
-        'role' => 'listitem',
-        'data-keywords' => self::itemKeywords($reference),
-      ],
-    ];
+    $build['status'] = $this->buildStatusDot($issues);
 
     $build['label'] = self::buildItemLabel($reference, $is_current);
 
@@ -308,41 +489,79 @@ class InstancesPanel extends IslandPluginBase {
       return $build;
     }
 
-    // Never on the row being edited. A status is read from saved config, and
-    // the one display whose saved config the user is busy changing is this
-    // one, so the word here is stale from the first edit until the next full
-    // page load: it announces "Empty" over a display that was just published.
-    // The panel does not rebuild on builder events on purpose, since listing
-    // every display of the site again after every mutation is not a price
-    // worth paying for one word about the display already on screen.
-    $status = $is_current ? NULL : $reference->status();
-    $word = $status === NULL ? NULL : self::statusLabel($status);
-
-    if ($word !== NULL) {
-      $build['status'] = [
-        '#type' => 'html_tag',
-        '#tag' => 'span',
-        '#value' => $word,
-        '#attributes' => [
-          'class' => ['db-instances__status', 'db-instances__status--' . $status],
-        ],
-      ];
-    }
-
-    // Where this display is configured, which is not where it is built: the
-    // row itself opens the builder, this leaves for Manage display, the view
-    // edit form, or the content an override belongs to.
     if ($reference->settingsUrl !== NULL) {
-      $build['action'] = $this->buildAction(
-        $reference->settingsUrl,
-        'gear',
-        $this->t('Settings'),
-        $reference->label,
-        $this->t('Settings of @display', ['@display' => $reference->label]),
-      );
+      $build['action'] = $this->buildItemSettingsAction($reference, $reference->settingsUrl);
     }
 
     return $build;
+  }
+
+  /**
+   * Build a row's outer container, empty of content.
+   *
+   * @param \Drupal\display_builder\DisplayReference $reference
+   *   The display the row is for.
+   * @param bool $over_cap
+   *   Whether this row sits past ::VISIBLE_COUNT.
+   * @param bool $is_current
+   *   Whether this is the display being edited right now.
+   *
+   * @return array
+   *   A renderable array, ready for its content keys.
+   */
+  protected function buildItemContainer(DisplayReference $reference, bool $over_cap, bool $is_current): array {
+    $classes = ['db-instances__item'];
+
+    if (!$reference->built) {
+      // What the toggle hides. @see ::buildNotBuiltToggle().
+      $classes[] = 'db-instances__item--not-built';
+    }
+
+    if ($over_cap) {
+      // What View more reveals. @see ::buildMoreButton().
+      $classes[] = 'db-instances__item--over-cap';
+    }
+
+    if ($is_current) {
+      // The whole row, not just its label: bold text alone reads as barely
+      // different from the rows around it at this font size.
+      $classes[] = 'db-instances__item--current';
+    }
+
+    return [
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => $classes,
+        'role' => 'listitem',
+        'data-keywords' => self::itemKeywords($reference),
+      ],
+    ];
+  }
+
+  /**
+   * Build a built row's Settings action.
+   *
+   * Where this display is configured, which is not where it is built: the
+   * row itself opens the builder, this leaves for Manage display, the view
+   * edit form, or the content an override belongs to.
+   *
+   * @param \Drupal\display_builder\DisplayReference $reference
+   *   The display the row is for.
+   * @param \Drupal\Core\Url $url
+   *   The display's settings URL, i.e. $reference->settingsUrl narrowed
+   *   non-null by the caller.
+   *
+   * @return array
+   *   A renderable array.
+   */
+  protected function buildItemSettingsAction(DisplayReference $reference, Url $url): array {
+    return $this->buildAction(
+      $url,
+      'gear',
+      $this->t('Settings'),
+      $reference->label,
+      $this->t('Settings of @display', ['@display' => $reference->label]),
+    );
   }
 
   /**
@@ -560,22 +779,46 @@ class InstancesPanel extends IslandPluginBase {
    *   The provider's label.
    * @param \Drupal\Core\StringTranslation\TranslatableMarkup|null $bound
    *   The provider's own sentence about what it left out, if anything.
+   * @param \Drupal\Core\Url|null $collection_url
+   *   Where every display of this kind is managed, from
+   *   ::getCollectionUrl(). NULL leaves the heading as plain text.
+   * @param \Drupal\Core\Url|null $add_url
+   *   Where a new display of this kind is added, from ::getAddUrl(). NULL
+   *   shows no add action.
    *
    * @return array
    *   A renderable array.
    *
    * @see \Drupal\display_builder\DisplayBuildableInterface::collectDisplaysBound()
    */
-  protected function buildGroupTitle(string|TranslatableMarkup $label, ?TranslatableMarkup $bound): array {
+  protected function buildGroupTitle(string|TranslatableMarkup $label, ?TranslatableMarkup $bound, ?Url $collection_url = NULL, ?Url $add_url = NULL): array {
+    $heading = [
+      '#type' => 'html_tag',
+      '#tag' => 'h4',
+    ];
+
+    if ($collection_url === NULL) {
+      $heading['#value'] = $label;
+    }
+    else {
+      $heading['link'] = $this->buildGroupHeadingLink($label, $collection_url);
+    }
+
     $title = [
       '#type' => 'container',
       '#attributes' => ['class' => ['db-instances__title']],
-      'heading' => [
-        '#type' => 'html_tag',
-        '#tag' => 'h4',
-        '#value' => $label,
-      ],
+      'heading' => $heading,
     ];
+
+    if ($add_url !== NULL) {
+      $title['add'] = $this->buildAction(
+        $add_url,
+        'plus-lg',
+        $this->t('Add'),
+        (string) $label,
+        $this->t('Add a new @kind', ['@kind' => $label]),
+      );
+    }
 
     if ($bound !== NULL) {
       $title['bound'] = [
@@ -602,28 +845,36 @@ class InstancesPanel extends IslandPluginBase {
   }
 
   /**
-   * The word shown for a built display's status.
+   * Build a group heading as a link to its buildable's collection page.
    *
-   * An empty display is a dead link that looks like a bug unless it says so,
-   * and a disabled page layout renders nowhere however full it is. Both are
-   * states, so both are words. There is no third: a display that is not built
-   * has an action rather than a status, and ::status() returns NULL for it.
+   * Same button-as-link idiom as ::buildItemLabel(), plain instead of small:
+   * the heading it replaces was plain text at heading size, and a link taking
+   * over that role must still read as a heading, not shrink to a row's size.
    *
-   * @param string $status
-   *   A status key from DisplayReference::status().
+   * @param string|\Drupal\Core\StringTranslation\TranslatableMarkup $label
+   *   The provider's label.
+   * @param \Drupal\Core\Url $url
+   *   The buildable's collection page, from ::getCollectionUrl().
    *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
-   *   The word to show, or NULL for a key with no word of its own.
+   * @return array
+   *   A renderable array.
    */
-  protected static function statusLabel(string $status): ?TranslatableMarkup {
-    // Every arm named, no catch-all: a default arm here would render a status
-    // key nobody has written a word for as "Empty", which is a lie about the
-    // display rather than a missing label.
-    return match ($status) {
-      'disabled' => new TranslatableMarkup('Disabled'),
-      'empty' => new TranslatableMarkup('Empty'),
-      default => NULL,
-    };
+  protected function buildGroupHeadingLink(string|TranslatableMarkup $label, Url $url): array {
+    $build = [
+      '#type' => 'component',
+      '#component' => 'display_builder:button',
+      '#props' => [
+        'label' => $label,
+        'variant' => 'text',
+      ],
+      '#attributes' => [
+        'class' => ['db-instances__title-link'],
+        'title' => $this->t('All @kind', ['@kind' => $label]),
+      ],
+    ];
+    self::applyHref($build, $url);
+
+    return $build;
   }
 
 }

@@ -27,6 +27,7 @@ use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildableOverrideInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\DisplayReference;
+use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\display_builder_entity_view\Entity\DisplayBuilderEntityDisplayInterface;
@@ -166,6 +167,20 @@ final class EntityViewOverride extends DisplayBuildablePluginBase implements Dis
     ];
 
     return Url::fromRoute(\sprintf('entity.%s.display_builder.%s', $entity_type_id, $display->getMode()), $parameters);
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * No admin page lists overrides on their own - each is configured on the
+   * content entity it belongs to. The Instances panel's group heading links
+   * to the flat instance list instead, pre-filtered to this buildable's own
+   * kind.
+   */
+  public function getCollectionUrl(): Url {
+    return Url::fromRoute('entity.display_builder_instance.collection', [], [
+      'query' => ['context' => $this->getPluginId()],
+    ]);
   }
 
   /**
@@ -475,6 +490,9 @@ final class EntityViewOverride extends DisplayBuildablePluginBase implements Dis
           // The label names the bundle and the entity id, and an id tells a
           // human nothing about which node this is.
           detail: (string) $entity->label(),
+          // Same array ::getSources() returns for this buildable, just read
+          // straight off the field already loaded above.
+          publishedHash: Instance::getUniqId($entity->get($field_name)->getValue()),
         );
       }
     }

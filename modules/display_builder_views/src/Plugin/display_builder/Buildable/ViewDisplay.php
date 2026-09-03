@@ -17,6 +17,7 @@ use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\DisplayReference;
+use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\views\Plugin\views\display\DisplayRouterInterface;
@@ -95,6 +96,16 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
     ];
 
     return Url::fromRoute('display_builder_views.views.manage', $params);
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * No ::getAddUrl() override: a view is added through Views UI's own flow,
+   * not a Display Builder route, so the base class's NULL stands.
+   */
+  public function getCollectionUrl(): Url {
+    return Url::fromRoute('display_builder_views.views.collection');
   }
 
   /**
@@ -280,6 +291,7 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
         }
         $instance_id = $buildable->getInstanceId();
         $settings_url = self::viewEditUrl($view_id, $display_id);
+        $sources = $extender[DisplayBuildableInterface::SOURCES_PROPERTY] ?? [];
 
         $references[] = new DisplayReference(
           instanceId: $instance_id,
@@ -287,8 +299,9 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
           label: $label,
           url: $built ? $buildable->getBuilderUrl() : $settings_url,
           built: $built,
-          empty: $built && empty($extender[DisplayBuildableInterface::SOURCES_PROPERTY] ?? []),
+          empty: $built && empty($sources),
           settingsUrl: $settings_url,
+          publishedHash: $built ? Instance::getUniqId($sources) : NULL,
         );
       }
     }

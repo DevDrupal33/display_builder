@@ -16,6 +16,7 @@ use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\DisplayReference;
+use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_page_layout\BuilderDataConverter;
 use Drupal\display_builder_page_layout\PageLayoutInterface;
@@ -121,6 +122,20 @@ final class PageLayout extends DisplayBuildablePluginBase {
    */
   public function getBuilderUrl(): Url {
     return Url::fromRoute('entity.page_layout.display_builder', ['page_layout' => $this->getEntity()->id()]);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCollectionUrl(): Url {
+    return Url::fromRoute('entity.page_layout.collection');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAddUrl(): Url {
+    return Url::fromRoute('entity.page_layout.add_form');
   }
 
   /**
@@ -274,14 +289,17 @@ final class PageLayout extends DisplayBuildablePluginBase {
         continue;
       }
 
+      $sources = $page_layout->getSources();
+
       $references[] = new DisplayReference(
         instanceId: $instance_id,
         kind: $buildable->label(),
         label: $buildable->getDisplayLabel() ?? $instance_id,
         url: $buildable->getBuilderUrl(),
-        empty: empty($page_layout->getSources()),
+        empty: empty($sources),
         disabled: !$page_layout->status(),
         settingsUrl: self::getDisplayUrlFromInstanceId($instance_id),
+        publishedHash: Instance::getUniqId($sources),
       );
     }
 

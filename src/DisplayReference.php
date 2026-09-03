@@ -51,6 +51,12 @@ final readonly class DisplayReference {
    *   What the label cannot say in the width it has. An override is named
    *   after its bundle and entity id, and an id identifies nothing to a human,
    *   so the entity's own label rides along: shown on hover, and searchable.
+   * @param int|null $publishedHash
+   *   `Instance::getUniqId()` of the published sources, only set when
+   *   $built. Lets a caller compare against an Instance entity's own
+   *   ::getHash() to tell a saved-but-unpublished draft from a published
+   *   one, without this class - which must stay read-only - loading or
+   *   hashing anything itself.
    */
   public function __construct(
     public string $instanceId,
@@ -62,6 +68,7 @@ final readonly class DisplayReference {
     public bool $disabled = FALSE,
     public ?Url $settingsUrl = NULL,
     public ?string $detail = NULL,
+    public ?int $publishedHash = NULL,
   ) {}
 
   /**

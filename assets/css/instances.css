@@ -121,6 +121,21 @@
   text-overflow: ellipsis;
 }
 
+/* The row being edited right now. Bold text alone was tried and reads as
+   barely different from the rows around it at this font size - a glance
+   through a list this dense has to catch it without reading every label.
+   A left accent bar plus a tinted background is the same "you are here"
+   pattern VS Code's and GitHub's own sidebars use, and it works at any zoom
+   level a word-weight difference does not. */
+.db-instances__item--current {
+  /* Without this the status dot (the row's first child, when there is one)
+     sits right against the accent bar instead of clear of it. */
+  padding-inline-start: var(--sl-spacing-2x-small);
+  border-inline-start: 3px solid var(--sl-color-primary-600);
+  border-radius: var(--sl-border-radius-small);
+  background-color: var(--sl-color-primary-50);
+}
+
 /* Not a link, so it must not read as one: this display has no builder to open
    yet, and its only action is the button at the end of the row. The two
    share the button's own metrics so a list mixing them still lines up. */
@@ -141,20 +156,33 @@
   opacity: 0.7;
 }
 
-.db-instances__current {
-  font-weight: bold;
+/* One dot per row for everything that needs a look: disabled, empty, and an
+   unpublished draft used to be a save-status dot plus a separate italic
+   status word - two visual languages for one question. Red for what nobody
+   can reach at all, amber for what is reachable but incomplete or not live
+   yet; a hover explains which. Empty (no color) when there is nothing to
+   flag - a mark on every row that is fine would be noise, not signal. A dot
+   alone is not accessible, so an actual issue carries role="img" and its own
+   aria-label/title rather than the icon-needs-a-word rule elsewhere in this
+   file - the label here is the full sentence, not a name for a static icon.
+   @see \Drupal\display_builder\Plugin\display_builder\Island\InstancesPanel::buildStatusDot() */
+.db-instances__status-dot {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+
+  &.db-instances__status-dot--danger {
+    background-color: var(--instances-color-dot-danger);
+  }
+
+  &.db-instances__status-dot--warning {
+    background-color: var(--instances-color-dot-warning);
+  }
 }
 
-/* A word, not an icon: this has to be readable by assistive tech without
-   extra plumbing, and there are only ever two of them. */
-.db-instances__status {
-  flex: none;
-  padding-right: 0.5rem;
-  opacity: 0.7;
-  /* A token, not an em: the row is already the small size, and a second
-     relative step compounds into something nobody can read. */
-  font-size: var(--sl-font-size-x-small);
-  font-style: italic;
+.db-instances__current {
+  font-weight: bold;
 }
 
 /* The end of the row is where it leaves the builder: to Manage display to
@@ -238,4 +266,14 @@
   margin: var(--sl-spacing-x-small) 0;
   font-size: var(--sl-font-size-medium);
   font-weight: bold;
+}
+
+/* A group heading linking to its buildable's collection page must still read
+   as the heading it replaces, not as a row-sized action button.
+   @see \Drupal\display_builder\Plugin\display_builder\Island\InstancesPanel::buildGroupHeadingLink() */
+.db-instances__title-link::part(base) {
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
 }

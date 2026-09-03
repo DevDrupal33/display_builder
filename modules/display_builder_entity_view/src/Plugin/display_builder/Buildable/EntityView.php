@@ -18,6 +18,7 @@ use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
 use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\DisplayReference;
+use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\Entity\ProfileInterface;
 use Drupal\display_builder_entity_view\BuilderDataConverter;
 use Drupal\display_builder_entity_view\Entity\LayoutBuilderEntityViewDisplay;
@@ -155,6 +156,20 @@ final class EntityView extends DisplayBuildablePluginBase {
 
   /**
    * {@inheritdoc}
+   *
+   * Unlike page_layout and view_display, entity view displays have no
+   * dedicated admin page of their own - they are managed per bundle through
+   * Field UI. The Instances panel's group heading links to the flat instance
+   * list instead, pre-filtered to this buildable's own kind.
+   */
+  public function getCollectionUrl(): Url {
+    return Url::fromRoute('entity.display_builder_instance.collection', [], [
+      'query' => ['context' => $this->getPluginId()],
+    ]);
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public static function getUrlFromInstanceId(string $instance_id): Url {
     $params = self::getUrlParamsFromInstanceId($instance_id);
@@ -279,7 +294,8 @@ final class EntityView extends DisplayBuildablePluginBase {
       $built = !empty($settings[DisplayBuildableInterface::PROFILE_PROPERTY] ?? NULL);
       // Read from config, never from an Instance entity: this listing must not
       // touch instance storage.
-      $empty = empty($settings[DisplayBuildableInterface::SOURCES_PROPERTY] ?? []);
+      $sources = $settings[DisplayBuildableInterface::SOURCES_PROPERTY] ?? [];
+      $empty = empty($sources);
       $settings_url = self::manageDisplayUrl($instance_id);
       $url = $built ? $buildable->getBuilderUrl() : $settings_url;
 
@@ -295,6 +311,7 @@ final class EntityView extends DisplayBuildablePluginBase {
         built: $built,
         empty: $built && $empty,
         settingsUrl: $settings_url,
+        publishedHash: $built ? Instance::getUniqId($sources) : NULL,
       );
     }
 

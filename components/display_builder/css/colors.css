@@ -204,6 +204,17 @@
   /* Restore and revert both discard work rather than record it, so they
      borrow the warning hue their own buttons already use. */
   --save-status-color-dot-lifecycle: var(--sl-color-warning-600);
+
+  /* Instances panel */
+  /* The status dot's two severities - one row, one dot, covering disabled,
+     empty and an unpublished draft together (see InstancesPanel::buildStatusDot()).
+     Danger for 'disabled': nobody can reach the display at all. Warning for
+     everything reachable but not quite there ('empty', 'unpublished') -
+     deliberately not --save-status-color-dot's green: that green fires once,
+     confirming an action just succeeded; this sits at rest in a scanned
+     list, flagging "needs a look", which green would read backwards for. */
+  --instances-color-dot-danger: var(--sl-color-danger-600);
+  --instances-color-dot-warning: var(--sl-color-warning-600);
 }
 
 /* The one color whose dark value is a genuinely different literal, not

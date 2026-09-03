@@ -185,15 +185,26 @@ final class InstanceListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function load(): array {
-    $entities = $this->getInstancesFromProviders();
-
-    // Apply filters from session and create missing instances if any.
-    $entities = $this->filterEntities($entities);
-
     // Build headers & request once.
     $headers = $this->buildHeader();
     $request = $this->requestStack->getCurrentRequest() ?? \Drupal::request();
     $session = $this->requestStack->getSession();
+
+    if ($request->query->has('context')) {
+      // A context in the URL is an explicit ask - e.g. the Instances panel's
+      // group heading link - and overrides whatever is already sitting in
+      // the session, same as sort below. It also lands in the session so the
+      // filter form's own default_value shows it selected.
+      $state = $session->get('db_instances_overview', []);
+      $state['filters']['context'] = (string) $request->query->get('context');
+      $state['filters']['name'] ??= '';
+      $session->set('db_instances_overview', $state);
+    }
+
+    $entities = $this->getInstancesFromProviders();
+
+    // Apply filters from session and create missing instances if any.
+    $entities = $this->filterEntities($entities);
 
     if ($request->query->has('order') || $request->query->has('sort')) {
       // Sort params are explicit in the URL — use and merge into session.

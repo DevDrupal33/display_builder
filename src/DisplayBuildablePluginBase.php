@@ -127,6 +127,20 @@ abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase impleme
   /**
    * {@inheritdoc}
    */
+  public function getCollectionUrl(): ?Url {
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAddUrl(): ?Url {
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function initInstanceIfMissing(): void {
     /** @var \Drupal\display_builder\InstanceInterface $instance */
     $instance = $this->getInstance();

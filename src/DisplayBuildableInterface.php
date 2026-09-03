@@ -164,6 +164,29 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, Con
   public function collectDisplaysBound(): ?TranslatableMarkup;
 
   /**
+   * The admin page listing every display of this buildable's own kind.
+   *
+   * Read by the Instances panel to link a group's heading to where all
+   * displays of that kind are managed - "Page layout" to the page layout
+   * list, for instance. Not every buildable has one: an entity view display
+   * is managed per bundle through Field UI, with no single collection page
+   * to point at.
+   *
+   * @return \Drupal\Core\Url|null
+   *   The collection page's URL, or NULL when there is none.
+   */
+  public function getCollectionUrl(): ?Url;
+
+  /**
+   * Where a new display of this buildable's own kind is added.
+   *
+   * @return \Drupal\Core\Url|null
+   *   The add-form URL, or NULL when there is none, or when adding one does
+   *   not belong to Display Builder (a view is added through Views UI).
+   */
+  public function getAddUrl(): ?Url;
+
+  /**
    * Get profiles allowed for the user.
    *
    * @param \Drupal\Core\Session\AccountInterface|null $account
