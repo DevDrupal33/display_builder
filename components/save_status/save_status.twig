@@ -5,18 +5,23 @@
   state label on the next re-render, which is correct - it was only ever
   describing how the display got here.
 
-  role="status" rather than an sl-tooltip or a toast: the island's content
-  is replaced by an innerHTML out-of-band swap on every action, so a toast
-  would fire on every drag and bury the error stack it shares the screen
-  with. Note the live region is itself replaced by each swap, so assistive
-  technology announcement depends on the AT treating an inserted populated
-  region as a change - reliable in practice, but not guaranteed by spec.
+  role="status" rather than an sl-tooltip or a toast: this used to be
+  replaced by an innerHTML out-of-band swap on every action; now
+  save_status.js mutates it in place after the client's own request
+  succeeds, so a toast would still fire on every drag and bury the error
+  stack it shares the screen with. The four data-label-* attributes are the
+  only thing PHP hands the JS - which status applies is inferred from the
+  request itself, per assets/js/request_action.js.
 #}
 {% set attributes = attributes.addClass('db-save-status') %}
 {% set attributes = attributes.addClass('db-save-status--' ~ variant|default('saved')) %}
 {% if pulse %}
   {% set attributes = attributes.addClass('db-save-status--pulse') %}
 {% endif %}
+{% set attributes = attributes.setAttribute('data-label-saved', label_saved) %}
+{% set attributes = attributes.setAttribute('data-label-published', label_published) %}
+{% set attributes = attributes.setAttribute('data-label-restored', label_restored) %}
+{% set attributes = attributes.setAttribute('data-label-reverted', label_reverted) %}
 <span{{ attributes.setAttribute('role', 'status') }}>
   <span class="db-save-status__dot" aria-hidden="true" title="{{ label }}"></span>
 </span>

@@ -23,3 +23,25 @@ props:
       description: Play the one-shot confirmation animation, for a re-render caused by an action rather than by the initial page build.
       type: boolean
       default: false
+    label_saved:
+      title: Saved label
+      description: Shipped once as a data attribute so save_status.js can show it without asking the server.
+      type: string
+    label_published:
+      title: Published label
+      description: Shipped once as a data attribute so save_status.js can show it without asking the server.
+      type: string
+    label_restored:
+      title: Restored label
+      description: Shipped once as a data attribute so save_status.js can show it without asking the server.
+      type: string
+    label_reverted:
+      title: Reverted label
+      description: Shipped once as a data attribute so save_status.js can show it without asking the server.
+      type: string
+libraryOverrides:
+  js:
+    save_status.js: {}
+  dependencies:
+    - core/drupal
+    - display_builder/request_action

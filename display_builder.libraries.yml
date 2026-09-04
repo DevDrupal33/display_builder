@@ -79,6 +79,15 @@ local_storage_manager:
   js:
     ./assets/js/localStorageManager.js: {}
 
+# Shared htmx:afterRequest path classifier.
+# @see assets/js/instances.js
+# @see components/save_status/save_status.js
+request_action:
+  js:
+    ./assets/js/request_action.js: {}
+  dependencies:
+    - core/drupal
+
 viewport_switcher:
   css:
     component:
@@ -130,6 +139,7 @@ instances:
   dependencies:
     - core/drupal
     - core/once
+    - display_builder/request_action
 
 # Barrier against the active front-end theme's CSS, which shares the document
 # with the chrome because the Canvas renders real theme output inline. In the

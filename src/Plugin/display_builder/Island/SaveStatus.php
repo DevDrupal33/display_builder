@@ -6,7 +6,6 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
-use Drupal\display_builder\DisplayBuilderHtmx;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandPluginBase;
 use Drupal\display_builder\Island\IslandType;
@@ -21,19 +20,18 @@ use Drupal\display_builder\Island\IslandType;
  * success toasts on every drag would train people to stop reading the
  * corner that carries failures.
  *
- * The label is state, the pulse is event. build() derives the label from
- * the instance itself whenever it is called without a status (the initial
- * page build, or a plain reload()), so the pip is a standing answer to
- * "where does this display stand", not only a flash. An event handler
- * passes its own status through $options, which both overrides the label
- * for that one render and turns the animation on.
- *
- * That is why publish, restore and revert are separate statuses rather
- * than all folded into "saved": they are the three actions whose outcome
- * a user cannot infer from the canvas, and each carries its own color.
- * The transient ones (restored, reverted) describe how the display got
- * here, so decaying to the plain state label on the next render is
- * correct rather than a bug.
+ * build() only ever computes the *resting* status - what the pip should
+ * show on the initial page build, or a plain reload() - because the four
+ * labels it could show are static, translated strings that never depend on
+ * anything the server alone knows. They ship once, as data attributes on
+ * the component root, and components/save_status/save_status.js flips the
+ * pip's class/label/pulse itself straight off the client's own successful
+ * mutation, undo/redo, publish, restore or revert request, the same way
+ * assets/js/instances.js reacts to its own dot - see
+ * assets/js/request_action.js for the classifier both share. That is why
+ * publish, restore and revert are separate statuses rather than all folded
+ * into "saved": they are the three actions whose outcome a user cannot
+ * infer from the canvas, and each carries its own color.
  */
 #[Island(
   id: 'save_status',
@@ -66,113 +64,34 @@ class SaveStatus extends IslandPluginBase {
   private const string STATUS_REVERTED = 'reverted';
 
   /**
-   * Key carrying the status through the $options passed to build().
-   */
-  private const string OPTION_STATUS = 'save_status';
-
-  /**
    * {@inheritdoc}
    *
    * Overrides build() rather than buildContent(), like the other toolbar
    * islands: IslandPluginBase::build() gates on isApplicable(), which
    * requires a node context no toolbar island ever has.
+   *
+   * Every event this island used to reload for (attach, move, update,
+   * delete, undo/redo, publish, restore, revert) is now handled entirely by
+   * components/save_status/save_status.js instead, so build() only has to
+   * answer the resting-state question and hand the JS the labels it needs
+   * for every other state up front.
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    $status = $options[self::OPTION_STATUS] ?? $this->restingStatus($builder);
+    $status = $this->restingStatus($builder);
+    $labels = $this->statusLabels();
 
     return [
       '#type' => 'component',
       '#component' => 'display_builder:save_status',
       '#props' => [
         'variant' => $status,
-        'label' => (string) ($this->statusLabels()[$status] ?? $this->statusLabels()[self::STATUS_SAVED]),
-        // Only an action animates. A reload triggered by anything else
-        // rebuilds the same pip silently.
-        'pulse' => isset($options[self::OPTION_STATUS]),
+        'label' => (string) $labels[$status],
+        'label_saved' => (string) $labels[self::STATUS_SAVED],
+        'label_published' => (string) $labels[self::STATUS_PUBLISHED],
+        'label_restored' => (string) $labels[self::STATUS_RESTORED],
+        'label_reverted' => (string) $labels[self::STATUS_REVERTED],
       ],
     ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onAttachToRoot(InstanceInterface $instance, string $node_id): array {
-    return $this->reloadWithStatus($instance, self::STATUS_SAVED);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onAttachToSlot(InstanceInterface $instance, string $node_id, string $parent_id): array {
-    return $this->reloadWithStatus($instance, self::STATUS_SAVED);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onMove(InstanceInterface $instance, string $node_id): array {
-    return $this->reloadWithStatus($instance, self::STATUS_SAVED);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onUpdate(InstanceInterface $instance, string $node_id): array {
-    return $this->reloadWithStatus($instance, self::STATUS_SAVED);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onDelete(InstanceInterface $instance, ?string $parent_id): array {
-    return $this->reloadWithStatus($instance, self::STATUS_SAVED);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onHistoryChange(InstanceInterface $instance): array {
-    return $this->reloadWithStatus($instance, self::STATUS_SAVED);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onPublish(InstanceInterface $instance): array {
-    return $this->reloadWithStatus($instance, self::STATUS_PUBLISHED);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onRestore(InstanceInterface $instance): array {
-    return $this->reloadWithStatus($instance, self::STATUS_RESTORED);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function onRevert(InstanceInterface $instance): array {
-    return $this->reloadWithStatus($instance, self::STATUS_REVERTED);
-  }
-
-  /**
-   * Reloads the island showing a given status, with the pulse animation on.
-   *
-   * @param \Drupal\display_builder\InstanceInterface $instance
-   *   The display builder instance.
-   * @param string $status
-   *   One of the self::STATUS_* constants.
-   *
-   * @return array
-   *   Returns a render array with out-of-band commands.
-   */
-  private function reloadWithStatus(InstanceInterface $instance, string $status): array {
-    return DisplayBuilderHtmx::outOfBand(
-      $this->build($instance, $instance->getCurrentState(), [self::OPTION_STATUS => $status]),
-      '#' . $this->getHtmlId((string) $instance->id()),
-      'innerHTML'
-    );
   }
 
   /**

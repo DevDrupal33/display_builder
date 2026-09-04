@@ -80,18 +80,12 @@
    * disagreeing again, so it gets its own 'unpublished' outcome.
    * @see \Drupal\display_builder\Plugin\display_builder\Island\InstancesPanel::buildDotStateAttributes
    *
-   * @param {string} path
-   *   The request path an htmx:afterRequest event fired for.
-   *
-   * @return {string|null}
-   *   The dataset key holding the dot's severity for this action, or null
-   *   when the path is none of publish/restore/revert.
+   * @type {Object<string, string>}
    */
-  const dotStateKey = (path) => {
-    if (path.endsWith('/publish') || path.endsWith('/restore')) {
-      return 'publishedState';
-    }
-    return path.endsWith('/revert') ? 'unpublishedState' : null;
+  const DOT_STATE_BY_SUFFIX = {
+    '/publish': 'publishedState',
+    '/restore': 'publishedState',
+    '/revert': 'unpublishedState',
   };
 
   /**
@@ -102,12 +96,18 @@
    * and the server already computed what its dot looks like afterwards into
    * data attributes, so no reload of this panel is needed to reflect it.
    *
+   * @see assets/js/request_action.js
+   *
    * @listens htmx:afterRequest
    */
   window.addEventListener('htmx:afterRequest', (event) => {
-    const path = event.detail?.requestConfig?.path;
-    const stateKey =
-      path && event.detail?.successful ? dotStateKey(path) : null;
+    const path = event.detail?.successful
+      ? event.detail?.requestConfig?.path
+      : null;
+    const stateKey = Drupal.displayBuilder.matchRequestPath(
+      path,
+      DOT_STATE_BY_SUFFIX,
+    );
     if (!stateKey) {
       return;
     }
