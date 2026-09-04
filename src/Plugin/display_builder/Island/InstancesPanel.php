@@ -424,30 +424,93 @@ class InstancesPanel extends IslandPluginBase {
    *   A renderable array.
    */
   protected function buildStatusDot(array $issues): array {
-    $output = [
-      '#type' => 'html_tag',
-      '#tag' => 'span',
-      '#attributes' => [
-        'class' => ['db-instances__status-dot'],
-      ],
-    ];
+    $attributes = ['class' => ['db-instances__status-dot']] + self::buildDotStateAttributes($issues);
 
-    if ($issues === []) {
-      return $output;
+    if ($issues !== []) {
+      [$severity, $label] = self::describeIssues($issues);
+
+      $attributes['class'][] = 'db-instances__status-dot--' . $severity;
+      $attributes['role'] = 'img';
+      $attributes['aria-label'] = $label;
+      $attributes['title'] = $label;
     }
 
+    return [
+      '#type' => 'html_tag',
+      '#tag' => 'span',
+      '#attributes' => $attributes,
+    ];
+  }
+
+  /**
+   * Data attributes describing a row's dot after its own next action.
+   *
+   * Every row carries these - cheap to compute, and simpler than gating on
+   * "is this the current row" - but only the current row's are ever read:
+   * assets/js/instances.js scopes its lookup to
+   * '.db-instances__item--current', because Publish, Restore and Revert
+   * only ever apply to the display being edited right now.
+   *
+   * Exactly one of the three is ever available on a row at a time, and each
+   * has a knowable effect on 'unpublished' - the only issue any of them can
+   * change:
+   * - Publish and Restore both end with the draft matching what is
+   *   published (Restore overwrites the draft with the published data,
+   *   Publish the reverse), clearing it.
+   * - Revert - only ever available on an override display - deletes the
+   *   published override outright and replaces the draft with the base
+   *   display's sources, so the two can never agree again; it adds
+   *   'unpublished' back. 'disabled' does not apply to an override display,
+   *   and 'empty' is already suppressed for the current row by
+   *   ::resolveRowIssues(), so 'unpublished' ends up the only issue.
+   *
+   * Knowing the result up front lets a small client script flip the dot
+   * straight from whichever action's response arrives, instead of
+   * round-tripping through the island/event system to rebuild this whole
+   * panel.
+   *
+   * @param string[] $issues
+   *   Issue keys from ::resolveRowIssues(), most severe first.
+   *
+   * @return array
+   *   The data attribute pair for whichever action applies - just the
+   *   severity one, empty, when that action would leave the dot with
+   *   nothing to explain.
+   *
+   * @see assets/js/instances.js
+   */
+  protected static function buildDotStateAttributes(array $issues): array {
+    [$prefix, $resulting] = \in_array('unpublished', $issues, TRUE)
+      ? ['data-published-state', \array_values(\array_diff($issues, ['unpublished']))]
+      : ['data-unpublished-state', [...$issues, 'unpublished']];
+
+    if ($resulting === []) {
+      return [$prefix => ''];
+    }
+
+    [$severity, $label] = self::describeIssues($resulting);
+
+    return [
+      $prefix => $severity,
+      $prefix . '-label' => $label,
+    ];
+  }
+
+  /**
+   * The dot's severity and tooltip for a non-empty set of issues.
+   *
+   * @param string[] $issues
+   *   Issue keys, most severe first. Never empty - a dot with nothing to
+   *   report is the caller's job to short-circuit before reaching here.
+   *
+   * @return array{0: string, 1: string}
+   *   The severity ('danger' or 'warning') and the joined tooltip sentence.
+   */
+  protected static function describeIssues(array $issues): array {
     $severity = \in_array('disabled', $issues, TRUE) ? 'danger' : 'warning';
     $sentences = \array_map(static fn (string $issue): string => (string) self::issueSentence($issue), $issues);
-    $label = \implode(' ', $sentences);
 
-    $output['#attributes'] = [
-      'class' => ['db-instances__status-dot', 'db-instances__status-dot--' . $severity],
-      'role' => 'img',
-      'aria-label' => $label,
-      'title' => $label,
-    ];
-
-    return $output;
+    return [$severity, \implode(' ', $sentences)];
   }
 
   /**

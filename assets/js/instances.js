@@ -71,4 +71,79 @@
       'View @count more',
     );
   };
+
+  /**
+   * Which data attribute pair a publishing action's dot state lives in.
+   *
+   * Publish and Restore both end with the draft matching what is published,
+   * so they share the 'published' outcome; Revert always ends with the two
+   * disagreeing again, so it gets its own 'unpublished' outcome.
+   * @see \Drupal\display_builder\Plugin\display_builder\Island\InstancesPanel::buildDotStateAttributes
+   *
+   * @param {string} path
+   *   The request path an htmx:afterRequest event fired for.
+   *
+   * @return {string|null}
+   *   The dataset key holding the dot's severity for this action, or null
+   *   when the path is none of publish/restore/revert.
+   */
+  const dotStateKey = (path) => {
+    if (path.endsWith('/publish') || path.endsWith('/restore')) {
+      return 'publishedState';
+    }
+    return path.endsWith('/revert') ? 'unpublishedState' : null;
+  };
+
+  /**
+   * Flips the current row's status dot right after publish/restore/revert.
+   *
+   * Reacts to the request directly instead of through the island/event
+   * system: each of these actions only ever changes the row being edited,
+   * and the server already computed what its dot looks like afterwards into
+   * data attributes, so no reload of this panel is needed to reflect it.
+   *
+   * @listens htmx:afterRequest
+   */
+  window.addEventListener('htmx:afterRequest', (event) => {
+    const path = event.detail?.requestConfig?.path;
+    const stateKey =
+      path && event.detail?.successful ? dotStateKey(path) : null;
+    if (!stateKey) {
+      return;
+    }
+
+    const labelKey = `${stateKey}Label`;
+
+    document
+      .querySelectorAll(
+        '.db-instances__item--current .db-instances__status-dot',
+      )
+      .forEach((dot) => {
+        if (!(stateKey in dot.dataset)) {
+          return;
+        }
+
+        const severity = dot.dataset[stateKey];
+        const label = dot.dataset[labelKey];
+
+        dot.className = severity
+          ? `db-instances__status-dot db-instances__status-dot--${severity}`
+          : 'db-instances__status-dot';
+
+        if (label) {
+          dot.setAttribute('role', 'img');
+          dot.setAttribute('aria-label', label);
+          dot.setAttribute('title', label);
+        } else {
+          dot.removeAttribute('role');
+          dot.removeAttribute('aria-label');
+          dot.removeAttribute('title');
+        }
+
+        delete dot.dataset.publishedState;
+        delete dot.dataset.publishedStateLabel;
+        delete dot.dataset.unpublishedState;
+        delete dot.dataset.unpublishedStateLabel;
+      });
+  });
 })(Drupal, once);
