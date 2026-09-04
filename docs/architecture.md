@@ -10,10 +10,12 @@ Always type-hint against `Drupal\display_builder\InstanceInterface`.
 
 The instance delegates all tree operations to `SourceTree` and provides:
 
-- `addToRoot()` / `addToSlot()` / `move()` / `update()` / `delete()` — tree mutations (each pushes to history)
-- `undo()` / `redo()` / `restore()` — history traversal
+- `attachToRoot()` / `attachToSlot()` / `moveToRoot()` / `moveToSlot()` / `setSource()` / `setThirdPartySettings()` / `remove()` — tree mutations, each recorded as a new present through `HistoryInterface::setNewPresent()`
+- `getPast()` / `getFuture()` — the revision stack that `ApiController::undo()` and `redo()` step through
+- `publish()` / `restore()` / `revert()` — `PublishableInterface`, the bridge to the permanent storage owned by the buildable plugin
 - `getCurrentState()` — the resolved tree as a flat array for debugging
 - `getPathIndex()` — the `SourceTree` path index cache
+- `getHash()` / `getPublishedHash()` — draft and published fingerprints; equal means nothing to publish
 
 ## SourceTree — normalized tree engine
 
@@ -39,16 +41,19 @@ The UI is powered by a RESTful API defined in `display_builder.routing.yml`. Con
 
 `ApiControllerBase` provides the shared plumbing:
 
-- `loadInstance(string $id): InstanceInterface`
+- `dispatchDisplayBuilderEvent(string $event_id, ...)` — builds the typed event, dispatches it, and collects every island's result into the out-of-band HTMX response
 - `createEventWithEnabledIsland(string $event_id, ...)` — typed event factory using a `match()` expression; returns the correct typed subclass per event ID
-- `buildOobResponse(DisplayBuilderEvent)` — collects island results and builds the out-of-band HTMX response
+- `getVisibleIslands()` — reads the `X-DB-Visible-Islands` request header, so islands the client reports as off screen are not rebuilt
+- `saveSseData(string $event_id)` — records the change for the real-time collaboration stream
+
+The instance itself is a route parameter (`{display_builder_instance}`), upcast by the entity param converter, never loaded by hand in a controller.
 
 The API surface is split across several controllers rather than one:
 
 | Controller | Responsibility |
 |---|---|
-| `ApiController` | attach to root/slot, get, reload island, update, third-party settings, undo, redo, clear |
-| `ApiContextualMenuController` | paste, delete, save as preset, paste and delete styles |
+| `ApiController` | attach to root/slot, get, reload island, update, third-party settings, undo, redo |
+| `ApiActionsController` | paste, delete, save as preset, paste and delete styles |
 | `ApiPublishingController` | publish, restore, revert |
 | `ApiPreviewController` | component, block and preset library previews |
 | `ApiSseController` | server-sent events for real-time collaboration |
@@ -73,11 +78,15 @@ Islands are Drupal plugins (`src/Plugin/display_builder/Island/`) annotated with
 
 ### Reload traits
 
+Every island event is a method of the single `IslandEventSubscriberInterface` (11 methods). `IslandPluginBase` no-ops all of them, so an island overrides only what it answers. Three traits answer the common groups with a full reload through `reloadWithGlobalData()`, which the using island must provide:
+
 | Trait | Covers |
 |-------|--------|
-| `IslandStructureReloadTrait` | `IslandStructureEventsInterface` (5 methods → `reloadWithGlobalData`) |
-| `IslandLifecycleReloadTrait` | `IslandLifecycleEventsInterface` (3 methods → `reloadWithGlobalData`) |
+| `IslandStructureReloadTrait` | `onAttachToRoot`, `onAttachToSlot`, `onMove`, `onUpdate`, `onDelete` |
+| `IslandLifecycleReloadTrait` | `onHistoryChange`, `onRestore`, `onRevert` |
 | `IslandReloadEventsTrait` | Both of the above — convenience aggregate |
+
+Not covered by any trait, so an island that needs them overrides directly: `onActive`, `onPublish`, `onPresetSave`.
 
 ## DisplayBuildable integration pattern
 

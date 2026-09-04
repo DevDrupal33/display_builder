@@ -11,7 +11,7 @@ use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\ui_patterns\SourceWithChoicesInterface;
 
 /**
- * Helper class for block library source handling.
+ * Helper class for component library definition handling.
  */
 class ComponentLibraryDefinitionHelper {
 

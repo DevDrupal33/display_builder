@@ -71,8 +71,8 @@ abstract class ApiControllerBase extends ControllerBase {
    *
    * If not NULL, the island will be skipped from the event dispatch. Useful to
    * avoid swapping the content of an island which is already in the expected
-   * state. For examples, if we move an instance in Builder, Wireframe or Tree
-   * panels, if we change the settings in InstanceForm.
+   * state. For examples, if we move an instance in Canvas, Scaffold or
+   * Navigator panels, if we change the settings in InstanceForm.
    *
    * @see \Drupal\display_builder\Event\DisplayBuilderEventsSubscriber::dispatchToIslands()
    * @see \Drupal\display_builder\HtmxEvents

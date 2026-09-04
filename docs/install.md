@@ -1,7 +1,7 @@
 # Installation
 
-!!!warning "Drupal 11.3+"
-    Display Builder targets Drupal **11.3+**. No Drupal 10.x support is planned unless sponsored.
+!!!warning "Drupal 11.4+"
+    Display Builder targets Drupal **11.4+**. No Drupal 10.x support is planned unless sponsored.
 
 Like any other Drupal module, it is recommended to use composer:
 
@@ -15,7 +15,7 @@ Display Builder is split in sub-modules, one for each Drupal Core's display buil
 - [Page layout](page-layout.md) (`display_builder_page_layout`)
 - [Views](with-views.md) (`display_builder_views`)
 
-They can be activated from `Administration > Extends` (`/admin/modules`) or with Drush:
+They can be activated from `Administration > Extend` (`/admin/modules`) or with Drush:
 
 ```shell
 drush -y en display_builder_entity_view display_builder_page_layout display_builder_views
@@ -26,6 +26,9 @@ You can also install Display Builder UI to [configure Display Builder](configura
 ```shell
 drush -y en display_builder_ui
 ```
+
+With the module installed, follow [Build your first display](getting-started.md)
+to build a display end to end.
 
 ## Recommended modules
 

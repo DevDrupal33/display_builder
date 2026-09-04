@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 /**
- * Provides an interface defining a display builder instance entity type.
+ * Publishing, restoring and reverting a display builder's working state.
  */
 interface PublishableInterface {
 

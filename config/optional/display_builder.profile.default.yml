@@ -100,9 +100,6 @@ islands:
   highlight:
     status: true
     weight: 0
-  scaffold_options:
-    status: true
-    weight: 0
   viewport:
     status: true
     weight: 0

@@ -7,7 +7,7 @@ namespace Drupal\display_builder\Island;
 use Drupal\display_builder\InstanceInterface;
 
 /**
- * Reload implementation for IslandLifecycleEventsInterface methods.
+ * Reload implementation for the lifecycle island events.
  *
  * Provides onHistoryChange, onRestore, and onRevert handlers that all
  * delegate to reloadWithGlobalData(), which the using island plugin must

@@ -19,14 +19,15 @@ Each Display Builder profile is a configuration entity with:
 - Metadata: a label and a description
 - The islands configuration, by type
 
-There are 6 type of islands:
+There are 7 types of islands:
 
-- `View` panels: They are displayed tabbed in the center of the toolbar, or as buttons in the start of the toolbar
-- `Button`s: they are displayed as buttons in the end of the toolbar
-- `Library` panels: They are displayed tabbed into the Library View panel
-- `Menu` items: they are displayed in the contextual menu triggered with right-click
-- `Contextual` panels: They are displayed tabbed into the contextual sidebar
-- `Floating` controls: they float over one or more `View` panels (e.g. the Canvas or Preview panel), only visible while an attached panel is the active main tab
+- `View` panels: shown as a tab in the main area, or as a drawer in the sidebar
+- `Preview`: a single panel rendering the display as visitors see it, pinned beside the active main-area tab by the toolbar's preview toggle
+- `Button`s: toolbar buttons, at the start or the end of the toolbar
+- `Library` panels: tabs of the Libraries sidebar panel
+- `Contextual` panels: tabs of the contextual sidebar, shown while a component or block is selected
+- `Menu` items: entries of the contextual menu, opened with a right-click
+- `Floating` controls: attached to one or more main-area panels (e.g. the Canvas or the Preview panel), only visible while one of them is the active pane
 
 Visual positioning:
 

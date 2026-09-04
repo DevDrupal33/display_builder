@@ -9,6 +9,7 @@ edit_uri = "/-/edit/main/docs/"
 nav = [
   { "Introduction" = "index.md" },
   { "Installation" = "install.md" },
+  { "Build your first display" = "getting-started.md" },
   { "Update" = "update.md" },
   { "Using Display Builder" = [
     { "How displays nest" = "how-displays-nest.md" },

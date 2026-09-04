@@ -562,7 +562,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
   /**
    * Determines which island (if any) to skip from the event dispatch fan-out.
    *
-   * Builder, Wireframe, and Tree share the same Sortable group (@see
+   * Canvas, Scaffold and Navigator share the same Sortable group (@see
    * components/dropzone/dropzone.js), so an existing node can be dragged
    * from one panel's dropzone straight into another's. Sortable only
    * relocates the DOM node - it never re-renders it - so after a

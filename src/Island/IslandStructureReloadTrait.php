@@ -7,7 +7,7 @@ namespace Drupal\display_builder\Island;
 use Drupal\display_builder\InstanceInterface;
 
 /**
- * Reload implementation for IslandStructureEventsInterface methods.
+ * Reload implementation for the structural island events.
  *
  * Provides onAttachToRoot, onAttachToSlot, onMove, onUpdate, and onDelete
  * handlers that all delegate to reloadWithGlobalData(), which the using

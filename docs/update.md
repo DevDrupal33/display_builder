@@ -8,7 +8,7 @@ Update problems are mitigated by the fact that Display Builder stores its
 configuration in Drupal configuration system and fields for entity overrides.
 See [internals](./internals.md) for more details.
 
-Currently a temporary working storage is leveraging Drupal [State API](https://www.drupal.org/docs/develop/drupal-apis/state-api/state-api-overview) to store Display work in progress and history.
+Work in progress and history live in a temporary working storage, the `display_builder_instance` content entities. See [Instances overview](instances.md).
 
 !!!warning "Unpublished Display"
     Display Builder module update will **always** delete this working storage, all

@@ -6,14 +6,15 @@
 
 Display Builder extensively uses HTMX's [out-of-band swapping](https://htmx.org/attributes/hx-swap-oob/) to allow an event triggered from an island to also update other islands.
 
-There are 6 type of islands:
+There are 7 types of islands, the cases of the `IslandType` enum:
 
-- `View` panels: They are displayed tabbed in the center of the toolbar, or as buttons in the start of the toolbar
-- `Button`s: they are displayed as buttons in the end of the toolbar
-- `Library` panels: They are displayed tabbed into the Library View panel
-- `Menu` items: they are displayed in the contextual menu triggered with right-click
-- `Contextual` panels: They are displayed tabbed into the contextual sidebar
-- `Floating` controls: they float over one or more `View` panels, only visible while an attached panel is the active main tab
+- `View` panels: shown as a tab in the main area (`region: main`), or as a drawer in the sidebar (`region: sidebar`)
+- `Preview`: a single panel rendering the display as visitors see it, pinned beside the active main-area tab by the toolbar's preview toggle
+- `Button`s: toolbar buttons, at the start or the end of the toolbar (`region: start` or `end`)
+- `Library` panels: tabs of the Libraries sidebar panel
+- `Contextual` panels: tabs of the contextual sidebar, shown while a component or block is selected
+- `Menu` items: entries of the contextual menu, opened with a right-click
+- `Floating` controls: attached to one or more main-area panels, only visible while one of them is the active pane
 
 Visual positioning:
 
@@ -45,7 +46,7 @@ Notable methods:
   | `onRestore()` | The builder is restored to its last published state |
   | `onRevert()` | An entity view override is reverted to the base display config |
 
-  The default base class (`IslandPluginBase`) returns an empty array for all events. Use `IslandReloadEventsTrait` if your island needs to do a full re-render on history/restore/revert changes.
+  The default base class (`IslandPluginBase`) returns an empty array for all events, so an island overrides only the ones it answers. Three traits cover the common cases with a full re-render: `IslandStructureReloadTrait` for the five structural events, `IslandLifecycleReloadTrait` for history, restore and revert, and `IslandReloadEventsTrait` for both. `onActive()`, `onPublish()` and `onPresetSave()` are not covered by any trait.
 - `PluginFormInterface::buildConfigurationForm()`: to make the island plugin configurable in the [Display Builder profile (config entity)](configuration.md)
 
 HTMX behavior will change according to `IslandInterface::build()` return value:
@@ -68,10 +69,14 @@ HTMX behavior will change according to `IslandInterface::build()` return value:
   regions of a type are built differently from one another. An island omitting
   it falls back to `IslandType::defaultRegion()`, `main` and `end`.
 - `attach_to`: For `IslandType::Floating` islands only: the plugin IDs of
-  the View panels this floating control attaches to. It renders once per
-  listed panel, alongside that panel's own content, and is only visible
-  while that panel's main tab is active. Fixed by the plugin definition,
-  not admin-configurable.
+  the main-area panels this floating control attaches to. It renders once,
+  and is only visible while one of the listed panels is the active pane.
+  Fixed by the plugin definition, not admin-configurable.
+- `pane_header`: For `IslandType::Floating` islands only. When `TRUE`, the
+  control renders in the header row of the pane it is attached to, as part
+  of that pane's own chrome, instead of the small box pinned over the pane.
+- `enabled_by_default`: Whether a profile created without touching this
+  island has it on.
 
 Example:
 
@@ -80,8 +85,8 @@ namespace Drupal\display_builder\Plugin\display_builder\Island;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
-use Drupal\display_builder\IslandPluginBase;
-use Drupal\display_builder\IslandType;
+use Drupal\display_builder\Island\IslandPluginBase;
+use Drupal\display_builder\Island\IslandType;
 
 #[Island(
   id: 'block_library',
@@ -93,48 +98,30 @@ class BlockLibraryPanel extends IslandPluginBase {
 }
 ```
 
-A `Floating` island whose `build()` is just a small cluster of icon buttons
-can use `IslandFloatingControlsTrait::buildControlButtons()` instead of
-assembling a button group by hand:
+### Floating islands
 
-```php
-namespace Drupal\display_builder\Plugin\display_builder\Island;
+A `Floating` island builds its own controls; there is no shared trait for
+them. `ProfileViewBuilder` only requires `build()` to return a renderable,
+and places it according to `attach_to` and `pane_header`. The two shipped
+ones show the pattern:
 
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder\Attribute\Island;
-use Drupal\display_builder\InstanceInterface;
-use Drupal\display_builder\Island\IslandFloatingControlsTrait;
-use Drupal\display_builder\Island\IslandPluginBase;
-use Drupal\display_builder\Island\IslandType;
+- `ViewportSwitcher` (`attach_to: ['preview']`, `pane_header: TRUE`) builds
+  one button per width in a private `buildViewportButton()` called in a
+  loop, plus a `buildZoomControl()` select, and sits in the Preview pane's
+  header row.
+- `HighlightToggle` (`attach_to: ['builder', 'scaffold']`) builds a dropdown
+  of independent checkboxes inline, with the `display_builder:dropdown` and
+  `display_builder:menu` components, and renders in the box pinned over the
+  Canvas or Scaffold pane.
 
-#[Island(
-  id: 'highlight',
-  label: new TranslatableMarkup('Highlight'),
-  description: new TranslatableMarkup('Highlight builder zones to ease drag and move around.'),
-  type: IslandType::Floating,
-  attach_to: ['builder'],
-)]
-class HighlightToggle extends IslandPluginBase {
+Two constraints a Floating island must respect:
 
-  use IslandFloatingControlsTrait;
-
-  public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    return $this->buildControlButtons([
-      'highlight' => [
-        'icon' => 'border',
-        'tooltip' => $this->t('Highlight builder zones to ease drag and move around.'),
-        'attribute' => 'data-set-highlight',
-        'library' => 'display_builder/highlight',
-      ],
-    ]);
-  }
-
-}
-```
-
-An island needing a richer control (e.g. a dropdown) doesn't need this
-trait at all - `ProfileViewBuilder` only requires `build()` to return a
-renderable, and positions it the same way regardless.
+- Name its buttons with a plain `title` attribute, never `<sl-tooltip>`:
+  Shoelace computes a permanently wrong position for a tooltip inside a
+  `position: fixed` box, and it is not fixable from the island.
+- Keep `attach_to` a fixed, plugin-level list. It is not a profile setting,
+  because a floating control is usually built for a specific panel's own
+  layout and CSS.
 
 ### Keyboard support
 

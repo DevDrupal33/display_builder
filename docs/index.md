@@ -4,6 +4,11 @@
 
 A display building tool by the [UI Suite](https://www.drupal.org/project/ui_suite) team.
 
+!!!tip "New to Display Builder?"
+    Follow [Build your first display](getting-started.md) to learn the core
+    workflow, Libraries, Canvas and toolbar, by building and publishing your
+    first display.
+
 Display Builder provides sub-modules for each Drupal Core's display building need:
 
 - [Entity view](entity-displays.md) and [entity view overrides](entity-displays-overrides.md) (`display_builder_entity_view`)

@@ -13,10 +13,10 @@ use Drupal\display_builder\Island\IslandType;
 /**
  * Highlight toggle island plugin implementation.
  *
- * Floating control attached to the Builder and Scaffold panes: both render
- * real component output that the highlighting annotates. Not the Wireframe or
- * Tree panes - those are purely schematic, so their structure is already
- * permanently outlined and there's nothing left for a highlight to reveal
+ * Floating control attached to the Canvas and Scaffold panes: both render
+ * real component output that the highlighting annotates. Not the Navigator
+ * pane - it is purely schematic, so its structure is already permanently
+ * outlined and there's nothing left for a highlight to reveal
  * (@see components/layer/layer.css). In Scaffold it applies to the
  * real-rendered "layout" components only; the schematic cards alongside
  * them keep their own always-on treatment.
@@ -29,10 +29,11 @@ use Drupal\display_builder\Island\IslandType;
  * dominated by one or the other, and highlighting both at once just adds
  * noise to whichever one you don't care about right now.
  *
- * Built directly here (not via IslandFloatingControlsTrait, which is only
- * for a plain icon-button cluster) following the same
- * display_builder:dropdown + display_builder:menu pattern as
- * ViewportSwitcher's compact format.
+ * Built directly here, following the same display_builder:dropdown +
+ * display_builder:menu pattern as ViewportSwitcher's compact format. There
+ * is no shared trait for Floating island buttons: each of the two builds
+ * its own markup, and a trait with two callers wanting different markup
+ * is not worth the indirection.
  *
  * @see assets/js/highlight.js
  * @see components/dropzone/dropzone.css

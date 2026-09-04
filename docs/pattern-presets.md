@@ -12,7 +12,7 @@ They must not be confused with UI components:
 
 ## Activate
 
-**Preset actions** menu and **Preset library** must be enabled in the Display Builder's profile:
+The **Preset** menu item and the **Presets** library panel must be enabled in the Display Builder's profile:
 
 ![Menu island configuration](images/menu-islands-config.webp)
 ![Menu island configuration](images/menu-library-config.webp)
@@ -29,7 +29,7 @@ Your preset must have a name:
 
 ## Use a pattern preset
 
-The pattern preset is now available in the `Patterns Library` panel if:
+The pattern preset is now available in the **Presets** library panel if:
 
 - it shares the same context(s) (Page, Content, Entity, Field, Field item, View...) as the current Display Builder:
 - the Drupal theme used when creating the pattern preset is activated
@@ -38,7 +38,7 @@ The pattern preset is now available in the `Patterns Library` panel if:
 
 ## Presets management from admin UI
 
-You need `ui_patterns_ui` module enabled to have access to `/admin/structure/display-builder/preset`:
+You need the `display_builder_ui` sub-module enabled to have access to `/admin/structure/display-builder/preset`:
 
 ![Presets management](images/presets-mgmt.webp)
 

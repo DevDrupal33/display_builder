@@ -1,13 +1,14 @@
 # Available islands
 
-There are 6 type of islands:
+There are 7 types of islands:
 
-- `View` panels: They are displayed tabbed in the center of the toolbar, or as buttons in the start of the toolbar
-- `Button`s: they are displayed as buttons in the end of the toolbar
-- `Library` panels: They are displayed tabbed into the Library View panel.
-- `Menu` items: they are displayed in the contextual menu triggered with right-click.
-- `Contextual` panels: They are displayed tabbed into the contextual sidebar.
-- `Floating` controls: they float over one or more `View` panels, only visible while an attached panel is the active main tab.
+- `View` panels: shown as a tab in the main area, or as a drawer in the sidebar
+- `Preview`: a single panel rendering the display as visitors see it, pinned beside the active main-area tab by the toolbar's preview toggle
+- `Button`s: toolbar buttons, at the start or the end of the toolbar
+- `Library` panels: tabs of the Libraries sidebar panel
+- `Contextual` panels: tabs of the contextual sidebar, shown while a component or block is selected
+- `Menu` items: entries of the contextual menu, opened with a right-click
+- `Floating` controls: attached to one or more main-area panels, only visible while one of them is the active pane
 
 Visual positioning:
 
@@ -73,7 +74,7 @@ list rather than a hardcoded one — set it in the island's configuration form.
 
 #### Logs
 
-Logs based on changes history.
+Logs based on changes history. Disabled by default.
 
 ![Logs](images/islands/logs.webp)
 
@@ -81,9 +82,19 @@ Logs based on changes history.
 
 ## Preview
 
-Show a real time preview of the display.
+Show a real time preview of the display, as visitors see it, without the
+builder chrome.
 
 ![Preview](images/islands/preview.webp)
+
+Preview is not a main-area tab. The toolbar's preview toggle (shortcut `p`)
+pins it beside the active editor pane, Canvas or Scaffold, and a handle
+between the two sets how much room each gets. Drag the handle all the way,
+double-click it, or press `Home` on it, and Preview takes the full width;
+the tab strip hides with the editor, and a panel shortcut (`c`, `g`) brings
+the editor back. The handle is keyboard operable: arrows resize, `Home`
+collapses the editor, `End` maximizes it, `Enter` or `Space` toggles. The
+split and its ratio are remembered per builder in your browser.
 
 ## Buttons
 
@@ -141,14 +152,15 @@ Information about the available keyboard shortcuts.
 #### Real-time collaboration
 
 See [real-time collaboration documentation](realtime-collaboration.md).
+Disabled by default.
 
-![Preview](images/islands/back.webp)
+![Real-time collaboration](images/islands/collaboration.webp)
 
 #### Back
 
 Exit the display builder and go back to admin UI.
 
-![Preview](images/islands/back.webp)
+![Back](images/islands/back.webp)
 
 ## Library panels
 
@@ -156,7 +168,7 @@ Exit the display builder and go back to admin UI.
 
 List of available components (SDC).
 
-![Preview](images/islands/component_library.webp)
+![Components library](images/islands/component_library.webp)
 
 A specific configuration allow to pick available components.
 
@@ -164,7 +176,7 @@ A specific configuration allow to pick available components.
 
 List of available blocks.
 
-![Preview](images/islands/block_library.webp)
+![Blocks library](images/islands/block_library.webp)
 
 ### Presets
 
@@ -172,15 +184,23 @@ See [patterns presets documentation](pattern-presets.md).
 
 ## Menu items
 
-Available on secondary click on a block, component or slot, in Canvas or Wireframe panels:
+Available on secondary click on a block, component or slot, in Canvas or Scaffold panels:
 
-![Logs](images/islands/menu.webp)
+![Contextual menu](images/islands/menu.webp)
 
 The menu title is the block, or component with tree position.
 
+### Main menu items
+
+Copy, paste and duplicate the selected block or component.
+
+### Styles menu
+
+Copy, paste, merge and delete the styles of the selected block or component.
+
 ### Preset
 
-See also: [patterns presets documentation](pattern-presets.md).
+Save as a preset. See also: [patterns presets documentation](pattern-presets.md).
 
 ### Delete
 
@@ -188,17 +208,20 @@ Remove a component or block with all children.
 
 ## Contextual panels
 
-### Contextual form
+### Config
 
 Configure the active component or block.
 
 ### Styles
 
-Apply style utilities to the active component or block.
+Apply style utilities to the active component or block. Needs the
+[UI Styles](https://www.drupal.org/project/ui_styles) module.
 
-### Skins
+### Design tokens
 
-Override CSS variables for the active component or block.
+Override CSS variables for the active component or block. Needs the
+[UI Skins](https://www.drupal.org/project/ui_skins) module. Disabled by
+default.
 
 ### Visibility
 
@@ -206,23 +229,32 @@ Set visibility conditions for the active component or block.
 
 ## Floating controls
 
-A floating control is pinned to the top-left of the View panel(s) it's
-attached to, below the toolbar, only visible while one of those panels is
-the active main tab. Unlike Toolbar buttons, a floating control lives
-alongside a specific panel's own content because it's usually meaningless
-anywhere else (e.g. it depends on CSS scoped to that panel).
+A floating control is attached to one or more main-area panels and is only
+visible while one of them is the active pane. Unlike toolbar buttons, it
+lives with a specific panel because it is usually meaningless anywhere else
+(e.g. it depends on CSS scoped to that panel). It renders either in the
+header row of its pane, or as a small box pinned to the top-left of the
+pane, below the toolbar.
 
 ### Highlight
 
 Highlight zones to ease drag and move around. Attached to the Canvas and
-Scaffold panels, where highlighting has a visible effect.
+Scaffold panels, where highlighting has a visible effect, as a dropdown of
+independent toggles: drop zones, components, blocks and visual spacing.
 
-### Viewport switcher
+### Responsive width and Zoom
 
-Change main region width according to breakpoints. Attached to both the
-Canvas and Preview panels.
+Switch the Preview between breakpoint widths to check responsive behavior,
+and scale it to 25, 50, 75 or 100% to see a wide layout whole. Sits in the
+Preview pane's header.
 
-![Preview](images/islands/viewport.webp)
+![Viewport switcher](images/islands/viewport.webp)
+
+### Chrome indicator
+
+Shows, in the Preview pane's header, whether the preview renders wrapped in
+the site's page chrome or bare. See
+[How displays nest](how-displays-nest.md) for what decides it.
 
 ## See also
 
