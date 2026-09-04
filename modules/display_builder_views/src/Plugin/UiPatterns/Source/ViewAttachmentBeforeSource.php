@@ -4,34 +4,18 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_views\Plugin\UiPatterns\Source;
 
-use Drupal\Core\Plugin\Context\ContextDefinition;
-use Drupal\Core\Plugin\Context\EntityContextDefinition;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder_views\Plugin\ViewsUiPatternsSourceBase;
-use Drupal\ui_patterns\Attribute\Source;
-use Drupal\views\ViewExecutable;
+use Drupal\display_builder\EmptyPlaceholderHelpInterface;
+use Drupal\display_builder\SourceProcessingDataInterface;
+use Drupal\display_builder_views\Plugin\ViewsBuilderSourceTrait;
+use Drupal\ui_patterns_views\Plugin\UiPatterns\Source\ViewAttachmentBeforeSource as UiPatternsViewAttachmentBeforeSource;
 
 /**
- * Plugin implementation of the source for views.
+ * The attachments before a view display, in a builder.
+ *
+ * @see \Drupal\display_builder_views\Hook\DisplayBuilderViewsHook::sourceInfoAlter()
  */
-#[Source(
-  id: 'view_attachment_before',
-  label: new TranslatableMarkup('[View] Attachment before'),
-  prop_types: ['slot'],
-  tags: ['views'],
-  context_requirements: ['views:style'],
-  context_definitions: [
-    'ui_patterns_views:view_entity' => new EntityContextDefinition('entity:view'),
-    'display' => new ContextDefinition('string'),
-  ],
-)]
-class ViewAttachmentBeforeSource extends ViewsUiPatternsSourceBase {
+class ViewAttachmentBeforeSource extends UiPatternsViewAttachmentBeforeSource implements EmptyPlaceholderHelpInterface, SourceProcessingDataInterface {
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function renderFromView(ViewExecutable $view): mixed {
-    return $view->attachment_before;
-  }
+  use ViewsBuilderSourceTrait;
 
 }

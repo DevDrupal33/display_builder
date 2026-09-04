@@ -8,56 +8,37 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
-use Drupal\display_builder\EmptyPlaceholderHelpInterface;
 use Drupal\display_builder\RegionPlaceholderSourceTrait;
-use Drupal\display_builder\SourceProcessingDataInterface;
-use Drupal\ui_patterns_views\Plugin\UiPatterns\Source\ViewsSourceBase;
+use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\views\Plugin\views\display\DisplayPluginInterface;
 use Drupal\views\Plugin\views\ViewsPluginInterface;
 use Drupal\views\ViewExecutable;
 
 /**
- * Base class for the areas a view display fills when it runs.
+ * What a builder adds to the view display sources of ui_patterns_views.
  *
- * Each subclass pulls one area out of an executed view and nothing else. The
- * two things they all share are here: getting a view that is executed exactly
- * once per request, and what to show when there is no view to get - in a
- * builder there is no page, so the header, the rows and the pager have nothing
- * behind them, and a node that renders as nothing is the one node the user
- * cannot select, move or delete.
- *
- * Sources backed by a views plugin (the pager, the exposed form, the rows)
- * also expose that plugin's own options form in place, through
+ * The sources render the parts of an executed view. In a builder there may
+ * be no view to get, and a node that renders as nothing is the one node the
+ * user cannot select, move or delete: it gets a placeholder instead. Sources
+ * backed by a views plugin (the pager, the exposed form, the rows) also
+ * expose that plugin's own options form in place, through
  * SourceProcessingDataInterface, instead of sending the user to the Views UI.
+ *
+ * Used by subclasses of the ui_patterns_views sources, swapped in by
+ * DisplayBuilderViewsHook::sourceInfoAlter().
  *
  * @see \Drupal\display_builder_page_layout\Plugin\PageRegionSourceBase
  */
-abstract class ViewsUiPatternsSourceBase extends ViewsSourceBase implements EmptyPlaceholderHelpInterface, SourceProcessingDataInterface {
+trait ViewsBuilderSourceTrait {
 
   use RegionPlaceholderSourceTrait;
-
-  /**
-   * Views already executed in this request, keyed by view and display id.
-   *
-   * Request-scoped by construction: nothing here survives the process serving
-   * one request. It exists because ::getView() can hand back a *different*
-   * executable on every call - while a view is open in Views UI its unsaved
-   * copy comes out of a shared tempstore, deserialized afresh each time - and
-   * a display carrying ten of these sources would then build and run the same
-   * view ten times over.
-   *
-   * @var \Drupal\views\ViewExecutable[]
-   */
-  protected static array $executed = [];
 
   /**
    * {@inheritdoc}
    */
   public function getPropValue(): mixed {
-    $view = $this->getView();
-
-    if ($view !== NULL) {
-      return $this->renderFromView($view);
+    if ($this->getView() !== NULL) {
+      return parent::getPropValue();
     }
 
     return $this->buildRegionPlaceholder(
@@ -80,9 +61,17 @@ abstract class ViewsUiPatternsSourceBase extends ViewsSourceBase implements Empt
 
   /**
    * {@inheritdoc}
+   *
+   * The views plugin options and the notice only make sense in a builder: the
+   * same sources are configured in the Views UI too, where the view itself is
+   * at hand.
    */
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $form = parent::settingsForm($form, $form_state);
+
+    if (!$this->inBuilder()) {
+      return $form;
+    }
     $type = $this->getViewsPluginType();
 
     if ($type !== NULL && $this->buildViewsPluginForm($form, $type, $form_state)) {
@@ -145,18 +134,36 @@ abstract class ViewsUiPatternsSourceBase extends ViewsSourceBase implements Empt
   }
 
   /**
-   * Pulls this source's area out of an executed view.
+   * Whether the source is configured in a builder.
    *
-   * Only ever called with a view that ran, so an implementation is one line
-   * and needs no guard of its own.
-   *
-   * @param \Drupal\views\ViewExecutable $view
-   *   The executed view.
-   *
-   * @return mixed
-   *   The area, as the prop type expects it.
+   * @return bool
+   *   TRUE when the contexts carry the 'display_builder' requirement, set by
+   *   ViewDisplay::getRuntimeContexts().
    */
-  abstract protected function renderFromView(ViewExecutable $view): mixed;
+  protected function inBuilder(): bool {
+    $requirements = $this->context['context_requirements'] ?? NULL;
+
+    return $requirements instanceof RequirementsContext && $requirements->hasValue('display_builder');
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * On its own page the view arrives here already built by
+   * ViewPageController, arguments included. A builder runs the view itself,
+   * on a route that is not the view's own page route, so any contextual
+   * filter this display declares gets nothing unless seeded from the current
+   * route by hand first.
+   */
+  protected function executedView(): ?ViewExecutable {
+    $view = $this->getView();
+
+    if ($view !== NULL && empty($view->args)) {
+      $view->setArguments($this->routeArguments());
+    }
+
+    return parent::executedView();
+  }
 
   /**
    * The room the area gets when it has to fall back to a placeholder.
@@ -203,8 +210,8 @@ abstract class ViewsUiPatternsSourceBase extends ViewsSourceBase implements Empt
    *   The URL, or NULL without views_ui or without access to it.
    */
   protected function getViewsUiEditUrl(): ?Url {
-    $view_id = $this->getUnexecutedView()?->storage->id();
-    $display_id = $this->getContextValue('display');
+    $view_id = $this->getView()?->id();
+    $display_id = isset($this->context['ui_patterns_views:display']) ? $this->getContextValue('ui_patterns_views:display') : NULL;
 
     if (!$this->moduleHandler->moduleExists('views_ui') || $view_id === NULL || !\is_string($display_id)) {
       return NULL;
@@ -220,16 +227,16 @@ abstract class ViewsUiPatternsSourceBase extends ViewsSourceBase implements Empt
   /**
    * Is the view held by the Views UI with changes nobody confirmed yet?
    *
-   * GetViewExecutable() prefers the views_ui shared tempstore copy over the
-   * saved view, so saving from here would publish edits the user is still
-   * working on in the other UI. The Views UI Save button stays the only way to
-   * commit those, and the builder refuses until it has been pressed.
+   * The sources prefer the views_ui shared tempstore copy over the saved
+   * view, so saving from here would publish edits the user is still working
+   * on in the other UI. The Views UI Save button stays the only way to commit
+   * those, and the builder refuses until it has been pressed.
    *
    * @return bool
    *   TRUE when the views_ui tempstore holds this view.
    */
   protected function isViewOpenInViewsUi(): bool {
-    $view_id = $this->getUnexecutedView()?->storage->id();
+    $view_id = $this->getView()?->id();
 
     if ($view_id === NULL) {
       return FALSE;
@@ -336,11 +343,14 @@ abstract class ViewsUiPatternsSourceBase extends ViewsSourceBase implements Empt
   /**
    * Gets the display handler of the view display this source belongs to.
    *
+   * Configuration reads and writes need the display handler, not the results:
+   * the view is not executed for them.
+   *
    * @return \Drupal\views\Plugin\views\display\DisplayPluginInterface|null
    *   The display handler, or NULL when the view or the display is unknown.
    */
   protected function getViewDisplay(): ?DisplayPluginInterface {
-    return $this->getUnexecutedView()?->getDisplay();
+    return $this->getView()?->getDisplay();
   }
 
   /**
@@ -352,114 +362,15 @@ abstract class ViewsUiPatternsSourceBase extends ViewsSourceBase implements Empt
    * @see self::isViewOpenInViewsUi()
    */
   protected function saveView(): void {
-    $this->getUnexecutedView()?->storage->save();
-  }
-
-  /**
-   * {@inheritdoc}
-   *
-   * We override UI Patterns method because UI Patterns is not managing the
-   * display (string) context yet.
-   *
-   * @todo Remove once #3608162 (or one of its follow-up) is done.
-   */
-  protected function getView(): ?ViewExecutable {
-    // Asking for a context that is not there throws, and not being there is
-    // the normal case: a builder has no view display behind it.
-    $display_id = isset($this->context['display']) ? $this->getContextValue('display') : NULL;
-
-    if ($display_id === NULL) {
-      // ui_patterns_views' own component style and row plugins reach these
-      // classes too, because the alter swaps the class site-wide. They hand
-      // over the view that is already running and never name a display, so
-      // that is a real view to render, not a builder with nothing behind it.
-      return isset($this->context['ui_patterns_views:view']) ? parent::getView() : NULL;
-    }
-
-    return $this->executedView((string) $display_id);
-  }
-
-  /**
-   * The view executable set on the right display, without executing it.
-   *
-   * Configuration reads and writes need the display handler, not the results.
-   *
-   * @return \Drupal\views\ViewExecutable|null
-   *   The view executable, or NULL when the view or the display is unknown.
-   */
-  protected function getUnexecutedView(): ?ViewExecutable {
-    $view = parent::getView();
-    $display_id = $this->getContextValue('display');
-
-    if ($view === NULL || $display_id === NULL) {
-      return NULL;
-    }
-    $view->setDisplay($display_id);
-
-    return $view;
-  }
-
-  /**
-   * Runs one display of the view in context, at most once per request.
-   *
-   * @param string $display_id
-   *   The display to run.
-   *
-   * @return \Drupal\views\ViewExecutable|null
-   *   The executed view, or NULL when there is none in context.
-   */
-  private function executedView(string $display_id): ?ViewExecutable {
-    // Answer from the memo before the parent is asked, not after: while a
-    // view is open in Views UI the parent reads it back out of a shared
-    // tempstore, which is a database read and a full unserialize *per call*.
-    // The view entity in context names the same view without paying for it.
-    $view_id = isset($this->context['ui_patterns_views:view_entity'])
-      ? (string) $this->getContextValue('ui_patterns_views:view_entity')->id()
-      : NULL;
-
-    if ($view_id !== NULL && isset(self::$executed[$view_id . ':' . $display_id])) {
-      return self::$executed[$view_id . ':' . $display_id];
-    }
-    $view = parent::getView();
-
-    if ($view === NULL) {
-      return NULL;
-    }
-    $key = $view->storage->id() . ':' . $display_id;
-
-    if (isset(self::$executed[$key])) {
-      return self::$executed[$key];
-    }
-    $view->setDisplay($display_id);
-
-    // Only when the view has none: on its own page the view arrived here
-    // already built by ViewPageController, arguments included, and replacing
-    // them would throw away the ones the route really carried.
-    if (empty($view->args)) {
-      $view->setArguments($this->routeArguments());
-    }
-    $view->execute($display_id);
-    // Executing a display builds its attachments, and core binds the view
-    // entity to each attachment clone it creates on the way
-    // (ViewExecutable::attachDisplays(), through the ViewExecutable
-    // constructor). The next source asking the entity for its executable
-    // would get that clone, render its own output from it, and then see it
-    // flipped back to the attachment display when the attachment renderable
-    // pre-renders - an HTML list rendered with the unformatted style's
-    // options, for instance. Reclaiming the binding right after the execute
-    // keeps every source of this display on one executable.
-    $view->storage->set('executable', $view);
-    self::$executed[$key] = $view;
-
-    return $view;
+    $this->getView()?->storage->save();
   }
 
   /**
    * The view arguments the current route carries, in order.
    *
-   * A views page route names its arguments in a map it carries itself, so the
-   * route parameters that are arguments are exactly the ones it lists. Every
-   * other parameter belongs to the route, not to the view.
+   * A views page route names its arguments in a map it carries itself, so
+   * the route parameters that are arguments are exactly the ones it lists.
+   * Every other parameter belongs to the route, not to the view.
    *
    * @return array
    *   The arguments, in the order the display declares them.

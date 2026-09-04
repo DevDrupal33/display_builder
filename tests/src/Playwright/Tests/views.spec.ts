@@ -36,6 +36,9 @@ async function seedViewFromTemplate (drupal: Drupal, name: string, path: string)
     `\\$v->set('label', '${name}');`,
     `\\$d = \\$v->get('display');`,
     `\\$d['page_1']['display_options']['path'] = '${path}';`,
+    // No result on any site: the aria snapshot below is the empty state, and
+    // a site with content would otherwise fill the rows.
+    `\\$d['default']['display_options']['filters']['type'] = ['id' => 'type', 'table' => 'node_field_data', 'field' => 'type', 'entity_type' => 'node', 'entity_field' => 'type', 'plugin_id' => 'bundle', 'value' => ['db_no_such_type' => 'db_no_such_type']];`,
     `\\$v->set('display', \\$d);`,
     `\\$v->save();`,
   ].join(' ')

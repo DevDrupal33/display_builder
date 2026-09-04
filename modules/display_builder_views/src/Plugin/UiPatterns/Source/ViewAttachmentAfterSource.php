@@ -4,34 +4,18 @@ declare(strict_types=1);
 
 namespace Drupal\display_builder_views\Plugin\UiPatterns\Source;
 
-use Drupal\Core\Plugin\Context\ContextDefinition;
-use Drupal\Core\Plugin\Context\EntityContextDefinition;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder_views\Plugin\ViewsUiPatternsSourceBase;
-use Drupal\ui_patterns\Attribute\Source;
-use Drupal\views\ViewExecutable;
+use Drupal\display_builder\EmptyPlaceholderHelpInterface;
+use Drupal\display_builder\SourceProcessingDataInterface;
+use Drupal\display_builder_views\Plugin\ViewsBuilderSourceTrait;
+use Drupal\ui_patterns_views\Plugin\UiPatterns\Source\ViewAttachmentAfterSource as UiPatternsViewAttachmentAfterSource;
 
 /**
- * Plugin implementation of the source for views.
+ * The attachments after a view display, in a builder.
+ *
+ * @see \Drupal\display_builder_views\Hook\DisplayBuilderViewsHook::sourceInfoAlter()
  */
-#[Source(
-  id: 'view_attachment_after',
-  label: new TranslatableMarkup('[View] Attachment after'),
-  prop_types: ['slot'],
-  tags: ['views'],
-  context_requirements: ['views:style'],
-  context_definitions: [
-    'ui_patterns_views:view_entity' => new EntityContextDefinition('entity:view'),
-    'display' => new ContextDefinition('string'),
-  ],
-)]
-class ViewAttachmentAfterSource extends ViewsUiPatternsSourceBase {
+class ViewAttachmentAfterSource extends UiPatternsViewAttachmentAfterSource implements EmptyPlaceholderHelpInterface, SourceProcessingDataInterface {
 
-  /**
-   * {@inheritdoc}
-   */
-  protected function renderFromView(ViewExecutable $view): mixed {
-    return $view->attachment_after;
-  }
+  use ViewsBuilderSourceTrait;
 
 }

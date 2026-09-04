@@ -137,11 +137,12 @@ Overview:
 
 Display Builder integration with Views is a `ContextProvider` for Source plugins:
 
-| Context                        | Type                     |
-| ------------------------------ | ------------------------ |
-| ui_patterns_views:view_entity' | `entity:view`            |
-| `ui_patterns_views:rows`       | `any` (renderable array) |
-| context_requirement            | "views:style" literal    |
+| Context                         | Type                                        |
+| ------------------------------- | ------------------------------------------- |
+| `ui_patterns_views:view_entity` | `entity:view`                               |
+| `ui_patterns_views:display`     | `string`, the display ID                    |
+| `ui_patterns_views:view`        | `any`, the running view, on a view page only |
+| context_requirement             | "views:display" literal                     |
 
 ### Permanent storage
 

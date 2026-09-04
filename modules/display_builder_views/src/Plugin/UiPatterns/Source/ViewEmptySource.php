@@ -7,14 +7,14 @@ namespace Drupal\display_builder_views\Plugin\UiPatterns\Source;
 use Drupal\display_builder\EmptyPlaceholderHelpInterface;
 use Drupal\display_builder\SourceProcessingDataInterface;
 use Drupal\display_builder_views\Plugin\ViewsBuilderSourceTrait;
-use Drupal\ui_patterns_views\Plugin\UiPatterns\Source\ViewFeedIconsSource as UiPatternsViewFeedIconsSource;
+use Drupal\ui_patterns_views\Plugin\UiPatterns\Source\ViewEmptySource as UiPatternsViewEmptySource;
 
 /**
- * The feed icons of a view display, in a builder.
+ * The empty area of a view display, in a builder.
  *
  * @see \Drupal\display_builder_views\Hook\DisplayBuilderViewsHook::sourceInfoAlter()
  */
-class ViewFeedIconsSource extends UiPatternsViewFeedIconsSource implements EmptyPlaceholderHelpInterface, SourceProcessingDataInterface {
+class ViewEmptySource extends UiPatternsViewEmptySource implements EmptyPlaceholderHelpInterface, SourceProcessingDataInterface {
 
   use ViewsBuilderSourceTrait;
 

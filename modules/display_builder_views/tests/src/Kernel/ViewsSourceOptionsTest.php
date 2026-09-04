@@ -8,7 +8,7 @@ use Drupal\Core\Form\FormState;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
-use Drupal\display_builder_views\Plugin\ViewsUiPatternsSourceBase;
+use Drupal\display_builder_views\Plugin\ViewsBuilderSourceTrait;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
@@ -16,7 +16,7 @@ use Drupal\ui_patterns\SourceInterface;
 use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\views\Entity\View;
 use Drupal\views_ui\ViewUI;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -24,7 +24,7 @@ use PHPUnit\Framework\Attributes\Group;
  *
  * @internal
  */
-#[CoversClass(ViewsUiPatternsSourceBase::class)]
+#[CoversTrait(ViewsBuilderSourceTrait::class)]
 #[Group('display_builder')]
 #[Group('display_builder_views')]
 final class ViewsSourceOptionsTest extends KernelTestBase {
@@ -226,6 +226,24 @@ final class ViewsSourceOptionsTest extends KernelTestBase {
   }
 
   /**
+   * Outside a builder, the Views UI dialog, the source form stays bare.
+   */
+  public function testOutsideBuilderTheFormIsBare(): void {
+    $contexts = [
+      'ui_patterns_views:view_entity' => EntityContext::fromEntity(View::load(self::VIEW_ID)),
+      'ui_patterns_views:display' => new Context(ContextDefinition::create('string'), self::DISPLAY_ID),
+    ];
+    $contexts = RequirementsContext::addToContext(['views:display'], $contexts);
+    foreach (['view_pager', 'view_more', 'view_feed_icons'] as $source_id) {
+      $source = $this->sourceManager->getSource('slot', [], ['source_id' => $source_id, 'source' => []], $contexts);
+      $form = $source->settingsForm([], new FormState());
+      self::assertArrayNotHasKey('pager_options', $form, $source_id);
+      self::assertArrayNotHasKey('more_options', $form, $source_id);
+      self::assertArrayNotHasKey('notice', $form, $source_id);
+    }
+  }
+
+  /**
    * A source computed from other displays stays non-configurable.
    */
   public function testNonConfigurableSource(): void {
@@ -247,39 +265,6 @@ final class ViewsSourceOptionsTest extends KernelTestBase {
   }
 
   /**
-   * Executing a display leaves the view entity bound to the same executable.
-   *
-   * Core binds the entity to every attachment clone it builds, so a source
-   * resolving the view after another one executed would render from a clone
-   * that later flips back to the attachment display.
-   */
-  public function testExecutingKeepsTheEntityExecutable(): void {
-    $this->setUpCurrentUser(['uid' => 1]);
-    $view = View::load(self::VIEW_ID)->createDuplicate();
-    $view->set('id', 'test_db_view_attached');
-    $attachment_id = $view->addDisplay('attachment', 'Attachment');
-    $displays = $view->get('display');
-    $displays[$attachment_id]['display_options']['displays'] = [self::DISPLAY_ID => self::DISPLAY_ID];
-    $view->set('display', $displays);
-    $view->save();
-
-    $view = View::load('test_db_view_attached');
-    $executable = $view->getExecutable();
-    $executable->setDisplay(self::DISPLAY_ID);
-
-    self::assertSame(
-      [$attachment_id],
-      $executable->display_handler->getAttachedDisplays(),
-      'The fixture really does attach a display, otherwise this proves nothing.',
-    );
-
-    $source = $this->getSource('view_rows', $view);
-    $source->getPropValue();
-
-    self::assertSame(self::DISPLAY_ID, $view->getExecutable()->current_display);
-  }
-
-  /**
    * Instantiates a view source plugin with the contexts the builder provides.
    *
    * @param string $source_id
@@ -294,10 +279,9 @@ final class ViewsSourceOptionsTest extends KernelTestBase {
     $view ??= View::load(self::VIEW_ID);
     $contexts = [
       'ui_patterns_views:view_entity' => EntityContext::fromEntity($view),
-      'display' => new Context(ContextDefinition::create('string'), self::DISPLAY_ID),
-      'ui_patterns_views:rows' => new Context(new ContextDefinition('any'), []),
+      'ui_patterns_views:display' => new Context(ContextDefinition::create('string'), self::DISPLAY_ID),
     ];
-    $contexts = RequirementsContext::addToContext(['views:style'], $contexts);
+    $contexts = RequirementsContext::addToContext(['views:display', 'display_builder'], $contexts);
     $source = $this->sourceManager->getSource(
       'slot',
       [],

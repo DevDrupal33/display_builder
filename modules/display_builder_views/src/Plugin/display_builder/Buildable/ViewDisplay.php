@@ -377,16 +377,20 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
     if ($extender === NULL) {
       return [];
     }
-    $contexts = [];
-    $contexts['ui_patterns_views:view_entity'] = EntityContext::fromEntity($extender->view->storage);
-    // Display (string) context is not managed yet by UI Patterns but it will
-    // be. We are a bit ahead here but we already need it on our side.
-    $contexts['display'] = new Context(ContextDefinition::create('string'), $extender->view->current_display);
-    // Still expected by ui_patterns_views source plugins.
-    // @todo Remove once the UI Patterns contexts system is cleaned.
-    $contexts['ui_patterns_views:rows'] = new Context(new ContextDefinition('any'), []);
+    $view = $extender->view;
+    $contexts = [
+      'ui_patterns_views:view_entity' => EntityContext::fromEntity($view->storage),
+      'ui_patterns_views:display' => new Context(ContextDefinition::create('string'), $view->current_display),
+    ];
+    // On a view page the view already ran, with its arguments: the sources
+    // get it as is. In a builder they get the entity and run it themselves,
+    // the copy open in the Views UI included.
+    if ($view->executed) {
+      $contexts['ui_patterns_views:view'] = new Context(new ContextDefinition('any'), $view);
+    }
 
-    return RequirementsContext::addToContext(['views:style'], $contexts);
+    // 'display_builder' tells the sources they are configured in a builder.
+    return RequirementsContext::addToContext(['views:display', 'display_builder'], $contexts);
   }
 
   /**

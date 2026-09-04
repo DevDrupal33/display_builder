@@ -9,6 +9,16 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\DisplayBuildablePluginManager;
+use Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewAttachmentAfterSource;
+use Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewAttachmentBeforeSource;
+use Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewEmptySource;
+use Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewExposedSource;
+use Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewFeedIconsSource;
+use Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewFooterSource;
+use Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewHeaderSource;
+use Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewMoreSource;
+use Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewPagerSource;
+use Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewRowsSource;
 use Drupal\views\Entity\View;
 
 /**
@@ -77,14 +87,27 @@ class DisplayBuilderViewsHook {
    */
   #[Hook('ui_patterns_source_info_alter')]
   public function sourceInfoAlter(array &$definitions): void {
-    // Both plugins belong to ui_patterns_views; ours add the display context
-    // it does not model yet, and a placeholder for when there is no view to
-    // run. Swapping the class rather than adding a plugin keeps one source id
-    // per area, so a stored display keeps working either way.
-    // @todo Remove once the UI Patterns context system has been revamped,
-    // #3608162.
-    $definitions['view_rows']['class'] = 'Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewRowsSource';
-    $definitions['view_title']['class'] = 'Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewTitleSource';
+    // The view display sources belong to ui_patterns_views; ours add what a
+    // builder needs, a placeholder without a view and the views plugin
+    // options forms. Swapping the class rather than adding plugins keeps one
+    // source id per part, so a stored display keeps working either way.
+    $classes = [
+      'view_header' => ViewHeaderSource::class,
+      'view_footer' => ViewFooterSource::class,
+      'view_empty' => ViewEmptySource::class,
+      'view_exposed' => ViewExposedSource::class,
+      'view_attachment_before' => ViewAttachmentBeforeSource::class,
+      'view_attachment_after' => ViewAttachmentAfterSource::class,
+      'view_pager' => ViewPagerSource::class,
+      'view_more' => ViewMoreSource::class,
+      'view_feed_icons' => ViewFeedIconsSource::class,
+      'view_rows' => ViewRowsSource::class,
+    ];
+    foreach ($classes as $source_id => $class) {
+      if (isset($definitions[$source_id])) {
+        $definitions[$source_id]['class'] = $class;
+      }
+    }
   }
 
 }

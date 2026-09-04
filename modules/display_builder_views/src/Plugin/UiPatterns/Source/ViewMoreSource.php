@@ -5,46 +5,35 @@ declare(strict_types=1);
 namespace Drupal\display_builder_views\Plugin\UiPatterns\Source;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\Context\ContextDefinition;
-use Drupal\Core\Plugin\Context\EntityContextDefinition;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\display_builder_views\Plugin\ViewsUiPatternsSourceBase;
-use Drupal\ui_patterns\Attribute\Source;
-use Drupal\views\ViewExecutable;
+use Drupal\display_builder\EmptyPlaceholderHelpInterface;
+use Drupal\display_builder\SourceProcessingDataInterface;
+use Drupal\display_builder_views\Plugin\ViewsBuilderSourceTrait;
+use Drupal\ui_patterns_views\Plugin\UiPatterns\Source\ViewMoreSource as UiPatternsViewMoreSource;
 
 /**
- * Plugin implementation of the source for views.
+ * The more link of a view display, in a builder, with its three options.
+ *
+ * The more link is three display options, not a views plugin, so the form is
+ * built here rather than borrowed from a plugin.
+ *
+ * @see \Drupal\display_builder_views\Hook\DisplayBuilderViewsHook::sourceInfoAlter()
  */
-#[Source(
-  id: 'view_more',
-  label: new TranslatableMarkup('[View] More'),
-  prop_types: ['slot'],
-  tags: ['views'],
-  context_requirements: ['views:style'],
-  context_definitions: [
-    'ui_patterns_views:view_entity' => new EntityContextDefinition('entity:view'),
-    'display' => new ContextDefinition('string'),
-  ],
-)]
-class ViewMoreSource extends ViewsUiPatternsSourceBase {
+class ViewMoreSource extends UiPatternsViewMoreSource implements EmptyPlaceholderHelpInterface, SourceProcessingDataInterface {
+
+  use ViewsBuilderSourceTrait;
 
   /**
-   * The form key holding the "more link" display options.
+   * The form key holding the more link options.
    */
-  private const OPTIONS_KEY = 'more_options';
+  protected const OPTIONS_KEY = 'more_options';
 
   /**
    * {@inheritdoc}
-   *
-   * The more link is not backed by a views plugin: it is three options of the
-   * display itself, which core builds under its "use_more" section.
-   *
-   * @see \Drupal\views\Plugin\views\display\DisplayPluginBase::buildOptionsForm()
    */
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $display = $this->getViewDisplay();
 
-    if ($display === NULL) {
+    if ($display === NULL || !$this->inBuilder()) {
       return $form;
     }
     $form[self::OPTIONS_KEY] = [
@@ -89,13 +78,6 @@ class ViewMoreSource extends ViewsUiPatternsSourceBase {
     unset($data[self::OPTIONS_KEY]);
 
     return $data;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function renderFromView(ViewExecutable $view): mixed {
-    return $view->getDisplay()->renderMoreLink();
   }
 
   /**

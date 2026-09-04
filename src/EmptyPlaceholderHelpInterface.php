@@ -17,9 +17,9 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
  * An interface rather than a source tag on purpose: the main module cannot
  * name a submodule's source class directly (this module has no dependency on
  * ui_patterns_views), and a tag would go unnoticed on a source that forgets
- * to carry it - view_rows, whose definition comes from ui_patterns_views
- * itself with no tags at all, is altered in place rather than declared
- * fresh. Implementing this interface cannot be missed the same way.
+ * to carry it - the view display sources keep the definitions of
+ * ui_patterns_views, only their classes are swapped. Implementing this
+ * interface cannot be missed the same way.
  *
  * @see \Drupal\display_builder\RenderableBuilderTrait::buildEmptyPlaceholder()
  */

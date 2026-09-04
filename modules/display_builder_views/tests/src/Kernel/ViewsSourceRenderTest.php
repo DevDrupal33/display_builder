@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\display_builder_views\Kernel;
 
+use Drupal\Core\Form\FormState;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
+use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Session\AnonymousUserSession;
-use Drupal\display_builder_views\Plugin\ViewsUiPatternsSourceBase;
+use Drupal\display_builder_views\Plugin\UiPatterns\Source\ViewRowsSource;
+use Drupal\display_builder_views\Plugin\ViewsBuilderSourceTrait;
 use Drupal\display_builder_views_test\Hook\CountViewExecutions;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\ui_patterns\Plugin\Context\RequirementsContext;
 use Drupal\ui_patterns\SourceInterface;
 use Drupal\views\Entity\View;
 use Drupal\views\Views;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -28,7 +32,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  *
  * @internal
  */
-#[CoversClass(ViewsUiPatternsSourceBase::class)]
+#[CoversTrait(ViewsBuilderSourceTrait::class)]
 #[Group('display_builder')]
 #[Group('display_builder_views')]
 #[RunTestsInSeparateProcesses]
@@ -142,38 +146,34 @@ final class ViewsSourceRenderTest extends KernelTestBase {
   }
 
   /**
-   * Ui_patterns_views hands over its own view, and never names a display.
+   * In the Component style plugin the swapped view_rows behaves as upstream.
    *
-   * The alter swaps these classes in site-wide, so ui_patterns_views' own
-   * component style and row plugins run through them too. Those supply the
-   * running view directly and have no display context to give, which must not
-   * read as "no view behind this" - that would put a builder placeholder on a
-   * plain view page.
+   * The class swap is site-wide, so the style plugin gets the subclass too:
+   * the raw rows, the field setting, and nothing from the builder.
    */
-  public function testUiPatternsViewsSuppliesItsOwnView(): void {
+  public function testStylePluginGetsTheUpstreamRowsFromTheSwappedSource(): void {
     $view = Views::getView(self::VIEW_ID);
     $view->setDisplay(self::DISPLAY_ID);
     $view->execute();
-
-    $contexts = [
+    $raw_rows = [['#markup' => 'raw-a'], ['#markup' => 'raw-b']];
+    $contexts = RequirementsContext::addToContext(['views:style'], [
       'ui_patterns_views:view' => new Context(new ContextDefinition('any'), $view),
-    ];
+      'ui_patterns_views:rows' => new Context(new ContextDefinition('any'), $raw_rows),
+      'ui_patterns_views:view_entity' => EntityContext::fromEntity(View::load(self::VIEW_ID)),
+    ]);
+    $source = $this->source('view_rows', $contexts);
+    self::assertInstanceOf(ViewRowsSource::class, $source);
 
-    self::assertSame(self::VIEW_ID, $this->source('view_title', $contexts, 'string')->getValue());
-
-    $rows = $this->source('view_rows', $contexts)->getValue();
-    self::assertIsArray($rows);
-    self::assertNotSame('display_builder:placeholder', $rows['#component'] ?? NULL);
+    $rows = $source->getPropValue();
+    self::assertSame('raw-a', $rows[0]['#markup'] ?? NULL);
+    $form = $source->settingsForm([], new FormState());
+    self::assertArrayHasKey('ui_patterns_views_field', $form);
+    self::assertArrayNotHasKey('style_options', $form);
+    self::assertArrayNotHasKey('notice', $form);
   }
 
   /**
-   * One exposed filter is still an exposed form worth rendering.
-   *
-   * The form is dropped when it carries nothing but its own plumbing, so the
-   * smallest form that must survive is the one this locks down. It is worth a
-   * test of its own because the check that decides it reads the plumbing
-   * names out of a list, and nothing else here would notice if the list and
-   * the form's own keys ever stopped lining up.
+   * One exposed filter renders as an exposed form.
    */
   public function testExposedFormWithOneFilterIsKept(): void {
     $this->container->get('current_user')->setAccount(new AnonymousUserSession());

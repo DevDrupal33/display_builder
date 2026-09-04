@@ -73,7 +73,9 @@
       STATUS_BY_SUFFIX,
     );
 
-    return suffixMatch ?? (isOwnMutation(path, verb, instanceId) ? 'saved' : null);
+    return (
+      suffixMatch ?? (isOwnMutation(path, verb, instanceId) ? 'saved' : null)
+    );
   };
 
   /**

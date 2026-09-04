@@ -20,7 +20,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
  * is exactly the kind of knowledge that should break in one place.
  *
  * @see \Drupal\display_builder_page_layout\Plugin\PageRegionSourceBase
- * @see \Drupal\display_builder_views\Plugin\ViewsUiPatternsSourceBase
+ * @see \Drupal\display_builder_views\Plugin\ViewsBuilderSourceTrait
  */
 trait RegionPlaceholderSourceTrait {
 
