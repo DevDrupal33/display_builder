@@ -117,7 +117,7 @@ final class DisplayBuilderRoutes implements EventSubscriberInterface {
     // exactly like the page-layout builder. Otherwise the builder sits inside
     // the themed admin page, and a viewport switch shrinks only the preview
     // pane while that surrounding chrome stays desktop-width.
-    // @see \Drupal\display_builder\Event\PageVariantSubscriber
+    // @see \Drupal\display_builder\Event\FullPageVariantSubscriber
     $options['_display_builder_full_page_route'] = TRUE;
 
     // @todo add the display builder access check

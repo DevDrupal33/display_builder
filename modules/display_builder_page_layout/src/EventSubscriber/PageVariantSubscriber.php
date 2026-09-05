@@ -24,7 +24,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  *
  * @endcode
  *
- * @see \Drupal\display_builder\Event\PageVariantSubscriber
+ * @see \Drupal\display_builder\Event\FullPageVariantSubscriber
  */
 class PageVariantSubscriber implements EventSubscriberInterface {
 

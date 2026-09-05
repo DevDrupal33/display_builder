@@ -118,15 +118,15 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
     $node_id1 = $instance->attachToRoot(0, 'test_group_source', ['value' => '1']);
     self::assertNotEmpty($node_id1);
 
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
     self::assertCount(1, $state);
     self::assertSame($node_id1, $state[0]['node_id']);
     self::assertSame('test_group_source', $state[0]['source_id']);
     self::assertSame(['value' => '1'], $state[0]['source']);
 
     $node_id2 = $instance->attachToRoot(1, 'test_group_source', ['value' => '2']);
-    self::assertCount(2, $instance->getCurrentState());
-    self::assertSame($node_id2, $instance->getCurrentState()[1]['node_id']);
+    self::assertCount(2, $instance->getSources());
+    self::assertSame($node_id2, $instance->getSources()[1]['node_id']);
   }
 
   /**
@@ -188,7 +188,7 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
     $instance->moveToRoot($node_id_child, 1);
 
     self::assertNull($instance->getParentId($node_id_child));
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
     self::assertCount(2, $state);
     self::assertSame($node_id_child, $state[1]['node_id']);
   }
@@ -235,8 +235,8 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
 
     // Removing a non-existent node must not alter state.
     $instance->remove('non_existent_id');
-    self::assertCount(1, $instance->getCurrentState());
-    self::assertSame($node_id, $instance->getCurrentState()[0]['node_id']);
+    self::assertCount(1, $instance->getSources());
+    self::assertSame($node_id, $instance->getSources()[0]['node_id']);
   }
 
   /**
@@ -282,12 +282,12 @@ final class InstanceTest extends DisplayBuilderKernelTestBase {
   public function testSetThirdPartySettingsOnNonExistentNodeIsSilent(): void {
     $instance = $this->createDisplayBuilderInstance();
     $node_id = $instance->attachToRoot(0, 'test_group_source', ['value' => 'keep']);
-    $before = $instance->getCurrentState();
+    $before = $instance->getSources();
 
     // Must not throw and must not alter state.
     $instance->setThirdPartySettings('non_existent_id', 'some_island', ['data' => 'x']);
-    self::assertSame($before, $instance->getCurrentState());
-    self::assertSame($node_id, $instance->getCurrentState()[0]['node_id']);
+    self::assertSame($before, $instance->getSources());
+    self::assertSame($node_id, $instance->getSources()[0]['node_id']);
   }
 
   /**

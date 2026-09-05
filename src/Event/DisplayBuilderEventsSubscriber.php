@@ -176,10 +176,6 @@ class DisplayBuilderEventsSubscriber implements EventSubscriberInterface {
     $visible_islands = $event->getVisibleIslands();
 
     foreach ($islands as $island_id => $island) {
-      if (!isset($island_enabled[$island_id])) {
-        continue;
-      }
-
       // Skip the island triggering the HTMX event. Useful to avoid swapping
       // the content of an island which is already in the expected state.
       // For examples, if we move an instance in Canvas, Scaffold or Navigator

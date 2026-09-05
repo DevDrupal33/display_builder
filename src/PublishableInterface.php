@@ -53,14 +53,22 @@ interface PublishableInterface {
    *
    * No-op when nothing is published, so it never empties a display that
    * has no published state to restore to.
+   *
+   * @return bool
+   *   TRUE when the state was restored, FALSE when there was nothing to
+   *   restore from.
    */
-  public function restore(): void;
+  public function restore(): bool;
 
   /**
    * Revert to the default/base configuration.
    *
    * Clears any overridden data and restores the default sources.
+   *
+   * @return bool
+   *   TRUE when the override was reverted, FALSE when the display is not an
+   *   override and nothing changed.
    */
-  public function revert(): void;
+  public function revert(): bool;
 
 }

@@ -10,6 +10,7 @@ use Drupal\display_builder\DisplayBuildableOverrideInterface;
 use Drupal\display_builder\DisplayBuildablePluginManager;
 use Drupal\display_builder_entity_view\Entity\EntityViewDisplay;
 use Drupal\display_builder_entity_view\Plugin\display_builder\Buildable\EntityViewOverride;
+use Drupal\display_builder_test\Hook\EntitySaveCounter;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestRev;
 use Drupal\field\Entity\FieldConfig;
@@ -149,11 +150,11 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
 
     $instance->revert();
     self::assertFalse($instance->isPublished());
-    $revertedState = $instance->getCurrentState();
+    $revertedState = $instance->getSources();
     self::assertNotSame([], $revertedState);
 
     $instance->restore();
-    self::assertSame($revertedState, $instance->getCurrentState());
+    self::assertSame($revertedState, $instance->getSources());
   }
 
   /**
@@ -172,7 +173,7 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
     $buildable->initInstanceIfMissing();
     $instance = $buildable->getInstance();
 
-    self::assertSame($defaultSources, $instance->getCurrentState());
+    self::assertSame($defaultSources, $instance->getSources());
   }
 
   /**
@@ -191,7 +192,7 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
     $buildable->initInstanceIfMissing();
     $instance = $buildable->getInstance();
 
-    self::assertSame([], $instance->getCurrentState());
+    self::assertSame([], $instance->getSources());
   }
 
   /**
@@ -212,7 +213,7 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
     [$entity, $buildable, $display] = $this->createOverrideFixture('full', $originalDefault, 'test_base');
     $buildable->initInstanceIfMissing();
     $instance = $buildable->getInstance();
-    self::assertSame($originalDefault, $instance->getCurrentState());
+    self::assertSame($originalDefault, $instance->getSources());
     $instance->publish();
 
     // The default display changes later, to a structurally unrelated
@@ -235,7 +236,7 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
     self::assertSame($originalDefault, $reloadedBuildable->getSources());
 
     $reloadedBuildable->initInstanceIfMissing();
-    self::assertSame($originalDefault, $reloadedBuildable->getInstance()->getCurrentState());
+    self::assertSame($originalDefault, $reloadedBuildable->getInstance()->getSources());
   }
 
   /**
@@ -257,7 +258,7 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
   /**
    * Verifies an override's data travels with the host entity's revisions.
    *
-   * ::EntityViewOverride::saveSources() starts a new host-entity revision on
+   * ::EntityViewOverride::publish() starts a new host-entity revision on
    * publish, when the entity type is revisionable, so the override field is
    * a normal revisionable field like any other. Loading an older entity
    * revision must return that revision's own override data, not always
@@ -307,11 +308,15 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
     $instance = $buildable->getInstance();
 
     $storage = \Drupal::entityTypeManager()->getStorage('entity_test_rev');
+    $revisions_before = $this->countRevisions($entity->id());
+    $updates_before = $this->countUpdates();
 
     $sourcesA = [['node_id' => 'a', 'source_id' => 'component', 'source' => [], 'third_party_settings' => []]];
     $instance->setNewPresent($sourcesA, 'Version A');
     $instance->publish();
     $revisionIdA = $storage->loadUnchanged($entity->id())->getRevisionId();
+    self::assertSame($revisions_before + 1, $this->countRevisions($entity->id()), 'One publish, one new revision.');
+    self::assertSame($updates_before + 1, $this->countUpdates(), 'One publish, one host entity save.');
 
     $sourcesB = [['node_id' => 'b', 'source_id' => 'other_component', 'source' => [], 'third_party_settings' => []]];
     $instance->setNewPresent($sourcesB, 'Version B');
@@ -319,6 +324,8 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
     $entityAfterB = $storage->loadUnchanged($entity->id());
     self::assertNotSame($revisionIdA, $entityAfterB->getRevisionId());
     self::assertSame($sourcesB, $entityAfterB->get(self::OVERRIDE_FIELD)->getValue());
+    self::assertSame($revisions_before + 2, $this->countRevisions($entity->id()), 'A second publish adds exactly one more.');
+    self::assertSame($updates_before + 2, $this->countUpdates(), 'Still one save per publish.');
 
     // The earlier revision must still show version A, not the now-current
     // version B: the override rides along with the revision it was
@@ -380,6 +387,37 @@ final class EntityViewOverrideTest extends EntityKernelTestBase {
     ]);
 
     return [$entity, $buildable, $display];
+  }
+
+  /**
+   * Counts the revisions of a revisionable test entity.
+   *
+   * @param string|int $entity_id
+   *   The entity_test_rev entity ID.
+   *
+   * @return int
+   *   How many revisions the entity has.
+   */
+  private function countRevisions(int|string $entity_id): int {
+    return (int) \Drupal::entityTypeManager()->getStorage('entity_test_rev')
+      ->getQuery()
+      ->allRevisions()
+      ->condition('id', $entity_id)
+      ->accessCheck(FALSE)
+      ->count()
+      ->execute();
+  }
+
+  /**
+   * How many times an entity_test_rev entity was saved so far.
+   *
+   * @return int
+   *   The hook_entity_update() count kept by display_builder_test.
+   *
+   * @see \Drupal\display_builder_test\Hook\EntitySaveCounter
+   */
+  private function countUpdates(): int {
+    return \Drupal::service(EntitySaveCounter::class)->count('entity_test_rev');
   }
 
 }

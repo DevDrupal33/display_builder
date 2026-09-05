@@ -9,9 +9,9 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 
 /**
- * Helper class for block library source handling.
+ * Turns UI Patterns sources into block library choices, grouped and sorted.
  */
-class BlockLibrarySourceHelper {
+class BlockLibrarySources {
 
   private const HIDE_BLOCK = [
     'htmx_loader',
@@ -39,8 +39,8 @@ class BlockLibrarySourceHelper {
    * @return array
    *   An array of grouped choices.
    */
-  public static function getGroupedChoices(array $sources, array $exclude_provider = [], array $exclude_by_id = [], bool $preview = TRUE): array {
-    $choices = self::getChoices($sources, $exclude_provider, $exclude_by_id, $preview);
+  public function getGroupedChoices(array $sources, array $exclude_provider = [], array $exclude_by_id = [], bool $preview = TRUE): array {
+    $choices = $this->getChoices($sources, $exclude_provider, $exclude_by_id, $preview);
     $default_category = (string) new TranslatableMarkup('Others');
 
     $categories = [];
@@ -60,7 +60,7 @@ class BlockLibrarySourceHelper {
       }
       $categories[$category]['choices'][] = $choice;
     }
-    self::sortGroupedChoices($categories);
+    $this->sortGroupedChoices($categories);
 
     return $categories;
   }
@@ -71,8 +71,7 @@ class BlockLibrarySourceHelper {
    * @param array $categories
    *   The categories to sort, passed by reference.
    */
-  public static function sortGroupedChoices(array &$categories): void {
-    // Public for reuse by PresetLibraryPanel.
+  public function sortGroupedChoices(array &$categories): void {
     $category_weight = [
       // Different builder contexts.
       (string) new TranslatableMarkup('Page') => 1,
@@ -119,7 +118,7 @@ class BlockLibrarySourceHelper {
    * @return array
    *   An array of choices.
    */
-  public static function getChoices(array $sources, array $exclude_provider, array $exclude_by_id = [], bool $preview = TRUE): array {
+  public function getChoices(array $sources, array $exclude_provider, array $exclude_by_id = [], bool $preview = TRUE): array {
     $result_choices = [];
 
     foreach ($sources as $source_id => $source_data) {
@@ -142,7 +141,7 @@ class BlockLibrarySourceHelper {
           'data' => ['source_id' => $source_id],
           'keywords' => $keywords,
           'preview' => NULL,
-          'group' => self::getSourceGroupLabel($definition),
+          'group' => $this->getSourceGroupLabel($definition),
         ];
 
         continue;
@@ -160,7 +159,7 @@ class BlockLibrarySourceHelper {
           continue;
         }
 
-        if (!self::isChoiceValid($choice, $definition, $exclude_provider)) {
+        if (!$this->isChoiceValid($choice, $definition, $exclude_provider)) {
           continue;
         }
 
@@ -175,7 +174,7 @@ class BlockLibrarySourceHelper {
             'source' => $source->getChoiceSettings($choice_id),
           ],
           'preview' => $preview ? Url::fromRoute('display_builder.api_block_preview', ['block_id' => $choice_id]) : NULL,
-          'group' => self::getChoiceGroupLabel($choice, $definition),
+          'group' => $this->getChoiceGroupLabel($choice, $definition),
         ];
       }
     }
@@ -201,7 +200,7 @@ class BlockLibrarySourceHelper {
    * @return bool
    *   Whether the choice is valid or not.
    */
-  private static function isChoiceValid(array &$choice, array &$source_definition, array $exclude_provider = []): bool {
+  private function isChoiceValid(array &$choice, array &$source_definition, array $exclude_provider = []): bool {
     $provider = $choice['provider'] ?? '';
 
     if ($provider) {
@@ -230,7 +229,7 @@ class BlockLibrarySourceHelper {
    * @return string
    *   The group label for the choice.
    */
-  private static function getSourceGroupLabel(array $source_definition): string {
+  private function getSourceGroupLabel(array $source_definition): string {
     $group = (string) new TranslatableMarkup('Others');
 
     $provider = $source_definition['provider'] ?? NULL;
@@ -286,7 +285,7 @@ class BlockLibrarySourceHelper {
    * @return string
    *   The group label for the choice.
    */
-  private static function getChoiceGroupLabel(array $choice, array $source_definition): string {
+  private function getChoiceGroupLabel(array $choice, array $source_definition): string {
     $group = (string) new TranslatableMarkup('Others');
     $source_id = $source_definition['id'] ?? NULL;
 

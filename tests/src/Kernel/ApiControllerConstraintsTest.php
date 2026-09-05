@@ -82,18 +82,18 @@ final class ApiControllerConstraintsTest extends DisplayBuilderKernelTestBase {
     ]);
 
     // 1. Root is empty, let's add a source. That's OK.
-    self::assertCount(0, $this->instance->getCurrentState());
+    self::assertCount(0, $this->instance->getSources());
     $this->controller->attachToRoot($request, $this->instance);
-    self::assertCount(1, $this->instance->getCurrentState());
+    self::assertCount(1, $this->instance->getSources());
 
     // 2. Let's add a second source. Still OK.
     $this->controller->attachToRoot($request, $this->instance);
-    $state = $this->instance->getCurrentState();
+    $state = $this->instance->getSources();
     self::assertCount(2, $state);
 
     // 3. Let's add a third source. Forbidden.
     $this->controller->attachToRoot($request, $this->instance);
-    self::assertSame($state, $this->instance->getCurrentState());
+    self::assertSame($state, $this->instance->getSources());
   }
 
   /**
@@ -114,22 +114,22 @@ final class ApiControllerConstraintsTest extends DisplayBuilderKernelTestBase {
     ]);
 
     // 1. Root has only the component, let's move a source. That's OK.
-    self::assertCount(1, $this->instance->getCurrentState());
+    self::assertCount(1, $this->instance->getSources());
     $request = Request::create($url->toString(), 'POST', [
       'node_id' => $node_id_1,
       'position' => 0,
     ]);
     $this->controller->attachToRoot($request, $this->instance);
-    self::assertCount(2, $this->instance->getCurrentState());
+    self::assertCount(2, $this->instance->getSources());
 
     // 2. Let's move a second source. Forbidden.
-    $state = $this->instance->getCurrentState();
+    $state = $this->instance->getSources();
     $request = Request::create($url->toString(), 'POST', [
       'node_id' => $node_id_2,
       'position' => 0,
     ]);
     $this->controller->attachToRoot($request, $this->instance);
-    self::assertSame($state, $this->instance->getCurrentState());
+    self::assertSame($state, $this->instance->getSources());
   }
 
   /**
@@ -138,7 +138,7 @@ final class ApiControllerConstraintsTest extends DisplayBuilderKernelTestBase {
   public function testMoveInsideRoot(): void {
     $node_id = $this->instance->attachToRoot(0, 'textfield', []);
     $this->instance->attachToRoot(1, 'textfield', []);
-    $initial_state = $this->instance->getCurrentState();
+    $initial_state = $this->instance->getSources();
     $url = Url::fromRoute('display_builder.api_root_attach', [
       'display_builder_instance' => $this->instance->id(),
     ]);
@@ -149,7 +149,7 @@ final class ApiControllerConstraintsTest extends DisplayBuilderKernelTestBase {
       'position' => 0,
     ]);
     $this->controller->attachToRoot($request, $this->instance);
-    self::assertSame($initial_state, $this->instance->getCurrentState());
+    self::assertSame($initial_state, $this->instance->getSources());
 
     // Switch positions.
     $request = Request::create($url->toString(), 'POST', [
@@ -157,7 +157,7 @@ final class ApiControllerConstraintsTest extends DisplayBuilderKernelTestBase {
       'position' => 1,
     ]);
     $this->controller->attachToRoot($request, $this->instance);
-    $new_state = $this->instance->getCurrentState();
+    $new_state = $this->instance->getSources();
     self::assertSame($initial_state[0], $new_state[1]);
     self::assertSame($initial_state[1], $new_state[0]);
   }
@@ -320,7 +320,7 @@ final class ApiControllerConstraintsTest extends DisplayBuilderKernelTestBase {
    *   A list of source arrays.
    */
   private function getSlot1Sources(): array {
-    return $this->instance->getCurrentState()[0]['source']['component']['slots']['slot_1']['sources'] ?? [];
+    return $this->instance->getSources()[0]['source']['component']['slots']['slot_1']['sources'] ?? [];
   }
 
 }

@@ -31,7 +31,7 @@ interface InstanceInterface extends ContentEntityInterface, ContextProviderInter
    *   bare.
    *
    * @see \Drupal\display_builder\DisplayBuildableInterface::previewWithChrome()
-   * @see \Drupal\display_builder\Event\PageVariantSubscriber
+   * @see \Drupal\display_builder\Event\FullPageVariantSubscriber
    */
   public function previewWithChrome(): bool;
 
@@ -126,6 +126,14 @@ interface InstanceInterface extends ContentEntityInterface, ContextProviderInter
   public function getParentId(string $node_id): ?string;
 
   /**
+   * Get the state of the current step.
+   *
+   * @return array
+   *   The current state.
+   */
+  public function getSources(): array;
+
+  /**
    * Set the source for a tree node.
    *
    * @param string $node_id
@@ -194,5 +202,13 @@ interface InstanceInterface extends ContentEntityInterface, ContextProviderInter
    *   The uniq id value.
    */
   public function getHash(): ?int;
+
+  /**
+   * Get display buildable plugin.
+   *
+   * @return \Drupal\display_builder\DisplayBuildableInterface
+   *   A display buildable plugin instance.
+   */
+  public function getBuildablePlugin(): DisplayBuildableInterface;
 
 }

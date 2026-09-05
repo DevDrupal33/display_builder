@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\display_builder;
 
 use Drupal\display_builder\Island\IslandPluginManagerInterface;
+use Drupal\display_builder\Island\ThirdPartySettingsInterface;
 use Drupal\ui_patterns\SourceInterface;
 
 /**

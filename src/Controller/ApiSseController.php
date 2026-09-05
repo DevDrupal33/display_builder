@@ -100,7 +100,7 @@ class ApiSseController extends ApiControllerBase {
         // updated.
         $event = $this->createEventWithEnabledIsland(
           DisplayBuilderEvents::ON_HISTORY_CHANGE,
-          $builder->getCurrentState(),
+          $builder->getSources(),
           NULL,
           NULL,
         );

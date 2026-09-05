@@ -146,10 +146,7 @@ class StateButtons extends IslandPluginBase implements IslandConfigurationFormIn
    *   Returns TRUE if the display builder is on an entity override.
    */
   protected function isOverridden(InstanceInterface $instance): bool {
-    /** @var \Drupal\display_builder\Plugin\Field\FieldType\PluginItem|null $item */
-    $item = $instance->get('buildable')->first();
-    /** @var \Drupal\display_builder\DisplayBuildableInterface|null $buildable */
-    $buildable = $item?->getInstance();
+    $buildable = $instance->getBuildablePlugin();
 
     if ($buildable instanceof DisplayBuildableOverrideInterface) {
       return !empty($buildable->getSources());

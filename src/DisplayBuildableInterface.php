@@ -335,7 +335,7 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, Con
   /**
    * Save sources tree retrieved from the Instance entity to config or content.
    */
-  public function saveSources(): void;
+  public function publish(): void;
 
   /**
    * Whether the live preview should be wrapped in the site's chrome.
@@ -352,7 +352,7 @@ interface DisplayBuildableInterface extends ContainerFactoryPluginInterface, Con
    *   TRUE to wrap the preview in the site's page chrome, FALSE to preview it
    *   bare.
    *
-   * @see \Drupal\display_builder\Event\PageVariantSubscriber
+   * @see \Drupal\display_builder\Event\FullPageVariantSubscriber
    */
   public function previewWithChrome(): bool;
 

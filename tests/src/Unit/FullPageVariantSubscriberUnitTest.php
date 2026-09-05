@@ -7,20 +7,20 @@ namespace Drupal\Tests\display_builder\Unit;
 use Drupal\Core\Render\PageDisplayVariantSelectionEvent;
 use Drupal\Core\Routing\RouteMatch;
 use Drupal\display_builder\Entity\Instance;
-use Drupal\display_builder\Event\PageVariantSubscriber;
+use Drupal\display_builder\Event\FullPageVariantSubscriber;
 use Drupal\Tests\UnitTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\Routing\Route;
 
 /**
- * Test the PageVariantSubscriber class.
+ * Test the FullPageVariantSubscriber class.
  *
  * @internal
  */
-#[CoversClass(PageVariantSubscriber::class)]
+#[CoversClass(FullPageVariantSubscriber::class)]
 #[Group('display_builder')]
-final class PageVariantSubscriberUnitTest extends UnitTestCase {
+final class FullPageVariantSubscriberUnitTest extends UnitTestCase {
 
   /**
    * Test a preview of a buildable that wants chrome keeps the normal variant.
@@ -62,7 +62,7 @@ final class PageVariantSubscriberUnitTest extends UnitTestCase {
     ]);
     $event = new PageDisplayVariantSelectionEvent('block_page', $route_match);
 
-    (new PageVariantSubscriber())->onSelectPageDisplayVariant($event);
+    (new FullPageVariantSubscriber())->onSelectPageDisplayVariant($event);
 
     return $event;
   }

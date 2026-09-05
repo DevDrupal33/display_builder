@@ -34,13 +34,13 @@ parameters:
 			rawMessage: 'Call to an undefined method object::getPluginDefinition().'
 			identifier: method.notFound
 			count: 1
-			path: src/ComponentLibraryDefinitionHelper.php
+			path: src/ComponentLibraryDefinitions.php
 
 		-
 			rawMessage: 'Call to an undefined method object::getPluginId().'
 			identifier: method.notFound
 			count: 1
-			path: src/ComponentLibraryDefinitionHelper.php
+			path: src/ComponentLibraryDefinitions.php
 
 		-
 			rawMessage: Cannot access offset 'icon' on array|Drupal\Component\Plugin\Definition\PluginDefinitionInterface.

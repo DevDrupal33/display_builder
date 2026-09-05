@@ -139,7 +139,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
    * distinct 'full' display is configured) previews with chrome; every other
    * view mode is a fragment that never appears as a page by itself.
    *
-   * @see \Drupal\display_builder\Event\PageVariantSubscriber
+   * @see \Drupal\display_builder\Event\FullPageVariantSubscriber
    */
   #[DataProvider('providerTestPreviewWithChrome')]
   public function testPreviewWithChrome(bool $expected, string $view_mode): void {
@@ -331,9 +331,9 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
   }
 
   /**
-   * Test the ::saveSources method.
+   * Test the ::publish method.
    */
-  public function testSaveSources(): void {
+  public function testPublish(): void {
     $display = self::createTestDisplayWithProfile();
     /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
     $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $display]);
@@ -351,7 +351,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $instance->setNewPresent($expected);
     $instance->save();
 
-    $buildable->saveSources();
+    $buildable->publish();
     $sources = $buildable->getSources();
     self::removeNodeId($sources);
 
@@ -430,7 +430,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $display->setSyncing(FALSE);
 
     $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($buildable->getInstanceId());
-    $actual = $instance->getCurrentState();
+    $actual = $instance->getSources();
     self::removeNodeId($actual);
 
     self::assertSame($expected, $actual);

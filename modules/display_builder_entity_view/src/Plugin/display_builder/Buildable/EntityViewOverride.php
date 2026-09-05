@@ -310,16 +310,14 @@ final class EntityViewOverride extends DisplayBuildablePluginBase implements Dis
   /**
    * {@inheritdoc}
    */
-  public function saveSources(): void {
-    $data = $this->getInstance()->getCurrentState();
+  public function publish(): void {
     $field = $this->getField();
     $entity = $field->getEntity();
+    $field->setValue($this->getInstance()->getSources());
 
     if ($entity instanceof ContentEntityInterface) {
       $this->setRevision($entity);
     }
-    $entity->save();
-    $field->setValue($data);
     $entity->save();
   }
 

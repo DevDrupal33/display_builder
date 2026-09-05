@@ -30,7 +30,7 @@ interface IslandInterface extends ConfigurableInterface, ContainerFactoryPluginI
    *   Display builder instance.
    * @param array $data
    *   (Optional) UI Patterns 2 sources data. It can be the full data state
-   *   (so, the same as $builder->getCurrentState()) or just some specific data
+   *   (so, the same as $builder->getSources()) or just some specific data
    *   of a single source of a sub-tree of sources.
    * @param array $options
    *   (Optional) Additional data to alter the island rendering.

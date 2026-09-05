@@ -275,7 +275,7 @@ display_builder.api_preset_preview:
 # Views display) previews inside whatever page wrapper the site would give it,
 # to stay close to the real render, while a buildable that is already a whole
 # page previews bare. That choice is per instance, so it is made at render time.
-# @see \Drupal\display_builder\Event\PageVariantSubscriber
+# @see \Drupal\display_builder\Event\FullPageVariantSubscriber
 # @see \Drupal\display_builder\Hook\LivePreviewChrome, which strips admin chrome
 # @see \Drupal\display_builder\Plugin\display_builder\Island\PreviewPanel::build()
 display_builder.preview_island:

@@ -94,10 +94,10 @@ final class TestDisplayBuildablePlugin extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function saveSources(): void {
+  public function publish(): void {
     // Because there is no proper Drupal integration to rely on, we store the
     // published data in a tempstore instead of a permanent storage.
-    $data = $this->getInstance()?->getCurrentState();
+    $data = $this->getInstance()?->getSources();
 
     if ($data !== NULL) {
       $this->state->set('display_builder_test__' . $this->instanceId, $data);

@@ -60,7 +60,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testFutureArrayManagement(): void {
     $instance = $this->createDisplayBuilderInstance();
-    self::assertEmpty($instance->getCurrentState());
+    self::assertEmpty($instance->getSources());
 
     // Create multiple states.
     for ($i = 1; $i <= 3; ++$i) {
@@ -107,7 +107,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testGetUsers(): void {
     $instance = $this->createDisplayBuilderInstance();
-    self::assertEmpty($instance->getCurrentState());
+    self::assertEmpty($instance->getSources());
 
     // Create states with different users.
     $state1 = $this->makeSource('state_1');
@@ -140,7 +140,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // Test with anonymous user (ID 0).
     $instance2 = $this->createDisplayBuilderInstance();
-    self::assertEmpty($instance2->getCurrentState());
+    self::assertEmpty($instance2->getSources());
     // Default kernel user is anonymous (ID 0).
     $instance2->setNewPresent($state1, 'State 1');
     $users2 = $instance2->getUsers();
@@ -152,7 +152,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testHistory(): void {
     $instance = $this->createDisplayBuilderInstance();
-    self::assertEmpty($instance->getCurrentState());
+    self::assertEmpty($instance->getSources());
 
     $state1 = $this->makeSource('state_1');
     $state2 = $this->makeSource('state_2');
@@ -172,13 +172,13 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
 
     // 4. Test Undo.
     $instance = $this->storage->undo($instance);
-    self::assertEquals($state1, $instance->getCurrentState());
+    self::assertEquals($state1, $instance->getSources());
     self::assertSame(0, \count($instance->getPast()));
     self::assertSame(1, \count($instance->getFuture()));
 
     // 5. Test Redo.
     $instance = $this->storage->redo($instance);
-    self::assertEquals($state2, $instance->getCurrentState());
+    self::assertEquals($state2, $instance->getSources());
     self::assertSame(1, \count($instance->getPast()));
     self::assertSame(0, \count($instance->getFuture()));
   }
@@ -188,7 +188,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testHashDuplicateDetection(): void {
     $instance = $this->createDisplayBuilderInstance();
-    self::assertEmpty($instance->getCurrentState());
+    self::assertEmpty($instance->getSources());
 
     $testData = $this->makeSource('state_1');
 
@@ -211,7 +211,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testHashDuplicateDetectionDisabled(): void {
     $instance = $this->createDisplayBuilderInstance();
-    self::assertEmpty($instance->getCurrentState());
+    self::assertEmpty($instance->getSources());
 
     $testData = $this->makeSource('state_1');
 
@@ -229,7 +229,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testHistoryLimit(): void {
     $instance = $this->createDisplayBuilderInstance();
-    self::assertEmpty($instance->getCurrentState());
+    self::assertEmpty($instance->getSources());
 
     // Create more states than MAX_HISTORY.
     for ($i = 1; $i <= 25; ++$i) {
@@ -247,10 +247,10 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testInitialHistoryState(): void {
     $instance = $this->createDisplayBuilderInstance();
-    self::assertEmpty($instance->getCurrentState());
+    self::assertEmpty($instance->getSources());
 
     // Test initial state: no sources and no phantom items from field prototype.
-    self::assertEmpty($instance->getCurrentState());
+    self::assertEmpty($instance->getSources());
     self::assertSame(0, \count($instance->getPast()));
     self::assertSame(0, \count($instance->getFuture()));
   }
@@ -262,7 +262,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testPastArrayManagement(): void {
     $instance = $this->createDisplayBuilderInstance();
-    self::assertEmpty($instance->getCurrentState());
+    self::assertEmpty($instance->getSources());
 
     // Create multiple states.
     for ($i = 1; $i <= 5; ++$i) {
@@ -282,7 +282,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testPostCreateWithPresentState(): void {
     $instance = $this->createDisplayBuilderInstance();
-    self::assertEmpty($instance->getCurrentState());
+    self::assertEmpty($instance->getSources());
 
     // Set initial present state.
     // Root level must be an array list because it is a collection of sources.
@@ -319,7 +319,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testRedo(): void {
     $instance = $this->createDisplayBuilderInstance();
-    self::assertEmpty($instance->getCurrentState());
+    self::assertEmpty($instance->getSources());
 
     // Create multiple states.
     $state1 = $this->makeSource('state_1');
@@ -333,24 +333,24 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     // Undo to state 1.
     $instance = $this->storage->undo($instance);
     $instance = $this->storage->undo($instance);
-    self::assertEquals($state1, $instance->getCurrentState());
+    self::assertEquals($state1, $instance->getSources());
 
     // Redo once.
     $instance = $this->storage->redo($instance);
-    self::assertEquals($state2, $instance->getCurrentState());
+    self::assertEquals($state2, $instance->getSources());
     self::assertSame(1, \count($instance->getPast()));
     self::assertSame(1, \count($instance->getFuture()));
     self::assertFalse($instance->isPublished());
 
     // Redo again.
     $instance = $this->storage->redo($instance);
-    self::assertEquals($state3, $instance->getCurrentState());
+    self::assertEquals($state3, $instance->getSources());
     self::assertSame(2, \count($instance->getPast()));
     self::assertSame(0, \count($instance->getFuture()));
 
     // Try to redo when at end.
     $instance = $this->storage->redo($instance);
-    self::assertEquals($state3, $instance->getCurrentState());
+    self::assertEquals($state3, $instance->getSources());
   }
 
   /**
@@ -358,7 +358,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testSetNewPresent(): void {
     $instance = $this->createDisplayBuilderInstance();
-    self::assertEmpty($instance->getCurrentState());
+    self::assertEmpty($instance->getSources());
 
     $testData = $this->makeSource('state_1');
 
@@ -371,7 +371,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     self::assertIsInt($instance->getRevisionCreationTime());
 
     // Verify current state.
-    self::assertEquals($testData, $instance->getCurrentState());
+    self::assertEquals($testData, $instance->getSources());
     self::assertSame(0, \count($instance->getPast()));
     self::assertSame(0, \count($instance->getFuture()));
   }
@@ -409,7 +409,7 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
    */
   public function testUndo(): void {
     $instance = $this->createDisplayBuilderInstance();
-    self::assertEmpty($instance->getCurrentState());
+    self::assertEmpty($instance->getSources());
 
     // Create multiple states.
     $state1 = $this->makeSource('state_1');
@@ -421,25 +421,25 @@ final class InstanceHistoryTest extends DisplayBuilderKernelTestBase {
     $instance->setNewPresent($state3, 'State 3');
 
     // Verify we're at state 3.
-    self::assertEquals($state3, $instance->getCurrentState());
+    self::assertEquals($state3, $instance->getSources());
     self::assertSame(2, \count($instance->getPast()));
     self::assertSame(0, \count($instance->getFuture()));
 
     // Undo once.
     $instance = $this->storage->undo($instance);
-    self::assertEquals($state2, $instance->getCurrentState());
+    self::assertEquals($state2, $instance->getSources());
     self::assertSame(1, \count($instance->getPast()));
     self::assertSame(1, \count($instance->getFuture()));
 
     // Undo again, to beginning.
     $instance = $this->storage->undo($instance);
-    self::assertEquals($state1, $instance->getCurrentState());
+    self::assertEquals($state1, $instance->getSources());
     self::assertSame(0, \count($instance->getPast()));
     self::assertSame(2, \count($instance->getFuture()));
 
     // Try to undo when at beginning.
     $instance = $this->storage->undo($instance);
-    self::assertEquals($state1, $instance->getCurrentState());
+    self::assertEquals($state1, $instance->getSources());
     self::assertSame(0, \count($instance->getPast()));
     self::assertSame(2, \count($instance->getFuture()));
   }

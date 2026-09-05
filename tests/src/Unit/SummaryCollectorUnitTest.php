@@ -6,8 +6,8 @@ namespace Drupal\Tests\display_builder\Unit;
 
 use Drupal\display_builder\Island\IslandInterface;
 use Drupal\display_builder\Island\IslandPluginManagerInterface;
+use Drupal\display_builder\Island\ThirdPartySettingsInterface;
 use Drupal\display_builder\SummaryCollector;
-use Drupal\display_builder\ThirdPartySettingsInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_patterns\SourceInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -154,7 +154,7 @@ final class SummaryCollectorUnitTest extends UnitTestCase {
    * @param array $summary
    *   The summary items.
    *
-   * @return \Drupal\display_builder\ThirdPartySettingsInterface
+   * @return \Drupal\display_builder\Island\ThirdPartySettingsInterface
    *   The mocked island.
    */
   private function mockIsland(array $summary): ThirdPartySettingsInterface {

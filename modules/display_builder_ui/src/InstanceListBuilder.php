@@ -103,14 +103,8 @@ final class InstanceListBuilder extends EntityListBuilder {
     $row['id']['data'] = $instance_id;
     $row['id']['class'] = ['hidden'];
 
-    /** @var \Drupal\display_builder\Plugin\Field\FieldType\PluginItem $item */
-    $item = $instance->get('buildable')->first();
-    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $item->getInstance();
-    $type = $buildable->label() ?? '-';
-
     // Set a human readable name from id.
-    $row['context']['data'] = $type;
+    $row['context']['data'] = $instance->getBuildablePlugin()->label() ?? '-';
     $row['context']['class'] = ['priority-medium'];
 
     $row['name']['data'] = $instance->label();
@@ -279,11 +273,8 @@ final class InstanceListBuilder extends EntityListBuilder {
    * {@inheritdoc}
    */
   public function getOperations(EntityInterface $entity, ?CacheableMetadata $cacheability = NULL) {
-    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-    /** @var \Drupal\display_builder\Plugin\Field\FieldType\PluginItem $field */
-    $field = $entity->get('buildable')->first();
-    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $field->getInstance();
+    /** @var \Drupal\display_builder\InstanceInterface $entity */
+    $buildable = $entity->getBuildablePlugin();
     $operations = [
       'build' => [
         'title' => new TranslatableMarkup('Build display'),

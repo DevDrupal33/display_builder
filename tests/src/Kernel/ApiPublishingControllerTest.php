@@ -98,18 +98,22 @@ final class ApiPublishingControllerTest extends DisplayBuilderKernelTestBase {
 
     // Present state must be restored to the published state.
     $saved = $this->loadInstance($this->instance->id());
-    $state = $saved->getCurrentState();
+    $state = $saved->getSources();
     self::assertCount(1, $state, 'State is reset to the last saved state.');
     self::assertSame($node_id, $state[0]['node_id']);
   }
 
   /**
-   * Tests ::revert() dispatches ON_REVERT.
+   * Tests ::revert() refuses an instance that is not an override.
+   *
+   * The UI never offers Revert there, so this is a direct POST. Nothing is
+   * reverted, and nothing must claim it was: no ON_REVERT dispatch, an error
+   * toast instead.
    */
-  public function testRevert(): void {
+  public function testRevertRefusesNonOverride(): void {
     $this->instance->attachToRoot(0, 'token', []);
     $this->instance->save();
-    $state = $this->instance->getCurrentState();
+    $state = $this->instance->getSources();
     self::assertCount(1, $state, 'State is modified.');
 
     $request = Request::create(
@@ -118,14 +122,35 @@ final class ApiPublishingControllerTest extends DisplayBuilderKernelTestBase {
     );
     $response = $this->controller->revert($request, $this->instance);
 
-    self::assertIsArray($response['history']);
-    self::assertIsArray($response['state']);
-    self::assertIsArray($response['logs']);
+    self::assertArrayNotHasKey('history', $response, 'No island was rebuilt.');
+    self::assertSame('display_builder:alert', $response['message']['#component']);
 
-    // Non-override instance: nothing is happening.
     $saved = $this->loadInstance($this->instance->id());
-    $saved_state = $saved->getCurrentState();
-    self::assertSame($saved_state, $state);
+    self::assertSame($state, $saved->getSources(), 'The draft is untouched.');
+  }
+
+  /**
+   * Tests ::restore() refuses an instance that was never published.
+   *
+   * Same shape as the revert case: the UI only offers Restore once
+   * something is published, so nothing must claim a restore happened.
+   */
+  public function testRestoreRefusesUnpublished(): void {
+    $this->instance->attachToRoot(0, 'token', []);
+    $this->instance->save();
+    $state = $this->instance->getSources();
+
+    $request = Request::create(
+      '/api/display-builder/' . $this->instance->id() . '/restore',
+      'POST',
+    );
+    $response = $this->controller->restore($request, $this->instance);
+
+    self::assertArrayNotHasKey('history', $response, 'No island was rebuilt.');
+    self::assertSame('display_builder:alert', $response['message']['#component']);
+
+    $saved = $this->loadInstance($this->instance->id());
+    self::assertSame($state, $saved->getSources(), 'The draft is untouched.');
   }
 
 }

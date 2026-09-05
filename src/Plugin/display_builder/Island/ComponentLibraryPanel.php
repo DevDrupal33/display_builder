@@ -11,7 +11,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
-use Drupal\display_builder\ComponentLibraryDefinitionHelper;
+use Drupal\display_builder\ComponentLibraryDefinitions;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandConfigurationFormInterface;
 use Drupal\display_builder\Island\IslandConfigurationFormTrait;
@@ -49,6 +49,11 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
   protected ModuleExtensionList $moduleList;
 
   /**
+   * The component library definitions service.
+   */
+  protected ComponentLibraryDefinitions $componentDefinitions;
+
+  /**
    * The definitions filtered for current theme.
    *
    * @var array
@@ -80,6 +85,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     $instance->themeManager = $container->get('theme.manager');
     $instance->themeList = $container->get('extension.list.theme');
     $instance->moduleList = $container->get('extension.list.module');
+    $instance->componentDefinitions = $container->get('display_builder.component_library_definitions');
 
     return $instance;
   }
@@ -237,8 +243,7 @@ class ComponentLibraryPanel extends IslandPluginBase implements IslandConfigurat
     // ::getComponentsGrouped().
     $configuration = $this->getConfiguration();
 
-    $componentDefinitions = new ComponentLibraryDefinitionHelper($this->sdcManager, $this->sourceManager);
-    $definitions = $componentDefinitions->getDefinitions($configuration);
+    $definitions = $this->componentDefinitions->getDefinitions($configuration);
 
     $this->definitionsFiltered = $definitions['filtered'] ?? [];
     $this->definitionsGrouped = $definitions['grouped'] ?? [];

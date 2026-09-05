@@ -224,7 +224,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
     $entity->setSyncing(FALSE);
 
     $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($buildable->getInstanceId());
-    $actual = $instance->getCurrentState();
+    $actual = $instance->getSources();
     self::removeNodeId($actual);
 
     self::assertSame($expected, $actual);

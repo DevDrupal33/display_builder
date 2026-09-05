@@ -15,14 +15,6 @@ namespace Drupal\display_builder\Entity;
 interface HistoryInterface {
 
   /**
-   * Get the state of the current step.
-   *
-   * @return array
-   *   The current state.
-   */
-  public function getCurrentState(): array;
-
-  /**
    * Set a new present.
    *
    * @param array $state

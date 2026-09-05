@@ -14,7 +14,7 @@ use Drupal\display_builder\Island\IslandType;
 use Drupal\display_builder\Island\IslandWithFormInterface;
 use Drupal\display_builder\Island\IslandWithFormTrait;
 use Drupal\display_builder\Island\RenderableAltererInterface;
-use Drupal\display_builder\ThirdPartySettingsInterface;
+use Drupal\display_builder\Island\ThirdPartySettingsInterface;
 use Drupal\ui_styles\StylePluginManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

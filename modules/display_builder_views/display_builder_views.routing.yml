@@ -13,7 +13,7 @@ display_builder_views.views.manage:
     # like the page-layout and entity-view builders. Otherwise the builder sits
     # in the themed admin page and a viewport switch shrinks only the preview
     # while that surrounding chrome stays desktop-width.
-    # @see \Drupal\display_builder\Event\PageVariantSubscriber
+    # @see \Drupal\display_builder\Event\FullPageVariantSubscriber
     _display_builder_full_page_route: true
     parameters:
       view:

@@ -7,6 +7,7 @@ namespace Drupal\display_builder_entity_view\Plugin\display_builder\Buildable;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Context\EntityContext;
@@ -16,7 +17,6 @@ use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\DisplayBuildable;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildablePluginBase;
-use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\DisplayReference;
 use Drupal\display_builder\Entity\Instance;
 use Drupal\display_builder\Entity\ProfileInterface;
@@ -214,8 +214,8 @@ final class EntityView extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function saveSources(): void {
-    $data = $this->getInstance()->getCurrentState();
+  public function publish(): void {
+    $data = $this->getInstance()->getSources();
     $display = $this->getDisplay();
     $display->setThirdPartySetting('display_builder', DisplayBuildableInterface::SOURCES_PROPERTY, $data);
     $display->save();
@@ -338,7 +338,7 @@ final class EntityView extends DisplayBuildablePluginBase {
     $entity_type_id = $display->getTargetEntityTypeId();
     $bundle = $display->getTargetBundle();
     $sampleEntity = $this->sampleEntityGenerator->get($entity_type_id, $bundle);
-    $contexts['entity'] = EntityContext::fromEntity(DisplayBuilderHelpers::markSampleEntity($sampleEntity));
+    $contexts['entity'] = EntityContext::fromEntity(self::markSampleEntity($sampleEntity));
     $contexts['view_mode'] = new Context(ContextDefinition::create('string'), $display->getMode());
     $contexts['bundle'] = new Context(ContextDefinition::create('string'), $bundle);
     return RequirementsContext::addToContext(['entity'], $contexts);
@@ -447,6 +447,38 @@ final class EntityView extends DisplayBuildablePluginBase {
       'view_mode_name' => $view_mode,
       'entity' => $entity,
     ];
+  }
+
+  /**
+   * Marks a sample entity as a preview, the way core's own previews do.
+   *
+   * A sample entity is never saved, so it has no ID, and a formatter that
+   * needs one has nothing to work with: the comment field's "Add comment"
+   * form loads the commented entity by ID and asserts its way out on NULL,
+   * taking down the render of everything around it. `in_preview` is the flag
+   * core already uses to say "not a real page, stand down" - node preview
+   * sets it, and comment, history and content_moderation all check it.
+   *
+   * Only sample entities get it. A display bound to a real entity is a real
+   * page and must render like one.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity, saved or sample.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface
+   *   The same entity, for chaining into a context.
+   *
+   * @see \Drupal\comment\Plugin\Field\FieldFormatter\CommentDefaultFormatter::viewElements()
+   */
+  private static function markSampleEntity(EntityInterface $entity): EntityInterface {
+    if ($entity->id() === NULL) {
+      // Undeclared on purpose, by core: `in_preview` is a plain dynamic
+      // property that NodeForm and CommentForm set the same way.
+      // @phpstan-ignore property.notFound
+      $entity->in_preview = TRUE;
+    }
+
+    return $entity;
   }
 
 }

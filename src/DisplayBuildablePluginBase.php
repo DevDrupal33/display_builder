@@ -206,7 +206,7 @@ abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase impleme
 
     // The attribute crosses a kernel boundary, so the draft is re-authorized
     // here rather than trusting whoever set it.
-    return $instance?->access('view') ? $instance->getCurrentState() : $this->getSources();
+    return $instance?->access('view') ? $instance->getSources() : $this->getSources();
   }
 
   /**
@@ -339,7 +339,7 @@ abstract class DisplayBuildablePluginBase extends ConfigurablePluginBase impleme
    * the definition instead of the attribute.
    *
    * @see \Drupal\display_builder\InstanceAccessControlHandler
-   * @see \Drupal\display_builder\Event\PageVariantSubscriber
+   * @see \Drupal\display_builder\Event\FullPageVariantSubscriber
    * @see \Drupal\display_builder\Plugin\display_builder\Island\BackButton
    *
    * Memoized per class because the attribute is the source of truth but

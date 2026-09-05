@@ -6,7 +6,7 @@ namespace Drupal\Tests\display_builder\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Plugin\Component as ComponentPlugin;
-use Drupal\display_builder\ComponentLibraryDefinitionHelper;
+use Drupal\display_builder\ComponentLibraryDefinitions;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_patterns\ComponentPluginManager as UiPatternsComponentPluginManager;
 use Drupal\ui_patterns\SourcePluginManager;
@@ -16,18 +16,18 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
- * Test the ComponentLibraryDefinitionHelper class.
+ * Test the ComponentLibraryDefinitions class.
  *
  * @internal
  */
-#[CoversClass(ComponentLibraryDefinitionHelper::class)]
+#[CoversClass(ComponentLibraryDefinitions::class)]
 #[Group('display_builder')]
-final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
+final class ComponentLibraryDefinitionsUnitTest extends UnitTestCase {
 
   /**
    * The service under test.
    */
-  private ComponentLibraryDefinitionHelper $helper;
+  private ComponentLibraryDefinitions $helper;
 
   /**
    * The SDC manager mock.
@@ -48,7 +48,7 @@ final class ComponentLibraryDefinitionHelperUnitTest extends UnitTestCase {
     $this->sdcManager = $this->createMock(UiPatternsComponentPluginManager::class);
     $this->sourceManager = $this->createMock(SourcePluginManager::class);
 
-    $this->helper = new ComponentLibraryDefinitionHelper($this->sdcManager, $this->sourceManager);
+    $this->helper = new ComponentLibraryDefinitions($this->sdcManager, $this->sourceManager);
 
     $container = new ContainerBuilder();
     $container->set('string_translation', $this->getStringTranslationStub());

@@ -372,7 +372,7 @@ abstract class IslandPluginBase extends PluginBase implements IslandInterface {
    */
   protected function reloadWithGlobalData(InstanceInterface $instance): array {
     return DisplayBuilderHtmx::outOfBand(
-      $this->build($instance, $instance->getCurrentState()),
+      $this->build($instance, $instance->getSources()),
       '#' . $this->getHtmlId((string) $instance->id()),
       'innerHTML'
     );

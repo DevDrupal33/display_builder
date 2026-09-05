@@ -13,7 +13,7 @@ The instance delegates all tree operations to `SourceTree` and provides:
 - `attachToRoot()` / `attachToSlot()` / `moveToRoot()` / `moveToSlot()` / `setSource()` / `setThirdPartySettings()` / `remove()` — tree mutations, each recorded as a new present through `HistoryInterface::setNewPresent()`
 - `getPast()` / `getFuture()` — the revision stack that `ApiController::undo()` and `redo()` step through
 - `publish()` / `restore()` / `revert()` — `PublishableInterface`, the bridge to the permanent storage owned by the buildable plugin
-- `getCurrentState()` — the resolved tree as a flat array for debugging
+- `getSources()` — the resolved tree as a flat array for debugging
 - `getPathIndex()` — the `SourceTree` path index cache
 - `getHash()` / `getPublishedHash()` — draft and published fingerprints; equal means nothing to publish
 
@@ -95,7 +95,7 @@ External integrations (entity view, page layout, Views) implement `DisplayBuilda
 When working in integration submodules, always follow this chain:
 
 ```
-getInstanceId() → getInstance() → getSources() → saveSources()
+getInstanceId() → getInstance() → getSources() → publish()
 ```
 
 Never access the instance entity storage directly in integration code.

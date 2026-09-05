@@ -16,11 +16,11 @@ use Drupal\display_builder\Update\ProfileIslandsUpdater;
  * Delete all states after ContentEntityType migration.
  */
 function display_builder_post_update_1(): void {
-  $storage = \Drupal::service('entity_type.manager')->getStorage('display_builder_instance');
+  $storage = Drupal::service('entity_type.manager')->getStorage('display_builder_instance');
   $instances = $storage->loadMultiple();
   $storage->delete($instances);
 
-  \Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
+  Drupal::service('plugin.cache_clearer')->clearCachedDefinitions();
 }
 
 /**
@@ -51,7 +51,7 @@ function display_builder_post_update_3(): void {
  * Enable the Instances panel on profiles that predate it.
  */
 function display_builder_post_update_4(): void {
-  $storage = \Drupal::service('entity_type.manager')->getStorage('display_builder_profile');
+  $storage = Drupal::service('entity_type.manager')->getStorage('display_builder_profile');
 
   foreach ($storage->loadMultiple() as $profile) {
     if (!$profile instanceof ProfileInterface) {
@@ -59,7 +59,7 @@ function display_builder_post_update_4(): void {
     }
 
     $islands = $profile->get('islands');
-    if (!is_array($islands) || isset($islands['instances'])) {
+    if (!\is_array($islands) || isset($islands['instances'])) {
       continue;
     }
 
@@ -76,7 +76,7 @@ function display_builder_post_update_4(): void {
     // plugin's default_region behind it, because a profile saved through that
     // form carries no region key at all and comparing against the ones that do
     // would find nothing to go below.
-    $definitions = \Drupal::service('plugin.manager.db_island')->getDefinitions();
+    $definitions = Drupal::service('plugin.manager.db_island')->getDefinitions();
     $weights = [];
 
     foreach ($islands as $island_id => $configuration) {
@@ -101,7 +101,7 @@ function display_builder_post_update_4(): void {
  * Drop the label/icon display options and split the Controls island.
  */
 function display_builder_post_update_5(): void {
-  $config_factory = \Drupal::configFactory();
+  $config_factory = Drupal::configFactory();
 
   foreach ($config_factory->listAll('display_builder.profile.') as $name) {
     $config = $config_factory->getEditable($name);
@@ -111,7 +111,7 @@ function display_builder_post_update_5(): void {
       continue;
     }
 
-    $islands = _display_builder_post_update_split_controls($islands);
+    $islands = \_display_builder_post_update_split_controls($islands);
 
     // Revert is the only button left with a say in whether it shows, and it is
     // a boolean now: a profile that had hidden it keeps it hidden.
@@ -119,7 +119,7 @@ function display_builder_post_update_5(): void {
       $islands['state']['revert'] = ($islands['state']['revert']['value'] ?? 'label') !== 'hidden';
     }
 
-    $config->set('islands', _display_builder_post_update_drop_button_values($islands));
+    $config->set('islands', \_display_builder_post_update_drop_button_values($islands));
     // Panels and tabs are labels only, so nothing stores how to show them.
     $config->clear('library_tabs_display')
       ->clear('contextual_tabs_display')
@@ -198,7 +198,7 @@ function _display_builder_post_update_drop_button_values(array $islands): array 
  * on every existing site regardless of enabled_by_default.
  */
 function display_builder_post_update_6(): void {
-  $storage = \Drupal::service('entity_type.manager')->getStorage('display_builder_profile');
+  $storage = Drupal::service('entity_type.manager')->getStorage('display_builder_profile');
 
   foreach ($storage->loadMultiple() as $profile) {
     if (!$profile instanceof ProfileInterface) {
@@ -206,7 +206,7 @@ function display_builder_post_update_6(): void {
     }
 
     $islands = $profile->get('islands');
-    if (!is_array($islands) || isset($islands['chrome_indicator'])) {
+    if (!\is_array($islands) || isset($islands['chrome_indicator'])) {
       continue;
     }
 
@@ -214,4 +214,13 @@ function display_builder_post_update_6(): void {
     $profile->set('islands', $islands);
     $profile->save();
   }
+}
+
+/**
+ * Drop the scaffold_options key, which never matched an island plugin.
+ */
+function display_builder_post_update_7(): void {
+  ProfileIslandsUpdater::create()
+    ->removeIsland('scaffold_options')
+    ->save();
 }

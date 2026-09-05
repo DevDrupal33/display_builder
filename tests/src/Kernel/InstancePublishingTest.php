@@ -88,12 +88,12 @@ final class InstancePublishingTest extends DisplayBuilderKernelTestBase {
     $instance = $this->createDisplayBuilderInstance();
     $testData = ['node_id' => '1', 'source_id' => 'component', 'source' => [], 'third_party_settings' => []];
     $instance->setNewPresent([$testData], 'Initial state');
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
     self::assertCount(1, $state);
 
-    $instance->revert();
-    // Non-override instance: nothing is happening.
-    self::assertSame($state, $instance->getCurrentState());
+    // Non-override instance: nothing is happening, and it says so.
+    self::assertFalse($instance->revert());
+    self::assertSame($state, $instance->getSources());
     self::assertNotSame('Revert to default display.', (string) $instance->getRevisionLogMessage());
   }
 
@@ -107,19 +107,19 @@ final class InstancePublishingTest extends DisplayBuilderKernelTestBase {
 
     // Publish initial data.
     $instance->setNewPresent([$testData], 'Modified state');
-    self::assertSame($testData, $instance->getCurrentState()[0]);
+    self::assertSame($testData, $instance->getSources()[0]);
 
     $instance->publish();
     self::assertTrue($instance->isPublishedPresent());
 
     // Modify current state without publishing.
     $instance->setNewPresent([$modifiedData], 'Modified state');
-    self::assertSame($modifiedData, $instance->getCurrentState()[0]);
+    self::assertSame($modifiedData, $instance->getSources()[0]);
     self::assertFalse($instance->isPublishedPresent());
 
     // Published state.
-    $instance->restore();
-    self::assertSame($testData, $instance->getCurrentState()[0]);
+    self::assertTrue($instance->restore());
+    self::assertSame($testData, $instance->getSources()[0]);
     self::assertSame('Restore published data.', (string) $instance->getRevisionLogMessage());
     self::assertTrue($instance->isPublishedPresent());
   }

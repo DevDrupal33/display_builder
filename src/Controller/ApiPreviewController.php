@@ -89,7 +89,7 @@ class ApiPreviewController extends ControllerBase {
     }
 
     return [
-      $island->build($display_builder_instance, $display_builder_instance->getCurrentState(), ['in_iframe' => TRUE]),
+      $island->build($display_builder_instance, $display_builder_instance->getSources(), ['in_iframe' => TRUE]),
       // The draft render is per-editor and must always be current.
       '#cache' => [
         'tags' => $display_builder_instance->getCacheTags(),
@@ -222,11 +222,7 @@ class ApiPreviewController extends ControllerBase {
       return NULL;
     }
 
-    /** @var \Drupal\display_builder\Plugin\Field\FieldType\PluginItem|null $item */
-    $item = $instance->get('buildable')->first();
-    /** @var \Drupal\display_builder\DisplayBuildableInterface|null $buildable */
-    $buildable = $item?->getInstance();
-    $path = $buildable?->getPreviewPagePath();
+    $path = $instance->getBuildablePlugin()->getPreviewPagePath();
 
     if ($path === NULL) {
       return NULL;

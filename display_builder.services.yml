@@ -18,6 +18,15 @@ services:
     arguments:
       - '@plugin.manager.ui_patterns_source'
 
+  display_builder.component_library_definitions:
+    class: Drupal\display_builder\ComponentLibraryDefinitions
+    arguments:
+      - '@plugin.manager.sdc'
+      - '@plugin.manager.ui_patterns_source'
+
+  display_builder.block_library_sources:
+    class: Drupal\display_builder\BlockLibrarySources
+
   display_builder.event_subscriber:
     class: '\Drupal\display_builder\Event\DisplayBuilderEventsSubscriber'
     arguments:
@@ -26,7 +35,7 @@ services:
       - { name: 'event_subscriber' }
 
   display_builder.page_variant_subscriber:
-    class: Drupal\display_builder\Event\PageVariantSubscriber
+    class: Drupal\display_builder\Event\FullPageVariantSubscriber
     tags:
       - { name: event_subscriber }
 

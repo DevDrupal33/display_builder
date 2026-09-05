@@ -76,7 +76,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
 
     /** @var \Drupal\display_builder\InstanceInterface $builder */
     $builder = $this->entityTypeManager->getStorage('display_builder_instance')->load($builder_id);
-    $buildable_id = $builder->get('buildable')->first()->get('plugin_id')->getValue() ?? '';
+    $buildable_id = $builder->getBuildablePlugin()->getPluginId();
     $contexts = $builder->getAvailableContexts() ?? [];
 
     $islands_enabled_sorted = $this->getIslandsEnableSorted($contexts);
@@ -119,7 +119,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    *   An associative array with the value of each slot.
    */
   private function buildSlots(InstanceInterface $builder, array $islands_enabled_sorted): array {
-    $builder_data = $builder->getCurrentState();
+    $builder_data = $builder->getSources();
 
     $button_islands = $islands_enabled_sorted[IslandType::Button->value] ?? [];
     $library_islands = $islands_enabled_sorted[IslandType::Library->value] ?? [];
@@ -327,7 +327,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
       $view_main_tabs = $this->buildDynamicTabs($builder, $view_main_tabs);
     }
 
-    $builder_data = $builder->getCurrentState();
+    $builder_data = $builder->getSources();
     $view_sidebar = $this->buildPanes($builder, $view_islands_sidebar, $builder_data);
     // Default hidden.
     $view_main = $this->buildPanes($builder, $view_islands_main, $builder_data, FALSE, ['shoelace-tabs__tab--hidden']);
@@ -445,7 +445,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
       ],
       'tabs' => $this->buildDynamicTabs($builder, $contextual_islands),
       'filter' => $filter,
-      'panes' => $this->buildPanes($builder, $contextual_islands, $builder->getCurrentState()),
+      'panes' => $this->buildPanes($builder, $contextual_islands, $builder->getSources()),
     ];
   }
 
@@ -555,7 +555,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    *   an empty array when none attach to a present pane.
    */
   private function buildFloatingControlsRegion(InstanceInterface $builder, array $view_islands, array $floating_islands): array {
-    $data = $builder->getCurrentState();
+    $data = $builder->getSources();
     $children = [];
 
     foreach ($floating_islands as $floating_island) {
@@ -646,7 +646,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
    *   A header render array per target pane, keyed by the pane's plugin ID.
    */
   private function buildPaneHeaders(InstanceInterface $builder, array $view_islands, array $floating_islands): array {
-    $data = $builder->getCurrentState();
+    $data = $builder->getSources();
     $headers = [];
 
     foreach ($floating_islands as $floating_island) {
@@ -810,7 +810,7 @@ class ProfileViewBuilder extends EntityViewBuilder implements TrustedCallbackInt
     $items = [];
 
     foreach ($islands as $island) {
-      $items = \array_merge($items, $island->build($builder, $builder->getCurrentState()));
+      $items = \array_merge($items, $island->build($builder, $builder->getSources()));
     }
     $build['#slots']['items'] = $items;
 

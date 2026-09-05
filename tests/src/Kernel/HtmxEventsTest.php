@@ -247,9 +247,7 @@ final class HtmxEventsTest extends DisplayBuilderKernelTestBase {
       'onUndo' => 'undo',
       'onRedo' => 'redo',
       'onReset' => 'restore',
-      // onRevert is deliberately absent: display_builder.api_revert is used
-      // with DisplayBuildableOverrideInterface implementation, so only in
-      // display_builder_entity_view for now. Covered there instead.
+      'onRevert' => 'revert',
       'onPublish' => 'publish',
     ];
   }

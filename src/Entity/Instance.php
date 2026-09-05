@@ -8,24 +8,20 @@ use Drupal\Core\Entity\Attribute\ContentEntityType;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\RevisionLogEntityTrait;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\Core\Plugin\Context\EntityContext;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\DisplayBuildableInterface;
 use Drupal\display_builder\DisplayBuildableOverrideInterface;
-use Drupal\display_builder\DisplayBuilderHelpers;
 use Drupal\display_builder\Exception\InvalidNodeException;
 use Drupal\display_builder\InstanceAccessControlHandler;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\SlotSourceProxy;
 use Drupal\display_builder\SourceTree;
 use Drupal\display_builder_ui\InstanceListBuilder;
-use Drupal\ui_patterns\Entity\SampleEntityGeneratorInterface;
 
 /**
  * Defines the display builder instance entity class.
@@ -76,16 +72,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * Current user.
    */
   public AccountInterface $currentUser;
-
-  /**
-   * Entity type manager.
-   */
-  protected EntityTypeManagerInterface $entityTypeManager;
-
-  /**
-   * Sample entity generator.
-   */
-  protected SampleEntityGeneratorInterface $sampleEntityGenerator;
 
   /**
    * Slot source proxy for resolving node labels.
@@ -390,9 +376,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function getRuntimeContexts(array $unqualified_context_ids): ?array {
-    $contexts = $this->getBuildablePlugin()->getRuntimeContexts($unqualified_context_ids) ?? [];
-
-    return $this->refreshContexts($contexts);
+    return $this->getBuildablePlugin()->getRuntimeContexts($unqualified_context_ids) ?? [];
   }
 
   /**
@@ -407,7 +391,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    *
    * @see \Drupal\display_builder\HistoryInterface
    */
-  public function getCurrentState(): array {
+  public function getSources(): array {
     return $this->get('sources')->getValue();
   }
 
@@ -415,7 +399,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * {@inheritdoc}
    */
   public function publish(): void {
-    $this->getBuildablePlugin()->saveSources();
+    $this->getBuildablePlugin()->publish();
     $this->publishedHash = NULL;
     $this->set('published', \Drupal::time()->getRequestTime());
     $this->setNewRevision(FALSE);
@@ -429,25 +413,31 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    * buildable plugin holds no published data any more, and restoring from it
    * would otherwise empty the display instead of leaving it untouched.
    */
-  public function restore(): void {
+  public function restore(): bool {
     if (!$this->isPublished()) {
-      return;
+      return FALSE;
     }
 
     $this->setNewPresent($this->getBuildablePlugin()->getSources(), new TranslatableMarkup('Restore published data.'));
+
+    return TRUE;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function revert(): void {
+  public function revert(): bool {
     $buildable = $this->getBuildablePlugin();
 
-    if ($buildable instanceof DisplayBuildableOverrideInterface) {
-      $sources = $buildable->revert();
-      $this->publishedHash = NULL;
-      $this->setNewPresent($sources, new TranslatableMarkup('Revert to default display.'));
+    if (!$buildable instanceof DisplayBuildableOverrideInterface) {
+      return FALSE;
     }
+
+    $sources = $buildable->revert();
+    $this->publishedHash = NULL;
+    $this->setNewPresent($sources, new TranslatableMarkup('Revert to default display.'));
+
+    return TRUE;
   }
 
   /**
@@ -572,6 +562,18 @@ class Instance extends ContentEntityBase implements InstanceInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getBuildablePlugin(): DisplayBuildableInterface {
+    /** @var \Drupal\display_builder\Plugin\Field\FieldType\PluginItem $item */
+    $item = $this->get('buildable')->first();
+    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
+    $buildable = $item->getInstance();
+
+    return $buildable;
+  }
+
+  /**
    * Is the root full?
    *
    * @return bool
@@ -584,7 +586,7 @@ class Instance extends ContentEntityBase implements InstanceInterface {
       return FALSE;
     }
 
-    return \count($this->getCurrentState()) >= $cardinality;
+    return \count($this->getSources()) >= $cardinality;
   }
 
   /**
@@ -607,21 +609,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     catch (\Throwable) {
       return NULL;
     }
-  }
-
-  /**
-   * Get display buildable plugin.
-   *
-   * @return \Drupal\display_builder\DisplayBuildableInterface
-   *   A display buildable plugin instance.
-   */
-  private function getBuildablePlugin(): DisplayBuildableInterface {
-    /** @var \Drupal\display_builder\Plugin\Field\FieldType\PluginItem $item */
-    $item = $this->get('buildable')->first();
-    /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-    $buildable = $item->getInstance();
-
-    return $buildable;
   }
 
   /**
@@ -663,17 +650,10 @@ class Instance extends ContentEntityBase implements InstanceInterface {
    */
   private function getSourceTree(): SourceTree {
     if ($this->sourceTree === NULL) {
-      $this->sourceTree = new SourceTree($this->getCurrentState());
+      $this->sourceTree = new SourceTree($this->getSources());
     }
 
     return $this->sourceTree;
-  }
-
-  /**
-   * Sample entity generator.
-   */
-  private function sampleEntityGenerator(): SampleEntityGeneratorInterface {
-    return $this->sampleEntityGenerator ??= \Drupal::service('ui_patterns.sample_entity_generator');
   }
 
   /**
@@ -707,49 +687,6 @@ class Instance extends ContentEntityBase implements InstanceInterface {
     $storage = $this->entityTypeManager()->getStorage('display_builder_instance');
 
     return $storage;
-  }
-
-  /**
-   * Refresh contexts after loaded from storage.
-   *
-   * @param \Drupal\Core\Plugin\Context\ContextInterface[] $contexts
-   *   The contexts.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\ContextException
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   *
-   * @return array
-   *   The refreshed contexts or NULL if no context.
-   */
-  private function refreshContexts(array $contexts): array {
-    foreach ($contexts as &$context) {
-      if ($context instanceof EntityContext) {
-        // @todo We should use cache entries here
-        // with the corresponding cache contexts in it.
-        // This may avoid some unnecessary entity loads or generation.
-        $entity = $context->getContextValue();
-
-        // Check if sample entity.
-        if ($entity->id()) {
-          $entity = $this->entityTypeManager()->getStorage($entity->getEntityTypeId())->load($entity->id());
-        }
-        else {
-          $entity = DisplayBuilderHelpers::markSampleEntity(
-            $this->sampleEntityGenerator()->get($entity->getEntityTypeId(), $entity->bundle())
-          );
-        }
-
-        // Edge case when the parent entity is deleted but not the builder
-        // instance.
-        if (!$entity) {
-          return $contexts;
-        }
-        $context = (\get_class($context))::fromEntity($entity);
-      }
-    }
-
-    return $contexts;
   }
 
 }

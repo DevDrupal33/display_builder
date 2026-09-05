@@ -93,7 +93,7 @@ final class ApiActionsControllerTest extends DisplayBuilderKernelTestBase {
     self::assertIsArray($response['state']);
 
     $saved = $this->loadInstance($this->instance->id());
-    self::assertEmpty($saved->getCurrentState());
+    self::assertEmpty($saved->getSources());
   }
 
   /**
@@ -121,7 +121,7 @@ final class ApiActionsControllerTest extends DisplayBuilderKernelTestBase {
     self::assertIsArray($response['logs']);
 
     $saved = $this->loadInstance($this->instance->id());
-    $state = $saved->getCurrentState();
+    $state = $saved->getSources();
     // Original + pasted copy must both exist at root.
     self::assertCount(2, $state);
     $node_ids = \array_column($state, 'node_id');
@@ -159,7 +159,7 @@ final class ApiActionsControllerTest extends DisplayBuilderKernelTestBase {
     self::assertIsArray($response['logs']);
 
     $saved = $this->loadInstance($this->instance->id());
-    $state = $saved->getCurrentState();
+    $state = $saved->getSources();
     // Root still has both original nodes.
     self::assertCount(2, $state);
     // The container's slot_1 must now contain the pasted copy.

@@ -241,9 +241,9 @@ final class PageLayout extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function saveSources(): void {
+  public function publish(): void {
     $entity = $this->getEntity();
-    $entity->setSources($this->getInstance()->getCurrentState());
+    $entity->setSources($this->getInstance()->getSources());
     $entity->save();
     // Clearing plugin cache seems enough to get the new layout.
     // @todo It looks very costly. Check if it is still needed.

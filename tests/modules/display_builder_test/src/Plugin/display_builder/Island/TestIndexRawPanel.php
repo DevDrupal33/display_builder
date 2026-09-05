@@ -30,7 +30,7 @@ class TestIndexRawPanel extends IslandPluginBase {
    * {@inheritdoc}
    */
   public function build(InstanceInterface $builder, array $data = [], array $options = []): array {
-    $tree = new SourceTree($builder->getCurrentState());
+    $tree = new SourceTree($builder->getSources());
     $rawTee = $tree->getNormalizedStructure();
 
     try {

@@ -6,7 +6,6 @@ namespace Drupal\display_builder;
 
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Datetime\DateFormatterInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Render\Markup;
@@ -53,38 +52,6 @@ class DisplayBuilderHelpers {
     $instance_id = $request?->attributes->get(DisplayBuildableInterface::PREVIEW_INSTANCE_ATTRIBUTE);
 
     return \is_string($instance_id) ? $instance_id : NULL;
-  }
-
-  /**
-   * Marks a sample entity as a preview, the way core's own previews do.
-   *
-   * A sample entity is never saved, so it has no ID, and a formatter that
-   * needs one has nothing to work with: the comment field's "Add comment"
-   * form loads the commented entity by ID and asserts its way out on NULL,
-   * taking down the render of everything around it. `in_preview` is the flag
-   * core already uses to say "not a real page, stand down" - node preview
-   * sets it, and comment, history and content_moderation all check it.
-   *
-   * Only sample entities get it. A display bound to a real entity is a real
-   * page and must render like one.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity, saved or sample.
-   *
-   * @return \Drupal\Core\Entity\EntityInterface
-   *   The same entity, for chaining into a context.
-   *
-   * @see \Drupal\comment\Plugin\Field\FieldFormatter\CommentDefaultFormatter::viewElements()
-   */
-  public static function markSampleEntity(EntityInterface $entity): EntityInterface {
-    if ($entity->id() === NULL) {
-      // Undeclared on purpose, by core: `in_preview` is a plain dynamic
-      // property that NodeForm and CommentForm set the same way.
-      // @phpstan-ignore property.notFound
-      $entity->in_preview = TRUE;
-    }
-
-    return $entity;
   }
 
   /**

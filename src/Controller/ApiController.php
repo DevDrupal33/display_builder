@@ -674,7 +674,7 @@ class ApiController extends ApiControllerBase implements ApiControllerInterface 
     $instance = $debug['instance'] ?? NULL;
 
     if ($instance) {
-      $tree = new SourceTree($debug['instance']->getCurrentState());
+      $tree = new SourceTree($debug['instance']->getSources());
       unset($debug['instance']);
       $debug['tree'] = $tree->getNormalizedStructure()['structure'];
     }

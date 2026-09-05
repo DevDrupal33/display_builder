@@ -38,7 +38,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  *
  * @endcode
  */
-class PageVariantSubscriber implements EventSubscriberInterface {
+class FullPageVariantSubscriber implements EventSubscriberInterface {
 
   /**
    * The route serving the live-preview iframe.

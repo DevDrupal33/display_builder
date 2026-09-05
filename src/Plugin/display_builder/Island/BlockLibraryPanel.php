@@ -8,7 +8,7 @@ use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\display_builder\Attribute\Island;
-use Drupal\display_builder\BlockLibrarySourceHelper;
+use Drupal\display_builder\BlockLibrarySources;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandConfigurationFormInterface;
 use Drupal\display_builder\Island\IslandConfigurationFormTrait;
@@ -54,11 +54,17 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
   protected ModuleExtensionList $moduleList;
 
   /**
+   * The block library sources service.
+   */
+  protected BlockLibrarySources $blockLibrarySources;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->moduleList = $container->get('extension.list.module');
+    $instance->blockLibrarySources = $container->get('display_builder.block_library_sources');
 
     return $instance;
   }
@@ -181,7 +187,7 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
     $build = [];
 
     if ($configuration['show'] === 'grouped') {
-      $categories = BlockLibrarySourceHelper::getGroupedChoices(
+      $categories = $this->blockLibrarySources->getGroupedChoices(
         $this->getSources(),
         $exclude_providers,
         $exclude_by_id,
@@ -193,7 +199,7 @@ class BlockLibraryPanel extends IslandPluginBase implements IslandConfigurationF
       }
     }
     else {
-      $choices = BlockLibrarySourceHelper::getChoices(
+      $choices = $this->blockLibrarySources->getChoices(
         $this->getSources(),
         $exclude_providers,
         $exclude_by_id,

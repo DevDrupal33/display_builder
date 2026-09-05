@@ -9,7 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\display_builder\Attribute\Island;
-use Drupal\display_builder\BlockLibrarySourceHelper;
+use Drupal\display_builder\BlockLibrarySources;
 use Drupal\display_builder\Entity\PatternPresetInterface;
 use Drupal\display_builder\InstanceInterface;
 use Drupal\display_builder\Island\IslandConfigurationFormInterface;
@@ -37,11 +37,17 @@ class PresetLibraryPanel extends IslandPluginBase implements IslandConfiguration
   protected EntityStorageInterface $presetConfigStorage;
 
   /**
+   * The block library sources service, for its category ordering.
+   */
+  protected BlockLibrarySources $blockLibrarySources;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
     $instance->presetConfigStorage = $container->get('entity_type.manager')->getStorage('pattern_preset');
+    $instance->blockLibrarySources = $container->get('display_builder.block_library_sources');
 
     return $instance;
   }
@@ -187,7 +193,7 @@ class PresetLibraryPanel extends IslandPluginBase implements IslandConfiguration
     $is_single_group = \count($formatted_groups) === 1;
 
     if (!$is_single_group) {
-      BlockLibrarySourceHelper::sortGroupedChoices($formatted_groups);
+      $this->blockLibrarySources->sortGroupedChoices($formatted_groups);
     }
 
     foreach ($formatted_groups as $group_data) {

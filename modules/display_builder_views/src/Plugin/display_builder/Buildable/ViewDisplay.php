@@ -224,8 +224,8 @@ final class ViewDisplay extends DisplayBuildablePluginBase {
   /**
    * {@inheritdoc}
    */
-  public function saveSources(): void {
-    $sources = $this->getInstance()->getCurrentState();
+  public function publish(): void {
+    $sources = $this->getInstance()->getSources();
     $extender = $this->getExtender();
     // First, we save in the "live" object.
     $extender->options[DisplayBuildableInterface::SOURCES_PROPERTY] = $sources;

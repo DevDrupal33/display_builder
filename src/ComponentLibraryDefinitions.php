@@ -11,9 +11,9 @@ use Drupal\ui_patterns\SourcePluginManager;
 use Drupal\ui_patterns\SourceWithChoicesInterface;
 
 /**
- * Helper class for component library definition handling.
+ * Builds the component library definitions, filtered and grouped.
  */
-class ComponentLibraryDefinitionHelper {
+class ComponentLibraryDefinitions {
 
   /**
    * The UI Patterns source plugin manager.

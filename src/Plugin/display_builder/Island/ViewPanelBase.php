@@ -189,13 +189,9 @@ abstract class ViewPanelBase extends IslandPluginBase {
 
     // For root dropzone, constraints can come from the buildable plugin.
     // Example: the cardinality of the field storage in EntityViewOverride.
-    /** @var \Drupal\display_builder\Plugin\Field\FieldType\PluginItem $field */
-    $field = $builder->get('buildable')->first();
-
-    if (!empty($field->getString())) {
-      /** @var \Drupal\display_builder\DisplayBuildableInterface $buildable */
-      $buildable = $field->getInstance();
-      $build = $this->addDropzoneConstraints($build, $buildable, '');
+    // An unsaved instance built in a test may carry no buildable yet.
+    if ($builder->get('buildable')->first()?->getString()) {
+      $build = $this->addDropzoneConstraints($build, $builder->getBuildablePlugin(), '');
     }
 
     return $this->htmxEvents->onRootDrop($build, $builder_id, $this->getPluginID());

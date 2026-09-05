@@ -6,20 +6,20 @@ namespace Drupal\Tests\display_builder\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Url;
-use Drupal\display_builder\BlockLibrarySourceHelper;
+use Drupal\display_builder\BlockLibrarySources;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_patterns\SourceWithChoicesInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Test the BlockLibrarySourceHelper class.
+ * Test the BlockLibrarySources class.
  *
  * @internal
  */
-#[CoversClass(BlockLibrarySourceHelper::class)]
+#[CoversClass(BlockLibrarySources::class)]
 #[Group('display_builder')]
-final class BlockLibrarySourceHelperUnitTest extends UnitTestCase {
+final class BlockLibrarySourcesUnitTest extends UnitTestCase {
 
   /**
    * {@inheritdoc}
@@ -129,7 +129,7 @@ final class BlockLibrarySourceHelperUnitTest extends UnitTestCase {
       ],
     ];
 
-    $result = BlockLibrarySourceHelper::getGroupedChoices($sources, ['excluded_provider']);
+    $result = (new BlockLibrarySources())->getGroupedChoices($sources, ['excluded_provider']);
 
     self::assertEquals($expected, $result);
   }
@@ -239,7 +239,7 @@ final class BlockLibrarySourceHelperUnitTest extends UnitTestCase {
       ],
     ];
 
-    $result = BlockLibrarySourceHelper::getGroupedChoices($sources);
+    $result = (new BlockLibrarySources())->getGroupedChoices($sources);
     self::assertSame($expected, $result);
   }
 
@@ -334,7 +334,7 @@ final class BlockLibrarySourceHelperUnitTest extends UnitTestCase {
       ],
     ];
 
-    $result = BlockLibrarySourceHelper::getGroupedChoices($sources);
+    $result = (new BlockLibrarySources())->getGroupedChoices($sources);
 
     self::assertEquals($expected, $result);
   }

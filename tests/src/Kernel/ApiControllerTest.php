@@ -111,7 +111,7 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
 
     // The new node must appear in the slot in persisted state.
     $saved = $this->loadInstance($this->instance->id());
-    $state = $saved->getCurrentState();
+    $state = $saved->getSources();
     self::assertNotEmpty($state[0]['source']['component']['slots']['slot_1']['sources']);
   }
 
@@ -166,7 +166,7 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
 
     // Reload from storage to verify the persisted state.
     $saved = $this->loadInstance($this->instance->id());
-    $state = $saved->getCurrentState();
+    $state = $saved->getSources();
 
     // The child must still be present inside slot_1.
     $slot_sources = $state[0]['source']['component']['slots']['slot_1']['sources'] ?? [];
@@ -196,19 +196,19 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
   public function testUndoRedoWalkTheRevisionHistory(): void {
     $this->attachTokenToRoot(0);
     $this->attachTokenToRoot(1);
-    self::assertCount(2, $this->loadInstance('test_instance')->getCurrentState());
+    self::assertCount(2, $this->loadInstance('test_instance')->getSources());
 
     $this->controller->undo(new Request(), $this->loadInstance('test_instance'));
     self::assertCount(
       1,
-      $this->loadInstance('test_instance')->getCurrentState(),
+      $this->loadInstance('test_instance')->getSources(),
       'Undo drops the most recent attach.'
     );
 
     $this->controller->redo(new Request(), $this->loadInstance('test_instance'));
     self::assertCount(
       2,
-      $this->loadInstance('test_instance')->getCurrentState(),
+      $this->loadInstance('test_instance')->getSources(),
       'Redo puts it back.'
     );
   }
@@ -220,7 +220,7 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
     $response = $this->controller->undo(new Request(), $this->instance);
 
     self::assertIsArray($response);
-    self::assertEmpty($this->loadInstance('test_instance')->getCurrentState());
+    self::assertEmpty($this->loadInstance('test_instance')->getSources());
   }
 
   /**
@@ -321,7 +321,7 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
 
     self::assertIsArray($response, 'A content less request yields an error payload.');
     self::assertEmpty(
-      $this->loadInstance('test_instance')->getCurrentState(),
+      $this->loadInstance('test_instance')->getSources(),
       'Nothing is attached when the request has no source_id/node_id/preset_id.'
     );
   }
@@ -339,7 +339,7 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
     $response = $this->controller->attachToSlot($request, $this->instance, $parent_id, 'slot_1');
 
     self::assertIsArray($response, 'A content less request yields an error payload.');
-    $state = $this->loadInstance('test_instance')->getCurrentState();
+    $state = $this->loadInstance('test_instance')->getSources();
     self::assertArrayNotHasKey(
       'sources',
       $state[0]['source']['component']['slots']['slot_1'] ?? [],

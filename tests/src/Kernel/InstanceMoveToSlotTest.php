@@ -58,7 +58,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
     $instance->setNewPresent($state, '');
     $instance->remove('inner_layout');
     $instance->moveToSlot('source_1', 'upper_component', 'slot_2', 0);
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
 
     self::assertEmpty($this->getComponentSlot($state[1], 'slot_1'));
     self::assertSame($this->getComponentSlot($state[1], 'slot_2'), [$source_to_move]);
@@ -82,7 +82,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
     $state = $this->getInitialDataTree([], [], [], [$source_to_move]);
     $instance->setNewPresent($state, '');
     $instance->moveToSlot('source_1', 'upper_component', 'slot_2', 0);
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
 
     self::assertEmpty($this->getComponentSlot($state[1], 'slot_1'));
     self::assertSame($this->getComponentSlot($state[1], 'slot_2')[0], $source_to_move);
@@ -95,7 +95,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
     // Move to the end of an busy slot.
     $instance->setNewPresent($state, '');
     $instance->moveToSlot('source_1', 'upper_component', 'slot_2', 1);
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
 
     self::assertEmpty($this->getComponentSlot($state[1], 'slot_1'));
     self::assertIsArray($this->getComponentSlot($state[1], 'slot_2')[0]);
@@ -130,7 +130,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
 
     // Move at the beginning (same position) of the slot.
     $instance->moveToSlot('source_1', 'upper_component', 'slot_1', 0);
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
     self::assertSame($this->getComponentSlot($state[1], 'slot_1'), [$source_to_move, $other_source_1, $other_source_2]);
     self::assertSame($instance->getPathIndex()['source_1'], [
       'path' => [1, 'source', 'component', 'slots', 'slot_1', 'sources', 0],
@@ -139,7 +139,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
 
     // Move at the middle position of the slot.
     $instance->moveToSlot('source_1', 'upper_component', 'slot_1', 1);
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
     self::assertSame($this->getComponentSlot($state[1], 'slot_1'), [$other_source_1, $source_to_move, $other_source_2]);
     self::assertSame($instance->getPathIndex()['source_1'], [
       'path' => [1, 'source', 'component', 'slots', 'slot_1', 'sources', 1],
@@ -148,7 +148,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
 
     // Move at the middle position of the slot.
     $instance->moveToSlot('source_1', 'upper_component', 'slot_1', 2);
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
     self::assertSame($this->getComponentSlot($state[1], 'slot_1'), [$other_source_1, $other_source_2, $source_to_move]);
     self::assertSame($instance->getPathIndex()['source_1'], [
       'path' => [1, 'source', 'component', 'slots', 'slot_1', 'sources', 2],
@@ -171,7 +171,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
     $state = $this->getInitialDataTree([], [], [$source_to_move], []);
     $instance->setNewPresent($state, '');
     $instance->moveToSlot('source_1', 'upper_component', 'slot_1', 0);
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
     $layout = $this->getComponentSlot($state[1], 'slot_2')[0];
     self::assertEmpty($this->getLayoutRegion($layout, 'content'));
     self::assertSame($this->getComponentSlot($state[1], 'slot_1'), [$source_to_move]);
@@ -205,7 +205,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
 
     // Move at the beginning (same position) of the region.
     $instance->moveToSlot('source_1', 'inner_layout', 'content', 0);
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
     $layout = $this->getComponentSlot($state[1], 'slot_2')[0];
     self::assertSame($this->getLayoutRegion($layout, 'content'), [$source_to_move, $other_source_1, $other_source_2]);
     self::assertSame($instance->getPathIndex()['source_1'], [
@@ -215,7 +215,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
 
     // Move at the middle position of the region.
     $instance->moveToSlot('source_1', 'inner_layout', 'content', 1);
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
     $layout = $this->getComponentSlot($state[1], 'slot_2')[0];
     self::assertSame($this->getLayoutRegion($layout, 'content'), [$other_source_1, $source_to_move, $other_source_2]);
     self::assertSame($instance->getPathIndex()['source_1'], [
@@ -225,7 +225,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
 
     // Move at the middle position of the region.
     $instance->moveToSlot('source_1', 'inner_layout', 'content', 2);
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
     $layout = $this->getComponentSlot($state[1], 'slot_2')[0];
     self::assertSame($this->getLayoutRegion($layout, 'content'), [$other_source_1, $other_source_2, $source_to_move]);
     self::assertSame($instance->getPathIndex()['source_1'], [
@@ -248,7 +248,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
     $state = $this->getInitialDataTree([], [], [], [$source_to_move]);
     $instance->setNewPresent($state, '');
     $instance->moveToSlot('source_1', 'inner_layout', 'content', 0);
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
     self::assertEmpty($this->getComponentSlot($state[1], 'slot_1'));
     $layout = $this->getComponentSlot($state[1], 'slot_2')[0];
     self::assertSame($this->getLayoutRegion($layout, 'content'), [$source_to_move]);
@@ -275,7 +275,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
     $instance->moveToSlot('source_1', 'upper_component', 'slot_2', 0);
     // `inner_layout` is now the second source of the slot.
     $instance->moveToSlot('source_1', 'inner_layout', 'content', 0);
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
     // `inner_layout` is now the only source of the slot and it is indexed "0".
     $inner_layout = $this->getComponentSlot($state[1], 'slot_2')[0];
 
@@ -310,7 +310,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
     $state = $this->getInitialDataTree([$source_to_move], [], [$other_source_1, $other_source_2], []);
     $instance->setNewPresent($state, '');
     $instance->moveToSlot('source_1', 'inner_layout', 'content', 0);
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
     self::assertEmpty($this->getComponentSlot($state[1], 'slot_1'));
     $layout = $this->getComponentSlot($state[1], 'slot_2')[0];
     self::assertSame(
@@ -324,7 +324,7 @@ final class InstanceMoveToSlotTest extends DisplayBuilderKernelTestBase {
 
     // Move to the end of an busy slot.
     $instance->moveToSlot('source_1', 'inner_layout', 'content', 2);
-    $state = $instance->getCurrentState();
+    $state = $instance->getSources();
     $layout = $this->getComponentSlot($state[1], 'slot_2')[0];
     self::assertSame(
       $this->getLayoutRegion($layout, 'content'),
