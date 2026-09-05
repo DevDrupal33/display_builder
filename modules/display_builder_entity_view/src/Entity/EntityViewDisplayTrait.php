@@ -40,7 +40,7 @@ trait EntityViewDisplayTrait {
     }
 
     /** @var \Drupal\display_builder\InstanceInterface $instance */
-    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($this->displayBuildable()->getInstanceId());
+    $instance = $this->displayBuildable()->getInstance();
 
     if (!$instance) {
       return $this;
@@ -312,10 +312,7 @@ trait EntityViewDisplayTrait {
    *   A display builder instance.
    */
   protected function getInstance(): ?InstanceInterface {
-    $instance_id = $this->displayBuildable()->getInstanceId();
-    /** @var \Drupal\display_builder\InstanceInterface|null $instance */
-    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($instance_id);
-    $this->instance = $instance;
+    $this->instance = $this->displayBuildable()->getInstance();
 
     return $this->instance;
   }

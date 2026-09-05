@@ -123,7 +123,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
     $buildable = $this->displayBuildableManager->createInstance('page_layout', ['entity' => $entity]);
     $buildable->initInstanceIfMissing();
 
-    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($buildable->getInstanceId());
+    $instance = $buildable->getInstance();
     self::assertNotNull($instance, 'PageLayout instance loaded.');
 
     // Load the entity.
@@ -137,7 +137,7 @@ final class PageLayoutEntityTest extends KernelTestBase {
     $id = self::PREFIX . 'test_layout';
     self::assertSame($id, $buildable->getInstanceId());
 
-    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($buildable->getInstanceId());
+    $instance = $buildable->getInstance();
     self::assertNotNull($instance);
 
     // Delete the entity.

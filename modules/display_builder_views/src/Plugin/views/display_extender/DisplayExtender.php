@@ -159,15 +159,8 @@ final class DisplayExtender extends DisplayExtenderPluginBase {
    *   A display builder instance.
    */
   protected function getInstance(): ?InstanceInterface {
-    if (!$this->displayBuildable()->getInstanceId()) {
-      return NULL;
-    }
-
     if (!isset($this->instance)) {
-      $instance_id = $this->displayBuildable()->getInstanceId();
-      /** @var \Drupal\display_builder\InstanceInterface|null $instance */
-      $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($instance_id);
-      $this->instance = $instance;
+      $this->instance = $this->displayBuildable()->getInstance();
     }
 
     return $this->instance;

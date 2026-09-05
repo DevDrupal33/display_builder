@@ -406,7 +406,7 @@ final class EntityViewDisplayTest extends EntityKernelTestBase {
     $buildable = $this->displayBuildableManager->createInstance('entity_view', ['display' => $display]);
 
     $buildable->initInstanceIfMissing();
-    $instance = $this->entityTypeManager->getStorage('display_builder_instance')->load($buildable->getInstanceId());
+    $instance = $buildable->getInstance();
 
     self::assertNotNull($instance);
     $id = \sprintf('%sentity_test__entity_test__default', self::PREFIX);

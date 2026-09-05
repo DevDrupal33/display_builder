@@ -260,9 +260,8 @@ final class PageLayout extends ConfigEntityBase implements PageLayoutInterface {
     }
 
     if (!isset($this->instance)) {
-      $instance_id = $this->displayBuildable()->getInstanceId();
       /** @var \Drupal\display_builder\InstanceInterface|null $instance */
-      $instance = $this->entityTypeManager()->getStorage('display_builder_instance')->load($instance_id);
+      $instance = $this->displayBuildable()->getInstance();
       $this->instance = $instance;
     }
 
