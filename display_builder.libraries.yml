@@ -110,6 +110,15 @@ expand:
   js:
     ./assets/js/expand.js: {}
 
+# The history island's logs dropdown, pinned open across island rebuilds.
+# @see \Drupal\display_builder\Plugin\display_builder\Island\HistoryButtons
+history:
+  js:
+    ./assets/js/history.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
 # Standalone CKEditor 5, hand-attached to a plain #type => 'textarea' -
 # never core's #type => 'text_format' / editor.module Drupal.editors
 # integration. @see assets/js/textarea_ckeditor.js

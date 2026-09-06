@@ -152,7 +152,7 @@ Shortcuts taken by the islands shipped with the module:
 | `n` | Navigator |
 | `p` | Preview |
 | `l` | Libraries |
-| `o` | Logs |
+| `o` | History (logs dropdown) |
 | `mod+z` (or `u`) | Undo |
 | `mod+shift+z` (or `r`) | Redo |
 | `shift+p` | Publish |

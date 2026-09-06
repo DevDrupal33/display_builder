@@ -17,9 +17,6 @@ islands:
   scaffold:
     status: true
     weight: -7
-  logs:
-    status: true
-    weight: -6
   preview:
     status: true
     weight: -5

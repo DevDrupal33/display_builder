@@ -49,7 +49,8 @@ async function expectToggled (isOn: Locator, isSidebar: boolean, on: boolean): P
 
 // Buttons in toolbar configuration is based on
 // display_builder.profile.test_base.yml ("Test full") - the only test profile
-// enabling the scaffold and logs panels this test asserts.
+// enabling the scaffold panel this test asserts. `logs` is a dropdown on the
+// always-on `history` island now, not a separate panel to enable.
 // Any change to the profile will be reflected here.
 test('Buttons', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) => {
   await test.step(`Create Page Layout and login`, async () => {
@@ -113,8 +114,12 @@ test('Buttons', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder }) 
   })
 
   await test.step(`Logs`, async () => {
-    const btn = page.getByTestId('tab_view_logs')
-    await testToggleTab(page, btn, '.db-island-logs', null)
+    // `logs` is a dropdown on the history button group now, not a tab: the
+    // same button opens and closes it, so this reuses testToggleFeature
+    // rather than testToggleTab.
+    // @see https://www.drupal.org/project/display_builder/issues/3620417
+    const btn = page.getByTestId('logs')
+    await testToggleFeature(page, btn, '.db-logs-dropdown')
   })
 
   async function testToggleFeature (page: Page, button: Locator, isOnLocator: string) {
@@ -248,8 +253,9 @@ test('Keyboard', { tag: [ '@extra' ] }, async ({ page, drupal, displayBuilder })
   })
 
   await test.step(`Logs`, async () => {
-    // @todo aria snapshot is hard with the table of logs, because of dates.
-    await testToggleTab(page, '.db-island-logs', key.logs, null)
+    // `logs` toggles the history dropdown, not a tab: 'o' pressed twice
+    // opens then closes it, so this reuses testToggleFeature.
+    await testToggleFeature(page, '.db-logs-dropdown', key.logs)
   })
 
   async function testToggleFeature (page: Page, isOnLocator: string, keyShortcut: string) {

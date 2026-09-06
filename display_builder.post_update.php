@@ -224,3 +224,18 @@ function display_builder_post_update_7(): void {
     ->removeIsland('scaffold_options')
     ->save();
 }
+
+/**
+ * Drop the 'logs' island, merged into 'history'.
+ *
+ * The View panel had no action of its own and sat in the main tab strip for
+ * no reason - its table now renders inside a dropdown on the history toolbar
+ * button group instead.
+ *
+ * @see https://www.drupal.org/project/display_builder/issues/3620417
+ */
+function display_builder_post_update_8(): void {
+  ProfileIslandsUpdater::create()
+    ->removeIsland('logs')
+    ->save();
+}

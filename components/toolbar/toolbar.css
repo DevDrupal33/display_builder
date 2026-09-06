@@ -163,3 +163,56 @@
 .db-state-menu .menu__item[value="revert"]::part(base) {
   color: var(--menu-color-danger);
 }
+
+/* The dropdown on the history button group, holding the log of steps
+   (@see \Drupal\display_builder\Plugin\display_builder\Island\HistoryButtons).
+   A surface of its own, like .db-state-menu: sl-dropdown's panel is
+   transparent and the table is a plain <table> in the light DOM, so with
+   nothing here it is the theme's table styling, or the lack of it, that
+   shows - a Tailwind preflight strips every border and cell padding. The
+   colors are the --db-table-* tokens, so dark mode follows on its own. */
+.db-logs-dropdown {
+  overflow: auto;
+  max-height: 70vh;
+  border: 1px solid var(--toolbar-color-border);
+  border-radius: var(--sl-border-radius-medium);
+  background-color: var(--db-background-color);
+  box-shadow: var(--sl-shadow-large);
+  font-size: var(--sl-font-size-small);
+}
+
+.db-logs-dropdown__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--db-space-4) var(--db-space-4) var(--db-space-4) var(--db-space-8);
+  font-weight: bold;
+}
+
+.db-logs-dropdown table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--db-table-bg);
+}
+
+.db-logs-dropdown th,
+.db-logs-dropdown td {
+  padding: var(--db-space-4) var(--db-space-8);
+  text-align: left;
+  vertical-align: middle;
+  border: 1px solid var(--db-table-border);
+}
+
+.db-logs-dropdown th {
+  color: var(--db-table-header-color);
+  background: var(--db-table-header-bg);
+  font-weight: bold;
+}
+
+.db-logs-dropdown tr {
+  background: var(--db-table-bg);
+}
+
+.db-logs-dropdown tbody tr:hover {
+  background: var(--db-table-row-hover);
+}

@@ -72,14 +72,6 @@ at a glance. Everything else stays a plain wireframe card.
 Which components count as "layout" is theme-specific, hence a configurable
 list rather than a hardcoded one — set it in the island's configuration form.
 
-#### Logs
-
-Logs based on changes history. Disabled by default.
-
-![Logs](images/islands/logs.webp)
-
-> 🚧 2026-08-25: Revisions are currently limited to 20.
-
 ## Preview
 
 Show a real time preview of the display, as visitors see it, without the
@@ -114,7 +106,11 @@ A small indicator confirming the last action reached the stored state.
 
 #### History
 
-Undo and redo changes.
+Undo and redo changes. A third button opens a dropdown listing every past and
+future step: time, who made it, the message, and a checkmark on whichever step
+is currently published. The dropdown stays open while you undo, redo or keep
+editing, so the log can be watched as it changes. It closes on its own close
+button, on the same toolbar button, or on Escape.
 
 ![History](images/islands/history.webp)
 

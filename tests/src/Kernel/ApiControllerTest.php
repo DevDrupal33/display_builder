@@ -82,7 +82,6 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
     $response = $this->controller->attachToRoot($request, $this->instance);
     self::assertIsArray($response['history']);
     self::assertIsArray($response['state']);
-    self::assertIsArray($response['logs']);
   }
 
   /**
@@ -107,7 +106,6 @@ final class ApiControllerTest extends DisplayBuilderKernelTestBase {
 
     self::assertIsArray($response['history']);
     self::assertIsArray($response['state']);
-    self::assertIsArray($response['logs']);
 
     // The new node must appear in the slot in persisted state.
     $saved = $this->loadInstance($this->instance->id());

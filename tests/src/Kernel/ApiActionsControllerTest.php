@@ -118,7 +118,6 @@ final class ApiActionsControllerTest extends DisplayBuilderKernelTestBase {
 
     self::assertIsArray($response['history']);
     self::assertIsArray($response['state']);
-    self::assertIsArray($response['logs']);
 
     $saved = $this->loadInstance($this->instance->id());
     $state = $saved->getSources();
@@ -156,7 +155,6 @@ final class ApiActionsControllerTest extends DisplayBuilderKernelTestBase {
 
     self::assertIsArray($response['history']);
     self::assertIsArray($response['state']);
-    self::assertIsArray($response['logs']);
 
     $saved = $this->loadInstance($this->instance->id());
     $state = $saved->getSources();

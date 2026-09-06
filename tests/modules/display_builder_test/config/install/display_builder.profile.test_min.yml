@@ -26,9 +26,6 @@ islands:
   test_index_raw:
     status: true
     weight: -7
-  logs:
-    status: false
-    weight: -6
   tree:
     status: false
     weight: -5

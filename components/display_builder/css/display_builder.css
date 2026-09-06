@@ -728,32 +728,4 @@ Kept separate from [data-db-stale] so a failed refresh leaves the panel usable
     outline: 2px solid var(--db-highlight-outline) !important;
     outline-offset: 2px !important;
   }
-
-  /* Table styling uses variables, so it switches automatically */
-  .db-island-logs table {
-    width: 100%;
-    border: 1px solid var(--db-table-border);
-    border-collapse: collapse;
-    background: var(--db-table-bg);
-  }
-
-  .db-island-logs th,
-  .db-island-logs td {
-    padding: 0.5rem;
-    border: 1px solid var(--db-table-border);
-  }
-
-  .db-island-logs th {
-    color: var(--db-table-header-color);
-    background: var(--db-table-header-bg);
-    font-weight: bold;
-  }
-
-  .db-island-logs tr {
-    background: var(--db-table-bg);
-  }
-
-  .db-island-logs tr:hover {
-    background: var(--db-table-row-hover);
-  }
 }

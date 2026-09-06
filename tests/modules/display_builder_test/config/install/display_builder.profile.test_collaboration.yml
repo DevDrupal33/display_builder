@@ -8,9 +8,6 @@ islands:
   library:
     status: true
     weight: -10
-  logs:
-    status: false
-    weight: -9
   preview:
     status: true
     weight: -5

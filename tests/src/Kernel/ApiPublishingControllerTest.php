@@ -94,7 +94,6 @@ final class ApiPublishingControllerTest extends DisplayBuilderKernelTestBase {
 
     self::assertIsArray($response['history']);
     self::assertIsArray($response['state']);
-    self::assertIsArray($response['logs']);
 
     // Present state must be restored to the published state.
     $saved = $this->loadInstance($this->instance->id());
